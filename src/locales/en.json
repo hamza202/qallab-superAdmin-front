@@ -1,0 +1,30 @@
+{
+  "app": {
+    "name": "Qallab",
+    "title": "Clients & Providers Portal",
+    "welcome": "Welcome"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "search": "Search",
+    "loading": "Loading...",
+    "noData": "No data available",
+    "confirm": "Confirm",
+    "yes": "Yes",
+    "no": "No",
+    "actions": "Actions"
+  },
+  "auth": {
+    "login": "Login"
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "users": "Users",
+    "settings": "Settings",
+    "profile": "Profile"
+  }
+}
