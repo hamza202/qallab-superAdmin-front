@@ -19,7 +19,26 @@
     "actions": "Actions"
   },
   "auth": {
-    "login": "Login"
+    "login": "Login",
+    "welcomeBack": "Welcome Back",
+    "loginSubtitle": "Sign in to your account now",
+    "username": "Username",
+    "usernamePlaceholder": "Enter mobile number / email",
+    "password": "Password",
+    "passwordPlaceholder": "••••••",
+    "rememberMe": "Remember Me",
+    "rememberMeShort": "Remember Me",
+    "branchAccount": "Branch Account",
+    "multiAccounts": "Multi Accounts",
+    "forgotPassword": "Forgot Password?",
+    "loginButton": "Sign In",
+    "allRightsReserved": "All rights reserved",
+    "accountType": "Account Type",
+    "accountTypePlaceholder": "Select your account type",
+    "businessName": "Business Name",
+    "businessNamePlaceholder": "Enter your business name",
+    "accountTypeMain": "Main Account",
+    "accountTypeBranch": "Branch Account"
   },
   "navigation": {
     "dashboard": "Dashboard",
