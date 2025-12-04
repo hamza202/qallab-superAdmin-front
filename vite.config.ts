@@ -39,12 +39,5 @@ export default defineConfig(({ mode }) => {
     server: {
       port: Number(env.VITE_PORT) || 3000,
     },
-    css: {
-      preprocessorOptions: {
-        scss: {
-          additionalData: `@use "@/styles/outher" as *;`,
-        },
-      },
-    },
   }
 })
