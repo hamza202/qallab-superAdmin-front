@@ -55,12 +55,12 @@ watch(multiAccounts, (val) => {
         <v-form>
           <!-- Username Field -->
           <TextInput v-model="username" :label="t('auth.username')" :placeholder="t('auth.usernamePlaceholder')"
-            bg-color="#FAFAFA" :rounded="'lg'" :hide-details="true" label-class="text-sm font-semibold text-gray-800"
+            bg-color="#FAFAFA" :rounded="'sm'" :hide-details="true" label-class="text-sm font-semibold text-gray-800"
             class="mb-5" />
 
           <!-- Password Field -->
           <TextInput v-model="password" :label="t('auth.password')" :placeholder="t('auth.passwordPlaceholder')"
-            type="password" passwordToggle bg-color="#FAFAFA" :rounded="'lg'" :hide-details="true"
+            type="password" passwordToggle bg-color="#FAFAFA" :rounded="'sm'" :hide-details="true"
             label-class="text-sm font-semibold text-gray-800" class="mb-5" />
 
 

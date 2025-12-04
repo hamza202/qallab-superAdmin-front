@@ -85,7 +85,7 @@ const inputClasses = computed(() => {
     }
 
     // Default style similar to the provided design
-    return "text-sm rounded-xl bg-[#FAFAFA] px-3";
+    return "text-sm bg-[#FAFAFA] px-3";
 });
 
 const handleAppendInnerClick = () => {
