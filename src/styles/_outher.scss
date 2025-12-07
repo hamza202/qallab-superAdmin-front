@@ -1,16 +1,20 @@
-@font-face {
-  font-family: "FF Shamel Family Sans One";
-  src: url("../assets/Fonts/ff-shamel-family/FF Shamel Family Sans One Book.ttf") format("truetype");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
+// Fonts are loaded from Google Fonts in index.html
+// Cairo: Arabic font
+// Be Vietnam Pro: English font
 
 body {
-  font-family: "FF Shamel Family Sans One",
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    sans-serif;
+  font-family: "Cairo", "Be Vietnam Pro", system-ui, -apple-system,
+    BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+// Arabic text uses Cairo font
+[lang="ar"],
+:lang(ar) {
+  font-family: "Cairo", system-ui, sans-serif;
+}
+
+// English text uses Be Vietnam Pro font
+[lang="en"],
+:lang(en) {
+  font-family: "Be Vietnam Pro", system-ui, sans-serif;
 }
