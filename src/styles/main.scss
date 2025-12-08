@@ -4,4 +4,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Custom styles */
+.v-navigation-drawer__content {
+  overflow: visible !important;
+}

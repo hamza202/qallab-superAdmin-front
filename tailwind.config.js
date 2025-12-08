@@ -96,6 +96,10 @@ export default {
           800: "#05603A",
           900: "#054F31",
         },
+        "qallab-blue": "#1849A9",
+        "qallab-yellow": "#FEC84B",
+        "qallab-blue-light": "#1570EF",
+        "qallab-dashboard-bg": "#F8FAFC",
       },
       fontFamily: {
         // English font
