@@ -8,7 +8,7 @@
                 </h1>
             </div>
 
-            <div class="flex items-center gap-4 ms-auto flex-1">
+            <div class="flex items-center gap-4 justify-end ms-auto flex-1">
                 <v-btn size="small" icon variant="flat" class="bg-qallab-blue text-white">
                     <v-icon>mdi-bell-outline</v-icon>
                 </v-btn>
@@ -28,7 +28,6 @@
                         <v-img alt="John" src="https://cdn.vuetifyjs.com/images/john.jpg" class="rounded-full"></v-img>
                         <img alt="John" src="@/assets/vectors/qallab-icon.svg"
                             class="position-absolute bottom-[-5px] start-[-4px] z-index-3"></img>
-
                     </v-avatar>
                 </div>
             </div>
