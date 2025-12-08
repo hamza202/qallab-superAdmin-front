@@ -12,19 +12,24 @@ type TextVariant =
     | "solo-inverted"
     | "underlined";
 
-interface SelectInputProps {
-    modelValue: string | number | null;
+interface TextareaInputProps {
+    modelValue: string | null;
     label?: string;
     placeholder?: string;
-    items: any[];
     color?: string;
     variant?: TextVariant;
     bgColor?: string;
     density?: Density;
-    rounded?: string | number | boolean;
+    rounded?: string | number | true;
     disabled?: boolean;
     readonly?: boolean;
     clearable?: boolean;
+    rows?: number | string;
+    autoGrow?: boolean;
+    noResize?: boolean;
+    counter?: true | number | string;
+    maxlength?: number | string;
+    rules?: any[];
     hideDetails?: boolean | "auto";
     hint?: string;
     persistentHint?: boolean;
@@ -32,18 +37,20 @@ interface SelectInputProps {
     labelClass?: string;
 }
 
-const props = withDefaults(defineProps<SelectInputProps>(), {
+const props = withDefaults(defineProps<TextareaInputProps>(), {
     color: "primary-300",
     bgColor: "#FFF",
     density: "comfortable" as Density,
     hideDetails: true,
-    clearable: false,
+    rows: 4,
+    autoGrow: false,
+    noResize: false,
     inputProps: () => ({}),
     labelClass: "",
 });
 
 const emit = defineEmits<{
-    (e: "update:modelValue", value: string | number | null): void;
+    (e: "update:modelValue", value: string | null): void;
 }>();
 
 const internalValue = computed({
@@ -54,31 +61,36 @@ const internalValue = computed({
 </script>
 
 <template>
-    <div class="select-input-wrapper">
+    <div class="textarea-wrapper">
         <label v-if="label" class="qallab-label" :class="labelClass">
             {{ label }}
         </label>
 
-        <v-select 
-            v-model="internalValue" 
-            :items="items" 
-            :placeholder="placeholder" 
+        <v-textarea
+            v-model="internalValue"
+            :placeholder="placeholder"
             variant="outlined"
-            :color="color" 
-            :density="density" 
+            :color="color"
+            :density="density"
             :disabled="disabled"
-            :readonly="readonly" 
-            :clearable="clearable" 
-            :hide-details="hideDetails" 
+            :readonly="readonly"
+            :clearable="clearable"
+            :rows="rows"
+            :auto-grow="autoGrow"
+            :no-resize="noResize"
+            :counter="counter"
+            :maxlength="maxlength"
+            :rules="rules"
+            :hide-details="hideDetails"
             :hint="hint"
-            :persistent-hint="persistentHint" 
-            v-bind="inputProps" 
+            :persistent-hint="persistentHint"
+            v-bind="inputProps"
         />
     </div>
 </template>
 
 <style scoped>
-.select-input-wrapper {
+.textarea-wrapper {
     margin-bottom: 16px;
 }
 </style>

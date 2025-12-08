@@ -38,8 +38,8 @@ interface TextInputProps {
 
 const props = withDefaults(defineProps<TextInputProps>(), {
     type: "text",
-    color: "primary",
-    bgColor: "#FAFAFA",
+    color: "primary-300",
+    bgColor: "#FFF",
     density: "comfortable" as Density,
     hideDetails: true,
     passwordToggle: false,
@@ -72,22 +72,6 @@ const effectiveAppendInnerIcon = computed(() => {
     return props.appendInnerIcon;
 });
 
-// If variant is not provided, use a neutral base (plain)
-// and rely on our custom classes to match the design.
-const computedVariant = computed<TextVariant>(() => {
-    return props.variant ?? "plain";
-});
-
-const inputClasses = computed(() => {
-    if (props.variant) {
-        // When consumer supplies a variant, don't interfere with styling
-        return "text-sm";
-    }
-
-    // Default style similar to the provided design
-    return "text-sm bg-[#FAFAFA] px-3";
-});
-
 const handleAppendInnerClick = () => {
     if (props.passwordToggle) {
         showPassword.value = !showPassword.value;
@@ -96,23 +80,39 @@ const handleAppendInnerClick = () => {
 </script>
 
 <template>
-    <div class="mb-4">
-        <div v-if="label" class="mb-1.5 text-sm font-semibold text-gray-800" :class="labelClass">
+    <div class="text-input-wrapper">
+        <label v-if="label" class="qallab-label" :class="labelClass">
             {{ label }}
-        </div>
+        </label>
 
-        <v-text-field v-model="internalValue" :type="inputType" :placeholder="placeholder" :variant="computedVariant"
-            :color="color" :bg-color="bgColor" :density="density" :rounded="rounded ?? 'lg'" :disabled="disabled"
-            :readonly="readonly" :rules="rules" :clearable="clearable" :hide-details="hideDetails" :hint="hint"
-            :persistent-hint="persistentHint" :prefix="prefix" :suffix="suffix" :prepend-inner-icon="prependInnerIcon"
-            :append-inner-icon="effectiveAppendInnerIcon" :prepend-icon="prependIcon" :append-icon="appendIcon"
-            v-bind="inputProps" :class="inputClasses" @click:append-inner="handleAppendInnerClick" />
+        <v-text-field 
+            v-model="internalValue" 
+            :type="inputType" 
+            :placeholder="placeholder" 
+            variant="outlined"
+            :color="color" 
+            :density="density" 
+            :disabled="disabled"
+            :readonly="readonly" 
+            :rules="rules" 
+            :clearable="clearable" 
+            :hide-details="hideDetails" 
+            :hint="hint"
+            :persistent-hint="persistentHint" 
+            :prefix="prefix" 
+            :suffix="suffix" 
+            :prepend-inner-icon="prependInnerIcon"
+            :append-inner-icon="effectiveAppendInnerIcon" 
+            :prepend-icon="prependIcon" 
+            :append-icon="appendIcon"
+            v-bind="inputProps" 
+            @click:append-inner="handleAppendInnerClick" 
+        />
     </div>
 </template>
 
-
-<style>
-.v-text-field .v-field__input {
-    font-size: 14px !important;
+<style scoped>
+.text-input-wrapper {
+    margin-bottom: 16px;
 }
 </style>

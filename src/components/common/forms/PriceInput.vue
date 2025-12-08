@@ -12,11 +12,11 @@ type TextVariant =
     | "solo-inverted"
     | "underlined";
 
-interface SelectInputProps {
-    modelValue: string | number | null;
+interface PriceInputProps {
+    modelValue: number | string | null;
     label?: string;
     placeholder?: string;
-    items: any[];
+    currency?: string;
     color?: string;
     variant?: TextVariant;
     bgColor?: string;
@@ -25,25 +25,29 @@ interface SelectInputProps {
     disabled?: boolean;
     readonly?: boolean;
     clearable?: boolean;
+    rules?: any[];
     hideDetails?: boolean | "auto";
     hint?: string;
     persistentHint?: boolean;
     inputProps?: Record<string, any>;
     labelClass?: string;
+    showCurrencyOnLeft?: boolean;
 }
 
-const props = withDefaults(defineProps<SelectInputProps>(), {
+const props = withDefaults(defineProps<PriceInputProps>(), {
+    currency: "$",
     color: "primary-300",
     bgColor: "#FFF",
     density: "comfortable" as Density,
     hideDetails: true,
-    clearable: false,
     inputProps: () => ({}),
     labelClass: "",
+    showCurrencyOnLeft: false,
+    placeholder: "ادخل السعر",
 });
 
 const emit = defineEmits<{
-    (e: "update:modelValue", value: string | number | null): void;
+    (e: "update:modelValue", value: number | string | null): void;
 }>();
 
 const internalValue = computed({
@@ -54,31 +58,46 @@ const internalValue = computed({
 </script>
 
 <template>
-    <div class="select-input-wrapper">
+    <div class="price-input-wrapper">
         <label v-if="label" class="qallab-label" :class="labelClass">
             {{ label }}
         </label>
 
-        <v-select 
-            v-model="internalValue" 
-            :items="items" 
-            :placeholder="placeholder" 
+        <v-text-field
+            v-model="internalValue"
+            type="number"
+            :placeholder="placeholder"
             variant="outlined"
-            :color="color" 
-            :density="density" 
+            :color="color"
+            :density="density"
             :disabled="disabled"
-            :readonly="readonly" 
-            :clearable="clearable" 
-            :hide-details="hideDetails" 
+            :readonly="readonly"
+            :clearable="clearable"
+            :rules="rules"
+            :hide-details="hideDetails"
             :hint="hint"
-            :persistent-hint="persistentHint" 
-            v-bind="inputProps" 
+            :persistent-hint="persistentHint"
+            :prefix="showCurrencyOnLeft ? currency : undefined"
+            :suffix="!showCurrencyOnLeft ? currency : undefined"
+            v-bind="inputProps"
+            class="price-input"
         />
     </div>
 </template>
 
 <style scoped>
-.select-input-wrapper {
+.price-input-wrapper {
     margin-bottom: 16px;
+}
+
+/* Hide number input spinners */
+.price-input :deep(input[type="number"]::-webkit-outer-spin-button),
+.price-input :deep(input[type="number"]::-webkit-inner-spin-button) {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.price-input :deep(input[type="number"]) {
+    -moz-appearance: textfield;
 }
 </style>
