@@ -51,6 +51,12 @@
     "no": "No",
     "actions": "Actions"
   },
+  "pages": {
+    "simpleProducts": {
+      "title": "Simple Products",
+      "description": "Allows you to add simple products"
+    }
+  },
   "auth": {
     "login": "Login",
     "welcomeBack": "Welcome Back",

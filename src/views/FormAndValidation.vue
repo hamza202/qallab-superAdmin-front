@@ -131,17 +131,11 @@ const arrowLeftIcon = `<svg width="15" height="12" viewBox="0 0 15 12" fill="non
       <!-- Main Card -->
 
       <!-- Header -->
-      <div class="flex items-start justify-between mb-6">
-        <div class="flex items-center gap-4">
-          <div class="w-[52px] h-[52px] flex items-center justify-center">
-            <span v-html="gridIcon"></span>
-          </div>
-          <div>
-            <h1 class="text-lg font-bold text-primary-900">المنتجات البسيطة</h1>
-            <p class="text-sm text-gray-600">تمكنك من اضافة المنتجات البسيطة</p>
-          </div>
-        </div>
-      </div>
+      <PageHeader
+        :icon="gridIcon"
+        title-key="pages.simpleProducts.title"
+        description-key="pages.simpleProducts.description"
+      />
 
       <!-- Tabs -->
       <div class="flex gap-2 mb-6">

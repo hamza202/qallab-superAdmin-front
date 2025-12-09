@@ -51,6 +51,12 @@
     "no": "لا",
     "actions": "إجراءات"
   },
+  "pages": {
+    "simpleProducts": {
+      "title": "المنتجات البسيطة",
+      "description": "تمكنك من اضافة المنتجات البسيطة"
+    }
+  },
   "auth": {
     "login": "تسجيل الدخول",
     "welcomeBack": "مرحباً بعودتك",

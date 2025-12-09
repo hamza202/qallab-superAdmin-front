@@ -61,6 +61,7 @@ export default defineConfig(({ mode }) => {
       // Auto import Vue components
       Components({
         dirs: [
+          'src/components/common',
           'src/components/common/forms',
           'src/layouts',
         ],
