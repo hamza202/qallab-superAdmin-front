@@ -34,21 +34,17 @@ const internalValue = computed({
 </script>
 
 <template>
-    <v-checkbox v-model="internalValue" :label="label" :color="color" :density="density" :disabled="disabled"
-        :readonly="readonly" :hide-details="hideDetails" v-bind="inputProps" :class="['custom-checkbox', classes]" />
+    <v-checkbox 
+        v-model="internalValue" 
+        :label="label" 
+        :color="color" 
+        :density="density" 
+        :disabled="disabled"
+        :readonly="readonly" 
+        :hide-details="hideDetails" 
+        v-bind="inputProps" 
+        :class="classes" 
+    />
 </template>
 
-
-<style>
-.custom-checkbox .v-icon {
-    color: #1e3a8a !important;
-}
-
-.custom-checkbox .v-label {
-    font-size: 14px;
-}
-
-.custom-checkbox.text-sm .v-label {
-    font-size: 12px;
-}
-</style>
+<!-- Styles are defined in main.scss using .qallab-checkbox class -->
