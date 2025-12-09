@@ -78,7 +78,4 @@ const internalValue = computed({
 </template>
 
 <style scoped>
-.select-input-wrapper {
-    margin-bottom: 16px;
-}
 </style>

@@ -86,9 +86,6 @@ const internalValue = computed({
 </template>
 
 <style scoped>
-.price-input-wrapper {
-    margin-bottom: 16px;
-}
 
 /* Hide number input spinners */
 .price-input :deep(input[type="number"]::-webkit-outer-spin-button),

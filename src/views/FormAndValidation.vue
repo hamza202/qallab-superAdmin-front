@@ -12,15 +12,13 @@ import SelectWithIconInput from "@/components/common/forms/SelectWithIconInput.v
 
 // Form data
 const productCode = ref("#eda23422");
-const arabicName = ref("محمد صقر");
-const englishName = ref("Mohammed Saqr");
+const arabicName = ref("");
+const englishName = ref("");
 const category = ref(null);
 const unit = ref(null);
-const isMinUnit = ref(true);
-const arabicDescription = ref("هذا المنتج هو برعاية شركة قلاب.");
-const englishDescription = ref(
-  "A little about the company and the team that you'll be working with."
-);
+const isMinUnit = ref(false);
+const arabicDescription = ref("");
+const englishDescription = ref("");
 const productImages = ref<File[] | null>(null);
 const purchasePrice = ref("");
 const salePrice = ref("");
@@ -97,16 +95,16 @@ const plusCircleIcon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="no
   <path d="M10 6.667v6.666M6.667 10h6.666M18.333 10a8.333 8.333 0 1 1-16.666 0 8.333 8.333 0 0 1 16.666 0Z" stroke="currentColor" stroke-width="1.67" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`;
 
-const returnIcon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <path d="M15 11.667a3.333 3.333 0 0 0-3.333-3.334H3.333m0 0L7.5 4.167M3.333 8.333 7.5 12.5" stroke="currentColor" stroke-width="1.67" stroke-linecap="round" stroke-linejoin="round"/>
+const returnIcon = `<svg width="17" height="13" viewBox="0 0 17 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M0.833332 4.16671H12.0833C14.1544 4.16671 15.8333 5.84564 15.8333 7.91671C15.8333 9.98778 14.1544 11.6667 12.0833 11.6667H8.33333M0.833332 4.16671L4.16667 0.833374M0.833332 4.16671L4.16667 7.50004" stroke="white" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`;
 
-const saveIcon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <path d="M17.5 12.5v3.333a1.666 1.666 0 0 1-1.667 1.667H4.167A1.667 1.667 0 0 1 2.5 15.833V12.5M5.833 8.333 10 12.5m0 0 4.167-4.167M10 12.5V2.5" stroke="currentColor" stroke-width="1.67" stroke-linecap="round" stroke-linejoin="round"/>
+const saveIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M4.08333 0.750122H10.4788C10.8864 0.750122 11.0902 0.750122 11.2821 0.796172C11.4521 0.837 11.6147 0.904341 11.7638 0.995722C11.932 1.09879 12.0761 1.24292 12.3644 1.53117L14.969 4.13574C15.2572 4.42399 15.4013 4.56812 15.5044 4.73631C15.5958 4.88543 15.6631 5.04801 15.7039 5.21807C15.75 5.40988 15.75 5.61371 15.75 6.02136V12.4168M8.66667 6.58346H5.41667C4.94996 6.58346 4.7166 6.58346 4.53834 6.49263C4.38154 6.41273 4.25406 6.28525 4.17416 6.12845C4.08333 5.95019 4.08333 5.71683 4.08333 5.25012V3.66679M9.5 15.7501V12.0835C9.5 11.6167 9.5 11.3834 9.40917 11.2051C9.32928 11.0483 9.20179 10.9208 9.04499 10.8409C8.86673 10.7501 8.63338 10.7501 8.16667 10.7501H5.41667C4.94996 10.7501 4.7166 10.7501 4.53834 10.8409C4.38154 10.9208 4.25406 11.0483 4.17416 11.2051C4.08333 11.3834 4.08333 11.6167 4.08333 12.0835V15.7501M12.8333 6.71907V13.0835C12.8333 14.0169 12.8333 14.4836 12.6517 14.8401C12.4919 15.1537 12.2369 15.4087 11.9233 15.5685C11.5668 15.7501 11.1001 15.7501 10.1667 15.7501H3.41667C2.48325 15.7501 2.01654 15.7501 1.66002 15.5685C1.34641 15.4087 1.09144 15.1537 0.931656 14.8401C0.75 14.4836 0.75 14.0169 0.75 13.0835V6.33346C0.75 5.40003 0.75 4.93332 0.931656 4.5768C1.09144 4.2632 1.34641 4.00823 1.66002 3.84844C2.01654 3.66679 2.48325 3.66679 3.41667 3.66679H9.78105C9.98487 3.66679 10.0868 3.66679 10.1827 3.68981C10.2677 3.71023 10.349 3.7439 10.4236 3.78959C10.5077 3.84112 10.5797 3.91319 10.7239 4.05731L12.4428 5.77626C12.5869 5.92039 12.659 5.99245 12.7105 6.07655C12.7562 6.15111 12.7899 6.2324 12.8103 6.31743C12.8333 6.41333 12.8333 6.51525 12.8333 6.71907Z" stroke="#175CD3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`;
 
-const arrowLeftIcon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <path d="M15.833 10H4.167m0 0 5 5m-5-5 5-5" stroke="currentColor" stroke-width="1.67" stroke-linecap="round" stroke-linejoin="round"/>
+const arrowLeftIcon = `<svg width="15" height="12" viewBox="0 0 15 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M14.1667 5.83337H0.833344M0.833344 5.83337L5.83334 10.8334M0.833344 5.83337L5.83334 0.833374" stroke="#175CD3" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`;
 </script>
 
@@ -157,9 +155,7 @@ const arrowLeftIcon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="non
             <h2 class="text-lg font-bold text-primary-900">
               المعلومات العامة للمنتج
             </h2>
-            <div
-              class="flex items-center gap-4 w-full sm:justify-end"
-            >
+            <div class="flex items-center gap-4 w-full sm:justify-end">
               <div class="text-sm font-semibold text-gray-700">كود المنتج</div>
               <div
                 class="bg-gray-200 border border-gray-300 rounded-lg px-3 py-2 font-semibold text-primary-900"
@@ -168,52 +164,36 @@ const arrowLeftIcon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="non
               </div>
             </div>
           </div>
-          <!-- Row 1: Product Code & Add Language Button -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <div class="flex items-end gap-4">
-              <button
-                class="bg-primary-600 text-white px-5 py-2.5 rounded flex items-center gap-2 font-semibold text-base h-[40px]"
-                @click="handleAddLanguage"
-              >
-                <span>أضف لغة جديدة</span>
-                <span class="text-white" v-html="plusCircleIcon"></span>
-              </button>
-            </div>
-          </div>
-
-          <!-- Row 2: Names -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <TextInput
-              v-model="englishName"
-              label="الأسم بالإنجليزية"
-              placeholder="Enter name in English"
-            />
+          <!-- Row 1: Names -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
             <TextInput
               v-model="arabicName"
               label="الأسم بالعربية"
               placeholder="أدخل الاسم"
             />
+            <TextInput
+              v-model="englishName"
+              label="الأسم بالإنجليزية"
+              placeholder="Enter name in English"
+            />
+            <div class="flex items-end gap-4">
+              <v-btn
+                variant="text"
+                color="primary-700"
+                height="40"
+                class="font-semibold text-base"
+                @click="handleAddLanguage"
+              >
+                <span>أضف لغة جديدة</span>
+                <template #prepend>
+                  <span v-html="plusCircleIcon"></span>
+                </template>
+              </v-btn>
+            </div>
           </div>
 
-          <!-- Row 3: Category & Unit -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <div class="flex items-end gap-2">
-              <CheckboxInput
-                v-model="isMinUnit"
-                label="أقل وحدة"
-                classes="mt-4"
-              />
-              <div class="flex-1">
-                <SelectWithIconInput
-                  v-model="unit"
-                  label="الوحدة"
-                  placeholder="اختر الوحدة"
-                  :items="unitItems"
-                  show-add-button
-                  @add-click="handleAddUnit"
-                />
-              </div>
-            </div>
+          <!-- Row 2: Category & Unit -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
             <SelectWithIconInput
               v-model="category"
               label="التصنيف"
@@ -222,10 +202,27 @@ const arrowLeftIcon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="non
               show-add-button
               @add-click="handleAddCategory"
             />
+
+            <SelectWithIconInput
+              v-model="unit"
+              label="الوحدة"
+              placeholder="اختر الوحدة"
+              :items="unitItems"
+              show-add-button
+              @add-click="handleAddUnit"
+            />
+
+            <div class="flex items-end">
+              <CheckboxInput
+                v-model="isMinUnit"
+                label="أقل وحدة"
+                color="primary"
+              />
+            </div>
           </div>
 
           <!-- Row 4: Descriptions -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-4">
             <TextareaInput
               v-model="englishDescription"
               label="الوصف بالإنجليزية"
@@ -242,157 +239,101 @@ const arrowLeftIcon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="non
         </div>
 
         <!-- Product Image Section -->
-        <div class="mb-8">
-          <FileUploadInput
-            v-model="productImages"
-            label="صورة المنتج"
-            hint="PNG, JPG or GIF (max. 400x400px)"
-            :max-files="4"
-          />
+        <div class="mb-8 grid grid-cols-1 md:grid-cols-3">
+          <div class="md:col-span-2">
+            <FileUploadInput
+              v-model="productImages"
+              label="صورة المنتج"
+              hint="PNG, JPG or GIF (max. 400x400px)"
+              :max-files="4"
+            />
+          </div>
         </div>
 
         <!-- Prices Section -->
         <div class="mb-8">
-          <h2 class="text-lg font-semibold text-primary-600 mb-4 text-right">
+          <h2 class="text-lg font-bold text-primary-900">
             الأسعار
           </h2>
 
           <!-- Row 1: Main Prices -->
-          <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-4">
+          <div class="grid grid-cols-2 md:grid-cols-5 gap-5 mb-4">
             <PriceInput v-model="branchPrice" label="سعر الفرع" />
             <PriceInput v-model="minSalePrice" label="أقل سعر للبيع" />
             <PriceInput v-model="maxSalePrice" label="أعلى سعر للبيع" />
             <PriceInput v-model="salePrice" label="سعر البيع" />
             <PriceInput v-model="purchasePrice" label="سعر الشراء" />
-          </div>
-
-          <!-- Row 2: Wholesale Prices -->
-          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-            <div></div>
-            <div></div>
             <PriceInput v-model="halfWholesalePrice" label="سعر نصف الجملة" />
             <PriceInput v-model="wholesalePrice" label="سعر الجملة" />
           </div>
 
+
           <!-- Row 3: Discount -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
             <div>
-              <div class="mb-1.5 text-sm font-semibold text-gray-700">
+              <SelectInput
+                  v-model="discountType"
+                  label="نوع الخصم"
+                  placeholder="اختر نوع الخصم"
+                  :items="discountTypeItems"
+              />
+            </div>
+            <div>
+              <div class="mb-[7px] text-sm font-semibold text-gray-700">
                 قيمة الخصم
               </div>
-              <div class="discount-value-box">
+              <div class="bg-gray-200 border border-gray-300 rounded-lg px-4 py-2 min-h-[47px] font-semibold text-primary-900 flex items-center">
                 <p>{{ discountValue }} $</p>
               </div>
             </div>
-            <div>
-              <SelectInput
-                v-model="discountType"
-                label="نوع الخصم"
-                placeholder="اختر نوع الخصم"
-                :items="discountTypeItems"
-              />
-            </div>
+
           </div>
         </div>
       </div>
 
       <!-- Action Buttons -->
-      <div class="flex justify-center gap-4 mt-6">
-        <button
-          class="bg-primary-600 text-white px-6 py-3 rounded flex items-center gap-2 font-semibold text-base"
+      <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col">
+        <v-btn
+          variant="flat"
+          color="primary"
+          height="48"
+          class="font-semibold text-base px-6"
           @click="handleSaveAndReturn"
         >
-          <span v-html="returnIcon" class="text-white"></span>
+          <template #prepend>
+            <span v-html="returnIcon"></span>
+          </template>
           <span>حفظ والعودة للرئيسية</span>
-        </button>
+        </v-btn>
 
-        <button
-          class="bg-white text-gray-700 border border-gray-300 px-6 py-3 rounded flex items-center gap-2 font-medium text-base"
+        <v-btn
+          variant="flat"
+          color="primary-50"
+          height="48"
+          class="font-semibold text-base text-primary-700 px-6"
           @click="handleSaveAndCreate"
         >
-          <span v-html="saveIcon"></span>
+          <template #prepend>
+            <span v-html="saveIcon"></span>
+          </template>
           <span>حفظ وإنشاء جديد</span>
-        </button>
+        </v-btn>
 
-        <button
-          class="bg-primary-600 text-white px-6 py-3 rounded flex items-center gap-2 font-semibold text-base"
+        <v-btn
+          variant="flat"
+          color="primary-50"
+          height="48"
+          class="font-semibold text-base text-primary-700 px-6"
           @click="handleSaveAndContinue"
         >
-          <span v-html="arrowLeftIcon" class="text-white"></span>
+          <template #prepend>
+            <span v-html="arrowLeftIcon"></span>
+          </template>
           <span>حفظ وإكمال</span>
-        </button>
+        </v-btn>
       </div>
     </div>
   </div>
 </template>
 
-<style scoped>
-.form-validation-page {
-  font-family: "Cairo", sans-serif;
-}
-
-/* Product code styled input */
-.product-code-styled :deep(.v-field) {
-  background-color: #1570ef !important;
-  border-radius: 6px;
-}
-
-.product-code-styled :deep(.v-field__input) {
-  color: white !important;
-  font-weight: 600;
-}
-
-.product-code-styled :deep(.v-field--variant-plain) {
-  background-color: #1570ef !important;
-}
-
-/* Global form styles */
-:deep(.v-field--variant-outlined) {
-  border-color: #cdd5df;
-}
-
-:deep(.v-field--variant-outlined.v-field--focused) {
-  border-color: #84caff;
-  box-shadow: 0px 0px 0px 4px #f5faff, 0px 1px 2px 0px rgba(245, 250, 255, 0.05);
-}
-
-:deep(.v-field__outline) {
-  --v-field-border-opacity: 1;
-}
-
-/* Tab active style */
-.tab-active {
-  background-color: #1570ef;
-  color: white;
-}
-
-/* Discount value box */
-.discount-value-box {
-  background-color: #1570ef;
-  border-radius: 6px;
-  padding: 12px 16px;
-  display: flex;
-  align-items: center;
-  height: 48px;
-}
-
-.discount-value-box p {
-  color: white;
-  font-weight: 500;
-  font-size: 16px;
-  margin: 0;
-}
-
-/* Button styles */
-.btn-primary {
-  background-color: #1570ef;
-  color: white;
-  font-weight: 600;
-}
-
-.btn-secondary {
-  background-color: white;
-  color: #364152;
-  border: 1px solid #cdd5df;
-}
-</style>
+<style scoped></style>

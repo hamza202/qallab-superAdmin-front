@@ -110,9 +110,3 @@ const handleAppendInnerClick = () => {
         />
     </div>
 </template>
-
-<style scoped>
-.text-input-wrapper {
-    margin-bottom: 16px;
-}
-</style>

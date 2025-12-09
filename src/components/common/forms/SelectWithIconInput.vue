@@ -113,10 +113,6 @@ const plusCircleIcon = `<svg width="22" height="22" viewBox="0 0 20 20" fill="no
 </template>
 
 <style scoped>
-.select-icon-wrapper {
-    margin-bottom: 16px;
-}
-
 .add-button {
     display: flex;
     align-items: center;

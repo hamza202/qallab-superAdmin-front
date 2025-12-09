@@ -70,5 +70,15 @@ $shadow-focus: 0px 0px 0px 4px rgb(var(--v-theme-primary-25)),
     font-size: 0;
   }
 }
-
+.v-selection-control__input > .mdi-checkbox-blank-outline{
+  @apply text-gray-300 opacity-100 !important;
+}
+.v-selection-control__input .mdi-checkbox-blank-outline::before,.v-selection-control__input .mdi-checkbox-marked::before {
+  @apply bg-gray-100 flex justify-center items-center rounded-[4px] overflow-hidden;
+  width: 19px;
+  height: 19px;
+}
+.v-checkbox .v-selection-control{
+  @apply min-h-0;
+}
 /* Custom styles */

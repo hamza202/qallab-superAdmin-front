@@ -14,6 +14,7 @@ const qallabTheme = {
     "primary-100": "#D1E9FF",
     "primary-300": "#84CAFF",
     "primary-600": "#1570EF",
+    "primary-700": "#175CD3",
     // Gray colors
     "gray-300": "#CDD5DF",
     "gray-500": "#697586",
