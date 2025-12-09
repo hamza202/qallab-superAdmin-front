@@ -1,4 +1,10 @@
-// Fonts are loaded from Google Fonts in index.html
+// stylelint-disable-next-line at-rule-no-unknown
+@tailwind base;
+// stylelint-disable-next-line at-rule-no-unknown
+@tailwind components;
+// stylelint-disable-next-line at-rule-no-unknown
+@tailwind utilities;
+
 // Cairo: Arabic font
 // Be Vietnam Pro: English font
 
