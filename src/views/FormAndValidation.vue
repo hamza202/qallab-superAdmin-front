@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from "vue";
+import DefaultLayout from "@/layouts/DefaultLayout.vue";
 
 // Form Components
 import TextInput from "@/components/common/forms/textInput.vue";
@@ -109,14 +110,10 @@ const arrowLeftIcon = `<svg width="15" height="12" viewBox="0 0 15 12" fill="non
 </script>
 
 <template>
-  <div
-    class="form-validation-page min-h-screen bg-gray-50 p-6 font-cairo"
-    dir="rtl"
-  >
-    <!-- Main Card -->
-    <div
-      class="bg-white rounded-3xl border border-gray-300 p-6 max-w-[1164px] mx-auto"
-    >
+  <default-layout>
+    <div class="form-validation-page">
+      <!-- Main Card -->
+
       <!-- Header -->
       <div class="flex items-start justify-between mb-6">
         <div class="flex items-center gap-4">
@@ -252,9 +249,7 @@ const arrowLeftIcon = `<svg width="15" height="12" viewBox="0 0 15 12" fill="non
 
         <!-- Prices Section -->
         <div class="mb-8">
-          <h2 class="text-lg font-bold text-primary-900">
-            الأسعار
-          </h2>
+          <h2 class="text-lg font-bold text-primary-900">الأسعار</h2>
 
           <!-- Row 1: Main Prices -->
           <div class="grid grid-cols-2 md:grid-cols-5 gap-5 mb-4">
@@ -267,26 +262,26 @@ const arrowLeftIcon = `<svg width="15" height="12" viewBox="0 0 15 12" fill="non
             <PriceInput v-model="wholesalePrice" label="سعر الجملة" />
           </div>
 
-
           <!-- Row 3: Discount -->
           <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
             <div>
               <SelectInput
-                  v-model="discountType"
-                  label="نوع الخصم"
-                  placeholder="اختر نوع الخصم"
-                  :items="discountTypeItems"
+                v-model="discountType"
+                label="نوع الخصم"
+                placeholder="اختر نوع الخصم"
+                :items="discountTypeItems"
               />
             </div>
             <div>
               <div class="mb-[7px] text-sm font-semibold text-gray-700">
                 قيمة الخصم
               </div>
-              <div class="bg-gray-200 border border-gray-300 rounded-lg px-4 py-2 min-h-[47px] font-semibold text-primary-900 flex items-center">
+              <div
+                class="bg-gray-200 border border-gray-300 rounded-lg px-4 py-2 min-h-[47px] font-semibold text-primary-900 flex items-center"
+              >
                 <p>{{ discountValue }} $</p>
               </div>
             </div>
-
           </div>
         </div>
       </div>
@@ -333,7 +328,7 @@ const arrowLeftIcon = `<svg width="15" height="12" viewBox="0 0 15 12" fill="non
         </v-btn>
       </div>
     </div>
-  </div>
+  </default-layout>
 </template>
 
 <style scoped></style>
