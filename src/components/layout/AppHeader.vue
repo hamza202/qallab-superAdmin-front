@@ -9,9 +9,11 @@
             </div>
 
             <div class="flex items-center gap-4 justify-end ms-auto flex-1">
-                <v-btn size="small" icon variant="flat" class="bg-qallab-blue text-white">
-                    <v-icon>mdi-bell-outline</v-icon>
-                </v-btn>
+                <v-badge content="34" color="error" location="top start" offset-x="2" offset-y="4">
+                    <v-btn size="small" icon variant="flat" class="bg-qallab-blue border !border-gray-300 text-white">
+                        <v-icon>mdi-bell-outline</v-icon>
+                    </v-btn>
+                </v-badge>
 
                 <v-text-field density="comfortable" variant="outlined" hide-details placeholder="Search"
                     class="max-w-md w-full flex-1" prepend-inner-icon="mdi-magnify" />
@@ -27,7 +29,7 @@
                     <v-avatar class="position-relative overflow-visible">
                         <v-img alt="John" src="https://cdn.vuetifyjs.com/images/john.jpg" class="rounded-full"></v-img>
                         <img alt="John" src="@/assets/vectors/qallab-icon.svg"
-                            class="position-absolute bottom-[-5px] start-[-4px] z-index-3"></img>
+                            class="position-absolute bottom-[-5px] start-[-4px] z-index-3"></img> 
                     </v-avatar>
                 </div>
             </div>

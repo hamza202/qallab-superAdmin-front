@@ -8,7 +8,8 @@
             :class="{ 'pt-0 rounded-none': isMobile }">
             <div class="flex flex-col gap-4">
                 <div class="flex justify-center mb-2 px-3">
-                    <img src="@/assets/logo-light.svg" alt="Qallab logo" class="w-15" />
+                    <img src="@/assets/logo-light.svg" alt="Qallab logo" class="w-15" v-if="isSidebarExpanded" />
+                    <img src="@/assets/vectors/qallab-favicon.svg" alt="" class="w-15" v-else >
                 </div>
                 <div class="q-sidebar-toggle z-10" v-if="!isMobile">
                     <v-btn size="x-small" icon class="bg-qallab-yellow text-white shadow-md rounded-full"
@@ -263,5 +264,10 @@ const isSidebarExpanded = computed(() => !isCollapsed.value || isDrawerHovered.v
 
 .q-sidebar-scroll {
     scrollbar-width: none;
+}
+
+
+.q-sidebar-drawer .v-list-item--active > .v-list-item__overlay{
+    display: none;
 }
 </style>
