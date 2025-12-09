@@ -1,9 +1,4 @@
 {
-  "app": {
-    "name": "قلاب",
-    "title": "بوابة العملاء ومقدمي الخدمات",
-    "welcome": "مرحباً بك"
-  },
   "validation": {
     "required": "هذا الحقل مطلوب",
     "arabicNameRequired": "الاسم بالعربية مطلوب",
@@ -36,53 +31,5 @@
     "pastDate": "يجب أن يكون التاريخ في الماضي",
     "pattern": "القيمة غير صالحة",
     "select": "يرجى اختيار قيمة"
-  },
-  "common": {
-    "save": "حفظ",
-    "cancel": "إلغاء",
-    "delete": "حذف",
-    "edit": "تعديل",
-    "add": "إضافة",
-    "search": "بحث",
-    "loading": "جاري التحميل...",
-    "noData": "لا توجد بيانات",
-    "confirm": "تأكيد",
-    "yes": "نعم",
-    "no": "لا",
-    "actions": "إجراءات"
-  },
-  "pages": {
-    "simpleProducts": {
-      "title": "المنتجات البسيطة",
-      "description": "تمكنك من اضافة المنتجات البسيطة"
-    }
-  },
-  "auth": {
-    "login": "تسجيل الدخول",
-    "welcomeBack": "مرحباً بعودتك",
-    "loginSubtitle": "قم بتسجيل الدخول إلى حسابك الآن",
-    "username": "اسم المستخدم",
-    "usernamePlaceholder": "ادخل رقم الهاتف المحمول / البريد الإلكتروني",
-    "password": "كلمة المرور",
-    "passwordPlaceholder": "••••••",
-    "rememberMe": "تذكرني",
-    "rememberMeShort": "تذكرني",
-    "branchAccount": "حساب فرعي",
-    "multiAccounts": "متعدد الحسابات",
-    "forgotPassword": "هل نسيت كلمة المرور؟",
-    "loginButton": "تسجيل الدخول",
-    "allRightsReserved": "جميع الحقوق محفوظة",
-    "accountType": "نوع الحساب",
-    "accountTypePlaceholder": "حدد نوع حسابك",
-    "businessName": "الاسم التجاري",
-    "businessNamePlaceholder": "ادخل الاسم التجاري",
-    "accountTypeMain": "حساب رئيسي",
-    "accountTypeBranch": "حساب فرعي"
-  },
-  "navigation": {
-    "dashboard": "لوحة التحكم",
-    "users": "المستخدمين",
-    "settings": "الإعدادات",
-    "profile": "الملف الشخصي"
   }
 }

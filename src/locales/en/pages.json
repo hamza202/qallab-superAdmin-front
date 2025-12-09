@@ -1,0 +1,12 @@
+{
+  "pages": {
+    "simpleProducts": {
+      "title": "Simple Products",
+      "description": "Allows you to add simple products"
+    },
+    "categories": {
+      "title": "Categories",
+      "description": "Allows you to add Categories"
+    }
+  }
+}

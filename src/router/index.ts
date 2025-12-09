@@ -1,31 +1,32 @@
-import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
+import {
+  createRouter,
+  createWebHistory,
+  type RouteRecordRaw,
+} from "vue-router";
+
+import { dashboardRoutes } from "./modules/dashboard.routes";
+import { productsRoutes } from "./modules/products.routes";
+import { settingsRoutes } from "./modules/settings.routes";
+import { authRoutes } from "./modules/auth.routes";
+import { errorRoutes } from "./modules/errors.routes";
 
 const routes: RouteRecordRaw[] = [
+  ...dashboardRoutes,
+  ...authRoutes,
+  ...productsRoutes,
+  ...settingsRoutes,
+  ...errorRoutes,
+
   {
-    path: '/',
-    name: 'Dashboard',
-    component: () => import('@/views/Dashboard.vue'),
+    path: "/form-and-validation",
+    name: "FormAndValidation",
+    component: () => import("@/views/FormAndValidation.vue"),
   },
-  {
-    path: '/login',
-    name: 'Login',
-    component: () => import('@/views/auth/Login.vue'),
-  },
-  {
-    path: '/form-and-validation',
-    name: 'FormAndValidation',
-    component: () => import('@/views/FormAndValidation.vue'),
-  },
-  {
-    path: '/:pathMatch(.*)*',
-    name: 'NotFound',
-    component: () => import('@/views/errors/NotFound.vue'),
-  },
-]
+];
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes,
-})
+});
 
-export default router
+export default router;

@@ -1,9 +1,4 @@
 {
-  "app": {
-    "name": "Qallab",
-    "title": "Clients & Providers Portal",
-    "welcome": "Welcome"
-  },
   "validation": {
     "required": "This field is required",
     "arabicNameRequired": "Arabic name is required",
@@ -36,53 +31,5 @@
     "pastDate": "Date must be in the past",
     "pattern": "Invalid value",
     "select": "Please select a value"
-  },
-  "common": {
-    "save": "Save",
-    "cancel": "Cancel",
-    "delete": "Delete",
-    "edit": "Edit",
-    "add": "Add",
-    "search": "Search",
-    "loading": "Loading...",
-    "noData": "No data available",
-    "confirm": "Confirm",
-    "yes": "Yes",
-    "no": "No",
-    "actions": "Actions"
-  },
-  "pages": {
-    "simpleProducts": {
-      "title": "Simple Products",
-      "description": "Allows you to add simple products"
-    }
-  },
-  "auth": {
-    "login": "Login",
-    "welcomeBack": "Welcome Back",
-    "loginSubtitle": "Sign in to your account now",
-    "username": "Username",
-    "usernamePlaceholder": "Enter mobile number / email",
-    "password": "Password",
-    "passwordPlaceholder": "••••••",
-    "rememberMe": "Remember Me",
-    "rememberMeShort": "Remember Me",
-    "branchAccount": "Branch Account",
-    "multiAccounts": "Multi Accounts",
-    "forgotPassword": "Forgot Password?",
-    "loginButton": "Sign In",
-    "allRightsReserved": "All rights reserved",
-    "accountType": "Account Type",
-    "accountTypePlaceholder": "Select your account type",
-    "businessName": "Business Name",
-    "businessNamePlaceholder": "Enter your business name",
-    "accountTypeMain": "Main Account",
-    "accountTypeBranch": "Branch Account"
-  },
-  "navigation": {
-    "dashboard": "Dashboard",
-    "users": "Users",
-    "settings": "Settings",
-    "profile": "Profile"
   }
 }
