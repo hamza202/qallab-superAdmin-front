@@ -12,6 +12,11 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/views/auth/Login.vue'),
   },
   {
+    path: '/form-and-validation',
+    name: 'FormAndValidation',
+    component: () => import('@/views/FormAndValidation.vue'),
+  },
+  {
     path: '/:pathMatch(.*)*',
     name: 'NotFound',
     component: () => import('@/views/errors/NotFound.vue'),
