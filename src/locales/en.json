@@ -4,6 +4,39 @@
     "title": "Clients & Providers Portal",
     "welcome": "Welcome"
   },
+  "validation": {
+    "required": "This field is required",
+    "arabicNameRequired": "Arabic name is required",
+    "englishNameRequired": "English name is required",
+    "categoryRequired": "Category is required",
+    "unitRequired": "Unit is required",
+    "priceRequired": "Price is required",
+    "minLength": "Must be at least {min} characters",
+    "maxLength": "Must not exceed {max} characters",
+    "exactLength": "Must be exactly {length} characters",
+    "numeric": "Must be a number",
+    "integer": "Must be an integer",
+    "minValue": "Value must be at least {min}",
+    "maxValue": "Value must not exceed {max}",
+    "between": "Value must be between {min} and {max}",
+    "positive": "Must be a positive number",
+    "email": "Invalid email address",
+    "phone": "Invalid phone number",
+    "saudiPhone": "Invalid Saudi phone number",
+    "arabicOnly": "Must contain Arabic characters only",
+    "englishOnly": "Must contain English characters only",
+    "noSpecialChars": "Special characters are not allowed",
+    "url": "Invalid URL",
+    "strongPassword": "Password must contain uppercase, lowercase, number and special character",
+    "confirmPassword": "Passwords do not match",
+    "maxFileSize": "File size must not exceed {max} MB",
+    "allowedFileTypes": "Allowed file types: {types}",
+    "validDate": "Invalid date",
+    "futureDate": "Date must be in the future",
+    "pastDate": "Date must be in the past",
+    "pattern": "Invalid value",
+    "select": "Please select a value"
+  },
   "common": {
     "save": "Save",
     "cancel": "Cancel",
@@ -17,6 +50,12 @@
     "yes": "Yes",
     "no": "No",
     "actions": "Actions"
+  },
+  "pages": {
+    "simpleProducts": {
+      "title": "Simple Products",
+      "description": "Allows you to add simple products"
+    }
   },
   "auth": {
     "login": "Login",

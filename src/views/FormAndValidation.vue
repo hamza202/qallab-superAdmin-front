@@ -1,15 +1,12 @@
 <script setup lang="ts">
-import { ref } from "vue";
-import DefaultLayout from "@/layouts/DefaultLayout.vue";
+// All imports are now auto-imported:
+// - Vue APIs (ref, computed, etc.) from 'vue'
+// - Components from 'src/components/common/forms' and 'src/layouts'
+// - Validators (required, minLength, etc.) from '@/utils/validators'
 
-// Form Components
-import TextInput from "@/components/common/forms/textInput.vue";
-import SelectInput from "@/components/common/forms/selectInput.vue";
-import CheckboxInput from "@/components/common/forms/checkboxInput.vue";
-import TextareaInput from "@/components/common/forms/TextareaInput.vue";
-import FileUploadInput from "@/components/common/forms/FileUploadInput.vue";
-import PriceInput from "@/components/common/forms/PriceInput.vue";
-import SelectWithIconInput from "@/components/common/forms/SelectWithIconInput.vue";
+// Form ref
+const formRef = ref<any>(null);
+const isFormValid = ref(false);
 
 // Form data
 const productCode = ref("#eda23422");
@@ -73,16 +70,35 @@ const handleAddLanguage = () => {
   console.log("Add new language");
 };
 
-const handleSaveAndReturn = () => {
-  console.log("Save and return to home");
+const handleSaveAndReturn = async () => {
+  const { valid } = await formRef.value?.validate();
+  if (valid) {
+    console.log("Form is valid! Save and return to home");
+    // هنا يمكنك إرسال البيانات للـ API
+  } else {
+    console.log("Form has errors");
+  }
 };
 
-const handleSaveAndCreate = () => {
-  console.log("Save and create new");
+const handleSaveAndCreate = async () => {
+  const { valid } = await formRef.value?.validate();
+  if (valid) {
+    console.log("Form is valid! Save and create new");
+    // هنا يمكنك إرسال البيانات للـ API ثم إعادة تعيين الفورم
+    formRef.value?.reset();
+  } else {
+    console.log("Form has errors");
+  }
 };
 
-const handleSaveAndContinue = () => {
-  console.log("Save and continue");
+const handleSaveAndContinue = async () => {
+  const { valid } = await formRef.value?.validate();
+  if (valid) {
+    console.log("Form is valid! Save and continue");
+    // هنا يمكنك إرسال البيانات للـ API
+  } else {
+    console.log("Form has errors");
+  }
 };
 
 // Icons
@@ -115,17 +131,11 @@ const arrowLeftIcon = `<svg width="15" height="12" viewBox="0 0 15 12" fill="non
       <!-- Main Card -->
 
       <!-- Header -->
-      <div class="flex items-start justify-between mb-6">
-        <div class="flex items-center gap-4">
-          <div class="w-[52px] h-[52px] flex items-center justify-center">
-            <span v-html="gridIcon"></span>
-          </div>
-          <div>
-            <h1 class="text-lg font-bold text-primary-900">المنتجات البسيطة</h1>
-            <p class="text-sm text-gray-600">تمكنك من اضافة المنتجات البسيطة</p>
-          </div>
-        </div>
-      </div>
+      <PageHeader
+        :icon="gridIcon"
+        title-key="pages.simpleProducts.title"
+        description-key="pages.simpleProducts.description"
+      />
 
       <!-- Tabs -->
       <div class="flex gap-2 mb-6">
@@ -145,146 +155,196 @@ const arrowLeftIcon = `<svg width="15" height="12" viewBox="0 0 15 12" fill="non
       </div>
 
       <!-- Form Content Area -->
-      <div class="bg-gray-50 rounded-md p-6">
-        <!-- Product Info Section -->
-        <div class="mb-8">
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-            <h2 class="text-lg font-bold text-primary-900">
-              المعلومات العامة للمنتج
-            </h2>
-            <div class="flex items-center gap-4 w-full sm:justify-end">
-              <div class="text-sm font-semibold text-gray-700">كود المنتج</div>
-              <div
-                class="bg-gray-200 border border-gray-300 rounded-lg px-3 py-2 font-semibold text-primary-900"
-              >
-                {{ productCode }}
+      <v-form ref="formRef" v-model="isFormValid" @submit.prevent>
+        <div class="bg-gray-50 rounded-md p-6">
+          <!-- Product Info Section -->
+          <div class="mb-8">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+              <h2 class="text-lg font-bold text-primary-900">
+                المعلومات العامة للمنتج
+              </h2>
+              <div class="flex items-center gap-4 w-full sm:justify-end">
+                <div class="text-sm font-semibold text-gray-700">كود المنتج</div>
+                <div
+                  class="bg-gray-200 border border-gray-300 rounded-lg px-3 py-2 font-semibold text-primary-900"
+                >
+                  {{ productCode }}
+                </div>
               </div>
             </div>
-          </div>
-          <!-- Row 1: Names -->
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-            <TextInput
-              v-model="arabicName"
-              label="الأسم بالعربية"
-              placeholder="أدخل الاسم"
-            />
-            <TextInput
-              v-model="englishName"
-              label="الأسم بالإنجليزية"
-              placeholder="Enter name in English"
-            />
-            <div class="flex items-end gap-4">
-              <v-btn
-                variant="text"
-                color="primary-700"
-                height="40"
-                class="font-semibold text-base"
-                @click="handleAddLanguage"
-              >
-                <span>أضف لغة جديدة</span>
-                <template #prepend>
-                  <span v-html="plusCircleIcon"></span>
-                </template>
-              </v-btn>
+            <!-- Row 1: Names -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+              <TextInput
+                v-model="arabicName"
+                label="الأسم بالعربية"
+                placeholder="أدخل الاسم"
+                :rules="[required('arabicNameRequired'), minLength(2), maxLength(100), arabicOnly()]"
+                :hide-details="false"
+              />
+              <TextInput
+                v-model="englishName"
+                label="الأسم بالإنجليزية"
+                placeholder="Enter name in English"
+                :rules="[required('englishNameRequired'), minLength(2), maxLength(100)]"
+                :hide-details="false"
+              />
+              <div class="flex items-center gap-4">
+                <v-btn
+                  variant="text"
+                  color="primary-700"
+                  height="40"
+                  class="font-semibold text-base"
+                  @click="handleAddLanguage"
+                >
+                  <span>أضف لغة جديدة</span>
+                  <template #prepend>
+                    <span v-html="plusCircleIcon"></span>
+                  </template>
+                </v-btn>
+              </div>
             </div>
-          </div>
 
-          <!-- Row 2: Category & Unit -->
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-            <SelectWithIconInput
-              v-model="category"
-              label="التصنيف"
-              placeholder="اختر التصنيف"
-              :items="categoryItems"
-              show-add-button
-              @add-click="handleAddCategory"
-            />
+            <!-- Row 2: Category & Unit -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+              <SelectWithIconInput
+                v-model="category"
+                label="التصنيف"
+                placeholder="اختر التصنيف"
+                :items="categoryItems"
+                :rules="[required()]"
+                :hide-details="false"
+                show-add-button
+                @add-click="handleAddCategory"
+              />
 
-            <SelectWithIconInput
-              v-model="unit"
-              label="الوحدة"
-              placeholder="اختر الوحدة"
-              :items="unitItems"
-              show-add-button
-              @add-click="handleAddUnit"
-            />
+              <SelectWithIconInput
+                v-model="unit"
+                label="الوحدة"
+                placeholder="اختر الوحدة"
+                :items="unitItems"
+                :rules="[required()]"
+                :hide-details="false"
+                show-add-button
+                @add-click="handleAddUnit"
+              />
 
-            <div class="flex items-end">
-              <CheckboxInput
-                v-model="isMinUnit"
-                label="أقل وحدة"
-                color="primary"
+              <div class="flex items-center">
+                <CheckboxInput
+                  v-model="isMinUnit"
+                  label="أقل وحدة"
+                  color="primary"
+                  classes="md:px-2"
+                />
+              </div>
+            </div>
+
+            <!-- Row 4: Descriptions -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-4">
+              <TextareaInput
+                v-model="englishDescription"
+                label="الوصف بالإنجليزية"
+                placeholder="Enter description in English"
+                :rows="5"
+                :rules="[maxLength(500)]"
+                :hide-details="false"
+              />
+              <TextareaInput
+                v-model="arabicDescription"
+                label="الوصف بالعربية"
+                placeholder="أدخل الوصف"
+                :rows="5"
+                :rules="[maxLength(500)]"
+                :hide-details="false"
               />
             </div>
           </div>
 
-          <!-- Row 4: Descriptions -->
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-4">
-            <TextareaInput
-              v-model="englishDescription"
-              label="الوصف بالإنجليزية"
-              placeholder="Enter description in English"
-              :rows="5"
-            />
-            <TextareaInput
-              v-model="arabicDescription"
-              label="الوصف بالعربية"
-              placeholder="أدخل الوصف"
-              :rows="5"
-            />
-          </div>
-        </div>
-
-        <!-- Product Image Section -->
-        <div class="mb-8 grid grid-cols-1 md:grid-cols-3">
-          <div class="md:col-span-2">
-            <FileUploadInput
-              v-model="productImages"
-              label="صورة المنتج"
-              hint="PNG, JPG or GIF (max. 400x400px)"
-              :max-files="4"
-            />
-          </div>
-        </div>
-
-        <!-- Prices Section -->
-        <div class="mb-8">
-          <h2 class="text-lg font-bold text-primary-900">الأسعار</h2>
-
-          <!-- Row 1: Main Prices -->
-          <div class="grid grid-cols-2 md:grid-cols-5 gap-5 mb-4">
-            <PriceInput v-model="branchPrice" label="سعر الفرع" />
-            <PriceInput v-model="minSalePrice" label="أقل سعر للبيع" />
-            <PriceInput v-model="maxSalePrice" label="أعلى سعر للبيع" />
-            <PriceInput v-model="salePrice" label="سعر البيع" />
-            <PriceInput v-model="purchasePrice" label="سعر الشراء" />
-            <PriceInput v-model="halfWholesalePrice" label="سعر نصف الجملة" />
-            <PriceInput v-model="wholesalePrice" label="سعر الجملة" />
-          </div>
-
-          <!-- Row 3: Discount -->
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-            <div>
-              <SelectInput
-                v-model="discountType"
-                label="نوع الخصم"
-                placeholder="اختر نوع الخصم"
-                :items="discountTypeItems"
+          <!-- Product Image Section -->
+          <div class="mb-8 grid grid-cols-1 md:grid-cols-3 gap-5">
+            <div class="md:col-span-2">
+              <FileUploadInput
+                v-model="productImages"
+                label="صورة المنتج"
+                hint="PNG, JPG or GIF (max. 400x400px)"
+                :max-files="4"
               />
             </div>
-            <div>
-              <div class="mb-[7px] text-sm font-semibold text-gray-700">
-                قيمة الخصم
+          </div>
+
+          <!-- Prices Section -->
+          <div class="mb-8">
+            <h2 class="text-lg font-bold text-primary-900">الأسعار</h2>
+
+            <!-- Row 1: Main Prices -->
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-5 mb-4">
+              <PriceInput
+                v-model="branchPrice"
+                label="سعر الفرع"
+                :rules="[numeric(), positive()]"
+                :hide-details="false"
+              />
+              <PriceInput
+                v-model="minSalePrice"
+                label="أقل سعر للبيع"
+                :rules="[numeric(), positive()]"
+                :hide-details="false"
+              />
+              <PriceInput
+                v-model="maxSalePrice"
+                label="أعلى سعر للبيع"
+                :rules="[numeric(), positive()]"
+                :hide-details="false"
+              />
+              <PriceInput
+                v-model="salePrice"
+                label="سعر البيع"
+                :rules="[required(), numeric(), positive()]"
+                :hide-details="false"
+              />
+              <PriceInput
+                v-model="purchasePrice"
+                label="سعر الشراء"
+                :rules="[required(), numeric(), positive()]"
+                :hide-details="false"
+              />
+              <PriceInput
+                v-model="halfWholesalePrice"
+                label="سعر نصف الجملة"
+                :rules="[numeric(), positive()]"
+                :hide-details="false"
+              />
+              <PriceInput
+                v-model="wholesalePrice"
+                label="سعر الجملة"
+                :rules="[numeric(), positive()]"
+                :hide-details="false"
+              />
+            </div>
+
+            <!-- Row 3: Discount -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+              <div>
+                <SelectInput
+                  v-model="discountType"
+                  label="نوع الخصم"
+                  placeholder="اختر نوع الخصم"
+                  :items="discountTypeItems"
+                />
               </div>
-              <div
-                class="bg-gray-200 border border-gray-300 rounded-lg px-4 py-2 min-h-[47px] font-semibold text-primary-900 flex items-center"
-              >
-                <p>{{ discountValue }} $</p>
+              <div>
+                <div class="mb-[7px] text-sm font-semibold text-gray-700">
+                  قيمة الخصم
+                </div>
+                <div
+                  class="bg-gray-200 border border-gray-300 rounded-lg px-4 py-2 min-h-[47px] font-semibold text-primary-900 flex items-center"
+                >
+                  <p>{{ discountValue }} $</p>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      </v-form>
 
       <!-- Action Buttons -->
       <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col">
