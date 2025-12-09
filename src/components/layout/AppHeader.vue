@@ -9,9 +9,12 @@
             </div>
 
             <div class="flex items-center gap-4 justify-end ms-auto flex-1">
-                <v-btn size="small" icon variant="flat" class="bg-qallab-blue text-white">
-                    <v-icon>mdi-bell-outline</v-icon>
-                </v-btn>
+                <v-badge content="34" color="error" location="top start" offset-x="2" offset-y="4">
+                    <v-btn size="small" icon variant="flat"
+                        class="bg-qallab-blue border !border-gray-300 text-white !rounded-full">
+                        <v-icon>mdi-bell-outline</v-icon>
+                    </v-btn>
+                </v-badge>
 
                 <v-text-field density="comfortable" variant="outlined" hide-details placeholder="Search"
                     class="max-w-md w-full flex-1" prepend-inner-icon="mdi-magnify" />

@@ -8,10 +8,11 @@
             :class="{ 'pt-0 rounded-none': isMobile }">
             <div class="flex flex-col gap-4">
                 <div class="flex justify-center mb-2 px-3">
-                    <img src="@/assets/logo-light.svg" alt="Qallab logo" class="w-15" />
+                    <img src="@/assets/logo-light.svg" alt="Qallab logo" class="w-15" v-if="isSidebarExpanded" />
+                    <img src="@/assets/vectors/qallab-favicon.svg" alt="" class="w-15" v-else >
                 </div>
                 <div class="q-sidebar-toggle z-10" v-if="!isMobile">
-                    <v-btn size="x-small" icon class="bg-qallab-yellow text-white shadow-md rounded-full"
+                    <v-btn size="x-small" icon class="bg-qallab-yellow text-white shadow-md !rounded-full"
                         @click="toggleCollapse">
                         <v-icon size="20">{{ isCollapsed ? 'mdi-chevron-left' : 'mdi-chevron-right' }}</v-icon>
                     </v-btn>
@@ -168,7 +169,7 @@
             <div class="mt-15 px-2">
                 <a href="#" class="block relative" v-if="isSidebarExpanded">
                     <v-btn size="x-small"
-                        class="!absolute !top-[-15px] !left-5 bg-white border-[3px] border-qallab-blue rounded-full p-1 h-9 w-9 flex items-center justify-center">
+                        class="!absolute !top-[-15px] !left-5 bg-white border-[3px] border-qallab-blue !rounded-full p-1 h-9 w-9 flex items-center justify-center">
                         <v-icon size="20" class="text-qallab-blue font-bold">mdi-arrow-top-right</v-icon>
                     </v-btn>
                     <div
@@ -263,5 +264,10 @@ const isSidebarExpanded = computed(() => !isCollapsed.value || isDrawerHovered.v
 
 .q-sidebar-scroll {
     scrollbar-width: none;
+}
+
+
+.q-sidebar-drawer .v-list-item--active > .v-list-item__overlay{
+    display: none;
 }
 </style>

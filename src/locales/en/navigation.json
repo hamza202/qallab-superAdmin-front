@@ -1,0 +1,8 @@
+{
+  "navigation": {
+    "dashboard": "Dashboard",
+    "users": "Users",
+    "settings": "Settings",
+    "profile": "Profile"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "pages": {
+    "simpleProducts": {
+      "title": "المنتجات البسيطة",
+      "description": "تمكنك من اضافة المنتجات البسيطة"
+    },
+    "categories": {
+      "title": "التصنيفات",
+      "description": "تمكنك من اضافة التصنيفات"
+    }
+  }
+}
