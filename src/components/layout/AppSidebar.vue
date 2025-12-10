@@ -69,18 +69,33 @@
                             </div>
 
                             <ul class="space-y-2">
-                                <li class="relative font-bold text-qallab-yellow">
-                                    <span>المنتجات البسيطة</span>
+                                <li class="relative">
+                                    <router-link 
+                                        to="/simple-products/create" 
+                                        :class="[$route.path.includes('/simple-products') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']"
+                                    >
+                                        {{ $t('pages.simpleProducts.title') }}
+                                    </router-link>
                                     <span
                                         class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
                                 </li>
-                                <li class="relative text-white">
-                                    <span>منتجات المجموعة</span>
+                                <li class="relative">
+                                    <router-link 
+                                        to="/group-products" 
+                                        :class="[$route.path.includes('/group-products') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']"
+                                    >
+                                        {{ $t('pages.groupProducts.title') }}
+                                    </router-link>
                                     <span
                                         class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
                                 </li>
-                                <li class="relative text-white">
-                                    <span>المنتجات المركبة</span>
+                                <li class="relative">
+                                    <router-link 
+                                        to="/composite-products" 
+                                        :class="[$route.path.includes('/composite-products') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']"
+                                    >
+                                        {{ $t('pages.compositeProducts.title') }}
+                                    </router-link>
                                     <span
                                         class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
                                 </li>

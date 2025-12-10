@@ -2,7 +2,18 @@
   "pages": {
     "simpleProducts": {
       "title": "Simple Products",
-      "description": "Allows you to add simple products"
+      "description": "Allows you to add simple products",
+      "list": "Simple Products List",
+      "create": "Add Simple Product",
+      "edit": "Edit Simple Product"
+    },
+    "groupProducts": {
+      "title": "Group Products",
+      "description": "Allows you to add group products"
+    },
+    "compositeProducts": {
+      "title": "Composite Products",
+      "description": "Allows you to add composite products"
     },
     "categories": {
       "title": "Categories",

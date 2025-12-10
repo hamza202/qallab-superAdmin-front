@@ -90,7 +90,4 @@ const internalValue = computed({
 </template>
 
 <style scoped>
-.textarea-wrapper {
-    margin-bottom: 16px;
-}
 </style>
