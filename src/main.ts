@@ -6,7 +6,8 @@ import router from './router'
 import i18n from './plugins/i18n'
 import vuetify from './plugins/vuetify'
 
-// Styles
+// Styles - Order matters! Vuetify first, then Tailwind/custom styles
+import 'vuetify/styles'
 import '@mdi/font/css/materialdesignicons.css'
 import './styles/main.scss'
 

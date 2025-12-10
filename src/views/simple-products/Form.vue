@@ -49,13 +49,75 @@ const discountTypeItems = [
   { title: "قيمة ثابتة", value: "fixed" },
 ];
 
+// Tax data
+const taxType = ref(null);
+const taxPercentage = ref("10%");
+const taxMinValue = ref(null);
+const taxPriority = ref(null);
+
+const taxTypeItems = [
+  { title: "اختر النوع", value: "" },
+  { title: "ضريبة القيمة المضافة", value: "vat" },
+  { title: "ضريبة المبيعات", value: "sales" },
+  { title: "ضريبة الدخل", value: "income" },
+];
+
+const taxMinValueItems = [
+  { title: "اختر القيمة", value: "" },
+  { title: "100", value: "100" },
+  { title: "500", value: "500" },
+  { title: "1000", value: "1000" },
+];
+
+const taxPriorityItems = [
+  { title: "اختر الأولوية", value: "" },
+  { title: "عالية", value: "high" },
+  { title: "متوسطة", value: "medium" },
+  { title: "منخفضة", value: "low" },
+];
+
+// Tax table data
+const taxTableHeaders = [
+  { key: "name", title: "الضريبة", width: "370px" },
+  { key: "percentage", title: "النسبة", width: "176px" },
+  { key: "minValue", title: "أقل قيمة", width: "176px" },
+  { key: "priority", title: "الأولوية", width: "176px" },
+];
+
+const taxTableItems = ref([
+  { id: 1, name: "ضريبة القيمة المضافة", percentage: "15%", minValue: "150", priority: "عالية" },
+  { id: 2, name: "ضريبة تأمين", percentage: "15%", minValue: "150", priority: "منخفضة" },
+  { id: 3, name: "ضريبة تأمين", percentage: "15%", minValue: "150", priority: "متوسطة" },
+]);
+
+const handleEditTax = (item: any) => {
+  console.log("Edit tax:", item);
+};
+
+const handleDeleteTax = (item: any) => {
+  taxTableItems.value = taxTableItems.value.filter((t) => t.id !== item.id);
+};
+
 // Tabs
 const activeTab = ref(0);
+const completedTabs = ref<number[]>([]);
 const tabs = [
-  { title: "البيانات الأساسية", value: 0 },
+  { title: "البيانات الاساسية", value: 0 },
   { title: "بيانات الضرائب", value: 1 },
-  { title: "البيانات الإضافية", value: 2 },
+  { title: "بيانات الإضافية", value: 2 },
 ];
+
+// Tab helpers
+const isTabCompleted = (tabValue: number) =>
+  completedTabs.value.includes(tabValue);
+const isTabActive = (tabValue: number) => activeTab.value === tabValue;
+
+// Watch for tab changes to mark previous tabs as completed
+watch(activeTab, (newVal, oldVal) => {
+  if (newVal > oldVal && !completedTabs.value.includes(oldVal)) {
+    completedTabs.value.push(oldVal);
+  }
+});
 
 // Handlers
 const handleAddCategory = () => {
@@ -68,6 +130,14 @@ const handleAddUnit = () => {
 
 const handleAddLanguage = () => {
   console.log("Add new language");
+};
+
+const handleAddTaxType = () => {
+  console.log("Add new tax type");
+};
+
+const handleAddTax = () => {
+  console.log("Add tax");
 };
 
 const handleSaveAndReturn = async () => {
@@ -123,6 +193,21 @@ const saveIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xm
 const arrowLeftIcon = `<svg width="15" height="12" viewBox="0 0 15 12" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M14.1667 5.83337H0.833344M0.833344 5.83337L5.83334 10.8334M0.833344 5.83337L5.83334 0.833374" stroke="#175CD3" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`;
+
+const plusIcon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M10 4.16667V15.8333M4.16667 10H15.8333" stroke="white" stroke-width="1.67" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`;
+
+const checkCircleIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_12506_1251)">
+<path d="M16.5 8.31429V9.00429C16.4991 10.6216 15.9754 12.1953 15.007 13.4907C14.0386 14.786 12.6775 15.7337 11.1265 16.1922C9.57557 16.6508 7.91794 16.5957 6.40085 16.0352C4.88376 15.4747 3.58849 14.4389 2.70822 13.0821C1.82795 11.7253 1.40984 10.1203 1.51626 8.50653C1.62267 6.89272 2.24791 5.35654 3.29871 4.1271C4.34951 2.89766 5.76959 2.04083 7.34714 1.6844C8.92469 1.32798 10.5752 1.49105 12.0525 2.14929M16.5 3L9 10.5075L6.75 8.2575" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<defs>
+<clipPath id="clip0_12506_1251">
+<rect width="18" height="18" fill="white"/>
+</clipPath>
+</defs>
+</svg>`;
 </script>
 
 <template>
@@ -138,265 +223,353 @@ const arrowLeftIcon = `<svg width="15" height="12" viewBox="0 0 15 12" fill="non
       />
 
       <!-- Tabs -->
-      <div class="flex gap-2 mb-6">
-        <button
+      <v-tabs v-model="activeTab" class="custom-tabs mb-6" hide-slider>
+        <v-tab
           v-for="tab in tabs"
           :key="tab.value"
+          :value="tab.value"
           :class="[
-            'px-6 py-3 rounded-md text-base font-medium transition-all',
-            activeTab === tab.value
-              ? 'bg-primary-600 text-white font-semibold'
-              : 'bg-primary-50 text-primary-900',
+            'custom-tab',
+            {
+              'custom-tab--active': isTabActive(tab.value),
+              'custom-tab--completed': isTabCompleted(tab.value),
+            },
           ]"
-          @click="activeTab = tab.value"
         >
           {{ tab.title }}
-        </button>
-      </div>
+          <span
+            v-if="isTabCompleted(tab.value)"
+            class="ms-2"
+            v-html="checkCircleIcon"
+          ></span>
+        </v-tab>
+      </v-tabs>
 
-      <!-- Form Content Area -->
-      <v-form ref="formRef" v-model="isFormValid" @submit.prevent>
-        <div class="">
-          <!-- Product Info Section -->
-          <div class="mb-3 bg-gray-50 rounded-lg p-6">
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-              <h2 class="text-lg font-bold text-primary-900">
-                المعلومات العامة للمنتج
-              </h2>
-              <div class="flex items-center gap-4 w-full sm:justify-end">
-                <div class="text-sm font-semibold text-gray-700">
-                  كود المنتج
+      <v-tabs-window v-model="activeTab">
+        <!-- Tab 1: البيانات الأساسية -->
+        <v-tabs-window-item :value="0">
+          <v-form ref="formRef" v-model="isFormValid" @submit.prevent>
+            <div class="">
+              <!-- Product Info Section -->
+              <div class="mb-3 bg-gray-50 rounded-lg p-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                  <h2 class="text-lg font-bold text-primary-900">
+                    المعلومات العامة للمنتج
+                  </h2>
+                  <div class="flex items-center gap-4 w-full sm:justify-end">
+                    <div class="text-sm font-semibold text-gray-700">
+                      كود المنتج
+                    </div>
+                    <div
+                      class="bg-gray-200 border border-gray-300 rounded-lg px-3 py-2 font-semibold text-primary-900"
+                    >
+                      {{ productCode }}
+                    </div>
+                  </div>
                 </div>
-                <div
-                  class="bg-gray-200 border border-gray-300 rounded-lg px-3 py-2 font-semibold text-primary-900"
-                >
-                  {{ productCode }}
+                <!-- Row 1: Names -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-2">
+                  <TextInput
+                    v-model="arabicName"
+                    label="الأسم بالعربية"
+                    placeholder="أدخل الاسم"
+                    :rules="[
+                      required('arabicNameRequired'),
+                      minLength(2),
+                      maxLength(100),
+                      arabicOnly(),
+                    ]"
+                    :hide-details="false"
+                  />
+                  <TextInput
+                    v-model="englishName"
+                    label="الأسم بالإنجليزية"
+                    placeholder="Enter name in English"
+                    :rules="[
+                      required('englishNameRequired'),
+                      minLength(2),
+                      maxLength(100),
+                    ]"
+                    :hide-details="false"
+                  />
+                  <div class="flex items-center gap-4">
+                    <v-btn
+                      variant="text"
+                      color="primary-700"
+                      height="40"
+                      class="font-semibold text-base"
+                      @click="handleAddLanguage"
+                    >
+                      <span>أضف لغة جديدة</span>
+                      <template #prepend>
+                        <span v-html="plusCircleIcon"></span>
+                      </template>
+                    </v-btn>
+                  </div>
+                </div>
+
+                <!-- Row 2: Category & Unit -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-2">
+                  <SelectWithIconInput
+                    v-model="category"
+                    label="التصنيف"
+                    placeholder="اختر التصنيف"
+                    :items="categoryItems"
+                    :rules="[required()]"
+                    :hide-details="false"
+                    show-add-button
+                    @add-click="handleAddCategory"
+                  />
+
+                  <SelectWithIconInput
+                    v-model="unit"
+                    label="الوحدة"
+                    placeholder="اختر الوحدة"
+                    :items="unitItems"
+                    :rules="[required()]"
+                    :hide-details="false"
+                    show-add-button
+                    @add-click="handleAddUnit"
+                  />
+
+                  <div class="flex items-center">
+                    <CheckboxInput
+                      v-model="isMinUnit"
+                      label="أقل وحدة"
+                      color="primary"
+                      classes="md:px-2"
+                    />
+                  </div>
+                </div>
+
+                <!-- Row 4: Descriptions -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-2">
+                  <TextareaInput
+                    v-model="englishDescription"
+                    label="الوصف بالإنجليزية"
+                    placeholder="Enter description in English"
+                    :rows="5"
+                    :rules="[maxLength(500)]"
+                    :hide-details="false"
+                  />
+                  <TextareaInput
+                    v-model="arabicDescription"
+                    label="الوصف بالعربية"
+                    placeholder="أدخل الوصف"
+                    :rows="5"
+                    :rules="[maxLength(500)]"
+                    :hide-details="false"
+                  />
+                </div>
+                <!-- Product Image Section -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                  <div class="md:col-span-2">
+                    <FileUploadInput
+                      v-model="productImages"
+                      label="صورة المنتج"
+                      hint="PNG, JPG or GIF (max. 400x400px)"
+                      :max-files="4"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <!-- Prices Section -->
+              <div class="mb-8 bg-gray-50 rounded-lg p-6">
+                <h2 class="text-lg font-bold text-primary-900">الأسعار</h2>
+
+                <!-- Row 1: Main Prices -->
+                <div class="grid grid-cols-2 md:grid-cols-5 gap-5 mb-2">
+                  <PriceInput
+                    v-model="branchPrice"
+                    label="سعر الفرع"
+                    :rules="[numeric(), positive()]"
+                    :hide-details="false"
+                  />
+                  <PriceInput
+                    v-model="minSalePrice"
+                    label="أقل سعر للبيع"
+                    :rules="[numeric(), positive()]"
+                    :hide-details="false"
+                  />
+                  <PriceInput
+                    v-model="maxSalePrice"
+                    label="أعلى سعر للبيع"
+                    :rules="[numeric(), positive()]"
+                    :hide-details="false"
+                  />
+                  <PriceInput
+                    v-model="salePrice"
+                    label="سعر البيع"
+                    :rules="[required(), numeric(), positive()]"
+                    :hide-details="false"
+                  />
+                  <PriceInput
+                    v-model="purchasePrice"
+                    label="سعر الشراء"
+                    :rules="[required(), numeric(), positive()]"
+                    :hide-details="false"
+                  />
+                  <PriceInput
+                    v-model="halfWholesalePrice"
+                    label="سعر نصف الجملة"
+                    :rules="[numeric(), positive()]"
+                    :hide-details="false"
+                  />
+                  <PriceInput
+                    v-model="wholesalePrice"
+                    label="سعر الجملة"
+                    :rules="[numeric(), positive()]"
+                    :hide-details="false"
+                  />
+                </div>
+
+                <!-- Row 3: Discount -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                  <div>
+                    <SelectInput
+                      v-model="discountType"
+                      label="نوع الخصم"
+                      placeholder="اختر نوع الخصم"
+                      :items="discountTypeItems"
+                    />
+                  </div>
+                  <div>
+                    <div class="mb-[7px] text-sm font-semibold text-gray-700">
+                      قيمة الخصم
+                    </div>
+                    <div
+                      class="bg-gray-200 border border-gray-300 rounded-lg px-4 py-2 min-h-[47px] font-semibold text-primary-900 flex items-center"
+                    >
+                      <p>{{ discountValue }} $</p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-            <!-- Row 1: Names -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-2">
-              <TextInput
-                v-model="arabicName"
-                label="الأسم بالعربية"
-                placeholder="أدخل الاسم"
-                :rules="[
-                  required('arabicNameRequired'),
-                  minLength(2),
-                  maxLength(100),
-                  arabicOnly(),
-                ]"
-                :hide-details="false"
-              />
-              <TextInput
-                v-model="englishName"
-                label="الأسم بالإنجليزية"
-                placeholder="Enter name in English"
-                :rules="[
-                  required('englishNameRequired'),
-                  minLength(2),
-                  maxLength(100),
-                ]"
-                :hide-details="false"
-              />
-              <div class="flex items-center gap-4">
-                <v-btn
-                  variant="text"
-                  color="primary-700"
-                  height="40"
-                  class="font-semibold text-base"
-                  @click="handleAddLanguage"
-                >
-                  <span>أضف لغة جديدة</span>
-                  <template #prepend>
-                    <span v-html="plusCircleIcon"></span>
-                  </template>
-                </v-btn>
-              </div>
-            </div>
+            <!-- Action Buttons -->
+            <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col">
+              <v-btn
+                variant="flat"
+                color="primary"
+                height="48"
+                class="font-semibold text-base px-6"
+                @click="handleSaveAndReturn"
+              >
+                <template #prepend>
+                  <span v-html="returnIcon"></span>
+                </template>
+                <span>حفظ والعودة للرئيسية</span>
+              </v-btn>
 
-            <!-- Row 2: Category & Unit -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-2">
+              <v-btn
+                variant="flat"
+                color="primary-50"
+                height="48"
+                class="font-semibold text-base text-primary-700 px-6"
+                @click="handleSaveAndCreate"
+              >
+                <template #prepend>
+                  <span v-html="saveIcon"></span>
+                </template>
+                <span>حفظ وإنشاء جديد</span>
+              </v-btn>
+
+              <v-btn
+                variant="flat"
+                color="primary-50"
+                height="48"
+                class="font-semibold text-base text-primary-700 px-6"
+                @click="handleSaveAndContinue"
+              >
+                <template #prepend>
+                  <span v-html="arrowLeftIcon"></span>
+                </template>
+                <span>حفظ وإكمال</span>
+              </v-btn>
+            </div>
+          </v-form>
+        </v-tabs-window-item>
+
+        <!-- Tab 2: بيانات الضرائب -->
+        <v-tabs-window-item :value="1">
+          <div class="bg-gray-50 rounded-lg p-6">
+            <h2 class="text-lg font-bold text-primary-900 mb-4">
+              بيانات الضرائب
+            </h2>
+
+            <!-- Tax Fields Row -->
+            <div class="grid grid-cols-1 lg:grid-cols-5 md:grid-cols-3 gap-4 items-end">
               <SelectWithIconInput
-                v-model="category"
-                label="التصنيف"
-                placeholder="اختر التصنيف"
-                :items="categoryItems"
-                :rules="[required()]"
-                :hide-details="false"
+                v-model="taxType"
+                label="الضريبة"
+                placeholder="اختر النوع"
+                :items="taxTypeItems"
+                :hide-details="true"
                 show-add-button
-                @add-click="handleAddCategory"
+                @add-click="handleAddTaxType"
               />
-
-              <SelectWithIconInput
-                v-model="unit"
-                label="الوحدة"
-                placeholder="اختر الوحدة"
-                :items="unitItems"
-                :rules="[required()]"
-                :hide-details="false"
-                show-add-button
-                @add-click="handleAddUnit"
+              <TextInput
+                v-model="taxPercentage"
+                label="النسبة"
+                placeholder="النسبة"
+                :hide-details="true"
+                disabled
               />
-
-              <div class="flex items-center">
-                <CheckboxInput
-                  v-model="isMinUnit"
-                  label="أقل وحدة"
-                  color="primary"
-                  classes="md:px-2"
-                />
-              </div>
+              <SelectInput
+                v-model="taxMinValue"
+                label="أقل قيمة"
+                placeholder="اختر القيمة"
+                :items="taxMinValueItems"
+                :hide-details="true"
+              />
+              <SelectInput
+                v-model="taxPriority"
+                label="الأولوية"
+                placeholder="اختر الأولوية"
+                :items="taxPriorityItems"
+                :hide-details="true"
+              />
+              <v-btn
+                variant="flat"
+                color="primary"
+                height="44"
+                class="font-semibold text-sm"
+                @click="handleAddTax"
+              >
+                <span>اضافة ضريبة</span>
+                <template #append>
+                  <span v-html="plusIcon"></span>
+                </template>
+              </v-btn>
             </div>
 
-            <!-- Row 4: Descriptions -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-2">
-              <TextareaInput
-                v-model="englishDescription"
-                label="الوصف بالإنجليزية"
-                placeholder="Enter description in English"
-                :rows="5"
-                :rules="[maxLength(500)]"
-                :hide-details="false"
-              />
-              <TextareaInput
-                v-model="arabicDescription"
-                label="الوصف بالعربية"
-                placeholder="أدخل الوصف"
-                :rows="5"
-                :rules="[maxLength(500)]"
-                :hide-details="false"
-              />
-            </div>
-            <!-- Product Image Section -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-              <div class="md:col-span-2">
-                <FileUploadInput
-                  v-model="productImages"
-                  label="صورة المنتج"
-                  hint="PNG, JPG or GIF (max. 400x400px)"
-                  :max-files="4"
-                />
-              </div>
-            </div>
+            <!-- Tax Table -->
+            <DataTable
+              title="الضرائب المطبقة على المنتج"
+              :headers="taxTableHeaders"
+              :items="taxTableItems"
+              show-checkbox
+              show-actions
+              class="mt-6"
+              @edit="handleEditTax"
+              @delete="handleDeleteTax"
+            />
           </div>
+        </v-tabs-window-item>
 
-          <!-- Prices Section -->
-          <div class="mb-8 bg-gray-50 rounded-lg p-6">
-            <h2 class="text-lg font-bold text-primary-900">الأسعار</h2>
-
-            <!-- Row 1: Main Prices -->
-            <div class="grid grid-cols-2 md:grid-cols-5 gap-5 mb-2">
-              <PriceInput
-                v-model="branchPrice"
-                label="سعر الفرع"
-                :rules="[numeric(), positive()]"
-                :hide-details="false"
-              />
-              <PriceInput
-                v-model="minSalePrice"
-                label="أقل سعر للبيع"
-                :rules="[numeric(), positive()]"
-                :hide-details="false"
-              />
-              <PriceInput
-                v-model="maxSalePrice"
-                label="أعلى سعر للبيع"
-                :rules="[numeric(), positive()]"
-                :hide-details="false"
-              />
-              <PriceInput
-                v-model="salePrice"
-                label="سعر البيع"
-                :rules="[required(), numeric(), positive()]"
-                :hide-details="false"
-              />
-              <PriceInput
-                v-model="purchasePrice"
-                label="سعر الشراء"
-                :rules="[required(), numeric(), positive()]"
-                :hide-details="false"
-              />
-              <PriceInput
-                v-model="halfWholesalePrice"
-                label="سعر نصف الجملة"
-                :rules="[numeric(), positive()]"
-                :hide-details="false"
-              />
-              <PriceInput
-                v-model="wholesalePrice"
-                label="سعر الجملة"
-                :rules="[numeric(), positive()]"
-                :hide-details="false"
-              />
-            </div>
-
-            <!-- Row 3: Discount -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-              <div>
-                <SelectInput
-                  v-model="discountType"
-                  label="نوع الخصم"
-                  placeholder="اختر نوع الخصم"
-                  :items="discountTypeItems"
-                />
-              </div>
-              <div>
-                <div class="mb-[7px] text-sm font-semibold text-gray-700">
-                  قيمة الخصم
-                </div>
-                <div
-                  class="bg-gray-200 border border-gray-300 rounded-lg px-4 py-2 min-h-[47px] font-semibold text-primary-900 flex items-center"
-                >
-                  <p>{{ discountValue }} $</p>
-                </div>
-              </div>
-            </div>
+        <!-- Tab 3: البيانات الإضافية -->
+        <v-tabs-window-item :value="2">
+          <div class="bg-gray-50 rounded-lg p-6">
+            <h2 class="text-lg font-bold text-primary-900">
+              البيانات الإضافية
+            </h2>
+            <p class="text-gray-600 mt-4">
+              محتوى البيانات الإضافية سيتم إضافته هنا...
+            </p>
           </div>
-        </div>
-      </v-form>
-
-      <!-- Action Buttons -->
-      <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col">
-        <v-btn
-          variant="flat"
-          color="primary"
-          height="48"
-          class="font-semibold text-base px-6"
-          @click="handleSaveAndReturn"
-        >
-          <template #prepend>
-            <span v-html="returnIcon"></span>
-          </template>
-          <span>حفظ والعودة للرئيسية</span>
-        </v-btn>
-
-        <v-btn
-          variant="flat"
-          color="primary-50"
-          height="48"
-          class="font-semibold text-base text-primary-700 px-6"
-          @click="handleSaveAndCreate"
-        >
-          <template #prepend>
-            <span v-html="saveIcon"></span>
-          </template>
-          <span>حفظ وإنشاء جديد</span>
-        </v-btn>
-
-        <v-btn
-          variant="flat"
-          color="primary-50"
-          height="48"
-          class="font-semibold text-base text-primary-700 px-6"
-          @click="handleSaveAndContinue"
-        >
-          <template #prepend>
-            <span v-html="arrowLeftIcon"></span>
-          </template>
-          <span>حفظ وإكمال</span>
-        </v-btn>
-      </div>
+        </v-tabs-window-item>
+      </v-tabs-window>
     </div>
   </default-layout>
 </template>

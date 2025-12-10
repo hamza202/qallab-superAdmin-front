@@ -1,4 +1,4 @@
-import "vuetify/styles";
+// Note: vuetify/styles is imported in main.ts before main.scss for proper CSS order
 import { createVuetify } from "vuetify";
 import { aliases, mdi } from "vuetify/iconsets/mdi";
 import { ar, en } from "vuetify/locale";
