@@ -94,5 +94,44 @@ export const settingsRoutes: RouteRecordRaw[] = [
       },
     ],
   },
+  {
+    path: "/factories",
+    name: "Factories",
+    redirect: "/factories/list",
+    children: [
+      {
+        path: "list",
+        name: "FactoriesList",
+        component: () => import("@/views/settings/factories/List.vue"),
+        meta: {
+          title: "pages.factories.title",
+        },
+      },
+      {
+        path: "create",
+        name: "FactoriesCreate",
+        component: () => import("@/views/settings/factories/Form.vue"),
+        meta: {
+          title: "pages.factories.title",
+        },
+      },
+      {
+        path: "edit/:id",
+        name: "FactoriesEdit",
+        component: () => import("@/views/settings/factories/Form.vue"),
+        meta: {
+          title: "pages.factories.title",
+        },
+      },
+    ],
+  },
+  {
+    path: "/codes",
+    name: "Codes",
+    component: () => import("@/views/settings/codes/Form.vue"),
+    meta: {
+      title: "pages.codes.title",
+    },
+  },
 
 ];

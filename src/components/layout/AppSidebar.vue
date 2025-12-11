@@ -153,6 +153,22 @@
                                     <span
                                         class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
                                 </li>
+                                <li class="relative">
+                                    <router-link to="/factories"
+                                        :class="[$route.path.includes('/factories') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        {{ $t('pages.factories.title') }}
+                                    </router-link>
+                                    <span
+                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
+                                </li>
+                                <li class="relative">
+                                    <router-link to="/codes"
+                                        :class="[$route.path.includes('/codes') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        {{ $t('pages.codes.title') }}
+                                    </router-link>
+                                    <span
+                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
+                                </li>
                             </ul>
                         </div>
                     </v-list-group>

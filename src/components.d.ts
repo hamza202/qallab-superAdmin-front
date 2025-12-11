@@ -15,7 +15,6 @@ declare module 'vue' {
     AuthLayout: typeof import('./layouts/AuthLayout.vue')['default']
     CheckboxInput: typeof import('./components/common/forms/checkboxInput.vue')['default']
     DataTable: typeof import('./components/common/tables/DataTable.vue')['default']
-    AppDialog: typeof import('./components/common/AppDialog.vue')['default']
     DefaultLayout: typeof import('./layouts/DefaultLayout.vue')['default']
     FileUploadInput: typeof import('./components/common/forms/FileUploadInput.vue')['default']
     PageHeader: typeof import('./components/common/PageHeader.vue')['default']
