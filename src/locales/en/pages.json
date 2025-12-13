@@ -18,6 +18,10 @@
     "categories": {
       "title": "Categories",
       "description": "Allows you to add Categories"
+    },
+    "cities": {
+      "title": "Cities",
+      "description": "Allows you to manage cities"
     }
   }
 }

@@ -97,65 +97,36 @@ const handleSaveFactory = (payload: any) => {
 <template>
   <default-layout>
     <div class="factories-page">
-      <PageHeader
-        :icon="factoriesIcon"
-        title-key="pages.factories.title"
-        description-key="pages.factories.description"
-      />
-    </div>
+      <PageHeader :icon="factoriesIcon" title-key="pages.factories.title"
+        description-key="pages.factories.description" />
 
-    <div class="bg-gray-50 rounded-md p-4 sm:p-6">
-      <div class="flex gap-1 items-cenetr justify-between flex-wrap">
-        <div class="flex flex-wrap gap-3">
-          <v-btn
-            variant="flat"
-            color="primary"
-            height="48"
-            class="px-7 font-semibold text-base"
-            prepend-icon="mdi-plus-circle-outline"
-            @click="openCreateFactory"
-          >
-            إضافة جديد
-          </v-btn>
+      <div class="bg-gray-50 rounded-md p-4 sm:p-6">
+        <div class="flex gap-1 items-cenetr justify-between flex-wrap">
+          <div class="flex flex-wrap gap-3">
+            <v-btn variant="flat" color="primary" height="48" class="px-7 font-semibold text-base"
+              prepend-icon="mdi-plus-circle-outline" @click="openCreateFactory">
+              إضافة جديد
+            </v-btn>
 
-          <v-btn
-            variant="outlined"
-            color="primary-50"
-            height="48"
-            class="px-7 font-semibold text-base text-primary-700 bg-white border border-primary-100"
-          >
-            فلتر متقدم
-          </v-btn>
+            <v-btn variant="outlined" color="primary-50" height="48"
+              class="px-7 font-semibold text-base text-primary-700 bg-white border border-primary-100">
+              فلتر متقدم
+            </v-btn>
+          </div>
+
+          <div class="flex flex-wrap gap-3">
+            <v-btn variant="outlined" color="gray-700" height="48"
+              class="px-7 font-semibold text-base bg-white border-gray-300" prepend-icon="mdi-upload">
+              تصدير
+            </v-btn>
+          </div>
         </div>
 
-        <div class="flex flex-wrap gap-3">
-          <v-btn
-            variant="outlined"
-            color="gray-700"
-            height="48"
-            class="px-7 font-semibold text-base bg-white border-gray-300"
-            prepend-icon="mdi-upload"
-          >
-            تصدير
-          </v-btn>
-        </div>
+        <DataTable title="المصانع" :headers="factoriesTableHeaders" :items="factoriesTableItems" :show-actions="false"
+          class="mt-6" @edit="handleEditFactory" @delete="handleDeleteFactory" />
+
+        <FactoryFormDialog v-model="showFactoryDialog" :factory="editingFactory" @save="handleSaveFactory" />
       </div>
-
-      <DataTable
-        title="المصانع"
-        :headers="factoriesTableHeaders"
-        :items="factoriesTableItems"
-        :show-actions="false"
-        class="mt-6"
-        @edit="handleEditFactory"
-        @delete="handleDeleteFactory"
-      />
-
-      <FactoryFormDialog
-        v-model="showFactoryDialog"
-        :factory="editingFactory"
-        @save="handleSaveFactory"
-      />
     </div>
   </default-layout>
 </template>

@@ -45,22 +45,6 @@ export const settingsRoutes: RouteRecordRaw[] = [
           title: "pages.units.title",
         },
       },
-      {
-        path: "create",
-        name: "UnitsCreate",
-        component: () => import("@/views/settings/units/Form.vue"),
-        meta: {
-          title: "pages.units.title",
-        },
-      },
-      {
-        path: "edit/:id",
-        name: "UnitsEdit",
-        component: () => import("@/views/settings/units/Form.vue"),
-        meta: {
-          title: "pages.units.title",
-        },
-      },
     ],
   },
   {
@@ -72,22 +56,6 @@ export const settingsRoutes: RouteRecordRaw[] = [
         path: "list",
         name: "BrandsList",
         component: () => import("@/views/settings/brands/List.vue"),
-        meta: {
-          title: "pages.brands.title",
-        },
-      },
-      {
-        path: "create",
-        name: "BrandsCreate",
-        component: () => import("@/views/settings/brands/Form.vue"),
-        meta: {
-          title: "pages.brands.title",
-        },
-      },
-      {
-        path: "edit/:id",
-        name: "BrandsEdit",
-        component: () => import("@/views/settings/brands/Form.vue"),
         meta: {
           title: "pages.brands.title",
         },
@@ -107,20 +75,19 @@ export const settingsRoutes: RouteRecordRaw[] = [
           title: "pages.factories.title",
         },
       },
+    ],
+  },
+  {
+    path: "/cities",
+    name: "Cities",
+    redirect: "/cities/list",
+    children: [
       {
-        path: "create",
-        name: "FactoriesCreate",
-        component: () => import("@/views/settings/factories/Form.vue"),
+        path: "list",
+        name: "CitiesList",
+        component: () => import("@/views/settings/cities/List.vue"),
         meta: {
-          title: "pages.factories.title",
-        },
-      },
-      {
-        path: "edit/:id",
-        name: "FactoriesEdit",
-        component: () => import("@/views/settings/factories/Form.vue"),
-        meta: {
-          title: "pages.factories.title",
+          title: "pages.cities.title",
         },
       },
     ],

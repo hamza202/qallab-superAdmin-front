@@ -126,56 +126,57 @@ const openCreateUnit = () => {
     <default-layout>
         <div class="units-page">
             <PageHeader :icon="unitsIcon" title-key="pages.units.title" description-key="pages.units.description" />
-        </div>
-        <div class="bg-gray-50 rounded-md p-4 sm:p-6">
-            <div class="flex gap-1 items-cenetr justify-between flex-wrap">
-                <div class="flex flex-wrap gap-3">
-                <!-- Save/Apply Button -->
-                <v-btn variant="flat" color="primary" height="48" class="px-7 font-semibold text-base"
-                    prepend-icon="mdi-plus-circle-outline" @click="openCreateUnit">
-                    اضف جديد
-                </v-btn>
+            <div class="bg-gray-50 rounded-md p-4 sm:p-6">
+                <div class="flex gap-1 items-cenetr justify-between flex-wrap">
+                    <div class="flex flex-wrap gap-3">
+                        <!-- Save/Apply Button -->
+                        <v-btn variant="flat" color="primary" height="48" class="px-7 font-semibold text-base"
+                            prepend-icon="mdi-plus-circle-outline" @click="openCreateUnit">
+                            اضف جديد
+                        </v-btn>
 
-                <!-- Close/Cancel Button -->
-                <v-btn variant="flat" color="primary-50" height="48"
-                    class="px-7 font-semibold text-base text-primary-700">
-                    <template #prepend>
-                        <span v-html="editIcon"></span>
-                    </template>
-                    تعديل
-                </v-btn>
+                        <!-- Close/Cancel Button -->
+                        <v-btn variant="flat" color="primary-50" height="48"
+                            class="px-7 font-semibold text-base text-primary-700">
+                            <template #prepend>
+                                <span v-html="editIcon"></span>
+                            </template>
+                            تعديل
+                        </v-btn>
 
-                <!-- Delete Button - only visible when editing -->
-                <v-btn variant="flat" color="error-50" height="48" class="px-7 font-semibold text-base text-error-700">
-                    <template #prepend>
-                        <span v-html="deleteIcon"></span>
-                    </template>
-                    حذف
-                </v-btn>
+                        <!-- Delete Button - only visible when editing -->
+                        <v-btn variant="flat" color="error-50" height="48"
+                            class="px-7 font-semibold text-base text-error-700">
+                            <template #prepend>
+                                <span v-html="deleteIcon"></span>
+                            </template>
+                            حذف
+                        </v-btn>
 
+                    </div>
+
+                    <div class="flex flex-wrap gap-3">
+                        <!-- Export Button -->
+                        <v-btn variant="outlined" color="gray-700" height="48"
+                            class="px-7 font-semibold text-base bg-white border-gray-300" prepend-icon="mdi-upload">
+                            تصدير
+                        </v-btn>
+
+                        <!-- Columns Button -->
+                        <v-btn variant="flat" color="primary-50" height="48"
+                            class="px-7 font-semibold text-base text-primary-700"
+                            prepend-icon="mdi-plus-circle-outline">
+                            الأعمدة
+                        </v-btn>
+
+                    </div>
                 </div>
+                <!-- Tax Table -->
+                <DataTable title="الوحدات" :headers="taxTableHeaders" :items="taxTableItems" show-actions class="mt-6"
+                    @edit="handleEditTax" @delete="handleDeleteTax" />
 
-                <div class="flex flex-wrap gap-3">
-                <!-- Export Button -->
-                <v-btn variant="outlined" color="gray-700" height="48" class="px-7 font-semibold text-base bg-white border-gray-300"
-                    prepend-icon="mdi-upload">
-                    تصدير
-                </v-btn>
-
-                <!-- Columns Button -->
-                <v-btn variant="flat" color="primary-50" height="48"
-                    class="px-7 font-semibold text-base text-primary-700" prepend-icon="mdi-plus-circle-outline">
-                    الأعمدة
-                </v-btn>
-
-                </div>
+                <UnitFormDialog v-model="showUnitDialog" :unit="editingUnit" @save="handleSaveUnit" />
             </div>
-            <!-- Tax Table -->
-            <DataTable title="الوحدات" :headers="taxTableHeaders" :items="taxTableItems" show-actions class="mt-6"
-                @edit="handleEditTax" @delete="handleDeleteTax" />
-
-            <UnitFormDialog v-model="showUnitDialog" :unit="editingUnit" @save="handleSaveUnit" />
-
         </div>
     </default-layout>
 </template>

@@ -18,6 +18,7 @@ interface Props {
   items: TableItem[];
   showCheckbox?: boolean;
   showActions?: boolean;
+  showDelete?: boolean;
   loading?: boolean;
 }
 
@@ -25,6 +26,7 @@ const props = withDefaults(defineProps<Props>(), {
   title: "",
   showCheckbox: false,
   showActions: true,
+  showDelete: true,
   loading: false,
 });
 
@@ -215,6 +217,7 @@ const editIcon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xm
               <v-btn
                 icon
                 variant="text"
+                v-if="showDelete"
                 size="small"
                 @click="handleDelete(item)"
               >

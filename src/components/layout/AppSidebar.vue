@@ -169,6 +169,14 @@
                                     <span
                                         class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
                                 </li>
+                                <li class="relative">
+                                    <router-link to="/cities"
+                                        :class="[$route.path.includes('/cities') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        {{ $t('pages.cities.title') }}
+                                    </router-link>
+                                    <span
+                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
+                                </li>
                             </ul>
                         </div>
                     </v-list-group>
