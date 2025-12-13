@@ -11,6 +11,7 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    AppDialog: typeof import('./components/common/AppDialog.vue')['default']
     AuthLayout: typeof import('./layouts/AuthLayout.vue')['default']
     CheckboxInput: typeof import('./components/common/forms/checkboxInput.vue')['default']
     DataTable: typeof import('./components/common/tables/DataTable.vue')['default']
@@ -24,5 +25,6 @@ declare module 'vue' {
     SelectWithIconInput: typeof import('./components/common/forms/SelectWithIconInput.vue')['default']
     TextareaInput: typeof import('./components/common/forms/TextareaInput.vue')['default']
     TextInput: typeof import('./components/common/forms/textInput.vue')['default']
+    UnitFormDialog: typeof import('./views/settings/units/components/UnitFormDialog.vue')['default']
   }
 }

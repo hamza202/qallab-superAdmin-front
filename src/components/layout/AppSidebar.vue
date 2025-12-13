@@ -9,7 +9,7 @@
             <div class="flex flex-col gap-4">
                 <div class="flex justify-center mb-2 px-3">
                     <img src="@/assets/logo-light.svg" alt="Qallab logo" class="w-15" v-if="isSidebarExpanded" />
-                    <img src="@/assets/vectors/qallab-favicon.svg" alt="" class="w-15" v-else >
+                    <img src="@/assets/vectors/qallab-favicon.svg" alt="" class="w-15" v-else>
                 </div>
                 <div class="q-sidebar-toggle z-10" v-if="!isMobile">
                     <v-btn size="x-small" icon class="bg-qallab-yellow text-white shadow-md !rounded-full"
@@ -70,31 +70,101 @@
 
                             <ul class="space-y-2">
                                 <li class="relative">
-                                    <router-link 
-                                        to="/simple-products/create" 
-                                        :class="[$route.path.includes('/simple-products') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']"
-                                    >
+                                    <router-link to="/simple-products/create"
+                                        :class="[$route.path.includes('/simple-products') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         {{ $t('pages.simpleProducts.title') }}
                                     </router-link>
                                     <span
                                         class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
                                 </li>
                                 <li class="relative">
-                                    <router-link 
-                                        to="/group-products" 
-                                        :class="[$route.path.includes('/group-products') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']"
-                                    >
+                                    <router-link to="/group-products"
+                                        :class="[$route.path.includes('/group-products') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         {{ $t('pages.groupProducts.title') }}
                                     </router-link>
                                     <span
                                         class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
                                 </li>
                                 <li class="relative">
-                                    <router-link 
-                                        to="/composite-products" 
-                                        :class="[$route.path.includes('/composite-products') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']"
-                                    >
+                                    <router-link to="/composite-products"
+                                        :class="[$route.path.includes('/composite-products') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         {{ $t('pages.compositeProducts.title') }}
+                                    </router-link>
+                                    <span
+                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
+                                </li>
+                            </ul>
+                        </div>
+                    </v-list-group>
+
+
+                    <v-list-group value="settings" :model-value="true" class="mt-1">
+                        <template #activator="{ props, isOpen }">
+                            <v-list-item v-bind="props" :class="{ '!mx-1 gap-5': !isSidebarExpanded }"
+                                class="px-2 py-1.5 mx-4 rounded-lg hover:bg-primary-700/40 text-white flex items-center justify-between gap-2">
+                                <template #append>
+                                    <v-icon size="20"
+                                        :class="['ms-auto transition-transform', isOpen ? 'rotate-180' : '']">
+                                        mdi-chevron-down
+                                    </v-icon>
+                                </template>
+                                <template #title>
+                                    <div class="flex-1">
+                                        <span class="font-semibold">الإعدادات</span>
+                                    </div>
+                                </template>
+                                <template #prepend>
+                                    <div
+                                        class="bg-qallab-yellow text-white rounded-lg w-8 h-8 flex  items-center justify-center">
+                                        <v-icon size="20">mdi-view-grid-outline</v-icon>
+                                    </div>
+                                </template>
+
+                            </v-list-item>
+                        </template>
+
+                        <div class="relative mt-3 ps-15 pe-4 text-sm">
+                            <div
+                                class="absolute top-1 bottom-1 right-[30px] border-r-2 border-dotted border-white -translate-y-3 h-[100.5%]">
+                            </div>
+
+                            <ul class="space-y-2">
+                                <li class="relative">
+                                    <router-link to="/categories"
+                                        :class="[$route.path.includes('/categories') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        {{ $t('pages.categories.title') }}
+                                    </router-link>
+                                    <span
+                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
+                                </li>
+                                <li class="relative">
+                                    <router-link to="/units"
+                                        :class="[$route.path.includes('/units') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        {{ $t('pages.units.title') }}
+                                    </router-link>
+                                    <span
+                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
+                                </li>
+                                <li class="relative">
+                                    <router-link to="/brands"
+                                        :class="[$route.path.includes('/brands') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        {{ $t('pages.brands.title') }}
+                                    </router-link>
+                                    <span
+                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
+                                </li>
+                                <li class="relative">
+                                    <router-link to="/factories"
+                                        :class="[$route.path.includes('/factories') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        {{ $t('pages.factories.title') }}
+                                    </router-link>
+                                    <span
+                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
+                                </li>
+                                <li class="relative">
+                                    <router-link to="/codes"
+                                        :class="[$route.path.includes('/codes') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        {{ $t('pages.codes.title') }}
                                     </router-link>
                                     <span
                                         class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
@@ -282,7 +352,7 @@ const isSidebarExpanded = computed(() => !isCollapsed.value || isDrawerHovered.v
 }
 
 
-.q-sidebar-drawer .v-list-item--active > .v-list-item__overlay{
+.q-sidebar-drawer .v-list-item--active>.v-list-item__overlay {
     display: none;
 }
 </style>
