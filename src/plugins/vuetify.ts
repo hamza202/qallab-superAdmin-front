@@ -20,6 +20,7 @@ const qallabTheme = {
     "gray-500": "#697586",
     "gray-700": "#364152",
     "gray-900": "#121926",
+    "error-600": "#D92D20",
     // Semantic colors
     secondary: "#364152",
     error: "#F04438",

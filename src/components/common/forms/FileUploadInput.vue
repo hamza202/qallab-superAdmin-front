@@ -11,6 +11,7 @@ interface FileUploadInputProps {
     disabled?: boolean;
     labelClass?: string;
     hint?: string;
+    layout?: 'default' | 'horizontal';
 }
 
 const props = withDefaults(defineProps<FileUploadInputProps>(), {
@@ -21,7 +22,10 @@ const props = withDefaults(defineProps<FileUploadInputProps>(), {
     disabled: false,
     labelClass: "",
     hint: "PNG, JPG or GIF (max. 400x400px)",
+    layout: 'default',
 });
+
+const isHorizontalLayout = computed(() => props.layout === 'horizontal');
 
 const emit = defineEmits<{
     (e: "update:modelValue", value: File[] | null): void;
@@ -103,176 +107,107 @@ const trashIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" x
             {{ label }}
         </label>
 
-        <!-- Upload Area -->
-        <div
-            class="file-upload-area"
-            :class="{ 'is-dragging': isDragging, 'is-disabled': disabled }"
-            @dragover="handleDragOver"
-            @dragleave="handleDragLeave"
-            @drop="handleDrop"
-            @click="triggerFileInput"
-        >
-            <input
-                ref="fileInput"
-                type="file"
-                :accept="accept"
-                :multiple="multiple"
-                :disabled="disabled"
-                class="hidden"
-                @change="handleFileSelect"
-            />
+        <!-- Horizontal Layout -->
+        <div v-if="isHorizontalLayout" class="grid grid-cols-1 md:grid-cols-3 gap-5 items-end">
+            <!-- Upload Area (Right Side) -->
+            <div
+                class="flex flex-col items-center justify-center py-4 px-6 border border-solid border-gray-300 rounded-[8px] bg-white cursor-pointer transition-all duration-200 min-w-[200px] flex-shrink-0 hover:border-blue-300 hover:bg-blue-50"
+                :class="{ 'border-blue-500 bg-blue-100': isDragging, 'opacity-60 cursor-not-allowed': disabled }"
+                @dragover="handleDragOver"
+                @dragleave="handleDragLeave"
+                @drop="handleDrop"
+                @click="triggerFileInput"
+            >
+                <input
+                    ref="fileInput"
+                    type="file"
+                    :accept="accept"
+                    :multiple="multiple"
+                    :disabled="disabled"
+                    class="hidden"
+                    @change="handleFileSelect"
+                />
 
-            <div class="upload-content">
-                <!-- Upload Icon -->
-                <div class="upload-icon">
-                    <span v-html="uploadCloudIcon"></span>
+                <div class="flex flex-col items-center gap-3">
+                    <div class="flex items-center justify-center w-10 h-10 bg-blue-200 border-[6px] border-solid border-blue-50 rounded-full">
+                        <span v-html="uploadCloudIcon"></span>
+                    </div>
+                    <div class="flex gap-1 items-center justify-center">
+                        <button type="button" class="font-cairo font-bold text-sm leading-5 text-primary-600 bg-transparent border-none cursor-pointer disabled:cursor-not-allowed disabled:opacity-60" :disabled="disabled">
+                            أرفق صورة
+                        </button>
+                    </div>
+                    <p class="font-inter font-normal text-xs leading-[18px] text-gray-500 text-center">{{ hint }}</p>
                 </div>
-
-                <!-- Upload Text -->
-                <div class="upload-text">
-                    <button type="button" class="upload-button" :disabled="disabled">
-                        أرفق صورة
+            </div>
+            <!-- Preview Images (Left Side) -->
+            <div v-if="previewUrls.length > 0" class="flex flex-row gap-3 flex-wrap flex-1 md:col-span-2">
+                <div v-for="(url, index) in previewUrls" :key="index" class="relative w-[137px] h-28 rounded overflow-hidden">
+                    <img :src="url" alt="Preview" class="w-full h-full object-cover rounded" />
+                    <button
+                        type="button"
+                        class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center p-2 bg-gray-50 border border-solid border-gray-300 rounded shadow-sm cursor-pointer transition-all duration-200 hover:bg-red-100 hover:border-red-300"
+                        @click.stop="removeFile(index)"
+                    >
+                        <span v-html="trashIcon"></span>
                     </button>
                 </div>
-
-                <!-- Hint -->
-                <p class="upload-hint">{{ hint }}</p>
             </div>
         </div>
 
-        <!-- Preview Images -->
-        <div v-if="previewUrls.length > 0" class="preview-container">
-            <div v-for="(url, index) in previewUrls" :key="index" class="preview-item">
-                <img :src="url" alt="Preview" class="preview-image" />
-                <button
-                    type="button"
-                    class="delete-button"
-                    @click.stop="removeFile(index)"
-                >
-                    <span v-html="trashIcon"></span>
-                </button>
+        <!-- Default Layout -->
+        <template v-else>
+            <!-- Upload Area -->
+            <div
+                class="flex flex-col items-center py-4 px-6 border border-dashed border-gray-300 rounded-[8px] bg-white cursor-pointer transition-all duration-200 hover:border-blue-300 hover:bg-blue-50"
+                :class="{ 'border-blue-500 bg-blue-100': isDragging, 'opacity-60 cursor-not-allowed': disabled }"
+                @dragover="handleDragOver"
+                @dragleave="handleDragLeave"
+                @drop="handleDrop"
+                @click="triggerFileInput"
+            >
+                <input
+                    ref="fileInput"
+                    type="file"
+                    :accept="accept"
+                    :multiple="multiple"
+                    :disabled="disabled"
+                    class="hidden"
+                    @change="handleFileSelect"
+                />
+
+                <div class="flex flex-col items-center gap-3">
+                    <!-- Upload Icon -->
+                    <div class="flex items-center justify-center w-10 h-10 bg-blue-200 border-[6px] border-solid border-blue-50 rounded-full">
+                        <span v-html="uploadCloudIcon"></span>
+                    </div>
+
+                    <!-- Upload Text -->
+                    <div class="flex gap-1 items-center justify-center">
+                        <button type="button" class="font-cairo font-bold text-sm leading-5 text-primary-600 bg-transparent border-none cursor-pointer disabled:cursor-not-allowed disabled:opacity-60" :disabled="disabled">
+                            أرفق صورة
+                        </button>
+                    </div>
+
+                    <!-- Hint -->
+                    <p class="font-inter font-normal text-xs leading-[18px] text-gray-500 text-center">{{ hint }}</p>
+                </div>
             </div>
-        </div>
+
+            <!-- Preview Images -->
+            <div v-if="previewUrls.length > 0" class="flex gap-3 mt-4 flex-wrap">
+                <div v-for="(url, index) in previewUrls" :key="index" class="relative w-[137px] h-28">
+                    <img :src="url" alt="Preview" class="w-full h-full object-cover rounded" />
+                    <button
+                        type="button"
+                        class="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center justify-center p-2 bg-gray-50 border border-solid border-gray-300 rounded shadow-sm cursor-pointer transition-all duration-200 hover:bg-red-100 hover:border-red-300"
+                        @click.stop="removeFile(index)"
+                    >
+                        <span v-html="trashIcon"></span>
+                    </button>
+                </div>
+            </div>
+        </template>
     </div>
 </template>
 
-<style scoped>
-.file-upload-area {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 16px 24px;
-    border: 1px dashed #cdd5df;
-    border-radius: 12px;
-    background-color: #ffffff;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.file-upload-area:hover {
-    border-color: #84caff;
-    background-color: #f5faff;
-}
-
-.file-upload-area.is-dragging {
-    border-color: #1570ef;
-    background-color: #eff8ff;
-}
-
-.file-upload-area.is-disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-
-.upload-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
-}
-
-.upload-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    background-color: #d1e9ff;
-    border: 6px solid #eff8ff;
-    border-radius: 28px;
-}
-
-.upload-text {
-    display: flex;
-    gap: 4px;
-    align-items: center;
-    justify-content: center;
-}
-
-.upload-button {
-    font-family: 'Cairo', sans-serif;
-    font-weight: 700;
-    font-size: 14px;
-    line-height: 20px;
-    color: #1570ef;
-    background: none;
-    border: none;
-    cursor: pointer;
-}
-
-.upload-button:disabled {
-    cursor: not-allowed;
-    opacity: 0.6;
-}
-
-.upload-hint {
-    font-family: 'Inter', sans-serif;
-    font-weight: 400;
-    font-size: 12px;
-    line-height: 18px;
-    color: #475467;
-    text-align: center;
-}
-
-.preview-container {
-    display: flex;
-    gap: 12px;
-    margin-top: 16px;
-    flex-wrap: wrap;
-}
-
-.preview-item {
-    position: relative;
-    width: 137px;
-    height: 112px;
-}
-
-.preview-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 4px;
-}
-
-.delete-button {
-    position: absolute;
-    bottom: 8px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 8px;
-    background-color: #f8fafc;
-    border: 1px solid #cdd5df;
-    border-radius: 4px;
-    box-shadow: 0px 1px 2px rgba(16, 24, 40, 0.05);
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.delete-button:hover {
-    background-color: #fee4e2;
-    border-color: #fda29b;
-}
-</style>

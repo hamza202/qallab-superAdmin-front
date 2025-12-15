@@ -7,6 +7,7 @@ import {
 import { dashboardRoutes } from "./modules/dashboard.routes";
 import { productsRoutes } from "./modules/products.routes";
 import { simpleProductsRoutes } from "./modules/simple-products.routes";
+import { groupProductsRoutes } from "./modules/group-products.routes";
 import { settingsRoutes } from "./modules/settings.routes";
 import { authRoutes } from "./modules/auth.routes";
 import { errorRoutes } from "./modules/errors.routes";
@@ -16,6 +17,7 @@ const routes: RouteRecordRaw[] = [
   ...authRoutes,
   ...productsRoutes,
   ...simpleProductsRoutes,
+  ...groupProductsRoutes,
   ...settingsRoutes,
   ...errorRoutes,
 

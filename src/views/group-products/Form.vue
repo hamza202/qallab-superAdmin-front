@@ -176,6 +176,64 @@ const handleDeleteTax = (item: any) => {
   taxTableItems.value = taxTableItems.value.filter((t) => t.id !== item.id);
 };
 
+// Sub Products table data
+const subProductsTableHeaders = [
+  {key: "name", title: "اسم الصنف"},
+  {key: "sku", title: "Sku"},
+  {key: "salePrice", title: "سعر البيع"},
+  {key: "purchasePrice", title: "سعر الشراء"},
+  {key: "quantity", title: "الكمية"},
+  {key: "totalAmount", title: "المبلغ الاجمالي"},
+];
+
+const subProductsTableItems = ref([
+  {
+    id: 1,
+    name: "بحص احمر _ صغير",
+    sku: "BR-S-BAG-50KG",
+    salePrice: "18.00 ريال",
+    purchasePrice: "12.00 ريال",
+    quantity: "500",
+    totalAmount: "6,000.00 ريال",
+  },
+  {
+    id: 2,
+    name: "بحص احمر _ وسط",
+    sku: "BR-S-BAG-50KG",
+    salePrice: "18.00 ريال",
+    purchasePrice: "12.00 ريال",
+    quantity: "500",
+    totalAmount: "6,000.00 ريال",
+  },
+  {
+    id: 3,
+    name: "بحص احمر _ كبير",
+    sku: "BR-S-BAG-50KG",
+    salePrice: "18.00 ريال",
+    purchasePrice: "12.00 ريال",
+    quantity: "500",
+    totalAmount: "6,000.00 ريال",
+  },
+  {
+    id: 4,
+    name: "بحص اصفر _ كبير",
+    sku: "BR-S-BAG-50KG",
+    salePrice: "18.00 ريال",
+    purchasePrice: "12.00 ريال",
+    quantity: "500",
+    totalAmount: "6,000.00 ريال",
+  },
+  {
+    id: 5,
+    name: "بحص ابيض _ كبير",
+    sku: "BR-S-BAG-50KG",
+    salePrice: "18.00 ريال",
+    purchasePrice: "12.00 ريال",
+    quantity: "500",
+    totalAmount: "6,000.00 ريال",
+  },
+]);
+
 // Tabs
 const activeTab = ref(0);
 const completedTabs = ref<number[]>([]);
@@ -222,7 +280,6 @@ const handleSaveAndReturn = async () => {
   const {valid} = await formRef.value?.validate();
   if (valid) {
     console.log("Form is valid! Save and return to home");
-    // هنا يمكنك إرسال البيانات للـ API
   } else {
     console.log("Form has errors");
   }
@@ -232,7 +289,6 @@ const handleSaveAndCreate = async () => {
   const {valid} = await formRef.value?.validate();
   if (valid) {
     console.log("Form is valid! Save and create new");
-    // هنا يمكنك إرسال البيانات للـ API ثم إعادة تعيين الفورم
     formRef.value?.reset();
   } else {
     console.log("Form has errors");
@@ -243,7 +299,6 @@ const handleSaveAndContinue = async () => {
   const {valid} = await formRef.value?.validate();
   if (valid) {
     console.log("Form is valid! Save and continue");
-    // هنا يمكنك إرسال البيانات للـ API
   } else {
     console.log("Form has errors");
   }
@@ -301,13 +356,11 @@ const checkCircleIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
 <template>
   <default-layout>
     <div class="form-validation-page">
-      <!-- Main Card -->
-
       <!-- Header -->
       <PageHeader
           :icon="gridIcon"
-          title-key="pages.simpleProducts.title"
-          description-key="pages.simpleProducts.description"
+          title-key="pages.groupProducts.title"
+          description-key="pages.groupProducts.description"
       />
 
       <!-- Tabs -->
@@ -531,6 +584,17 @@ const checkCircleIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
                 </div>
               </div>
             </div>
+            
+          <!-- Sub Products Table Section -->
+          <div class="mt-6 -mx-6">
+            <DataTable
+                title="المنتجات الفرعية"
+                :headers="subProductsTableHeaders"
+                :items="subProductsTableItems"
+                :show-checkbox="false"
+                :show-actions="false"
+            />
+          </div>
             <!-- Action Buttons -->
             <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col">
               <v-btn
@@ -746,6 +810,8 @@ const checkCircleIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
               />
             </div>
           </div>
+
+
           <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col">
             <v-btn
                 variant="flat"

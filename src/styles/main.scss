@@ -114,3 +114,12 @@ $shadow-focus: 0px 0px 0px 4px rgb(var(--v-theme-primary-25)),
 .v-table__wrapper{
   @apply rounded-none;
 }
+.v-window{
+  @apply overflow-visible !important;
+}
+.text-input-wrapper, .textarea-input-wrapper, .select-input-wrapper, .select-icon-wrapper,.v-text-field {
+  @apply relative;
+  .v-input__details{
+    @apply absolute bottom-[-20px] end-0 text-sm ;
+  }
+}
