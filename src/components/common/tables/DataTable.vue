@@ -34,6 +34,7 @@ const emit = defineEmits<{
   (e: "edit", item: TableItem): void;
   (e: "delete", item: TableItem): void;
   (e: "select", item: TableItem, selected: boolean): void;
+  (e: "selectAll", selected: boolean): void;
 }>();
 
 const selectedItems = ref<(string | number)[]>([]);
@@ -42,8 +43,10 @@ const selectAll = ref(false);
 const toggleSelectAll = () => {
   if (selectAll.value) {
     selectedItems.value = props.items.map((item) => item.id);
+    emit("selectAll", true);
   } else {
     selectedItems.value = [];
+    emit("selectAll", false);
   }
 };
 
@@ -109,9 +112,7 @@ const editIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xm
 </script>
 
 <template>
-  <div
-    class="bg-white overflow-hidden"
-  >
+  <div class="bg-white overflow-hidden">
     <!-- Header -->
     <div v-if="title" class="px-3 py-3 border-b border-gray-300 border-t bg-gray-50 border-t-gray-300">
       <h3 class="font-bold text-gray-900">{{ title }}</h3>
@@ -123,22 +124,13 @@ const editIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xm
         <tr class="bg-gray-50">
           <!-- Checkbox Header (Right side for RTL) -->
           <th v-if="showCheckbox" class="w-[60px] !bg-gray-50">
-            <v-checkbox
-              v-model="selectAll"
-              hide-details
-              density="compact"
-              class="justify-end"
-              @change="toggleSelectAll"
-            />
+            <v-checkbox v-model="selectAll" hide-details density="compact" class="justify-end"
+              @change="toggleSelectAll" />
           </th>
 
           <!-- Dynamic Headers (original order for RTL) -->
-          <th
-            v-for="header in headers"
-            :key="header.key"
-            class="!font-bold !text-gray-600 !text-xs !bg-gray-50"
-            :style="header.width ? { width: header.width } : {}"
-          >
+          <th v-for="header in headers" :key="header.key" class="!font-bold !text-gray-600 !text-xs !bg-gray-50"
+            :style="header.width ? { width: header.width } : {}">
             {{ header.title }}
           </th>
 
@@ -150,27 +142,16 @@ const editIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xm
         <tr v-for="item in items" :key="item.id" class="border-b border-gray-200 bg-white">
           <!-- Checkbox Column (Right side for RTL) -->
           <td v-if="showCheckbox" class="!text-start !py-4 !bg-white">
-            <v-checkbox
-              :model-value="isSelected(item.id)"
-              hide-details
-              density="compact"
-              class="justify-end"
-              @change="toggleSelect(item)"
-            />
+            <v-checkbox :model-value="isSelected(item.id)" hide-details density="compact" class="justify-end"
+              @change="toggleSelect(item)" />
           </td>
 
           <!-- Dynamic Columns (original order for RTL) -->
-          <td
-            v-for="header in headers"
-            :key="header.key"
-            class="!text-start !py-4 !bg-white"
-          >
+          <td v-for="header in headers" :key="header.key" class="!text-start !py-4 !bg-white">
             <!-- Priority Badge -->
             <template v-if="header.key === 'priority'">
-              <span
-                class="inline-block px-2 py-0.5 rounded-full text-xs font-medium"
-                :class="getPriorityClass(item[header.key])"
-              >
+              <span class="inline-block px-2 py-0.5 rounded-full text-xs font-medium"
+                :class="getPriorityClass(item[header.key])">
                 {{ item[header.key] }}
               </span>
             </template>
@@ -178,11 +159,8 @@ const editIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xm
             <!-- Taxes Pills -->
             <template v-else-if="header.key === 'taxes'">
               <div class="flex flex-wrap gap-2">
-                <span
-                  v-for="(tax, index) in (Array.isArray(item[header.key]) ? item[header.key] : [item[header.key]])"
-                  :key="index"
-                  class="px-3 py-1 rounded-full bg-primary-50 text-primary-700 text-xs font-medium"
-                >
+                <span v-for="(tax, index) in (Array.isArray(item[header.key]) ? item[header.key] : [item[header.key]])"
+                  :key="index" class="px-3 py-1 rounded-full bg-primary-50 text-primary-700 text-xs font-medium">
                   {{ tax }}
                 </span>
               </div>
@@ -191,14 +169,8 @@ const editIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xm
             <!-- Status Switch -->
             <template v-else-if="header.key === 'status'">
               <div class="flex">
-                <v-switch
-                  :model-value="isStatusActive(item[header.key])"
-                  hide-details
-                  inset
-                  density="compact"
-                  color="primary"
-                  readonly
-                />
+                <v-switch :model-value="isStatusActive(item[header.key])" hide-details inset density="compact"
+                  color="primary" readonly />
               </div>
             </template>
 
@@ -211,23 +183,10 @@ const editIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xm
           <!-- Actions Column (Left side for RTL) -->
           <td v-if="showActions" class="!py-4 !bg-white">
             <div class="flex items-center gap-1">
-              <v-btn
-                icon
-                variant="text"
-                v-if="showDelete"
-                size="small"
-                color="error"
-                @click="handleDelete(item)"
-              >
+              <v-btn icon variant="text" v-if="showDelete" size="small" color="error" @click="handleDelete(item)">
                 <span v-html="trashIcon"></span>
               </v-btn>
-              <v-btn
-                icon
-                variant="text"
-                color="primary"
-                size="small"
-                @click="handleEdit(item)"
-              >
+              <v-btn icon variant="text" color="primary" size="small" @click="handleEdit(item)">
                 <span v-html="editIcon"></span>
               </v-btn>
             </div>
@@ -236,10 +195,8 @@ const editIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xm
 
         <!-- Empty State -->
         <tr v-if="items.length === 0">
-          <td
-            :colspan="headers.length + (showActions ? 1 : 0) + (showCheckbox ? 1 : 0)"
-            class="text-center py-8 text-gray-500"
-          >
+          <td :colspan="headers.length + (showActions ? 1 : 0) + (showCheckbox ? 1 : 0)"
+            class="text-center py-8 text-gray-500">
             لا توجد بيانات
           </td>
         </tr>
@@ -247,11 +204,7 @@ const editIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xm
     </v-table>
 
     <!-- Loading Overlay -->
-    <v-overlay
-      :model-value="loading"
-      contained
-      class="align-center justify-center"
-    >
+    <v-overlay :model-value="loading" contained class="align-center justify-center">
       <v-progress-circular indeterminate color="primary" />
     </v-overlay>
   </div>

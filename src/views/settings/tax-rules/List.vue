@@ -106,102 +106,66 @@ const handleSaveTaxRule = (payload: any) => {
       status: payload.status ? "نشطة" : "غير نشطة",
     });
   }
-
-  editingTaxRule.value = null;
-  showTaxRuleDialog.value = false;
 };
+
+
+const trashIcon = `<svg width="17" height="19" viewBox="0 0 17 19" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M11.6673 4.16732V3.50065C11.6673 2.56723 11.6673 2.10052 11.4857 1.744C11.3259 1.4304 11.0709 1.17543 10.7573 1.01564C10.4008 0.833984 9.93407 0.833984 9.00065 0.833984H7.66732C6.7339 0.833984 6.26719 0.833984 5.91067 1.01564C5.59706 1.17543 5.3421 1.4304 5.18231 1.744C5.00065 2.10052 5.00065 2.56723 5.00065 3.50065V4.16732M6.66732 8.75065V12.9173M10.0007 8.75065V12.9173M0.833984 4.16732H15.834M14.1673 4.16732V13.5007C14.1673 14.9008 14.1673 15.6008 13.8948 16.1356C13.6552 16.606 13.2727 16.9885 12.8023 17.2282C12.2675 17.5007 11.5674 17.5007 10.1673 17.5007H6.50065C5.10052 17.5007 4.40045 17.5007 3.86567 17.2282C3.39527 16.9885 3.01282 16.606 2.77313 16.1356C2.50065 15.6008 2.50065 14.9008 2.50065 13.5007V4.16732" stroke="#4B5565" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`;
+
 </script>
 
 <template>
   <default-layout>
     <div class="tax-rules-page">
-      <PageHeader
-        :icon="taxRulesIcon"
-        title-key="pages.taxRules.title"
-        description-key="pages.taxRules.description"
-      />
+      <PageHeader :icon="taxRulesIcon" title-key="pages.taxRules.title" description-key="pages.taxRules.description" />
 
-      <div class="bg-gray-50 rounded-md p-4 sm:p-6 mt-4">
-        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
-          <div class="flex flex-wrap gap-3">
-            <v-btn
-              variant="flat"
-              color="primary"
-              height="48"
-              class="px-7 font-semibold text-base"
-              prepend-icon="mdi-plus-circle-outline"
-              @click="openCreateTaxRule"
-            >
-              قاعدة ضريبية جديدة
-            </v-btn>
+      <div class="bg-gray-50 rounded-md mt-4 -mx-6 ">
+        <div class="flex flex-wrap items-center justify-between gap-3 px-4 sm:px-6 py-2">
+          <div class="text-sm sm:text-lg font-bold text-gray-900">
+            قائمة القواعد الضريبية
+          </div>
 
-            <v-btn
-              variant="outlined"
-              color="primary-50"
-              height="48"
-              class="px-7 font-semibold text-base text-primary-700 bg-white border border-primary-100"
-              prepend-icon="mdi-filter-variant"
-            >
+          <div class="flex flex-wrap items-center gap-2">
+            <v-text-field density="comfortable" variant="outlined" hide-details placeholder="بحث"
+              prepend-inner-icon="mdi-magnify" class="w-full sm:w-64 bg-white rounded-md" />
+
+            <v-btn variant="outlined" color="primary-50" height="45"
+              class="px-4 font-semibold text-sm text-gray-700 bg-white border !border-gray-200"
+              prepend-icon="mdi-filter-variant">
               فلتر
             </v-btn>
-          </div>
 
-          <div class="flex flex-wrap gap-3 items-center">
-            <v-text-field
-              density="comfortable"
-              variant="outlined"
-              hide-details
-              placeholder="بحث"
-              prepend-inner-icon="mdi-magnify"
-              class="w-full sm:w-64"
-            />
+            <v-btn height="45" icon variant="outlined" color="error-50"
+              class="!min-w-0 w-11 h-10 bg-white border !border-gray-200 text-gray-700">
+              <span v-html="trashIcon"></span>
+            </v-btn>
           </div>
         </div>
 
-        <div class="flex flex-wrap gap-3 mb-4">
-          <v-text-field
-            density="comfortable"
-            variant="outlined"
-            hide-details
-            placeholder="الاسم"
-            class="w-full sm:w-48"
-          />
-          <v-select
-            density="comfortable"
-            variant="outlined"
-            hide-details
-            :items="['النوع 1', 'النوع 2']"
-            placeholder="النوع"
-            class="w-full sm:w-40"
-          />
-          <v-select
-            density="comfortable"
-            variant="outlined"
-            hide-details
-            :items="['نشطة', 'غير نشطة']"
-            placeholder="الحالة"
-            class="w-full sm:w-40"
-          />
+        <div
+          class="flex flex-wrap sm:items-center flex-col sm:flex-row justify-between gap-3 bg-primary-50 border-y border-y-slate-300 px-4 sm:px-6 py-3">
+          <div class="flex flex-wrap gap-3 flex-1 justify-end sm:justify-start">
+            <v-text-field density="comfortable" variant="outlined" hide-details placeholder="الاسم"
+              class="w-full sm:w-52 bg-white" />
+            <v-select density="comfortable" variant="outlined" hide-details :items="['النوع 1', 'النوع 2']"
+              placeholder="النوع" class="w-full sm:w-40 bg-white" />
+            <v-select density="comfortable" variant="outlined" hide-details :items="['نشطة', 'غير نشطة']"
+              placeholder="الحالة" class="w-full sm:w-40 bg-white" />
+          </div>
+
+          <v-btn variant="flat" color="primary" height="45"
+            class="px-6 font-semibold text-sm sm:text-base text-white flex-shrink-0"
+            prepend-icon="mdi-plus-circle-outline" @click="openCreateTaxRule">
+            قاعدة ضريبية جديدة
+          </v-btn>
         </div>
 
-        <DataTable
-          title="قائمة القواعد الضريبية"
-          :headers="taxRulesTableHeaders"
-          :items="taxRulesTableItems"
-          show-actions
-          class="mt-4"
-          @edit="handleEditTaxRule"
-          @delete="handleDeleteTaxRule"
-        />
+        <DataTable :headers="taxRulesTableHeaders" :items="taxRulesTableItems" show-actions @edit="handleEditTaxRule"
+          show-checkbox @delete="handleDeleteTaxRule" />
 
-        <TaxRuleFormDialog
-          v-model="showTaxRuleDialog"
-          :tax-rule="editingTaxRule"
-          @save="handleSaveTaxRule"
-        />
+        <TaxRuleFormDialog v-model="showTaxRuleDialog" :tax-rule="editingTaxRule" @save="handleSaveTaxRule" />
       </div>
     </div>
   </default-layout>
 </template>
-
-<style scoped></style>

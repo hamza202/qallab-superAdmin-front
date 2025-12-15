@@ -115,75 +115,61 @@ const handleSaveTax = (payload: any) => {
   editingTax.value = null;
   showTaxDialog.value = false;
 };
+
+const columnIcon = `<svg width="16" height="17" viewBox="0 0 16 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path
+    d="M6 13.5V3.5C6 2.72343 6 2.33515 5.87313 2.02886C5.70398 1.62048 5.37952 1.29602 4.97114 1.12687C4.66485 1 4.27657 1 3.5 1C2.72343 1 2.33515 1 2.02886 1.12687C1.62048 1.29602 1.29602 1.62048 1.12687 2.02886C1 2.33515 1 2.72343 1 3.5V13.5C1 14.2766 1 14.6649 1.12687 14.9711C1.29602 15.3795 1.62048 15.704 2.02886 15.8731C2.33515 16 2.72343 16 3.5 16C4.27657 16 4.66485 16 4.97114 15.8731C5.37952 15.704 5.70398 15.3795 5.87313 14.9711C6 14.6649 6 14.2766 6 13.5Z"
+    stroke="#697586" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+  <path
+    d="M14.3333 10.1667V3.5C14.3333 2.72343 14.3333 2.33515 14.2065 2.02886C14.0373 1.62048 13.7129 1.29602 13.3045 1.12687C12.9982 1 12.6099 1 11.8333 1C11.0568 1 10.6685 1 10.3622 1.12687C9.95381 1.29602 9.62936 1.62048 9.4602 2.02886C9.33333 2.33515 9.33333 2.72343 9.33333 3.5V10.1667C9.33333 10.9432 9.33333 11.3315 9.4602 11.6378C9.62936 12.0462 9.95381 12.3706 10.3622 12.5398C10.6685 12.6667 11.0568 12.6667 11.8333 12.6667C12.6099 12.6667 12.9982 12.6667 13.3045 12.5398C13.7129 12.3706 14.0373 12.0462 14.2065 11.6378C14.3333 11.3315 14.3333 10.9432 14.3333 10.1667Z"
+    stroke="#697586" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+</svg>`
 </script>
 
 <template>
   <default-layout>
     <div class="taxes-page">
-      <PageHeader
-        :icon="taxesIcon"
-        title-key="pages.taxes.title"
-        description-key="pages.taxes.description"
-      />
+      <PageHeader :icon="taxesIcon" title-key="pages.taxes.title" description-key="pages.taxes.description" />
 
-      <div class="bg-gray-50 rounded-md p-4 sm:p-6 mt-4">
-        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+      <div class="bg-gray-50 rounded-md -mx-6 mt-4">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-y border-y-slate-300 px-4 sm:px-6 py-3">
+
+          <div class="text-sm sm:text-lg font-bold text-gray-900">
+            الضرائب
+          </div>
+
+
           <div class="flex flex-wrap gap-3">
-            <v-btn
-              variant="flat"
-              color="primary"
-              height="48"
-              class="px-7 font-semibold text-base"
-              prepend-icon="mdi-plus-circle-outline"
-              @click="openCreateTax"
-            >
-              اضف جديد
+            <v-btn variant="outlined" append-icon="mdi-chevron-down" color="gray-500" height="40"
+              class="font-semibold text-base border-gray-400">
+              <template #prepend>
+                <span v-html="columnIcon">
+                </span>
+              </template>
+              الأعمدة
             </v-btn>
 
-            <v-btn
-              variant="flat"
-              color="primary-50"
-              height="48"
-              class="px-7 font-semibold text-base text-primary-700"
-              prepend-icon="mdi-magnify"
-            >
+            <v-btn variant="outlined" color="primary-50" height="40"
+              class="px-7 font-semibold text-base text-primary-700" prepend-icon="mdi-magnify">
               بحث متقدم
             </v-btn>
 
-            <v-btn
-              variant="flat"
-              color="primary-50"
-              height="48"
-              class="px-7 font-semibold text-base text-primary-700"
-              prepend-icon="mdi-view-column"
-            >
-              الأعمدة
+            <v-btn variant="flat" color="primary" height="40" class="px-7 font-semibold text-base"
+              prepend-icon="mdi-plus-circle-outline" @click="openCreateTax">
+              اضف جديد
             </v-btn>
           </div>
 
-          <div class="flex flex-wrap gap-3 items-center">
-            <v-text-field
-              density="comfortable"
-              variant="outlined"
-              hide-details
-              placeholder="بحث"
-              prepend-inner-icon="mdi-magnify"
-              class="w-full sm:w-64"
-            />
-          </div>
+
+
+          <!-- <div class="flex flex-wrap gap-3 items-center">
+            <v-text-field density="comfortable" variant="outlined" hide-details placeholder="بحث"
+              prepend-inner-icon="mdi-magnify" class="w-full sm:w-64" />
+          </div> -->
         </div>
 
-        <DataTable
-          title="الضرائب"
-          :headers="taxesTableHeaders"
-          :items="taxesTableItems"
-          show-actions
-          show-checkbox
-          :show-delete="false"
-          class="mt-4"
-          @edit="handleEditTax"
-          @delete="handleDeleteTax"
-        />
+        <DataTable :headers="taxesTableHeaders" :items="taxesTableItems" show-actions show-checkbox :show-delete="false"
+          @edit="handleEditTax" @delete="handleDeleteTax" />
 
         <TaxFormDialog v-model="showTaxDialog" :tax="editingTax" @save="handleSaveTax" />
       </div>
