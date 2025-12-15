@@ -93,6 +93,66 @@ export const settingsRoutes: RouteRecordRaw[] = [
     ],
   },
   {
+    path: "/taxes",
+    name: "Taxes",
+    redirect: "/taxes/list",
+    children: [
+      {
+        path: "list",
+        name: "TaxesList",
+        component: () => import("@/views/settings/taxes/List.vue"),
+        meta: {
+          title: "pages.taxes.title",
+        },
+      },
+    ],
+  },
+  {
+    path: "/geo-areas",
+    name: "GeoAreas",
+    redirect: "/geo-areas/list",
+    children: [
+      {
+        path: "list",
+        name: "GeoAreasList",
+        component: () => import("@/views/settings/geo-areas/List.vue"),
+        meta: {
+          title: "pages.geoAreas.title",
+        },
+      },
+    ],
+  },
+  {
+    path: "/account-types",
+    name: "AccountTypes",
+    redirect: "/account-types/list",
+    children: [
+      {
+        path: "list",
+        name: "AccountTypesList",
+        component: () => import("@/views/settings/account-types/List.vue"),
+        meta: {
+          title: "pages.accountTypes.title",
+        },
+      },
+    ],
+  },
+  {
+    path: "/tax-rules",
+    name: "TaxRules",
+    redirect: "/tax-rules/list",
+    children: [
+      {
+        path: "list",
+        name: "TaxRulesList",
+        component: () => import("@/views/settings/tax-rules/List.vue"),
+        meta: {
+          title: "pages.taxRules.title",
+        },
+      },
+    ],
+  },
+  {
     path: "/codes",
     name: "Codes",
     component: () => import("@/views/settings/codes/Form.vue"),
@@ -100,5 +160,4 @@ export const settingsRoutes: RouteRecordRaw[] = [
       title: "pages.codes.title",
     },
   },
-
 ];
