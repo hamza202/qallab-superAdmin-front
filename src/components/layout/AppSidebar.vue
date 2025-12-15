@@ -162,9 +162,49 @@
                                         class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
                                 </li>
                                 <li class="relative">
+                                    <router-link to="/geo-areas"
+                                        :class="[$route.path.includes('/geo-areas') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        {{ $t('pages.geoAreas.title') }}
+                                    </router-link>
+                                    <span
+                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
+                                </li>
+                                <li class="relative">
                                     <router-link to="/codes"
                                         :class="[$route.path.includes('/codes') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         {{ $t('pages.codes.title') }}
+                                    </router-link>
+                                    <span
+                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
+                                </li>
+                                <li class="relative">
+                                    <router-link to="/cities"
+                                        :class="[$route.path.includes('/cities') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        {{ $t('pages.cities.title') }}
+                                    </router-link>
+                                    <span
+                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
+                                </li>
+                                <li class="relative">
+                                    <router-link to="/taxes"
+                                        :class="[$route.path.includes('/taxes') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        {{ $t('pages.taxes.title') }}
+                                    </router-link>
+                                    <span
+                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
+                                </li>
+                                <li class="relative">
+                                    <router-link to="/account-types"
+                                        :class="[$route.path.includes('/account-types') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        {{ $t('pages.accountTypes.title') }}
+                                    </router-link>
+                                    <span
+                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
+                                </li>
+                                <li class="relative">
+                                    <router-link to="/tax-rules"
+                                        :class="[$route.path.includes('/tax-rules') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        {{ $t('pages.taxRules.title') }}
                                     </router-link>
                                     <span
                                         class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>

@@ -18,6 +18,22 @@
     "categories": {
       "title": "Categories",
       "description": "Allows you to add Categories"
+    },
+    "taxes": {
+      "title": "Taxes",
+      "description": "Allows you to manage taxes"
+    },
+    "accountTypes": {
+      "title": "Account Types",
+      "description": "Allows you to manage account types"
+    },
+    "taxRules": {
+      "title": "Tax Rules",
+      "description": "Allows you to manage tax rules"
+    },
+    "cities": {
+      "title": "Cities",
+      "description": "Allows you to manage cities"
     }
   }
 }

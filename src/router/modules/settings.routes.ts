@@ -45,22 +45,6 @@ export const settingsRoutes: RouteRecordRaw[] = [
           title: "pages.units.title",
         },
       },
-      {
-        path: "create",
-        name: "UnitsCreate",
-        component: () => import("@/views/settings/units/Form.vue"),
-        meta: {
-          title: "pages.units.title",
-        },
-      },
-      {
-        path: "edit/:id",
-        name: "UnitsEdit",
-        component: () => import("@/views/settings/units/Form.vue"),
-        meta: {
-          title: "pages.units.title",
-        },
-      },
     ],
   },
   {
@@ -72,22 +56,6 @@ export const settingsRoutes: RouteRecordRaw[] = [
         path: "list",
         name: "BrandsList",
         component: () => import("@/views/settings/brands/List.vue"),
-        meta: {
-          title: "pages.brands.title",
-        },
-      },
-      {
-        path: "create",
-        name: "BrandsCreate",
-        component: () => import("@/views/settings/brands/Form.vue"),
-        meta: {
-          title: "pages.brands.title",
-        },
-      },
-      {
-        path: "edit/:id",
-        name: "BrandsEdit",
-        component: () => import("@/views/settings/brands/Form.vue"),
         meta: {
           title: "pages.brands.title",
         },
@@ -107,20 +75,79 @@ export const settingsRoutes: RouteRecordRaw[] = [
           title: "pages.factories.title",
         },
       },
+    ],
+  },
+  {
+    path: "/cities",
+    name: "Cities",
+    redirect: "/cities/list",
+    children: [
       {
-        path: "create",
-        name: "FactoriesCreate",
-        component: () => import("@/views/settings/factories/Form.vue"),
+        path: "list",
+        name: "CitiesList",
+        component: () => import("@/views/settings/cities/List.vue"),
         meta: {
-          title: "pages.factories.title",
+          title: "pages.cities.title",
         },
       },
+    ],
+  },
+  {
+    path: "/taxes",
+    name: "Taxes",
+    redirect: "/taxes/list",
+    children: [
       {
-        path: "edit/:id",
-        name: "FactoriesEdit",
-        component: () => import("@/views/settings/factories/Form.vue"),
+        path: "list",
+        name: "TaxesList",
+        component: () => import("@/views/settings/taxes/List.vue"),
         meta: {
-          title: "pages.factories.title",
+          title: "pages.taxes.title",
+        },
+      },
+    ],
+  },
+  {
+    path: "/geo-areas",
+    name: "GeoAreas",
+    redirect: "/geo-areas/list",
+    children: [
+      {
+        path: "list",
+        name: "GeoAreasList",
+        component: () => import("@/views/settings/geo-areas/List.vue"),
+        meta: {
+          title: "pages.geoAreas.title",
+        },
+      },
+    ],
+  },
+  {
+    path: "/account-types",
+    name: "AccountTypes",
+    redirect: "/account-types/list",
+    children: [
+      {
+        path: "list",
+        name: "AccountTypesList",
+        component: () => import("@/views/settings/account-types/List.vue"),
+        meta: {
+          title: "pages.accountTypes.title",
+        },
+      },
+    ],
+  },
+  {
+    path: "/tax-rules",
+    name: "TaxRules",
+    redirect: "/tax-rules/list",
+    children: [
+      {
+        path: "list",
+        name: "TaxRulesList",
+        component: () => import("@/views/settings/tax-rules/List.vue"),
+        meta: {
+          title: "pages.taxRules.title",
         },
       },
     ],
@@ -133,5 +160,4 @@ export const settingsRoutes: RouteRecordRaw[] = [
       title: "pages.codes.title",
     },
   },
-
 ];

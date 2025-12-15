@@ -56,63 +56,59 @@ const handleDeleteTax = (item: any) => {
 <template>
     <default-layout>
         <div class="categories-page">
-            <PageHeader :icon="categoriesIcon" title-key="pages.categories.title" description-key="pages.categories.description" />
-        </div>
-        <div class="bg-gray-50 rounded-md p-4 sm:p-6">
-            <div class="flex gap-1 items-cenetr justify-between flex-wrap">
-                <div class="flex flex-wrap gap-3">
-                <!-- Save/Apply Button -->
-                <router-link to="/categories/create">
-                    <v-btn
-                        variant="flat"
-                        color="primary"
-                        height="48"
-                        class="px-7 font-semibold text-base"
-                        prepend-icon="mdi-plus-circle-outline"
-                    >
-                        اضف جديد
-                    </v-btn>
-                </router-link>
+            <PageHeader :icon="categoriesIcon" title-key="pages.categories.title"
+                description-key="pages.categories.description" />
+            <div class="bg-gray-50 rounded-md p-4 sm:p-6">
+                <div class="flex gap-1 items-cenetr justify-between flex-wrap">
+                    <div class="flex flex-wrap gap-3">
+                        <!-- Save/Apply Button -->
+                        <router-link to="/categories/create">
+                            <v-btn variant="flat" color="primary" height="48" class="px-7 font-semibold text-base"
+                                prepend-icon="mdi-plus-circle-outline">
+                                اضف جديد
+                            </v-btn>
+                        </router-link>
 
-                <!-- Close/Cancel Button -->
-                <v-btn variant="flat" color="primary-50" height="48"
-                    class="px-7 font-semibold text-base text-primary-700">
-                    <template #prepend>
-                        <span v-html="editIcon"></span>
-                    </template>
-                    تعديل
-                </v-btn>
+                        <!-- Close/Cancel Button -->
+                        <v-btn variant="flat" color="primary-50" height="48"
+                            class="px-7 font-semibold text-base text-primary-700">
+                            <template #prepend>
+                                <span v-html="editIcon"></span>
+                            </template>
+                            تعديل
+                        </v-btn>
 
-                <!-- Delete Button - only visible when editing -->
-                <v-btn variant="flat" color="error-50" height="48" class="px-7 font-semibold text-base text-error-700">
-                    <template #prepend>
-                        <span v-html="deleteIcon"></span>
-                    </template>
-                    حذف
-                </v-btn>
+                        <!-- Delete Button - only visible when editing -->
+                        <v-btn variant="flat" color="error-50" height="48"
+                            class="px-7 font-semibold text-base text-error-700">
+                            <template #prepend>
+                                <span v-html="deleteIcon"></span>
+                            </template>
+                            حذف
+                        </v-btn>
 
+                    </div>
+
+                    <div class="flex flex-wrap gap-3">
+                        <!-- Export Button -->
+                        <v-btn variant="outlined" color="gray-700" height="48"
+                            class="px-7 font-semibold text-base bg-white border-gray-300" prepend-icon="mdi-upload">
+                            تصدير
+                        </v-btn>
+
+                        <!-- Columns Button -->
+                        <v-btn variant="flat" color="primary-50" height="48"
+                            class="px-7 font-semibold text-base text-primary-700"
+                            prepend-icon="mdi-plus-circle-outline">
+                            الأعمدة
+                        </v-btn>
+
+                    </div>
                 </div>
-
-                <div class="flex flex-wrap gap-3">
-                <!-- Export Button -->
-                <v-btn variant="outlined" color="gray-700" height="48" class="px-7 font-semibold text-base bg-white border-gray-300"
-                    prepend-icon="mdi-upload">
-                    تصدير
-                </v-btn>
-
-                <!-- Columns Button -->
-                <v-btn variant="flat" color="primary-50" height="48"
-                    class="px-7 font-semibold text-base text-primary-700" prepend-icon="mdi-plus-circle-outline">
-                    الأعمدة
-                </v-btn>
-
-                </div>
+                <!-- Tax Table -->
+                <DataTable title="قائمة التصنيفات" :headers="taxTableHeaders" :items="taxTableItems"
+                    :show-actions="false" class="mt-6" @delete="handleDeleteTax" />
             </div>
-            <!-- Tax Table -->
-            <DataTable title="قائمة التصنيفات" :headers="taxTableHeaders" :items="taxTableItems" :show-actions="false" class="mt-6"
-             @delete="handleDeleteTax" />
-
-
         </div>
     </default-layout>
 </template>
