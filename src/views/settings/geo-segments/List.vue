@@ -1,115 +1,101 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
-import GeoAreaFormDialog from "@/views/settings/geo-areas/components/GeoAreaFormDialog.vue";
+import { useRouter } from "vue-router";
 
-const geoAreasIcon = `<svg width="52" height="52" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+const geoSegmentsIcon = `<svg width="52" height="52" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path fill-rule="evenodd" clip-rule="evenodd" d="M26 4.33301C18.0876 4.33301 11.6667 10.7539 11.6667 18.6663C11.6667 25.7604 17.4354 35.1195 23.0716 41.9692C24.015 43.109 24.4867 43.6789 25.122 43.9063C25.6669 44.1026 26.3331 44.1026 26.878 43.9063C27.5133 43.6789 27.985 43.109 28.9284 41.9692C34.5646 35.1195 40.3333 25.7604 40.3333 18.6663C40.3333 10.7539 33.9124 4.33301 26 4.33301ZM26 24.333C29.2216 24.333 31.8333 21.7213 31.8333 18.4997C31.8333 15.278 29.2216 12.6663 26 12.6663C22.7784 12.6663 20.1667 15.278 20.1667 18.4997C20.1667 21.7213 22.7784 24.333 26 24.333Z" fill="#1570EF"/>
 </svg>`;
 
-const geoAreasTableHeaders = [
+const geoSegmentsTableHeaders = [
   { key: "id", title: "#", width: "60px" },
-  { key: "nameAr", title: "الاسم بالعربية", width: "200px" },
-  { key: "nameEn", title: "الاسم بالانجليزية", width: "200px" },
-  { key: "description", title: "الوصف", width: "260px" },
+  { key: "nameAr", title: "اسم التقسيم", width: "200px" },
+  { key: "segmentType", title: "نوع التقسيم", width: "160px" },
+  { key: "truckType", title: "نوع الشاحنة", width: "160px" },
+  { key: "createdAt", title: "تاريخ الإنشاء", width: "160px" },
   { key: "status", title: "الحالة", width: "120px" },
 ];
 
-const geoAreasTableItems = ref([
+const geoSegmentsTableItems = ref([
   {
     id: 1,
-    nameAr: "منطقة شمالية",
-    nameEn: "Northern Area",
-    description: "الوصف",
+    nameAr: "اسم التقسيم 1",
+    nameEn: "Segment 1",
+    segmentType: "نوع التقسيم",
+    truckType: "شاحنة صغيرة",
+    createdAt: "12 Dec 2025",
     status: true,
   },
   {
     id: 2,
-    nameAr: "منطقة جنوبية",
-    nameEn: "Southern Area",
-    description: "الوصف",
+    nameAr: "اسم التقسيم 2",
+    nameEn: "Segment 2",
+    segmentType: "نوع التقسيم",
+    truckType: "قلاب",
+    createdAt: "12 Dec 2025",
     status: false,
+  },
+  {
+    id: 3,
+    nameAr: "اسم التقسيم 3",
+    nameEn: "Segment 3",
+    segmentType: "نوع التقسيم",
+    truckType: "شاحنة كبيرة",
+    createdAt: "12 Dec 2025",
+    status: true,
   },
 ]);
 
-const showGeoAreaDialog = ref(false);
-const editingGeoArea = ref<any | null>(null);
+const router = useRouter();
 
-// Selection and filters (similar to other settings pages)
-const selectedGeoAreaIds = ref<(string | number)[]>([]);
+// Selection and filters
+const selectedGeoSegmentIds = ref<(string | number)[]>([]);
 
 const showAdvancedFilters = ref(false);
 
-const filterName = ref("");
+const filterNameAr = ref("");
+const filterSegmentType = ref<string | null>(null);
+const filterTruckType = ref<string | null>(null);
 const filterStatus = ref<string | null>(null);
 
-const hasSelectedGeoAreas = computed(() => selectedGeoAreaIds.value.length > 0);
+const hasSelectedGeoSegments = computed(
+  () => selectedGeoSegmentIds.value.length > 0,
+);
 
-const openCreateGeoArea = () => {
-  editingGeoArea.value = null;
-  showGeoAreaDialog.value = true;
+const openCreateGeoSegment = () => {
+  router.push({ name: "GeoSegmentsCreate" });
 };
 
-const handleEditGeoArea = (item: any) => {
-  editingGeoArea.value = {
-    id: item.id,
-    nameAr: item.nameAr,
-    nameEn: item.nameEn,
-    description: item.description,
-    status: typeof item.status === "boolean" ? item.status : item.status === "فعال",
-  };
-
-  showGeoAreaDialog.value = true;
+const handleEditGeoSegment = (item: any) => {
+  router.push({ name: "GeoSegmentsEdit", params: { id: item.id } });
 };
 
-const handleDeleteGeoArea = (item: any) => {
-  geoAreasTableItems.value = geoAreasTableItems.value.filter((g) => g.id !== item.id);
+const handleDeleteGeoSegment = (item: any) => {
+  geoSegmentsTableItems.value = geoSegmentsTableItems.value.filter(
+    (g) => g.id !== item.id,
+  );
 };
 
-const handleSaveGeoArea = (payload: any) => {
-  if (editingGeoArea.value && editingGeoArea.value.id) {
-    const index = geoAreasTableItems.value.findIndex((g) => g.id === editingGeoArea.value.id);
-    if (index !== -1) {
-      geoAreasTableItems.value[index] = {
-        ...geoAreasTableItems.value[index],
-        nameAr: payload.nameAr,
-        nameEn: payload.nameEn,
-        description: payload.description,
-        status: payload.status,
-      };
-    }
-  } else {
-    const nextId = geoAreasTableItems.value.length
-      ? Math.max(...geoAreasTableItems.value.map((g) => g.id)) + 1
-      : 1;
+// For now we keep delete as a simple local operation on the mock data.
 
-    geoAreasTableItems.value.push({
-      id: nextId,
-      nameAr: payload.nameAr,
-      nameEn: payload.nameEn,
-      description: payload.description,
-      status: payload.status,
-    });
-  }
-
-  editingGeoArea.value = null;
-  showGeoAreaDialog.value = false;
-};
-
-const handleSelectGeoArea = (item: any, selected: boolean) => {
+const handleSelectGeoSegment = (item: any, selected: boolean) => {
   if (selected) {
-    if (!selectedGeoAreaIds.value.includes(item.id)) {
-      selectedGeoAreaIds.value.push(item.id);
+    if (!selectedGeoSegmentIds.value.includes(item.id)) {
+      selectedGeoSegmentIds.value.push(item.id);
     }
   } else {
-    selectedGeoAreaIds.value = selectedGeoAreaIds.value.filter((id) => id !== item.id);
+    selectedGeoSegmentIds.value = selectedGeoSegmentIds.value.filter(
+      (id) => id !== item.id,
+    );
   }
 };
 
-const handleSelectAllGeoAreas = (selected: boolean) => {
+const handleSelectAllGeoSegments = (selected: boolean) => {
   if (selected) {
-    selectedGeoAreaIds.value = geoAreasTableItems.value.map((item) => item.id);
+    selectedGeoSegmentIds.value = geoSegmentsTableItems.value.map(
+      (item) => item.id,
+    );
   } else {
-    selectedGeoAreaIds.value = [];
+    selectedGeoSegmentIds.value = [];
   }
 };
 
@@ -118,7 +104,9 @@ const toggleAdvancedFilters = () => {
 };
 
 const resetFilters = () => {
-  filterName.value = "";
+  filterNameAr.value = "";
+  filterSegmentType.value = null;
+  filterTruckType.value = null;
   filterStatus.value = null;
 };
 
@@ -150,11 +138,19 @@ const editIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none" xm
 
 <template>
   <default-layout>
-    <div class="geo-areas-page">
-      <PageHeader :icon="geoAreasIcon" title-key="pages.geoAreas.title" description-key="pages.geoAreas.description" />
+    <div class="geo-segments-page">
+      <PageHeader
+        :icon="geoSegmentsIcon"
+        title-key="pages.geoSegments.title"
+        description-key="pages.geoSegments.description"
+      />
+
       <div class="flex justify-end pb-2">
-        <v-btn variant="outlined" height="40"
-          class="font-semibold text-base border-gray-300 bg-primary-50 !text-primary-900">
+        <v-btn
+          variant="outlined"
+          height="40"
+          class="font-semibold text-base border-gray-300 bg-primary-50 !text-primary-900"
+        >
           <template #prepend>
             <span v-html="exportIcon"></span>
           </template>
@@ -163,11 +159,15 @@ const editIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none" xm
       </div>
 
       <div class="bg-gray-50 rounded-md -mx-6">
-        <div :class="hasSelectedGeoAreas ? 'justify-between' : 'justify-end'"
-          class="flex flex-wrap items-center gap-3 border-y border-y-slate-300 px-4 sm:px-6 py-3">
+        <div
+          :class="hasSelectedGeoSegments ? 'justify-between' : 'justify-end'"
+          class="flex flex-wrap items-center gap-3 border-y border-y-slate-300 px-4 sm:px-6 py-3"
+        >
           <!-- Actions when rows are selected -->
-          <div v-if="hasSelectedGeoAreas"
-            class="flex flex-wrap items-stretch rounded-lg overflow-hidden border border-gray-200 bg-white text-sm">
+          <div
+            v-if="hasSelectedGeoSegments"
+            class="flex flex-wrap items-stretch rounded-lg overflow-hidden border border-gray-200 bg-white text-sm"
+          >
             <v-btn class="px-4 font-semibold text-primary-600 hover:bg-primary-50 !rounded-none">
               <template #prepend>
                 <span v-html="editIcon"></span>
@@ -192,57 +192,123 @@ const editIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none" xm
 
           <!-- Main header controls -->
           <div class="flex flex-wrap gap-3">
-            <v-btn variant="outlined" append-icon="mdi-chevron-down" color="gray-500" height="40"
-              class="font-semibold text-base border-gray-400">
+            <v-btn
+              variant="outlined"
+              append-icon="mdi-chevron-down"
+              color="gray-500"
+              height="40"
+              class="font-semibold text-base border-gray-400"
+            >
               <template #prepend>
                 <span v-html="columnIcon"></span>
               </template>
               الأعمدة
             </v-btn>
 
-            <v-btn variant="outlined" color="primary-50" height="40"
-              class="px-7 font-semibold text-base text-primary-700" prepend-icon="mdi-magnify"
-              @click="toggleAdvancedFilters">
+            <v-btn
+              variant="outlined"
+              color="primary-50"
+              height="40"
+              class="px-7 font-semibold text-base text-primary-700"
+              prepend-icon="mdi-magnify"
+              @click="toggleAdvancedFilters"
+            >
               بحث متقدم
             </v-btn>
 
-            <v-btn variant="flat" color="primary" height="40" class="px-7 font-semibold text-base"
-              prepend-icon="mdi-plus-circle-outline" @click="openCreateGeoArea">
+            <v-btn
+              variant="flat"
+              color="primary"
+              height="40"
+              class="px-7 font-semibold text-base"
+              prepend-icon="mdi-plus-circle-outline"
+              @click="openCreateGeoSegment"
+            >
               اضف جديد
             </v-btn>
           </div>
         </div>
 
         <!-- Advanced filters row -->
-        <div v-if="showAdvancedFilters"
-          class="border-y border-y-primary-100 bg-primary-50 px-4 sm:px-6 py-3 flex flex-col gap-3 sm:gap-2">
+        <div
+          v-if="showAdvancedFilters"
+          class="border-y border-y-primary-100 bg-primary-50 px-4 sm:px-6 py-3 flex flex-col gap-3 sm:gap-2"
+        >
           <div class="flex flex-col sm:flex-row gap-3 sm:items-center justify-between">
             <div class="flex flex-wrap gap-2 order-2 sm:order-1 justify-start sm:justify-start">
-              <v-btn variant="flat" color="primary" height="45" class="px-5 font-semibold text-sm sm:text-base"
-                prepend-icon="mdi-magnify">
+              <v-btn
+                variant="flat"
+                color="primary"
+                height="45"
+                class="px-5 font-semibold text-sm sm:text-base"
+                prepend-icon="mdi-magnify"
+              >
                 ابحث الآن
               </v-btn>
-              <v-btn variant="outlined" color="primary-50" height="45"
-                class="px-5 font-semibold text-sm sm:text-base text-primary-700" prepend-icon="mdi-refresh"
-                @click="resetFilters">
+              <v-btn
+                variant="outlined"
+                color="primary-50"
+                height="45"
+                class="px-5 font-semibold text-sm sm:text-base text-primary-700"
+                prepend-icon="mdi-refresh"
+                @click="resetFilters"
+              >
                 إعادة تعيين
               </v-btn>
             </div>
 
             <div class="flex flex-wrap gap-3 flex-1 order-1 sm:order-2 justify-end sm:justify-start">
-              <v-text-field v-model="filterName" density="comfortable" variant="outlined" hide-details
-                placeholder="الاسم" class="w-full sm:w-60 bg-white" />
-              <v-select v-model="filterStatus" :items="['نشط', 'غير نشط']" density="comfortable" variant="outlined"
-                hide-details placeholder="الحالة" class="w-full sm:w-40 bg-white" />
+              <v-text-field
+                v-model="filterNameAr"
+                density="comfortable"
+                variant="outlined"
+                hide-details
+                placeholder="اسم التقسيم"
+                class="w-full sm:w-60 bg-white"
+              />
+              <v-select
+                v-model="filterSegmentType"
+                :items="['نوع التقسيم 1', 'نوع التقسيم 2']"
+                density="comfortable"
+                variant="outlined"
+                hide-details
+                placeholder="نوع التقسيم"
+                class="w-full sm:w-40 bg-white"
+              />
+              <v-select
+                v-model="filterTruckType"
+                :items="['شاحنة صغيرة', 'قلاب', 'شاحنة كبيرة']"
+                density="comfortable"
+                variant="outlined"
+                hide-details
+                placeholder="نوع الشاحنة"
+                class="w-full sm:w-40 bg-white"
+              />
+              <v-select
+                v-model="filterStatus"
+                :items="['نشطة', 'غير نشطة']"
+                density="comfortable"
+                variant="outlined"
+                hide-details
+                placeholder="الحالة"
+                class="w-full sm:w-40 bg-white"
+              />
             </div>
           </div>
         </div>
 
-        <DataTable title="تقسيمات المناطق الجغرافية" :headers="geoAreasTableHeaders" :items="geoAreasTableItems"
-          show-actions show-checkbox :show-delete="false" class="mt-4" @edit="handleEditGeoArea"
-          @delete="handleDeleteGeoArea" @select="handleSelectGeoArea" @selectAll="handleSelectAllGeoAreas" />
-
-        <GeoAreaFormDialog v-model="showGeoAreaDialog" :area="editingGeoArea" @save="handleSaveGeoArea" />
+        <DataTable
+          title="تقسيم النطاقات الجغرافية"
+          :headers="geoSegmentsTableHeaders"
+          :items="geoSegmentsTableItems"
+          show-actions
+          show-checkbox
+          class="mt-4"
+          @edit="handleEditGeoSegment"
+          @delete="handleDeleteGeoSegment"
+          @select="handleSelectGeoSegment"
+          @selectAll="handleSelectAllGeoSegments"
+        />
       </div>
     </div>
   </default-layout>
