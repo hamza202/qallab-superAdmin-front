@@ -99,26 +99,23 @@ const isStatusActive = (status: unknown) => {
 };
 
 // Icons
-const trashIcon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M13.3333 5.00001V4.33334C13.3333 3.39992 13.3333 2.93321 13.1517 2.5767C12.9919 2.26309 12.7369 2.00812 12.4233 1.84833C12.0668 1.66667 11.6001 1.66667 10.6667 1.66667H9.33333C8.39991 1.66667 7.9332 1.66667 7.57668 1.84833C7.26308 2.00812 7.00811 2.26309 6.84832 2.5767C6.66667 2.93321 6.66667 3.39992 6.66667 4.33334V5.00001M8.33333 9.58334V13.75M11.6667 9.58334V13.75M2.5 5.00001H17.5M15.8333 5.00001V14.3333C15.8333 15.7335 15.8333 16.4335 15.5608 16.9683C15.3212 17.4387 14.9387 17.8212 14.4683 18.0609C13.9335 18.3333 13.2335 18.3333 11.8333 18.3333H8.16667C6.76654 18.3333 6.06647 18.3333 5.53169 18.0609C5.06129 17.8212 4.67883 17.4387 4.43915 16.9683C4.16667 16.4335 4.16667 15.7335 4.16667 14.3333V5.00001" stroke="#4B5565" stroke-width="1.67" stroke-linecap="round" stroke-linejoin="round"/>
+const trashIcon = `<svg width="17" height="19" viewBox="0 0 17 19" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M11.6666 4.16668V3.50001C11.6666 2.56659 11.6666 2.09988 11.4849 1.74336C11.3251 1.42976 11.0702 1.17479 10.7566 1.015C10.4 0.833344 9.93334 0.833344 8.99992 0.833344H7.66658C6.73316 0.833344 6.26645 0.833344 5.90993 1.015C5.59633 1.17479 5.34136 1.42976 5.18157 1.74336C4.99992 2.09988 4.99992 2.56659 4.99992 3.50001V4.16668M6.66659 8.75001V12.9167M9.99992 8.75001V12.9167M0.833252 4.16668H15.8333M14.1666 4.16668V13.5C14.1666 14.9001 14.1666 15.6002 13.8941 16.135C13.6544 16.6054 13.272 16.9878 12.8016 17.2275C12.2668 17.5 11.5667 17.5 10.1666 17.5H6.49992C5.09979 17.5 4.39972 17.5 3.86494 17.2275C3.39454 16.9878 3.01209 16.6054 2.7724 16.135C2.49992 15.6002 2.49992 14.9001 2.49992 13.5V4.16668" stroke="#D92D20" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`;
 
-const editIcon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M2.39662 15.0963C2.43491 14.7517 2.45405 14.5794 2.50618 14.4184C2.55243 14.2755 2.61778 14.1396 2.70045 14.0142C2.79363 13.8729 2.91621 13.7503 3.16136 13.5052L14.1666 2.49992C15.0871 1.57945 16.5795 1.57945 17.4999 2.49993C18.4204 3.4204 18.4204 4.91279 17.4999 5.83326L6.49469 16.8385C6.24954 17.0836 6.12696 17.2062 5.98566 17.2994C5.86029 17.3821 5.72433 17.4474 5.58146 17.4937C5.42042 17.5458 5.24813 17.5649 4.90356 17.6032L2.08325 17.9166L2.39662 15.0963Z" stroke="#4B5565" stroke-width="1.67" stroke-linecap="round" stroke-linejoin="round"/>
+const editIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M1.14662 14.1201C1.18491 13.7755 1.20405 13.6032 1.25618 13.4422C1.30243 13.2993 1.36778 13.1633 1.45045 13.038C1.54363 12.8967 1.66621 12.7741 1.91136 12.5289L12.9166 1.5237C13.8371 0.603225 15.3295 0.603226 16.2499 1.5237C17.1704 2.44417 17.1704 3.93656 16.2499 4.85703L5.24469 15.8623C4.99954 16.1074 4.87696 16.23 4.73566 16.3232C4.61029 16.4058 4.47433 16.4712 4.33146 16.5174C4.17042 16.5696 3.99813 16.5887 3.65356 16.627L0.833252 16.9404L1.14662 14.1201Z" stroke="#1570EF" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`;
 </script>
 
 <template>
   <div
-    class="bg-white border border-gray-200 !rounded-xl shadow-sm overflow-hidden"
+    class="bg-white overflow-hidden"
   >
     <!-- Header -->
-    <div v-if="title" class="px-6 pt-5 pb-0">
-      <h3 class="text-lg font-bold text-gray-900">{{ title }}</h3>
+    <div v-if="title" class="px-3 py-3 border-b border-gray-300 border-t bg-gray-50 border-t-gray-300">
+      <h3 class="font-bold text-gray-900">{{ title }}</h3>
     </div>
-
-    <!-- Divider -->
-    <div v-if="title" class="border-b border-gray-200 mt-5"></div>
 
     <!-- Table -->
     <v-table class="data-table" hover>
@@ -219,6 +216,7 @@ const editIcon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xm
                 variant="text"
                 v-if="showDelete"
                 size="small"
+                color="error"
                 @click="handleDelete(item)"
               >
                 <span v-html="trashIcon"></span>
@@ -226,6 +224,7 @@ const editIcon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xm
               <v-btn
                 icon
                 variant="text"
+                color="primary"
                 size="small"
                 @click="handleEdit(item)"
               >
