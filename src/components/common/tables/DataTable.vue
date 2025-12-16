@@ -19,6 +19,7 @@ interface Props {
   showCheckbox?: boolean;
   showActions?: boolean;
   showDelete?: boolean;
+  confirmDelete?: boolean;
   loading?: boolean;
 }
 
@@ -27,6 +28,7 @@ const props = withDefaults(defineProps<Props>(), {
   showCheckbox: false,
   showActions: true,
   showDelete: true,
+  confirmDelete: true,
   loading: false,
 });
 
@@ -39,6 +41,9 @@ const emit = defineEmits<{
 
 const selectedItems = ref<(string | number)[]>([]);
 const selectAll = ref(false);
+
+const showDeleteDialog = ref(false);
+const pendingDeleteItem = ref<TableItem | null>(null);
 
 const toggleSelectAll = () => {
   if (selectAll.value) {
@@ -69,7 +74,23 @@ const handleEdit = (item: TableItem) => {
 };
 
 const handleDelete = (item: TableItem) => {
-  emit("delete", item);
+  if (!props.confirmDelete) {
+    emit("delete", item);
+    return;
+  }
+
+  pendingDeleteItem.value = item;
+  showDeleteDialog.value = true;
+};
+
+const confirmDelete = () => {
+  if (!pendingDeleteItem.value) return;
+  emit("delete", pendingDeleteItem.value);
+  pendingDeleteItem.value = null;
+};
+
+const cancelDelete = () => {
+  pendingDeleteItem.value = null;
 };
 
 // Priority badge colors
@@ -207,6 +228,14 @@ const editIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xm
     <v-overlay :model-value="loading" contained class="align-center justify-center">
       <v-progress-circular indeterminate color="primary" />
     </v-overlay>
+
+    <DeleteConfirmDialog
+      v-model="showDeleteDialog"
+      :persistent="true"
+      @confirm="confirmDelete"
+      @cancel="cancelDelete"
+      @close="cancelDelete"
+    />
   </div>
 </template>
 

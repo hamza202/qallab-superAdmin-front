@@ -96,7 +96,7 @@ $shadow-focus: 0px 0px 0px 4px rgb(var(--v-theme-primary-25)),
 }
 
 .custom-tab {
-  @apply min-w-[140px] max-w-[172px] h-12 px-5 py-3 rounded font-semibold text-base normal-case tracking-normal !important;
+  @apply min-w-[140px] h-12 px-5 py-3 rounded font-semibold text-base normal-case tracking-normal !important;
   @apply bg-primary-50 text-primary-700 border border-primary-50 !important;
   @apply transition-all duration-200 ease-in-out;
 

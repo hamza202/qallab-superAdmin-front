@@ -123,6 +123,37 @@ export const settingsRoutes: RouteRecordRaw[] = [
     ],
   },
   {
+    path: "/geo-segments",
+    name: "GeoSegments",
+    redirect: "/geo-segments/list",
+    children: [
+      {
+        path: "list",
+        name: "GeoSegmentsList",
+        component: () => import("@/views/settings/geo-segments/List.vue"),
+        meta: {
+          title: "pages.geoSegments.title",
+        },
+      },
+      {
+        path: "create",
+        name: "GeoSegmentsCreate",
+        component: () => import("@/views/settings/geo-segments/Form.vue"),
+        meta: {
+          title: "pages.geoSegments.title",
+        },
+      },
+      {
+        path: "edit/:id",
+        name: "GeoSegmentsEdit",
+        component: () => import("@/views/settings/geo-segments/Form.vue"),
+        meta: {
+          title: "pages.geoSegments.title",
+        },
+      },
+    ],
+  },
+  {
     path: "/account-types",
     name: "AccountTypes",
     redirect: "/account-types/list",

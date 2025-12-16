@@ -34,6 +34,13 @@
     "cities": {
       "title": "Cities",
       "description": "Allows you to manage cities"
+    },
+    "suppliers": {
+      "title": "Suppliers",
+      "description": "Allows you to manage suppliers",
+      "list": "Suppliers List",
+      "create": "Add Supplier",
+      "edit": "Edit Supplier"
     }
   }
 }
