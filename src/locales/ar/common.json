@@ -11,6 +11,12 @@
     "confirm": "تأكيد",
     "yes": "نعم",
     "no": "لا",
-    "actions": "إجراءات"
+    "actions": "إجراءات",
+    "deleteConfirm": {
+      "title": "تأكيد الحذف",
+      "message": "هل تريد بالتأكيد الحذف",
+      "confirm": "حذف",
+      "cancel": "إلغاء"
+    }
   }
 }

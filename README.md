@@ -1,6 +1,6 @@
-# Qallab Clients & Providers Portal
+# Qallab superAdmin Portal
 
-A Vue 3 Clients & Providers Portal built with TypeScript, supporting Arabic and English languages.
+A Vue 3 superAdmin Portal built with TypeScript, supporting Arabic and English languages.
 
 ## Tech Stack
 
@@ -19,7 +19,7 @@ A Vue 3 Clients & Providers Portal built with TypeScript, supporting Arabic and 
 ## Project Structure
 
 ```
-qallab-clients-provider-front/
+qallab-superAdmin-front/
 ├── public/                    # Public static files
 │   └── favicon.svg            # Site favicon
 ├── src/
@@ -137,7 +137,7 @@ Create a `.env` file based on `.env.example`:
 
 ```env
 # Application title
-VITE_APP_TITLE=Qallab Clients & Providers Portal
+VITE_APP_TITLE=Qallab superAdmin Portal
 
 # Development port
 VITE_PORT=3001

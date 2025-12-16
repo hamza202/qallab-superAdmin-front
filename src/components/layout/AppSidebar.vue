@@ -224,9 +224,11 @@
                     <v-list-item value="inventory" :class="{ '!mx-1 gap-5': !isSidebarExpanded }"
                         class="mx-4 px-2 py-1.5 rounded-lg hover:bg-primary-700/40 transition text-white flex items-center justify-start gap-2 mt-2">
                         <template #title>
-                            <span class="font-semibold">
-                                إدارة المخازن
-                            </span>
+                            <router-link to="/suppliers/list"
+                                :class="[$route.path.includes('/suppliers/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                {{ $t('pages.suppliers.title') }}
+                            </router-link>
+
                         </template>
                         <template #prepend>
                             <div
