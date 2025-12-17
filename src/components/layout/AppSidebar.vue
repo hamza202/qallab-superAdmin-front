@@ -20,76 +20,71 @@
 
                 <v-list density="compact" nav class="text-sm px-0 space-y-1"
                     active-class="bg-white !text-qallab-blue !font-bold relative before:absolute before:content-[''] before:inset-y-1 before:start-[-16px] before:bottom-[5px] before:w-1.5 before:bg-qallab-yellow before:rounded-e-lg">
-                    <div class="px-4 pb-1 text-xs text-primary-200"
-                        :class="{ '!px-1 text-center': !isSidebarExpanded }">
-                        الرئيسية
-                    </div>
 
-                    <v-list-item value="overview" :class="{ '!mx-1 gap-5': !isSidebarExpanded }"
+                    <!-- الرئيسية -->
+                    <v-list-item to="/" value="home" :class="{ '!mx-1 gap-5': !isSidebarExpanded }"
                         class="mx-4 px-2 py-1.5 rounded-lg text-white hover:bg-primary-700/40 transition flex items-center justify-start gap-2">
                         <template #title>
-                            نظرة عامة
+                            الرئيسية
                         </template>
                         <template #prepend>
                             <div
-                                class="bg-qallab-yellow text-white rounded-lg w-8 h-8 flex items-center justify-center ">
-                                <v-icon size="20">mdi-view-grid-outline</v-icon>
+                                class="bg-qallab-yellow text-white rounded-md w-6 h-6 flex items-center justify-center">
+                                <span v-html="homeIcon"></span>
                             </div>
                         </template>
                     </v-list-item>
 
-                    <v-list-group value="products" :model-value="true" class="mt-1">
+                    <!-- المنتجات -->
+                    <v-list-group value="products" class="mt-1">
                         <template #activator="{ props, isOpen }">
                             <v-list-item v-bind="props" :class="{ '!mx-1 gap-5': !isSidebarExpanded }"
                                 class="px-2 py-1.5 mx-4 rounded-lg hover:bg-primary-700/40 text-white flex items-center justify-between gap-2">
                                 <template #append>
                                     <v-icon size="20"
-                                        :class="['ms-auto transition-transform', isOpen ? 'rotate-180' : '']">
-                                        mdi-chevron-down
-                                    </v-icon>
+                                        :class="['ms-auto transition-transform', isOpen ? 'rotate-180' : '']">mdi-chevron-down</v-icon>
                                 </template>
                                 <template #title>
-                                    <div class="flex-1">
-                                        <span class="font-semibold">المنتجات</span>
-                                    </div>
+                                    <div class="flex-1"><span class="font-semibold">المنتجات</span></div>
                                 </template>
                                 <template #prepend>
                                     <div
-                                        class="bg-qallab-yellow text-white rounded-lg w-8 h-8 flex  items-center justify-center">
-                                        <v-icon size="20">mdi-view-grid-outline</v-icon>
+                                        class="bg-qallab-yellow text-white rounded-md w-6 h-6 flex items-center justify-center">
+                                        <span v-html="productsIcon"></span>
                                     </div>
                                 </template>
-
                             </v-list-item>
                         </template>
-
                         <div class="relative mt-3 ps-15 pe-4 text-sm">
                             <div
                                 class="absolute top-1 bottom-1 right-[30px] border-r-2 border-dotted border-white -translate-y-3 h-[100.5%]">
                             </div>
-
                             <ul class="space-y-2">
                                 <li class="relative">
-                                    <router-link to="/simple-products/create"
-                                        :class="[$route.path.includes('/simple-products') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
-                                        {{ $t('pages.simpleProducts.title') }}
-                                    </router-link>
+                                    <router-link to="/products/sales-management"
+                                        :class="[$route.path.includes('/products/sales-management') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
+                                        المبيعات</router-link>
                                     <span
                                         class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
                                 </li>
                                 <li class="relative">
-                                    <router-link to="/group-products"
-                                        :class="[$route.path.includes('/group-products') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
-                                        {{ $t('pages.groupProducts.title') }}
-                                    </router-link>
+                                    <router-link to="/products/price-list"
+                                        :class="[$route.path.includes('/products/price-list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">قائمة
+                                        الأسعار</router-link>
                                     <span
                                         class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
                                 </li>
                                 <li class="relative">
-                                    <router-link to="/composite-products"
-                                        :class="[$route.path.includes('/composite-products') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
-                                        {{ $t('pages.compositeProducts.title') }}
-                                    </router-link>
+                                    <router-link to="/products/production-capacity"
+                                        :class="[$route.path.includes('/products/production-capacity') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">القدرة
+                                        الإنتاجية</router-link>
+                                    <span
+                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
+                                </li>
+                                <li class="relative">
+                                    <router-link to="/products/settings"
+                                        :class="[$route.path.includes('/products/settings') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إعدادات
+                                        المنتج</router-link>
                                     <span
                                         class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
                                 </li>
@@ -97,123 +92,49 @@
                         </div>
                     </v-list-group>
 
-
-                    <v-list-group value="settings" :model-value="true" class="mt-1">
+                    <!-- الخدمات -->
+                    <v-list-group value="services" class="mt-1">
                         <template #activator="{ props, isOpen }">
                             <v-list-item v-bind="props" :class="{ '!mx-1 gap-5': !isSidebarExpanded }"
                                 class="px-2 py-1.5 mx-4 rounded-lg hover:bg-primary-700/40 text-white flex items-center justify-between gap-2">
                                 <template #append>
                                     <v-icon size="20"
-                                        :class="['ms-auto transition-transform', isOpen ? 'rotate-180' : '']">
-                                        mdi-chevron-down
-                                    </v-icon>
+                                        :class="['ms-auto transition-transform', isOpen ? 'rotate-180' : '']">mdi-chevron-down</v-icon>
                                 </template>
                                 <template #title>
-                                    <div class="flex-1">
-                                        <span class="font-semibold">الإعدادات</span>
-                                    </div>
+                                    <div class="flex-1"><span class="font-semibold">الخدمات</span></div>
                                 </template>
                                 <template #prepend>
                                     <div
-                                        class="bg-qallab-yellow text-white rounded-lg w-8 h-8 flex  items-center justify-center">
-                                        <v-icon size="20">mdi-view-grid-outline</v-icon>
+                                        class="bg-qallab-yellow text-white rounded-md w-6 h-6 flex items-center justify-center">
+                                        <span v-html="servicesIcon"></span>
                                     </div>
                                 </template>
-
                             </v-list-item>
                         </template>
-
                         <div class="relative mt-3 ps-15 pe-4 text-sm">
                             <div
                                 class="absolute top-1 bottom-1 right-[30px] border-r-2 border-dotted border-white -translate-y-3 h-[100.5%]">
                             </div>
-
                             <ul class="space-y-2">
                                 <li class="relative">
-                                    <router-link to="/categories"
-                                        :class="[$route.path.includes('/categories') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
-                                        {{ $t('pages.categories.title') }}
-                                    </router-link>
+                                    <router-link to="/services/management"
+                                        :class="[$route.path.includes('/services/management') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
+                                        الخدمات</router-link>
                                     <span
                                         class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
                                 </li>
                                 <li class="relative">
-                                    <router-link to="/units"
-                                        :class="[$route.path.includes('/units') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
-                                        {{ $t('pages.units.title') }}
-                                    </router-link>
+                                    <router-link to="/services/price-list"
+                                        :class="[$route.path.includes('/services/price-list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">قوائم
+                                        الأسعار</router-link>
                                     <span
                                         class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
                                 </li>
                                 <li class="relative">
-                                    <router-link to="/brands"
-                                        :class="[$route.path.includes('/brands') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
-                                        {{ $t('pages.brands.title') }}
-                                    </router-link>
-                                    <span
-                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
-                                </li>
-                                <li class="relative">
-                                    <router-link to="/factories"
-                                        :class="[$route.path.includes('/factories') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
-                                        {{ $t('pages.factories.title') }}
-                                    </router-link>
-                                    <span
-                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
-                                </li>
-                                <li class="relative">
-                                    <router-link to="/geo-areas"
-                                        :class="[$route.path.includes('/geo-areas') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
-                                        {{ $t('pages.geoAreas.title') }}
-                                    </router-link>
-                                    <span
-                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
-                                </li>
-                                <li class="relative">
-                                    <router-link to="/geo-segments"
-                                        :class="[$route.path.includes('/geo-segments') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
-                                        {{ $t('pages.geoSegments.title') }}
-                                    </router-link>
-                                    <span
-                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
-                                </li>
-                                <li class="relative">
-                                    <router-link to="/codes"
-                                        :class="[$route.path.includes('/codes') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
-                                        {{ $t('pages.codes.title') }}
-                                    </router-link>
-                                    <span
-                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
-                                </li>
-                                <li class="relative">
-                                    <router-link to="/cities"
-                                        :class="[$route.path.includes('/cities') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
-                                        {{ $t('pages.cities.title') }}
-                                    </router-link>
-                                    <span
-                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
-                                </li>
-                                <li class="relative">
-                                    <router-link to="/taxes"
-                                        :class="[$route.path.includes('/taxes') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
-                                        {{ $t('pages.taxes.title') }}
-                                    </router-link>
-                                    <span
-                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
-                                </li>
-                                <li class="relative">
-                                    <router-link to="/account-types"
-                                        :class="[$route.path.includes('/account-types') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
-                                        {{ $t('pages.accountTypes.title') }}
-                                    </router-link>
-                                    <span
-                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
-                                </li>
-                                <li class="relative">
-                                    <router-link to="/tax-rules"
-                                        :class="[$route.path.includes('/tax-rules') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
-                                        {{ $t('pages.taxRules.title') }}
-                                    </router-link>
+                                    <router-link to="/services/settings"
+                                        :class="[$route.path.includes('/services/settings') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إعدادات
+                                        الخدمات</router-link>
                                     <span
                                         class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
                                 </li>
@@ -221,83 +142,382 @@
                         </div>
                     </v-list-group>
 
-                    <v-list-item value="inventory" :class="{ '!mx-1 gap-5': !isSidebarExpanded }"
-                        class="mx-4 px-2 py-1.5 rounded-lg hover:bg-primary-700/40 transition text-white flex items-center justify-start gap-2 mt-2">
-                        <template #title>
-                            <router-link to="/suppliers/list"
-                                :class="[$route.path.includes('/suppliers/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
-                                {{ $t('pages.suppliers.title') }}
-                            </router-link>
-
+                    <!-- المبيعات -->
+                    <v-list-group value="sales" class="mt-1">
+                        <template #activator="{ props, isOpen }">
+                            <v-list-item v-bind="props" :class="{ '!mx-1 gap-5': !isSidebarExpanded }"
+                                class="px-2 py-1.5 mx-4 rounded-lg hover:bg-primary-700/40 text-white flex items-center justify-between gap-2">
+                                <template #append>
+                                    <v-icon size="20"
+                                        :class="['ms-auto transition-transform', isOpen ? 'rotate-180' : '']">mdi-chevron-down</v-icon>
+                                </template>
+                                <template #title>
+                                    <div class="flex-1"><span class="font-semibold">المبيعات</span></div>
+                                </template>
+                                <template #prepend>
+                                    <div
+                                        class="bg-qallab-yellow text-white rounded-md w-6 h-6 flex items-center justify-center">
+                                        <span v-html="salesIcon"></span>
+                                    </div>
+                                </template>
+                            </v-list-item>
                         </template>
-                        <template #prepend>
+                        <div class="relative mt-3 ps-15 pe-4 text-sm">
                             <div
-                                class="bg-qallab-yellow text-white rounded-lg w-8 h-8 flex items-center justify-center ">
-                                <v-icon size="20">mdi-warehouse</v-icon>
+                                class="absolute top-1 bottom-1 right-[30px] border-r-2 border-dotted border-white -translate-y-3 h-[100.5%]">
                             </div>
-                        </template>
-                    </v-list-item>
+                            <ul class="space-y-2">
+                                <li class="relative">
+                                    <router-link to="/sales/quotations"
+                                        :class="[$route.path.includes('/sales/quotations') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
+                                        عروض الأسعار</router-link>
+                                    <span
+                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
+                                </li>
+                                <li class="relative">
+                                    <router-link to="/sales/invoices"
+                                        :class="[$route.path.includes('/sales/invoices') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
+                                        فواتير المبيعات</router-link>
+                                    <span
+                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
+                                </li>
+                                <li class="relative">
+                                    <router-link to="/sales/orders"
+                                        :class="[$route.path.includes('/sales/orders') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
+                                        طلبات المبيعات</router-link>
+                                    <span
+                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
+                                </li>
+                                <li class="relative">
+                                    <router-link to="/sales/contracts"
+                                        :class="[$route.path.includes('/sales/contracts') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
+                                        العقود</router-link>
+                                    <span
+                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
+                                </li>
+                                <li class="relative">
+                                    <router-link to="/sales/clearing"
+                                        :class="[$route.path.includes('/sales/clearing') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
+                                        المقاصة</router-link>
+                                    <span
+                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
+                                </li>
+                            </ul>
+                        </div>
+                    </v-list-group>
 
-                    <v-list-item value="product-settings" :class="{ '!mx-1 gap-5': !isSidebarExpanded }"
-                        class="mx-4 px-2 py-1.5 rounded-lg hover:bg-primary-700/40 transition text-white flex items-center justify-start gap-2">
-                        <template #title>
-                            إدارة اعدادات المنتجات
+                    <!-- المشاريع -->
+                    <v-list-group value="projects" class="mt-1">
+                        <template #activator="{ props, isOpen }">
+                            <v-list-item v-bind="props" :class="{ '!mx-1 gap-5': !isSidebarExpanded }"
+                                class="px-2 py-1.5 mx-4 rounded-lg hover:bg-primary-700/40 text-white flex items-center justify-between gap-2">
+                                <template #append>
+                                    <v-icon size="20"
+                                        :class="['ms-auto transition-transform', isOpen ? 'rotate-180' : '']">mdi-chevron-down</v-icon>
+                                </template>
+                                <template #title>
+                                    <div class="flex-1"><span class="font-semibold">المشاريع</span></div>
+                                </template>
+                                <template #prepend>
+                                    <div
+                                        class="bg-qallab-yellow text-white rounded-md w-6 h-6 flex items-center justify-center">
+                                        <span v-html="projectsIcon"></span>
+                                    </div>
+                                </template>
+                            </v-list-item>
                         </template>
-                        <template #prepend>
+                        <div class="relative mt-3 ps-15 pe-4 text-sm">
                             <div
-                                class="bg-qallab-yellow text-white rounded-lg w-8 h-8 flex items-center justify-center ">
-                                <v-icon size="20">mdi-view-grid-plus</v-icon>
+                                class="absolute top-1 bottom-1 right-[30px] border-r-2 border-dotted border-white -translate-y-3 h-[100.5%]">
                             </div>
-                        </template>
-                    </v-list-item>
+                            <ul class="space-y-2">
+                                <li class="relative">
+                                    <router-link to="/projects/management"
+                                        :class="[$route.path.includes('/projects/management') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
+                                        المشاريع</router-link>
+                                    <span
+                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
+                                </li>
+                                <li class="relative">
+                                    <router-link to="/projects/scheduling"
+                                        :class="[$route.path.includes('/projects/scheduling') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">جدولة
+                                        المشاريع</router-link>
+                                    <span
+                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
+                                </li>
+                            </ul>
+                        </div>
+                    </v-list-group>
 
-                    <v-list-item value="services" :class="{ '!mx-1 gap-5': !isSidebarExpanded }"
-                        class="mx-4 px-2 py-1.5 rounded-lg hover:bg-primary-700/40 transition text-white flex items-center justify-start gap-2">
-                        <template #title>
-                            الخدمات
+                    <!-- المشتريات -->
+                    <v-list-group value="purchases" class="mt-1">
+                        <template #activator="{ props, isOpen }">
+                            <v-list-item v-bind="props" :class="{ '!mx-1 gap-5': !isSidebarExpanded }"
+                                class="px-2 py-1.5 mx-4 rounded-lg hover:bg-primary-700/40 text-white flex items-center justify-between gap-2">
+                                <template #append>
+                                    <v-icon size="20"
+                                        :class="['ms-auto transition-transform', isOpen ? 'rotate-180' : '']">mdi-chevron-down</v-icon>
+                                </template>
+                                <template #title>
+                                    <div class="flex-1"><span class="font-semibold">المشتريات</span></div>
+                                </template>
+                                <template #prepend>
+                                    <div
+                                        class="bg-qallab-yellow text-white rounded-md w-6 h-6 flex items-center justify-center">
+                                        <span v-html="purchasesIcon"></span>
+                                    </div>
+                                </template>
+                            </v-list-item>
                         </template>
-                        <template #prepend>
+                        <div class="relative mt-3 ps-15 pe-4 text-sm">
                             <div
-                                class="bg-qallab-yellow text-white rounded-lg w-8 h-8 flex items-center justify-center ">
-                                <v-icon size="20">mdi-apps-box</v-icon>
+                                class="absolute top-1 bottom-1 right-[30px] border-r-2 border-dotted border-white -translate-y-3 h-[100.5%]">
                             </div>
+                            <ul class="space-y-2">
+                                <li class="relative">
+                                    <router-link to="/purchases/quotations"
+                                        :class="[$route.path.includes('/purchases/quotations') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
+                                        عروض الأسعار</router-link>
+                                    <span
+                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
+                                </li>
+                                <li class="relative">
+                                    <router-link to="/purchases/invoices"
+                                        :class="[$route.path.includes('/purchases/invoices') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
+                                        فواتير المبيعات</router-link>
+                                    <span
+                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
+                                </li>
+                                <li class="relative">
+                                    <router-link to="/purchases/orders"
+                                        :class="[$route.path.includes('/purchases/orders') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
+                                        طلبات المشتريات</router-link>
+                                    <span
+                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
+                                </li>
+                                <li class="relative">
+                                    <router-link to="/purchases/contracts"
+                                        :class="[$route.path.includes('/purchases/contracts') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
+                                        العقود</router-link>
+                                    <span
+                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
+                                </li>
+                            </ul>
+                        </div>
+                    </v-list-group>
+
+                    <!-- المالية -->
+                    <v-list-group value="finance" class="mt-1">
+                        <template #activator="{ props, isOpen }">
+                            <v-list-item v-bind="props" :class="{ '!mx-1 gap-5': !isSidebarExpanded }"
+                                class="px-2 py-1.5 mx-4 rounded-lg hover:bg-primary-700/40 text-white flex items-center justify-between gap-2">
+                                <template #append>
+                                    <v-icon size="20"
+                                        :class="['ms-auto transition-transform', isOpen ? 'rotate-180' : '']">mdi-chevron-down</v-icon>
+                                </template>
+                                <template #title>
+                                    <div class="flex-1"><span class="font-semibold">المالية</span></div>
+                                </template>
+                                <template #prepend>
+                                    <div
+                                        class="bg-qallab-yellow text-white rounded-md w-6 h-6 flex items-center justify-center">
+                                        <span v-html="financeIcon"></span>
+                                    </div>
+                                </template>
+                            </v-list-item>
                         </template>
-                    </v-list-item>
-                    <div class="px-3 my-3">
-                        <v-divider opacity=".25" thickness="2" color="white"></v-divider>
-
-                    </div>
-
-                    <div class="px-4 pb-1 text-xs text-primary-200"
-                        :class="{ '!px-1 text-center': !isSidebarExpanded }">
-                        الإعدادات
-                    </div>
-
-                    <v-list-item value="users" :class="{ '!mx-1 gap-5': !isSidebarExpanded }"
-                        class="mx-4 px-2 py-1.5 rounded-lg hover:bg-primary-700/40 transition text-white flex items-center justify-start gap-2">
-                        <template #title>
-                            إدارة المستخدمين
-                        </template>
-                        <template #prepend>
+                        <div class="relative mt-3 ps-15 pe-4 text-sm">
                             <div
-                                class="bg-qallab-yellow text-white rounded-lg w-8 h-8 flex items-center justify-center ">
-                                <v-icon size="20">mdi-account-outline</v-icon>
+                                class="absolute top-1 bottom-1 right-[30px] border-r-2 border-dotted border-white -translate-y-3 h-[100.5%]">
                             </div>
-                        </template>
-                    </v-list-item>
+                            <ul class="space-y-2">
+                                <li class="relative">
+                                    <router-link to="/finance/payment-vouchers"
+                                        :class="[$route.path.includes('/finance/payment-vouchers') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
+                                        سندات الصرف</router-link>
+                                    <span
+                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
+                                </li>
+                                <li class="relative">
+                                    <router-link to="/finance/receipt-vouchers"
+                                        :class="[$route.path.includes('/finance/receipt-vouchers') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
+                                        سندات القبض</router-link>
+                                    <span
+                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
+                                </li>
+                            </ul>
+                        </div>
+                    </v-list-group>
 
-                    <v-list-item value="language" :class="{ '!mx-1 gap-5': !isSidebarExpanded }"
-                        class="mx-4 px-2 py-1.5 rounded-lg hover:bg-primary-700/40 transition text-white flex items-center justify-start gap-2">
-                        <template #title>
-                            اللغة
+                    <!-- المستخدمين -->
+                    <v-list-group value="users" class="mt-1">
+                        <template #activator="{ props, isOpen }">
+                            <v-list-item v-bind="props" :class="{ '!mx-1 gap-5': !isSidebarExpanded }"
+                                class="px-2 py-1.5 mx-4 rounded-lg hover:bg-primary-700/40 text-white flex items-center justify-between gap-2">
+                                <template #append>
+                                    <v-icon size="20"
+                                        :class="['ms-auto transition-transform', isOpen ? 'rotate-180' : '']">mdi-chevron-down</v-icon>
+                                </template>
+                                <template #title>
+                                    <div class="flex-1"><span class="font-semibold">المستخدمين</span></div>
+                                </template>
+                                <template #prepend>
+                                    <div
+                                        class="bg-qallab-yellow text-white rounded-md w-6 h-6 flex items-center justify-center">
+                                        <span v-html="usersIcon"></span>
+                                    </div>
+                                </template>
+                            </v-list-item>
                         </template>
-                        <template #prepend>
+                        <div class="relative mt-3 ps-15 pe-4 text-sm">
                             <div
-                                class="bg-qallab-yellow text-white rounded-lg w-8 h-8 flex items-center justify-center ">
-                                <v-icon size="20">mdi-web</v-icon>
+                                class="absolute top-1 bottom-1 right-[30px] border-r-2 border-dotted border-white -translate-y-3 h-[100.5%]">
                             </div>
+                            <ul class="space-y-2">
+                                <li class="relative">
+                                    <router-link to="/users/list"
+                                        :class="[$route.path.includes('/users/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">المستخدمين</router-link>
+                                    <span
+                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
+                                </li>
+                                <li class="relative">
+                                    <router-link to="/users/roles"
+                                        :class="[$route.path.includes('/users/roles') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">الأدوار
+                                        والصلاحيات</router-link>
+                                    <span
+                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
+                                </li>
+                            </ul>
+                        </div>
+                    </v-list-group>
+
+                    <!-- اللوجستيات -->
+                    <v-list-group value="logistics" class="mt-1">
+                        <template #activator="{ props, isOpen }">
+                            <v-list-item v-bind="props" :class="{ '!mx-1 gap-5': !isSidebarExpanded }"
+                                class="px-2 py-1.5 mx-4 rounded-lg hover:bg-primary-700/40 text-white flex items-center justify-between gap-2">
+                                <template #append>
+                                    <v-icon size="20"
+                                        :class="['ms-auto transition-transform', isOpen ? 'rotate-180' : '']">mdi-chevron-down</v-icon>
+                                </template>
+                                <template #title>
+                                    <div class="flex-1"><span class="font-semibold">اللوجستيات</span></div>
+                                </template>
+                                <template #prepend>
+                                    <div
+                                        class="bg-qallab-yellow text-white rounded-md w-6 h-6 flex items-center justify-center">
+                                        <span v-html="logisticsIcon"></span>
+                                    </div>
+                                </template>
+                            </v-list-item>
                         </template>
-                    </v-list-item>
+                        <div class="relative mt-3 ps-15 pe-4 text-sm">
+                            <div
+                                class="absolute top-1 bottom-1 right-[30px] border-r-2 border-dotted border-white -translate-y-3 h-[100.5%]">
+                            </div>
+                            <ul class="space-y-2">
+                                <li class="relative">
+                                    <router-link to="/logistics/transport-orders"
+                                        :class="[$route.path.includes('/logistics/transport-orders') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">طلبات
+                                        النقل</router-link>
+                                    <span
+                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
+                                </li>
+                                <li class="relative">
+                                    <router-link to="/logistics/transport-invoices"
+                                        :class="[$route.path.includes('/logistics/transport-invoices') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">فواتير
+                                        النقل</router-link>
+                                    <span
+                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
+                                </li>
+                            </ul>
+                        </div>
+                    </v-list-group>
+
+                    <!-- التقارير -->
+                    <v-list-group value="reports" class="mt-1">
+                        <template #activator="{ props, isOpen }">
+                            <v-list-item v-bind="props" :class="{ '!mx-1 gap-5': !isSidebarExpanded }"
+                                class="px-2 py-1.5 mx-4 rounded-lg hover:bg-primary-700/40 text-white flex items-center justify-between gap-2">
+                                <template #append>
+                                    <v-icon size="20"
+                                        :class="['ms-auto transition-transform', isOpen ? 'rotate-180' : '']">mdi-chevron-down</v-icon>
+                                </template>
+                                <template #title>
+                                    <div class="flex-1"><span class="font-semibold">التقارير</span></div>
+                                </template>
+                                <template #prepend>
+                                    <div
+                                        class="bg-qallab-yellow text-white rounded-md w-6 h-6 flex items-center justify-center">
+                                        <span v-html="reportsIcon"></span>
+                                    </div>
+                                </template>
+                            </v-list-item>
+                        </template>
+                        <div class="relative mt-3 ps-15 pe-4 text-sm">
+                            <div
+                                class="absolute top-1 bottom-1 right-[30px] border-r-2 border-dotted border-white -translate-y-3 h-[100.5%]">
+                            </div>
+                            <ul class="space-y-2">
+                                <li class="relative">
+                                    <router-link to="/reports/sales"
+                                        :class="[$route.path.includes('/reports/sales') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">تقارير
+                                        المبيعات</router-link>
+                                    <span
+                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
+                                </li>
+                                <li class="relative">
+                                    <router-link to="/reports/purchases"
+                                        :class="[$route.path.includes('/reports/purchases') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">تقارير
+                                        المشتريات</router-link>
+                                    <span
+                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
+                                </li>
+                            </ul>
+                        </div>
+                    </v-list-group>
+
+                    <!-- الإعدادات -->
+                    <v-list-group value="settings" class="mt-1">
+                        <template #activator="{ props, isOpen }">
+                            <v-list-item v-bind="props" :class="{ '!mx-1 gap-5': !isSidebarExpanded }"
+                                class="px-2 py-1.5 mx-4 rounded-lg hover:bg-primary-700/40 text-white flex items-center justify-between gap-2">
+                                <template #append>
+                                    <v-icon size="20"
+                                        :class="['ms-auto transition-transform', isOpen ? 'rotate-180' : '']">mdi-chevron-down</v-icon>
+                                </template>
+                                <template #title>
+                                    <div class="flex-1"><span class="font-semibold">الإعدادات</span></div>
+                                </template>
+                                <template #prepend>
+                                    <div
+                                        class="bg-qallab-yellow text-white rounded-md w-6 h-6 flex items-center justify-center">
+                                        <span v-html="settingsIcon"></span>
+                                    </div>
+                                </template>
+                            </v-list-item>
+                        </template>
+                        <div class="relative mt-3 ps-15 pe-4 text-sm">
+                            <div
+                                class="absolute top-1 bottom-1 right-[30px] border-r-2 border-dotted border-white -translate-y-3 h-[100.5%]">
+                            </div>
+                            <ul class="space-y-2">
+                                <li class="relative">
+                                    <router-link to="/settings/countries-cities"
+                                        :class="[$route.path.includes('/settings/countries-cities') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">الدول
+                                        والمدن</router-link>
+                                    <span
+                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
+                                </li>
+                                <li class="relative">
+                                    <router-link to="/settings/categories"
+                                        :class="[$route.path.includes('/settings/categories') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">التصنيفات</router-link>
+                                    <span
+                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
+                                </li>
+                            </ul>
+                        </div>
+                    </v-list-group>
                 </v-list>
             </div>
 
@@ -327,6 +547,19 @@
 
 <script setup>
 import { computed, ref } from "vue";
+import {
+    homeIcon,
+    productsIcon,
+    servicesIcon,
+    salesIcon,
+    projectsIcon,
+    purchasesIcon,
+    financeIcon,
+    usersIcon,
+    logisticsIcon,
+    reportsIcon,
+    settingsIcon
+} from "@/components/icons/sidebarIcons";
 
 const props = defineProps({
     modelValue: {
