@@ -4,20 +4,36 @@ export const productsRoutes: RouteRecordRaw[] = [
   {
     path: '/products',
     name: 'Products',
-    redirect: '/products/price-list',
+    redirect: '/products/list',
     children: [
       {
-        path: 'price-list',
+        path: 'prices-list',
         name: 'ProductsPriceList',
-        component: () => import('@/views/price-lists/PriceList.vue'),
+        component: () => import('@/views/products/price-lists/List.vue'),
         meta: {
           title: 'pages.priceLists.title',
         },
       },
       {
-        path: 'production-capacity',
-        name: 'ProductsProductionCapacity',
-        component: () => import('@/views/production-capacity/ProductionCapacity.vue'),
+        path: 'price-list-edit',
+        name: 'ProductPriceListEdit',
+        component: () => import('@/views/products/price-lists/Form.vue'),
+        meta: {
+          title: 'pages.priceList.title',
+        },
+      },
+      {
+        path: 'production-capacity-list',
+        name: 'ProductsProductionCapacityList',
+        component: () => import('@/views/products/production-capacity/List.vue'),
+        meta: {
+          title: 'pages.productionCapacity.title',
+        },
+      },
+      {
+        path: 'production-capacity-edit',
+        name: 'ProductsProductionCapacityEdit',
+        component: () => import('@/views/products/production-capacity/Form.vue'),
         meta: {
           title: 'pages.productionCapacity.title',
         },

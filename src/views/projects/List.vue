@@ -165,24 +165,25 @@ const handleSelectAllProjects = (checked: boolean) => {
     }
 };
 
+const getStatusClass = (status: string) => {
+    switch (status) {
+        case 'مكتمل':
+            return 'bg-[#ECFDF3] text-[#027A48]';
+        case 'قيد المراجعة':
+            return 'bg-[#FEF0C7] text-[#DC6803]';
+        case 'تأكيد':
+            return 'bg-[#F2F4F7] text-[#344054]';
+        case 'الغاء':
+            return 'bg-[#FEE4E2] text-[#D92D20]';
+        default:
+            return 'bg-[#F2F4F7] text-[#344054]';
+    }
+};
+
 const openCreateProject = () => {
     router.push({ name: "ProjectsCreate" });
 };
 
-const getStatusClass = (status: string) => {
-    switch (status) {
-        case 'مكتمل':
-            return 'bg-success-50 text-success-700';
-        case 'قيد المراجعة':
-            return 'bg-warning-50 text-warning-700';
-        case 'تأكيد':
-            return 'bg-gray-100 text-gray-700';
-        case 'الغاء':
-            return 'bg-error-50 text-error-700';
-        default:
-            return 'bg-gray-100 text-gray-700';
-    }
-};
 </script>
 
 <template>
@@ -238,21 +239,17 @@ const getStatusClass = (status: string) => {
                             </template>
                             الأعمدة
                         </v-btn>
-
-                        <v-btn variant="outlined" color="gray-500" height="40"
-                            class="font-semibold text-base border-gray-400"
-                            @click="toggleAdvancedFilters">
-                            <template #prepend>
-                                <span v-html="filterIcon"></span>
-                            </template>
-                            فلتر متقدم
-                        </v-btn>
-
                         <v-btn variant="outlined" color="primary-50" height="40"
                             class="px-7 font-semibold text-base text-primary-700" prepend-icon="mdi-magnify"
                             @click="toggleAdvancedFilters">
                             بحث متقدم
                         </v-btn>
+
+                        <v-btn variant="flat" color="primary" height="40" class="px-7 font-semibold text-base"
+                            prepend-icon="mdi-plus-circle-outline" @click="openCreateProject">
+                            أضف مشروع
+                        </v-btn>
+
                     </div>
                 </div>
 
@@ -292,7 +289,7 @@ const getStatusClass = (status: string) => {
                 <DataTable :headers="tableHeaders" :items="tableItems" show-checkbox show-actions @edit="handleEdit"
                     @delete="handleDelete" @select="handleSelectProject" @selectAll="handleSelectAllProjects">
                     <template #item.status="{ item }">
-                        <span :class="['px-3 py-1 rounded-full text-sm font-medium', getStatusClass(item.status)]">
+                        <span :class="['inline-block px-4 py-1 rounded-full text-sm font-medium', getStatusClass(item.status)]">
                             {{ item.status }}
                         </span>
                     </template>

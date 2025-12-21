@@ -87,6 +87,18 @@
     "productionCapacity": {
       "title": "القدرة الإنتاجية",
       "description": "تمكنك من إدارة القدرة الإنتاجية للمنتجات"
+    },
+    "services": {
+      "title": "الخدمات",
+      "description": "تمكنك من إدارة الخدمات"
+    },
+    "servicesPrices": {
+      "title": "قوائم الأسعار",
+      "description": "تمكنك من ادارة أسعار الخدمات"
+    },
+    "servicesSettings": {
+      "title": "إعدادات الخدمات",
+      "description": "تمكنك من ادارة إعدادات الخدمات"
     }
   }
 }

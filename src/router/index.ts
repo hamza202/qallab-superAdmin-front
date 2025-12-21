@@ -14,6 +14,7 @@ import { customersRoutes } from "./modules/customers.routes";
 import { projectsRoutes } from "./modules/projects.routes";
 import { authRoutes } from "./modules/auth.routes";
 import { errorRoutes } from "./modules/errors.routes";
+import { servicesRoutes } from "./modules/services.routes";
 
 const routes: RouteRecordRaw[] = [
   ...dashboardRoutes,
@@ -26,7 +27,7 @@ const routes: RouteRecordRaw[] = [
   ...customersRoutes,
   ...projectsRoutes,
   ...errorRoutes,
-
+  ...servicesRoutes,
   {
     path: "/form-and-validation",
     name: "FormAndValidation",

@@ -68,15 +68,15 @@
                                         class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
                                 </li>
                                 <li class="relative">
-                                    <router-link to="/products/price-list"
-                                        :class="[$route.path.includes('/products/price-list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">قائمة
+                                    <router-link to="/products/prices-list"
+                                        :class="[$route.path.includes('/products/prices-list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">قائمة
                                         الأسعار</router-link>
                                     <span
                                         class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
                                 </li>
                                 <li class="relative">
-                                    <router-link to="/products/production-capacity"
-                                        :class="[$route.path.includes('/products/production-capacity') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">القدرة
+                                    <router-link to="/products/production-capacity-list"
+                                        :class="[$route.path.includes('/products/production-capacity-list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">القدرة
                                         الإنتاجية</router-link>
                                     <span
                                         class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
@@ -125,8 +125,8 @@
                                         class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
                                 </li>
                                 <li class="relative">
-                                    <router-link to="/services/price-list"
-                                        :class="[$route.path.includes('/services/price-list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">قوائم
+                                    <router-link to="/services/prices-list"
+                                        :class="[$route.path.includes('/services/prices-list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">قوائم
                                         الأسعار</router-link>
                                     <span
                                         class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
@@ -232,8 +232,8 @@
                             </div>
                             <ul class="space-y-2">
                                 <li class="relative">
-                                    <router-link to="/projects/management"
-                                        :class="[$route.path.includes('/projects/management') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
+                                    <router-link to="/projects/list"
+                                        :class="[$route.path.includes('/projects/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
                                         المشاريع</router-link>
                                     <span
                                         class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
@@ -503,15 +503,15 @@
                             </div>
                             <ul class="space-y-2">
                                 <li class="relative">
-                                    <router-link to="/settings/countries-cities"
-                                        :class="[$route.path.includes('/settings/countries-cities') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">الدول
+                                    <router-link to="/cities/list"
+                                        :class="[$route.path.includes('/cities/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">الدول
                                         والمدن</router-link>
                                     <span
                                         class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
                                 </li>
                                 <li class="relative">
-                                    <router-link to="/settings/categories"
-                                        :class="[$route.path.includes('/settings/categories') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">التصنيفات</router-link>
+                                    <router-link to="/categories/list"
+                                        :class="[$route.path.includes('/categories/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">التصنيفات</router-link>
                                     <span
                                         class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
                                 </li>
