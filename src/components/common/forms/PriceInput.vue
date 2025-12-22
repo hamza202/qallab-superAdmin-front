@@ -32,10 +32,11 @@ interface PriceInputProps {
     inputProps?: Record<string, any>;
     labelClass?: string;
     showCurrencyOnLeft?: boolean;
+    keepCurrencyVisible?: boolean;
 }
 
 const props = withDefaults(defineProps<PriceInputProps>(), {
-    currency: "$",
+    currency: '',
     color: "primary-300",
     bgColor: "#FFF",
     density: "comfortable" as Density,
@@ -43,6 +44,7 @@ const props = withDefaults(defineProps<PriceInputProps>(), {
     inputProps: () => ({}),
     labelClass: "",
     showCurrencyOnLeft: false,
+    keepCurrencyVisible: false,
     placeholder: "ادخل السعر",
 });
 
@@ -63,25 +65,19 @@ const internalValue = computed({
             {{ label }}
         </label>
 
-        <v-text-field
-            v-model="internalValue"
-            type="number"
-            :placeholder="placeholder"
-            variant="outlined"
-            :color="color"
-            :density="density"
-            :disabled="disabled"
-            :readonly="readonly"
-            :clearable="clearable"
-            :rules="rules"
-            :hide-details="hideDetails"
-            :hint="hint"
-            :persistent-hint="persistentHint"
-            :prefix="showCurrencyOnLeft ? currency : undefined"
-            :suffix="!showCurrencyOnLeft ? currency : undefined"
-            v-bind="inputProps"
-            class="price-input"
-        />
+        <v-text-field v-model="internalValue" type="number" :placeholder="placeholder" variant="outlined" :color="color"
+            :density="density" :disabled="disabled" :readonly="readonly" :clearable="clearable" :rules="rules"
+            :hide-details="hideDetails" :hint="hint" :persistent-hint="persistentHint"
+            :prefix="!keepCurrencyVisible && showCurrencyOnLeft ? currency : undefined"
+            :suffix="!keepCurrencyVisible && !showCurrencyOnLeft ? currency : undefined" v-bind="inputProps"
+            class="price-input">
+            <template v-if="keepCurrencyVisible && currency && showCurrencyOnLeft" #prepend-inner>
+                <span class="text-xs text-gray-500">{{ currency }}</span>
+            </template>
+            <template v-if="keepCurrencyVisible && currency && !showCurrencyOnLeft" #append-inner>
+                <span class="text-xs text-gray-500">{{ currency }}</span>
+            </template>
+        </v-text-field>
     </div>
 </template>
 

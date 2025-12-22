@@ -11,6 +11,12 @@
     "confirm": "Confirm",
     "yes": "Yes",
     "no": "No",
-    "actions": "Actions"
+    "actions": "Actions",
+    "deleteConfirm": {
+      "title": "Delete confirmation",
+      "message": "Are you sure you want to delete",
+      "confirm": "Delete",
+      "cancel": "Cancel"
+    }
   }
 }

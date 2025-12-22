@@ -1040,44 +1040,21 @@ const categoriesIcon = `<svg width="52" height="52" viewBox="0 0 52 52" fill="no
       </v-form>
     </div>
     <!-- Delete Confirmation Dialog -->
-    <v-dialog v-model="showDeleteDialog" max-width="400" persistent>
-      <v-card class="rounded-xl">
-        <v-card-title class="text-h6 font-bold text-error-700 pt-6 px-6">
-          <v-icon color="error" class="me-2">mdi-alert-circle-outline</v-icon>
-          تأكيد الحذف
-        </v-card-title>
-        <v-card-text class="px-6 py-4">
-          <p class="text-gray-700">
-            هل أنت متأكد من حذف التصنيف 
-            <strong class="text-primary-700">{{ selectedCategory?.name }}</strong>؟
-          </p>
-          <p v-if="selectedCategory?.children?.length" class="text-error-600 text-sm mt-2">
-            <v-icon size="16" class="me-1">mdi-information-outline</v-icon>
-            سيتم حذف جميع التصنيفات الفرعية المرتبطة بهذا التصنيف.
-          </p>
-        </v-card-text>
-        <v-card-actions class="px-6 pb-6">
-          <v-spacer />
-          <v-btn
-            variant="flat"
-            color="primary-100"
-            class="text-primary-700 font-semibold"
-            @click="showDeleteDialog = false"
-          >
-            إلغاء
-          </v-btn>
-          <v-btn
-            variant="flat"
-            color="error"
-            class="font-semibold"
-            :loading="isDeleting"
-            @click="confirmDelete"
-          >
-            حذف
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+    <DeleteConfirmDialog
+      v-model="showDeleteDialog"
+      :loading="isDeleting"
+      :persistent="true"
+      @confirm="confirmDelete"
+    >
+      <p class="text-gray-700 text-center">
+        هل أنت متأكد من حذف التصنيف
+        <strong class="text-primary-700">{{ selectedCategory?.name }}</strong>؟
+      </p>
+      <p v-if="selectedCategory?.children?.length" class="text-error-600 text-sm mt-2 text-center">
+        <v-icon size="16" class="me-1">mdi-information-outline</v-icon>
+        سيتم حذف جميع التصنيفات الفرعية المرتبطة بهذا التصنيف.
+      </p>
+    </DeleteConfirmDialog>
 
     <!-- Notification Snackbar -->
     <v-snackbar

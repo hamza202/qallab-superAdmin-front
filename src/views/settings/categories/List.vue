@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref, computed } from "vue";
 
 const categoriesIcon = `<svg width="52" height="52" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path fill-rule="evenodd" clip-rule="evenodd" d="M32.8498 26H36.4835C37.6257 26 38.611 25.9999 39.4226 26.0662C40.2791 26.1362 41.1311 26.2907 41.9509 26.7085C43.174 27.3316 44.1684 28.326 44.7915 29.5491C45.2093 30.3689 45.3638 31.2209 45.4338 32.0774C45.5001 32.889 45.5 33.8743 45.5 35.0164V36.4836C45.5 37.6257 45.5001 38.611 45.4338 39.4226C45.3638 40.2791 45.2093 41.1311 44.7915 41.9509C44.1684 43.174 43.174 44.1684 41.9509 44.7915C41.1311 45.2093 40.2791 45.3638 39.4226 45.4338C38.611 45.5001 37.6256 45.5 36.4835 45.5H32.8499C31.7077 45.5 30.7224 45.5001 29.9108 45.4338C29.0542 45.3638 28.2022 45.2093 27.3824 44.7915C26.1593 44.1684 25.165 43.174 24.5418 41.9509C24.1241 41.1311 23.9696 40.2791 23.8996 39.4226C23.8333 38.611 23.8333 37.6257 23.8333 36.4835V35.0165C23.8333 33.8743 23.8333 32.889 23.8996 32.0774C23.9696 31.2209 24.1241 30.3689 24.5418 29.5491C25.165 28.326 26.1593 27.3316 27.3824 26.7085C28.2022 26.2907 29.0542 26.1362 29.9108 26.0662C30.7223 25.9999 31.7077 26 32.8498 26ZM30.2636 30.3852C29.675 30.4333 29.4568 30.5149 29.3497 30.5695C28.942 30.7772 28.6105 31.1087 28.4028 31.5164C28.3482 31.6235 28.2666 31.8417 28.2185 32.4303C28.1684 33.0442 28.1667 33.8508 28.1667 35.1V36.4C28.1667 37.6492 28.1684 38.4558 28.2185 39.0697C28.2666 39.6583 28.3482 39.8765 28.4028 39.9836C28.6105 40.3913 28.942 40.7228 29.3497 40.9305C29.4568 40.9851 29.675 41.0667 30.2636 41.1148C30.8775 41.165 31.6841 41.1667 32.9333 41.1667H36.4C37.6492 41.1667 38.4558 41.165 39.0697 41.1148C39.6583 41.0667 39.8765 40.9851 39.9836 40.9305C40.3913 40.7228 40.7228 40.3913 40.9305 39.9836C40.9851 39.8765 41.0667 39.6583 41.1148 39.0697C41.165 38.4558 41.1667 37.6492 41.1667 36.4V35.1C41.1667 33.8508 41.165 33.0442 41.1148 32.4303C41.0667 31.8417 40.9851 31.6235 40.9305 31.5164C40.7228 31.1087 40.3913 30.7772 39.9836 30.5695C39.8765 30.5149 39.6583 30.4333 39.0697 30.3852C38.4558 30.335 37.6492 30.3333 36.4 30.3333H32.9333C31.6841 30.3333 30.8775 30.335 30.2636 30.3852Z" fill="#1570EF"/>
@@ -12,12 +13,7 @@ const editIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none" xm
 </svg>
 `
 
-const deleteIcon = `
-<svg width="19" height="15" viewBox="0 0 19 15" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M13.1247 5.00065L8.12467 10.0007M8.12467 5.00065L13.1247 10.0007M1.22467 8.30065L4.82467 13.1007C5.11801 13.4918 5.26467 13.6873 5.45055 13.8284C5.61518 13.9533 5.8016 14.0465 6.00032 14.1032C6.22468 14.1673 6.46912 14.1673 6.95801 14.1673H13.2913C14.6915 14.1673 15.3915 14.1673 15.9263 13.8948C16.3967 13.6552 16.7792 13.2727 17.0189 12.8023C17.2913 12.2675 17.2913 11.5674 17.2913 10.1673V4.83398C17.2913 3.43385 17.2913 2.73379 17.0189 2.19901C16.7792 1.7286 16.3967 1.34615 15.9263 1.10647C15.3915 0.833984 14.6915 0.833984 13.2913 0.833984H6.95801C6.46912 0.833984 6.22468 0.833984 6.00032 0.89806C5.8016 0.954812 5.61518 1.04802 5.45055 1.17294C5.26467 1.31399 5.11801 1.50954 4.82467 1.90065L1.22467 6.70065C1.00951 6.98753 0.901932 7.13097 0.860462 7.28851C0.823856 7.42757 0.823856 7.57373 0.860462 7.71279C0.901932 7.87033 1.00951 8.01377 1.22467 8.30065Z" stroke="#B42318" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>
-`
-// Units table data
+// Table data
 const taxTableHeaders = [
     { key: "id", title: "#", width: "60px" },
     { key: "name", title: "الاسم", width: "176px" },
@@ -50,6 +46,65 @@ const handleDeleteTax = (item: any) => {
     taxTableItems.value = taxTableItems.value.filter((t) => t.id !== item.id);
 };
 
+// Selection and filters (similar to cities page)
+const selectedCategoryIds = ref<(string | number)[]>([]);
+
+const showAdvancedFilters = ref(false);
+
+const filterName = ref("");
+const filterStatus = ref<string | null>(null);
+
+const handleSelectCategory = (item: any, selected: boolean) => {
+    if (selected) {
+        if (!selectedCategoryIds.value.includes(item.id)) {
+            selectedCategoryIds.value.push(item.id);
+        }
+    } else {
+        selectedCategoryIds.value = selectedCategoryIds.value.filter((id) => id !== item.id);
+    }
+};
+
+const handleSelectAllCategories = (selected: boolean) => {
+    if (selected) {
+        selectedCategoryIds.value = taxTableItems.value.map((item) => item.id);
+    } else {
+        selectedCategoryIds.value = [];
+    }
+};
+
+const hasSelectedCategories = computed(() => selectedCategoryIds.value.length > 0);
+
+const toggleAdvancedFilters = () => {
+    showAdvancedFilters.value = !showAdvancedFilters.value;
+};
+
+const resetFilters = () => {
+    filterName.value = "";
+    filterStatus.value = null;
+};
+
+const columnIcon = `<svg width="16" height="17" viewBox="0 0 16 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path
+    d="M6 13.5V3.5C6 2.72343 6 2.33515 5.87313 2.02886C5.70398 1.62048 5.37952 1.29602 4.97114 1.12687C4.66485 1 4.27657 1 3.5 1C2.72343 1 2.33515 1 2.02886 1.12687C1.62048 1.29602 1.29602 1.62048 1.12687 2.02886C1 2.33515 1 2.72343 1 3.5V13.5C1 14.2766 1 14.6649 1.12687 14.9711C1.29602 15.3795 1.62048 15.704 2.02886 15.8731C2.33515 16 2.72343 16 3.5 16C4.27657 16 4.66485 16 4.97114 15.8731C5.37952 15.704 5.70398 15.3795 5.87313 14.9711C6 14.6649 6 14.2766 6 13.5Z"
+    stroke="#697586" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+  <path
+    d="M14.3333 10.1667V3.5C14.3333 2.72343 14.3333 2.33515 14.2065 2.02886C14.0373 1.62048 13.7129 1.29602 13.3045 1.12687C12.9982 1 12.6099 1 11.8333 1C11.0568 1 10.6685 1 10.3622 1.12687C9.95381 1.29602 9.62936 1.62048 9.4602 2.02886C9.33333 2.33515 9.33333 2.72343 9.33333 3.5V10.1667C9.33333 10.9432 9.33333 11.3315 9.4602 11.6378C9.62936 12.0462 9.95381 12.3706 10.3622 12.5398C10.6685 12.6667 11.0568 12.6667 11.8333 12.6667C12.6099 12.6667 12.9982 12.6667 13.3045 12.5398C13.7129 12.3706 14.0373 12.0462 14.2065 11.6378C14.3333 11.3315 14.3333 10.9432 14.3333 10.1667Z"
+    stroke="#697586" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+</svg>`;
+
+
+const trash_1_icon = `<svg width="17" height="19" viewBox="0 0 17 19" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M11.5833 4.08333V3.41667C11.5833 2.48325 11.5833 2.01654 11.4017 1.66002C11.2419 1.34641 10.9869 1.09144 10.6733 0.931656C10.3168 0.75 9.85009 0.75 8.91667 0.75H7.58333C6.64991 0.75 6.1832 0.75 5.82668 0.931656C5.51308 1.09144 5.25811 1.34641 5.09832 1.66002C4.91667 2.01654 4.91667 2.48325 4.91667 3.41667V4.08333M0.75 4.08333H15.75M14.0833 4.08333V13.4167C14.0833 14.8168 14.0833 15.5169 13.8108 16.0516C13.5712 16.522 13.1887 16.9045 12.7183 17.1442C12.1835 17.4167 11.4835 17.4167 10.0833 17.4167H6.41667C5.01654 17.4167 4.31647 17.4167 3.78169 17.1442C3.31129 16.9045 2.92883 16.522 2.68915 16.0516C2.41667 15.5169 2.41667 14.8168 2.41667 13.4167V4.08333" stroke="#D92D20" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+`
+const trash_2_icon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M5.75 0.75H10.75M0.75 3.25H15.75M14.0833 3.25L13.4989 12.0161C13.4112 13.3313 13.3674 13.9889 13.0833 14.4875C12.8333 14.9265 12.456 15.2794 12.0014 15.4997C11.485 15.75 10.8259 15.75 9.50779 15.75H6.99221C5.67409 15.75 5.01503 15.75 4.49861 15.4997C4.04396 15.2794 3.66674 14.9265 3.41665 14.4875C3.13259 13.9889 3.08875 13.3313 3.00107 12.0161L2.41667 3.25M6.58333 7V11.1667M9.91667 7V11.1667" stroke="#D92D20" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+`
+const exportIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M4.16732 7.50065C3.39234 7.50065 3.00485 7.50065 2.68694 7.58584C1.82421 7.817 1.15034 8.49087 0.91917 9.3536C0.833984 9.67152 0.833984 10.059 0.833984 10.834V11.834C0.833984 13.2341 0.833984 13.9342 1.10647 14.469C1.34615 14.9394 1.7286 15.3218 2.19901 15.5615C2.73379 15.834 3.43385 15.834 4.83398 15.834H11.834C13.2341 15.834 13.9342 15.834 14.469 15.5615C14.9394 15.3218 15.3218 14.9394 15.5615 14.469C15.834 13.9342 15.834 13.2341 15.834 11.834V10.834C15.834 10.059 15.834 9.67152 15.7488 9.3536C15.5176 8.49087 14.8438 7.817 13.981 7.58584C13.6631 7.50065 13.2756 7.50065 12.5007 7.50065M11.6673 4.16732L8.33398 0.833984M8.33398 0.833984L5.00065 4.16732M8.33398 0.833984V10.834" stroke="#194185" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+`
 
 </script>
 
@@ -58,56 +113,97 @@ const handleDeleteTax = (item: any) => {
         <div class="categories-page">
             <PageHeader :icon="categoriesIcon" title-key="pages.categories.title"
                 description-key="pages.categories.description" />
-            <div class="bg-gray-50 rounded-md p-4 sm:p-6">
-                <div class="flex gap-1 items-cenetr justify-between flex-wrap">
+            <div class="flex justify-end pb-2">
+                <v-btn variant="outlined" height="40"
+                    class="font-semibold text-base border-gray-300 bg-primary-50 !text-primary-900">
+                    <template #prepend>
+                        <span v-html="exportIcon"></span>
+                    </template>
+                    تصدير
+                </v-btn>
+
+            </div>
+
+            <div class="bg-gray-50 rounded-md -mx-6">
+                <div :class="hasSelectedCategories ? 'justify-between' : 'justify-end'"
+                    class="flex flex-wrap items-center gap-3 border-y border-y-slate-300 px-4 sm:!px-6 py-3">
+                    <!-- Actions when rows are selected -->
+                    <div v-if="hasSelectedCategories"
+                        class="flex flex-wrap items-stretch rounded-lg overflow-hidden border border-gray-200 bg-white text-sm">
+                        <v-btn class="px-4 font-semibold text-primary-600 hover:bg-primary-50 !rounded-none">
+                            <template #prepend>
+                                <span v-html="editIcon"></span>
+                            </template>
+                            <span>تعديل</span>
+                        </v-btn>
+                        <div class="w-px bg-gray-200"></div>
+                        <v-btn class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none">
+                            <template #prepend>
+                                <span v-html="trash_1_icon"></span>
+                            </template>
+                            <span>حذف</span>
+                        </v-btn>
+                        <div class="w-px bg-gray-200"></div>
+                        <v-btn class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none">
+                            <template #prepend>
+                                <span v-html="trash_2_icon"></span>
+                            </template>
+                            <span>حذف الجميع</span>
+                        </v-btn>
+                    </div>
+
+                    <!-- Main header controls -->
                     <div class="flex flex-wrap gap-3">
-                        <!-- Save/Apply Button -->
+                        <v-btn variant="outlined" append-icon="mdi-chevron-down" color="gray-500" height="40"
+                            class="font-semibold text-base border-gray-400">
+                            <template #prepend>
+                                <span v-html="columnIcon"></span>
+                            </template>
+                            الأعمدة
+                        </v-btn>
+
+                        <v-btn variant="outlined" color="primary-50" height="40"
+                            class="px-7 font-semibold text-base text-primary-700" prepend-icon="mdi-magnify"
+                            @click="toggleAdvancedFilters">
+                            بحث متقدم
+                        </v-btn>
+
                         <router-link to="/categories/create">
-                            <v-btn variant="flat" color="primary" height="48" class="px-7 font-semibold text-base"
+                            <v-btn variant="flat" color="primary" height="40" class="px-7 font-semibold text-base"
                                 prepend-icon="mdi-plus-circle-outline">
                                 اضف جديد
                             </v-btn>
                         </router-link>
-
-                        <!-- Close/Cancel Button -->
-                        <v-btn variant="flat" color="primary-50" height="48"
-                            class="px-7 font-semibold text-base text-primary-700">
-                            <template #prepend>
-                                <span v-html="editIcon"></span>
-                            </template>
-                            تعديل
-                        </v-btn>
-
-                        <!-- Delete Button - only visible when editing -->
-                        <v-btn variant="flat" color="error-50" height="48"
-                            class="px-7 font-semibold text-base text-error-700">
-                            <template #prepend>
-                                <span v-html="deleteIcon"></span>
-                            </template>
-                            حذف
-                        </v-btn>
-
-                    </div>
-
-                    <div class="flex flex-wrap gap-3">
-                        <!-- Export Button -->
-                        <v-btn variant="outlined" color="gray-700" height="48"
-                            class="px-7 font-semibold text-base bg-white border-gray-300" prepend-icon="mdi-upload">
-                            تصدير
-                        </v-btn>
-
-                        <!-- Columns Button -->
-                        <v-btn variant="flat" color="primary-50" height="48"
-                            class="px-7 font-semibold text-base text-primary-700"
-                            prepend-icon="mdi-plus-circle-outline">
-                            الأعمدة
-                        </v-btn>
-
                     </div>
                 </div>
-                <!-- Tax Table -->
-                <DataTable title="قائمة التصنيفات" :headers="taxTableHeaders" :items="taxTableItems"
-                    :show-actions="false" class="mt-6" @delete="handleDeleteTax" />
+
+                <!-- Advanced filters row -->
+                <div v-if="showAdvancedFilters"
+                    class="border-y border-y-primary-100 bg-primary-50 px-4 sm:px-6 py-3 flex flex-col gap-3 sm:gap-2">
+                    <div class="flex flex-col sm:flex-row gap-3 sm:items-center justify-between">
+                        <div class="flex flex-wrap gap-2 order-2 sm:order-1 justify-start sm:justify-start">
+                            <v-btn variant="flat" color="primary" height="45"
+                                class="px-5 font-semibold text-sm sm:text-base" prepend-icon="mdi-magnify">
+                                ابحث الآن
+                            </v-btn>
+                            <v-btn variant="outlined" color="primary-50" height="45"
+                                class="px-5 font-semibold text-sm sm:text-base text-primary-700"
+                                prepend-icon="mdi-refresh" @click="resetFilters">
+                                إعادة تعيين
+                            </v-btn>
+                        </div>
+
+                        <div class="flex flex-wrap gap-3 sm:w-1/2 order-1 sm:order-2 justify-end sm:justify-start">
+                            <v-text-field v-model="filterName" density="comfortable" variant="outlined" hide-details
+                                placeholder="اسم التصنيف" class="w-full sm:w-60 bg-white" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Categories Table --> 
+                <DataTable :headers="taxTableHeaders" :items="taxTableItems" show-checkbox
+                    :show-actions="false" @delete="handleDeleteTax" @select="handleSelectCategory"
+                    @selectAll="handleSelectAllCategories" />
             </div>
         </div>
     </default-layout>

@@ -119,7 +119,7 @@ watch(
     </template>
 
     <v-form ref="formRef" v-model="isFormValid" @submit.prevent>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-x-3 gap-y-2 mb-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-x-3 gap-y-5 mb-4">
         <TextInput
           v-model="form.nameAr"
           label="الاسم بالعربية"
