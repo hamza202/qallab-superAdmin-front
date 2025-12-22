@@ -794,8 +794,8 @@ const categoriesIcon = `<svg width="52" height="52" viewBox="0 0 52 52" fill="no
   <default-layout>
     <div class="categories-page">
       <div class="flex items-center flex-wrap justify-between">
-        <PageHeader :icon="categoriesIcon" title-key="pages.categories.title"
-          description-key="pages.categories.description" />
+        <PageHeader :icon="categoriesIcon" title-key="pages.ProductsCategories.title"
+          description-key="pages.ProductsCategories.description" />
 
         <div class="flex flex-wrap gap-3 mb-6">
           <!-- Add New Category Button - visible when not editing -->

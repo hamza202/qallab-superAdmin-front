@@ -239,7 +239,7 @@ const editIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none" xm
         </div>
 
         <DataTable title="تقسيمات المناطق الجغرافية" :headers="geoAreasTableHeaders" :items="geoAreasTableItems"
-          show-actions show-checkbox :show-delete="false" class="mt-4" @edit="handleEditGeoArea"
+          show-actions show-checkbox :show-delete="false" @edit="handleEditGeoArea"
           @delete="handleDeleteGeoArea" @select="handleSelectGeoArea" @selectAll="handleSelectAllGeoAreas" />
 
         <GeoAreaFormDialog v-model="showGeoAreaDialog" :area="editingGeoArea" @save="handleSaveGeoArea" />

@@ -91,16 +91,19 @@ const openCreate = () => {
 <template>
   <default-layout>
     <div class="production-capacity-page">
-      <PageHeader :icon="productionCapacityIcon" title-key="pages.productionCapacity.title" description-key="pages.productionCapacity.description" />
+      <PageHeader :icon="productionCapacityIcon" title-key="pages.productionCapacityLists.title"
+        description-key="pages.productionCapacityLists.description" />
 
       <div class="flex justify-end pb-2 gap-3">
-        <v-btn variant="outlined" height="40" class="font-semibold text-base border-gray-300 bg-primary-100 !text-primary-900">
+        <v-btn variant="outlined" height="40"
+          class="font-semibold text-base border-gray-300 bg-primary-100 !text-primary-900">
           <template #prepend>
             <span v-html="importIcon" />
           </template>
           استيراد
         </v-btn>
-        <v-btn variant="outlined" height="40" class="font-semibold text-base border-gray-300 bg-primary-50 !text-primary-900">
+        <v-btn variant="outlined" height="40"
+          class="font-semibold text-base border-gray-300 bg-primary-50 !text-primary-900">
           <template #prepend>
             <span v-html="exportIcon" />
           </template>
@@ -109,9 +112,11 @@ const openCreate = () => {
       </div>
 
       <div class="bg-gray-50 rounded-md -mx-6">
-        <div :class="hasSelected ? 'justify-between' : 'justify-end'" class="flex flex-wrap items-center gap-3 border-y border-y-slate-300 px-4 sm:px-6 py-3">
+        <div :class="hasSelected ? 'justify-between' : 'justify-end'"
+          class="flex flex-wrap items-center gap-3 border-y border-y-slate-300 px-4 sm:px-6 py-3">
           <!-- Actions when rows are selected -->
-          <div v-if="hasSelected" class="flex flex-wrap items-stretch rounded-lg overflow-hidden border border-gray-200 bg-white text-sm">
+          <div v-if="hasSelected"
+            class="flex flex-wrap items-stretch rounded-lg overflow-hidden border border-gray-200 bg-white text-sm">
             <v-btn class="px-4 font-semibold text-primary-600 hover:bg-primary-50 !rounded-none">
               <template #prepend>
                 <span v-html="editIcon" />
@@ -136,47 +141,46 @@ const openCreate = () => {
 
           <!-- Main header controls -->
           <div class="flex flex-wrap gap-3">
-            <v-btn variant="outlined" append-icon="mdi-chevron-down" color="gray-500" height="40" class="font-semibold text-base border-gray-400">
+            <v-btn variant="outlined" append-icon="mdi-chevron-down" color="gray-500" height="40"
+              class="font-semibold text-base border-gray-400">
               <template #prepend>
                 <span v-html="columnIcon" />
               </template>
               الأعمدة
             </v-btn>
 
-            <v-btn variant="outlined" color="primary-50" height="40" class="px-7 font-semibold text-base text-primary-700" prepend-icon="mdi-magnify" @click="toggleAdvancedFilters">
+            <v-btn variant="outlined" color="primary-50" height="40"
+              class="px-7 font-semibold text-base text-primary-700" prepend-icon="mdi-magnify"
+              @click="toggleAdvancedFilters">
               بحث متقدم
             </v-btn>
 
-            <v-btn variant="flat" color="primary" height="40" class="px-7 font-semibold text-base" prepend-icon="mdi-plus-circle-outline" @click="openCreate">
+            <v-btn variant="flat" color="primary" height="40" class="px-7 font-semibold text-base"
+              prepend-icon="mdi-plus-circle-outline" @click="openCreate">
               أضف سجل
             </v-btn>
           </div>
         </div>
 
         <!-- Advanced filters row -->
-        <div v-if="showAdvancedFilters" class="border-y border-y-primary-100 bg-primary-50 px-4 sm:px-6 py-3 flex flex-col gap-3 sm:gap-2">
+        <div v-if="showAdvancedFilters"
+          class="border-y border-y-primary-100 bg-primary-50 px-4 sm:px-6 py-3 flex flex-col gap-3 sm:gap-2">
           <div class="flex flex-wrap gap-3 flex-1 order-1 sm:order-2 justify-end sm:justify-start">
-            <v-select v-model="filterStatus" :items="['فعال', 'غير فعال']" density="comfortable" variant="outlined" hide-details placeholder="الحالة" class="w-full sm:w-40 bg-white" />
-            <v-text-field v-model="filterCreatedAt" type="date" density="comfortable" variant="outlined" hide-details placeholder="تاريخ الانشاء" class="w-full sm:w-40 bg-white" />
-            <v-text-field v-model="filterName" density="comfortable" variant="outlined" hide-details placeholder="الاسم" class="w-full sm:w-40 bg-white" />
+            <v-select v-model="filterStatus" :items="['فعال', 'غير فعال']" density="comfortable" variant="outlined"
+              hide-details placeholder="الحالة" class="w-full sm:w-40 bg-white" />
+            <v-text-field v-model="filterCreatedAt" type="date" density="comfortable" variant="outlined" hide-details
+              placeholder="تاريخ الانشاء" class="w-full sm:w-40 bg-white" />
+            <v-text-field v-model="filterName" density="comfortable" variant="outlined" hide-details placeholder="الاسم"
+              class="w-full sm:w-40 bg-white" />
           </div>
         </div>
 
         <!-- Production Capacity Table -->
-        <DataTable
-          :headers="tableHeaders"
-          :items="tableItems"
-          show-checkbox
-          show-actions
-          @edit="handleEdit"
-          @delete="handleDelete"
-          @select="handleSelect"
-          @selectAll="handleSelectAll"
-        />
+        <DataTable :headers="tableHeaders" :items="tableItems" show-checkbox show-actions @edit="handleEdit"
+          @delete="handleDelete" @select="handleSelect" @selectAll="handleSelectAll" />
       </div>
     </div>
   </default-layout>
-  </template>
+</template>
 
 <style scoped></style>
-

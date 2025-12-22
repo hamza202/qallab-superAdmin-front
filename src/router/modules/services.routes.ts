@@ -11,7 +11,7 @@ export const servicesRoutes: RouteRecordRaw[] = [
         name: 'ServicesPriceList',
         component: () => import('@/views/services/services-prices/List.vue'),
         meta: {
-          title: 'pages.servicesPrices.title',
+          title: 'pages.servicesPricesList.title',
         },
       },
       {
@@ -19,7 +19,7 @@ export const servicesRoutes: RouteRecordRaw[] = [
         name: 'ServicesPriceListEdit',
         component: () => import('@/views/services/services-prices/Form.vue'),
         meta: {
-          title: 'pages.servicesPrices.title',
+          title: 'pages.servicePricesList.title',
         },
       },
     ],

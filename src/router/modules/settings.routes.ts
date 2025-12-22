@@ -2,32 +2,63 @@ import type { RouteRecordRaw } from "vue-router";
 
 export const settingsRoutes: RouteRecordRaw[] = [
   {
-    path: "/categories",
-    name: "Categories",
-    redirect: "/categories/list",
+    path: "/products-categories",
+    name: "ProductsCategories",
+    redirect: "/products-categories/list",
     children: [
       {
         path: "list",
-        name: "CategoriesList",
-        component: () => import("@/views/settings/categories/List.vue"),
+        name: "ProductsCategoriesList",
+        component: () => import("@/views/settings/products-categories/List.vue"),
         meta: {
-          title: "pages.categories.title",
+          title: "pages.ProductsCategories.title",
         },
       },
       {
         path: "create",
-        name: "CategoriesCreate",
-        component: () => import("@/views/settings/categories/Form.vue"),
+        name: "ProductsCategoriesCreate",
+        component: () => import("@/views/settings/products-categories/Form.vue"),
         meta: {
-          title: "pages.categories.title",
+          title: "pages.ProductsCategories.title",
         },
       },
       {
         path: "edit/:id",
-        name: "CategoriesEdit",
-        component: () => import("@/views/settings/categories/Form.vue"),
+        name: "ProductsCategoriesEdit",
+        component: () => import("@/views/settings/products-categories/Form.vue"),
         meta: {
-          title: "pages.categories.title",
+          title: "pages.ProductsCategories.title",
+        },
+      },
+    ],
+  },
+  {
+    path: "/services-categories",
+    name: "ServicesCategories",
+    redirect: "/services-categories/list",
+    children: [
+      {
+        path: "list",
+        name: "ServicesCategoriesList",
+        component: () => import("@/views/settings/services-categories/List.vue"),
+        meta: {
+          title: "pages.ServicesCategories.title",
+        },
+      },
+      {
+        path: "create",
+        name: "ServicesCategoriesCreate",
+        component: () => import("@/views/settings/services-categories/Form.vue"),
+        meta: {
+          title: "pages.ServicesCategories.title",
+        },
+      },
+      {
+        path: "edit/:id",
+        name: "ServicesCategoriesEdit",
+        component: () => import("@/views/settings/services-categories/Form.vue"),
+        meta: {
+          title: "pages.ServicesCategories.title",
         },
       },
     ],

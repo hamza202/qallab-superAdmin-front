@@ -1,8 +1,72 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, onMounted, nextTick, onBeforeUnmount } from "vue";
 import { useRouter } from "vue-router";
+import { useApi } from "@/composables/useApi";
+import { useNotification } from "@/composables/useNotification";
 
 const router = useRouter();
+const api = useApi();
+const { success, error } = useNotification();
+
+// TypeScript Interfaces
+interface CustomerAction {
+    can_update: boolean;
+    can_delete: boolean;
+    can_view: boolean;
+    can_change_status: boolean;
+}
+
+interface Customer {
+    id: number;
+    full_name: string;
+    customer_code: string;
+    total_invoices: number;
+    total_paid: number;
+    due_amount: number;
+    mobile: string;
+    commercial_register: string;
+    city: string;
+    status: boolean;
+    status_value: string;
+    created_at: string;
+    actions: CustomerAction;
+}
+
+interface TableHeader {
+    key: string;
+    title: string;
+}
+
+interface Pagination {
+    next_cursor: string | null;
+    previous_cursor: string | null;
+    per_page: number;
+}
+
+interface CustomersResponse {
+    status: number;
+    code: number;
+    locale: string;
+    message: string;
+    data: Customer[];
+    pagination: Pagination;
+    headers: TableHeader[];
+    shownHeaders: TableHeader[];
+    actions: {
+        can_create: boolean;
+    };
+}
+
+interface CustomerFilters {
+    per_page?: number;
+    cursor?: string | null;
+    full_name?: string;
+    code?: string;
+    mobile?: string;
+    city_id?: string;
+    commercial_reg?: string;
+    status?: string;
+}
 
 // Customers icon
 const customersIcon = `<svg width="52" height="52" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -40,57 +104,28 @@ const importIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" 
 </svg>
 `;
 
-// Customers table data
-const tableHeaders = [
-    { key: "fullName", title: "الاسم الكامل", width: "150px" },
-    { key: "code", title: "كود SKU", width: "120px" },
-    { key: "totalInvoices", title: "اجمالي الفواتير", width: "140px" },
-    { key: "totalPayments", title: "اجمالي المدفوعات", width: "140px" },
-    { key: "dueAmount", title: "المبلغ المستحق", width: "140px" },
-    { key: "mobile", title: "الجوال", width: "140px" },
-    { key: "commercialRegister", title: "السجل التجاري", width: "140px" },
-    { key: "city", title: "المدينة", width: "120px" },
-    { key: "status", title: "الحالة", width: "100px" },
-];
+// API Data
+const tableItems = ref<Customer[]>([]);
+const allHeaders = ref<TableHeader[]>([]);
+const shownHeaders = ref<TableHeader[]>([]);
+const canCreate = ref(false);
+const loading = ref(false);
+const loadingMore = ref(false);
 
-const tableItems = ref([
-    {
-        id: 1,
-        fullName: "علي خالد",
-        code: "AfgEHJ",
-        totalInvoices: 150,
-        totalPayments: 150,
-        dueAmount: 450,
-        mobile: "+966000000000",
-        commercialRegister: "101000123456",
-        city: "الرياض",
-        status: true,
-    },
-    {
-        id: 2,
-        fullName: "فارس علي",
-        code: "1f5fgh",
-        totalInvoices: 150,
-        totalPayments: 150,
-        dueAmount: 150,
-        mobile: "+966000000000",
-        commercialRegister: "101000123456",
-        city: "جدة",
-        status: false,
-    },
-    {
-        id: 3,
-        fullName: "احمد فارس",
-        code: "GFkns",
-        totalInvoices: 150,
-        totalPayments: 150,
-        dueAmount: 150,
-        mobile: "+966000000000",
-        commercialRegister: "101000123456",
-        city: "الطائف",
-        status: true,
-    },
-]);
+// Pagination
+const nextCursor = ref<string | null>(null);
+const previousCursor = ref<string | null>(null);
+const perPage = ref(15);
+const hasMoreData = computed(() => nextCursor.value !== null);
+
+// Computed table headers for DataTable component
+const tableHeaders = computed(() => {
+    return shownHeaders.value.map(header => ({
+        key: header.key,
+        title: header.title,
+        width: "140px"
+    }));
+});
 
 // Selection state
 const selectedCustomers = ref<number[]>([]);
@@ -100,9 +135,6 @@ const hasSelectedCustomers = computed(() => selectedCustomers.value.length > 0);
 const showAdvancedFilters = ref(false);
 const filterFullName = ref("");
 const filterCode = ref("");
-const filterTotalInvoices = ref("");
-const filterTotalPayments = ref("");
-const filterDueAmount = ref("");
 const filterMobile = ref("");
 const filterCommercialRegister = ref("");
 const filterCity = ref<string | null>(null);
@@ -114,13 +146,219 @@ const toggleAdvancedFilters = () => {
     showAdvancedFilters.value = !showAdvancedFilters.value;
 };
 
+// Delete confirmation
+const showDeleteDialog = ref(false);
+const showBulkDeleteDialog = ref(false);
+const deleteLoading = ref(false);
+const itemToDelete = ref<Customer | null>(null);
+
+// Status change confirmation
+const showStatusChangeDialog = ref(false);
+const statusChangeLoading = ref(false);
+const itemToChangeStatus = ref<Customer | null>(null);
+
+// Headers dropdown
+const showHeadersMenu = ref(false);
+const updatingHeaders = ref(false);
+
+// Computed checked headers for menu
+const headerCheckStates = computed(() => {
+    const states: Record<string, boolean> = {};
+    allHeaders.value.forEach(header => {
+        states[header.key] = shownHeaders.value.some(sh => sh.key === header.key);
+    });
+    return states;
+});
+
+// API Functions
+const fetchCustomers = async (cursor?: string | null, append = false) => {
+    try {
+        if (append) {
+            loadingMore.value = true;
+        } else {
+            loading.value = true;
+        }
+
+        const filters: CustomerFilters = {
+            per_page: perPage.value,
+            cursor: cursor || undefined,
+        };
+
+        if (filterFullName.value) filters.full_name = filterFullName.value;
+        if (filterCode.value) filters.code = filterCode.value;
+        if (filterMobile.value) filters.mobile = filterMobile.value;
+        if (filterCity.value) filters.city_id = filterCity.value;
+        if (filterCommercialRegister.value) filters.commercial_reg = filterCommercialRegister.value;
+        if (filterStatus.value) filters.status = filterStatus.value;
+
+        const params = new URLSearchParams();
+        Object.entries(filters).forEach(([key, value]) => {
+            if (value !== null && value !== undefined && value !== '') {
+                params.append(key, String(value));
+            }
+        });
+
+        const queryString = params.toString();
+        const url = queryString ? `/admin/api/customers?${queryString}` : '/admin/api/customers';
+
+        const response = await api.get<CustomersResponse>(url);
+
+        if (append) {
+            tableItems.value = [...tableItems.value, ...response.data];
+        } else {
+            tableItems.value = response.data;
+            allHeaders.value = response.headers;
+            shownHeaders.value = response.shownHeaders;
+            canCreate.value = response.actions.can_create;
+        }
+
+        nextCursor.value = response.pagination.next_cursor;
+        previousCursor.value = response.pagination.previous_cursor;
+        perPage.value = response.pagination.per_page;
+    } catch (err: any) {
+        console.error('Error fetching customers:', err);
+        error(err?.response?.data?.message || 'Failed to fetch customers');
+    } finally {
+        loading.value = false;
+        loadingMore.value = false;
+    }
+};
+
+// Load more data (lazy loading)
+const loadMore = () => {
+    if (hasMoreData.value && !loadingMore.value) {
+        fetchCustomers(nextCursor.value, true);
+    }
+};
+
+// Apply filters
+const applyFilters = () => {
+    fetchCustomers();
+};
+
+// Toggle header visibility
+const toggleHeader = async (headerKey: string) => {
+    const isCurrentlyShown = shownHeaders.value.some(h => h.key === headerKey);
+
+    if (isCurrentlyShown) {
+        shownHeaders.value = shownHeaders.value.filter(h => h.key !== headerKey);
+    } else {
+        const headerToAdd = allHeaders.value.find(h => h.key === headerKey);
+        if (headerToAdd) {
+            shownHeaders.value.push(headerToAdd);
+        }
+    }
+
+    await updateHeadersOnServer();
+};
+
+// Update headers on server
+const updateHeadersOnServer = async () => {
+    try {
+        updatingHeaders.value = true;
+        const headerKeys = shownHeaders.value.map(h => h.key);
+
+        const formData = new FormData();
+        formData.append('table', 'customers');
+        headerKeys.forEach((header, index) => {
+            formData.append(`header[${index}]`, header);
+        });
+
+        await api.post('/admin/api/headers', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+    } catch (err: any) {
+        console.error('Error updating headers:', err);
+        error(err?.response?.data?.message || 'Failed to update headers');
+    } finally {
+        updatingHeaders.value = false;
+    }
+};
+
 // Handlers
 const handleEdit = (item: any) => {
     router.push({ name: "CustomersEdit", params: { id: item.id } });
 };
 
 const handleDelete = (item: any) => {
-    tableItems.value = tableItems.value.filter((t) => t.id !== item.id);
+    itemToDelete.value = item;
+    showDeleteDialog.value = true;
+};
+
+const handleStatusChange = (item: any) => {
+    itemToChangeStatus.value = item;
+    showStatusChangeDialog.value = true;
+};
+
+const confirmStatusChange = async () => {
+    if (!itemToChangeStatus.value) return;
+
+    try {
+        statusChangeLoading.value = true;
+        const newStatus = !itemToChangeStatus.value.status;
+        
+        await api.patch(`/admin/api/customers/${itemToChangeStatus.value.id}/change-status`, {
+            status: newStatus
+        });
+        
+        success(`تم ${newStatus ? 'تفعيل' : 'تعطيل'} العميل بنجاح`);
+        
+        // Update the item in the list
+        const index = tableItems.value.findIndex(c => c.id === itemToChangeStatus.value!.id);
+        if (index !== -1) {
+            tableItems.value[index].status = newStatus;
+            tableItems.value[index].status_value = newStatus ? 'فعال' : 'غير فعال';
+        }
+        
+        itemToChangeStatus.value = null;
+    } catch (err: any) {
+        console.error('Error changing customer status:', err);
+        error(err?.response?.data?.message || 'فشل تغيير حالة العميل');
+    } finally {
+        statusChangeLoading.value = false;
+        showStatusChangeDialog.value = false;
+    }
+};
+
+const confirmDelete = async () => {
+    if (!itemToDelete.value) return;
+
+    try {
+        deleteLoading.value = true;
+        await api.delete(`/admin/api/customers/${itemToDelete.value.id}`);
+        success('Customer deleted successfully');
+        await fetchCustomers();
+        itemToDelete.value = null;
+    } catch (err: any) {
+        console.error('Error deleting customer:', err);
+        error(err?.response?.data?.message || 'Failed to delete customer');
+    } finally {
+        deleteLoading.value = false;
+        showDeleteDialog.value = false;
+    }
+};
+
+const handleBulkDelete = () => {
+    if (selectedCustomers.value.length === 0) return;
+    showBulkDeleteDialog.value = true;
+};
+
+const confirmBulkDelete = async () => {
+    try {
+        deleteLoading.value = true;
+        await api.post('/admin/api/customers/bulk-delete', { ids: selectedCustomers.value });
+        success(`${selectedCustomers.value.length} customers deleted successfully`);
+        selectedCustomers.value = [];
+        await fetchCustomers();
+    } catch (err: any) {
+        console.error('Error bulk deleting customers:', err);
+        error(err?.response?.data?.message || 'Failed to delete customers');
+    } finally {
+        deleteLoading.value = false;
+        showBulkDeleteDialog.value = false;
+    }
 };
 
 const handleSelectCustomer = (item: any, selected: boolean) => {
@@ -142,6 +380,49 @@ const handleSelectAllCustomers = (checked: boolean) => {
 const openCreateCustomer = () => {
     router.push({ name: "CustomersCreate" });
 };
+
+// Infinite scroll with Intersection Observer
+const loadMoreTrigger = ref<HTMLElement | null>(null);
+const observer = ref<IntersectionObserver | null>(null);
+
+const setupInfiniteScroll = () => {
+    if (!loadMoreTrigger.value) return;
+
+    observer.value = new IntersectionObserver(
+        (entries) => {
+            const entry = entries[0];
+            if (entry.isIntersecting && hasMoreData.value && !loadingMore.value && !loading.value) {
+                loadMore();
+            }
+        },
+        {
+            root: null,
+            rootMargin: '100px',
+            threshold: 0.1,
+        }
+    );
+
+    observer.value.observe(loadMoreTrigger.value);
+};
+
+const cleanupInfiniteScroll = () => {
+    if (observer.value && loadMoreTrigger.value) {
+        observer.value.unobserve(loadMoreTrigger.value);
+        observer.value.disconnect();
+    }
+};
+
+// Lifecycle
+onMounted(() => {
+    fetchCustomers();
+    nextTick(() => {
+        setupInfiniteScroll();
+    });
+});
+
+onBeforeUnmount(() => {
+    cleanupInfiniteScroll();
+});
 </script>
 
 <template>
@@ -180,14 +461,16 @@ const openCreateCustomer = () => {
                             <span>تعديل</span>
                         </v-btn>
                         <div class="w-px bg-gray-200"></div>
-                        <v-btn class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none">
+                        <v-btn class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
+                            @click="handleBulkDelete">
                             <template #prepend>
                                 <span v-html="trash_1_icon"></span>
                             </template>
-                            <span>حذف</span>
+                            <span>حذف المحدد</span>
                         </v-btn>
                         <div class="w-px bg-gray-200"></div>
-                        <v-btn class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none">
+                        <v-btn class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
+                            @click="handleBulkDelete">
                             <template #prepend>
                                 <span v-html="trash_2_icon"></span>
                             </template>
@@ -197,18 +480,38 @@ const openCreateCustomer = () => {
 
                     <!-- Main header controls -->
                     <div class="flex flex-wrap gap-3">
-                        <v-btn variant="outlined" append-icon="mdi-chevron-down" color="gray-500" height="40"
-                            class="font-semibold text-base border-gray-400">
-                            <template #prepend>
-                                <span v-html="columnIcon"></span>
+                        <v-menu v-model="showHeadersMenu" :close-on-content-click="false">
+                            <template v-slot:activator="{ props }">
+                                <v-btn v-bind="props" variant="outlined" append-icon="mdi-chevron-down" color="gray-500"
+                                    height="40" class="font-semibold text-base border-gray-400">
+                                    <template #prepend>
+                                        <span v-html="columnIcon"></span>
+                                    </template>
+                                    الأعمدة
+                                </v-btn>
                             </template>
-                            الأعمدة
-                        </v-btn>
+                            <v-list>
+                                <v-list-item v-for="header in allHeaders" :key="header.key"
+                                    @click="toggleHeader(header.key)">
+                                    <template v-slot:prepend>
+                                        <v-checkbox-btn :model-value="headerCheckStates[header.key]"
+                                            :disabled="updatingHeaders"
+                                            @click.stop="toggleHeader(header.key)"></v-checkbox-btn>
+                                    </template>
+                                    <v-list-item-title>{{ header.title }}</v-list-item-title>
+                                </v-list-item>
+                            </v-list>
+                        </v-menu>
 
                         <v-btn variant="outlined" color="primary-50" height="40"
                             class="px-7 font-semibold text-base text-primary-700" prepend-icon="mdi-magnify"
                             @click="toggleAdvancedFilters">
                             بحث متقدم
+                        </v-btn>
+
+                        <v-btn v-if="showAdvancedFilters" variant="flat" color="primary" height="40"
+                            class="px-7 font-semibold text-base" @click="applyFilters" :loading="loading">
+                            تطبيق الفلاتر
                         </v-btn>
 
                         <v-btn variant="flat" color="primary" height="40" class="px-7 font-semibold text-base"
@@ -223,36 +526,56 @@ const openCreateCustomer = () => {
                     class="border-y border-y-primary-100 bg-primary-50 px-4 sm:px-6 py-3 flex flex-col gap-3 sm:gap-2">
                     <div class="flex flex-wrap gap-3 flex-1 order-1 sm:order-2 justify-end sm:justify-start">
                         <v-text-field v-model="filterFullName" density="comfortable" variant="outlined" hide-details
-                            placeholder="الاسم الكامل" class="w-full sm:w-40 bg-white" />
+                            placeholder="الاسم الكامل" class="w-full sm:w-40 bg-white" @keyup.enter="applyFilters" />
                         <v-text-field v-model="filterCode" density="comfortable" variant="outlined" hide-details
-                            placeholder="12345" class="w-full sm:w-40 bg-white" />
-                        <v-text-field v-model="filterTotalInvoices" density="comfortable" variant="outlined"
-                            hide-details placeholder="03" class="w-full sm:w-40 bg-white" />
-                        <v-text-field v-model="filterTotalPayments" density="comfortable" variant="outlined"
-                            hide-details placeholder="03" class="w-full sm:w-40 bg-white" />
-                        <v-text-field v-model="filterDueAmount" density="comfortable" variant="outlined" hide-details
-                            placeholder="450" class="w-full sm:w-40 bg-white" />
+                            placeholder="12345" class="w-full sm:w-40 bg-white" @keyup.enter="applyFilters" />
                         <v-text-field v-model="filterMobile" density="comfortable" variant="outlined" hide-details
-                            placeholder="+966" class="w-full sm:w-40 bg-white" />
-                        <v-text-field v-model="filterCommercialRegister" density="comfortable" variant="outlined" hide-details
-                            placeholder="2566669" class="w-full sm:w-40 bg-white" />
+                            placeholder="+966" class="w-full sm:w-40 bg-white" @keyup.enter="applyFilters" />
+                        <v-text-field v-model="filterCommercialRegister" density="comfortable" variant="outlined"
+                            hide-details placeholder="2566669" class="w-full sm:w-40 bg-white"
+                            @keyup.enter="applyFilters" />
                         <v-select v-model="filterCity" :items="cityItems" density="comfortable" variant="outlined"
-                            hide-details placeholder="المدينة" class="w-full sm:w-40 bg-white" />
+                            hide-details placeholder="المدينة" class="w-full sm:w-40 bg-white"
+                            @update:model-value="applyFilters" />
                         <v-select v-model="filterStatus" :items="['فعال', 'غير فعال']" density="comfortable"
-                            variant="outlined" hide-details placeholder="الحالة" class="w-full sm:w-40 bg-white" />
+                            variant="outlined" hide-details placeholder="الحالة" class="w-full sm:w-40 bg-white"
+                            @update:model-value="applyFilters" />
                     </div>
                 </div>
 
                 <!-- Customers Table -->
-                <DataTable :headers="tableHeaders" :items="tableItems" show-checkbox show-actions @edit="handleEdit"
-                    @delete="handleDelete" @select="handleSelectCustomer" @selectAll="handleSelectAllCustomers">
+                <DataTable :headers="tableHeaders" :items="tableItems" :loading="loading" show-checkbox show-actions
+                    @edit="handleEdit" @delete="handleDelete" @select="handleSelectCustomer"
+                    @selectAll="handleSelectAllCustomers">
                     <template #item.status="{ item }">
-                        <v-switch v-model="item.status" color="primary" hide-details density="compact"
-                            class="flex-grow-0" />
+                        <v-switch :model-value="item.status" hide-details inset density="compact" color="primary"
+                            @click="handleStatusChange(item)" />
                     </template>
+
                 </DataTable>
+
+                <!-- Infinite Scroll Trigger & Loading Indicator -->
+                <div ref="loadMoreTrigger" class="flex justify-center py-4">
+                    <v-progress-circular v-if="loadingMore" indeterminate color="primary" size="32" />
+                    <span v-else-if="!hasMoreData && tableItems.length > 0" class="text-gray-500 text-sm">
+                        لا توجد المزيد من البيانات
+                    </span>
+                </div>
             </div>
         </div>
+
+        <!-- Delete Confirmation Dialog -->
+        <DeleteConfirmDialog v-model="showDeleteDialog" :loading="deleteLoading" :item-name="itemToDelete?.full_name"
+            title="حذف العميل" message="هل أنت متأكد من حذف العميل" @confirm="confirmDelete" />
+
+        <!-- Bulk Delete Confirmation Dialog -->
+        <DeleteConfirmDialog v-model="showBulkDeleteDialog" :loading="deleteLoading" title="حذف العملاء"
+            :message="`هل أنت متأكد من حذف ${selectedCustomers.length} عميل؟`" @confirm="confirmBulkDelete" />
+
+        <!-- Status Change Confirmation Dialog -->
+        <StatusChangeDialog v-model="showStatusChangeDialog" :loading="statusChangeLoading"
+            :item-name="itemToChangeStatus?.full_name" :current-status="itemToChangeStatus?.status || false"
+            @confirm="confirmStatusChange" />
     </default-layout>
 </template>
 

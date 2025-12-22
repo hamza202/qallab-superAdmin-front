@@ -105,8 +105,8 @@ const handleSave = () => {
 <template>
   <default-layout>
     <div class="services-price-list-page">
-      <PageHeader :icon="priceListIcon" title-key="pages.servicesPrices.title"
-        description-key="pages.servicesPrices.description" />
+      <PageHeader :icon="priceListIcon" title-key="pages.servicePricesList.title"
+        description-key="pages.servicePricesList.description" />
 
       <div class="-mx-6">
         <div class="pb-2">

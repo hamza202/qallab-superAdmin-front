@@ -141,7 +141,7 @@ const editIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xm
 
     <!-- Table -->
     <v-table class="data-table" hover>
-      <thead>
+      <thead v-if="items.length > 0">
         <tr class="bg-gray-50">
           <!-- Checkbox Header (Right side for RTL) -->
           <th v-if="showCheckbox" class="w-[60px] !bg-gray-50">

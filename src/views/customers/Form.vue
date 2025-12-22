@@ -284,7 +284,9 @@ const editIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none" xm
 
               <!-- Row 1: Full Name, Customer Code, Branch -->
               <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                <TextInput v-model="fullName" label="الاسم كامل" placeholder="الاسم كامل"
+                <TextInput v-model="fullName" label="الاسم كامل بالعربية" placeholder="الاسم كامل بالعربية"
+                  :rules="[required()]" :hide-details="false" />
+                <TextInput v-model="fullName" label="الاسم كامل بالإنحليزية" placeholder="الاسم كامل بالإنحليزية"
                   :rules="[required()]" :hide-details="false" />
                 <div>
                   <div class="mb-[7px] text-sm font-semibold text-gray-700">الكود</div>
@@ -294,10 +296,7 @@ const editIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none" xm
                 </div>
                 <SelectWithIconInput v-model="branch" label="الفرع" placeholder="الفرع" :items="branchItems"
                   :hide-details="false" show-add-button @add-click="handleAddBranch" />
-              </div>
 
-              <!-- Row 2: Mobile, Phone, Email -->
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                 <TextInput v-model="mobile" label="الجوال" placeholder="+966 (555) 000-0000" :rules="[required()]"
                   :hide-details="false">
                   <template #append-inner>
@@ -311,20 +310,13 @@ const editIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none" xm
                 </TextInput>
                 <TextInput v-model="email" label="البريد الالكتروني" placeholder="البريد الالكتروني"
                   :hide-details="false" />
-              </div>
-
-              <!-- Row 3: Commercial Name, Legal Name, Entity Type -->
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                 <TextInput v-model="commercialName" label="الاسم التجاري" placeholder="Al-Nahda Contracting"
                   :hide-details="false" />
                 <TextInput v-model="legalName" label="الاسم القانوني" placeholder="Al-Nahda Construction LLC"
                   :hide-details="false" />
-                <SelectWithIconInput v-model="entityType" label="نوع الكيان" placeholder="Establishment" :items="entityTypeItems"
-                  :hide-details="false" show-add-button />
-              </div>
+                <SelectWithIconInput v-model="entityType" label="نوع الكيان" placeholder="Establishment"
+                  :items="entityTypeItems" :hide-details="false" show-add-button />
 
-              <!-- Row 4: Tax Number -->
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <TextInput v-model="taxNumber" label="الرقم الضريبي" placeholder="310123456700003"
                   :hide-details="false" />
               </div>
@@ -359,18 +351,14 @@ const editIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none" xm
                     :hide-details="false" />
                   <SelectInput v-model="city" label="المدينة" placeholder="المدينة" :items="cityItems"
                     :hide-details="false" />
-                  <TextInput v-model="postalCode" label="الرمز البريدي" placeholder="00000"
-                    :hide-details="false" />
+                  <TextInput v-model="postalCode" label="الرمز البريدي" placeholder="00000" :hide-details="false" />
                 </div>
 
                 <!-- Row 2: District, Street Name, Building Number -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                  <TextInput v-model="district" label="اسم الحي" placeholder="الحي"
-                    :hide-details="false" />
-                  <TextInput v-model="streetName" label="اسم الشارع" placeholder="الشارع"
-                    :hide-details="false" />
-                  <TextInput v-model="buildingNumber" label="رقم المبنى" placeholder="00000"
-                    :hide-details="false" />
+                  <TextInput v-model="district" label="اسم الحي" placeholder="الحي" :hide-details="false" />
+                  <TextInput v-model="streetName" label="اسم الشارع" placeholder="الشارع" :hide-details="false" />
+                  <TextInput v-model="buildingNumber" label="رقم المبنى" placeholder="00000" :hide-details="false" />
                 </div>
 
                 <!-- Row 3: National Address, Address 2 -->
@@ -381,8 +369,7 @@ const editIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none" xm
                       <v-icon size="small" color="gray">mdi-help-circle-outline</v-icon>
                     </template>
                   </TextInput>
-                  <TextInput v-model="address2" label="عنوان 2" placeholder="العنوان"
-                    :hide-details="false" />
+                  <TextInput v-model="address2" label="عنوان 2" placeholder="العنوان" :hide-details="false" />
                 </div>
               </div>
 
@@ -403,8 +390,7 @@ const editIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none" xm
                   <TextInput v-model="newContact.mobile" label="الجوال" placeholder="+96600000000"
                     :hide-details="true" />
                   <div class="flex items-center gap-2">
-                    <v-btn variant="flat" color="primary" height="40" class="font-semibold"
-                      @click="addContact">
+                    <v-btn variant="flat" color="primary" height="40" class="font-semibold" @click="addContact">
                       اضف
                     </v-btn>
                   </div>
@@ -460,16 +446,18 @@ const editIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none" xm
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
               <SelectInput v-model="priceType" label="نوع السعر" placeholder="نوع السعر" :items="priceTypeItems"
                 :hide-details="false" />
-              <SelectWithIconInput v-model="priceList" label="قائمة الاسعار" placeholder="قائمة الاسعار" :items="priceListItems"
-                :hide-details="false" show-add-button @add-click="handleAddPriceList" />
-              <SelectWithIconInput v-model="customerClassification" label="تصنيف العميل" placeholder="تصنيف العميل" :items="customerClassificationItems"
-                :hide-details="false" show-add-button @add-click="handleAddClassification" />
+              <SelectWithIconInput v-model="priceList" label="قائمة الاسعار" placeholder="قائمة الاسعار"
+                :items="priceListItems" :hide-details="false" show-add-button @add-click="handleAddPriceList" />
+              <SelectWithIconInput v-model="customerClassification" label="تصنيف العميل" placeholder="تصنيف العميل"
+                :items="customerClassificationItems" :hide-details="false" show-add-button
+                @add-click="handleAddClassification" />
             </div>
 
             <!-- Row 2: Sales Representative, Create Account Option -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-              <SelectWithIconInput v-model="salesRepresentative" label="مندوب المبيعات" placeholder="مندوب المبيعات" :items="salesRepresentativeItems"
-                :hide-details="false" show-add-button @add-click="handleAddSalesRep" />
+              <SelectWithIconInput v-model="salesRepresentative" label="مندوب المبيعات" placeholder="مندوب المبيعات"
+                :items="salesRepresentativeItems" :hide-details="false" show-add-button
+                @add-click="handleAddSalesRep" />
               <div>
                 <span class="text-sm font-semibold text-gray-700 mb-1 block">انشاء حساب خاص في شجرة المحاسبة</span>
                 <v-radio-group v-model="createAccountInTree" inline hide-details>
@@ -483,8 +471,8 @@ const editIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none" xm
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
               <SelectWithIconInput v-model="account" label="الحساب" placeholder="الحساب" :items="accountItems"
                 :hide-details="false" show-add-button @add-click="handleAddAccount" />
-              <SelectInput v-model="relatedCustomers" label="العملاء المرتبطين" placeholder="العملاء المرتبطين" :items="relatedCustomersItems"
-                :hide-details="false" />
+              <SelectInput v-model="relatedCustomers" label="العملاء المرتبطين" placeholder="العملاء المرتبطين"
+                :items="relatedCustomersItems" :hide-details="false" />
               <TextInput v-model="accountLowerLimit" label="الحد الادنى (دائن)" placeholder="الحد الادنى"
                 :hide-details="false" />
             </div>

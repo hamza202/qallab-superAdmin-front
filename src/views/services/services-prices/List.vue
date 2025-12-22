@@ -91,7 +91,7 @@ const openCreate = () => {
 <template>
   <default-layout>
     <div class="services-prices-page">
-      <PageHeader :icon="servicesPricesIcon" title-key="pages.servicesPrices.title" description-key="pages.servicesPrices.description" />
+      <PageHeader :icon="servicesPricesIcon" title-key="pages.servicesPricesList.title" description-key="pages.servicesPricesList.description" />
 
       <div class="flex justify-end pb-2 gap-3">
         <v-btn variant="outlined" height="40" class="font-semibold text-base border-gray-300 bg-primary-100 !text-primary-900">

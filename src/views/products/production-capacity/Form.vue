@@ -61,7 +61,7 @@ const tableHeaders = [
   { key: "productId", title: "المنتج", width: "280px" },
   {
     key: "tonPerHour",
-    title: "سعر البيع بالطن / ساعة",
+    title: "كمية الإنتاج بالطن / ساعة",
     children: [
       { key: "tonPerHourMin", title: "أدنى", width: "140px" },
       { key: "tonPerHourMax", title: "أعلى", width: "140px" },
@@ -69,7 +69,7 @@ const tableHeaders = [
   },
   {
     key: "tonPerDay",
-    title: "سعر البيع بالطن / باليوم",
+    title: "كمية الإنتاج بالطن / باليوم",
     children: [
       { key: "tonPerDayMin", title: "أدنى", width: "140px" },
       { key: "tonPerDayMax", title: "أعلى", width: "140px" },
@@ -77,7 +77,7 @@ const tableHeaders = [
   },
   {
     key: "tonPerWeek",
-    title: "سعر البيع بالطن / بالاسبوع",
+    title: "كمية الإنتاج بالطن / بالاسبوع",
     children: [
       { key: "tonPerWeekMin", title: "أدنى", width: "140px" },
       { key: "tonPerWeekMax", title: "أعلى", width: "140px" },
@@ -85,7 +85,7 @@ const tableHeaders = [
   },
   {
     key: "tonPerMonth",
-    title: "سعر البيع بالطن / بالشهر",
+    title: "كمية الإنتاج بالطن / بالشهر",
     children: [
       { key: "tonPerMonthMin", title: "أدنى", width: "140px" },
       { key: "tonPerMonthMax", title: "أعلى", width: "140px" },
@@ -164,8 +164,8 @@ const handleSave = () => {
 <template>
   <default-layout>
     <div class="production-capacity-page">
-      <PageHeader :icon="productionCapacityIcon" title-key="pages.productionCapacity.title"
-        description-key="pages.productionCapacity.description" />
+      <PageHeader :icon="productionCapacityIcon" title-key="pages.productionCapacityList.title"
+        description-key="pages.productionCapacityList.description" />
 
       <div class="-mx-6">
         <div class="pb-2">

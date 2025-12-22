@@ -15,30 +15,33 @@ const editIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none" xm
 
 // Table data
 const taxTableHeaders = [
-    { key: "id", title: "#", width: "60px" },
-    { key: "name", title: "الاسم", width: "176px" },
-    { key: "taxes", title: "الضرائب", width: "176px" },
-    { key: "status", title: "الحالة", width: "176px" },
+    { key: "name", title: "الاسم", width: "280px" },
+    { key: "unit", title: "الوحدة", width: "200px" },
+    { key: "taxes", title: "الضرائب", width: "200px" },
+    { key: "status", title: "الحالة", width: "140px" },
 ];
 
 const taxTableItems = ref([
     {
         id: 1,
-        name: "المنتجات الغذائية",
-        taxes: ["ضريبة 11"],
-        status: "نشطة",
+        name: "اسم التصنيف / التصنيف الرئيسي",
+        unit: "م 3",
+        taxes: ["ضريبة", "ضريبة", "ضريبة"],
+        status: true,
     },
     {
         id: 2,
-        name: "المشروبات",
-        taxes: ["ضريبة 11"],
-        status: "نشطة",
+        name: "اسم التصنيف / التصنيف الرئيسي",
+        unit: "طن",
+        taxes: ["ضريبة", "ضريبة", "ضريبة"],
+        status: false,
     },
     {
         id: 3,
-        name: "العروض الخاصة",
-        taxes: ["ضريبة 11"],
-        status: "غير نشطة",
+        name: "اسم التصنيف / التصنيف الرئيسي",
+        unit: "م 3",
+        taxes: ["ضريبة"],
+        status: true,
     },
 ]);
 
@@ -52,6 +55,8 @@ const selectedCategoryIds = ref<(string | number)[]>([]);
 const showAdvancedFilters = ref(false);
 
 const filterName = ref("");
+const filterUnit = ref<string | null>(null);
+const filterTaxes = ref<string | null>(null);
 const filterStatus = ref<string | null>(null);
 
 const handleSelectCategory = (item: any, selected: boolean) => {
@@ -80,6 +85,8 @@ const toggleAdvancedFilters = () => {
 
 const resetFilters = () => {
     filterName.value = "";
+    filterUnit.value = null;
+    filterTaxes.value = null;
     filterStatus.value = null;
 };
 
@@ -111,8 +118,8 @@ const exportIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" 
 <template>
     <default-layout>
         <div class="categories-page">
-            <PageHeader :icon="categoriesIcon" title-key="pages.categories.title"
-                description-key="pages.categories.description" />
+            <PageHeader :icon="categoriesIcon" title-key="pages.ProductsCategories.title"
+                description-key="pages.ProductsCategories.description" />
             <div class="flex justify-end pb-2">
                 <v-btn variant="outlined" height="40"
                     class="font-semibold text-base border-gray-300 bg-primary-50 !text-primary-900">
@@ -168,7 +175,7 @@ const exportIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" 
                             بحث متقدم
                         </v-btn>
 
-                        <router-link to="/categories/create">
+                        <router-link to="/products-categories/create">
                             <v-btn variant="flat" color="primary" height="40" class="px-7 font-semibold text-base"
                                 prepend-icon="mdi-plus-circle-outline">
                                 اضف جديد
@@ -193,17 +200,28 @@ const exportIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" 
                             </v-btn>
                         </div>
 
-                        <div class="flex flex-wrap gap-3 sm:w-1/2 order-1 sm:order-2 justify-end sm:justify-start">
+                        <div class="flex flex-wrap gap-3 flex-1 order-1 sm:order-2 justify-end sm:justify-start">
                             <v-text-field v-model="filterName" density="comfortable" variant="outlined" hide-details
                                 placeholder="اسم التصنيف" class="w-full sm:w-60 bg-white" />
+                            <v-select v-model="filterUnit" :items="['م 3', 'طن', 'كجم']" density="comfortable"
+                                variant="outlined" hide-details placeholder="الوحدة" class="w-full sm:w-40 bg-white" />
+                            <v-select v-model="filterTaxes" :items="['ضريبة', 'ضريبة 1', 'ضريبة 2']" density="comfortable"
+                                variant="outlined" hide-details placeholder="الضرائب" class="w-full sm:w-40 bg-white" />
+                            <v-select v-model="filterStatus" :items="['فعال', 'غير فعال']" density="comfortable"
+                                variant="outlined" hide-details placeholder="الحالة" class="w-full sm:w-40 bg-white" />
                         </div>
                     </div>
                 </div>
 
                 <!-- Categories Table --> 
                 <DataTable :headers="taxTableHeaders" :items="taxTableItems" show-checkbox
-                    :show-actions="false" @delete="handleDeleteTax" @select="handleSelectCategory"
-                    @selectAll="handleSelectAllCategories" />
+                    show-actions @delete="handleDeleteTax" @select="handleSelectCategory"
+                    @selectAll="handleSelectAllCategories">
+                    <template #item.status="{ item }">
+                        <v-switch :model-value="item.status" hide-details inset density="compact" color="primary"
+                            readonly />
+                    </template>
+                </DataTable>
             </div>
         </div>
     </default-layout>

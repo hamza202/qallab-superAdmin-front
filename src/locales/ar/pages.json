@@ -15,9 +15,13 @@
       "title": "المنتجات المركبة",
       "description": "تمكنك من اضافة المنتجات المركبة"
     },
-    "categories": {
-      "title": "التصنيفات",
-      "description": "تمكنك من اضافة التصنيفات"
+    "ProductsCategories": {
+      "title": "تصنيفات المنتجات",
+      "description": "تمكنك من إدارة تصنيفات المنتجات"
+    },
+    "ServicesCategories": {
+      "title": "تصنيفات الخدمات",
+      "description": "تمكنك من إدارة تصنيفات الخدمات"
     },
     "units": {
       "title": "الوحدات",
@@ -80,20 +84,32 @@
       "create": "إضافة مشروع",
       "edit": "تعديل مشروع"
     },
-    "priceLists": {
-      "title": "قوائم الأسعار",
+    "ProductsPriceLists": {
+      "title": "قوائم أسعار المنتجات",
       "description": "تمكنك من ادارة أسعار المنتجات"
     },
-    "productionCapacity": {
-      "title": "القدرة الإنتاجية",
+    "ProductsPriceList": {
+      "title": "قائمة أسعار المنتجات",
+      "description": "تمكنك من ادارة أسعار المنتجات"
+    },
+    "productionCapacityLists": {
+      "title": "قوائم  القدرة الانتاجية",
+      "description": "تمكنك من إدارة القدرة الإنتاجية للمنتجات"
+    },
+    "productionCapacityList": {
+      "title": "قائمة  القدرة الانتاجية",
       "description": "تمكنك من إدارة القدرة الإنتاجية للمنتجات"
     },
     "services": {
       "title": "الخدمات",
       "description": "تمكنك من إدارة الخدمات"
     },
-    "servicesPrices": {
-      "title": "قوائم الأسعار",
+    "servicesPricesList": {
+      "title": "قوائم أسعار الخدمات",
+      "description": "تمكنك من ادارة أسعار الخدمات"
+    },
+    "servicePricesList": {
+      "title": "قائمة أسعار الخدمات",
       "description": "تمكنك من ادارة أسعار الخدمات"
     },
     "servicesSettings": {
