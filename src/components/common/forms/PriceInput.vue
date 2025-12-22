@@ -68,7 +68,7 @@ const internalValue = computed({
         <v-text-field v-model="internalValue" type="number" :placeholder="placeholder" variant="outlined" :color="color"
             :density="density" :disabled="disabled" :readonly="readonly" :clearable="clearable" :rules="rules"
             :hide-details="hideDetails" :hint="hint" :persistent-hint="persistentHint"
-            :prefix="!keepCurrencyVisible && showCurrencyOnLeft ? currency : undefined"
+            :prefix="!keepCurrencyVisible && showCurrencyOnLeft ? currency : undefined" 
             :suffix="!keepCurrencyVisible && !showCurrencyOnLeft ? currency : undefined" v-bind="inputProps"
             class="price-input">
             <template v-if="keepCurrencyVisible && currency && showCurrencyOnLeft" #prepend-inner>
@@ -92,5 +92,6 @@ const internalValue = computed({
 
 .price-input :deep(input[type="number"]) {
     -moz-appearance: textfield;
+    
 }
 </style>

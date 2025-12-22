@@ -303,7 +303,6 @@ const editIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none" xm
           :items="geoSegmentsTableItems"
           show-actions
           show-checkbox
-          class="mt-4"
           @edit="handleEditGeoSegment"
           @delete="handleDeleteGeoSegment"
           @select="handleSelectGeoSegment"

@@ -55,38 +55,41 @@
                                 </template>
                             </v-list-item>
                         </template>
-                        <div class="relative mt-3 ps-15 pe-4 text-sm">
-                            <div
-                                class="absolute top-1 bottom-1 right-[30px] border-r-2 border-dotted border-white -translate-y-3 h-[100.5%]">
-                            </div>
-                            <ul class="space-y-2">
+                        <div class="relative mt-1 ps-10 pe-4 text-sm">
+                            <h2 class="text-sm font-medium leading-5 mb-2">إدارة المتجات</h2>
+                            <ul class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
                                 <li class="relative">
-                                    <router-link to="/products/sales-management"
-                                        :class="[$route.path.includes('/products/sales-management') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
-                                        المبيعات</router-link>
-                                    <span
-                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
+                                    <router-link to="/simple-products/list"
+                                        :class="[$route.path.includes('/simple-products/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        منتجات بسيطة </router-link>
                                 </li>
                                 <li class="relative">
-                                    <router-link to="/products/price-list"
-                                        :class="[$route.path.includes('/products/price-list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">قائمة
-                                        الأسعار</router-link>
-                                    <span
-                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
+                                    <router-link to="/group-products/list"
+                                        :class="[$route.path.includes('/group-products/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        منتجات المجموعة</router-link>
                                 </li>
                                 <li class="relative">
-                                    <router-link to="/products/production-capacity"
-                                        :class="[$route.path.includes('/products/production-capacity') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">القدرة
-                                        الإنتاجية</router-link>
-                                    <span
-                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
+                                    <router-link to="/products/prices-list"
+                                        :class="[$route.path.includes('/products/prices-list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        قوائم الاسعار</router-link>
                                 </li>
                                 <li class="relative">
-                                    <router-link to="/products/settings"
-                                        :class="[$route.path.includes('/products/settings') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إعدادات
-                                        المنتج</router-link>
-                                    <span
-                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
+                                    <router-link to="/products/production-capacity-list"
+                                        :class="[$route.path.includes('/products/production-capacity-list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        القدرة الإنتاجية</router-link>
+                                </li>
+                            </ul>
+                            <h2 class="text-sm font-medium leading-5 my-2">إعدادات المنتجات</h2>
+                            <ul class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
+                                <li class="relative">
+                                    <router-link to="/customers/list"
+                                        :class="[$route.path.includes('/customers/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        متغيرات المنتج </router-link>
+                                </li>
+                                <li class="relative">
+                                    <router-link to="/sales/invoices"
+                                        :class="[$route.path.includes('/sales/invoices') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        اعدادات جدول المنتجات</router-link>
                                 </li>
                             </ul>
                         </div>
@@ -112,33 +115,30 @@
                                 </template>
                             </v-list-item>
                         </template>
-                        <div class="relative mt-3 ps-15 pe-4 text-sm">
-                            <div
-                                class="absolute top-1 bottom-1 right-[30px] border-r-2 border-dotted border-white -translate-y-3 h-[100.5%]">
-                            </div>
-                            <ul class="space-y-2">
+                        <div class="relative mt-1 ps-10 pe-4 text-sm">
+                            <ul class="space-y-2 text-slate-100">
                                 <li class="relative">
-                                    <router-link to="/services/management"
-                                        :class="[$route.path.includes('/services/management') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
-                                        الخدمات</router-link>
-                                    <span
-                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
+                                    <router-link to="/simple-products/list"
+                                        :class="[$route.path.includes('/simple-products/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        إدارة الخدمات </router-link>
                                 </li>
                                 <li class="relative">
-                                    <router-link to="/services/price-list"
-                                        :class="[$route.path.includes('/services/price-list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">قوائم
-                                        الأسعار</router-link>
-                                    <span
-                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
+                                    <router-link to="/group-products/list"
+                                        :class="[$route.path.includes('/group-products/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
+                                        الاشتراكات</router-link>
                                 </li>
                                 <li class="relative">
-                                    <router-link to="/services/settings"
-                                        :class="[$route.path.includes('/services/settings') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إعدادات
-                                        الخدمات</router-link>
-                                    <span
-                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
+                                    <router-link to="/services/prices-list"
+                                        :class="[$route.path.includes('/services/prices-list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
+                                        قوائم الاسعار</router-link>
+                                </li>
+                                <li class="relative">
+                                    <router-link to="/products/production-capacity-list"
+                                        :class="[$route.path.includes('/products/production-capacity-list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
+                                        إعدادات الخدمات</router-link>
                                 </li>
                             </ul>
+
                         </div>
                     </v-list-group>
 
@@ -162,8 +162,8 @@
                                 </template>
                             </v-list-item>
                         </template>
-                        <div class="relative mt-3 ps-15 pe-4 text-sm">
-                            <div
+                        <div class="relative mt-1 ps-10 pe-4 text-sm">
+                            <!-- <div
                                 class="absolute top-1 bottom-1 right-[30px] border-r-2 border-dotted border-white -translate-y-3 h-[100.5%]">
                             </div>
                             <ul class="space-y-2">
@@ -202,7 +202,36 @@
                                     <span
                                         class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
                                 </li>
+                            </ul> -->
+                            <h2 class="text-sm font-medium leading-5 mb-2">إدارة العملاء</h2>
+                            <ul class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
+                                <li class="relative">
+                                    <router-link to="/customers/list"
+                                        :class="[$route.path.includes('/customers/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        قائمة العملاء </router-link>
+                                </li>
+                                <li class="relative">
+                                    <router-link to="/sales/invoices"
+                                        :class="[$route.path.includes('/sales/invoices') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
+                                        فواتير المبيعات</router-link>
+                                </li>
+                                <li class="relative">
+                                    <router-link to="/sales/orders"
+                                        :class="[$route.path.includes('/sales/orders') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
+                                        طلبات المبيعات</router-link>
+                                </li>
+                                <li class="relative">
+                                    <router-link to="/sales/contracts"
+                                        :class="[$route.path.includes('/sales/contracts') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
+                                        العقود</router-link>
+                                </li>
+                                <li class="relative">
+                                    <router-link to="/sales/clearing"
+                                        :class="[$route.path.includes('/sales/clearing') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
+                                        المقاصة</router-link>
+                                </li>
                             </ul>
+
                         </div>
                     </v-list-group>
 
@@ -226,24 +255,19 @@
                                 </template>
                             </v-list-item>
                         </template>
-                        <div class="relative mt-3 ps-15 pe-4 text-sm">
-                            <div
-                                class="absolute top-1 bottom-1 right-[30px] border-r-2 border-dotted border-white -translate-y-3 h-[100.5%]">
-                            </div>
-                            <ul class="space-y-2">
+                        <div class="relative mt-1 ps-10 pe-4 text-sm">
+                            <ul class="space-y-2 text-slate-100">
                                 <li class="relative">
-                                    <router-link to="/projects/management"
-                                        :class="[$route.path.includes('/projects/management') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
-                                        المشاريع</router-link>
-                                    <span
-                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
+                                    <router-link to="/projects/list"
+                                        :class="[$route.path.includes('/projects/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        إدارة
+                                        المشاريع </router-link>
                                 </li>
                                 <li class="relative">
                                     <router-link to="/projects/scheduling"
-                                        :class="[$route.path.includes('/projects/scheduling') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">جدولة
+                                        :class="[$route.path.includes('/projects/scheduling') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
+                                        جدولة
                                         المشاريع</router-link>
-                                    <span
-                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
                                 </li>
                             </ul>
                         </div>
@@ -269,38 +293,18 @@
                                 </template>
                             </v-list-item>
                         </template>
-                        <div class="relative mt-3 ps-15 pe-4 text-sm">
-                            <div
-                                class="absolute top-1 bottom-1 right-[30px] border-r-2 border-dotted border-white -translate-y-3 h-[100.5%]">
-                            </div>
-                            <ul class="space-y-2">
+                        <div class="relative mt-1 ps-10 pe-4 text-sm">
+                            <h2 class="text-sm font-medium leading-5 mb-2">إدارة الموردين</h2>
+                            <ul class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
                                 <li class="relative">
-                                    <router-link to="/purchases/quotations"
-                                        :class="[$route.path.includes('/purchases/quotations') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
-                                        عروض الأسعار</router-link>
-                                    <span
-                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
+                                    <router-link to="/suppliers/list"
+                                        :class="[$route.path.includes('/suppliers/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        إدارة الموردين </router-link>
                                 </li>
                                 <li class="relative">
-                                    <router-link to="/purchases/invoices"
-                                        :class="[$route.path.includes('/purchases/invoices') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
-                                        فواتير المبيعات</router-link>
-                                    <span
-                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
-                                </li>
-                                <li class="relative">
-                                    <router-link to="/purchases/orders"
-                                        :class="[$route.path.includes('/purchases/orders') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
-                                        طلبات المشتريات</router-link>
-                                    <span
-                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
-                                </li>
-                                <li class="relative">
-                                    <router-link to="/purchases/contracts"
-                                        :class="[$route.path.includes('/purchases/contracts') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
-                                        العقود</router-link>
-                                    <span
-                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
+                                    <router-link to="/suppliers/list"
+                                        :class="[$route.path.includes('/suppliers/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        تسوية حساب موردين</router-link>
                                 </li>
                             </ul>
                         </div>
@@ -497,25 +501,99 @@
                                 </template>
                             </v-list-item>
                         </template>
-                        <div class="relative mt-3 ps-15 pe-4 text-sm">
-                            <div
-                                class="absolute top-1 bottom-1 right-[30px] border-r-2 border-dotted border-white -translate-y-3 h-[100.5%]">
-                            </div>
-                            <ul class="space-y-2">
+                        <div class="relative mt-1 ps-10 pe-4 text-sm">
+                            <h2 class="text-sm font-medium leading-5 mb-2">الإعدادات الاساسية</h2>
+                            <ul class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
                                 <li class="relative">
-                                    <router-link to="/settings/countries-cities"
-                                        :class="[$route.path.includes('/settings/countries-cities') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">الدول
-                                        والمدن</router-link>
-                                    <span
-                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
+                                    <router-link to="/products-categories/list"
+                                        :class="[$route.path.includes('/products-categories/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        قائمة تصنيفات المنتجات </router-link>
                                 </li>
                                 <li class="relative">
-                                    <router-link to="/settings/categories"
-                                        :class="[$route.path.includes('/settings/categories') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">التصنيفات</router-link>
-                                    <span
-                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
+                                    <router-link to="/services-categories/list"
+                                        :class="[$route.path.includes('/services-categories/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        قائمة تصنيفات الخدمات</router-link>
+                                </li>
+                                <li class="relative">
+                                    <router-link to="/products-categories/list"
+                                        :class="[$route.path.includes('/products-categories/create') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        تصنيفات المنتجات </router-link>
+                                </li>
+                                <li class="relative">
+                                    <router-link to="/services-categories/list"
+                                        :class="[$route.path.includes('/services-categories/create') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        تصنيفات الخدمات</router-link>
+                                </li>
+                                <li class="relative">
+                                    <router-link to="/units/list"
+                                        :class="[$route.path.includes('/units/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        الوحدات</router-link>
+                                </li>
+                                <li class="relative">
+                                    <router-link to="/factories/list"
+                                        :class="[$route.path.includes('/factories/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        المصانع</router-link>
+                                </li>
+                                <li class="relative">
+                                    <router-link to="/brands/list"
+                                        :class="[$route.path.includes('/brands/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        العلامة التجارية</router-link>
+                                </li>
+                                <li class="relative">
+                                    <router-link to="/geo-areas/list"
+                                        :class="[$route.path.includes('/geo-areas/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        تقسيمات المناطق الجغرافية</router-link>
+                                </li>
+                                <li class="relative">
+                                    <router-link to="/geo-segments/list"
+                                        :class="[$route.path.includes('/geo-segments/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        تقسيمات النطاقات الجغرافية</router-link>
                                 </li>
                             </ul>
+                            <h2 class="text-sm font-medium leading-5 my-2">إدارة الضرائب</h2>
+                            <ul class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
+                                <li class="relative">
+                                    <router-link to="/tax-rules/list"
+                                        :class="[$route.path.includes('/tax-rules/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        القواعد الضريبية
+                                    </router-link>
+                                </li>
+                                <li class="relative">
+                                    <router-link to="/taxes/list"
+                                        :class="[$route.path.includes('/taxes/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        الضرائب</router-link>
+                                </li>
+                            </ul>
+                            <h2 class="text-sm font-medium leading-5 my-2">الدول والعملات</h2>
+                            <ul class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
+                                <li class="relative">
+                                    <router-link to="/cities/list"
+                                        :class="[$route.path.includes('/cities/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        إدارة الدول
+                                    </router-link>
+                                </li>
+                                <li class="relative">
+                                    <router-link to="/sales/invoices"
+                                        :class="[$route.path.includes('/sales/invoices') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        إدارة العملات</router-link>
+                                </li>
+                            </ul>
+                            <h2 class="text-sm font-medium leading-5 my-2">إعدادات متقدمة</h2>
+                            <ul class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
+                                <li class="relative">
+                                    <router-link to="/codes"
+                                        :class="[$route.path.includes('/codes') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        اعدادات الاكواد
+                                    </router-link>
+                                </li>
+                                <li class="relative">
+                                    <router-link to="/account-types/list"
+                                        :class="[$route.path.includes('/account-types/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        أنواع الحسابات
+                                    </router-link>
+                                </li>
+                            </ul>
+
                         </div>
                     </v-list-group>
                 </v-list>

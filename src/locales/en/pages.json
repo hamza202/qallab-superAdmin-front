@@ -42,6 +42,20 @@
       "create": "Add Supplier",
       "edit": "Edit Supplier"
     },
+    "customers": {
+      "title": "Customers",
+      "description": "Allows you to manage customers",
+      "list": "Customers List",
+      "create": "Add Customer",
+      "edit": "Edit Customer"
+    },
+    "projects": {
+      "title": "Projects Table",
+      "description": "View projects",
+      "list": "Projects List",
+      "create": "Add Project",
+      "edit": "Edit Project"
+    },
     "priceLists": {
       "title": "Price Lists",
       "description": "Allows you to manage product prices"

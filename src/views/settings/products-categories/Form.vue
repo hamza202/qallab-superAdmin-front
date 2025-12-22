@@ -5,10 +5,13 @@ import { useApi } from '@/composables/useApi';
 const { notification, success, error: showError } = useNotification();
 const api = useApi();
 
-// API Endpoints
+// API Endpoints - Update these URLs when backend is ready
 const API_ENDPOINTS = {
-  categories: '/settings/categories',
-  categoryById: (id: number) => `/settings/categories/${id}`,
+  categories: '/api/categories', // GET: list, POST: create
+  categoryById: (id: number) => `/api/categories/${id}`, // GET: details, PUT: update, DELETE: delete
+  bulkTaxes: '/api/categories/bulk-taxes', // POST: apply taxes to multiple categories
+  taxes: '/api/taxes', // GET: list of taxes
+  units: '/api/units', // GET: list of units
 };
 
 // =====================
@@ -66,7 +69,7 @@ const MOCK_CATEGORY_DETAILS: Record<number, any> = {
 };
 
 // Set to true to use mock data, false to use real API
-const USE_MOCK_DATA = true;
+const USE_MOCK_DATA = true; // Change to false when API is ready
 
 // =====================
 // Types & Interfaces
@@ -87,19 +90,53 @@ interface TaxRule {
 }
 
 interface CategoryFormData {
-  name_ar: string;
-  name_en: string;
+  name: {
+    ar: string;
+    en: string;
+  };
   description: string;
   parent_id: number | null;
-  is_active: number;
-  unit?: string;
+  user_id: number;
+  unit_id: number | null;
   image: File | null;
+  is_active: boolean;
   taxes: Array<{
-    name: string;
-    percentage: string;
-    min_value: string;
-    priority: string;
+    tax_id: number;
+    tax_percentage: number;
+    min_tax_amount: number;
+    priority: number;
   }>;
+}
+
+interface ApiCategory {
+  id: number;
+  name: string;
+  translations: {
+    name: {
+      en: string;
+      ar: string;
+    };
+  };
+  description?: string;
+  image?: any;
+  is_active: number;
+  created_at: string;
+  updated_at?: string;
+  parent: ApiCategory | null;
+  children: ApiCategory[];
+  has_children: boolean;
+}
+
+interface ApiTax {
+  id: number;
+  tax_name: string;
+  value_rate: string;
+  code: string;
+}
+
+interface ApiUnit {
+  id: number;
+  name: string;
 }
 
 // =====================
@@ -146,24 +183,22 @@ const expandedCategoryIds = ref<number[]>([]);
 // =====================
 // Dropdown Items
 // =====================
-const unitItems = [
-  { title: "اختر الوحدة", value: "" },
-  { title: "قطعة", value: "piece" },
-  { title: "كيلو", value: "kg" },
-  { title: "لتر", value: "liter" },
-];
+const unitItems = ref<Array<{ title: string; value: number | string }>>([{ title: "اختر الوحدة", value: "" }]);
+const taxNameItems = ref<Array<{ title: string; value: number | string }>>([{ title: "اختر الضريبة", value: "" }]);
 
-const taxNameItems = [
-  { title: "اختر الضريبة", value: "" },
-  { title: "ضريبة القيمة المضافة", value: "vat" },
-  { title: "ضريبة أخرى", value: "other" },
-];
-
+// Priority is static 1-10
 const priorityItems = [
   { title: "اختر الأولوية", value: "" },
-  { title: "عالية", value: "high" },
-  { title: "متوسطة", value: "medium" },
-  { title: "منخفضة", value: "low" },
+  { title: "الأولى (1)", value: 1 },
+  { title: "الثانية (2)", value: 2 },
+  { title: "الثالثة (3)", value: 3 },
+  { title: "الرابعة (4)", value: 4 },
+  { title: "الخامسة (5)", value: 5 },
+  { title: "السادسة (6)", value: 6 },
+  { title: "السابعة (7)", value: 7 },
+  { title: "الثامنة (8)", value: 8 },
+  { title: "التاسعة (9)", value: 9 },
+  { title: "العاشرة (10)", value: 10 },
 ];
 
 const valuesItems = [
@@ -180,12 +215,12 @@ const parentCategoryItems = computed(() => {
   const items: { title: string; value: number | string }[] = [
     { title: "بدون تصنيف رئيسي", value: "" },
   ];
-  
+
   // Only main categories (those without parentId) can be parents
   categoriesList.value.forEach((cat) => {
     items.push({ title: cat.name, value: cat.id });
   });
-  
+
   return items;
 });
 
@@ -200,7 +235,7 @@ const showAddCategoryButton = computed(() => {
 const showAddSubcategoryButton = computed(() => {
   // Show only when a main category is selected (editing a main category)
   if (!isEditing.value || !selectedCategory.value) return false;
-  
+
   // Check if selected category is a main category (has children or no parentId)
   const isMainCategory = !selectedCategory.value.parentId;
   return isMainCategory;
@@ -317,7 +352,7 @@ const toggleCategoryExpand = (id: number) => {
 const isCategoryExpanded = (id: number) =>
   expandedCategoryIds.value.includes(id);
 
-const isCategorySelected = (id: number) => 
+const isCategorySelected = (id: number) =>
   selectedCategory.value?.id === id;
 
 const resetNewTaxRule = () => {
@@ -330,16 +365,16 @@ const resetNewTaxRule = () => {
   };
 };
 
-const getTaxNameLabel = (value: string | null) => {
+const getTaxNameLabel = (value: string | number | null) => {
   if (!value) return "";
-  const item = taxNameItems.find((i) => i.value === value);
-  return item ? item.title : value;
+  const item = taxNameItems.value.find((i) => i.value === value);
+  return item ? item.title : String(value);
 };
 
-const getPriorityLabel = (value: string | null) => {
+const getPriorityLabel = (value: string | number | null) => {
   if (!value) return "";
   const item = priorityItems.find((i) => i.value === value);
-  return item ? item.title : value;
+  return item ? item.title : String(value);
 };
 
 const addTaxRule = () => {
@@ -378,27 +413,103 @@ const resetForm = () => {
 };
 
 // =====================
+// API: Fetch Taxes List
+// =====================
+const fetchTaxes = async () => {
+  try {
+    if (USE_MOCK_DATA) {
+      // Mock taxes data
+      taxNameItems.value = [
+        { title: "اختر الضريبة", value: "" },
+        { title: "ضريبة القيمة المضافة (15%)", value: 1 },
+        { title: "ضريبة أخرى (5%)", value: 2 },
+      ];
+    } else {
+      // Real API call
+      const response = await api.get<{ data: ApiTax[] }>(API_ENDPOINTS.taxes);
+
+      taxNameItems.value = [
+        { title: "اختر الضريبة", value: "" },
+        ...response.data.map((tax) => ({
+          title: `${tax.tax_name} (${tax.value_rate}%)`,
+          value: tax.id,
+        })),
+      ];
+    }
+  } catch (error) {
+    console.error('Failed to fetch taxes:', error);
+    showError('حدث خطأ أثناء تحميل الضرائب');
+  }
+};
+
+// =====================
+// API: Fetch Units List
+// =====================
+const fetchUnits = async () => {
+  try {
+    if (USE_MOCK_DATA) {
+      // Mock units data
+      unitItems.value = [
+        { title: "اختر الوحدة", value: "" },
+        { title: "قطعة", value: 1 },
+        { title: "كيلو", value: 2 },
+        { title: "لتر", value: 3 },
+      ];
+    } else {
+      // Real API call
+      const response = await api.get<{ data: ApiUnit[] }>(API_ENDPOINTS.units);
+
+      unitItems.value = [
+        { title: "اختر الوحدة", value: "" },
+        ...response.data.map((unit) => ({
+          title: unit.name,
+          value: unit.id,
+        })),
+      ];
+    }
+  } catch (error) {
+    console.error('Failed to fetch units:', error);
+    showError('حدث خطأ أثناء تحميل الوحدات');
+  }
+};
+
+// =====================
 // API: Fetch Categories List
 // =====================
 const fetchCategories = async () => {
   isLoading.value = true;
   try {
-    // Use mock data or real API
-    const response = USE_MOCK_DATA 
-      ? MOCK_CATEGORIES 
-      : await api.get<any[]>(API_ENDPOINTS.categories);
-    
-    // Transform API response: sup_category to children
-    categoriesList.value = response.map((cat: any) => ({
-      id: cat.id,
-      name: cat.name,
-      parentId: null,
-      children: cat.sup_category?.map((sub: any) => ({
-        id: sub.id,
-        name: sub.name,
-        parentId: cat.id,
-      })) || [],
-    }));
+    if (USE_MOCK_DATA) {
+      // Use mock data
+      categoriesList.value = MOCK_CATEGORIES.map((cat: any) => ({
+        id: cat.id,
+        name: cat.name,
+        parentId: null,
+        children: cat.sup_category?.map((sub: any) => ({
+          id: sub.id,
+          name: sub.name,
+          parentId: cat.id,
+        })) || [],
+      }));
+    } else {
+      // Real API call
+      const response = await api.get<{ data: ApiCategory[] }>(API_ENDPOINTS.categories);
+
+      // Transform API response to internal format
+      // Filter only main categories (those without parent)
+      const mainCategories = response.data.filter(cat => !cat.parent);
+
+      categoriesList.value = mainCategories.map((cat) => ({
+        id: cat.id,
+        name: cat.translations?.name?.ar || cat.name,
+        parentId: null,
+        children: cat.children?.map((child) => ({
+          id: child.id,
+          name: child.translations?.name?.ar || child.name,
+          parentId: cat.id,
+        })) || [],
+      }));
+    }
   } catch (error) {
     console.error('Failed to fetch categories:', error);
     showError('حدث خطأ أثناء تحميل التصنيفات');
@@ -413,20 +524,35 @@ const fetchCategories = async () => {
 const fetchCategoryDetails = async (id: number) => {
   isLoading.value = true;
   try {
-    // Use mock data or real API
-    const cat = USE_MOCK_DATA 
-      ? MOCK_CATEGORY_DETAILS[id] 
-      : await api.get<any>(API_ENDPOINTS.categoryById(id));
-    
-    if (cat) {
-      // Populate form with category data
-      categoryNameAr.value = cat.name_ar || "";
-      categoryNameEn.value = cat.name_en || "";
-      categoryDescription.value = cat.description || "";
-      parentCategory.value = cat.parent_id;
-      isActive.value = Boolean(cat.is_active);
-      unit.value = cat.unit || null;
-      taxRules.value = cat.taxes || [];
+    if (USE_MOCK_DATA) {
+      // Use mock data
+      const cat = MOCK_CATEGORY_DETAILS[id];
+      if (cat) {
+        categoryNameAr.value = cat.name_ar || "";
+        categoryNameEn.value = cat.name_en || "";
+        categoryDescription.value = cat.description || "";
+        parentCategory.value = cat.parent_id;
+        isActive.value = Boolean(cat.is_active);
+        unit.value = cat.unit || null;
+        taxRules.value = cat.taxes || [];
+      }
+    } else {
+      // Real API call
+      const response = await api.get<{ data: ApiCategory }>(API_ENDPOINTS.categoryById(id));
+      const cat = response.data;
+
+      if (cat) {
+        // Populate form with API data
+        categoryNameAr.value = cat.translations?.name?.ar || "";
+        categoryNameEn.value = cat.translations?.name?.en || "";
+        categoryDescription.value = cat.description || "";
+        parentCategory.value = cat.parent?.id || null;
+        isActive.value = Boolean(cat.is_active);
+        unit.value = null; // Map unit_id if needed
+
+        // Transform taxes if they exist in response
+        taxRules.value = []; // Map from API taxes structure if available
+      }
     }
   } catch (error) {
     console.error('Failed to fetch category details:', error);
@@ -449,13 +575,13 @@ const handleCategorySelect = async (category: CategoryListItem, isSubcategory: b
     resetForm();
     return;
   }
-  
+
   // Select the category
   selectedCategory.value = { ...category, parentId: isSubcategory ? category.parentId : null };
   isEditing.value = true;
   isSubcategoryMode.value = false;
   parentCategoryForSubcategory.value = null;
-  
+
   // Fetch category details from API
   await fetchCategoryDetails(category.id);
 };
@@ -477,16 +603,16 @@ const handleAddNewCategory = () => {
 // =====================
 const handleAddSubcategory = () => {
   if (!selectedCategory.value) return;
-  
+
   // Store the parent category
   parentCategoryForSubcategory.value = { ...selectedCategory.value };
   parentCategory.value = selectedCategory.value.id;
-  
+
   // Switch to add mode for subcategory
   isEditing.value = false;
   isSubcategoryMode.value = true;
   selectedCategory.value = null;
-  
+
   // Reset form but keep parent category
   categoryNameAr.value = "";
   categoryNameEn.value = "";
@@ -511,49 +637,52 @@ const handleSave = async () => {
       return;
     }
   }
-  
+
   isSaving.value = true;
-  
+
   try {
     // Bulk mode - apply taxes to multiple categories
     if (isBulkMode.value) {
       const taxData = {
         category_ids: selectedCategoryIds.value,
-        taxes: taxRules.value.map((tax) => ({
-          name: tax.name || '',
-          percentage: tax.percentage,
-          min_value: tax.minValue || '',
-          priority: tax.maxValue || '',
+        taxes: taxRules.value.map((tax, index) => ({
+          tax_id: parseInt(tax.name || '1'), // Map tax name to tax_id
+          tax_percentage: parseFloat(tax.percentage) || 0,
+          min_tax_amount: parseFloat(tax.minValue || '0'),
+          priority: index + 1,
         })),
       };
-      
+
       if (USE_MOCK_DATA) {
         console.log('Mock: Applying bulk taxes', taxData);
       } else {
-        await api.post(`${API_ENDPOINTS.categories}/bulk-taxes`, taxData);
+        await api.post(API_ENDPOINTS.bulkTaxes, taxData);
       }
       success(`تم تطبيق الضرائب على ${selectedCategoryIds.value.length} تصنيف بنجاح`);
-      
+
       // Clear selections
       selectedCategoryIds.value = [];
     } else {
-      // Single category mode
+      // Single category mode - prepare payload matching API structure
       const formData: CategoryFormData = {
-        name_ar: categoryNameAr.value,
-        name_en: categoryNameEn.value,
+        name: {
+          ar: categoryNameAr.value,
+          en: categoryNameEn.value,
+        },
         description: categoryDescription.value,
         parent_id: parentCategory.value,
-        is_active: isActive.value ? 1 : 0,
-        unit: unit.value || undefined,
+        user_id: 1, // TODO: Get from auth context
+        unit_id: unit.value ? parseInt(unit.value) : null,
         image: categoryImage.value?.[0] || null,
-        taxes: taxRules.value.map((tax) => ({
-          name: tax.name || '',
-          percentage: tax.percentage,
-          min_value: tax.minValue || '',
-          priority: tax.maxValue || '',
+        is_active: isActive.value,
+        taxes: taxRules.value.map((tax, index) => ({
+          tax_id: parseInt(tax.name || '1'), // Map tax name to tax_id
+          tax_percentage: parseFloat(tax.percentage) || 0,
+          min_tax_amount: parseFloat(tax.minValue || '0'),
+          priority: index + 1,
         })),
       };
-      
+
       if (isEditing.value && selectedCategory.value) {
         // Update existing category
         if (USE_MOCK_DATA) {
@@ -572,17 +701,17 @@ const handleSave = async () => {
         success(isSubcategoryMode.value ? 'تم إضافة التصنيف الفرعي بنجاح' : 'تم إضافة التصنيف بنجاح');
       }
     }
-    
+
     // Refresh categories list
     await fetchCategories();
-    
+
     // Reset form and state
     resetForm();
     selectedCategory.value = null;
     isEditing.value = false;
     isSubcategoryMode.value = false;
     parentCategoryForSubcategory.value = null;
-    
+
   } catch (err) {
     console.error('Failed to save category:', err);
     showError('حدث خطأ أثناء حفظ التصنيف');
@@ -613,10 +742,10 @@ const openDeleteDialog = () => {
 
 const confirmDelete = async () => {
   if (!selectedCategory.value) return;
-  
+
   showDeleteDialog.value = false;
   isDeleting.value = true;
-  
+
   try {
     if (USE_MOCK_DATA) {
       console.log('Mock: Deleting category', selectedCategory.value.id);
@@ -624,10 +753,10 @@ const confirmDelete = async () => {
       await api.delete(API_ENDPOINTS.categoryById(selectedCategory.value.id));
     }
     success('تم حذف التصنيف بنجاح');
-    
+
     // Refresh categories list
     await fetchCategories();
-    
+
     // Reset form and state
     resetForm();
     selectedCategory.value = null;
@@ -635,7 +764,7 @@ const confirmDelete = async () => {
     isEditing.value = false;
     isSubcategoryMode.value = false;
     parentCategoryForSubcategory.value = null;
-    
+
   } catch (err) {
     console.error('Failed to delete category:', err);
     showError('حدث خطأ أثناء حذف التصنيف');
@@ -645,10 +774,12 @@ const confirmDelete = async () => {
 };
 
 // =====================
-// Lifecycle: Fetch categories on mount
+// Lifecycle: Fetch data on mount
 // =====================
 onMounted(() => {
   fetchCategories();
+  fetchTaxes();
+  fetchUnits();
 });
 
 const categoriesIcon = `<svg width="52" height="52" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -663,33 +794,20 @@ const categoriesIcon = `<svg width="52" height="52" viewBox="0 0 52 52" fill="no
   <default-layout>
     <div class="categories-page">
       <div class="flex items-center flex-wrap justify-between">
-        <PageHeader :icon="categoriesIcon" title-key="pages.categories.title"
-          description-key="pages.categories.description" />
+        <PageHeader :icon="categoriesIcon" title-key="pages.ProductsCategories.title"
+          description-key="pages.ProductsCategories.description" />
 
         <div class="flex flex-wrap gap-3 mb-6">
           <!-- Add New Category Button - visible when not editing -->
-          <v-btn 
-            v-if="showAddCategoryButton"
-            variant="flat" 
-            color="primary" 
-            height="44" 
-            class="font-semibold text-base px-6"
-            prepend-icon="mdi-plus-circle-outline"
-            @click="handleAddNewCategory"
-          >
+          <v-btn v-if="showAddCategoryButton" variant="flat" color="primary" height="44"
+            class="font-semibold text-base px-6" prepend-icon="mdi-plus-circle-outline" @click="handleAddNewCategory">
             <span>إضافة تصنيف جديد</span>
           </v-btn>
 
           <!-- Add Subcategory Button - visible only when a main category is selected -->
-          <v-btn 
-            v-if="showAddSubcategoryButton"
-            variant="flat" 
-            prepend-icon="mdi-plus-circle-outline" 
-            color="primary-50" 
-            height="44"
-            class="font-semibold text-base text-primary px-6"
-            @click="handleAddSubcategory"
-          >
+          <v-btn v-if="showAddSubcategoryButton" variant="flat" prepend-icon="mdi-plus-circle-outline"
+            color="primary-50" height="44" class="font-semibold text-base text-primary px-6"
+            @click="handleAddSubcategory">
             <span>إضافة تصنيف فرعي جديد</span>
           </v-btn>
         </div>
@@ -719,36 +837,22 @@ const categoriesIcon = `<svg width="52" height="52" viewBox="0 0 52 52" fill="no
               <div class="max-h-[600px] overflow-y-auto space-y-0.5">
                 <div v-for="category in filteredCategories" :key="category.id">
                   <!-- Main Category Row -->
-                  <div 
-                    class="flex items-center justify-start text-sm gap-2 px-4 py-50 rounded-md transition-colors"
-                    :class="isCategorySelected(category.id) ? 'bg-primary-100/50 border-s-4 border-primary-500' : 'hover:bg-gray-100'"
-                  >
-                    <v-checkbox 
-                      v-model="selectedCategoryIds" 
-                      :value="category.id" 
-                      density="compact" 
-                      hide-details
-                      class="m-0" 
-                    />
+                  <div class="flex items-center justify-start text-sm gap-2 px-4 py-50 rounded-md transition-colors"
+                    :class="isCategorySelected(category.id) ? 'bg-primary-100/50 border-s-4 border-primary-500' : 'hover:bg-gray-100'">
+                    <v-checkbox v-model="selectedCategoryIds" :value="category.id" density="compact" hide-details
+                      class="m-0" />
 
-                    <span 
-                      class="flex-1 cursor-pointer" 
-                      :class="isCategorySelected(category.id)
-                        ? 'text-primary-700 font-semibold'
-                        : selectedCategoryIds.includes(category.id)
-                          ? 'text-primary-600 font-medium'
-                          : 'text-gray-700'"
-                      @click="handleCategorySelect(category, false)"
-                    >
+                    <span class="flex-1 cursor-pointer" :class="isCategorySelected(category.id)
+                      ? 'text-primary-700 font-semibold'
+                      : selectedCategoryIds.includes(category.id)
+                        ? 'text-primary-600 font-medium'
+                        : 'text-gray-700'" @click="handleCategorySelect(category, false)">
                       {{ category.name }}
                     </span>
 
-                    <button 
-                      v-if="category.children && category.children.length" 
-                      type="button"
+                    <button v-if="category.children && category.children.length" type="button"
                       class="text-gray-400 hover:text-primary-600 transition-colors"
-                      @click="toggleCategoryExpand(category.id)"
-                    >
+                      @click="toggleCategoryExpand(category.id)">
                       <v-icon size="25">
                         {{ isCategoryExpanded(category.id) ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
                       </v-icon>
@@ -758,29 +862,18 @@ const categoriesIcon = `<svg width="52" height="52" viewBox="0 0 52 52" fill="no
                   <!-- Subcategories -->
                   <div v-if="category.children && category.children.length && isCategoryExpanded(category.id)"
                     class="ps-8 space-y-0.5">
-                    <div 
-                      v-for="child in category.children" 
-                      :key="child.id"
+                    <div v-for="child in category.children" :key="child.id"
                       class="flex items-center justify-start text-sm gap-2 py-50 ps-2 rounded-md transition-colors"
-                      :class="isCategorySelected(child.id) ? 'bg-primary-100/50 border-s-4 border-primary-500' : 'hover:bg-gray-100'"
-                    >
-                      <v-checkbox 
-                        v-model="selectedCategoryIds" 
-                        :value="child.id" 
-                        density="compact" 
-                        hide-details
-                        class="m-0" 
-                      />
+                      :class="isCategorySelected(child.id) ? 'bg-primary-100/50 border-s-4 border-primary-500' : 'hover:bg-gray-100'">
+                      <v-checkbox v-model="selectedCategoryIds" :value="child.id" density="compact" hide-details
+                        class="m-0" />
 
-                      <span 
-                        class="cursor-pointer"
-                        :class="isCategorySelected(child.id)
-                          ? 'text-primary-700 font-semibold'
-                          : selectedCategoryIds.includes(child.id)
-                            ? 'text-primary-600 font-medium'
-                            : 'text-gray-700'"
-                        @click="handleCategorySelect({ ...child, parentId: category.id }, true)"
-                      >
+                      <span class="cursor-pointer" :class="isCategorySelected(child.id)
+                        ? 'text-primary-700 font-semibold'
+                        : selectedCategoryIds.includes(child.id)
+                          ? 'text-primary-600 font-medium'
+                          : 'text-gray-700'"
+                        @click="handleCategorySelect({ ...child, parentId: category.id }, true)">
                         {{ child.name }}
                       </span>
                     </div>
@@ -818,37 +911,18 @@ const categoriesIcon = `<svg width="52" height="52" viewBox="0 0 52 52" fill="no
               </div>
 
               <div class="grid gap-4 mb-4 grid-cols-1 md:grid-cols-[repeat(auto-fit,minmax(250px,1fr))]">
-                <TextInput 
-                  v-model="categoryNameAr" 
-                  :label="$t('form.labels.name_ar')" 
-                  :placeholder="$t('form.placeholders.name_ar')"
-                  :rules="[required(), maxLength(100)]" 
-                  :hide-details="false" 
-                />
-                <TextInput 
-                  v-model="categoryNameEn" 
-                  :label="$t('form.labels.name_en')" 
-                  :placeholder="$t('form.placeholders.name_en')"
-                  :rules="[required(), maxLength(100)]" 
-                  :hide-details="false" 
-                />
+                <TextInput v-model="categoryNameAr" :label="$t('form.labels.name_ar')"
+                  :placeholder="$t('form.placeholders.name_ar')" :rules="[required(), maxLength(100)]"
+                  :hide-details="false" />
+                <TextInput v-model="categoryNameEn" :label="$t('form.labels.name_en')"
+                  :placeholder="$t('form.placeholders.name_en')" :rules="[required(), maxLength(100)]"
+                  :hide-details="false" />
 
-                <SelectWithIconInput 
-                  v-model="parentCategory" 
-                  label="التصنيف الرئيسي" 
-                  placeholder="اختر التصنيف الرئيسي"
-                  :items="parentCategoryItems" 
-                  :hide-details="false"
-                  :disabled="isSubcategoryMode"
-                />
+                <SelectWithIconInput v-model="parentCategory" label="التصنيف الرئيسي" placeholder="اختر التصنيف الرئيسي"
+                  :items="parentCategoryItems" :hide-details="false" :disabled="isSubcategoryMode" />
 
-                <SelectWithIconInput 
-                  v-model="unit" 
-                  label="الوحدة" 
-                  placeholder="اختر الوحدة" 
-                  :items="unitItems"
-                  :hide-details="false" 
-                />
+                <SelectWithIconInput v-model="unit" label="الوحدة" placeholder="اختر الوحدة" :items="unitItems"
+                  :hide-details="false" />
               </div>
 
               <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -859,8 +933,8 @@ const categoriesIcon = `<svg width="52" height="52" viewBox="0 0 52 52" fill="no
                   <div>
                     <span class="text-gray-700 text-sm font-semibold">
                       فعال \ غير فعال</span>
-                    <v-switch v-model="isActive" :label="`${isActive ? 'فعال' : 'غير فعال'}`"
-                      color="primary" inset hide-details />
+                    <v-switch v-model="isActive" :label="`${isActive ? 'فعال' : 'غير فعال'}`" color="primary" inset
+                      hide-details />
                   </div>
                 </div>
                 <div>
@@ -877,55 +951,11 @@ const categoriesIcon = `<svg width="52" height="52" viewBox="0 0 52 52" fill="no
                 <h2 class="text-lg font-bold text-primary-900">
                   {{ isBulkMode ? 'الضرائب للتصنيفات المحددة' : 'الضرائب' }}
                 </h2>
-              </div>
-
-              <div class="flex flex-wrap gap-4 items-end mb-6">
-                <div class="w-full lg:w-auto lg:flex-1 min-w-[160px]">
-                  <SelectWithIconInput
-                    v-model="newTaxRule.name"
-                    label="الضريبة"
-                    placeholder="اختر النوع"
-                    :items="taxNameItems"
-                    show-add-button
-                    :hide-details="true"
-                  />
-                </div>
-
-                <div class="w-full sm:flex-1 lg:w-auto min-w-[100px]">
-                  <TextInput
-                    v-model="newTaxRule.percentage"
-                    label="النسبة"
-                    placeholder="10%"
-                    :rules="[numeric()]"
-                    :hide-details="true"
-                  />
-                </div> 
-
-                <div class="w-full sm:flex-1 lg:w-auto min-w-[140px]">
-                  <SelectWithIconInput
-                    v-model="newTaxRule.minValue"
-                    label="أقل قيمة"
-                    placeholder="اختر القيمة"
-                    :items="valuesItems"
-                    :hide-details="true"
-                  />
-                </div>
-
-                <div class="w-full sm:flex-1 lg:w-auto min-w-[140px]">
-                  <SelectWithIconInput
-                    v-model="newTaxRule.maxValue"
-                    label="الأولوية"
-                    placeholder="اختر الأولوية"
-                    :items="priorityItems"
-                    :hide-details="true"
-                  />
-                </div>
-
                 <div class="w-full lg:w-auto flex justify-start lg:justify-end">
                   <v-btn
                     variant="flat"
                     color="primary"
-                    height="45"
+                    height="40"
                     class="font-semibold text-sm px-4 w-full lg:w-auto"
                     :disabled="!isNewTaxValid"
                     @click="addTaxRule"
@@ -935,6 +965,28 @@ const categoriesIcon = `<svg width="52" height="52" viewBox="0 0 52 52" fill="no
                     </template>
                     <span>اضافة ضريبة</span>
                   </v-btn>
+                </div>
+              </div>
+
+              <div class="flex flex-wrap gap-4 items-end mb-6">
+                <div class="w-full lg:w-auto lg:flex-1 min-w-[250px]">
+                  <SelectWithIconInput v-model="newTaxRule.name" label="الضريبة" placeholder="اختر النوع"
+                    :items="taxNameItems" show-add-button :hide-details="true" />
+                </div>
+
+                <div class="w-full sm:flex-1 lg:w-auto min-w-[100px]">
+                  <TextInput v-model="newTaxRule.percentage" label="النسبة" placeholder="10%" :rules="[numeric()]"
+                    :hide-details="true" />
+                </div>
+
+                <div class="w-full sm:flex-1 lg:w-auto min-w-[140px]">
+                  <SelectWithIconInput v-model="newTaxRule.minValue" label="أقل قيمة" placeholder="اختر القيمة"
+                    :items="valuesItems" :hide-details="true" />
+                </div>
+
+                <div class="w-full sm:flex-1 lg:w-auto min-w-[140px]">
+                  <SelectWithIconInput v-model="newTaxRule.maxValue" label="الأولوية" placeholder="اختر الأولوية"
+                    :items="priorityItems" :hide-details="true" />
                 </div>
               </div>
 
@@ -993,44 +1045,23 @@ const categoriesIcon = `<svg width="52" height="52" viewBox="0 0 52 52" fill="no
 
             <div class="flex justify-center gap-3 mt-6 sm:flex-row flex-col">
               <!-- Save/Apply Button -->
-              <v-btn 
-                variant="flat" 
-                color="primary" 
-                height="48" 
-                class="sm:flex-1 font-semibold text-base"
-                :prepend-icon="isBulkMode ? 'mdi-check-all' : 'mdi-content-save-all-outline'" 
-                :loading="isSaving"
-                :disabled="isSaving || isDeleting || (isBulkMode && !taxRules.length)"
-                @click="handleSave"
-              >
+              <v-btn variant="flat" color="primary" height="48" class="sm:flex-1 font-semibold text-base"
+                :prepend-icon="isBulkMode ? 'mdi-check-all' : 'mdi-content-save-all-outline'" :loading="isSaving"
+                :disabled="isSaving || isDeleting || (isBulkMode && !taxRules.length)" @click="handleSave">
                 {{ isBulkMode ? 'تطبيق الضرائب على التصنيفات المحددة' : isEditing ? 'تحديث' : 'حفظ' }}
               </v-btn>
 
               <!-- Close/Cancel Button -->
-              <v-btn 
-                variant="flat" 
-                color="primary-100" 
-                height="48"
-                class="sm:flex-1 font-semibold text-base text-primary-700" 
-                prepend-icon="mdi-close"
-                :disabled="isSaving || isDeleting"
-                @click="handleClose"
-              >
+              <v-btn variant="flat" color="primary-100" height="48"
+                class="sm:flex-1 font-semibold text-base text-primary-700" prepend-icon="mdi-close"
+                :disabled="isSaving || isDeleting" @click="handleClose">
                 {{ isBulkMode ? 'إلغاء التحديد' : 'إغلاق' }}
               </v-btn>
 
               <!-- Delete Button - only visible when editing -->
-              <v-btn 
-                v-if="isEditing && selectedCategory"
-                variant="flat" 
-                color="error-50" 
-                height="48" 
-                class="sm:flex-1 font-semibold text-base text-error-700"
-                prepend-icon="mdi-trash-can-outline" 
-                :loading="isDeleting"
-                :disabled="isSaving || isDeleting"
-                @click="openDeleteDialog"
-              >
+              <v-btn v-if="isEditing && selectedCategory" variant="flat" color="error-50" height="48"
+                class="sm:flex-1 font-semibold text-base text-error-700" prepend-icon="mdi-trash-can-outline"
+                :loading="isDeleting" :disabled="isSaving || isDeleting" @click="openDeleteDialog">
                 حذف
               </v-btn>
             </div>
@@ -1040,12 +1071,7 @@ const categoriesIcon = `<svg width="52" height="52" viewBox="0 0 52 52" fill="no
       </v-form>
     </div>
     <!-- Delete Confirmation Dialog -->
-    <DeleteConfirmDialog
-      v-model="showDeleteDialog"
-      :loading="isDeleting"
-      :persistent="true"
-      @confirm="confirmDelete"
-    >
+    <DeleteConfirmDialog v-model="showDeleteDialog" :loading="isDeleting" :persistent="true" @confirm="confirmDelete">
       <p class="text-gray-700 text-center">
         هل أنت متأكد من حذف التصنيف
         <strong class="text-primary-700">{{ selectedCategory?.name }}</strong>؟
@@ -1057,18 +1083,12 @@ const categoriesIcon = `<svg width="52" height="52" viewBox="0 0 52 52" fill="no
     </DeleteConfirmDialog>
 
     <!-- Notification Snackbar -->
-    <v-snackbar
-      v-model="notification.show"
-      :timeout="notification.timeout"
+    <v-snackbar v-model="notification.show" :timeout="notification.timeout"
       :color="notification.type === 'success' ? 'success' : notification.type === 'error' ? 'error' : notification.type === 'warning' ? 'warning' : 'info'"
-      location="top end"
-    >
+      location="top end">
       {{ notification.message }}
       <template #actions>
-        <v-btn
-          variant="text"
-          @click="notification.show = false"
-        >
+        <v-btn variant="text" @click="notification.show = false">
           إغلاق
         </v-btn>
       </template>

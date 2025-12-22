@@ -1,12 +1,11 @@
 <script setup lang="ts">
 import { ref } from "vue";
 
-interface PriceListRow {
+interface ServicePriceRow {
   id: number;
-  productId: number | null;
-  salePriceTon: number | null;
-  salePriceM3: number | null;
-  salePriceRd: number | null;
+  serviceId: number | null;
+  maxPrice: number | null;
+  minPrice: number | null;
 }
 
 type EditableTableItem = {
@@ -21,30 +20,30 @@ const priceListIcon = `<svg width="52" height="52" viewBox="0 0 52 52" fill="non
 <path fill-rule="evenodd" clip-rule="evenodd" d="M10.8333 6.5C8.4401 6.5 6.5 8.4401 6.5 10.8333V41.1667C6.5 43.5599 8.4401 45.5 10.8333 45.5H41.1667C43.5599 45.5 45.5 43.5599 45.5 41.1667V10.8333C45.5 8.4401 43.5599 6.5 41.1667 6.5H10.8333ZM15.1667 18.4167C15.1667 17.2201 16.1367 16.25 17.3333 16.25H34.6667C35.8633 16.25 36.8333 17.2201 36.8333 18.4167C36.8333 19.6133 35.8633 20.5833 34.6667 20.5833H17.3333C16.1367 20.5833 15.1667 19.6133 15.1667 18.4167ZM15.1667 29.25C15.1667 28.0534 16.1367 27.0833 17.3333 27.0833H34.6667C35.8633 27.0833 36.8333 28.0534 36.8333 29.25C36.8333 30.4466 35.8633 31.4167 34.6667 31.4167H17.3333C16.1367 31.4167 15.1667 30.4466 15.1667 29.25Z" fill="#1570EF"/>
 </svg>`;
 
-const productName = ref("");
+const serviceName = ref("");
 
-const productItems = ref([
-  { title: "مواد بناء", value: 1 },
-  { title: "اسمنت", value: 2 },
-  { title: "حديد", value: 3 },
+const serviceItems = ref([
+  { title: "خدمة استشارية", value: 1 },
+  { title: "خدمة صيانة", value: 2 },
+  { title: "خدمة تركيب", value: 3 },
 ]);
 
 const nextRowId = ref(1);
 
-const createEmptyRow = (): PriceListRow => ({
+const createEmptyRow = (): ServicePriceRow => ({
   id: nextRowId.value++,
-  productId: null,
-  salePriceTon: null,
-  salePriceM3: null,
-  salePriceRd: null,
+  serviceId: null,
+  maxPrice: null,
+  minPrice: null,
 });
 
-const rows = ref<PriceListRow[]>([createEmptyRow()]);
+const rows = ref<ServicePriceRow[]>([createEmptyRow()]);
 
 const tableHeaders = [
   { key: "rowNumber", title: "#", width: "70px" },
-  { key: "productId", title: "المنتج" },
-  { key: "salePrice", title: "سعر البيع", width: "420px" },
+  { key: "serviceId", title: "المنتج" },
+  { key: "maxPrice", title: "أعلى سعر", width: "150px" },
+  { key: "minPrice", title: "أدنى سعر", width: "150px" },
 ];
 
 const bulkEditMode = ref<BulkEditMode>("percentage");
@@ -73,9 +72,8 @@ const applyBulkEdit = () => {
   };
 
   rows.value.forEach((r) => {
-    r.salePriceTon = applyToValue(r.salePriceTon);
-    r.salePriceM3 = applyToValue(r.salePriceM3);
-    r.salePriceRd = applyToValue(r.salePriceRd);
+    r.maxPrice = applyToValue(r.maxPrice);
+    r.minPrice = applyToValue(r.minPrice);
   });
 };
 
@@ -97,8 +95,8 @@ const handleDeleteRow = (item: EditableTableItem) => {
 };
 
 const handleSave = () => {
-  console.log("Save price list", {
-    name: productName.value,
+  console.log("Save services price list", {
+    name: serviceName.value,
     rows: rows.value,
   });
 };
@@ -106,9 +104,9 @@ const handleSave = () => {
 
 <template>
   <default-layout>
-    <div class="price-list-page">
-      <PageHeader :icon="priceListIcon" title-key="pages.priceLists.title"
-        description-key="pages.priceLists.description" />
+    <div class="services-price-list-page">
+      <PageHeader :icon="priceListIcon" title-key="pages.servicePricesList.title"
+        description-key="pages.servicePricesList.description" />
 
       <div class="-mx-6">
         <div class="pb-2">
@@ -163,13 +161,13 @@ const handleSave = () => {
         <div class="border-y border-y-primary-100 bg-primary-50 px-4 sm:px-6 py-3">
           <div class="flex flex-col md:flex-row gap-3 md:items-center justify-between">
             <div class="min-w-[250px]">
-              <TextInput v-model="productName" placeholder="اسم المنتج" :hide-details="true"
+              <TextInput v-model="serviceName" placeholder="اسم قائمة السعر" :hide-details="true"
                 :input-props="{ class: 'bg-white' }" />
             </div>
 
             <v-btn variant="flat" color="primary" height="40" class="px-7 font-semibold text-base"
               prepend-icon="mdi-plus" @click="addRow">
-              إضافة منتج
+              إضافة خدمة
             </v-btn>
           </div>
         </div>
@@ -179,26 +177,19 @@ const handleSave = () => {
             <span class="text-sm text-gray-600">{{ rowIndex + 1 }}</span>
           </template>
 
-          <template #item.productId="{ item }">
-            <SelectInput v-model="item.productId" :items="productItems" placeholder="اختر المنتج" :hide-details="true"
-              :input-props="{ class: 'bg-white' }" />
+          <template #item.serviceId="{ item }">
+            <SelectInput v-model="item.serviceId" :items="serviceItems" placeholder="اختر المنتج" :hide-details="true"
+              :input-props="{ class: 'bg-white max-w-[350px]' }" />
           </template>
 
-          <template #item.salePrice="{ item }">
-            <div class="flex items-center gap-2">
-              <div class="w-[130px]">
-                <PriceInput v-model="item.salePriceTon" currency="طن" keep-currency-visible placeholder="0"
-                  :hide-details="true" :input-props="{ class: 'bg-white' }" />
-              </div>
-              <div class="w-[130px]">
-                <PriceInput v-model="item.salePriceM3" currency="م^3" keep-currency-visible placeholder="0"
-                  :hide-details="true" :input-props="{ class: 'bg-white' }" />
-              </div>
-              <div class="w-[130px]">
-                <PriceInput v-model="item.salePriceRd" currency="رد" keep-currency-visible placeholder="0"
-                  :hide-details="true" :input-props="{ class: 'bg-white' }" />
-              </div>
-            </div>
+          <template #item.maxPrice="{ item }">
+            <PriceInput v-model="item.maxPrice" placeholder="60"
+              :hide-details="true" :input-props="{ class: 'bg-white md:min-w-[200px]' }" />
+          </template>
+
+          <template #item.minPrice="{ item }">
+            <PriceInput v-model="item.minPrice" placeholder="60"
+              :hide-details="true" :input-props="{ class: 'bg-white md:min-w-[200px]' }" />
           </template>
         </EditableDataTable>
 
@@ -223,3 +214,5 @@ const handleSave = () => {
     </div>
   </default-layout>
 </template>
+
+<style scoped></style>

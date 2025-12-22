@@ -15,9 +15,13 @@
       "title": "المنتجات المركبة",
       "description": "تمكنك من اضافة المنتجات المركبة"
     },
-    "categories": {
-      "title": "التصنيفات",
-      "description": "تمكنك من اضافة التصنيفات"
+    "ProductsCategories": {
+      "title": "تصنيفات المنتجات",
+      "description": "تمكنك من إدارة تصنيفات المنتجات"
+    },
+    "ServicesCategories": {
+      "title": "تصنيفات الخدمات",
+      "description": "تمكنك من إدارة تصنيفات الخدمات"
     },
     "units": {
       "title": "الوحدات",
@@ -66,13 +70,51 @@
       "create": "إضافة مورد",
       "edit": "تعديل مورد"
     },
-    "priceLists": {
-      "title": "قوائم الأسعار",
+    "customers": {
+      "title": "العملاء",
+      "description": "تمكنك من ادارة العملاء",
+      "list": "قائمة العملاء",
+      "create": "إضافة عميل",
+      "edit": "تعديل عميل"
+    },
+    "projects": {
+      "title": "جدول المشاريع",
+      "description": "عرض المشاريع",
+      "list": "قائمة المشاريع",
+      "create": "إضافة مشروع",
+      "edit": "تعديل مشروع"
+    },
+    "ProductsPriceLists": {
+      "title": "قوائم أسعار المنتجات",
       "description": "تمكنك من ادارة أسعار المنتجات"
     },
-    "productionCapacity": {
-      "title": "القدرة الإنتاجية",
+    "ProductsPriceList": {
+      "title": "قائمة أسعار المنتجات",
+      "description": "تمكنك من ادارة أسعار المنتجات"
+    },
+    "productionCapacityLists": {
+      "title": "قوائم  القدرة الانتاجية",
       "description": "تمكنك من إدارة القدرة الإنتاجية للمنتجات"
+    },
+    "productionCapacityList": {
+      "title": "قائمة  القدرة الانتاجية",
+      "description": "تمكنك من إدارة القدرة الإنتاجية للمنتجات"
+    },
+    "services": {
+      "title": "الخدمات",
+      "description": "تمكنك من إدارة الخدمات"
+    },
+    "servicesPricesList": {
+      "title": "قوائم أسعار الخدمات",
+      "description": "تمكنك من ادارة أسعار الخدمات"
+    },
+    "servicePricesList": {
+      "title": "قائمة أسعار الخدمات",
+      "description": "تمكنك من ادارة أسعار الخدمات"
+    },
+    "servicesSettings": {
+      "title": "إعدادات الخدمات",
+      "description": "تمكنك من ادارة إعدادات الخدمات"
     }
   }
 }

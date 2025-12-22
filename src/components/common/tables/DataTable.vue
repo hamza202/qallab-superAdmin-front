@@ -141,7 +141,7 @@ const editIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xm
 
     <!-- Table -->
     <v-table class="data-table" hover>
-      <thead>
+      <thead v-if="items.length > 0">
         <tr class="bg-gray-50">
           <!-- Checkbox Header (Right side for RTL) -->
           <th v-if="showCheckbox" class="w-[60px] !bg-gray-50">
@@ -169,8 +169,13 @@ const editIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xm
 
           <!-- Dynamic Columns (original order for RTL) -->
           <td v-for="header in headers" :key="header.key" class="!text-start !py-4 !bg-white">
+            <!-- Custom Cell Slot -->
+            <template v-if="$slots[`item.${header.key}`]">
+              <slot :name="`item.${header.key}`" :item="item" />
+            </template>
+
             <!-- Priority Badge -->
-            <template v-if="header.key === 'priority'">
+            <template v-else-if="header.key === 'priority'">
               <span class="inline-block px-2 py-0.5 rounded-full text-xs font-medium"
                 :class="getPriorityClass(item[header.key])">
                 {{ item[header.key] }}
@@ -187,7 +192,7 @@ const editIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xm
               </div>
             </template>
 
-            <!-- Status Switch -->
+            <!-- Status Switch (fallback when no custom slot provided) -->
             <template v-else-if="header.key === 'status'">
               <div class="flex">
                 <v-switch :model-value="isStatusActive(item[header.key])" hide-details inset density="compact"
