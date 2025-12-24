@@ -123,3 +123,6 @@ $shadow-focus: 0px 0px 0px 4px rgb(var(--v-theme-primary-25)),
     @apply absolute bottom-[-20px] end-0 text-sm ;
   }
 }
+.v-text-field input[type=date]{
+  @apply block;
+}

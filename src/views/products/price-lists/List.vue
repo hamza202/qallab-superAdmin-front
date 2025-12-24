@@ -171,6 +171,7 @@ const openCreate = () => {
           :items="tableItems"
           show-checkbox
           show-actions
+          :show-view="false"
           @edit="handleEdit"
           @delete="handleDelete"
           @select="handleSelect"

@@ -1,137 +1,166 @@
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
+import { ref } from "vue";
 import { useI18n } from "vue-i18n";
+import { useLocaleStore } from "@/stores/locale";
 import AuthLayout from "@/layouts/AuthLayout.vue";
-import TextInput from "@/components/common/forms/textInput.vue";
-import CheckboxInput from "@/components/common/forms/checkboxInput.vue";
-import SelectInput from "@/components/common/forms/selectInput.vue";
 
 const { t } = useI18n();
+const localeStore = useLocaleStore();
 
 // Form data
-const username = ref("");
+const email = ref("");
 const password = ref("");
 const rememberMe = ref(false);
-const branchAccount = ref(false);
-const multiAccounts = ref(false);
-const accountType = ref<string | number | null>(null);
-const businessName = ref("");
 const isLoading = ref(false);
+const showPassword = ref(false);
 
-const accountTypeItems = computed(() => [
-  { title: t('auth.accountTypeMain'), value: 'main' },
-  { title: t('auth.accountTypeBranch'), value: 'branch' },
-]);
+// Form validation
+const formRef = ref<any>(null);
+const isFormValid = ref(false);
 
-watch(branchAccount, (val) => {
-  if (val) {
-    multiAccounts.value = false;
+// Translation key for AuthLayout
+const layoutTranslationKey = 'auth.supplierDashboard';
+
+// Handle login
+const handleLogin = async () => {
+  const { valid } = await formRef.value?.validate();
+  if (valid) {
+    isLoading.value = true;
+    console.log("Login with:", { email: email.value, password: password.value, rememberMe: rememberMe.value });
+    // Add your login logic here
+    setTimeout(() => {
+      isLoading.value = false;
+    }, 2000);
   }
-});
+};
 
-watch(multiAccounts, (val) => {
-  if (val) {
-    branchAccount.value = false;
-  }
-});
+// Handle forgot password
+const handleForgotPassword = () => {
+  console.log("Forgot password clicked");
+};
 
+// Handle create account
+const handleCreateAccount = () => {
+  console.log("Create account clicked");
+};
 </script>
 
 <template>
-  <AuthLayout>
-    <v-card class="mx-auto shadow-[0_0_14.6px_0_#0000000F]" rounded="xl">
-      <v-card-text class="px-6 py-8">
-        <!-- Header -->
-        <div class="text-center mb-6">
-          <h1 class="text-lg font-bold mb-2">
-            {{ t('auth.welcomeBack') }}
-          </h1>
-          <div class="text-sm text-gray-600">
-            {{ t('auth.loginSubtitle') }}
-          </div>
-        </div>
+  <AuthLayout :translation-key="layoutTranslationKey">
+    <div class="w-full">
+      <!-- Logo for mobile -->
+      <div class="flex mb-8">
+        <img 
+          src="/logo.svg" 
+          alt="Qallab Logo" 
+          class="w-[104px] h-auto"
+        />
+      </div>
 
-        <!-- Login Form -->
-        <v-form>
-          <!-- Username Field -->
-          <TextInput v-model="username" :label="t('auth.username')" :placeholder="t('auth.usernamePlaceholder')"
-            bg-color="#FAFAFA" :rounded="'sm'" :hide-details="true" label-class="text-sm font-semibold text-gray-800"
-            class="mb-5" />
+      <!-- Header -->
+      <div class="mb-8" :class="localeStore.isRtl ? 'text-right' : 'text-left'">
+        <h1 class="text-[28px] font-semibold mb-3" :class="localeStore.isRtl ? 'text-right' : 'text-left'">
+          <span class="text-[#121926]">{{ t('auth.loginText') }}&nbsp;</span>
+          <span class="text-[#1570ef] font-bold inline-block"> {{ t('auth.supplierDashboardText') }}</span>
+        </h1>
+        <p class="text-base text-[#4B5565] leading-6">
+          {{ t('auth.loginSubtitle') }}
+        </p> 
+      </div>
+
+      <!-- Login Form -->
+      <v-form ref="formRef" v-model="isFormValid" @submit.prevent="handleLogin">
+        <div class="space-y-5">
+          <!-- Email Field -->
+          <TextInput
+            v-model="email"
+            :label="t('auth.email')"
+            :placeholder="t('auth.emailPlaceholder')"
+            type="email"
+            :rules="[(v: string) => !!v || t('auth.emailRequired'), (v: string) => /.+@.+\..+/.test(v) || t('auth.emailInvalid')]"
+            :hide-details="false"
+          />
 
           <!-- Password Field -->
-          <TextInput v-model="password" :label="t('auth.password')" :placeholder="t('auth.passwordPlaceholder')"
-            type="password" passwordToggle bg-color="#FAFAFA" :rounded="'sm'" :hide-details="true"
-            label-class="text-sm font-semibold text-gray-800" class="mb-5" />
-
-
-          <!-- Checkboxes & Forgot Password -->
-          <div class="mb-6 text-sm">
-            <div class="flex justify-between items-center flex-wrap">
-              <div class="flex items-center justify-end gap-1">
-                <CheckboxInput v-model="branchAccount" :label="t('auth.branchAccount')" color="indigo" />
-              </div>
-
-
-              <div class="flex items-center justify-start gap-1">
-                <CheckboxInput v-model="multiAccounts" :label="t('auth.multiAccounts')" color="indigo" />
-              </div>
-            </div>
-
-            <Transition name="fade-slide">
-              <div v-if="branchAccount || multiAccounts" class="mt-4">
-                <SelectInput v-model="accountType" :label="t('auth.accountType')"
-                  :placeholder="t('auth.accountTypePlaceholder')" :items="accountTypeItems" bg-color="#FAFAFA"
-                  :rounded="'lg'" :hide-details="true" label-class="text-sm font-semibold text-gray-800" />
-              </div>
-            </Transition>
-
-            <Transition name="fade-slide">
-              <div v-if="branchAccount" class="mt-4">
-                <TextInput v-model="businessName" :label="t('auth.businessName')"
-                  :placeholder="t('auth.businessNamePlaceholder')" bg-color="#FAFAFA" :rounded="'lg'"
-                  :hide-details="true" label-class="text-sm font-semibold text-gray-800" />
-              </div>
-            </Transition>
-
-            <div class="flex justify-between items-center flex-wrap">
-              <div class="flex items-center justify-end gap-2">
-                <CheckboxInput v-model="rememberMe" :label="t('auth.rememberMeShort')" color="indigo" />
-              </div>
-
-              <div class="flex items-center justify-start">
-                <button type="button" class="text-sm font-medium text-blue-600 hover:text-blue-700">
-                  {{ t('auth.forgotPassword') }}
-                </button>
-              </div>
-            </div>
+          <div class="relative">
+            <TextInput
+              v-model="password"
+              :label="t('auth.password')"
+              :placeholder="t('auth.passwordPlaceholder')"
+              :type="showPassword ? 'text' : 'password'"
+              :rules="[(v: string) => !!v || t('auth.passwordRequired'), (v: string) => v.length >= 6 || t('auth.passwordMinLength')]"
+              :hide-details="false"
+            >
+              <template #append-inner>
+                <v-btn
+                  icon
+                  variant="text"
+                  size="small"
+                  @click="showPassword = !showPassword"
+                  class="text-gray-500"
+                >
+                  <v-icon size="20">
+                    {{ showPassword ? 'mdi-eye-off' : 'mdi-eye' }}
+                  </v-icon>
+                </v-btn>
+              </template>
+            </TextInput>
           </div>
 
-          <v-btn type="submit" color="#1868DB" rounded="lg"
-            class="text-none transition-colors duration-200 hover:!bg-[#FFB73F] font-bold" block height="44"
-            :loading="isLoading" :disabled="!username || !password">
+          <!-- Remember Me & Forgot Password -->
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2" :class="localeStore.isRtl ? 'order-2' : 'order-1'">
+              <CheckboxInput
+                v-model="rememberMe"
+                :label="t('auth.rememberMe')"
+                color="primary"
+                hide-details
+              />
+            </div>
+            <button
+              type="button"
+              @click="handleForgotPassword"
+              class="text-sm font-semibold text-[#175CD3] hover:text-[#1570EF] transition-colors"
+              :class="localeStore.isRtl ? 'order-1' : 'order-2'"
+            >
+              {{ t('auth.forgotPassword') }}
+            </button>
+          </div>
+
+          <!-- Login Button -->
+          <v-btn
+            type="submit"
+            variant="flat"
+            color="primary"
+            size="large"
+            block
+            :loading="isLoading"
+            :disabled="!isFormValid"
+            class="font-semibold text-base py-3 h-[48px]"
+          >
             {{ t('auth.loginButton') }}
           </v-btn>
-        </v-form>
-      </v-card-text>
-    </v-card>
+
+          <!-- Create Account Link -->
+          <div class="flex items-center justify-center gap-1 text-sm" :class="localeStore.isRtl ? 'flex-row' : 'flex-row-reverse'">
+            <button
+              type="button"
+              @click="handleCreateAccount"
+              class="font-semibold text-[#175CD3] hover:text-[#1570EF] transition-colors"
+              :class="localeStore.isRtl ? 'order-2' : 'order-1'"
+            >
+              {{ t('auth.createAccount') }}
+            </button>
+            <span class="text-[#697586]" :class="localeStore.isRtl ? 'order-1' : 'order-2'">{{ t('auth.noAccount') }}</span>
+          </div>
+        </div>
+      </v-form>
+    </div>
   </AuthLayout>
 </template>
 
 <style scoped>
-.fade-slide-enter-active,
-.fade-slide-leave-active {
-  transition: opacity 0.2s ease, transform 0.2s ease;
-}
-
-.fade-slide-enter-from,
-.fade-slide-leave-to {
-  opacity: 0;
-  transform: translateY(-4px);
-}
-
-.fade-slide-enter-to,
-.fade-slide-leave-from {
-  opacity: 1;
-  transform: translateY(0);
+.space-y-5 > * + * {
+  margin-top: 1.25rem;
 }
 </style>
