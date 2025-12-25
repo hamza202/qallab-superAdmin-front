@@ -126,3 +126,8 @@ $shadow-focus: 0px 0px 0px 4px rgb(var(--v-theme-primary-25)),
 .v-text-field input[type=date]{
   @apply block;
 }
+.v-navigation-drawer{
+  .v-list-item__append{
+    @apply max-w-5
+  }
+}
