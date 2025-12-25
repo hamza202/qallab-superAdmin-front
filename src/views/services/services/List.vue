@@ -8,28 +8,27 @@ const router = useRouter()
 const api = useApi()
 const { success, error } = useNotification()
 
-// TypeScript Interfaces
-interface ServicePriceList {
+interface Service {
   id: number
   name: string
-  translations?: {
-    name: {
-      en: string
-      ar: string
-    }
-  }
+  code: string
+  classification: string
+  creation_date: string
+  unit: string
+  price_min: number
+  price_max: number
+  tax_percentage: number
+  status: string
   is_active: boolean
-  created_at: string
 }
 
-interface ServicePriceListsResponse {
+interface ServicesResponse {
   success: boolean
   message: string
-  data: ServicePriceList[]
+  data: Service[]
 }
 
-// Services Prices Icon
-const servicesPricesIcon = `<svg width="52" height="52" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+const servicesIcon = `<svg width="52" height="52" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
 <rect x="6" y="6" width="40" height="40" rx="4" stroke="#1570EF" stroke-width="3"/>
 <path d="M14 16H38" stroke="#1570EF" stroke-width="3"/>
 <path d="M14 24H38" stroke="#1570EF" stroke-width="3"/>
@@ -61,68 +60,83 @@ const importIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" 
 <path d="M16 11V12C16 13.4001 16 14.1002 15.7275 14.635C15.4878 15.1054 15.1054 15.4878 14.635 15.7275C14.1002 16 13.4001 16 12 16H5C3.59987 16 2.8998 16 2.36502 15.7275C1.89462 15.4878 1.51217 15.1054 1.27248 14.635C1 14.1002 1 13.4001 1 12V11M12.6667 6.83333L8.5 11M8.5 11L4.33333 6.83333M8.5 11V1" stroke="#194185" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`
 
-// Table headers
+const viewIcon = `<svg width="20" height="14" viewBox="0 0 20 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M1.25781 7.00065C1.25781 7.00065 4.42448 0.667318 10.0911 0.667318C15.7578 0.667318 18.9245 7.00065 18.9245 7.00065C18.9245 7.00065 15.7578 13.334 10.0911 13.334C4.42448 13.334 1.25781 7.00065 1.25781 7.00065Z" stroke="#697586" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M10.0911 9.41732C11.4258 9.41732 12.5078 8.33537 12.5078 7.00065C12.5078 5.66593 11.4258 4.58398 10.0911 4.58398C8.75639 4.58398 7.67444 5.66593 7.67444 7.00065C7.67444 8.33537 8.75639 9.41732 10.0911 9.41732Z" stroke="#697586" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`
+
 const tableHeaders = [
-  { key: 'name', title: 'اسم القائمة', width: '200px' },
-  { key: 'createdAt', title: 'تاريخ الإنشاء', width: '160px' },
-  { key: 'status', title: 'الحالة', width: '120px' },
+  { key: 'name', title: 'اسم الخدمة', width: '180px' },
+  { key: 'code', title: 'كود الخدمة', width: '140px' },
+  { key: 'classification', title: 'تصنيف الخدمة', width: '140px' },
+  { key: 'creation_date', title: 'تاريخ الإنشاء', width: '140px' },
+  { key: 'unit', title: 'وحدة الخدمة', width: '120px' },
+  { key: 'price_min', title: 'حد أدنى لطلب الخدمة', width: '160px' },
+  { key: 'price_max', title: 'حد أعلى', width: '120px' },
+  { key: 'tax_percentage', title: 'نسبة الضريبة', width: '120px' },
+  { key: 'status', title: 'الحالة', width: '100px' },
 ]
 
-// Data
-const tableItems = ref<ServicePriceList[]>([])
+const tableItems = ref<Service[]>([])
 const loading = ref(false)
 const deleteLoading = ref(false)
 
-// Selection state
 const selectedRows = ref<number[]>([])
 const hasSelected = computed(() => selectedRows.value.length > 0)
 
-// Filters
 const showAdvancedFilters = ref(false)
+const filterName = ref('')
+const filterCode = ref('')
+const filterClassification = ref('')
+const filterCreationDate = ref('')
+const filterUnit = ref('')
+const filterMinPrice = ref('')
+const filterMaxPrice = ref('')
+const filterTaxPercentage = ref('')
 const filterStatus = ref<string | null>(null)
-const filterCreatedAt = ref('')
-const filterListName = ref('')
 
 const toggleAdvancedFilters = () => {
   showAdvancedFilters.value = !showAdvancedFilters.value
 }
 
-// API Functions
-const fetchServicePriceLists = async () => {
+const fetchServices = async () => {
   try {
     loading.value = true
-    const response = await api.get<ServicePriceListsResponse>('/api/service-price-lists')
+    const response = await api.get<ServicesResponse>('/api/services')
     tableItems.value = response.data
   } catch (err: any) {
-    console.error('Error fetching service price lists:', err)
-    error(err?.response?.data?.message || 'فشل في جلب قوائم أسعار الخدمات')
+    console.error('Error fetching services:', err)
+    error(err?.response?.data?.message || 'فشل في جلب الخدمات')
   } finally {
     loading.value = false
   }
 }
 
-const deleteServicePriceList = async (priceListId: number) => {
+const deleteService = async (serviceId: number) => {
   try {
     deleteLoading.value = true
-    await api.delete(`/api/service-price-lists/${priceListId}`)
-    success('تم حذف قائمة الأسعار بنجاح')
-    await fetchServicePriceLists()
+    await api.delete(`/api/services/${serviceId}`)
+    success('تم حذف الخدمة بنجاح')
+    await fetchServices()
   } catch (err: any) {
-    console.error('Error deleting service price list:', err)
-    error(err?.response?.data?.message || 'فشل في حذف قائمة الأسعار')
+    console.error('Error deleting service:', err)
+    error(err?.response?.data?.message || 'فشل في حذف الخدمة')
   } finally {
     deleteLoading.value = false
   }
 }
 
-// Handlers
 const handleEdit = (item: any) => {
-  router.push({ name: 'ServicesPriceListEdit', params: { id: item.id } })
+  router.push({ name: 'ServicesEdit', params: { id: item.id } })
+}
+
+const handleView = (item: any) => {
+  router.push({ name: 'ServicesView', params: { id: item.id } })
 }
 
 const handleDelete = async (item: any) => {
-  if (confirm('هل أنت متأكد من حذف هذه القائمة؟')) {
-    await deleteServicePriceList(item.id)
+  if (confirm('هل أنت متأكد من حذف هذه الخدمة؟')) {
+    await deleteService(item.id)
   }
 }
 
@@ -136,19 +150,18 @@ const handleSelectAll = (checked: boolean) => {
 }
 
 const openCreate = () => {
-  router.push({ name: 'ServicesPriceListCreate' })
+  router.push({ name: 'ServicesCreate' })
 }
 
-// Lifecycle
 onMounted(() => {
-  fetchServicePriceLists()
+  fetchServices()
 })
 </script>
 
 <template>
   <default-layout>
-    <div class="services-prices-page">
-      <PageHeader :icon="servicesPricesIcon" title-key="pages.servicesPricesList.title" description-key="pages.servicesPricesList.description" />
+    <div class="services-page">
+      <PageHeader :icon="servicesIcon" title-key="pages.services.title" description-key="pages.services.description" />
 
       <div class="flex justify-end pb-2 gap-3">
         <v-btn variant="outlined" height="40" class="font-semibold text-base border-gray-300 bg-primary-100 !text-primary-900">
@@ -167,7 +180,6 @@ onMounted(() => {
 
       <div class="bg-gray-50 rounded-md -mx-6">
         <div :class="hasSelected ? 'justify-between' : 'justify-end'" class="flex flex-wrap items-center gap-3 border-y border-y-slate-300 px-4 sm:px-6 py-3">
-          <!-- Actions when rows are selected -->
           <div v-if="hasSelected" class="flex flex-wrap items-stretch rounded-lg overflow-hidden border border-gray-200 bg-white text-sm">
             <v-btn class="px-4 font-semibold text-primary-600 hover:bg-primary-50 !rounded-none">
               <template #prepend>
@@ -191,7 +203,6 @@ onMounted(() => {
             </v-btn>
           </div>
 
-          <!-- Main header controls -->
           <div class="flex flex-wrap gap-3">
             <v-btn variant="outlined" append-icon="mdi-chevron-down" color="gray-500" height="40" class="font-semibold text-base border-gray-400">
               <template #prepend>
@@ -205,21 +216,25 @@ onMounted(() => {
             </v-btn>
 
             <v-btn variant="flat" color="primary" height="40" class="px-7 font-semibold text-base" prepend-icon="mdi-plus-circle-outline" @click="openCreate">
-              أضف قائمة
+              أضف خدمة
             </v-btn>
           </div>
         </div>
 
-        <!-- Advanced filters row -->
         <div v-if="showAdvancedFilters" class="border-y border-y-primary-100 bg-primary-50 px-4 sm:px-6 py-3 flex flex-col gap-3 sm:gap-2">
           <div class="flex flex-wrap gap-3 flex-1 order-1 sm:order-2 justify-end sm:justify-start">
-            <v-text-field v-model="filterListName" density="comfortable" variant="outlined" hide-details placeholder="اسم القائمة" class="w-full sm:w-40 bg-white" />
-            <v-text-field v-model="filterCreatedAt" type="date" density="comfortable" variant="outlined" hide-details placeholder="تاريخ الانشاء" class="w-full sm:w-40 bg-white" />
+            <v-text-field v-model="filterName" density="comfortable" variant="outlined" hide-details placeholder="اسم الخدمة" class="w-full sm:w-40 bg-white" />
+            <v-text-field v-model="filterCode" density="comfortable" variant="outlined" hide-details placeholder="كود الخدمة" class="w-full sm:w-40 bg-white" />
+            <v-select v-model="filterClassification" :items="['تصنيف 1', 'تصنيف 2']" density="comfortable" variant="outlined" hide-details placeholder="التصنيف" class="w-full sm:w-40 bg-white" />
+            <v-text-field v-model="filterCreationDate" type="date" density="comfortable" variant="outlined" hide-details placeholder="تاريخ الإنشاء" class="w-full sm:w-40 bg-white" />
+            <v-select v-model="filterUnit" :items="['طن', 'متر', 'ساعة']" density="comfortable" variant="outlined" hide-details placeholder="وحدة الخدمة" class="w-full sm:w-40 bg-white" />
+            <v-text-field v-model="filterMinPrice" type="number" density="comfortable" variant="outlined" hide-details placeholder="حد أدنى" class="w-full sm:w-40 bg-white" />
+            <v-text-field v-model="filterMaxPrice" type="number" density="comfortable" variant="outlined" hide-details placeholder="حد أعلى" class="w-full sm:w-40 bg-white" />
+            <v-text-field v-model="filterTaxPercentage" density="comfortable" variant="outlined" hide-details placeholder="نسبة الضريبة" class="w-full sm:w-40 bg-white" />
             <v-select v-model="filterStatus" :items="['فعال', 'غير فعال']" density="comfortable" variant="outlined" hide-details placeholder="الحالة" class="w-full sm:w-40 bg-white" />
           </div>
         </div>
 
-        <!-- Services Prices Table -->
         <DataTable
           :headers="tableHeaders"
           :items="tableItems"
@@ -235,12 +250,50 @@ onMounted(() => {
             <span class="text-sm font-semibold text-gray-900">{{ item.name }}</span>
           </template>
 
-          <template #item.createdAt="{ item }">
-            <span class="text-sm text-gray-600">{{ new Date(item.created_at).toLocaleDateString('ar-SA') }}</span>
+          <template #item.code="{ item }">
+            <span class="text-sm text-gray-600">{{ item.code }}</span>
+          </template>
+
+          <template #item.classification="{ item }">
+            <span class="text-sm text-gray-600">{{ item.classification }}</span>
+          </template>
+
+          <template #item.creation_date="{ item }">
+            <span class="text-sm text-gray-600">{{ item.creation_date }}</span>
+          </template>
+
+          <template #item.unit="{ item }">
+            <span class="text-sm text-gray-600">{{ item.unit }}</span>
+          </template>
+
+          <template #item.price_min="{ item }">
+            <span class="text-sm text-gray-600">{{ item.price_min }}</span>
+          </template>
+
+          <template #item.price_max="{ item }">
+            <span class="text-sm text-gray-600">{{ item.price_max }}</span>
+          </template>
+
+          <template #item.tax_percentage="{ item }">
+            <span class="text-sm text-gray-600">{{ item.tax_percentage }}%</span>
           </template>
 
           <template #item.status="{ item }">
             <v-switch :model-value="item.is_active" hide-details inset density="compact" color="primary" disabled />
+          </template>
+
+          <template #actions="{ item }">
+            <div class="flex gap-2">
+              <v-btn icon size="small" variant="text" @click="handleView(item)">
+                <span v-html="viewIcon" />
+              </v-btn>
+              <v-btn icon size="small" variant="text" @click="handleEdit(item)">
+                <span v-html="editIcon" />
+              </v-btn>
+              <v-btn icon size="small" variant="text" @click="handleDelete(item)">
+                <span v-html="trash_1_icon" />
+              </v-btn>
+            </div>
           </template>
         </DataTable>
       </div>

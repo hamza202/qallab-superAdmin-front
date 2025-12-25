@@ -298,20 +298,20 @@ const confirmStatusChange = async () => {
     try {
         statusChangeLoading.value = true;
         const newStatus = !itemToChangeStatus.value.status;
-        
+
         await api.patch(`/admin/api/customers/${itemToChangeStatus.value.id}/change-status`, {
             status: newStatus
         });
-        
+
         success(`تم ${newStatus ? 'تفعيل' : 'تعطيل'} العميل بنجاح`);
-        
+
         // Update the item in the list
         const index = tableItems.value.findIndex(c => c.id === itemToChangeStatus.value!.id);
         if (index !== -1) {
             tableItems.value[index].status = newStatus;
             tableItems.value[index].status_value = newStatus ? 'فعال' : 'غير فعال';
         }
-        
+
         itemToChangeStatus.value = null;
     } catch (err: any) {
         console.error('Error changing customer status:', err);
@@ -508,12 +508,6 @@ onBeforeUnmount(() => {
                             @click="toggleAdvancedFilters">
                             بحث متقدم
                         </v-btn>
-
-                        <v-btn v-if="showAdvancedFilters" variant="flat" color="primary" height="40"
-                            class="px-7 font-semibold text-base" @click="applyFilters" :loading="loading">
-                            تطبيق الفلاتر
-                        </v-btn>
-
                         <v-btn variant="flat" color="primary" height="40" class="px-7 font-semibold text-base"
                             prepend-icon="mdi-plus-circle-outline" @click="openCreateCustomer">
                             أضف عميل
@@ -524,7 +518,7 @@ onBeforeUnmount(() => {
                 <!-- Advanced filters row -->
                 <div v-if="showAdvancedFilters"
                     class="border-y border-y-primary-100 bg-primary-50 px-4 sm:px-6 py-3 flex flex-col gap-3 sm:gap-2">
-                    <div class="flex flex-wrap gap-3 flex-1 order-1 sm:order-2 justify-end sm:justify-start">
+                    <div class="flex flex-wrap gap-3 justify-end sm:justify-start">
                         <v-text-field v-model="filterFullName" density="comfortable" variant="outlined" hide-details
                             placeholder="الاسم الكامل" class="w-full sm:w-40 bg-white" @keyup.enter="applyFilters" />
                         <v-text-field v-model="filterCode" density="comfortable" variant="outlined" hide-details
@@ -540,6 +534,14 @@ onBeforeUnmount(() => {
                         <v-select v-model="filterStatus" :items="['فعال', 'غير فعال']" density="comfortable"
                             variant="outlined" hide-details placeholder="الحالة" class="w-full sm:w-40 bg-white"
                             @update:model-value="applyFilters" />
+
+                        <div class="flex gap-2 justify-start sm:justify-start">
+                            <v-btn variant="flat" color="primary" height="45" @click="applyFilters" :loading="loading"
+                                class="px-5 font-semibold text-sm sm:text-base" prepend-icon="mdi-magnify">
+                                ابحث
+                            </v-btn>
+                        </div>
+
                     </div>
                 </div>
 

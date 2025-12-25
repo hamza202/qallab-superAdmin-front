@@ -1,27 +1,59 @@
-import type { RouteRecordRaw } from 'vue-router'
+import type { RouteRecordRaw } from "vue-router";
 
 export const servicesRoutes: RouteRecordRaw[] = [
   {
-    path: '/services',
-    name: 'Services',
-    redirect: '/services/prices-list',
+    path: "/services",
+    name: "Services",
+    redirect: "/services/list",
     children: [
       {
-        path: 'prices-list',
-        name: 'ServicesPriceList',
-        component: () => import('@/views/services/services-prices/List.vue'),
+        path: "list",
+        name: "ServicesList",
+        component: () => import("@/views/services/services/List.vue"),
         meta: {
-          title: 'pages.servicesPricesList.title',
+          title: "pages.services.title",
         },
       },
       {
-        path: 'price-list-edit',
-        name: 'ServicesPriceListEdit',
-        component: () => import('@/views/services/services-prices/Form.vue'),
+        path: "create",
+        name: "ServicesCreate",
+        component: () => import("@/views/services/services/Form.vue"),
         meta: {
-          title: 'pages.servicePricesList.title',
+          title: "pages.services.create",
+        },
+      },
+      {
+        path: "edit/:id",
+        name: "ServicesEdit",
+        component: () => import("@/views/services/services/Form.vue"),
+        meta: {
+          title: "pages.services.edit",
+        },
+      },
+      {
+        path: "prices-list",
+        name: "ServicesPriceListsList",
+        component: () => import("@/views/services/services-prices/List.vue"),
+        meta: {
+          title: "pages.servicesPricesList.title",
+        },
+      },
+      {
+        path: "price-list-edit/:id",
+        name: "ServicesPriceListEdit",
+        component: () => import("@/views/services/services-prices/Form.vue"),
+        meta: {
+          title: "pages.servicePricesList.title",
+        },
+      },
+      {
+        path: "price-list-create",
+        name: "ServicesPriceListCreate",
+        component: () => import("@/views/services/services-prices/Form.vue"),
+        meta: {
+          title: "pages.servicePricesList.title",
         },
       },
     ],
   },
-]
+];
