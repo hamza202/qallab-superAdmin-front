@@ -34,6 +34,32 @@ const routes: RouteRecordRaw[] = [
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes,
+  scrollBehavior() {
+    // Prevent automatic scroll - keep current position
+    return false;
+  },
+});
+
+// Store sidebar scroll position
+let sidebarScrollTop = 0;
+
+// Save sidebar scroll position before each navigation
+router.beforeEach(() => {
+  const sidebar = document.querySelector('.q-sidebar-scroll');
+  if (sidebar) {
+    sidebarScrollTop = sidebar.scrollTop;
+  }
+  return true;
+});
+
+// Restore sidebar scroll position after each navigation
+router.afterEach(() => {
+  setTimeout(() => {
+    const sidebar = document.querySelector('.q-sidebar-scroll');
+    if (sidebar && sidebarScrollTop > 0) {
+      sidebar.scrollTop = sidebarScrollTop;
+    }
+  }, 0);
 });
 
 export default router;

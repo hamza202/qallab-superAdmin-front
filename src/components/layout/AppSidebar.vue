@@ -18,7 +18,7 @@
                     </v-btn>
                 </div>
 
-                <v-list v-model:opened="openGroups" density="compact" nav class="text-sm px-0 space-y-1"
+                <v-list :opened="openGroups" density="compact" nav class="text-sm px-0 space-y-1"
                     active-class="bg-white !text-qallab-blue !font-bold relative before:absolute before:content-[''] before:inset-y-1 before:start-[-16px] before:bottom-[5px] before:w-1.5 before:bg-qallab-yellow before:rounded-e-lg">
 
                     <!-- الرئيسية -->
@@ -624,7 +624,7 @@
 </template>
 
 <script setup>
-import { computed, ref, watch } from "vue";
+import { computed, ref } from "vue";
 import { useRoute } from "vue-router";
 import {
     homeIcon,
@@ -674,23 +674,27 @@ const isSettingsActive = computed(() => isGroupActive(settingsRoutes));
 // Track open groups
 const openGroups = ref([]);
 
-// Watch route changes to open only the dropdown containing the active route
-watch(() => route.path, () => {
-    // Reset and only open the active group
-    const activeGroups = [];
-    if (isProductsActive.value) activeGroups.push('products');
-    else if (isServicesActive.value) activeGroups.push('services');
-    else if (isSalesActive.value) activeGroups.push('sales');
-    else if (isProjectsActive.value) activeGroups.push('projects');
-    else if (isPurchasesActive.value) activeGroups.push('purchases');
-    else if (isFinanceActive.value) activeGroups.push('finance');
-    else if (isUsersActive.value) activeGroups.push('users');
-    else if (isLogisticsActive.value) activeGroups.push('logistics');
-    else if (isReportsActive.value) activeGroups.push('reports');
-    else if (isSettingsActive.value) activeGroups.push('settings');
-    
-    openGroups.value = activeGroups;
-}, { immediate: true });
+// Get current active group name
+const getActiveGroupName = () => {
+    if (isProductsActive.value) return 'products';
+    if (isServicesActive.value) return 'services';
+    if (isSalesActive.value) return 'sales';
+    if (isProjectsActive.value) return 'projects';
+    if (isPurchasesActive.value) return 'purchases';
+    if (isFinanceActive.value) return 'finance';
+    if (isUsersActive.value) return 'users';
+    if (isLogisticsActive.value) return 'logistics';
+    if (isReportsActive.value) return 'reports';
+    if (isSettingsActive.value) return 'settings';
+    return null;
+};
+
+// Initialize openGroups only once - don't watch route changes
+// This prevents scroll reset when navigating within the same dropdown
+const initActiveGroup = getActiveGroupName();
+if (initActiveGroup) {
+    openGroups.value = [initActiveGroup];
+}
 
 const props = defineProps({
     modelValue: {
@@ -729,6 +733,10 @@ const isSidebarExpanded = computed(() => !isCollapsed.value || isDrawerHovered.v
     overflow: visible !important;
 }
 
+.q-sidebar-drawer .v-navigation-drawer__content {
+    overflow: hidden !important;
+}
+
 .q-sidebar-drawer .v-list-item__content {
     flex: 1;
 }
@@ -754,6 +762,7 @@ const isSidebarExpanded = computed(() => !isCollapsed.value || isDrawerHovered.v
 .q-sidebar-scroll {
     overflow-y: auto;
     overflow-x: hidden !important;
+    overflow-anchor: none !important;
 }
 
 .q-sidebar-scroll::-webkit-scrollbar {
@@ -765,8 +774,20 @@ const isSidebarExpanded = computed(() => !isCollapsed.value || isDrawerHovered.v
     scrollbar-width: none;
 }
 
-
 .q-sidebar-drawer .v-list-item--active>.v-list-item__overlay {
     display: none;
+}
+
+.q-sidebar-drawer .v-list-group__items {
+    scroll-margin: 0 !important;
+}
+
+.q-sidebar-scroll * {
+    scroll-behavior: auto !important;
+}
+
+.q-sidebar-drawer .v-list-item {
+    scroll-margin: 0 !important;
+    scroll-snap-align: none !important;
 }
 </style>
