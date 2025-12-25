@@ -131,3 +131,6 @@ $shadow-focus: 0px 0px 0px 4px rgb(var(--v-theme-primary-25)),
     @apply max-w-5
   }
 }
+.v-input{
+  @apply rounded-md overflow-hidden;
+}
