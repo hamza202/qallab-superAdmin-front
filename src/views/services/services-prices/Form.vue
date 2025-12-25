@@ -304,7 +304,7 @@ onMounted(async () => {
               <div class="text-lg font-bold text-gray-900">تعديل الكل</div>
 
               <div class="flex flex-wrap items-center gap-3">
-                <div class="p-2 bg-gray-50 border border-gray-100 rounded-lg">
+                <div class="p-1 bg-gray-50 border border-gray-100 rounded-lg">
                   <v-btn-toggle v-model="bulkEditMode" mandatory density="comfortable" color="primary" class="gap-2">
                     <v-btn value="percentage" variant="flat" class="px-6">نسبة</v-btn>
                     <v-btn value="value" variant="flat" class="px-6">قيمة</v-btn>
@@ -315,7 +315,7 @@ onMounted(async () => {
                   <PriceInput v-model="bulkEditAmount" :hide-details="true" :input-props="{ class: 'bg-white' }"
                     :currency="bulkEditMode === 'percentage' ? '%' : ''" placeholder="10" />
                 </div>
-                <div class="p-2 bg-gray-50 border border-gray-100 rounded-lg">
+                <div class="p-1 bg-gray-50 border border-gray-100 rounded-lg">
 
                   <v-btn-toggle v-model="bulkEditDirection" mandatory density="comfortable" color="primary"
                     class="gap-2">

@@ -9,7 +9,10 @@
     },
     "groupProducts": {
       "title": "Group Products",
-      "description": "Allows you to add group products"
+      "description": "Allows you to manage added group products and add new group products",
+      "list": "Group Products List",
+      "create": "Add Group Product",
+      "edit": "Edit Group Product"
     },
     "compositeProducts": {
       "title": "Composite Products",

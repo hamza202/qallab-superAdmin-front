@@ -118,8 +118,8 @@ const cancelDelete = () => {
     <v-table class="editable-data-table" hover>
       <thead>
         <tr v-if="!hasGroupedHeaders" class="bg-gray-50">
-          <th v-if="showCheckbox" class="w-[60px] !bg-gray-50">
-            <v-checkbox v-model="selectAll" hide-details density="compact" class="justify-end"
+          <th v-if="showCheckbox" class="w-[60px] !bg-gray-50 px-2">
+            <v-checkbox v-model="selectAll" hide-details density="compact" class="justify-end min-w-7"
               @change="toggleSelectAll" />
           </th>
 
@@ -132,8 +132,8 @@ const cancelDelete = () => {
         </tr>
 
         <tr v-else class="bg-gray-50">
-          <th v-if="showCheckbox" class="w-[60px] !bg-gray-50">
-            <v-checkbox v-model="selectAll" hide-details density="compact" class="justify-end"
+          <th v-if="showCheckbox" class="w-[60px] !bg-gray-50 px-2">
+            <v-checkbox v-model="selectAll" hide-details density="compact" class="justify-end min-w-7"
               @change="toggleSelectAll" />
           </th>
 
@@ -170,7 +170,7 @@ const cancelDelete = () => {
       <tbody>
         <tr v-for="(item, rowIndex) in items" :key="item.id" class="border-b border-gray-200 bg-white">
           <td v-if="showCheckbox" class="!text-start !py-4 !bg-white !px-2">
-            <v-checkbox :model-value="isSelected(item.id)" hide-details density="compact" class="justify-end"
+            <v-checkbox :model-value="isSelected(item.id)" hide-details density="compact" class="justify-end min-w-7"
               @change="toggleSelect(item)" />
           </td>
 

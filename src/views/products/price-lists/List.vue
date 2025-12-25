@@ -226,6 +226,7 @@ onMounted(() => {
           :loading="loading"
           show-checkbox
           show-actions
+          :show-view="false"
           @edit="handleEdit"
           @delete="handleDelete"
           @select="handleSelect"

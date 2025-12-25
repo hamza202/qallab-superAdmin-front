@@ -18,7 +18,7 @@
                     </v-btn>
                 </div>
 
-                <v-list density="compact" nav class="text-sm px-0 space-y-1"
+                <v-list :opened="openGroups" density="compact" nav class="text-sm px-0 space-y-1"
                     active-class="bg-white !text-qallab-blue !font-bold relative before:absolute before:content-[''] before:inset-y-1 before:start-[-16px] before:bottom-[5px] before:w-1.5 before:bg-qallab-yellow before:rounded-e-lg">
 
                     <!-- الرئيسية -->
@@ -38,14 +38,14 @@
                     <!-- المنتجات -->
                     <v-list-group value="products" class="mt-1">
                         <template #activator="{ props, isOpen }">
-                            <v-list-item v-bind="props" :class="{ '!mx-1 gap-5': !isSidebarExpanded }"
+                            <v-list-item v-bind="props" :class="[{ '!mx-1 gap-5': !isSidebarExpanded }, isProductsActive ? 'bg-white !text-[#1570EF]' : '']"
                                 class="px-2 py-1.5 mx-4 rounded-lg hover:bg-primary-700/40 text-white flex items-center justify-between gap-2">
                                 <template #append>
                                     <v-icon size="20"
-                                        :class="['ms-auto transition-transform', isOpen ? 'rotate-180' : '']">mdi-chevron-down</v-icon>
+                                        :class="['ms-auto transition-transform', isOpen ? 'rotate-180' : '', isProductsActive ? '!text-[#1570EF]' : '']">mdi-chevron-down</v-icon>
                                 </template>
                                 <template #title>
-                                    <div class="flex-1"><span class="font-semibold">المنتجات</span></div>
+                                    <div class="flex-1"><span class="font-semibold" :class="isProductsActive ? '!text-[#1570EF]' : ''">المنتجات</span></div>
                                 </template>
                                 <template #prepend>
                                     <div
@@ -98,14 +98,14 @@
                     <!-- الخدمات -->
                     <v-list-group value="services" class="mt-1">
                         <template #activator="{ props, isOpen }">
-                            <v-list-item v-bind="props" :class="{ '!mx-1 gap-5': !isSidebarExpanded }"
+                            <v-list-item v-bind="props" :class="[{ '!mx-1 gap-5': !isSidebarExpanded }, isServicesActive ? 'bg-white !text-[#1570EF]' : '']"
                                 class="px-2 py-1.5 mx-4 rounded-lg hover:bg-primary-700/40 text-white flex items-center justify-between gap-2">
                                 <template #append>
                                     <v-icon size="20"
-                                        :class="['ms-auto transition-transform', isOpen ? 'rotate-180' : '']">mdi-chevron-down</v-icon>
+                                        :class="['ms-auto transition-transform', isOpen ? 'rotate-180' : '', isServicesActive ? '!text-[#1570EF]' : '']">mdi-chevron-down</v-icon>
                                 </template>
                                 <template #title>
-                                    <div class="flex-1"><span class="font-semibold">الخدمات</span></div>
+                                    <div class="flex-1"><span class="font-semibold" :class="isServicesActive ? '!text-[#1570EF]' : ''">الخدمات</span></div>
                                 </template>
                                 <template #prepend>
                                     <div
@@ -145,14 +145,14 @@
                     <!-- المبيعات -->
                     <v-list-group value="sales" class="mt-1">
                         <template #activator="{ props, isOpen }">
-                            <v-list-item v-bind="props" :class="{ '!mx-1 gap-5': !isSidebarExpanded }"
+                            <v-list-item v-bind="props" :class="[{ '!mx-1 gap-5': !isSidebarExpanded }, isSalesActive ? 'bg-white !text-[#1570EF]' : '']"
                                 class="px-2 py-1.5 mx-4 rounded-lg hover:bg-primary-700/40 text-white flex items-center justify-between gap-2">
                                 <template #append>
                                     <v-icon size="20"
-                                        :class="['ms-auto transition-transform', isOpen ? 'rotate-180' : '']">mdi-chevron-down</v-icon>
+                                        :class="['ms-auto transition-transform', isOpen ? 'rotate-180' : '', isSalesActive ? '!text-[#1570EF]' : '']">mdi-chevron-down</v-icon>
                                 </template>
                                 <template #title>
-                                    <div class="flex-1"><span class="font-semibold">المبيعات</span></div>
+                                    <div class="flex-1"><span class="font-semibold" :class="isSalesActive ? '!text-[#1570EF]' : ''">المبيعات</span></div>
                                 </template>
                                 <template #prepend>
                                     <div
@@ -238,14 +238,14 @@
                     <!-- المشاريع -->
                     <v-list-group value="projects" class="mt-1">
                         <template #activator="{ props, isOpen }">
-                            <v-list-item v-bind="props" :class="{ '!mx-1 gap-5': !isSidebarExpanded }"
+                            <v-list-item v-bind="props" :class="[{ '!mx-1 gap-5': !isSidebarExpanded }, isProjectsActive ? 'bg-white !text-[#1570EF]' : '']"
                                 class="px-2 py-1.5 mx-4 rounded-lg hover:bg-primary-700/40 text-white flex items-center justify-between gap-2">
                                 <template #append>
                                     <v-icon size="20"
-                                        :class="['ms-auto transition-transform', isOpen ? 'rotate-180' : '']">mdi-chevron-down</v-icon>
+                                        :class="['ms-auto transition-transform', isOpen ? 'rotate-180' : '', isProjectsActive ? '!text-[#1570EF]' : '']">mdi-chevron-down</v-icon>
                                 </template>
                                 <template #title>
-                                    <div class="flex-1"><span class="font-semibold">المشاريع</span></div>
+                                    <div class="flex-1"><span class="font-semibold" :class="isProjectsActive ? '!text-[#1570EF]' : ''">المشاريع</span></div>
                                 </template>
                                 <template #prepend>
                                     <div
@@ -276,14 +276,14 @@
                     <!-- المشتريات -->
                     <v-list-group value="purchases" class="mt-1">
                         <template #activator="{ props, isOpen }">
-                            <v-list-item v-bind="props" :class="{ '!mx-1 gap-5': !isSidebarExpanded }"
+                            <v-list-item v-bind="props" :class="[{ '!mx-1 gap-5': !isSidebarExpanded }, isPurchasesActive ? 'bg-white !text-[#1570EF]' : '']"
                                 class="px-2 py-1.5 mx-4 rounded-lg hover:bg-primary-700/40 text-white flex items-center justify-between gap-2">
                                 <template #append>
                                     <v-icon size="20"
-                                        :class="['ms-auto transition-transform', isOpen ? 'rotate-180' : '']">mdi-chevron-down</v-icon>
+                                        :class="['ms-auto transition-transform', isOpen ? 'rotate-180' : '', isPurchasesActive ? '!text-[#1570EF]' : '']">mdi-chevron-down</v-icon>
                                 </template>
                                 <template #title>
-                                    <div class="flex-1"><span class="font-semibold">المشتريات</span></div>
+                                    <div class="flex-1"><span class="font-semibold" :class="isPurchasesActive ? '!text-[#1570EF]' : ''">المشتريات</span></div>
                                 </template>
                                 <template #prepend>
                                     <div
@@ -313,14 +313,14 @@
                     <!-- المالية -->
                     <v-list-group value="finance" class="mt-1">
                         <template #activator="{ props, isOpen }">
-                            <v-list-item v-bind="props" :class="{ '!mx-1 gap-5': !isSidebarExpanded }"
+                            <v-list-item v-bind="props" :class="[{ '!mx-1 gap-5': !isSidebarExpanded }, isFinanceActive ? 'bg-white !text-[#1570EF]' : '']"
                                 class="px-2 py-1.5 mx-4 rounded-lg hover:bg-primary-700/40 text-white flex items-center justify-between gap-2">
                                 <template #append>
                                     <v-icon size="20"
-                                        :class="['ms-auto transition-transform', isOpen ? 'rotate-180' : '']">mdi-chevron-down</v-icon>
+                                        :class="['ms-auto transition-transform', isOpen ? 'rotate-180' : '', isFinanceActive ? '!text-[#1570EF]' : '']">mdi-chevron-down</v-icon>
                                 </template>
                                 <template #title>
-                                    <div class="flex-1"><span class="font-semibold">المالية</span></div>
+                                    <div class="flex-1"><span class="font-semibold" :class="isFinanceActive ? '!text-[#1570EF]' : ''">المالية</span></div>
                                 </template>
                                 <template #prepend>
                                     <div
@@ -356,14 +356,14 @@
                     <!-- المستخدمين -->
                     <v-list-group value="users" class="mt-1">
                         <template #activator="{ props, isOpen }">
-                            <v-list-item v-bind="props" :class="{ '!mx-1 gap-5': !isSidebarExpanded }"
+                            <v-list-item v-bind="props" :class="[{ '!mx-1 gap-5': !isSidebarExpanded }, isUsersActive ? 'bg-white !text-[#1570EF]' : '']"
                                 class="px-2 py-1.5 mx-4 rounded-lg hover:bg-primary-700/40 text-white flex items-center justify-between gap-2">
                                 <template #append>
                                     <v-icon size="20"
-                                        :class="['ms-auto transition-transform', isOpen ? 'rotate-180' : '']">mdi-chevron-down</v-icon>
+                                        :class="['ms-auto transition-transform', isOpen ? 'rotate-180' : '', isUsersActive ? '!text-[#1570EF]' : '']">mdi-chevron-down</v-icon>
                                 </template>
                                 <template #title>
-                                    <div class="flex-1"><span class="font-semibold">المستخدمين</span></div>
+                                    <div class="flex-1"><span class="font-semibold" :class="isUsersActive ? '!text-[#1570EF]' : ''">المستخدمين</span></div>
                                 </template>
                                 <template #prepend>
                                     <div
@@ -398,14 +398,14 @@
                     <!-- اللوجستيات -->
                     <v-list-group value="logistics" class="mt-1">
                         <template #activator="{ props, isOpen }">
-                            <v-list-item v-bind="props" :class="{ '!mx-1 gap-5': !isSidebarExpanded }"
+                            <v-list-item v-bind="props" :class="[{ '!mx-1 gap-5': !isSidebarExpanded }, isLogisticsActive ? 'bg-white !text-[#1570EF]' : '']"
                                 class="px-2 py-1.5 mx-4 rounded-lg hover:bg-primary-700/40 text-white flex items-center justify-between gap-2">
                                 <template #append>
                                     <v-icon size="20"
-                                        :class="['ms-auto transition-transform', isOpen ? 'rotate-180' : '']">mdi-chevron-down</v-icon>
+                                        :class="['ms-auto transition-transform', isOpen ? 'rotate-180' : '', isLogisticsActive ? '!text-[#1570EF]' : '']">mdi-chevron-down</v-icon>
                                 </template>
                                 <template #title>
-                                    <div class="flex-1"><span class="font-semibold">اللوجستيات</span></div>
+                                    <div class="flex-1"><span class="font-semibold" :class="isLogisticsActive ? '!text-[#1570EF]' : ''">اللوجستيات</span></div>
                                 </template>
                                 <template #prepend>
                                     <div
@@ -441,14 +441,14 @@
                     <!-- التقارير -->
                     <v-list-group value="reports" class="mt-1">
                         <template #activator="{ props, isOpen }">
-                            <v-list-item v-bind="props" :class="{ '!mx-1 gap-5': !isSidebarExpanded }"
+                            <v-list-item v-bind="props" :class="[{ '!mx-1 gap-5': !isSidebarExpanded }, isReportsActive ? 'bg-white !text-[#1570EF]' : '']"
                                 class="px-2 py-1.5 mx-4 rounded-lg hover:bg-primary-700/40 text-white flex items-center justify-between gap-2">
                                 <template #append>
                                     <v-icon size="20"
-                                        :class="['ms-auto transition-transform', isOpen ? 'rotate-180' : '']">mdi-chevron-down</v-icon>
+                                        :class="['ms-auto transition-transform', isOpen ? 'rotate-180' : '', isReportsActive ? '!text-[#1570EF]' : '']">mdi-chevron-down</v-icon>
                                 </template>
                                 <template #title>
-                                    <div class="flex-1"><span class="font-semibold">التقارير</span></div>
+                                    <div class="flex-1"><span class="font-semibold" :class="isReportsActive ? '!text-[#1570EF]' : ''">التقارير</span></div>
                                 </template>
                                 <template #prepend>
                                     <div
@@ -484,14 +484,14 @@
                     <!-- الإعدادات -->
                     <v-list-group value="settings" class="mt-1">
                         <template #activator="{ props, isOpen }">
-                            <v-list-item v-bind="props" :class="{ '!mx-1 gap-5': !isSidebarExpanded }"
+                            <v-list-item v-bind="props" :class="[{ '!mx-1 gap-5': !isSidebarExpanded }, isSettingsActive ? 'bg-white !text-[#1570EF]' : '']"
                                 class="px-2 py-1.5 mx-4 rounded-lg hover:bg-primary-700/40 text-white flex items-center justify-between gap-2">
                                 <template #append>
                                     <v-icon size="20"
-                                        :class="['ms-auto transition-transform', isOpen ? 'rotate-180' : '']">mdi-chevron-down</v-icon>
+                                        :class="['ms-auto transition-transform', isOpen ? 'rotate-180' : '', isSettingsActive ? '!text-[#1570EF]' : '']">mdi-chevron-down</v-icon>
                                 </template>
                                 <template #title>
-                                    <div class="flex-1"><span class="font-semibold">الإعدادات</span></div>
+                                    <div class="flex-1"><span class="font-semibold" :class="isSettingsActive ? '!text-[#1570EF]' : ''">الإعدادات</span></div>
                                 </template>
                                 <template #prepend>
                                     <div
@@ -625,6 +625,7 @@
 
 <script setup>
 import { computed, ref } from "vue";
+import { useRoute } from "vue-router";
 import {
     homeIcon,
     productsIcon,
@@ -638,6 +639,62 @@ import {
     reportsIcon,
     settingsIcon
 } from "@/components/icons/sidebarIcons";
+
+const route = useRoute();
+
+// Define routes for each dropdown group
+const productsRoutes = ['/simple-products', '/group-products', '/products/prices-list', '/products/production-capacity-list', '/customers/list', '/sales/invoices'];
+const servicesRoutes = ['/services'];
+const salesRoutes = ['/customers', '/sales'];
+const projectsRoutes = ['/projects'];
+const purchasesRoutes = ['/suppliers'];
+const financeRoutes = ['/finance'];
+const usersRoutes = ['/users'];
+const logisticsRoutes = ['/logistics'];
+const reportsRoutes = ['/reports'];
+const settingsRoutes = ['/products-categories', '/services-categories', '/units', '/factories', '/brands', '/geo-areas', '/geo-segments', '/tax-rules', '/taxes', '/cities', '/codes', '/account-types'];
+
+// Check if current route is active for a group
+const isGroupActive = (routes) => {
+    return routes.some(r => route.path.includes(r));
+};
+
+// Computed properties for each group's active state
+const isProductsActive = computed(() => isGroupActive(productsRoutes));
+const isServicesActive = computed(() => isGroupActive(servicesRoutes));
+const isSalesActive = computed(() => isGroupActive(salesRoutes));
+const isProjectsActive = computed(() => isGroupActive(projectsRoutes));
+const isPurchasesActive = computed(() => isGroupActive(purchasesRoutes));
+const isFinanceActive = computed(() => isGroupActive(financeRoutes));
+const isUsersActive = computed(() => isGroupActive(usersRoutes));
+const isLogisticsActive = computed(() => isGroupActive(logisticsRoutes));
+const isReportsActive = computed(() => isGroupActive(reportsRoutes));
+const isSettingsActive = computed(() => isGroupActive(settingsRoutes));
+
+// Track open groups
+const openGroups = ref([]);
+
+// Get current active group name
+const getActiveGroupName = () => {
+    if (isProductsActive.value) return 'products';
+    if (isServicesActive.value) return 'services';
+    if (isSalesActive.value) return 'sales';
+    if (isProjectsActive.value) return 'projects';
+    if (isPurchasesActive.value) return 'purchases';
+    if (isFinanceActive.value) return 'finance';
+    if (isUsersActive.value) return 'users';
+    if (isLogisticsActive.value) return 'logistics';
+    if (isReportsActive.value) return 'reports';
+    if (isSettingsActive.value) return 'settings';
+    return null;
+};
+
+// Initialize openGroups only once - don't watch route changes
+// This prevents scroll reset when navigating within the same dropdown
+const initActiveGroup = getActiveGroupName();
+if (initActiveGroup) {
+    openGroups.value = [initActiveGroup];
+}
 
 const props = defineProps({
     modelValue: {
@@ -676,6 +733,10 @@ const isSidebarExpanded = computed(() => !isCollapsed.value || isDrawerHovered.v
     overflow: visible !important;
 }
 
+.q-sidebar-drawer .v-navigation-drawer__content {
+    overflow: hidden !important;
+}
+
 .q-sidebar-drawer .v-list-item__content {
     flex: 1;
 }
@@ -701,6 +762,7 @@ const isSidebarExpanded = computed(() => !isCollapsed.value || isDrawerHovered.v
 .q-sidebar-scroll {
     overflow-y: auto;
     overflow-x: hidden !important;
+    overflow-anchor: none !important;
 }
 
 .q-sidebar-scroll::-webkit-scrollbar {
@@ -712,8 +774,20 @@ const isSidebarExpanded = computed(() => !isCollapsed.value || isDrawerHovered.v
     scrollbar-width: none;
 }
 
-
 .q-sidebar-drawer .v-list-item--active>.v-list-item__overlay {
     display: none;
+}
+
+.q-sidebar-drawer .v-list-group__items {
+    scroll-margin: 0 !important;
+}
+
+.q-sidebar-scroll * {
+    scroll-behavior: auto !important;
+}
+
+.q-sidebar-drawer .v-list-item {
+    scroll-margin: 0 !important;
+    scroll-snap-align: none !important;
 }
 </style>
