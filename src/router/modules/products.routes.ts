@@ -15,8 +15,16 @@ export const productsRoutes: RouteRecordRaw[] = [
         },
       },
       {
-        path: "price-list-edit",
+        path: "price-list-edit/:id",
         name: "ProductPriceListEdit",
+        component: () => import("@/views/products/price-lists/Form.vue"),
+        meta: {
+          title: "pages.ProductsPriceList.title",
+        },
+      },
+      {
+        path: "price-list-create",
+        name: "ProductPriceListCreate",
         component: () => import("@/views/products/price-lists/Form.vue"),
         meta: {
           title: "pages.ProductsPriceList.title",
@@ -32,8 +40,17 @@ export const productsRoutes: RouteRecordRaw[] = [
         },
       },
       {
-        path: "production-capacity-edit",
+        path: "production-capacity-edit/:id",
         name: "ProductsProductionCapacityEdit",
+        component: () =>
+          import("@/views/products/production-capacity/Form.vue"),
+        meta: {
+          title: "pages.productionCapacityList.title",
+        },
+      },
+      {
+        path: "production-capacity-create",
+        name: "ProductsProductionCapacityCreate",
         component: () =>
           import("@/views/products/production-capacity/Form.vue"),
         meta: {

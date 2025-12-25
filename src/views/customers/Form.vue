@@ -1,13 +1,112 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { useApi } from "@/composables/useApi";
+import { useNotification } from "@/composables/useNotification";
 
 const route = useRoute();
 const router = useRouter();
+const api = useApi();
+const { success, error } = useNotification();
+
+// TypeScript Interfaces
+interface ConstantItem {
+  key: string;
+  label: string;
+}
+
+interface ListItem {
+  id: number;
+  name: string;
+}
+
+interface CustomerConstants {
+  types: ConstantItem[];
+  entity_types: ConstantItem[];
+  price_types: ConstantItem[];
+}
+
+interface Address {
+  country_id: number | null;
+  city_id: number | null;
+  postal_code: string;
+  neighborhood: string;
+  street_name: string;
+  building_number: string;
+  address_1: string;
+  address_2: string;
+}
+
+interface ContactListItem {
+  id?: number;
+  first_name: string;
+  last_name: string;
+  email: string;
+  mobile: string;
+  telephone: string;
+}
+
+interface CustomerBalance {
+  id: number;
+  currency: string;
+  debit: string;
+  credit: string;
+  balance: string;
+  last_amount: string;
+  last_validated_date: string;
+}
+
+interface CustomerPayload {
+  step: number;
+  customer_id?: number;
+  customer_type: string;
+  full_name: {
+    en: string;
+    ar: string;
+  };
+  customer_code: string;
+  mobile: string;
+  phone: string;
+  email: string;
+  trade_name: string;
+  legal_name: string;
+  entity_type: string | null;
+  commercial_register: string;
+  address: Address;
+  contact_list: ContactListItem[];
+  price_type: string | null;
+  customer_category_id: number | null;
+  sales_man_id: number | null;
+  tree_chart_card_id: number | null;
+  related_customers: number[];
+  minimum_credit: number | string;
+  maximum_credit: number | string;
+  minimum_debit: number | string;
+  maximum_debit: number | string;
+  is_active: boolean;
+}
+
+interface CustomerResponse {
+  status: number;
+  code: number;
+  locale: string;
+  message: string;
+  data: {
+    customer_id: number;
+  };
+}
 
 // Check if editing
 const isEditing = computed(() => !!route.params.id);
 const pageTitle = computed(() => isEditing.value ? 'تعديل عميل' : 'إضافة عميل');
+
+// Loading states
+const loading = ref(false);
+const saving = ref(false);
+const loadingConstants = ref(false);
+
+// Customer ID for step 2
+const customerId = ref<number | null>(null);
 
 // Form ref
 const formRef = ref<any>(null);
@@ -27,9 +126,34 @@ const isTabCompleted = (value: number) => {
   return false;
 };
 
+// Handle tab change with validation
+const handleTabChange = (newTab: number, event?: Event) => {
+  // Validate when creating (not editing) and trying to move to step 2
+  if (!isEditing.value && newTab === 1 && activeTab.value === 0) {
+    if (!basicInfoCompleted.value) {
+      error('يجب إكمال المعلومات الأساسية أولاً');
+      if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      // Force tab to stay on current tab
+      setTimeout(() => {
+        activeTab.value = 0;
+      }, 0);
+      return;
+    }
+  }
+  activeTab.value = newTab;
+};
+
 // Basic Info completion check
 const basicInfoCompleted = computed(() => {
-  return !!(fullName.value && mobile.value);
+  // When editing, check if data is loaded
+  if (isEditing.value) {
+    return !!(fullNameAr.value && mobile.value && customerId.value);
+  }
+  // When creating, only check required fields (customerId will be set after first save)
+  return !!(fullNameAr.value && mobile.value);
 });
 
 const accountingInfoCompleted = computed(() => {
@@ -39,22 +163,22 @@ const accountingInfoCompleted = computed(() => {
 });
 
 // Form data - Basic Info
-const accountType = ref<'individual' | 'commercial'>('individual');
+const accountType = ref<string>('individual');
 const customerCode = ref("CU-5478544");
-const fullName = ref("");
+const fullNameAr = ref("");
+const fullNameEn = ref("");
 const commercialName = ref("");
 const legalName = ref("");
-const branch = ref(null);
 const mobile = ref("");
 const phone = ref("");
 const email = ref("");
-const entityType = ref(null);
+const entityType = ref<string | null>(null);
 const taxNumber = ref("");
 const status = ref(true);
 
 // Address Info (sub-tab)
-const country = ref(null);
-const city = ref(null);
+const country = ref<number | null>(null);
+const city = ref<number | null>(null);
 const postalCode = ref("");
 const district = ref("");
 const streetName = ref("");
@@ -63,112 +187,299 @@ const nationalAddress = ref("");
 const address2 = ref("");
 
 // Contact List
-const contacts = ref([
-  {
-    id: 1,
-    firstName: "علي",
-    lastName: "خالد",
-    email: "example@gmail.com",
-    phone: "+96600000000",
-    mobile: "+96600000000",
-  },
-]);
-
-const newContact = ref({
-  firstName: "",
-  lastName: "",
-  email: "",
-  phone: "",
-  mobile: "",
-});
+const contacts = ref<ContactListItem[]>([]);
 
 // Accounting Info
-const priceType = ref(null);
-const priceList = ref(null);
-const customerClassification = ref(null);
-const salesRepresentative = ref(null);
+const priceType = ref<string | null>(null);
+const customerClassification = ref<number | null>(null);
+const salesRepresentative = ref<number | null>(null);
 const createAccountInTree = ref<boolean | null>(true);
-const account = ref(null);
-const relatedCustomers = ref(null);
-const accountLowerLimit = ref("");
-const upperLimitDebit = ref("");
-const lowerLimitDebit = ref("");
-const upperLimitCredit = ref("");
-const lowerLimitCredit = ref("");
+const account = ref<number | null>(null);
+const relatedCustomers = ref<(number | string)[]>([]);
+const minimumCredit = ref<number | string>("");
+const maximumCredit = ref<number | string>("");
+const minimumDebit = ref<number | string>("");
+const maximumDebit = ref<number | string>("");
 const defaultStatus = ref(true);
 
-// Balances
-const debit = ref(10.00);
-const credit = ref(20.00);
-const netBalance = computed(() => credit.value - debit.value);
+// Balances (read-only from API)
+const customerBalances = ref<CustomerBalance[]>([]);
 
-// Select items
-const branchItems = [
-  { title: "الفرع الرئيسي", value: "main" },
-  { title: "فرع الرياض", value: "riyadh" },
-  { title: "فرع جدة", value: "jeddah" },
-];
-
-const entityTypeItems = [
-  { title: "Establishment", value: "establishment" },
-  { title: "Company", value: "company" },
-  { title: "Individual", value: "individual" },
-];
-
-const countryItems = [
-  { title: "السعودية", value: "SA" },
-  { title: "الإمارات", value: "AE" },
-  { title: "مصر", value: "EG" },
-];
-
-const cityItems = [
-  { title: "الرياض", value: "riyadh" },
-  { title: "جدة", value: "jeddah" },
-  { title: "مكة", value: "makkah" },
-];
-
-const accountItems = [
-  { title: "حساب العملاء", value: "customers" },
-  { title: "حساب المدينين", value: "debtors" },
-];
-
-const priceTypeItems = [
-  { title: "نوع السعر", value: "type1" },
-  { title: "نوع السعر 2", value: "type2" },
-];
-
-const priceListItems = [
-  { title: "قائمة الاسعار", value: "list1" },
-  { title: "قائمة الاسعار 2", value: "list2" },
-];
-
-const customerClassificationItems = [
-  { title: "تصنيف العميل", value: "class1" },
-  { title: "تصنيف العميل 2", value: "class2" },
-];
-
-const salesRepresentativeItems = [
-  { title: "مندوب المبيعات", value: "rep1" },
-  { title: "مندوب المبيعات 2", value: "rep2" },
-];
-
-const relatedCustomersItems = [
-  { title: "العملاء المرتبطين", value: "related1" },
-  { title: "العملاء المرتبطين 2", value: "related2" },
-];
+// Dropdown items from API
+const customerTypeItems = ref<{ title: string; value: string }[]>([]);
+const entityTypeItems = ref<{ title: string; value: string }[]>([]);
+const priceTypeItems = ref<{ title: string; value: string }[]>([]);
+const countryItems = ref<{ title: string; value: number }[]>([]);
+const cityItems = ref<{ title: string; value: number }[]>([]);
+const customerClassificationItems = ref<{ title: string; value: number }[]>([]);
+const salesRepresentativeItems = ref<{ title: string; value: number }[]>([]);
+const accountItems = ref<{ title: string; value: number }[]>([]);
+const relatedCustomersItems = ref<{ title: string; value: number }[]>([]);
 
 // Sub-tabs for basic info section
 const basicInfoSubTab = ref(0);
 
+// API Functions
+const fetchConstants = async () => {
+  try {
+    loadingConstants.value = true;
+    const response = await api.get<{ data: CustomerConstants }>('/admin/api/customers/constants');
+
+    customerTypeItems.value = response.data.types.map(item => ({
+      title: item.label,
+      value: item.key
+    }));
+
+    entityTypeItems.value = response.data.entity_types.map(item => ({
+      title: item.label,
+      value: item.key
+    }));
+
+    priceTypeItems.value = response.data.price_types.map(item => ({
+      title: item.label,
+      value: item.key
+    }));
+  } catch (err: any) {
+    console.error('Error fetching constants:', err);
+    error(err?.response?.data?.message || 'Failed to fetch constants');
+  } finally {
+    loadingConstants.value = false;
+  }
+};
+
+const fetchCountries = async () => {
+  try {
+    const response = await api.get<{ data: ListItem[] }>('/admin/api/countries/list');
+    countryItems.value = response.data.map(item => ({
+      title: item.name,
+      value: item.id
+    }));
+  } catch (err: any) {
+    console.error('Error fetching countries:', err);
+  }
+};
+
+const fetchCities = async (countryId: number) => {
+  try {
+    const response = await api.get<{ data: ListItem[] }>(`/admin/api/cities/list?country_id=${countryId}`);
+    cityItems.value = response.data.map(item => ({
+      title: item.name,
+      value: item.id
+    }));
+  } catch (err: any) {
+    console.error('Error fetching cities:', err);
+  }
+};
+
+const fetchCustomerCategories = async () => {
+  try {
+    const response = await api.get<{ data: ListItem[] }>('/admin/api/customer-categories/list');
+    customerClassificationItems.value = response.data.map(item => ({
+      title: item.name,
+      value: item.id
+    }));
+  } catch (err: any) {
+    console.error('Error fetching customer categories:', err);
+  }
+};
+
+const fetchSalesMans = async () => {
+  try {
+    const response = await api.get<{ data: ListItem[] }>('/admin/api/sales-man/list');
+    salesRepresentativeItems.value = response.data.map(item => ({
+      title: item.name,
+      value: item.id
+    }));
+  } catch (err: any) {
+    console.error('Error fetching sales mans:', err);
+  }
+};
+
+const fetchTreeChartCards = async () => {
+  try {
+    const response = await api.get<{ data: ListItem[] }>('/admin/api/tree-chart-cards/list');
+    accountItems.value = response.data.map(item => ({
+      title: item.name,
+      value: item.id
+    }));
+  } catch (err: any) {
+    console.error('Error fetching tree chart cards:', err);
+  }
+};
+
+const fetchRelatedCustomers = async () => {
+  if (!customerId.value) return;
+  try {
+    const response = await api.get<{ data: { id: number; full_name: string }[] }>(
+      `/admin/api/customers/list?related_customer=${customerId.value}`
+    );
+    relatedCustomersItems.value = response.data.map(item => ({
+      title: item.full_name,
+      value: item.id
+    }));
+  } catch (err: any) {
+    console.error('Error fetching related customers:', err);
+  }
+};
+
+const fetchCustomerData = async () => {
+  if (!route.params.id) return;
+
+  try {
+    loading.value = true;
+    const response = await api.get<any>(`/admin/api/customers/${route.params.id}`);
+    const data = response.data;
+
+    // Set customer ID
+    customerId.value = data.id;
+
+    // Basic Info
+    accountType.value = data.customer_type;
+    fullNameAr.value = data.full_name;
+    fullNameEn.value = data.full_name;
+    customerCode.value = data.customer_code;
+    mobile.value = data.mobile;
+    phone.value = data.phone;
+    email.value = data.email;
+    commercialName.value = data.trade_name;
+    legalName.value = data.legal_name;
+    entityType.value = data.entity_type;
+    taxNumber.value = data.commercial_register;
+    status.value = data.is_active;
+
+    // Address
+    if (data.address) {
+      country.value = data.address.country_id;
+      city.value = data.address.city_id;
+      postalCode.value = data.address.postal_code;
+      district.value = data.address.neighborhood;
+      streetName.value = data.address.street_name;
+      buildingNumber.value = data.address.building_number;
+      nationalAddress.value = data.address.address_1;
+      address2.value = data.address.address_2;
+
+      // Fetch cities for selected country
+      if (data.address.country_id) {
+        await fetchCities(data.address.country_id);
+      }
+    }
+
+    // Contact List
+    contacts.value = data.contact_list || [];
+
+    // Customer Balances
+    customerBalances.value = data.customer_balances || [];
+
+    // Accounting Info
+    priceType.value = data.price_type;
+    customerClassification.value = data.customer_classification_id;
+    salesRepresentative.value = data.sales_man_id;
+    account.value = data.tree_chart_card_id;
+    relatedCustomers.value = data.related_customers?.map((id: string) => parseInt(id)) || [];
+    minimumCredit.value = data.minimum_credit;
+    maximumCredit.value = data.maximum_credit;
+    minimumDebit.value = data.minimum_debit;
+    maximumDebit.value = data.maximum_debit;
+    defaultStatus.value = data.is_active;
+
+    // Fetch related customers
+    await fetchRelatedCustomers();
+  } catch (err: any) {
+    console.error('Error fetching customer data:', err);
+    error(err?.response?.data?.message || 'Failed to fetch customer data');
+  } finally {
+    loading.value = false;
+  }
+};
+
+const buildPayload = (step: number): CustomerPayload => {
+  return {
+    step,
+    customer_id: customerId.value || undefined,
+    customer_type: accountType.value,
+    full_name: {
+      en: fullNameEn.value,
+      ar: fullNameAr.value
+    },
+    customer_code: customerCode.value,
+    mobile: mobile.value,
+    phone: phone.value,
+    email: email.value,
+    trade_name: commercialName.value,
+    legal_name: legalName.value,
+    entity_type: entityType.value,
+    commercial_register: taxNumber.value,
+    address: {
+      country_id: country.value,
+      city_id: city.value,
+      postal_code: postalCode.value,
+      neighborhood: district.value,
+      street_name: streetName.value,
+      building_number: buildingNumber.value,
+      address_1: nationalAddress.value,
+      address_2: address2.value
+    },
+    contact_list: contacts.value.map(contact => ({
+      id: contact.id,
+      first_name: contact.first_name,
+      last_name: contact.last_name,
+      email: contact.email,
+      mobile: contact.mobile,
+      telephone: contact.telephone
+    })),
+    price_type: priceType.value,
+    customer_category_id: customerClassification.value,
+    sales_man_id: salesRepresentative.value,
+    tree_chart_card_id: account.value,
+    related_customers: relatedCustomers.value.map(id => typeof id === 'string' ? parseInt(id) : id),
+    minimum_credit: minimumCredit.value,
+    maximum_credit: maximumCredit.value,
+    minimum_debit: minimumDebit.value,
+    maximum_debit: maximumDebit.value,
+    is_active: defaultStatus.value
+  };
+};
+
+const saveStep = async (step: number) => {
+  try {
+    saving.value = true;
+    const payload = buildPayload(step);
+
+    let response: CustomerResponse;
+
+    if (customerId.value) {
+      // Update existing customer
+      response = await api.put(`/admin/api/customers/${customerId.value}`, payload);
+    } else {
+      // Create new customer
+      response = await api.post('/admin/api/customers', payload);
+    }
+
+    // Store customer ID for subsequent saves
+    if (response.data.customer_id) {
+      customerId.value = response.data.customer_id;
+    }
+
+    success(response.message || 'Customer saved successfully');
+    return true;
+  } catch (err: any) {
+    console.error('Error saving customer:', err);
+
+    // Handle validation errors
+    if (err?.response?.data?.errors) {
+      const errors = err.response.data.errors;
+      const errorMessages = Object.values(errors).flat().join('\n');
+      error(errorMessages);
+    } else {
+      error(err?.response?.data?.message || 'Failed to save customer');
+    }
+    return false;
+  } finally {
+    saving.value = false;
+  }
+};
+
 // Handlers
-const handleAddBranch = () => {
-  console.log("Add new branch");
-};
-
-const handleAddPriceList = () => {
-  console.log("Add new price list");
-};
-
 const handleAddClassification = () => {
   console.log("Add new classification");
 };
@@ -182,36 +493,75 @@ const handleAddAccount = () => {
 };
 
 const addContact = () => {
-  if (newContact.value.firstName && newContact.value.lastName) {
-    contacts.value.push({
-      id: contacts.value.length + 1,
-      ...newContact.value,
-    });
-    newContact.value = {
-      firstName: "",
-      lastName: "",
-      email: "",
-      phone: "",
-      mobile: "",
-    };
-  }
+  contacts.value.push({
+    first_name: "",
+    last_name: "",
+    email: "",
+    mobile: "",
+    telephone: ""
+  });
 };
 
-const deleteContact = (contactId: number) => {
-  contacts.value = contacts.value.filter(c => c.id !== contactId);
+const deleteContact = (index: number) => {
+  contacts.value.splice(index, 1);
 };
 
 const handleSave = async () => {
   const { valid } = await formRef.value?.validate();
-  if (valid) {
-    console.log("Form is valid! Saving customer...");
-    router.push({ name: "CustomersList" });
+  if (!valid) {
+    error('Please fill all required fields');
+    return;
+  }
+
+  // Save step 1 (basic info)
+  if (activeTab.value === 0) {
+    const saved = await saveStep(1);
+    if (saved) {
+      // Move to accounting tab
+      activeTab.value = 1;
+    }
+  }
+  // Save step 2 (accounting info)
+  else if (activeTab.value === 1) {
+    const saved = await saveStep(2);
+    if (saved) {
+      router.push({ name: "CustomersList" });
+    }
   }
 };
 
 const handleClose = () => {
   router.push({ name: "CustomersList" });
 };
+
+// Watch country change to fetch cities
+const handleCountryChange = async (countryId: string | number | null | (string | number)[]) => {
+  // Handle array case (shouldn't happen for single select, but type-safe)
+  const singleValue = Array.isArray(countryId) ? countryId[0] : countryId;
+  
+  if (singleValue) {
+    city.value = null;
+    const numericId = typeof singleValue === 'string' ? parseInt(singleValue) : singleValue;
+    await fetchCities(numericId);
+  }
+};
+
+// Lifecycle
+onMounted(async () => {
+  // Fetch all dropdown data
+  await Promise.all([
+    fetchConstants(),
+    fetchCountries(),
+    fetchCustomerCategories(),
+    fetchSalesMans(),
+    fetchTreeChartCards()
+  ]);
+
+  // If editing, fetch customer data
+  if (isEditing.value) {
+    await fetchCustomerData();
+  }
+});
 
 // Icons
 const customersIcon = `<svg width="52" height="52" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -238,10 +588,6 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
 <path d="M12.3333 5.00033V4.33366C12.3333 3.40024 12.3333 2.93353 12.1517 2.57701C11.9919 2.2634 11.7369 2.00844 11.4233 1.84865C11.0668 1.66699 10.6001 1.66699 9.66667 1.66699H8.33333C7.39991 1.66699 6.9332 1.66699 6.57668 1.84865C6.26308 2.00844 6.00811 2.2634 5.84832 2.57701C5.66667 2.93353 5.66667 3.40024 5.66667 4.33366V5.00033M7.33333 9.58366V13.7503M10.6667 9.58366V13.7503M1.5 5.00033H16.5M14.8333 5.00033V14.3337C14.8333 15.7338 14.8333 16.4339 14.5608 16.9686C14.3212 17.439 13.9387 17.8215 13.4683 18.0612C12.9335 18.3337 12.2335 18.3337 10.8333 18.3337H7.16667C5.76654 18.3337 5.06647 18.3337 4.53169 18.0612C4.06129 17.8215 3.67883 17.439 3.43915 16.9686C3.16667 16.4339 3.16667 15.7338 3.16667 14.3337V5.00033" stroke="#B42318" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`;
 
-const editIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M8.33301 2.60175H4.83301C3.43288 2.60175 2.73281 2.60175 2.19803 2.87424C1.72763 3.11392 1.34517 3.49637 1.10549 3.96678C0.833008 4.50156 0.833008 5.20162 0.833008 6.60175V13.6018C0.833008 15.0019 0.833008 15.7019 1.10549 16.2367C1.34517 16.7071 1.72763 17.0896 2.19803 17.3293C2.73281 17.6018 3.43288 17.6018 4.83301 17.6018H11.833C13.2331 17.6018 13.9332 17.6018 14.468 17.3293C14.9384 17.0896 15.3208 16.7071 15.5605 16.2367C15.833 15.7019 15.833 15.0019 15.833 13.6018V10.1018M5.83299 12.6018H7.22844C7.63609 12.6018 7.83992 12.6018 8.03173 12.5557C8.20179 12.5149 8.36436 12.4475 8.51348 12.3562C8.68168 12.2531 8.8258 12.109 9.11406 11.8207L17.083 3.85175C17.7734 3.1614 17.7734 2.04211 17.083 1.35175C16.3927 0.661396 15.2734 0.661395 14.583 1.35175L6.61404 9.3207C6.32578 9.60896 6.18166 9.75308 6.07859 9.92128C5.9872 10.0704 5.91986 10.233 5.87904 10.403C5.83299 10.5948 5.83299 10.7987 5.83299 11.2063V12.6018Z" stroke="#175CD3" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>`;
-
 </script>
 
 <template>
@@ -259,7 +605,7 @@ const editIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none" xm
             'custom-tab--active': isTabActive(tab.value),
             'custom-tab--completed': isTabCompleted(tab.value),
           },
-        ]">
+        ]" @click="handleTabChange(tab.value, $event)">
           {{ tab.title }}
           <span v-if="isTabCompleted(tab.value)" class="ms-2" v-html="checkCircleIcon"></span>
         </v-tab>
@@ -282,11 +628,11 @@ const editIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none" xm
                 </v-radio-group>
               </div>
 
-              <!-- Row 1: Full Name, Customer Code, Branch -->
+              <!-- Row 1: Full Name, Customer Code -->
               <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                <TextInput v-model="fullName" label="الاسم كامل بالعربية" placeholder="الاسم كامل بالعربية"
+                <TextInput v-model="fullNameAr" label="الاسم كامل بالعربية" placeholder="الاسم كامل بالعربية"
                   :rules="[required()]" :hide-details="false" />
-                <TextInput v-model="fullName" label="الاسم كامل بالإنحليزية" placeholder="الاسم كامل بالإنحليزية"
+                <TextInput v-model="fullNameEn" label="الاسم كامل بالإنحليزية" placeholder="الاسم كامل بالإنحليزية"
                   :rules="[required()]" :hide-details="false" />
                 <div>
                   <div class="mb-[7px] text-sm font-semibold text-gray-700">الكود</div>
@@ -294,8 +640,6 @@ const editIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none" xm
                     {{ customerCode }}
                   </div>
                 </div>
-                <SelectWithIconInput v-model="branch" label="الفرع" placeholder="الفرع" :items="branchItems"
-                  :hide-details="false" show-add-button @add-click="handleAddBranch" />
 
                 <TextInput v-model="mobile" label="الجوال" placeholder="+966 (555) 000-0000" :rules="[required()]"
                   :hide-details="false">
@@ -315,10 +659,9 @@ const editIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none" xm
                 <TextInput v-model="legalName" label="الاسم القانوني" placeholder="Al-Nahda Construction LLC"
                   :hide-details="false" />
                 <SelectWithIconInput v-model="entityType" label="نوع الكيان" placeholder="Establishment"
-                  :items="entityTypeItems" :hide-details="false" show-add-button />
+                  :items="entityTypeItems" :hide-details="false" />
 
-                <TextInput v-model="taxNumber" label="الرقم الضريبي" placeholder="310123456700003"
-                  :hide-details="false" />
+                <TextInput v-model="taxNumber" label="السجل التجاري" placeholder="1255" :hide-details="false" />
               </div>
             </div>
 
@@ -348,9 +691,9 @@ const editIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none" xm
                 <!-- Row 1: Country, City, Postal Code -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                   <SelectInput v-model="country" label="الدولة" placeholder="الدولة" :items="countryItems"
-                    :hide-details="false" />
+                    :hide-details="false" @update:model-value="handleCountryChange" />
                   <SelectInput v-model="city" label="المدينة" placeholder="المدينة" :items="cityItems"
-                    :hide-details="false" />
+                    :hide-details="false" :disabled="!country" />
                   <TextInput v-model="postalCode" label="الرمز البريدي" placeholder="00000" :hide-details="false" />
                 </div>
 
@@ -375,36 +718,20 @@ const editIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none" xm
 
               <!-- Contact List Sub-tab -->
               <div v-if="basicInfoSubTab === 1" class="bg-gray-50 rounded-lg p-6">
-                <h2 class="text-lg font-bold text-primary-900 mb-4">قائمة عملاء العميل</h2>
-
-                <!-- New Contact Row -->
-                <div class="grid grid-cols-1 md:grid-cols-6 gap-3 mb-4 items-end">
-                  <TextInput v-model="newContact.firstName" label="الاسم الاول" placeholder="الاسم الاول"
-                    :hide-details="true" />
-                  <TextInput v-model="newContact.lastName" label="الاسم الاخر" placeholder="الاسم الاخر"
-                    :hide-details="true" />
-                  <TextInput v-model="newContact.email" label="البريد الالكتروني" placeholder="example@gmail.com"
-                    :hide-details="true" />
-                  <TextInput v-model="newContact.phone" label="الهاتف" placeholder="+96600000000"
-                    :hide-details="true" />
-                  <TextInput v-model="newContact.mobile" label="الجوال" placeholder="+96600000000"
-                    :hide-details="true" />
-                  <div class="flex items-center gap-2">
-                    <v-btn variant="flat" color="primary" height="40" class="font-semibold" @click="addContact">
-                      اضف
-                    </v-btn>
-                  </div>
+                <div class="flex justify-between items-center mb-4">
+                  <h2 class="text-lg font-bold text-primary-900">قائمة عملاء العميل</h2>
+                  <v-btn variant="flat" color="primary" height="40" class="font-semibold" @click="addContact"
+                    prepend-icon="mdi-plus">
+                    اضف
+                  </v-btn>
                 </div>
 
-                <!-- Contacts Table -->
+                <!-- Contacts Table with Editable Inputs -->
                 <v-table v-if="contacts.length > 0" class="bg-white rounded-lg">
                   <thead>
                     <tr class="bg-gray-100">
-                      <th class="text-right font-semibold text-gray-700 py-3 px-4">
-                        <v-checkbox hide-details density="compact" />
-                      </th>
                       <th class="text-right font-semibold text-gray-700 py-3 px-4">الاسم الاول</th>
-                      <th class="text-right font-semibold text-gray-700 py-3 px-4">الاسم الاخر</th>
+                      <th class="text-right font-semibold text-gray-700 py-3 px-4">الاسم الاخير</th>
                       <th class="text-right font-semibold text-gray-700 py-3 px-4">البريد الالكتروني</th>
                       <th class="text-right font-semibold text-gray-700 py-3 px-4">الهاتف</th>
                       <th class="text-right font-semibold text-gray-700 py-3 px-4">الجوال</th>
@@ -412,28 +739,40 @@ const editIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none" xm
                     </tr>
                   </thead>
                   <tbody>
-                    <tr v-for="contact in contacts" :key="contact.id" class="border-b border-gray-200">
+                    <tr v-for="(contact, index) in contacts" :key="index" class="border-b border-gray-200">
                       <td class="py-3 px-4">
-                        <v-checkbox hide-details density="compact" />
+                        <TextInput v-model="contact.first_name" density="compact" variant="outlined" hide-details
+                          placeholder="الاسم الاول" :input-props="{ class: '!min-w-[160px]' }" />
                       </td>
-                      <td class="py-3 px-4 text-gray-900">{{ contact.firstName }}</td>
-                      <td class="py-3 px-4 text-gray-900">{{ contact.lastName }}</td>
-                      <td class="py-3 px-4 text-gray-900">{{ contact.email }}</td>
-                      <td class="py-3 px-4 text-gray-900">{{ contact.phone }}</td>
-                      <td class="py-3 px-4 text-gray-900">{{ contact.mobile }}</td>
+                      <td class="py-3 px-4">
+                        <TextInput v-model="contact.last_name" density="compact" variant="outlined" hide-details
+                          placeholder="الاسم الاخير" :input-props="{ class: '!min-w-[160px]' }" />
+                      </td>
+                      <td class="py-3 px-4">
+                        <TextInput v-model="contact.email" density="compact" variant="outlined" hide-details
+                          placeholder="example@gmail.com" :input-props="{ class: '!min-w-[200px]' }" />
+                      </td>
+                      <td class="py-3 px-4">
+                        <TextInput v-model="contact.telephone" density="compact" variant="outlined" hide-details
+                          placeholder="96600000000+"  :input-props="{ class: '!min-w-[150px]' }"  />
+                      </td>
+                      <td class="py-3 px-4">
+                        <TextInput v-model="contact.mobile" density="compact" variant="outlined" hide-details
+                          placeholder="96600000000+" :input-props="{ class: '!min-w-[150px]' }" />
+                      </td>
                       <td class="py-3 px-4">
                         <div class="flex items-center gap-2">
-                          <v-btn icon size="small" variant="text" @click="deleteContact(contact.id)">
+                          <v-btn icon size="small" variant="text" @click="deleteContact(index)">
                             <span v-html="trashIcon"></span>
-                          </v-btn>
-                          <v-btn icon size="small" variant="text">
-                            <span v-html="editIcon"></span>
                           </v-btn>
                         </div>
                       </td>
                     </tr>
                   </tbody>
                 </v-table>
+                <div v-else class="text-center py-8 text-gray-500">
+                  لا توجد جهات اتصال. انقر على "اضف" لإضافة جهة اتصال جديدة.
+                </div>
               </div>
             </div>
           </v-form>
@@ -446,18 +785,12 @@ const editIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none" xm
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
               <SelectInput v-model="priceType" label="نوع السعر" placeholder="نوع السعر" :items="priceTypeItems"
                 :hide-details="false" />
-              <SelectWithIconInput v-model="priceList" label="قائمة الاسعار" placeholder="قائمة الاسعار"
-                :items="priceListItems" :hide-details="false" show-add-button @add-click="handleAddPriceList" />
+              <!-- <SelectWithIconInput v-model="priceList" label="قائمة الاسعار" placeholder="قائمة الاسعار"
+                :items="priceListItems" :hide-details="false"  @add-click="handleAddPriceList" /> -->
               <SelectWithIconInput v-model="customerClassification" label="تصنيف العميل" placeholder="تصنيف العميل"
-                :items="customerClassificationItems" :hide-details="false" show-add-button
-                @add-click="handleAddClassification" />
-            </div>
-
-            <!-- Row 2: Sales Representative, Create Account Option -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                :items="customerClassificationItems" :hide-details="false" @add-click="handleAddClassification" />
               <SelectWithIconInput v-model="salesRepresentative" label="مندوب المبيعات" placeholder="مندوب المبيعات"
-                :items="salesRepresentativeItems" :hide-details="false" show-add-button
-                @add-click="handleAddSalesRep" />
+                :items="salesRepresentativeItems" :hide-details="false" @add-click="handleAddSalesRep" />
               <div>
                 <span class="text-sm font-semibold text-gray-700 mb-1 block">انشاء حساب خاص في شجرة المحاسبة</span>
                 <v-radio-group v-model="createAccountInTree" inline hide-details>
@@ -465,31 +798,17 @@ const editIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none" xm
                   <v-radio label="لا" :value="false" color="primary" />
                 </v-radio-group>
               </div>
-            </div>
-
-            <!-- Row 3: Account, Related Customers, Account Lower Limit -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
               <SelectWithIconInput v-model="account" label="الحساب" placeholder="الحساب" :items="accountItems"
-                :hide-details="false" show-add-button @add-click="handleAddAccount" />
+                :hide-details="false" @add-click="handleAddAccount" />
               <SelectInput v-model="relatedCustomers" label="العملاء المرتبطين" placeholder="العملاء المرتبطين"
-                :items="relatedCustomersItems" :hide-details="false" />
-              <TextInput v-model="accountLowerLimit" label="الحد الادنى (دائن)" placeholder="الحد الادنى"
+                :items="relatedCustomersItems" :hide-details="false" multiple />
+              <TextInput v-model="minimumCredit" label="الحد الادنى (دائن)" placeholder="الحد الادنى" type="number"
                 :hide-details="false" />
-            </div>
-
-            <!-- Row 4: Upper/Lower Limits -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-              <TextInput v-model="upperLimitDebit" label="الحد الاعلى (مدين)" placeholder="الحد الادنى"
+              <TextInput v-model="maximumCredit" label="الحد الاعلى (دائن)" placeholder="الحد الاعلى" type="number"
                 :hide-details="false" />
-              <TextInput v-model="lowerLimitDebit" label="الحد الادنى (مدين)" placeholder="الحد الادنى"
+              <TextInput v-model="minimumDebit" label="الحد الادنى (مدين)" placeholder="الحد الادنى" type="number"
                 :hide-details="false" />
-              <TextInput v-model="upperLimitCredit" label="الحد الاعلى (دائن)" placeholder="الحد الادنى"
-                :hide-details="false" />
-            </div>
-
-            <!-- Row 5: Lower Limit Credit, Default Status -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-              <TextInput v-model="lowerLimitCredit" label="الحد الادنى" placeholder="الحد الادنى"
+              <TextInput v-model="maximumDebit" label="الحد الاعلى (مدين)" placeholder="الحد الاعلى" type="number"
                 :hide-details="false" />
               <div>
                 <span class="text-sm font-semibold text-gray-700 mb-1 block">الحالة الافتراضية</span>
@@ -499,24 +818,47 @@ const editIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none" xm
                 </v-radio-group>
               </div>
             </div>
+
+
+
+
           </div>
 
           <!-- Balances Section -->
           <div class="bg-gray-50 rounded-lg p-6">
             <h2 class="text-lg font-bold text-primary-900 mb-4">الارصدة</h2>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div class="text-center">
-                <div class="text-sm font-semibold text-gray-700 mb-2">دائن</div>
-                <div class="text-lg font-bold text-gray-900">{{ debit.toFixed(2) }}</div>
-              </div>
-              <div class="text-center">
-                <div class="text-sm font-semibold text-gray-700 mb-2">مدين</div>
-                <div class="text-lg font-bold text-gray-900">{{ credit.toFixed(2) }}</div>
-              </div>
-              <div class="text-center">
-                <div class="text-sm font-semibold text-gray-700 mb-2">صافي الرصيد</div>
-                <div class="text-lg font-bold text-gray-900">{{ netBalance.toFixed(2) }}</div>
+            <div v-if="customerBalances.length === 0" class="text-center text-gray-500 py-4">
+              لا توجد أرصدة متاحة
+            </div>
+
+            <div v-else class="space-y-6">
+              <div v-for="balance in customerBalances" :key="balance.id" 
+                class="bg-white rounded-lg p-4 border border-gray-200">
+                <div class="text-sm font-semibold text-primary-700 mb-3">{{ balance.currency }}</div>
+                
+                <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                  <div class="text-center">
+                    <div class="text-xs font-semibold text-gray-600 mb-1">دائن</div>
+                    <div class="text-base font-bold text-gray-900">{{ parseFloat(balance.debit).toFixed(2) }}</div>
+                  </div>
+                  <div class="text-center">
+                    <div class="text-xs font-semibold text-gray-600 mb-1">مدين</div>
+                    <div class="text-base font-bold text-gray-900">{{ parseFloat(balance.credit).toFixed(2) }}</div>
+                  </div>
+                  <div class="text-center">
+                    <div class="text-xs font-semibold text-gray-600 mb-1">الرصيد</div>
+                    <div class="text-base font-bold text-primary-700">{{ parseFloat(balance.balance).toFixed(2) }}</div>
+                  </div>
+                  <div class="text-center">
+                    <div class="text-xs font-semibold text-gray-600 mb-1">آخر مبلغ</div>
+                    <div class="text-base font-bold text-gray-900">{{ parseFloat(balance.last_amount).toFixed(2) }}</div>
+                  </div>
+                  <div class="text-center">
+                    <div class="text-xs font-semibold text-gray-600 mb-1">آخر تحديث</div>
+                    <div class="text-sm font-medium text-gray-700">{{ new Date(balance.last_validated_date).toLocaleDateString('ar-SA') }}</div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -526,8 +868,8 @@ const editIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none" xm
       <!-- Action Buttons -->
       <div class="flex justify-center gap-4 mt-6">
         <v-btn variant="flat" color="primary" prepend-icon="mdi-content-save-all-outline" height="48"
-          class="font-semibold text-base  px-8 sm:!px-20" @click="handleSave">
-          <span>حفظ</span>
+          class="font-semibold text-base  px-8 sm:!px-20" @click="handleSave" :loading="saving" :disabled="loading">
+          <span>{{ activeTab === 0 ? 'حفظ والمتابعة' : 'حفظ' }}</span>
         </v-btn>
 
         <v-btn variant="outlined" height="48" prepend-icon="mdi-close" color="primary"

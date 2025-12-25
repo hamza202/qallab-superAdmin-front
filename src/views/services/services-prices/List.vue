@@ -1,8 +1,32 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useApi } from '@/composables/useApi'
+import { useNotification } from '@/composables/useNotification'
 
 const router = useRouter()
+const api = useApi()
+const { success, error } = useNotification()
+
+// TypeScript Interfaces
+interface ServicePriceList {
+  id: number
+  name: string
+  translations?: {
+    name: {
+      en: string
+      ar: string
+    }
+  }
+  is_active: boolean
+  created_at: string
+}
+
+interface ServicePriceListsResponse {
+  success: boolean
+  message: string
+  data: ServicePriceList[]
+}
 
 // Services Prices Icon
 const servicesPricesIcon = `<svg width="52" height="52" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -39,17 +63,15 @@ const importIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" 
 
 // Table headers
 const tableHeaders = [
-  { key: 'service', title: 'الخدمة', width: '200px' },
-  { key: 'createdAt', title: 'تاريخ الانشاء', width: '160px' },
+  { key: 'name', title: 'اسم القائمة', width: '200px' },
+  { key: 'createdAt', title: 'تاريخ الإنشاء', width: '160px' },
   { key: 'status', title: 'الحالة', width: '120px' },
 ]
 
-// Sample data
-const tableItems = ref([
-  { id: 1, service: 'خدمة 1', createdAt: '12/07/2025', status: true },
-  { id: 2, service: 'خدمة 2', createdAt: '13/07/2025', status: false },
-  { id: 3, service: 'خدمة 3', createdAt: '14/07/2025', status: true },
-])
+// Data
+const tableItems = ref<ServicePriceList[]>([])
+const loading = ref(false)
+const deleteLoading = ref(false)
 
 // Selection state
 const selectedRows = ref<number[]>([])
@@ -59,19 +81,49 @@ const hasSelected = computed(() => selectedRows.value.length > 0)
 const showAdvancedFilters = ref(false)
 const filterStatus = ref<string | null>(null)
 const filterCreatedAt = ref('')
-const filterName = ref('')
+const filterListName = ref('')
 
 const toggleAdvancedFilters = () => {
   showAdvancedFilters.value = !showAdvancedFilters.value
 }
 
-// Handlers
-const handleEdit = (item: any) => {
-  router.push({ name: 'ServicesPriceListEdit' })
+// API Functions
+const fetchServicePriceLists = async () => {
+  try {
+    loading.value = true
+    const response = await api.get<ServicePriceListsResponse>('/api/service-price-lists')
+    tableItems.value = response.data
+  } catch (err: any) {
+    console.error('Error fetching service price lists:', err)
+    error(err?.response?.data?.message || 'فشل في جلب قوائم أسعار الخدمات')
+  } finally {
+    loading.value = false
+  }
 }
 
-const handleDelete = (item: any) => {
-  tableItems.value = tableItems.value.filter(t => t.id !== item.id)
+const deleteServicePriceList = async (priceListId: number) => {
+  try {
+    deleteLoading.value = true
+    await api.delete(`/api/service-price-lists/${priceListId}`)
+    success('تم حذف قائمة الأسعار بنجاح')
+    await fetchServicePriceLists()
+  } catch (err: any) {
+    console.error('Error deleting service price list:', err)
+    error(err?.response?.data?.message || 'فشل في حذف قائمة الأسعار')
+  } finally {
+    deleteLoading.value = false
+  }
+}
+
+// Handlers
+const handleEdit = (item: any) => {
+  router.push({ name: 'ServicesPriceListEdit', params: { id: item.id } })
+}
+
+const handleDelete = async (item: any) => {
+  if (confirm('هل أنت متأكد من حذف هذه القائمة؟')) {
+    await deleteServicePriceList(item.id)
+  }
 }
 
 const handleSelect = (item: any, selected: boolean) => {
@@ -84,8 +136,13 @@ const handleSelectAll = (checked: boolean) => {
 }
 
 const openCreate = () => {
-  router.push({ name: 'ServicesPriceListEdit' })
+  router.push({ name: 'ServicesPriceListCreate' })
 }
+
+// Lifecycle
+onMounted(() => {
+  fetchServicePriceLists()
+})
 </script>
 
 <template>
@@ -153,17 +210,39 @@ const openCreate = () => {
           </div>
         </div>
 
+        <!-- Advanced filters row -->
+        <div v-if="showAdvancedFilters" class="border-y border-y-primary-100 bg-primary-50 px-4 sm:px-6 py-3 flex flex-col gap-3 sm:gap-2">
+          <div class="flex flex-wrap gap-3 flex-1 order-1 sm:order-2 justify-end sm:justify-start">
+            <v-text-field v-model="filterListName" density="comfortable" variant="outlined" hide-details placeholder="اسم القائمة" class="w-full sm:w-40 bg-white" />
+            <v-text-field v-model="filterCreatedAt" type="date" density="comfortable" variant="outlined" hide-details placeholder="تاريخ الانشاء" class="w-full sm:w-40 bg-white" />
+            <v-select v-model="filterStatus" :items="['فعال', 'غير فعال']" density="comfortable" variant="outlined" hide-details placeholder="الحالة" class="w-full sm:w-40 bg-white" />
+          </div>
+        </div>
+
         <!-- Services Prices Table -->
         <DataTable
           :headers="tableHeaders"
           :items="tableItems"
+          :loading="loading"
           show-checkbox
           show-actions
           @edit="handleEdit"
           @delete="handleDelete"
           @select="handleSelect"
           @selectAll="handleSelectAll"
-        />
+        >
+          <template #item.name="{ item }">
+            <span class="text-sm font-semibold text-gray-900">{{ item.name }}</span>
+          </template>
+
+          <template #item.createdAt="{ item }">
+            <span class="text-sm text-gray-600">{{ new Date(item.created_at).toLocaleDateString('ar-SA') }}</span>
+          </template>
+
+          <template #item.status="{ item }">
+            <v-switch :model-value="item.is_active" hide-details inset density="compact" color="primary" disabled />
+          </template>
+        </DataTable>
       </div>
     </div>
   </default-layout>

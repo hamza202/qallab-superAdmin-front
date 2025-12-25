@@ -13,7 +13,7 @@ type TextVariant =
     | "underlined";
 
 interface SelectInputProps {
-    modelValue: string | number | null;
+    modelValue: string | number | null | (string | number)[];
     label?: string;
     placeholder?: string;
     items: any[];
@@ -28,6 +28,7 @@ interface SelectInputProps {
     hideDetails?: boolean | "auto";
     hint?: string;
     persistentHint?: boolean;
+    multiple?: boolean;
     inputProps?: Record<string, any>;
     labelClass?: string;
 }
@@ -43,7 +44,7 @@ const props = withDefaults(defineProps<SelectInputProps>(), {
 });
 
 const emit = defineEmits<{
-    (e: "update:modelValue", value: string | number | null): void;
+    (e: "update:modelValue", value: string | number | null | (string | number)[]): void;
 }>();
 
 const internalValue = computed({
@@ -71,7 +72,8 @@ const internalValue = computed({
             :clearable="clearable" 
             :hide-details="hideDetails" 
             :hint="hint"
-            :persistent-hint="persistentHint" 
+            :persistent-hint="persistentHint"
+            :multiple="multiple" 
             v-bind="inputProps" 
         />
     </div>

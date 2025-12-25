@@ -118,8 +118,8 @@
                         <div class="relative mt-1 ps-10 pe-4 text-sm">
                             <ul class="space-y-2 text-slate-100">
                                 <li class="relative">
-                                    <router-link to="/simple-products/list"
-                                        :class="[$route.path.includes('/simple-products/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                    <router-link to="/services/list"
+                                        :class="[$route.path.includes('/services/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         إدارة الخدمات </router-link>
                                 </li>
                                 <li class="relative">
