@@ -118,7 +118,7 @@ const cancelDelete = () => {
     <v-table class="editable-data-table" hover>
       <thead>
         <tr v-if="!hasGroupedHeaders" class="bg-gray-50">
-          <th v-if="showCheckbox" class="w-[60px] !bg-gray-50">
+          <th v-if="showCheckbox" class="w-[60px] !bg-gray-50 px-2">
             <v-checkbox v-model="selectAll" hide-details density="compact" class="justify-end min-w-7"
               @change="toggleSelectAll" />
           </th>
