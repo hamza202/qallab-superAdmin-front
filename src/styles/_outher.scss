@@ -24,3 +24,13 @@ body {
 :lang(en) {
   font-family: "Be Vietnam Pro", system-ui, sans-serif;
 }
+
+.inner-select .v-field__append-inner {
+  padding: 0 !important;
+  align-items: center !important;
+}
+
+.inner-select .v-field__input {
+  align-items: center !important;
+  padding: 0 !important;
+}

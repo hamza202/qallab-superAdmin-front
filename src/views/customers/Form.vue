@@ -538,7 +538,7 @@ const handleClose = () => {
 const handleCountryChange = async (countryId: string | number | null | (string | number)[]) => {
   // Handle array case (shouldn't happen for single select, but type-safe)
   const singleValue = Array.isArray(countryId) ? countryId[0] : countryId;
-  
+
   if (singleValue) {
     city.value = null;
     const numericId = typeof singleValue === 'string' ? parseInt(singleValue) : singleValue;
@@ -642,17 +642,17 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
                 </div>
 
                 <TextInput v-model="mobile" label="الجوال" placeholder="+966 (555) 000-0000" :rules="[required()]"
-                  :hide-details="false">
+                  :hide-details="false" dir="ltr">
                   <template #append-inner>
-                    <span class="text-gray-500 text-sm">KSA</span>
+                    <span class="text-gray-900 font-semibold me-2 block text-sm">KSA</span>
                   </template>
                 </TextInput>
-                <TextInput v-model="phone" label="الهاتف" placeholder="+966 (555) 000-0000" :hide-details="false">
+                <TextInput v-model="phone" dir="ltr" label="الهاتف" placeholder="+966 (555) 000-0000" :hide-details="false">
                   <template #append-inner>
-                    <span class="text-gray-500 text-sm">KSA</span>
+                    <span class="text-gray-900 font-semibold me-2 block text-sm">KSA</span>
                   </template>
                 </TextInput>
-                <TextInput v-model="email" label="البريد الالكتروني" placeholder="البريد الالكتروني"
+                <TextInput v-model="email" dir="ltr" label="البريد الالكتروني" placeholder="البريد الالكتروني"
                   :hide-details="false" />
                 <TextInput v-model="commercialName" label="الاسم التجاري" placeholder="Al-Nahda Contracting"
                   :hide-details="false" />
@@ -695,17 +695,9 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
                   <SelectInput v-model="city" label="المدينة" placeholder="المدينة" :items="cityItems"
                     :hide-details="false" :disabled="!country" />
                   <TextInput v-model="postalCode" label="الرمز البريدي" placeholder="00000" :hide-details="false" />
-                </div>
-
-                <!-- Row 2: District, Street Name, Building Number -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                   <TextInput v-model="district" label="اسم الحي" placeholder="الحي" :hide-details="false" />
                   <TextInput v-model="streetName" label="اسم الشارع" placeholder="الشارع" :hide-details="false" />
                   <TextInput v-model="buildingNumber" label="رقم المبنى" placeholder="00000" :hide-details="false" />
-                </div>
-
-                <!-- Row 3: National Address, Address 2 -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <TextInput v-model="nationalAddress" label="العنوان الوطني" placeholder="ادخل العنوان"
                     :hide-details="false">
                     <template #prepend-inner>
@@ -754,7 +746,7 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
                       </td>
                       <td class="py-3 px-4">
                         <TextInput v-model="contact.telephone" density="compact" variant="outlined" hide-details
-                          placeholder="96600000000+"  :input-props="{ class: '!min-w-[150px]' }"  />
+                          placeholder="96600000000+" :input-props="{ class: '!min-w-[150px]' }" />
                       </td>
                       <td class="py-3 px-4">
                         <TextInput v-model="contact.mobile" density="compact" variant="outlined" hide-details
@@ -833,10 +825,10 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
             </div>
 
             <div v-else class="space-y-6">
-              <div v-for="balance in customerBalances" :key="balance.id" 
+              <div v-for="balance in customerBalances" :key="balance.id"
                 class="bg-white rounded-lg p-4 border border-gray-200">
                 <div class="text-sm font-semibold text-primary-700 mb-3">{{ balance.currency }}</div>
-                
+
                 <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
                   <div class="text-center">
                     <div class="text-xs font-semibold text-gray-600 mb-1">دائن</div>
@@ -852,11 +844,13 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
                   </div>
                   <div class="text-center">
                     <div class="text-xs font-semibold text-gray-600 mb-1">آخر مبلغ</div>
-                    <div class="text-base font-bold text-gray-900">{{ parseFloat(balance.last_amount).toFixed(2) }}</div>
+                    <div class="text-base font-bold text-gray-900">{{ parseFloat(balance.last_amount).toFixed(2) }}
+                    </div>
                   </div>
                   <div class="text-center">
                     <div class="text-xs font-semibold text-gray-600 mb-1">آخر تحديث</div>
-                    <div class="text-sm font-medium text-gray-700">{{ new Date(balance.last_validated_date).toLocaleDateString('ar-SA') }}</div>
+                    <div class="text-sm font-medium text-gray-700">{{ new
+                      Date(balance.last_validated_date).toLocaleDateString('ar-SA') }}</div>
                   </div>
                 </div>
               </div>

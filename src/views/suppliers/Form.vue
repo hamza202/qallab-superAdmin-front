@@ -1,13 +1,99 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { useApi } from "@/composables/useApi";
+import { useNotification } from "@/composables/useNotification";
 
 const route = useRoute();
 const router = useRouter();
+const api = useApi();
+const { success, error } = useNotification();
+
+// TypeScript Interfaces
+interface ListItem {
+  id: number;
+  name: string;
+}
+
+interface Address {
+  country_id: number | null;
+  city_id: number | null;
+  postal_code: string;
+  neighborhood: string;
+  street_name: string;
+  building_number: string;
+  address_1: string;
+  address_2: string;
+}
+
+interface ContactListItem {
+  id?: number;
+  first_name: string;
+  last_name: string;
+  email: string;
+  mobile: string;
+  telephone: string;
+}
+
+interface SupplierBalance {
+  id: number;
+  currency: string;
+  debit: string;
+  credit: string;
+  balance: string;
+  last_amount: string;
+  last_validated_date: string;
+}
+
+interface SupplierPayload {
+  step: number;
+  supplier_id?: number;
+  business_name: {
+    en: string;
+    ar: string;
+  };
+  first_name: {
+    en: string;
+    ar: string;
+  };
+  last_name: {
+    en: string;
+    ar: string;
+  };
+  supplier_code: string;
+  default_currency_id: number | null;
+  mobile: string;
+  phone: string;
+  email: string;
+  address_1: string;
+  buisnessno: string;
+  taxno: string;
+  is_active: boolean;
+  address: Address;
+  contact_list: ContactListItem[];
+  tree_chart_card_id: number | null;
+}
+
+interface SupplierResponse {
+  status: number;
+  code: number;
+  locale: string;
+  message: string;
+  data: {
+    supplier_id: number;
+  };
+}
 
 // Check if editing
 const isEditing = computed(() => !!route.params.id);
 const pageTitle = computed(() => isEditing.value ? 'تعديل مورد' : 'إضافة مورد');
+
+// Loading states
+const loading = ref(false);
+const saving = ref(false);
+
+// Supplier ID for step 2
+const supplierId = ref<number | null>(null);
 
 // Form ref
 const formRef = ref<any>(null);
@@ -27,9 +113,34 @@ const isTabCompleted = (value: number) => {
   return false;
 };
 
+// Handle tab change with validation
+const handleTabChange = (newTab: number, event?: Event) => {
+  // Validate when creating (not editing) and trying to move to step 2
+  if (!isEditing.value && newTab === 1 && activeTab.value === 0) {
+    if (!basicInfoCompleted.value) {
+      error('يجب إكمال المعلومات الأساسية أولاً');
+      if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      // Force tab to stay on current tab
+      setTimeout(() => {
+        activeTab.value = 0;
+      }, 0);
+      return;
+    }
+  }
+  activeTab.value = newTab;
+};
+
 // Basic Info completion check
 const basicInfoCompleted = computed(() => {
-  return !!(commercialName.value && firstName.value && mobile.value);
+  // When editing, check if data is loaded
+  if (isEditing.value) {
+    return !!(businessNameAr.value && mobile.value && supplierId.value);
+  }
+  // When creating, only check required fields (supplierId will be set after first save)
+  return !!(businessNameAr.value && mobile.value);
 });
 
 const accountingInfoCompleted = computed(() => {
@@ -39,129 +150,306 @@ const accountingInfoCompleted = computed(() => {
 });
 
 // Form data - Basic Info
-const supplierCode = ref("CU-5478544");
-const commercialName = ref("");
-const firstName = ref("");
-const lastName = ref("");
-const branch = ref(null);
-const defaultCurrency = ref(null);
+const supplierCode = ref("SUP-5478544");
+const businessNameAr = ref("");
+const businessNameEn = ref("");
+const firstNameAr = ref("");
+const firstNameEn = ref("");
+const lastNameAr = ref("");
+const lastNameEn = ref("");
+const defaultCurrency = ref<number | null>(null);
 const mobile = ref("");
 const phone = ref("");
 const email = ref("");
-const commercialRegister = ref("");
+const businessNumber = ref("");
+const taxNumber = ref("");
 const nationalAddress = ref("");
 const status = ref(true);
 
 // Address Info (sub-tab)
-const country = ref(null);
-const city = ref(null);
+const country = ref<number | null>(null);
+const city = ref<number | null>(null);
+const postalCode = ref("");
+const district = ref("");
+const streetName = ref("");
+const buildingNumber = ref("");
+const address2 = ref("");
 
 // Contact List
-const contacts = ref([
-  {
-    id: 1,
-    firstName: "علي",
-    lastName: "خالد",
-    email: "example@gmail.com",
-    phone: "+96600000000",
-    mobile: "+96600000000",
-  },
-]);
-
-const newContact = ref({
-  firstName: "",
-  lastName: "",
-  email: "",
-  phone: "",
-  mobile: "",
-});
+const contacts = ref<ContactListItem[]>([]);
 
 // Accounting Info
 const createAccountInTree = ref<boolean | null>(true);
-const account = ref(null);
+const account = ref<number | null>(null);
 
-// Balances table
+// Balances (read-only from API)
+const supplierBalances = ref<SupplierBalance[]>([]);
 
-const balances = ref([
-  {
-    id: 1,
-    balance: 10.0,
-    dueAmount: 10.0,
-    currency: "ريال سعودي",
-    lastVerificationDate: "01/01/2025",
-  },
-]);
-
-// Select items
-const branchItems = [
-  { title: "الفرع الرئيسي", value: "main" },
-  { title: "فرع الرياض", value: "riyadh" },
-  { title: "فرع جدة", value: "jeddah" },
-];
-
-const currencyItems = [
-  { title: "ريال سعودي", value: "SAR" },
-  { title: "دولار أمريكي", value: "USD" },
-  { title: "يورو", value: "EUR" },
-];
-
-const countryItems = [
-  { title: "السعودية", value: "SA" },
-  { title: "الإمارات", value: "AE" },
-  { title: "مصر", value: "EG" },
-];
-
-const cityItems = [
-  { title: "الرياض", value: "riyadh" },
-  { title: "جدة", value: "jeddah" },
-  { title: "مكة", value: "makkah" },
-];
-
-const accountItems = [
-  { title: "حساب الموردين", value: "suppliers" },
-  { title: "حساب الدائنين", value: "creditors" },
-];
+// Dropdown items from API
+const currencyItems = ref<{ title: string; value: number }[]>([]);
+const countryItems = ref<{ title: string; value: number }[]>([]);
+const cityItems = ref<{ title: string; value: number }[]>([]);
+const accountItems = ref<{ title: string; value: number }[]>([]);
 
 // Sub-tabs for basic info section
 const basicInfoSubTab = ref(0);
 
-// Handlers
-const handleAddBranch = () => {
-  console.log("Add new branch");
+// API Functions
+const fetchCountries = async () => {
+  try {
+    const response = await api.get<{ data: ListItem[] }>('/admin/api/countries/list');
+    countryItems.value = response.data.map(item => ({
+      title: item.name,
+      value: item.id
+    }));
+  } catch (err: any) {
+    console.error('Error fetching countries:', err);
+  }
 };
 
+const fetchCities = async (countryId: number) => {
+  try {
+    const response = await api.get<{ data: ListItem[] }>(`/admin/api/cities/list?country_id=${countryId}`);
+    cityItems.value = response.data.map(item => ({
+      title: item.name,
+      value: item.id
+    }));
+  } catch (err: any) {
+    console.error('Error fetching cities:', err);
+  }
+};
+
+const fetchCurrencies = async () => {
+  try {
+    const response = await api.get<{ data: ListItem[] }>('/admin/api/currencies/list');
+    currencyItems.value = response.data.map(item => ({
+      title: item.name,
+      value: item.id
+    }));
+  } catch (err: any) {
+    console.error('Error fetching currencies:', err);
+  }
+};
+
+const fetchTreeChartCards = async () => {
+  try {
+    const response = await api.get<{ data: ListItem[] }>('/admin/api/tree-chart-cards/list');
+    accountItems.value = response.data.map(item => ({
+      title: item.name,
+      value: item.id
+    }));
+  } catch (err: any) {
+    console.error('Error fetching tree chart cards:', err);
+  }
+};
+
+const fetchSupplierData = async () => {
+  if (!route.params.id) return;
+
+  try {
+    loading.value = true;
+    const response = await api.get<any>(`/admin/api/suppliers/${route.params.id}`);
+    const data = response.data;
+
+    // Set supplier ID
+    supplierId.value = data.id;
+
+    // Basic Info
+    businessNameAr.value = data.business_name_translations?.ar || data.business_name;
+    businessNameEn.value = data.business_name_translations?.en || data.business_name;
+    firstNameAr.value = data.first_name_translations?.ar || data.first_name;
+    firstNameEn.value = data.first_name_translations?.en || data.first_name;
+    lastNameAr.value = data.last_name_translations?.ar || data.last_name;
+    lastNameEn.value = data.last_name_translations?.en || data.last_name;
+    supplierCode.value = data.supplier_code;
+    mobile.value = data.mobile;
+    phone.value = data.phone;
+    email.value = data.email;
+    defaultCurrency.value = data.default_currency_id;
+    businessNumber.value = data.buisnessno;
+    taxNumber.value = data.taxno;
+    nationalAddress.value = data.address_1;
+    status.value = data.is_active;
+
+    // Address
+    if (data.address) {
+      country.value = data.address.country_id;
+      city.value = data.address.city_id;
+      postalCode.value = data.address.postal_code;
+      district.value = data.address.neighborhood;
+      streetName.value = data.address.street_name;
+      buildingNumber.value = data.address.building_number;
+      nationalAddress.value = data.address.address_1;
+      address2.value = data.address.address_2;
+
+      // Fetch cities for selected country
+      if (data.address.country_id) {
+        await fetchCities(data.address.country_id);
+      }
+    }
+
+    // Contact List
+    contacts.value = data.contact_list || [];
+
+    // Supplier Balances
+    supplierBalances.value = data.supplier_balances || [];
+
+    // Accounting Info
+    account.value = data.tree_chart_card_id;
+  } catch (err: any) {
+    console.error('Error fetching supplier data:', err);
+    error(err?.response?.data?.message || 'Failed to fetch supplier data');
+  } finally {
+    loading.value = false;
+  }
+};
+
+const buildPayload = (step: number): SupplierPayload => {
+  return {
+    step,
+    supplier_id: supplierId.value || undefined,
+    business_name: {
+      en: businessNameEn.value,
+      ar: businessNameAr.value
+    },
+    first_name: {
+      en: firstNameEn.value,
+      ar: firstNameAr.value
+    },
+    last_name: {
+      en: lastNameEn.value,
+      ar: lastNameAr.value
+    },
+    supplier_code: supplierCode.value,
+    default_currency_id: defaultCurrency.value,
+    mobile: mobile.value,
+    phone: phone.value,
+    email: email.value,
+    address_1: nationalAddress.value,
+    buisnessno: businessNumber.value,
+    taxno: taxNumber.value,
+    is_active: status.value,
+    address: {
+      country_id: country.value,
+      city_id: city.value,
+      postal_code: postalCode.value,
+      neighborhood: district.value,
+      street_name: streetName.value,
+      building_number: buildingNumber.value,
+      address_1: nationalAddress.value,
+      address_2: address2.value
+    },
+    contact_list: contacts.value.map(contact => ({
+      id: contact.id,
+      first_name: contact.first_name,
+      last_name: contact.last_name,
+      email: contact.email,
+      mobile: contact.mobile,
+      telephone: contact.telephone
+    })),
+    tree_chart_card_id: account.value
+  };
+};
+
+const saveStep = async (step: number) => {
+  try {
+    saving.value = true;
+    const payload = buildPayload(step);
+
+    let response: SupplierResponse;
+
+    if (supplierId.value) {
+      // Update existing supplier
+      response = await api.put(`/admin/api/suppliers/${supplierId.value}`, payload);
+    } else {
+      // Create new supplier
+      response = await api.post('/admin/api/suppliers', payload);
+    }
+
+    // Store supplier ID for subsequent saves
+    if (response.data.supplier_id) {
+      supplierId.value = response.data.supplier_id;
+    }
+
+    success(response.message || 'Supplier saved successfully');
+    return true;
+  } catch (err: any) {
+    console.error('Error saving supplier:', err);
+
+    // Handle validation errors
+    if (err?.response?.data?.errors) {
+      const errors = err.response.data.errors;
+      const errorMessages = Object.values(errors).flat().join('\n');
+      error(errorMessages);
+    } else {
+      error(err?.response?.data?.message || 'Failed to save supplier');
+    }
+    return false;
+  } finally {
+    saving.value = false;
+  }
+};
+
+// Handlers
 const handleAddAccount = () => {
   console.log("Add new account");
 };
 
 const addContact = () => {
-  if (newContact.value.firstName && newContact.value.lastName) {
-    contacts.value.push({
-      id: contacts.value.length + 1,
-      ...newContact.value,
-    });
-    newContact.value = {
-      firstName: "",
-      lastName: "",
-      email: "",
-      phone: "",
-      mobile: "",
-    };
-  }
+  contacts.value.push({
+    first_name: "",
+    last_name: "",
+    email: "",
+    mobile: "",
+    telephone: ""
+  });
 };
 
+const removeContact = (index: number) => {
+  contacts.value.splice(index, 1);
+};
 
 const handleSave = async () => {
-  const { valid } = await formRef.value?.validate();
-  if (valid) {
-    console.log("Form is valid! Saving supplier...");
-    router.push({ name: "SuppliersList" });
+  // Save step 1 first
+  const step1Success = await saveStep(1);
+  if (!step1Success) return;
+
+  // If on accounting tab, save step 2
+  if (activeTab.value === 1) {
+    const step2Success = await saveStep(2);
+    if (step2Success) {
+      router.push({ name: "SuppliersList" });
+    }
+  } else {
+    // Move to accounting tab after saving step 1
+    activeTab.value = 1;
   }
 };
 
 const handleClose = () => {
   router.push({ name: "SuppliersList" });
 };
+
+// Watch country change to fetch cities
+watch(country, (newCountryId) => {
+  if (newCountryId) {
+    city.value = null; // Reset city when country changes
+    fetchCities(newCountryId);
+  }
+});
+
+// Lifecycle
+onMounted(async () => {
+  await Promise.all([
+    fetchCountries(),
+    fetchCurrencies(),
+    fetchTreeChartCards()
+  ]);
+
+  if (isEditing.value) {
+    await fetchSupplierData();
+  }
+});
 
 // Icons
 const suppliersIcon = `<svg width="52" height="52" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -190,6 +478,10 @@ const checkCircleIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
 <rect width="18" height="18" fill="white"/>
 </clipPath>
 </defs>
+</svg>`;
+
+const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M12.3333 5.00033V4.33366C12.3333 3.40024 12.3333 2.93353 12.1517 2.57701C11.9919 2.2634 11.7369 2.00844 11.4233 1.84865C11.0668 1.66699 10.6001 1.66699 9.66667 1.66699H8.33333C7.39991 1.66699 6.9332 1.66699 6.57668 1.84865C6.26308 2.00844 6.00811 2.2634 5.84832 2.57701C5.66667 2.93353 5.66667 3.40024 5.66667 4.33366V5.00033M7.33333 9.58366V13.7503M10.6667 9.58366V13.7503M1.5 5.00033H16.5M14.8333 5.00033V14.3337C14.8333 15.7338 14.8333 16.4339 14.5608 16.9686C14.3212 17.439 13.9387 17.8215 13.4683 18.0612C12.9335 18.3337 12.2335 18.3337 10.8333 18.3337H7.16667C5.76654 18.3337 5.06647 18.3337 4.53169 18.0612C4.06129 17.8215 3.67883 17.439 3.43915 16.9686C3.16667 16.4339 3.16667 15.7338 3.16667 14.3337V5.00033" stroke="#B42318" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`;
 
 </script>
@@ -223,16 +515,27 @@ const checkCircleIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
             <div class="mb-6 bg-gray-50 rounded-lg p-6">
               <h2 class="text-lg font-bold text-primary-900 mb-4">{{ pageTitle }} - بيانات المورد</h2>
 
-              <!-- Row 1: Commercial Name, First Name, Last Name -->
+              <!-- Row 1: Business Name (AR), First Name (AR), Last Name (AR) -->
               <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                <TextInput v-model="commercialName" label="اسم التجاري" placeholder="الاسم التجاري"
+                <TextInput v-model="businessNameAr" label="الاسم التجاري (عربي)" placeholder="الاسم التجاري"
                   :rules="[required()]" :hide-details="false" />
-                <TextInput v-model="firstName" label="الاسم الاول" placeholder="الاسم الاول" :rules="[required()]"
+                <TextInput v-model="firstNameAr" label="الاسم الاول (عربي)" placeholder="الاسم الاول"
+                  :rules="[required()]" :hide-details="false" />
+                <TextInput v-model="lastNameAr" label="الاسم الاخير (عربي)" placeholder="الاسم الاخير"
                   :hide-details="false" />
-                <TextInput v-model="lastName" label="الاسم الاخير" placeholder="الاسم الاخير" :hide-details="false" />
               </div>
 
-              <!-- Row 2: Supplier Code, Branch, Currency -->
+              <!-- Row 1.5: Business Name (EN), First Name (EN), Last Name (EN) -->
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <TextInput v-model="businessNameEn" label="الاسم التجاري (انجليزي)" placeholder="Business Name"
+                  :hide-details="false" />
+                <TextInput v-model="firstNameEn" label="الاسم الاول (انجليزي)" placeholder="First Name"
+                  :hide-details="false" />
+                <TextInput v-model="lastNameEn" label="الاسم الاخير (انجليزي)" placeholder="Last Name"
+                  :hide-details="false" />
+              </div>
+
+              <!-- Row 2: Supplier Code, Currency -->
               <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                 <div>
                   <div class="mb-[7px] text-sm font-semibold text-gray-700">كود المورد</div>
@@ -240,8 +543,6 @@ const checkCircleIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
                     {{ supplierCode }}
                   </div>
                 </div>
-                <SelectWithIconInput v-model="branch" label="الفرع" placeholder="الفرع" :items="branchItems"
-                  :hide-details="false" show-add-button @add-click="handleAddBranch" />
                 <SelectInput v-model="defaultCurrency" label="العملة الافتراضية" placeholder="ريال سعودي"
                   :items="currencyItems" :hide-details="false" />
               </div>
@@ -249,30 +550,29 @@ const checkCircleIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
               <!-- Row 3: Mobile, Phone, Email -->
               <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                 <TextInput v-model="mobile" label="الجوال" placeholder="+966 (555) 000-0000" :rules="[required()]"
-                  :hide-details="false">
+                  :hide-details="false" dir="ltr">
                   <template #append-inner>
-                    <span class="text-gray-500 text-sm">KSA</span>
+                    <span class="text-gray-900 font-semibold me-2 block text-sm">KSA</span>
                   </template>
                 </TextInput>
-                <TextInput v-model="phone" label="الهاتف" placeholder="+966 (555) 000-0000" :hide-details="false">
+                <TextInput v-model="phone" dir="ltr" label="الهاتف" placeholder="+966 (555) 000-0000" :hide-details="false">
                   <template #append-inner>
-                    <span class="text-gray-500 text-sm">KSA</span>
+                    <span class="text-gray-900 font-semibold me-2 block text-sm">KSA</span>
                   </template>
                 </TextInput>
                 <TextInput v-model="email" label="البريد الالكتروني" placeholder="example@gmail.com"
                   :hide-details="false" />
               </div>
 
-              <!-- Row 4: National Address, Commercial Register, Status -->
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <TextInput v-model="nationalAddress" label="العنوان الوطني" placeholder="ادخل العنوان"
+              <!-- Row 4: Business Number, Tax Number -->
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <TextInput v-model="businessNumber" label="رقم السجل التجاري" placeholder="ادخل الرقم"
                   :hide-details="false">
                   <template #prepend-inner>
                     <v-icon size="small" color="gray">mdi-help-circle-outline</v-icon>
                   </template>
                 </TextInput>
-                <TextInput v-model="commercialRegister" label="رقم السجل التجاري" placeholder="ادخل الرقم"
-                  :hide-details="false">
+                <TextInput v-model="taxNumber" label="الرقم الضريبي" placeholder="ادخل الرقم" :hide-details="false">
                   <template #prepend-inner>
                     <v-icon size="small" color="gray">mdi-help-circle-outline</v-icon>
                   </template>
@@ -312,65 +612,74 @@ const checkCircleIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
 
               <!-- Address Info Sub-tab -->
               <div v-if="basicInfoSubTab === 0" class="bg-gray-50 rounded-lg p-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                   <SelectInput v-model="country" label="الدولة" placeholder="الدولة" :items="countryItems"
                     :hide-details="false" />
                   <SelectInput v-model="city" label="المدينة" placeholder="المدينة" :items="cityItems"
                     :hide-details="false" />
+                  <TextInput v-model="postalCode" label="الرمز البريدي" placeholder="الرمز البريدي"
+                    :hide-details="false" />
+                  <TextInput v-model="district" label="اسم الحي" placeholder="اسم الحي" :hide-details="false" />
+                  <TextInput v-model="streetName" label="اسم الشارع" placeholder="اسم الشارع" :hide-details="false" />
+                  <TextInput v-model="buildingNumber" label="رقم المبنى" placeholder="رقم المبنى"
+                    :hide-details="false" />
+                  <TextInput v-model="nationalAddress" label="أدخل العنوان الوطني" placeholder="العنوان الوطني" :hide-details="false" />
+                  <TextInput v-model="address2" label="العنوان 2" placeholder="العنوان الإضافي" :hide-details="false" />
                 </div>
               </div>
 
               <!-- Contact List Sub-tab -->
               <div v-if="basicInfoSubTab === 1" class="bg-gray-50 rounded-lg p-6">
                 <!-- Add Contact Form -->
-                <div class="mb-4">
+                <div class="mb-4 flex items-center justify-between flex-wrap gap-4">
+                  <h3 class="text-lg font-bold text-gray-600">قائمة جهات الاتصال</h3>
                   <v-btn variant="flat" color="primary" height="40" class="font-semibold text-base mb-4"
                     @click="addContact">
                     <template #prepend>
                       <span v-html="plusIcon"></span>
                     </template>
-                    اضف المزيد
+                    أضف
                   </v-btn>
-                </div>
-
-                <!-- New Contact Row -->
-                <div class="grid grid-cols-1 md:grid-cols-5 gap-3 mb-4 items-end">
-                  <TextInput v-model="newContact.firstName" label="الاسم الاول" placeholder="الاسم الاول"
-                    :hide-details="true" />
-                  <TextInput v-model="newContact.lastName" label="الاسم الاخر" placeholder="الاسم الاخر"
-                    :hide-details="true" />
-                  <TextInput v-model="newContact.email" label="البريد الالكتروني" placeholder="example@gmail.com"
-                    :hide-details="true" />
-                  <TextInput v-model="newContact.phone" label="الهاتف" placeholder="+96600000000"
-                    :hide-details="true" />
-                  <TextInput v-model="newContact.mobile" label="الجوال" placeholder="+96600000000"
-                    :hide-details="true" />
                 </div>
 
                 <!-- Contacts Table -->
                 <v-table v-if="contacts.length > 0" class="bg-white rounded-lg">
                   <thead>
                     <tr class="bg-gray-100">
-                      <th class="text-right font-semibold text-gray-700 py-3 px-4">
-                        <v-checkbox hide-details density="compact" />
-                      </th>
                       <th class="text-right font-semibold text-gray-700 py-3 px-4">الاسم الاول</th>
                       <th class="text-right font-semibold text-gray-700 py-3 px-4">الاسم الاخر</th>
                       <th class="text-right font-semibold text-gray-700 py-3 px-4">البريد الالكتروني</th>
                       <th class="text-right font-semibold text-gray-700 py-3 px-4">الهاتف</th>
                       <th class="text-right font-semibold text-gray-700 py-3 px-4">الجوال</th>
+                      <th class="text-right font-semibold text-gray-700 py-3 px-4">إجراءات</th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr v-for="contact in contacts" :key="contact.id" class="border-b border-gray-200">
+                    <tr v-for="(contact, index) in contacts" :key="index" class="border-b border-gray-200">
                       <td class="py-3 px-4">
-                        <v-checkbox hide-details density="compact" />
+                        <TextInput v-model="contact.first_name" placeholder="الاسم الاول" :hide-details="true"
+                          density="compact" />
                       </td>
-                      <td class="py-3 px-4 text-gray-900">{{ contact.firstName }}</td>
-                      <td class="py-3 px-4 text-gray-900">{{ contact.lastName }}</td>
-                      <td class="py-3 px-4 text-gray-900">{{ contact.email }}</td>
-                      <td class="py-3 px-4 text-gray-900">{{ contact.phone }}</td>
-                      <td class="py-3 px-4 text-gray-900">{{ contact.mobile }}</td>
+                      <td class="py-3 px-4">
+                        <TextInput v-model="contact.last_name" placeholder="الاسم الاخر" :hide-details="true"
+                          density="compact" />
+                      </td>
+                      <td class="py-3 px-4">
+                        <TextInput v-model="contact.email" placeholder="example@gmail.com" :hide-details="true"
+                          density="compact" />
+                      </td>
+                      <td class="py-3 px-4">
+                        <TextInput v-model="contact.telephone" placeholder="+966" :hide-details="true"
+                          density="compact" />
+                      </td>
+                      <td class="py-3 px-4">
+                        <TextInput v-model="contact.mobile" placeholder="+966" :hide-details="true" density="compact" />
+                      </td>
+                      <td class="py-3 px-4">
+                        <v-btn icon size="small" variant="text" color="error" @click="removeContact(index)">
+                          <span v-html="trashIcon"></span>
+                        </v-btn>
+                      </td>
                     </tr>
                   </tbody>
                 </v-table>
@@ -396,32 +705,43 @@ const checkCircleIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
               </div>
 
               <SelectWithIconInput v-model="account" label="الحساب" placeholder="الحساب" :items="accountItems"
-                :hide-details="false" show-add-button @add-click="handleAddAccount" />
+                :hide-details="false"  @add-click="handleAddAccount" />
             </div>
           </div>
 
           <!-- Balances Section -->
-          <div class="bg-gray-50 rounded-lg p-6">
+          <div v-if="isEditing" class="bg-gray-50 rounded-lg p-6">
             <h2 class="text-lg font-bold text-primary-900 mb-4">الارصدة</h2>
 
-            <v-table class="bg-white rounded-lg">
-              <thead>
-                <tr class="bg-gray-100">
-                  <th class="text-right font-semibold text-gray-700 py-3 px-4">الرصيد</th>
-                  <th class="text-right font-semibold text-gray-700 py-3 px-4">المبلغ المستحق</th>
-                  <th class="text-right font-semibold text-gray-700 py-3 px-4">العملة</th>
-                  <th class="text-right font-semibold text-gray-700 py-3 px-4">تاريخ التحقق الاخير</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="balance in balances" :key="balance.id" class="border-b border-gray-200">
-                  <td class="py-3 px-4 text-gray-900">{{ balance.balance.toFixed(2) }}</td>
-                  <td class="py-3 px-4 text-gray-900">{{ balance.dueAmount.toFixed(2) }}</td>
-                  <td class="py-3 px-4 text-gray-900">{{ balance.currency }}</td>
-                  <td class="py-3 px-4 text-gray-900">{{ balance.lastVerificationDate }}</td>
-                </tr>
-              </tbody>
-            </v-table>
+            <div v-if="supplierBalances.length === 0" class="text-center py-8">
+              <p class="text-gray-500">لا توجد أرصدة متاحة</p>
+            </div>
+
+            <div v-else class="space-y-6">
+              <div v-for="balance in supplierBalances" :key="balance.id"
+                class="bg-white rounded-lg p-4 border border-gray-200">
+                <div class="text-sm font-semibold text-primary-700 mb-3">{{ balance.currency }}</div>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div class="text-center">
+                    <div class="text-xs font-semibold text-gray-600 mb-1">الرصيد</div>
+                    <div class="text-base font-bold text-gray-900">{{ balance.balance }}</div>
+                  </div>
+                  <div class="text-center">
+                    <div class="text-xs font-semibold text-gray-600 mb-1">المبلغ المستحق</div>
+                    <div class="text-base font-bold text-gray-900">{{ balance.last_amount }}</div>
+                  </div>
+                  <div class="text-center">
+                    <div class="text-xs font-semibold text-gray-600 mb-1">العملة</div>
+                    <div class="text-base font-bold text-gray-900">{{ balance.currency }}</div>
+                  </div>
+                  <div class="text-center">
+                    <div class="text-xs font-semibold text-gray-600 mb-1">تاريخ التدقيق الأخير</div>
+                    <div class="text-sm font-medium text-gray-700">{{ balance.last_validated_date }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </v-tabs-window-item>
       </v-tabs-window>
@@ -429,12 +749,13 @@ const checkCircleIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
       <!-- Action Buttons -->
       <div class="flex justify-center gap-4 mt-6">
         <v-btn variant="flat" color="primary" prepend-icon="mdi-content-save-all-outline" height="48"
-          class="font-semibold text-base  px-8 sm:!px-20" @click="handleSave">
+          class="font-semibold text-base  px-8 sm:!px-20" @click="handleSave" :loading="saving" :disabled="saving">
           <span>حفظ</span>
         </v-btn>
 
         <v-btn variant="outlined" height="48" prepend-icon="mdi-close" color="primary"
-          class="font-semibold text-base px-8 border-gray-300 bg-primary-50 px-8 sm:!px-20" @click="handleClose">
+          class="font-semibold text-base px-8 border-gray-300 bg-primary-50 px-8 sm:!px-20" @click="handleClose"
+          :disabled="saving">
           <span>اغلاق</span>
         </v-btn>
       </div>

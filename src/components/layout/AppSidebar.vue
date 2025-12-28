@@ -19,11 +19,11 @@
                 </div>
 
                 <v-list :opened="openGroups" density="compact" nav class="text-sm px-0 space-y-1"
-                    active-class="bg-white !text-qallab-blue !font-bold relative before:absolute before:content-[''] before:inset-y-1 before:start-[-16px] before:bottom-[5px] before:w-1.5 before:bg-qallab-yellow before:rounded-e-lg">
+                    active-class="bg-white !text-qallab-blue !font-bold relative before:absolute before:content-[''] before:inset-y-1 before:start-[-16px] before:bottom-[5px] before:w-1.5 before:bg-qallab-yellow before:rounded-e-lg ">
 
                     <!-- الرئيسية -->
-                    <v-list-item to="/" value="home" :class="{ '!mx-1 gap-5': !isSidebarExpanded }"
-                        class="mx-4 px-2 py-1.5 rounded-lg text-white hover:bg-primary-700/40 transition flex items-center justify-start gap-2">
+                    <v-list-item to="/" value="home"  :class="{ '!mx-1 gap-5': !isSidebarExpanded }"
+                        class="mx-4 px-2 py-1.5 !ps-[11px] rounded-lg text-white hover:bg-primary-700/40 transition flex items-center justify-start gap-2">
                         <template #title>
                             الرئيسية
                         </template>
@@ -38,7 +38,7 @@
                     <!-- المنتجات -->
                     <v-list-group value="products" class="mt-1">
                         <template #activator="{ props, isOpen }">
-                            <v-list-item v-bind="props" :class="[{ '!mx-1 gap-5': !isSidebarExpanded }, isProductsActive ? 'bg-white !text-[#1570EF]' : '']"
+                            <v-list-item v-bind="props" :class="[{ '!mx-1 gap-5': !isSidebarExpanded }, isProductsActive ? 'bg-white !text-[#1570EF]' : '', '!ps-[11px]']"
                                 class="px-2 py-1.5 mx-4 rounded-lg hover:bg-primary-700/40 text-white flex items-center justify-between gap-2">
                                 <template #append>
                                     <v-icon size="20"
@@ -60,22 +60,22 @@
                             <ul class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
                                 <li class="relative">
                                     <router-link to="/simple-products/list"
-                                        :class="[$route.path.includes('/simple-products/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        :class="[isMenuItemActive('/simple-products/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         منتجات بسيطة </router-link>
                                 </li>
                                 <li class="relative">
                                     <router-link to="/group-products/list"
-                                        :class="[$route.path.includes('/group-products/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        :class="[isMenuItemActive('/group-products/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         منتجات المجموعة</router-link>
                                 </li>
                                 <li class="relative">
                                     <router-link to="/products/prices-list"
-                                        :class="[$route.path.includes('/products/prices-list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        :class="[isMenuItemActive('/products/prices-list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         قوائم الاسعار</router-link>
                                 </li>
                                 <li class="relative">
                                     <router-link to="/products/production-capacity-list"
-                                        :class="[$route.path.includes('/products/production-capacity-list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        :class="[isMenuItemActive('/products/production-capacity-list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         القدرة الإنتاجية</router-link>
                                 </li>
                             </ul>
@@ -83,12 +83,12 @@
                             <ul class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
                                 <li class="relative">
                                     <router-link to="/customers/list"
-                                        :class="[$route.path.includes('/customers/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        :class="[isMenuItemActive('/customers/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         متغيرات المنتج </router-link>
                                 </li>
                                 <li class="relative">
                                     <router-link to="/sales/invoices"
-                                        :class="[$route.path.includes('/sales/invoices') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        :class="[isMenuItemActive('/sales/invoices') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         اعدادات جدول المنتجات</router-link>
                                 </li>
                             </ul>
@@ -98,7 +98,7 @@
                     <!-- الخدمات -->
                     <v-list-group value="services" class="mt-1">
                         <template #activator="{ props, isOpen }">
-                            <v-list-item v-bind="props" :class="[{ '!mx-1 gap-5': !isSidebarExpanded }, isServicesActive ? 'bg-white !text-[#1570EF]' : '']"
+                            <v-list-item v-bind="props" :class="[{ '!mx-1 gap-5': !isSidebarExpanded }, isServicesActive ? 'bg-white !text-[#1570EF]' : '','!ps-[11px]']"
                                 class="px-2 py-1.5 mx-4 rounded-lg hover:bg-primary-700/40 text-white flex items-center justify-between gap-2">
                                 <template #append>
                                     <v-icon size="20"
@@ -119,22 +119,22 @@
                             <ul class="space-y-2 text-slate-100">
                                 <li class="relative">
                                     <router-link to="/services/list"
-                                        :class="[$route.path.includes('/services/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        :class="[isMenuItemActive('/services/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         إدارة الخدمات </router-link>
                                 </li>
                                 <li class="relative">
                                     <router-link to="/group-products/list"
-                                        :class="[$route.path.includes('/group-products/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
+                                        :class="[isMenuItemActive('/group-products/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
                                         الاشتراكات</router-link>
                                 </li>
                                 <li class="relative">
                                     <router-link to="/services/prices-list"
-                                        :class="[$route.path.includes('/services/prices-list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
+                                        :class="[isMenuItemActive('/services/prices-list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
                                         قوائم الاسعار</router-link>
                                 </li>
                                 <li class="relative">
                                     <router-link to="/products/production-capacity-list"
-                                        :class="[$route.path.includes('/products/production-capacity-list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
+                                        :class="[isMenuItemActive('/products/production-capacity-list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
                                         إعدادات الخدمات</router-link>
                                 </li>
                             </ul>
@@ -145,7 +145,7 @@
                     <!-- المبيعات -->
                     <v-list-group value="sales" class="mt-1">
                         <template #activator="{ props, isOpen }">
-                            <v-list-item v-bind="props" :class="[{ '!mx-1 gap-5': !isSidebarExpanded }, isSalesActive ? 'bg-white !text-[#1570EF]' : '']"
+                            <v-list-item v-bind="props" :class="[{ '!mx-1 gap-5': !isSidebarExpanded }, isSalesActive ? 'bg-white !text-[#1570EF]' : '', '!ps-[11px]']"
                                 class="px-2 py-1.5 mx-4 rounded-lg hover:bg-primary-700/40 text-white flex items-center justify-between gap-2">
                                 <template #append>
                                     <v-icon size="20"
@@ -169,35 +169,35 @@
                             <ul class="space-y-2">
                                 <li class="relative">
                                     <router-link to="/sales/quotations"
-                                        :class="[$route.path.includes('/sales/quotations') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
+                                        :class="[isMenuItemActive('/sales/quotations') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
                                         عروض الأسعار</router-link>
                                     <span
                                         class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
                                 </li>
                                 <li class="relative">
                                     <router-link to="/sales/invoices"
-                                        :class="[$route.path.includes('/sales/invoices') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
+                                        :class="[isMenuItemActive('/sales/invoices') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
                                         فواتير المبيعات</router-link>
                                     <span
                                         class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
                                 </li>
                                 <li class="relative">
                                     <router-link to="/sales/orders"
-                                        :class="[$route.path.includes('/sales/orders') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
+                                        :class="[isMenuItemActive('/sales/orders') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
                                         طلبات المبيعات</router-link>
                                     <span
                                         class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
                                 </li>
                                 <li class="relative">
                                     <router-link to="/sales/contracts"
-                                        :class="[$route.path.includes('/sales/contracts') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
+                                        :class="[isMenuItemActive('/sales/contracts') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
                                         العقود</router-link>
                                     <span
                                         class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
                                 </li>
                                 <li class="relative">
                                     <router-link to="/sales/clearing"
-                                        :class="[$route.path.includes('/sales/clearing') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
+                                        :class="[isMenuItemActive('/sales/clearing') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
                                         المقاصة</router-link>
                                     <span
                                         class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
@@ -207,27 +207,27 @@
                             <ul class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
                                 <li class="relative">
                                     <router-link to="/customers/list"
-                                        :class="[$route.path.includes('/customers/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        :class="[isMenuItemActive('/customers/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         قائمة العملاء </router-link>
                                 </li>
                                 <li class="relative">
                                     <router-link to="/sales/invoices"
-                                        :class="[$route.path.includes('/sales/invoices') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
+                                        :class="[isMenuItemActive('/sales/invoices') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
                                         فواتير المبيعات</router-link>
                                 </li>
                                 <li class="relative">
                                     <router-link to="/sales/orders"
-                                        :class="[$route.path.includes('/sales/orders') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
+                                        :class="[isMenuItemActive('/sales/orders') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
                                         طلبات المبيعات</router-link>
                                 </li>
                                 <li class="relative">
                                     <router-link to="/sales/contracts"
-                                        :class="[$route.path.includes('/sales/contracts') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
+                                        :class="[isMenuItemActive('/sales/contracts') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
                                         العقود</router-link>
                                 </li>
                                 <li class="relative">
                                     <router-link to="/sales/clearing"
-                                        :class="[$route.path.includes('/sales/clearing') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
+                                        :class="[isMenuItemActive('/sales/clearing') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
                                         المقاصة</router-link>
                                 </li>
                             </ul>
@@ -238,7 +238,7 @@
                     <!-- المشاريع -->
                     <v-list-group value="projects" class="mt-1">
                         <template #activator="{ props, isOpen }">
-                            <v-list-item v-bind="props" :class="[{ '!mx-1 gap-5': !isSidebarExpanded }, isProjectsActive ? 'bg-white !text-[#1570EF]' : '']"
+                            <v-list-item v-bind="props" :class="[{ '!mx-1 gap-5': !isSidebarExpanded }, isProjectsActive ? 'bg-white !text-[#1570EF]' : '', '!ps-[11px]']"
                                 class="px-2 py-1.5 mx-4 rounded-lg hover:bg-primary-700/40 text-white flex items-center justify-between gap-2">
                                 <template #append>
                                     <v-icon size="20"
@@ -259,13 +259,13 @@
                             <ul class="space-y-2 text-slate-100">
                                 <li class="relative">
                                     <router-link to="/projects/list"
-                                        :class="[$route.path.includes('/projects/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        :class="[isMenuItemActive('/projects/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         إدارة
                                         المشاريع </router-link>
                                 </li>
                                 <li class="relative">
                                     <router-link to="/projects/scheduling"
-                                        :class="[$route.path.includes('/projects/scheduling') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
+                                        :class="[isMenuItemActive('/projects/scheduling') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
                                         جدولة
                                         المشاريع</router-link>
                                 </li>
@@ -276,7 +276,7 @@
                     <!-- المشتريات -->
                     <v-list-group value="purchases" class="mt-1">
                         <template #activator="{ props, isOpen }">
-                            <v-list-item v-bind="props" :class="[{ '!mx-1 gap-5': !isSidebarExpanded }, isPurchasesActive ? 'bg-white !text-[#1570EF]' : '']"
+                            <v-list-item v-bind="props" :class="[{ '!mx-1 gap-5': !isSidebarExpanded }, isPurchasesActive ? 'bg-white !text-[#1570EF]' : '', '!ps-[11px]']"
                                 class="px-2 py-1.5 mx-4 rounded-lg hover:bg-primary-700/40 text-white flex items-center justify-between gap-2">
                                 <template #append>
                                     <v-icon size="20"
@@ -298,12 +298,12 @@
                             <ul class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
                                 <li class="relative">
                                     <router-link to="/suppliers/list"
-                                        :class="[$route.path.includes('/suppliers/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        :class="[isMenuItemActive('/suppliers/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         إدارة الموردين </router-link>
                                 </li>
                                 <li class="relative">
                                     <router-link to="/suppliers/list"
-                                        :class="[$route.path.includes('/suppliers/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        :class="[isMenuItemActive('/suppliers/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         تسوية حساب موردين</router-link>
                                 </li>
                             </ul>
@@ -313,7 +313,7 @@
                     <!-- المالية -->
                     <v-list-group value="finance" class="mt-1">
                         <template #activator="{ props, isOpen }">
-                            <v-list-item v-bind="props" :class="[{ '!mx-1 gap-5': !isSidebarExpanded }, isFinanceActive ? 'bg-white !text-[#1570EF]' : '']"
+                            <v-list-item v-bind="props" :class="[{ '!mx-1 gap-5': !isSidebarExpanded }, isFinanceActive ? 'bg-white !text-[#1570EF]' : '', '!ps-[11px]']"
                                 class="px-2 py-1.5 mx-4 rounded-lg hover:bg-primary-700/40 text-white flex items-center justify-between gap-2">
                                 <template #append>
                                     <v-icon size="20"
@@ -356,7 +356,7 @@
                     <!-- المستخدمين -->
                     <v-list-group value="users" class="mt-1">
                         <template #activator="{ props, isOpen }">
-                            <v-list-item v-bind="props" :class="[{ '!mx-1 gap-5': !isSidebarExpanded }, isUsersActive ? 'bg-white !text-[#1570EF]' : '']"
+                            <v-list-item v-bind="props" :class="[{ '!mx-1 gap-5': !isSidebarExpanded }, isUsersActive ? 'bg-white !text-[#1570EF]' : '', '!ps-[11px]']"
                                 class="px-2 py-1.5 mx-4 rounded-lg hover:bg-primary-700/40 text-white flex items-center justify-between gap-2">
                                 <template #append>
                                     <v-icon size="20"
@@ -398,7 +398,7 @@
                     <!-- اللوجستيات -->
                     <v-list-group value="logistics" class="mt-1">
                         <template #activator="{ props, isOpen }">
-                            <v-list-item v-bind="props" :class="[{ '!mx-1 gap-5': !isSidebarExpanded }, isLogisticsActive ? 'bg-white !text-[#1570EF]' : '']"
+                            <v-list-item v-bind="props" :class="[{ '!mx-1 gap-5': !isSidebarExpanded }, isLogisticsActive ? 'bg-white !text-[#1570EF]' : '', '!ps-[11px]']"
                                 class="px-2 py-1.5 mx-4 rounded-lg hover:bg-primary-700/40 text-white flex items-center justify-between gap-2">
                                 <template #append>
                                     <v-icon size="20"
@@ -422,14 +422,14 @@
                             <ul class="space-y-2">
                                 <li class="relative">
                                     <router-link to="/logistics/transport-orders"
-                                        :class="[$route.path.includes('/logistics/transport-orders') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">طلبات
+                                        :class="[isMenuItemActive('/logistics/transport-orders') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">طلبات
                                         النقل</router-link>
                                     <span
                                         class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
                                 </li>
                                 <li class="relative">
                                     <router-link to="/logistics/transport-invoices"
-                                        :class="[$route.path.includes('/logistics/transport-invoices') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">فواتير
+                                        :class="[isMenuItemActive('/logistics/transport-invoices') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">فواتير
                                         النقل</router-link>
                                     <span
                                         class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
@@ -441,7 +441,7 @@
                     <!-- التقارير -->
                     <v-list-group value="reports" class="mt-1">
                         <template #activator="{ props, isOpen }">
-                            <v-list-item v-bind="props" :class="[{ '!mx-1 gap-5': !isSidebarExpanded }, isReportsActive ? 'bg-white !text-[#1570EF]' : '']"
+                            <v-list-item v-bind="props" :class="[{ '!mx-1 gap-5': !isSidebarExpanded }, isReportsActive ? 'bg-white !text-[#1570EF]' : '', '!ps-[11px]']"
                                 class="px-2 py-1.5 mx-4 rounded-lg hover:bg-primary-700/40 text-white flex items-center justify-between gap-2">
                                 <template #append>
                                     <v-icon size="20"
@@ -465,14 +465,14 @@
                             <ul class="space-y-2">
                                 <li class="relative">
                                     <router-link to="/reports/sales"
-                                        :class="[$route.path.includes('/reports/sales') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">تقارير
+                                        :class="[isMenuItemActive('/reports/sales') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">تقارير
                                         المبيعات</router-link>
                                     <span
                                         class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
                                 </li>
                                 <li class="relative">
                                     <router-link to="/reports/purchases"
-                                        :class="[$route.path.includes('/reports/purchases') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">تقارير
+                                        :class="[isMenuItemActive('/reports/purchases') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">تقارير
                                         المشتريات</router-link>
                                     <span
                                         class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
@@ -484,7 +484,7 @@
                     <!-- الإعدادات -->
                     <v-list-group value="settings" class="mt-1">
                         <template #activator="{ props, isOpen }">
-                            <v-list-item v-bind="props" :class="[{ '!mx-1 gap-5': !isSidebarExpanded }, isSettingsActive ? 'bg-white !text-[#1570EF]' : '']"
+                            <v-list-item v-bind="props" :class="[{ '!mx-1 gap-5': !isSidebarExpanded }, isSettingsActive ? 'bg-white !text-[#1570EF]' : '', '!ps-[11px]']"
                                 class="px-2 py-1.5 mx-4 rounded-lg hover:bg-primary-700/40 text-white flex items-center justify-between gap-2">
                                 <template #append>
                                     <v-icon size="20"
@@ -506,47 +506,47 @@
                             <ul class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
                                 <li class="relative">
                                     <router-link to="/products-categories/list"
-                                        :class="[$route.path.includes('/products-categories/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        :class="[isMenuItemActive('/products-categories/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         قائمة تصنيفات المنتجات </router-link>
                                 </li>
                                 <li class="relative">
                                     <router-link to="/services-categories/list"
-                                        :class="[$route.path.includes('/services-categories/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        :class="[isMenuItemActive('/services-categories/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         قائمة تصنيفات الخدمات</router-link>
                                 </li>
                                 <li class="relative">
                                     <router-link to="/products-categories/list"
-                                        :class="[$route.path.includes('/products-categories/create') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        :class="[isMenuItemActive('/products-categories/create') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         تصنيفات المنتجات </router-link>
                                 </li>
                                 <li class="relative">
                                     <router-link to="/services-categories/list"
-                                        :class="[$route.path.includes('/services-categories/create') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        :class="[isMenuItemActive('/services-categories/create') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         تصنيفات الخدمات</router-link>
                                 </li>
                                 <li class="relative">
                                     <router-link to="/units/list"
-                                        :class="[$route.path.includes('/units/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        :class="[isMenuItemActive('/units/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         الوحدات</router-link>
                                 </li>
                                 <li class="relative">
                                     <router-link to="/factories/list"
-                                        :class="[$route.path.includes('/factories/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        :class="[isMenuItemActive('/factories/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         المصانع</router-link>
                                 </li>
                                 <li class="relative">
                                     <router-link to="/brands/list"
-                                        :class="[$route.path.includes('/brands/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        :class="[isMenuItemActive('/brands/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         العلامة التجارية</router-link>
                                 </li>
                                 <li class="relative">
                                     <router-link to="/geo-areas/list"
-                                        :class="[$route.path.includes('/geo-areas/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        :class="[isMenuItemActive('/geo-areas/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         تقسيمات المناطق الجغرافية</router-link>
                                 </li>
                                 <li class="relative">
                                     <router-link to="/geo-segments/list"
-                                        :class="[$route.path.includes('/geo-segments/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        :class="[isMenuItemActive('/geo-segments/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         تقسيمات النطاقات الجغرافية</router-link>
                                 </li>
                             </ul>
@@ -554,13 +554,13 @@
                             <ul class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
                                 <li class="relative">
                                     <router-link to="/tax-rules/list"
-                                        :class="[$route.path.includes('/tax-rules/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        :class="[isMenuItemActive('/tax-rules/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         القواعد الضريبية
                                     </router-link>
                                 </li>
                                 <li class="relative">
                                     <router-link to="/taxes/list"
-                                        :class="[$route.path.includes('/taxes/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        :class="[isMenuItemActive('/taxes/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         الضرائب</router-link>
                                 </li>
                             </ul>
@@ -568,13 +568,13 @@
                             <ul class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
                                 <li class="relative">
                                     <router-link to="/cities/list"
-                                        :class="[$route.path.includes('/cities/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        :class="[isMenuItemActive('/cities/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         إدارة الدول
                                     </router-link>
                                 </li>
                                 <li class="relative">
                                     <router-link to="/sales/invoices"
-                                        :class="[$route.path.includes('/sales/invoices') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        :class="[isMenuItemActive('/sales/invoices') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         إدارة العملات</router-link>
                                 </li>
                             </ul>
@@ -582,13 +582,13 @@
                             <ul class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
                                 <li class="relative">
                                     <router-link to="/codes"
-                                        :class="[$route.path.includes('/codes') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        :class="[isMenuItemActive('/codes') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         اعدادات الاكواد
                                     </router-link>
                                 </li>
                                 <li class="relative">
                                     <router-link to="/account-types/list"
-                                        :class="[$route.path.includes('/account-types/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        :class="[isMenuItemActive('/account-types/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         أنواع الحسابات
                                     </router-link>
                                 </li>
@@ -624,7 +624,7 @@
 </template>
 
 <script setup>
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import {
     homeIcon,
@@ -643,7 +643,7 @@ import {
 const route = useRoute();
 
 // Define routes for each dropdown group
-const productsRoutes = ['/simple-products', '/group-products', '/products/prices-list', '/products/production-capacity-list', '/customers/list', '/sales/invoices'];
+const productsRoutes = ['/simple-products', '/group-products', '/products'];
 const servicesRoutes = ['/services'];
 const salesRoutes = ['/customers', '/sales'];
 const projectsRoutes = ['/projects'];
@@ -654,9 +654,77 @@ const logisticsRoutes = ['/logistics'];
 const reportsRoutes = ['/reports'];
 const settingsRoutes = ['/products-categories', '/services-categories', '/units', '/factories', '/brands', '/geo-areas', '/geo-segments', '/tax-rules', '/taxes', '/cities', '/codes', '/account-types'];
 
+// Helper function to check if route matches (including child routes like /form, /create, /edit/:id, /view/:id)
+const isRouteActive = (basePath) => {
+    const currentPath = route.path;
+    // Check if current path starts with the base path
+    if (currentPath.startsWith(basePath)) {
+        return true;
+    }
+    return false;
+};
+
+// Dynamic function to check if a menu item should be active based on its link path
+const isMenuItemActive = (menuLinkPath) => {
+    const currentPath = route.path;
+    
+    // Direct match
+    if (currentPath === menuLinkPath) return true;
+    
+    // Extract the base path from the menu link (e.g., '/services/list' -> '/services')
+    const pathParts = menuLinkPath.split('/').filter(p => p);
+    if (pathParts.length === 0) return false;
+    
+    const basePath = '/' + pathParts[0];
+    
+    // Check if we're in the same parent route
+    if (currentPath.startsWith(basePath + '/') || currentPath === basePath) {
+        // Special handling for different types of routes
+        
+        // 1. Price-related routes: keep them separate
+        if (pathParts.length > 1 && pathParts[1].includes('price')) {
+            return currentPath.includes('price');
+        }
+        
+        // 2. Main list routes (e.g., /services/list, /customers/list)
+        if (pathParts.length > 1 && pathParts[1] === 'list') {
+            // Active for: list, create, edit, view, form pages
+            // NOT active for: price-related or other sub-features
+            const isMainRoute = currentPath === menuLinkPath ||
+                              currentPath === basePath + '/create' ||
+                              currentPath.startsWith(basePath + '/edit/') ||
+                              currentPath === basePath + '/form' ||
+                              currentPath.startsWith(basePath + '/view/') ||
+                              currentPath === basePath + '/new';
+            
+            // Don't activate for price or other special routes
+            if (currentPath.includes('price') || currentPath.includes('scheduling')) {
+                return false;
+            }
+            
+            return isMainRoute;
+        }
+        
+        // 3. Special sub-features (scheduling, etc.)
+        if (pathParts.length > 1 && pathParts[1] === 'scheduling') {
+            return currentPath.includes('scheduling');
+        }
+        
+        // 4. For simple paths without /list (like /codes)
+        if (pathParts.length === 1) {
+            return currentPath.startsWith(basePath);
+        }
+        
+        // Default: match if same path structure
+        return currentPath.startsWith(menuLinkPath.replace('/list', ''));
+    }
+    
+    return false;
+};
+
 // Check if current route is active for a group
 const isGroupActive = (routes) => {
-    return routes.some(r => route.path.includes(r));
+    return routes.some(r => isRouteActive(r));
 };
 
 // Computed properties for each group's active state
@@ -671,8 +739,8 @@ const isLogisticsActive = computed(() => isGroupActive(logisticsRoutes));
 const isReportsActive = computed(() => isGroupActive(reportsRoutes));
 const isSettingsActive = computed(() => isGroupActive(settingsRoutes));
 
-// Track open groups
-const openGroups = ref([]);
+// Note: Individual menu items now use the dynamic isMenuItemActive() function
+// No need for specific computed properties for each menu item
 
 // Get current active group name
 const getActiveGroupName = () => {
@@ -689,12 +757,16 @@ const getActiveGroupName = () => {
     return null;
 };
 
+// Track open groups
+const openGroups = ref([]);
+
 // Initialize openGroups only once - don't watch route changes
 // This prevents scroll reset when navigating within the same dropdown
 const initActiveGroup = getActiveGroupName();
 if (initActiveGroup) {
     openGroups.value = [initActiveGroup];
 }
+
 
 const props = defineProps({
     modelValue: {
@@ -726,6 +798,35 @@ const toggleCollapse = () => {
 };
 
 const isSidebarExpanded = computed(() => !isCollapsed.value || isDrawerHovered.value);
+
+// Watch for collapse state changes
+watch(isCollapsed, (newValue) => {
+    if (newValue) {
+        // When collapsed, close all dropdowns
+        openGroups.value = [];
+    } else {
+        // When expanded, open the active group
+        const activeGroup = getActiveGroupName();
+        if (activeGroup) {
+            openGroups.value = [activeGroup];
+        }
+    }
+});
+
+// Watch for drawer hover state when collapsed
+watch(isDrawerHovered, (newValue) => {
+    if (isCollapsed.value && newValue) {
+        // When hovering over collapsed sidebar, open the active group
+        const activeGroup = getActiveGroupName();
+        if (activeGroup) {
+            openGroups.value = [activeGroup];
+        }
+    } else if (isCollapsed.value && !newValue) {
+        // When leaving hover, close all groups
+        openGroups.value = [];
+    }
+});
+
 </script>
 
 <style>

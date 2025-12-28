@@ -1,23 +1,33 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed, watch } from 'vue'
 
 const props = defineProps<{
     modelValue: any
+    durationUnits: Array<{ key: string; label: string }>
+    visibilityLevels: Array<{ key: string; label: string }>
 }>()
 
 const emit = defineEmits(['update:modelValue'])
 
 const formData = ref(props.modelValue)
 
+// Watch for external changes to modelValue
+watch(() => props.modelValue, (newVal) => {
+    formData.value = newVal
+}, { deep: true })
+
 const updateFormData = () => {
     emit('update:modelValue', formData.value)
 }
 
-const monitoringLevels = [
-    { title: 'عام', value: 'general' },
-    { title: 'متوسط', value: 'medium' },
-    { title: 'تفصيلي', value: 'detailed' },
-]
+// Convert API data to select items format
+const durationUnitItems = computed(() =>
+    props.durationUnits.map(d => ({ title: d.label, value: d.key }))
+)
+
+const visibilityItems = computed(() =>
+    props.visibilityLevels.map(v => ({ title: v.label, value: v.key }))
+)
 
 const handleFileUpload = (event: any) => {
     const files = event.target.files
@@ -40,14 +50,26 @@ const handleFileUpload = (event: any) => {
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="mb-6">
                     <label class="block text-sm font-semibold text-gray-900 mb-2">هل تحتاج موعد؟</label>
-                    <v-radio-group v-model="formData.has_schedule" inline hide-details
+                    <v-radio-group v-model="formData.requires_scheduling" inline hide-details
                         @update:model-value="updateFormData">
                         <v-radio label="نعم" :value="true" color="primary" />
                         <v-radio label="لا" :value="false" color="primary" />
                     </v-radio-group>
                 </div>
-                <TextInput label="مدة الخدمة" v-model="formData.duration" variant="outlined" density="comfortable"
-                    placeholder="5 ساعات" hide-details @update:model-value="updateFormData" />
+                <div>
+                    <label class="block text-sm font-semibold text-gray-900 mb-2">مدة الخدمة</label>
+                    <v-text-field v-model="formData.service_duration" type="number" variant="outlined"
+                        density="comfortable" placeholder="5" hide-details @update:model-value="updateFormData">
+                        <template #append-inner>
+                            <v-divider vertical class="mx-2" />
+                            <div @mousedown.stop @click.stop>
+                                <v-select v-model="formData.service_duration_unit" :items="durationUnitItems"
+                                    variant="plain" density="compact" hide-details class="inner-select"
+                                    style="width: 100px; min-width: 100px;" @update:model-value="updateFormData" />
+                            </div>
+                        </template>
+                    </v-text-field>
+                </div>
             </div>
 
         </div>
@@ -66,7 +88,7 @@ const handleFileUpload = (event: any) => {
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-900 mb-2">قابلة للمقايضة</label>
-                    <v-radio-group v-model="formData.exchangeable" inline hide-details
+                    <v-radio-group v-model="formData.is_barter" inline hide-details
                         @update:model-value="updateFormData">
                         <v-radio label="نعم" :value="true" color="primary" />
                         <v-radio label="لا" :value="false" color="primary" />
@@ -74,7 +96,7 @@ const handleFileUpload = (event: any) => {
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-900 mb-2">قابلة للتجزئة</label>
-                    <v-radio-group v-model="formData.divisible" inline hide-details
+                    <v-radio-group v-model="formData.is_partial_allowed" inline hide-details
                         @update:model-value="updateFormData">
                         <v-radio label="نعم" :value="true" color="primary" />
                         <v-radio label="لا" :value="false" color="primary" />
@@ -83,7 +105,7 @@ const handleFileUpload = (event: any) => {
 
                 <div>
                     <label class="block text-sm font-semibold text-gray-900 mb-2">متاحة للبيع</label>
-                    <v-radio-group v-model="formData.available_for_sale" inline hide-details
+                    <v-radio-group v-model="formData.sales_enabled" inline hide-details
                         @update:model-value="updateFormData">
                         <v-radio label="نعم" :value="true" color="primary" />
                         <v-radio label="لا" :value="false" color="primary" />
@@ -92,7 +114,7 @@ const handleFileUpload = (event: any) => {
 
                 <div>
                     <label class="block text-sm font-semibold text-gray-900 mb-2">متاحة للشراء</label>
-                    <v-radio-group v-model="formData.available_for_purchase" inline hide-details
+                    <v-radio-group v-model="formData.purchase_enabled" inline hide-details
                         @update:model-value="updateFormData">
                         <v-radio label="نعم" :value="true" color="primary" />
                         <v-radio label="لا" :value="false" color="primary" />
@@ -100,16 +122,16 @@ const handleFileUpload = (event: any) => {
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-900 mb-2">متاحة للمشاريع</label>
-                    <v-radio-group v-model="formData.available_for_projects" inline hide-details
+                    <v-radio-group v-model="formData.project_enabled" inline hide-details
                         @update:model-value="updateFormData">
                         <v-radio label="نعم" :value="true" color="primary" />
                         <v-radio label="لا" :value="false" color="primary" />
                     </v-radio-group>
                 </div>
 
-                    <selectInput label="مستوى الرقابة" v-model="formData.monitoring_level" :items="monitoringLevels" variant="outlined"
-                        density="comfortable" placeholder="عام" hide-details class="max-w-md"
-                        @update:model-value="updateFormData" />
+                <selectInput label="مستوى الرؤية" v-model="formData.visibility_level" :items="visibilityItems"
+                    variant="outlined" density="comfortable" placeholder="عام" hide-details class="max-w-md"
+                    @update:model-value="updateFormData" />
             </div>
         </div>
 
@@ -120,11 +142,11 @@ const handleFileUpload = (event: any) => {
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2">الوصف بالعربية</label>
-                    <v-textarea v-model="formData.additional_description_ar" variant="outlined" density="comfortable"
+                    <v-textarea v-model="formData.notes" variant="outlined" density="comfortable"
                         placeholder="تفاصيل المنتج" rows="4" hide-details @update:model-value="updateFormData" />
                 </div>
 
-                <div>
+                <!-- <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2">مستندات مرفقة</label>
                     <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center bg-white">
                         <input type="file" class="hidden" id="file-upload" @change="handleFileUpload" />
@@ -145,7 +167,7 @@ const handleFileUpload = (event: any) => {
                         </label>
                     </div>
                 </div>
-
+ -->
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2">تاريخ التفعيل</label>
                     <v-text-field v-model="formData.activation_date" type="date" variant="outlined"
@@ -157,4 +179,3 @@ const handleFileUpload = (event: any) => {
     </div>
 </template>
 
-<style scoped></style>
