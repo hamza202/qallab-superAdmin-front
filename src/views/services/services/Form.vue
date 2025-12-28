@@ -1,17 +1,32 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useApi } from '@/composables/useApi'
 import { useNotification } from '@/composables/useNotification'
 import BasicInfoTab from './components/BasicInfoTab.vue'
 import OperationalDataTab from './components/OperationalDataTab.vue'
 
 const route = useRoute()
 const router = useRouter()
+const api = useApi()
 const { success, error } = useNotification()
 
-const serviceId = computed(() => route.params.id ? Number(route.params.id) : null)
-const isEditing = computed(() => !!serviceId.value)
+const serviceId = ref<number | null>(null)
+const isEditing = computed(() => !!route.params.id)
 const saving = ref(false)
+const loading = ref(false)
+
+// Constants from API
+const domains = ref<Array<{ key: string; label: string }>>([])
+const types = ref<Array<{ key: string; label: string }>>([])
+const pricingMethods = ref<Array<{ key: string; label: string }>>([])
+const durationUnits = ref<Array<{ key: string; label: string }>>([])
+const visibilityLevels = ref<Array<{ key: string; label: string }>>([])
+
+// Dropdown data from API
+const units = ref<Array<{ id: number; name: string }>>([])
+const taxes = ref<Array<{ id: number; tax_name: string }>>([])
+const pricingMethodsList = ref<Array<{ id: number; name: string }>>([])
 
 const servicesIcon = `<svg width="52" height="52" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
 <rect x="6" y="6" width="40" height="40" rx="4" stroke="#1570EF" stroke-width="3"/>
@@ -27,53 +42,51 @@ const tabs = [
     { title: "البيانات التشغيلية", value: 1 },
 ]
 
+// Form data matching API payload structure
 const basicInfoData = ref({
     name_ar: '',
     name_en: '',
-    code: '',
+    service_code: '',
     service_type: 'internal',
-    service_category: 'consulting',
-    service_status: 'processing',
-    measurement_unit: 'hour',
-    arabic_description: 'تفاصيل الخدمة',
-    english_description: 'Service details',
-    unit_price: '25',
-    tax_applicable: true,
-    pricing_method: 'fixed',
-    minimum_service: 'ساعة',
-    tax_percentage: '25',
+    service_category_id: null as number | null,
+    description_ar: '',
+    description_en: '',
+    unit_id: null as number | null,
+    unit_price: '',
+    pricing_method_id: null as number | null,
+    min_quantity: '',
+    is_taxable: true,
+    tax_id: null as number | null,
+    tax_percentage: '',
+    is_active: true,
 })
 
 const operationalData = ref({
-    has_schedule: true,
-    duration: '',
+    requires_scheduling: true,
+    service_duration: '',
+    service_duration_unit: 'دقيقة',
     requires_approval: true,
-    available_for_sale: true,
-    available_for_purchase: true,
-    available_for_projects: true,
-    divisible: false,
-    exchangeable: false,
-    monitoring_level: 'عام',
-    additional_description_ar: '',
-    attachments: {
-        name: 'ملف مشروع البيوت',
-        size: '200 kB',
-        uploaded: true
-    },
-    activation_date: '2024-03-01',
+    is_barter: false,
+    is_partial_allowed: false,
+    sales_enabled: true,
+    purchase_enabled: true,
+    project_enabled: true,
+    visibility_level: 'public',
+    notes: '',
+    activation_date: null as string | null,
 })
 
 const isTabActive = (value: number) => activeTab.value === value
 
 const basicInfoCompleted = computed(() => {
     if (isEditing.value) {
-        return !!(basicInfoData.value.name_ar && basicInfoData.value.code)
+        return !!(basicInfoData.value.name_ar && basicInfoData.value.service_code && serviceId.value)
     }
-    return !!(basicInfoData.value.name_ar && basicInfoData.value.code)
+    return !!(basicInfoData.value.name_ar && basicInfoData.value.service_code)
 })
 
 const operationalInfoCompleted = computed(() => {
-    return !!(operationalData.value.duration && operationalData.value.monitoring_level)
+    return !!(operationalData.value.service_duration && operationalData.value.visibility_level)
 })
 
 const isTabCompleted = (value: number) => {
@@ -99,26 +112,208 @@ const handleTabChange = (newTab: number, event?: Event) => {
     activeTab.value = newTab
 }
 
-const handleSave = async () => {
+// API Functions
+const fetchConstants = async () => {
+    try {
+        const response = await api.get<any>('/admin/api/services/constants')
+        const data = response.data
+
+        domains.value = data.domains || []
+        types.value = data.types || []
+        pricingMethods.value = data.pricing_methods || []
+        durationUnits.value = data.duration_units || []
+        visibilityLevels.value = data.visibility || []
+    } catch (err: any) {
+        console.error('Error fetching constants:', err)
+        error(err?.response?.data?.message || 'Failed to fetch constants')
+    }
+}
+
+const fetchUnits = async () => {
+    try {
+        const response = await api.get<any>('/admin/api/units/list')
+        units.value = response.data || []
+    } catch (err: any) {
+        console.error('Error fetching units:', err)
+    }
+}
+
+const fetchTaxes = async () => {
+    try {
+        const response = await api.get<any>('/admin/api/taxes/list')
+        taxes.value = response.data || []
+    } catch (err: any) {
+        console.error('Error fetching taxes:', err)
+    }
+}
+
+const fetchPricingMethods = async () => {
+    try {
+        const response = await api.get<any>('/admin/api/pricing-methods/list')
+        pricingMethodsList.value = response.data || []
+    } catch (err: any) {
+        console.error('Error fetching pricing methods:', err)
+    }
+}
+
+const fetchServiceData = async () => {
+    if (!route.params.id) return
+
+    try {
+        loading.value = true
+        const response = await api.get<any>(`/admin/api/services/${route.params.id}`)
+        const data = response.data
+
+        serviceId.value = data.id
+
+        // Basic Info
+        basicInfoData.value = {
+            name_ar: data.name_translations?.ar || data.name,
+            name_en: data.name_translations?.en || data.name,
+            service_code: data.service_code,
+            service_type: data.service_type,
+            service_category_id: data.service_category_id,
+            description_ar: data.description_translations?.ar || data.description,
+            description_en: data.description_translations?.en || data.description,
+            unit_id: data.unit_id,
+            unit_price: data.unit_price,
+            pricing_method_id: data.pricing_method_id,
+            min_quantity: data.min_quantity,
+            is_taxable: data.is_taxable,
+            tax_id: data.tax_id,
+            tax_percentage: data.tax_percentage,
+            is_active: data.is_active,
+        }
+
+        // Operational Data
+        operationalData.value = {
+            requires_scheduling: data.requires_scheduling,
+            service_duration: data.service_duration,
+            service_duration_unit: data.service_duration_unit,
+            requires_approval: data.requires_approval,
+            is_barter: data.is_barter,
+            is_partial_allowed: data.is_partial_allowed,
+            sales_enabled: data.sales_enabled,
+            purchase_enabled: data.purchase_enabled,
+            project_enabled: data.project_enabled,
+            visibility_level: data.visibility_level,
+            notes: data.notes,
+            activation_date: data.activation_date,
+        }
+    } catch (err: any) {
+        console.error('Error fetching service data:', err)
+        error(err?.response?.data?.message || 'Failed to fetch service data')
+    } finally {
+        loading.value = false
+    }
+}
+
+const buildPayload = (step: number) => {
+    return {
+        step,
+        service_id: serviceId.value || undefined,
+        name: {
+            en: basicInfoData.value.name_en,
+            ar: basicInfoData.value.name_ar
+        },
+        description: {
+            en: basicInfoData.value.description_en,
+            ar: basicInfoData.value.description_ar
+        },
+        service_code: basicInfoData.value.service_code,
+        service_category_id: basicInfoData.value.service_category_id,
+        service_type: basicInfoData.value.service_type,
+        is_active: basicInfoData.value.is_active,
+        unit_id: basicInfoData.value.unit_id,
+        unit_price: parseFloat(basicInfoData.value.unit_price) || 0,
+        pricing_method_id: basicInfoData.value.pricing_method_id,
+        min_quantity: parseInt(basicInfoData.value.min_quantity) || 0,
+        is_taxable: basicInfoData.value.is_taxable,
+        tax_id: basicInfoData.value.tax_id,
+        tax_percentage: parseFloat(basicInfoData.value.tax_percentage) || 0,
+        requires_scheduling: operationalData.value.requires_scheduling,
+        service_duration: parseInt(operationalData.value.service_duration) || 0,
+        service_duration_unit: operationalData.value.service_duration_unit,
+        requires_approval: operationalData.value.requires_approval,
+        is_barter: operationalData.value.is_barter,
+        is_partial_allowed: operationalData.value.is_partial_allowed,
+        sales_enabled: operationalData.value.sales_enabled,
+        purchase_enabled: operationalData.value.purchase_enabled,
+        project_enabled: operationalData.value.project_enabled,
+        visibility_level: operationalData.value.visibility_level,
+        notes: operationalData.value.notes,
+        activation_date: operationalData.value.activation_date,
+    }
+}
+
+const saveStep = async (step: number) => {
     try {
         saving.value = true
+        const payload = buildPayload(step)
 
-        success('تم حفظ الخدمة بنجاح')
+        let response: any
 
-        setTimeout(() => {
-            router.push({ name: 'ServicesList' })
-        }, 1000)
+        if (serviceId.value) {
+            response = await api.put(`/admin/api/services/${serviceId.value}`, payload)
+        } else {
+            response = await api.post('/admin/api/services', payload)
+        }
+
+        if (response.data.service_id) {
+            serviceId.value = response.data.service_id
+        }
+
+        success(response.message || 'Service saved successfully')
+        return true
     } catch (err: any) {
         console.error('Error saving service:', err)
-        error('فشل في حفظ الخدمة')
+
+        if (err?.response?.data?.errors) {
+            const errors = err.response.data.errors
+            const errorMessages = Object.values(errors).flat().join('\n')
+            error(errorMessages)
+        } else {
+            error(err?.response?.data?.message || 'Failed to save service')
+        }
+        return false
     } finally {
         saving.value = false
+    }
+}
+
+const handleSave = async () => {
+    const step1Success = await saveStep(1)
+    if (!step1Success) return
+
+    if (activeTab.value === 1) {
+        const step2Success = await saveStep(2)
+        if (step2Success) {
+            router.push({ name: 'ServicesList' })
+        }
+    } else {
+        activeTab.value = 1
     }
 }
 
 const handleClose = () => {
     router.push({ name: 'ServicesList' })
 }
+
+// Lifecycle
+onMounted(async () => {
+    // Fetch all dropdown data
+    await Promise.all([
+        fetchConstants(),
+        fetchUnits(),
+        fetchTaxes(),
+        fetchPricingMethods()
+    ])
+
+    // Fetch service data if editing
+    if (isEditing.value) {
+        await fetchServiceData()
+    }
+})
 
 const checkCircleIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g clip-path="url(#clip0_12506_1251)">
@@ -155,11 +350,22 @@ const checkCircleIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
 
                     <v-tabs-window v-model="activeTab">
                         <v-tabs-window-item :value="0">
-                            <BasicInfoTab v-model="basicInfoData" />
+                            <BasicInfoTab 
+                                v-model="basicInfoData" 
+                                :domains="domains"
+                                :types="types"
+                                :units="units"
+                                :pricing-methods="pricingMethodsList"
+                                :taxes="taxes"
+                            />
                         </v-tabs-window-item>
 
                         <v-tabs-window-item :value="1">
-                            <OperationalDataTab v-model="operationalData" />
+                            <OperationalDataTab 
+                                v-model="operationalData"
+                                :duration-units="durationUnits"
+                                :visibility-levels="visibilityLevels"
+                            />
                         </v-tabs-window-item>
                     </v-tabs-window>
                 </div>

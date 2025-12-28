@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, nextTick, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { useApi } from '@/composables/useApi'
 import { useNotification } from '@/composables/useNotification'
@@ -8,24 +8,51 @@ const router = useRouter()
 const api = useApi()
 const { success, error } = useNotification()
 
+// TypeScript Interfaces
+interface ServiceAction {
+  can_update: boolean
+  can_delete: boolean
+  can_view: boolean
+  can_change_status: boolean
+}
+
 interface Service {
   id: number
   name: string
-  code: string
-  classification: string
-  creation_date: string
-  unit: string
-  price_min: number
-  price_max: number
-  tax_percentage: number
-  status: string
+  service_code: string
+  service_category: string | null
+  created_at: string
+  tax_percentage: string
+  service_unit: string
+  min_quantity: number
   is_active: boolean
+  actions: ServiceAction
+}
+
+interface TableHeader {
+  key: string
+  title: string
+}
+
+interface Pagination {
+  next_cursor: string | null
+  previous_cursor: string | null
+  per_page: number
 }
 
 interface ServicesResponse {
-  success: boolean
+  status: number
+  code: number
+  locale: string
   message: string
   data: Service[]
+  pagination: Pagination
+  header_table: string
+  headers: TableHeader[]
+  shownHeaders: TableHeader[]
+  actions: {
+    can_create: boolean
+  }
 }
 
 const servicesIcon = `<svg width="52" height="52" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -65,67 +92,165 @@ const viewIcon = `<svg width="20" height="14" viewBox="0 0 20 14" fill="none" xm
 <path d="M10.0911 9.41732C11.4258 9.41732 12.5078 8.33537 12.5078 7.00065C12.5078 5.66593 11.4258 4.58398 10.0911 4.58398C8.75639 4.58398 7.67444 5.66593 7.67444 7.00065C7.67444 8.33537 8.75639 9.41732 10.0911 9.41732Z" stroke="#697586" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`
 
-const tableHeaders = [
-  { key: 'name', title: 'اسم الخدمة', width: '180px' },
-  { key: 'code', title: 'كود الخدمة', width: '140px' },
-  { key: 'classification', title: 'تصنيف الخدمة', width: '140px' },
-  { key: 'creation_date', title: 'تاريخ الإنشاء', width: '140px' },
-  { key: 'unit', title: 'وحدة الخدمة', width: '120px' },
-  { key: 'price_min', title: 'حد أدنى لطلب الخدمة', width: '160px' },
-  { key: 'price_max', title: 'حد أعلى', width: '120px' },
-  { key: 'tax_percentage', title: 'نسبة الضريبة', width: '120px' },
-  { key: 'status', title: 'الحالة', width: '100px' },
-]
-
+// API Data
 const tableItems = ref<Service[]>([])
+const allHeaders = ref<TableHeader[]>([])
+const shownHeaders = ref<TableHeader[]>([])
+const canCreate = ref(false)
 const loading = ref(false)
-const deleteLoading = ref(false)
+const loadingMore = ref(false)
 
+// Pagination
+const nextCursor = ref<string | null>(null)
+const previousCursor = ref<string | null>(null)
+const perPage = ref(15)
+const hasMoreData = computed(() => nextCursor.value !== null)
+
+// Computed table headers for DataTable component
+const tableHeaders = computed(() => {
+  return shownHeaders.value.map(header => ({
+    key: header.key,
+    title: header.title,
+    width: '140px'
+  }))
+})
+
+// Selection state
 const selectedRows = ref<number[]>([])
 const hasSelected = computed(() => selectedRows.value.length > 0)
 
+// Filters
 const showAdvancedFilters = ref(false)
 const filterName = ref('')
 const filterCode = ref('')
-const filterClassification = ref('')
-const filterCreationDate = ref('')
-const filterUnit = ref('')
-const filterMinPrice = ref('')
-const filterMaxPrice = ref('')
-const filterTaxPercentage = ref('')
+const filterCategory = ref<string | null>(null)
 const filterStatus = ref<string | null>(null)
+
+// Delete confirmation
+const showDeleteDialog = ref(false)
+const showBulkDeleteDialog = ref(false)
+const deleteLoading = ref(false)
+const itemToDelete = ref<Service | null>(null)
+
+// Status change confirmation
+const showStatusChangeDialog = ref(false)
+const statusChangeLoading = ref(false)
+const itemToChangeStatus = ref<Service | null>(null)
+
+// Headers dropdown
+const showHeadersMenu = ref(false)
+const updatingHeaders = ref(false)
+
+// Computed checked headers for menu
+const headerCheckStates = computed(() => {
+  const states: Record<string, boolean> = {}
+  allHeaders.value.forEach(header => {
+    states[header.key] = shownHeaders.value.some(sh => sh.key === header.key)
+  })
+  return states
+})
 
 const toggleAdvancedFilters = () => {
   showAdvancedFilters.value = !showAdvancedFilters.value
 }
 
-const fetchServices = async () => {
+// API Functions
+const fetchServices = async (cursor?: string | null, append = false) => {
   try {
-    loading.value = true
-    const response = await api.get<ServicesResponse>('/api/services')
-    tableItems.value = response.data
+    if (append) {
+      loadingMore.value = true
+    } else {
+      loading.value = true
+    }
+
+    const params = new URLSearchParams()
+    params.append('per_page', String(perPage.value))
+    if (cursor) params.append('cursor', cursor)
+    if (filterName.value) params.append('name', filterName.value)
+    if (filterCode.value) params.append('service_code', filterCode.value)
+    if (filterCategory.value) params.append('service_category_id', filterCategory.value)
+    if (filterStatus.value) params.append('status', filterStatus.value)
+
+    const queryString = params.toString()
+    const url = queryString ? `/admin/api/services?${queryString}` : '/admin/api/services'
+
+    const response = await api.get<ServicesResponse>(url)
+
+    if (append) {
+      tableItems.value = [...tableItems.value, ...response.data]
+    } else {
+      tableItems.value = response.data
+      allHeaders.value = response.headers
+      shownHeaders.value = response.shownHeaders
+      canCreate.value = response.actions.can_create
+    }
+
+    nextCursor.value = response.pagination.next_cursor
+    previousCursor.value = response.pagination.previous_cursor
+    perPage.value = response.pagination.per_page
   } catch (err: any) {
     console.error('Error fetching services:', err)
     error(err?.response?.data?.message || 'فشل في جلب الخدمات')
   } finally {
     loading.value = false
+    loadingMore.value = false
   }
 }
 
-const deleteService = async (serviceId: number) => {
+// Load more data (lazy loading)
+const loadMore = () => {
+  if (hasMoreData.value && !loadingMore.value) {
+    fetchServices(nextCursor.value, true)
+  }
+}
+
+// Apply filters
+const applyFilters = () => {
+  fetchServices()
+}
+
+// Toggle header visibility
+const toggleHeader = async (headerKey: string) => {
+  const isCurrentlyShown = shownHeaders.value.some(h => h.key === headerKey)
+
+  if (isCurrentlyShown) {
+    shownHeaders.value = shownHeaders.value.filter(h => h.key !== headerKey)
+  } else {
+    const headerToAdd = allHeaders.value.find(h => h.key === headerKey)
+    if (headerToAdd) {
+      shownHeaders.value.push(headerToAdd)
+    }
+  }
+
+  await updateHeadersOnServer()
+}
+
+// Update headers on server
+const updateHeadersOnServer = async () => {
   try {
-    deleteLoading.value = true
-    await api.delete(`/api/services/${serviceId}`)
-    success('تم حذف الخدمة بنجاح')
-    await fetchServices()
+    updatingHeaders.value = true
+    const headerKeys = shownHeaders.value.map(h => h.key)
+
+    const formData = new FormData()
+    formData.append('table', 'services')
+    headerKeys.forEach((header, index) => {
+      formData.append(`header[${index}]`, header)
+    })
+
+    await api.post('/admin/api/headers', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
   } catch (err: any) {
-    console.error('Error deleting service:', err)
-    error(err?.response?.data?.message || 'فشل في حذف الخدمة')
+    console.error('Error updating headers:', err)
+    error(err?.response?.data?.message || 'Failed to update headers')
   } finally {
-    deleteLoading.value = false
+    updatingHeaders.value = false
   }
 }
 
+// Handlers
 const handleEdit = (item: any) => {
   router.push({ name: 'ServicesEdit', params: { id: item.id } })
 }
@@ -134,27 +259,145 @@ const handleView = (item: any) => {
   router.push({ name: 'ServicesView', params: { id: item.id } })
 }
 
-const handleDelete = async (item: any) => {
-  if (confirm('هل أنت متأكد من حذف هذه الخدمة؟')) {
-    await deleteService(item.id)
+const handleDelete = (item: any) => {
+  itemToDelete.value = item
+  showDeleteDialog.value = true
+}
+
+const handleStatusChange = (item: any) => {
+  itemToChangeStatus.value = item
+  showStatusChangeDialog.value = true
+}
+
+const confirmStatusChange = async () => {
+  if (!itemToChangeStatus.value) return
+
+  try {
+    statusChangeLoading.value = true
+    const newStatus = !itemToChangeStatus.value.is_active
+
+    await api.patch(`/admin/api/services/${itemToChangeStatus.value.id}/change-status`, {
+      status: newStatus
+    })
+
+    success(`تم ${newStatus ? 'تفعيل' : 'تعطيل'} الخدمة بنجاح`)
+
+    // Update the item in the list
+    const index = tableItems.value.findIndex(s => s.id === itemToChangeStatus.value!.id)
+    if (index !== -1) {
+      tableItems.value[index].is_active = newStatus
+    }
+
+    itemToChangeStatus.value = null
+  } catch (err: any) {
+    console.error('Error changing service status:', err)
+    error(err?.response?.data?.message || 'فشل تغيير حالة الخدمة')
+  } finally {
+    statusChangeLoading.value = false
+    showStatusChangeDialog.value = false
+  }
+}
+
+const confirmDelete = async () => {
+  if (!itemToDelete.value) return
+
+  try {
+    deleteLoading.value = true
+    await api.delete(`/admin/api/services/${itemToDelete.value.id}`)
+    success('تم حذف الخدمة بنجاح')
+    await fetchServices()
+    itemToDelete.value = null
+  } catch (err: any) {
+    console.error('Error deleting service:', err)
+    error(err?.response?.data?.message || 'فشل في حذف الخدمة')
+  } finally {
+    deleteLoading.value = false
+    showDeleteDialog.value = false
+  }
+}
+
+const handleBulkDelete = () => {
+  if (selectedRows.value.length === 0) return
+  showBulkDeleteDialog.value = true
+}
+
+const confirmBulkDelete = async () => {
+  try {
+    deleteLoading.value = true
+    await api.post('/admin/api/services/bulk-delete', { ids: selectedRows.value })
+    success(`تم حذف ${selectedRows.value.length} خدمة بنجاح`)
+    selectedRows.value = []
+    await fetchServices()
+  } catch (err: any) {
+    console.error('Error bulk deleting services:', err)
+    error(err?.response?.data?.message || 'فشل في حذف الخدمات')
+  } finally {
+    deleteLoading.value = false
+    showBulkDeleteDialog.value = false
   }
 }
 
 const handleSelect = (item: any, selected: boolean) => {
-  if (selected) selectedRows.value.push(item.id)
-  else selectedRows.value = selectedRows.value.filter(id => id !== item.id)
+  if (selected) {
+    selectedRows.value.push(item.id)
+  } else {
+    selectedRows.value = selectedRows.value.filter((id) => id !== item.id)
+  }
 }
 
 const handleSelectAll = (checked: boolean) => {
-  selectedRows.value = checked ? tableItems.value.map(i => i.id) : []
+  if (checked) {
+    selectedRows.value = tableItems.value.map((item) => item.id)
+  } else {
+    selectedRows.value = []
+  }
 }
 
 const openCreate = () => {
   router.push({ name: 'ServicesCreate' })
 }
 
+// Infinite scroll with Intersection Observer
+const loadMoreTrigger = ref<HTMLElement | null>(null)
+const observer = ref<IntersectionObserver | null>(null)
+
+const setupInfiniteScroll = () => {
+  if (!loadMoreTrigger.value) return
+
+  observer.value = new IntersectionObserver(
+    (entries) => {
+      const entry = entries[0]
+      if (entry.isIntersecting && hasMoreData.value && !loadingMore.value && !loading.value) {
+        loadMore()
+      }
+    },
+    {
+      root: null,
+      rootMargin: '100px',
+      threshold: 0.1,
+    }
+  )
+
+  observer.value.observe(loadMoreTrigger.value)
+}
+
+const cleanupInfiniteScroll = () => {
+  if (observer.value && loadMoreTrigger.value) {
+    observer.value.unobserve(loadMoreTrigger.value)
+    observer.value.disconnect()
+  }
+}
+
+// Lifecycle
 onMounted(() => {
   fetchServices()
+  nextTick(() => {
+    setupInfiniteScroll()
+  })
+})
+
+onBeforeUnmount(() => {
+  cleanupInfiniteScroll()
 })
 </script>
 
@@ -188,14 +431,14 @@ onMounted(() => {
               <span>تعديل</span>
             </v-btn>
             <div class="w-px bg-gray-200"></div>
-            <v-btn class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none">
+            <v-btn class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none" @click="handleBulkDelete">
               <template #prepend>
                 <span v-html="trash_1_icon" />
               </template>
-              <span>حذف</span>
+              <span>حذف المحدد</span>
             </v-btn>
             <div class="w-px bg-gray-200"></div>
-            <v-btn class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none">
+            <v-btn class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none" @click="handleBulkDelete">
               <template #prepend>
                 <span v-html="trash_2_icon" />
               </template>
@@ -204,12 +447,24 @@ onMounted(() => {
           </div>
 
           <div class="flex flex-wrap gap-3">
-            <v-btn variant="outlined" append-icon="mdi-chevron-down" color="gray-500" height="40" class="font-semibold text-base border-gray-400">
-              <template #prepend>
-                <span v-html="columnIcon" />
+            <v-menu v-model="showHeadersMenu" :close-on-content-click="false">
+              <template v-slot:activator="{ props }">
+                <v-btn v-bind="props" variant="outlined" append-icon="mdi-chevron-down" color="gray-500" height="40" class="font-semibold text-base border-gray-400">
+                  <template #prepend>
+                    <span v-html="columnIcon" />
+                  </template>
+                  الأعمدة
+                </v-btn>
               </template>
-              الأعمدة
-            </v-btn>
+              <v-list>
+                <v-list-item v-for="header in allHeaders" :key="header.key" @click="toggleHeader(header.key)">
+                  <template v-slot:prepend>
+                    <v-checkbox-btn :model-value="headerCheckStates[header.key]" :disabled="updatingHeaders" @click.stop="toggleHeader(header.key)"></v-checkbox-btn>
+                  </template>
+                  <v-list-item-title>{{ header.title }}</v-list-item-title>
+                </v-list-item>
+              </v-list>
+            </v-menu>
 
             <v-btn variant="outlined" color="primary-50" height="40" class="px-7 font-semibold text-base text-primary-700" prepend-icon="mdi-magnify" @click="toggleAdvancedFilters">
               بحث متقدم
@@ -222,16 +477,17 @@ onMounted(() => {
         </div>
 
         <div v-if="showAdvancedFilters" class="border-y border-y-primary-100 bg-primary-50 px-4 sm:px-6 py-3 flex flex-col gap-3 sm:gap-2">
-          <div class="flex flex-wrap gap-3 flex-1 order-1 sm:order-2 justify-end sm:justify-start">
-            <v-text-field v-model="filterName" density="comfortable" variant="outlined" hide-details placeholder="اسم الخدمة" class="w-full sm:w-40 bg-white" />
-            <v-text-field v-model="filterCode" density="comfortable" variant="outlined" hide-details placeholder="كود الخدمة" class="w-full sm:w-40 bg-white" />
-            <v-select v-model="filterClassification" :items="['تصنيف 1', 'تصنيف 2']" density="comfortable" variant="outlined" hide-details placeholder="التصنيف" class="w-full sm:w-40 bg-white" />
-            <v-text-field v-model="filterCreationDate" type="date" density="comfortable" variant="outlined" hide-details placeholder="تاريخ الإنشاء" class="w-full sm:w-40 bg-white" />
-            <v-select v-model="filterUnit" :items="['طن', 'متر', 'ساعة']" density="comfortable" variant="outlined" hide-details placeholder="وحدة الخدمة" class="w-full sm:w-40 bg-white" />
-            <v-text-field v-model="filterMinPrice" type="number" density="comfortable" variant="outlined" hide-details placeholder="حد أدنى" class="w-full sm:w-40 bg-white" />
-            <v-text-field v-model="filterMaxPrice" type="number" density="comfortable" variant="outlined" hide-details placeholder="حد أعلى" class="w-full sm:w-40 bg-white" />
-            <v-text-field v-model="filterTaxPercentage" density="comfortable" variant="outlined" hide-details placeholder="نسبة الضريبة" class="w-full sm:w-40 bg-white" />
-            <v-select v-model="filterStatus" :items="['فعال', 'غير فعال']" density="comfortable" variant="outlined" hide-details placeholder="الحالة" class="w-full sm:w-40 bg-white" />
+          <div class="flex flex-wrap gap-3 justify-end sm:justify-start">
+            <v-text-field v-model="filterName" density="comfortable" variant="outlined" hide-details placeholder="اسم الخدمة" class="w-full sm:w-40 bg-white" @keyup.enter="applyFilters" />
+            <v-text-field v-model="filterCode" density="comfortable" variant="outlined" hide-details placeholder="كود الخدمة" class="w-full sm:w-40 bg-white" @keyup.enter="applyFilters" />
+            <v-select v-model="filterCategory" :items="['استشارات', 'صيانة']" density="comfortable" variant="outlined" hide-details placeholder="التصنيف" class="w-full sm:w-40 bg-white" @update:model-value="applyFilters" />
+            <v-select v-model="filterStatus" :items="['فعال', 'غير فعال']" density="comfortable" variant="outlined" hide-details placeholder="الحالة" class="w-full sm:w-40 bg-white" @update:model-value="applyFilters" />
+            
+            <div class="flex gap-2 justify-start sm:justify-start">
+              <v-btn variant="flat" color="primary" height="45" @click="applyFilters" :loading="loading" class="px-5 font-semibold text-sm sm:text-base" prepend-icon="mdi-magnify">
+                ابحث
+              </v-btn>
+            </div>
           </div>
         </div>
 
@@ -246,58 +502,29 @@ onMounted(() => {
           @select="handleSelect"
           @selectAll="handleSelectAll"
         >
-          <template #item.name="{ item }">
-            <span class="text-sm font-semibold text-gray-900">{{ item.name }}</span>
-          </template>
-
-          <template #item.code="{ item }">
-            <span class="text-sm text-gray-600">{{ item.code }}</span>
-          </template>
-
-          <template #item.classification="{ item }">
-            <span class="text-sm text-gray-600">{{ item.classification }}</span>
-          </template>
-
-          <template #item.creation_date="{ item }">
-            <span class="text-sm text-gray-600">{{ item.creation_date }}</span>
-          </template>
-
-          <template #item.unit="{ item }">
-            <span class="text-sm text-gray-600">{{ item.unit }}</span>
-          </template>
-
-          <template #item.price_min="{ item }">
-            <span class="text-sm text-gray-600">{{ item.price_min }}</span>
-          </template>
-
-          <template #item.price_max="{ item }">
-            <span class="text-sm text-gray-600">{{ item.price_max }}</span>
-          </template>
-
-          <template #item.tax_percentage="{ item }">
-            <span class="text-sm text-gray-600">{{ item.tax_percentage }}%</span>
-          </template>
-
-          <template #item.status="{ item }">
-            <v-switch :model-value="item.is_active" hide-details inset density="compact" color="primary" disabled />
-          </template>
-
-          <template #actions="{ item }">
-            <div class="flex gap-2">
-              <v-btn icon size="small" variant="text" @click="handleView(item)">
-                <span v-html="viewIcon" />
-              </v-btn>
-              <v-btn icon size="small" variant="text" @click="handleEdit(item)">
-                <span v-html="editIcon" />
-              </v-btn>
-              <v-btn icon size="small" variant="text" @click="handleDelete(item)">
-                <span v-html="trash_1_icon" />
-              </v-btn>
-            </div>
+          <template #item.is_active="{ item }">
+            <v-switch :model-value="item.is_active" hide-details inset density="compact" color="primary" @click="handleStatusChange(item)" />
           </template>
         </DataTable>
+
+        <!-- Infinite Scroll Trigger & Loading Indicator -->
+        <div ref="loadMoreTrigger" class="flex justify-center py-4">
+          <v-progress-circular v-if="loadingMore" indeterminate color="primary" size="32" />
+          <span v-else-if="!hasMoreData && tableItems.length > 0" class="text-gray-500 text-sm">
+            لا توجد المزيد من البيانات
+          </span>
+        </div>
       </div>
     </div>
+
+    <!-- Delete Confirmation Dialog -->
+    <DeleteConfirmDialog v-model="showDeleteDialog" :loading="deleteLoading" :item-name="itemToDelete?.name" title="حذف الخدمة" message="هل أنت متأكد من حذف الخدمة" @confirm="confirmDelete" />
+
+    <!-- Bulk Delete Confirmation Dialog -->
+    <DeleteConfirmDialog v-model="showBulkDeleteDialog" :loading="deleteLoading" title="حذف الخدمات" :message="`هل أنت متأكد من حذف ${selectedRows.length} خدمة؟`" @confirm="confirmBulkDelete" />
+
+    <!-- Status Change Confirmation Dialog -->
+    <StatusChangeDialog v-model="showStatusChangeDialog" :loading="statusChangeLoading" :item-name="itemToChangeStatus?.name" :current-status="itemToChangeStatus?.is_active || false" @confirm="confirmStatusChange" />
   </default-layout>
 </template>
 

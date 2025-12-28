@@ -12,6 +12,7 @@ interface TextInputProps {
     type?: string;
     color?: string;
     variant?: TextVariant;
+    dir?: string;
     bgColor?: string;
     density?: Density;
     rounded?: string | number | boolean;
@@ -40,6 +41,7 @@ const props = withDefaults(defineProps<TextInputProps>(), {
     type: "text",
     color: "primary-300",
     bgColor: "#FFF",
+    dir: "rtl",
     density: "comfortable" as Density,
     hideDetails: true,
     passwordToggle: false,
@@ -95,6 +97,7 @@ const handleAppendInnerClick = () => {
             :disabled="disabled"
             :readonly="readonly" 
             :rules="rules" 
+            :dir="dir"
             :clearable="clearable" 
             :hide-details="hideDetails" 
             :hint="hint"
@@ -107,6 +110,9 @@ const handleAppendInnerClick = () => {
             :append-icon="appendIcon"
             v-bind="inputProps" 
             @click:append-inner="handleAppendInnerClick" 
-        />
+        >
+
+        <slot name="append-inner"></slot>
+        </v-text-field>
     </div>
 </template>

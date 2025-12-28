@@ -20,7 +20,7 @@ const API_ENDPOINTS = {
 const MOCK_CATEGORIES = [
   {
     id: 49,
-    name: "Clothing",
+    name: "الملابس",
     sup_category: [
       { id: 55, name: "Men's Clothing" },
       { id: 56, name: "Women's Clothing" },
@@ -29,7 +29,7 @@ const MOCK_CATEGORIES = [
   },
   {
     id: 50,
-    name: "Electronics",
+    name: "الإلكترونيات",
     sup_category: [
       { id: 58, name: "Phones" },
       { id: 59, name: "Laptops" },
@@ -38,16 +38,16 @@ const MOCK_CATEGORIES = [
   },
   {
     id: 51,
-    name: "Food & Beverages",
+    name: "الطعام والمشروبات",
     sup_category: [
       { id: 61, name: "Hot Drinks" },
       { id: 62, name: "Cold Drinks" },
       { id: 63, name: "Snacks" },
     ],
   },
-  { id: 52, name: "Furniture" },
-  { id: 53, name: "Home Supplies" },
-  { id: 54, name: "Sports" },
+  { id: 52, name: "أحذية" },
+  { id: 53, name: "مستلزمات المنزل" },
+  { id: 54, name: "الرياضة" },
 ];
 
 const MOCK_CATEGORY_DETAILS: Record<number, any> = {
@@ -816,66 +816,80 @@ const categoriesIcon = `<svg width="52" height="52" viewBox="0 0 52 52" fill="no
       <v-form ref="formRef" v-model="isFormValid" @submit.prevent>
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-          <div class="bg-gray-50 rounded-md p-4 sm:p-6 gap-4">
+          <div class="bg-white rounded-lg shadow-sm">
+            <!-- Header -->
+            <div class="px-6">
+              <h2 class="text-base font-bold text-gray-900 mb-1">شجرة التصنيفات</h2>
+              <p class="text-xs text-gray-600">اختر تصنيف لعرض التفاصيل</p>
+            </div>
+
             <!-- Loading indicator -->
-            <div v-if="isLoading" class="flex justify-center py-4">
+            <div v-if="isLoading" class="flex justify-center py-8">
               <v-progress-circular indeterminate color="primary" size="32" />
             </div>
 
             <template v-else>
-              <v-text-field v-model="categoriesSearch" density="comfortable" variant="outlined" hide-details
-                placeholder="بحث" prepend-inner-icon="mdi-magnify" class="mb-3" />
-
-              <div class="flex items-center mb-1 text-sm gap-2 text-gray-700">
-                <v-checkbox v-model="isAllSelected" density="compact" hide-details class="m-0" />
-                <div class="flex items-center gap-2">
-                  <span>اختيار الكل</span>
-                  <span>({{ flattenedFilteredCategories.length }})</span>
-                </div>
+              <!-- Search Box -->
+              <div class="px-6 pt-4">
+                <v-text-field v-model="categoriesSearch" density="comfortable" variant="outlined" hide-details
+                  placeholder="بحث" prepend-inner-icon="mdi-magnify" class="mb-4" bg-color="gray-50" rounded="lg" />
               </div>
 
-              <div class="max-h-[600px] overflow-y-auto space-y-0.5">
-                <div v-for="category in filteredCategories" :key="category.id">
+              <!-- Categories List -->
+              <div class="px-6 pb-4 max-h-[600px] overflow-y-auto space-y-2">
+                <div v-for="category in filteredCategories" :key="category.id" class="space-y-2">
                   <!-- Main Category Row -->
-                  <div class="flex items-center justify-start text-sm gap-2 px-4 py-50 rounded-md transition-colors"
-                    :class="isCategorySelected(category.id) ? 'bg-primary-100/50 border-s-4 border-primary-500' : 'hover:bg-gray-100'">
-                    <v-checkbox v-model="selectedCategoryIds" :value="category.id" density="compact" hide-details
-                      class="m-0" />
+                  <div class="flex items-center gap-2 px-2 py-1 text-white rounded-lg transition-all cursor-pointer"
+                    :class="[
+                      isCategorySelected(category.id)
+                        ? 'bg-primary-900 shadow-md'
+                        : 'bg-primary-500 hover:bg-primary-600'
+                    ]" @click="handleCategorySelect(category, false)">
 
-                    <span class="flex-1 cursor-pointer" :class="isCategorySelected(category.id)
-                      ? 'text-primary-700 font-semibold'
-                      : selectedCategoryIds.includes(category.id)
-                        ? 'text-primary-600 font-medium'
-                        : 'text-gray-700'" @click="handleCategorySelect(category, false)">
+                    <!-- Action Icons -->
+                    <div class="flex items-center">
+                      <v-checkbox v-model="selectedCategoryIds" :value="category.id" density="compact" hide-details
+                        :color="isCategorySelected(category.id) ? 'gray-500' : 'gray-500'" class="m-0" @click.stop />
+                    </div>
+
+                    <!-- Category Name -->
+                    <span class="flex-1 font-normal text-base">
                       {{ category.name }}
                     </span>
 
-                    <button v-if="category.children && category.children.length" type="button"
-                      class="text-gray-400 hover:text-primary-600 transition-colors"
-                      @click="toggleCategoryExpand(category.id)">
-                      <v-icon size="25">
+
+                    <!-- Expand/Collapse Icon -->
+                    <button v-if="category.children && category.children.length" type="button" class="flex-shrink-0"
+                      @click.stop="toggleCategoryExpand(category.id)">
+                      <v-icon size="20" :color="isCategorySelected(category.id) ? 'white' : 'gray'">
                         {{ isCategoryExpanded(category.id) ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
                       </v-icon>
                     </button>
+                    <div v-else class="w-5"></div>
+
                   </div>
 
                   <!-- Subcategories -->
                   <div v-if="category.children && category.children.length && isCategoryExpanded(category.id)"
-                    class="ps-8 space-y-0.5">
+                    class="space-y-2 ps-0">
                     <div v-for="child in category.children" :key="child.id"
-                      class="flex items-center justify-start text-sm gap-2 py-50 ps-2 rounded-md transition-colors"
-                      :class="isCategorySelected(child.id) ? 'bg-primary-100/50 border-s-4 border-primary-500' : 'hover:bg-gray-100'">
-                      <v-checkbox v-model="selectedCategoryIds" :value="child.id" density="compact" hide-details
-                        class="m-0" />
+                      class="flex items-center gap-2 px-2 py-1 border rounded-lg transition-all cursor-pointer" :class="[
+                        isCategorySelected(child.id)
+                          ? 'bg-gray-300 border-gray-400 text-white shadow-sm'
+                          : 'bg-gray-100 border-gray-100 text-gray-700 hover:bg-gray-200'
+                      ]" @click="handleCategorySelect({ ...child, parentId: category.id }, true)">
 
-                      <span class="cursor-pointer" :class="isCategorySelected(child.id)
-                        ? 'text-primary-700 font-semibold'
-                        : selectedCategoryIds.includes(child.id)
-                          ? 'text-primary-600 font-medium'
-                          : 'text-gray-700'"
-                        @click="handleCategorySelect({ ...child, parentId: category.id }, true)">
+                      <!-- Action Icons -->
+                      <div class="flex items-center gap-2">
+                        <v-checkbox v-model="selectedCategoryIds" :value="child.id" density="compact" hide-details
+                          :color="isCategorySelected(child.id) ? 'white' : 'primary'" class="m-0" @click.stop />
+                      </div>
+
+                      <!-- Subcategory Name -->
+                      <span class="flex-1 font-semibold text-base">
                         {{ child.name }}
                       </span>
+
                     </div>
                   </div>
                 </div>
@@ -952,14 +966,8 @@ const categoriesIcon = `<svg width="52" height="52" viewBox="0 0 52 52" fill="no
                   {{ isBulkMode ? 'الضرائب للتصنيفات المحددة' : 'الضرائب' }}
                 </h2>
                 <div class="w-full lg:w-auto flex justify-start lg:justify-end">
-                  <v-btn
-                    variant="flat"
-                    color="primary"
-                    height="40"
-                    class="font-semibold text-sm px-4 w-full lg:w-auto"
-                    :disabled="!isNewTaxValid"
-                    @click="addTaxRule"
-                  >
+                  <v-btn variant="flat" color="primary" height="40" class="font-semibold text-sm px-4 w-full lg:w-auto"
+                    :disabled="!isNewTaxValid" @click="addTaxRule">
                     <template #append>
                       <v-icon size="22">mdi-plus</v-icon>
                     </template>
@@ -968,7 +976,7 @@ const categoriesIcon = `<svg width="52" height="52" viewBox="0 0 52 52" fill="no
                 </div>
               </div>
 
-              <div class="flex flex-wrap gap-4 items-end mb-6">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                 <div class="w-full lg:w-auto lg:flex-1 min-w-[250px]">
                   <SelectWithIconInput v-model="newTaxRule.name" label="الضريبة" placeholder="اختر النوع"
                     :items="taxNameItems" show-add-button :hide-details="true" />
