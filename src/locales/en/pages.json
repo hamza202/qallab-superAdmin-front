@@ -52,6 +52,13 @@
       "create": "Add Customer",
       "edit": "Edit Customer"
     },
+    "crushers": {
+      "title": "Crushers",
+      "description": "Allows you to manage crushers",
+      "list": "Crushers List",
+      "create": "Add Crusher",
+      "edit": "Edit Crusher"
+    },
     "projects": {
       "title": "Projects Table",
       "description": "View projects",

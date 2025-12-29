@@ -391,6 +391,12 @@
                                     <span
                                         class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
                                 </li>
+                                <li class="relative">
+                                    <router-link to="/crushers/list"
+                                        :class="[$route.path.includes('/crushers') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">الكسارات</router-link>
+                                    <span
+                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
+                                </li>
                             </ul>
                         </div>
                     </v-list-group>
@@ -649,7 +655,7 @@ const salesRoutes = ['/customers', '/sales'];
 const projectsRoutes = ['/projects'];
 const purchasesRoutes = ['/suppliers'];
 const financeRoutes = ['/finance'];
-const usersRoutes = ['/users'];
+const usersRoutes = ['/users', '/crushers'];
 const logisticsRoutes = ['/logistics'];
 const reportsRoutes = ['/reports'];
 const settingsRoutes = ['/products-categories', '/services-categories', '/units', '/factories', '/brands', '/geo-areas', '/geo-segments', '/tax-rules', '/taxes', '/cities', '/codes', '/account-types'];

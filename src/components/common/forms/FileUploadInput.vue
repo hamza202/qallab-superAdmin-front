@@ -4,6 +4,7 @@ import { ref, computed } from "vue";
 interface FileUploadInputProps {
     modelValue: File[] | null;
     label?: string;
+    innerLabel?: string;
     accept?: string;
     multiple?: boolean;
     maxSize?: number; // in MB
@@ -18,6 +19,7 @@ const props = withDefaults(defineProps<FileUploadInputProps>(), {
     accept: "image/png, image/jpeg, image/gif",
     multiple: true,
     maxSize: 5,
+    innerLabel: 'أرفق صورة',
     maxFiles: 4,
     disabled: false,
     labelClass: "",
@@ -110,30 +112,21 @@ const trashIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" x
         <!-- Horizontal Layout -->
         <div v-if="isHorizontalLayout" class="grid grid-cols-1 md:grid-cols-3 gap-5 items-end">
             <!-- Upload Area (Right Side) -->
-            <div
-                class="flex flex-col items-center justify-center py-4 px-6 border border-solid border-gray-300 rounded-[8px] bg-white cursor-pointer transition-all duration-200 min-w-[200px] flex-shrink-0 hover:border-blue-300 hover:bg-blue-50"
+            <div class="flex flex-col items-center justify-center py-4 px-6 border border-solid border-gray-300 rounded-[8px] bg-white cursor-pointer transition-all duration-200 min-w-[200px] flex-shrink-0 hover:border-blue-300 hover:bg-blue-50"
                 :class="{ 'border-blue-500 bg-blue-100': isDragging, 'opacity-60 cursor-not-allowed': disabled }"
-                @dragover="handleDragOver"
-                @dragleave="handleDragLeave"
-                @drop="handleDrop"
-                @click="triggerFileInput"
-            >
-                <input
-                    ref="fileInput"
-                    type="file"
-                    :accept="accept"
-                    :multiple="multiple"
-                    :disabled="disabled"
-                    class="hidden"
-                    @change="handleFileSelect"
-                />
+                @dragover="handleDragOver" @dragleave="handleDragLeave" @drop="handleDrop" @click="triggerFileInput">
+                <input ref="fileInput" type="file" :accept="accept" :multiple="multiple" :disabled="disabled"
+                    class="hidden" @change="handleFileSelect" />
 
                 <div class="flex flex-col items-center gap-3">
-                    <div class="flex items-center justify-center w-10 h-10 bg-blue-200 border-[6px] border-solid border-blue-50 rounded-full">
+                    <div
+                        class="flex items-center justify-center w-10 h-10 bg-blue-200 border-[6px] border-solid border-blue-50 rounded-full">
                         <span v-html="uploadCloudIcon"></span>
                     </div>
                     <div class="flex gap-1 items-center justify-center">
-                        <button type="button" class="font-cairo font-bold text-sm leading-5 text-primary-600 bg-transparent border-none cursor-pointer disabled:cursor-not-allowed disabled:opacity-60" :disabled="disabled">
+                        <button type="button"
+                            class="font-cairo font-bold text-sm leading-5 text-primary-600 bg-transparent border-none cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
+                            :disabled="disabled">
                             أرفق صورة
                         </button>
                     </div>
@@ -142,13 +135,12 @@ const trashIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" x
             </div>
             <!-- Preview Images (Left Side) -->
             <div v-if="previewUrls.length > 0" class="flex flex-row gap-3 flex-wrap flex-1 md:col-span-2">
-                <div v-for="(url, index) in previewUrls" :key="index" class="relative w-[137px] h-28 rounded overflow-hidden">
+                <div v-for="(url, index) in previewUrls" :key="index"
+                    class="relative w-[137px] h-28 rounded overflow-hidden">
                     <img :src="url" alt="Preview" class="w-full h-full object-cover rounded" />
-                    <button
-                        type="button"
+                    <button type="button"
                         class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center p-2 bg-gray-50 border border-solid border-gray-300 rounded shadow-sm cursor-pointer transition-all duration-200 hover:bg-red-100 hover:border-red-300"
-                        @click.stop="removeFile(index)"
-                    >
+                        @click.stop="removeFile(index)">
                         <span v-html="trashIcon"></span>
                     </button>
                 </div>
@@ -158,34 +150,25 @@ const trashIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" x
         <!-- Default Layout -->
         <template v-else>
             <!-- Upload Area -->
-            <div
-                class="flex flex-col items-center py-4 px-6 border border-dashed border-gray-300 rounded-[8px] bg-white cursor-pointer transition-all duration-200 hover:border-blue-300 hover:bg-blue-50"
+            <div class="flex flex-col items-center py-4 px-6 border border-dashed border-gray-300 rounded-[8px] bg-white cursor-pointer transition-all duration-200 hover:border-blue-300 hover:bg-blue-50"
                 :class="{ 'border-blue-500 bg-blue-100': isDragging, 'opacity-60 cursor-not-allowed': disabled }"
-                @dragover="handleDragOver"
-                @dragleave="handleDragLeave"
-                @drop="handleDrop"
-                @click="triggerFileInput"
-            >
-                <input
-                    ref="fileInput"
-                    type="file"
-                    :accept="accept"
-                    :multiple="multiple"
-                    :disabled="disabled"
-                    class="hidden"
-                    @change="handleFileSelect"
-                />
+                @dragover="handleDragOver" @dragleave="handleDragLeave" @drop="handleDrop" @click="triggerFileInput">
+                <input ref="fileInput" type="file" :accept="accept" :multiple="multiple" :disabled="disabled"
+                    class="hidden" @change="handleFileSelect" />
 
                 <div class="flex flex-col items-center gap-3">
                     <!-- Upload Icon -->
-                    <div class="flex items-center justify-center w-10 h-10 bg-blue-200 border-[6px] border-solid border-blue-50 rounded-full">
+                    <div
+                        class="flex items-center justify-center w-10 h-10 bg-blue-200 border-[6px] border-solid border-blue-50 rounded-full">
                         <span v-html="uploadCloudIcon"></span>
                     </div>
 
                     <!-- Upload Text -->
                     <div class="flex gap-1 items-center justify-center">
-                        <button type="button" class="font-cairo font-bold text-sm leading-5 text-primary-600 bg-transparent border-none cursor-pointer disabled:cursor-not-allowed disabled:opacity-60" :disabled="disabled">
-                            أرفق صورة
+                        <button type="button"
+                            class="font-cairo font-bold text-sm leading-5 text-primary-600 bg-transparent border-none cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
+                            :disabled="disabled">
+                            {{ innerLabel }}
                         </button>
                     </div>
 
@@ -198,11 +181,9 @@ const trashIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" x
             <div v-if="previewUrls.length > 0" class="flex gap-3 mt-4 flex-wrap">
                 <div v-for="(url, index) in previewUrls" :key="index" class="relative w-[137px] h-28">
                     <img :src="url" alt="Preview" class="w-full h-full object-cover rounded" />
-                    <button
-                        type="button"
+                    <button type="button"
                         class="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center justify-center p-2 bg-gray-50 border border-solid border-gray-300 rounded shadow-sm cursor-pointer transition-all duration-200 hover:bg-red-100 hover:border-red-300"
-                        @click.stop="removeFile(index)"
-                    >
+                        @click.stop="removeFile(index)">
                         <span v-html="trashIcon"></span>
                     </button>
                 </div>
@@ -210,4 +191,3 @@ const trashIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" x
         </template>
     </div>
 </template>
-
