@@ -20,7 +20,7 @@ app.use(i18n)
 app.use(vuetify)
 app.use(VueGoogleMaps, {
   load: {
-    key: 'AIzaSyDNbMwiIBjwnK9PHv7yjg91y8nItriVoEc',
+    key: '',
     libraries: 'places'
   }
 })
