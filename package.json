@@ -11,6 +11,7 @@
     "type-check": "vue-tsc --noEmit -p tsconfig.app.json --composite false"
   },
   "dependencies": {
+    "@fawmi/vue-google-maps": "^0.9.79",
     "@mdi/font": "^7.4.47",
     "axios": "^1.7.9",
     "pinia": "^3.0.2",

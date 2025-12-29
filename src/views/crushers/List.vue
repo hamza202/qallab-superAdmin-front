@@ -1,0 +1,588 @@
+<script setup lang="ts">
+import { ref, computed, onMounted, nextTick, onBeforeUnmount } from "vue";
+import { useRouter } from "vue-router";
+import { useApi } from "@/composables/useApi";
+import { useNotification } from "@/composables/useNotification";
+
+const router = useRouter();
+const api = useApi();
+const { success, error } = useNotification();
+
+interface CrusherAction {
+    can_update: boolean;
+    can_delete: boolean;
+    can_view: boolean;
+    can_change_status: boolean;
+}
+
+interface Crusher {
+    id: number;
+    business_name: string;
+    owner_name: string;
+    buisness_number: number;
+    tax_number: number;
+    license_number: string;
+    license_issue_date: string;
+    license_expiry_date: string;
+    balance: boolean;
+    city: string;
+    status: boolean | null;
+    status_value?: string;
+    created_at: string;
+    actions: CrusherAction;
+}
+
+interface TableHeader {
+    key: string;
+    title: string;
+}
+
+interface Pagination {
+    next_cursor: string | null;
+    previous_cursor: string | null;
+    per_page: number;
+}
+
+interface CrushersResponse {
+    status: number;
+    code: number;
+    locale: string;
+    message: string;
+    data: Crusher[];
+    pagination: Pagination;
+    headers: TableHeader[];
+    shownHeaders: TableHeader[];
+    actions: {
+        can_create: boolean;
+    };
+}
+
+interface CrusherFilters {
+    per_page?: number;
+    cursor?: string | null;
+    business_name?: string;
+    owner_name?: string;
+    buisness_number?: string;
+    tax_number?: string;
+    license_number?: string;
+    city_id?: string;
+    status?: string;
+    license_issue_date?: string;
+    license_expiry_date?: string;
+    production_lines?: string;
+    rock_type?: string;
+    crusher_type?: string;
+    max_production_from?: string;
+    max_production_to?: string;
+    current_production_from?: string;
+    current_production_to?: string;
+}
+
+const crushersIcon = `<svg width="52" height="52" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path opacity="0.12" fill-rule="evenodd" clip-rule="evenodd" d="M40.3519 33.8018C40.236 33.1628 40.3142 32.5038 40.5764 31.9097C40.8261 31.3272 41.2407 30.8303 41.7691 30.4803C42.2976 30.1304 42.9168 29.9426 43.5506 29.94H43.7279C44.7727 29.94 45.7747 29.525 46.5135 28.7862C47.2523 28.0474 47.6673 27.0454 47.6673 26.0006C47.6673 24.9559 47.2523 23.9539 46.5135 23.2151C45.7747 22.4763 44.7727 22.0613 43.7279 22.0613H43.3931C42.7593 22.0587 42.14 21.8709 41.6116 21.521C41.0831 21.171 40.6685 20.6741 40.4188 20.0916V19.934C40.1566 19.3399 40.0784 18.6809 40.1943 18.0419C40.3101 17.403 40.6147 16.8134 41.0688 16.3491L41.187 16.231C41.5533 15.8651 41.8438 15.4306 42.0421 14.9524C42.2403 14.4742 42.3424 13.9615 42.3424 13.4438C42.3424 12.9261 42.2403 12.4135 42.0421 11.9353C41.8438 11.457 41.5533 11.0226 41.187 10.6567C40.8211 10.2904 40.3867 9.99987 39.9084 9.80163C39.4302 9.60338 38.9176 9.50134 38.3999 9.50134C37.8822 9.50134 37.3696 9.60338 36.8913 9.80163C36.4131 9.99987 35.9786 10.2904 35.6128 10.6567L35.4946 10.7749C35.0304 11.229 34.4408 11.5336 33.8018 11.6494C33.1628 11.7653 32.5038 11.6871 31.9097 11.4249C31.3272 11.1752 30.8303 10.7606 30.4803 10.2322C30.1304 9.70372 29.9426 9.08447 29.94 8.45065V8.27338C29.94 7.22859 29.525 6.22659 28.7862 5.48781C28.0474 4.74903 27.0454 4.33398 26.0006 4.33398C24.9559 4.33398 23.9539 4.74903 23.2151 5.48781C22.4763 6.22659 22.0613 7.22859 22.0613 8.27338V8.60823C22.0587 9.24205 21.8709 9.8613 21.521 10.3897C21.171 10.9182 20.6741 11.3328 20.0916 11.5825H19.934C19.3399 11.8447 18.6809 11.9229 18.0419 11.807C17.403 11.6912 16.8134 11.3866 16.3491 10.9325L16.231 10.8143C15.8651 10.448 15.4306 10.1575 14.9524 9.9592C14.4742 9.76096 13.9615 9.65892 13.4438 9.65892C12.9261 9.65892 12.4135 9.76096 11.9353 9.9592C11.457 10.1575 11.0226 10.448 10.6567 10.8143C10.2904 11.1802 9.99987 11.6146 9.80163 12.0929C9.60338 12.5711 9.50134 13.0837 9.50134 13.6014C9.50134 14.1191 9.60338 14.6317 9.80163 15.11C9.99987 15.5882 10.2904 16.0227 10.6567 16.3885L10.7749 16.5067C11.229 16.9709 11.5336 17.5605 11.6494 18.1995C11.7653 18.8385 11.6871 19.4975 11.4249 20.0916C11.1998 20.7036 10.7958 21.2338 10.2653 21.6132C9.7349 21.9926 9.10261 22.2036 8.45065 22.2188H8.27338C7.22859 22.2188 6.22659 22.6339 5.48781 23.3727C4.74903 24.1114 4.33398 25.1134 4.33398 26.1582C4.33398 27.203 4.74903 28.205 5.48781 28.9438C6.22659 29.6826 7.22859 30.0976 8.27338 30.0976H8.60823C9.24205 30.1001 9.8613 30.288 10.3897 30.6379C10.9182 30.9879 11.3328 31.4847 11.5825 32.0673C11.8447 32.6614 11.9229 33.3204 11.807 33.9594C11.6912 34.5983 11.3866 35.1879 10.9325 35.6522L10.8143 35.7703C10.448 36.1362 10.1575 36.5707 9.9592 37.0489C9.76096 37.5271 9.65892 38.0398 9.65892 38.5575C9.65892 39.0752 9.76096 39.5878 9.9592 40.066C10.1575 40.5443 10.448 40.9787 10.8143 41.3446C11.1802 41.7109 11.6146 42.0014 12.0929 42.1997C12.5711 42.3979 13.0837 42.5 13.6014 42.5C14.1191 42.5 14.6317 42.3979 15.11 42.1997C15.5882 42.0014 16.0227 41.7109 16.3885 41.3446L16.5067 41.2264C16.9709 40.7723 17.5605 40.4677 18.1995 40.3519C18.8385 40.236 19.4975 40.3142 20.0916 40.5764C20.7036 40.8015 21.2338 41.2055 21.6132 41.736C21.9926 42.2664 22.2036 42.8987 22.2188 43.5506V43.7279C22.2188 44.7727 22.6339 45.7747 23.3727 46.5135C24.1114 47.2523 25.1134 47.6673 26.1582 47.6673C27.203 47.6673 28.205 47.2523 28.9438 46.5135C29.6826 45.7747 30.0976 44.7727 30.0976 43.7279V43.3931C30.1001 42.7593 30.288 42.14 30.6379 41.6116C30.9879 41.0831 31.4847 40.6685 32.0673 40.4188C32.6614 40.1566 33.3204 40.0784 33.9594 40.1943C34.5983 40.3101 35.1879 40.6147 35.6522 41.0688L35.7703 41.187C36.1362 41.5533 36.5707 41.8438 37.0489 42.0421C37.5271 42.2403 38.0398 42.3424 38.5575 42.3424C39.0752 42.3424 39.5878 42.2403 40.066 42.0421C40.5443 41.8438 40.9787 41.5533 41.3446 41.187C41.7109 40.8211 42.0014 40.3867 42.1997 39.9084C42.3979 39.4302 42.5 38.9176 42.5 38.3999C42.5 37.8822 42.3979 37.3696 42.1997 36.8913C42.0014 36.4131 41.7109 35.9786 41.3446 35.6128L41.2264 35.4946C40.7723 35.0304 40.4677 34.4408 40.3519 33.8018ZM32.5006 26.0006C32.5006 29.5905 29.5905 32.5006 26.0006 32.5006C22.4108 32.5006 19.5006 29.5905 19.5006 26.0006C19.5006 22.4108 22.4108 19.5006 26.0006 19.5006C29.5905 19.5006 32.5006 22.4108 32.5006 26.0006Z" fill="#1570EF"/>
+<path d="M26.0006 32.5006C29.5905 32.5006 32.5006 29.5905 32.5006 26.0006C32.5006 22.4108 29.5905 19.5006 26.0006 19.5006C22.4108 19.5006 19.5006 22.4108 19.5006 26.0006C19.5006 29.5905 22.4108 32.5006 26.0006 32.5006Z" stroke="#194185" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M40.5764 31.9097C40.3142 32.5038 40.236 33.1628 40.3519 33.8018C40.4677 34.4408 40.7723 35.0304 41.2264 35.4946L41.3446 35.6128C41.7109 35.9786 42.0014 36.4131 42.1997 36.8913C42.3979 37.3696 42.5 37.8822 42.5 38.3999C42.5 38.9176 42.3979 39.4302 42.1997 39.9084C42.0014 40.3867 41.7109 40.8211 41.3446 41.187C40.9787 41.5533 40.5443 41.8438 40.066 42.0421C39.5878 42.2403 39.0752 42.3424 38.5575 42.3424C38.0398 42.3424 37.5272 42.2403 37.0489 42.0421C36.5707 41.8438 36.1362 41.5533 35.7703 41.187L35.6522 41.0688C35.1879 40.6147 34.5983 40.3101 33.9594 40.1943C33.3204 40.0784 32.6614 40.1566 32.0673 40.4188C31.4847 40.6685 30.9879 41.0831 30.6379 41.6116C30.288 42.14 30.1001 42.7593 30.0976 43.3931V43.7279C30.0976 44.7727 29.6826 45.7747 28.9438 46.5135C28.205 47.2523 27.203 47.6673 26.1582 47.6673C25.1134 47.6673 24.1114 47.2523 23.3727 46.5135C22.6339 45.7747 22.2188 44.7727 22.2188 43.7279V43.5506C22.2036 42.8987 21.9926 42.2664 21.6132 41.736C21.2338 41.2055 20.7036 40.8015 20.0916 40.5764C19.4975 40.3142 18.8385 40.236 18.1995 40.3519C17.5605 40.4677 16.9709 40.7723 16.5067 41.2264L16.3885 41.3446C16.0227 41.7109 15.5882 42.0014 15.11 42.1997C14.6317 42.3979 14.1191 42.5 13.6014 42.5C13.0837 42.5 12.5711 42.3979 12.0929 42.1997C11.6146 42.0014 11.1802 41.7109 10.8143 41.3446C10.448 40.9787 10.1575 40.5443 9.9592 40.066C9.76096 39.5878 9.65892 39.0752 9.65892 38.5575C9.65892 38.0398 9.76096 37.5272 9.9592 37.0489C10.1575 36.5707 10.448 36.1362 10.8143 35.7703L10.9325 35.6522C11.3866 35.1879 11.6912 34.5983 11.807 33.9594C11.9229 33.3204 11.8447 32.6614 11.5825 32.0673C11.3328 31.4847 10.9182 30.9879 10.3897 30.6379C9.8613 30.288 9.24205 30.1001 8.60823 30.0976H8.27338C7.22859 30.0976 6.22659 29.6826 5.48781 28.9438C4.74903 28.205 4.33398 27.203 4.33398 26.1582C4.33398 25.1134 4.74903 24.1114 5.48781 23.3727C6.22659 22.6339 7.22859 22.2188 8.27338 22.2188H8.45065C9.10261 22.2036 9.7349 21.9926 10.2653 21.6132C10.7958 21.2338 11.1998 20.7036 11.4249 20.0916C11.6871 19.4975 11.7653 18.8385 11.6494 18.1995C11.5336 17.5605 11.229 16.9709 10.7749 16.5067L10.6567 16.3885C10.2904 16.0227 9.99987 15.5882 9.80163 15.11C9.60338 14.6317 9.50134 14.1191 9.50134 13.6014C9.50134 13.0837 9.60338 12.5711 9.80163 12.0929C9.99987 11.6146 10.2904 11.1802 10.6567 10.8143C11.0226 10.448 11.457 10.1575 11.9353 9.9592C12.4135 9.76096 12.9261 9.65892 13.4438 9.65892C13.9615 9.65892 14.4742 9.76096 14.9524 9.9592C15.4306 10.1575 15.8651 10.448 16.231 10.8143L16.3491 10.9325C16.8134 11.3866 17.403 11.6912 18.0419 11.807C18.6809 11.9229 19.3399 11.8447 19.934 11.5825H20.0916C20.6741 11.3328 21.171 10.9182 21.521 10.3897C21.8709 9.8613 22.0587 9.24205 22.0613 8.60823V8.27338C22.0613 7.22859 22.4763 6.22659 23.2151 5.48781C23.9539 4.74903 24.9559 4.33398 26.0006 4.33398C27.0454 4.33398 28.0474 4.74903 28.7862 5.48781C29.525 6.22659 29.94 7.22859 29.94 8.27338V8.45065C29.9426 9.08447 30.1304 9.70372 30.4803 10.2322C30.8303 10.7606 31.3272 11.1752 31.9097 11.4249C32.5038 11.6871 33.1628 11.7653 33.8018 11.6494C34.4408 11.5336 35.0304 11.229 35.4946 10.7749L35.6128 10.6567C35.9786 10.2904 36.4131 9.99987 36.8913 9.80163C37.3696 9.60338 37.8822 9.50134 38.3999 9.50134C38.9176 9.50134 39.4302 9.60338 39.9084 9.80163C40.3867 9.99987 40.8211 10.2904 41.187 10.6567C41.5533 11.0226 41.8438 11.457 42.0421 11.9353C42.2403 12.4135 42.3424 12.9261 42.3424 13.4438C42.3424 13.9615 42.2403 14.4742 42.0421 14.9524C41.8438 15.4306 41.5533 15.8651 41.187 16.231L41.0688 16.3491C40.6147 16.8134 40.3101 17.403 40.1943 18.0419C40.0784 18.6809 40.1566 19.3399 40.4188 19.934V20.0916C40.6685 20.6741 41.0831 21.171 41.6116 21.521C42.14 21.8709 42.7593 22.0587 43.3931 22.0613H43.7279C44.7727 22.0613 45.7747 22.4763 46.5135 23.2151C47.2523 23.9539 47.6673 24.9559 47.6673 26.0006C47.6673 27.0454 47.2523 28.0474 46.5135 28.7862C45.7747 29.525 44.7727 29.94 43.7279 29.94H43.5506C42.9168 29.9426 42.2976 30.1304 41.7691 30.4803C41.2407 30.8303 40.8261 31.3272 40.5764 31.9097Z" stroke="#194185" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+`;
+const editIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M8.33301 2.60175H4.83301C3.43288 2.60175 2.73281 2.60175 2.19803 2.87424C1.72763 3.11392 1.34517 3.49637 1.10549 3.96678C0.833008 4.50156 0.833008 5.20162 0.833008 6.60175V13.6018C0.833008 15.0019 0.833008 15.7019 1.10549 16.2367C1.34517 16.7071 1.72763 17.0896 2.19803 17.3293C2.73281 17.6018 3.43288 17.6018 4.83301 17.6018H11.833C13.2331 17.6018 13.9332 17.6018 14.468 17.3293C14.9384 17.0896 15.3208 16.7071 15.5605 16.2367C15.833 15.7019 15.833 15.0019 15.833 13.6018V10.1018M5.83299 12.6018H7.22844C7.63609 12.6018 7.83992 12.6018 8.03173 12.5557C8.20179 12.5149 8.36436 12.4475 8.51348 12.3562C8.68168 12.2531 8.8258 12.109 9.11406 11.8207L17.083 3.85175C17.7734 3.1614 17.7734 2.04211 17.083 1.35175C16.3927 0.661396 15.2734 0.661395 14.583 1.35175L6.61404 9.3207C6.32578 9.60896 6.18166 9.75308 6.07859 9.92128C5.9872 10.0704 5.91986 10.233 5.87904 10.403C5.83299 10.5948 5.83299 10.7987 5.83299 11.2063V12.6018Z" stroke="#175CD3" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`;
+
+const trash_1_icon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M12.3333 5.00033V4.33366C12.3333 3.40024 12.3333 2.93353 12.1517 2.57701C11.9919 2.2634 11.7369 2.00844 11.4233 1.84865C11.0668 1.66699 10.6001 1.66699 9.66667 1.66699H8.33333C7.39991 1.66699 6.9332 1.66699 6.57668 1.84865C6.26308 2.00844 6.00811 2.2634 5.84832 2.57701C5.66667 2.93353 5.66667 3.40024 5.66667 4.33366V5.00033M7.33333 9.58366V13.7503M10.6667 9.58366V13.7503M1.5 5.00033H16.5M14.8333 5.00033V14.3337C14.8333 15.7338 14.8333 16.4339 14.5608 16.9686C14.3212 17.439 13.9387 17.8215 13.4683 18.0612C12.9335 18.3337 12.2335 18.3337 10.8333 18.3337H7.16667C5.76654 18.3337 5.06647 18.3337 4.53169 18.0612C4.06129 17.8215 3.67883 17.439 3.43915 16.9686C3.16667 16.4339 3.16667 15.7338 3.16667 14.3337V5.00033" stroke="#B42318" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`;
+
+const trash_2_icon = `<svg width="19" height="15" viewBox="0 0 19 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M13.1247 5.00065L8.12467 10.0007M8.12467 5.00065L13.1247 10.0007M1.22467 8.30065L4.82467 13.1007C5.11801 13.4918 5.26467 13.6873 5.45055 13.8284C5.61518 13.9533 5.8016 14.0465 6.00032 14.1032C6.22468 14.1673 6.46912 14.1673 6.95801 14.1673H13.2913C14.6915 14.1673 15.3915 14.1673 15.9263 13.8948C16.3967 13.6552 16.7792 13.2727 17.0189 12.8023C17.2913 12.2675 17.2913 11.5674 17.2913 10.1673V4.83398C17.2913 3.43385 17.2913 2.73379 17.0189 2.19901C16.7792 1.7286 16.3967 1.34615 15.9263 1.10647C15.3915 0.833984 14.6915 0.833984 13.2913 0.833984H6.95801C6.46912 0.833984 6.22468 0.833984 6.00032 0.89806C5.8016 0.954812 5.61518 1.04802 5.45055 1.17294C5.26467 1.31399 5.11801 1.50954 4.82467 1.90065L1.22467 6.70065C1.00951 6.98753 0.901932 7.13097 0.860462 7.28851C0.823856 7.42757 0.823856 7.57373 0.860462 7.71279C0.901932 7.87033 1.00951 8.01377 1.22467 8.30065Z" stroke="#B42318" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`;
+
+const columnIcon = `<svg width="16" height="17" viewBox="0 0 16 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path
+    d="M6 13.5V3.5C6 2.72343 6 2.33515 5.87313 2.02886C5.70398 1.62048 5.37952 1.29602 4.97114 1.12687C4.66485 1 4.27657 1 3.5 1C2.72343 1 2.33515 1 2.02886 1.12687C1.62048 1.29602 1.29602 1.62048 1.12687 2.02886C1 2.33515 1 2.72343 1 3.5V13.5C1 14.2766 1 14.6649 1.12687 14.9711C1.29602 15.3795 1.62048 15.704 2.02886 15.8731C2.33515 16 2.72343 16 3.5 16C4.27657 16 4.66485 16 4.97114 15.8731C5.37952 15.704 5.70398 15.3795 5.87313 14.9711C6 14.6649 6 14.2766 6 13.5Z"
+    stroke="#697586" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+  <path
+    d="M14.3333 10.1667V3.5C14.3333 2.72343 14.3333 2.33515 14.2065 2.02886C14.0373 1.62048 13.7129 1.29602 13.3045 1.12687C12.9982 1 12.6099 1 11.8333 1C11.0568 1 10.6685 1 10.3622 1.12687C9.95381 1.29602 9.62936 1.62048 9.4602 2.02886C9.33333 2.33515 9.33333 2.72343 9.33333 3.5V10.1667C9.33333 10.9432 9.33333 11.3315 9.4602 11.6378C9.62936 12.0462 9.95381 12.3706 10.3622 12.5398C10.6685 12.6667 11.0568 12.6667 11.8333 12.6667C12.6099 12.6667 12.9982 12.6667 13.3045 12.5398C13.7129 12.3706 14.0373 12.0462 14.2065 11.6378C14.3333 11.3315 14.3333 10.9432 14.3333 10.1667Z"
+    stroke="#697586" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+</svg>`;
+
+const exportIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M4.16732 7.50065C3.39234 7.50065 3.00485 7.50065 2.68694 7.58584C1.82421 7.817 1.15034 8.49087 0.91917 9.3536C0.833984 9.67152 0.833984 10.059 0.833984 10.834V11.834C0.833984 13.2341 0.833984 13.9342 1.10647 14.469C1.34615 14.9394 1.7286 15.3218 2.19901 15.5615C2.73379 15.834 3.43385 15.834 4.83398 15.834H11.834C13.2341 15.834 13.9342 15.834 14.469 15.5615C14.9394 15.3218 15.3218 14.9394 15.5615 14.469C15.834 13.9342 15.834 13.2341 15.834 11.834V10.834C15.834 10.059 15.834 9.67152 15.7488 9.3536C15.5176 8.49087 14.8438 7.817 13.981 7.58584C13.6631 7.50065 13.2756 7.50065 12.5007 7.50065M11.6673 4.16732L8.33398 0.833984M8.33398 0.833984L5.00065 4.16732M8.33398 0.833984V10.834" stroke="#194185" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`;
+
+const importIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M16 11V12C16 13.4001 16 14.1002 15.7275 14.635C15.4878 15.1054 15.1054 15.4878 14.635 15.7275C14.1002 16 13.4001 16 12 16H5C3.59987 16 2.8998 16 2.36502 15.7275C1.89462 15.4878 1.51217 15.1054 1.27248 14.635C1 14.1002 1 13.4001 1 12V11M12.6667 6.83333L8.5 11M8.5 11L4.33333 6.83333M8.5 11V1" stroke="#194185" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+`;
+
+const tableItems = ref<Crusher[]>([]);
+const allHeaders = ref<TableHeader[]>([]);
+const shownHeaders = ref<TableHeader[]>([]);
+const canCreate = ref(false);
+const loading = ref(false);
+const loadingMore = ref(false);
+
+const nextCursor = ref<string | null>(null);
+const previousCursor = ref<string | null>(null);
+const perPage = ref(15);
+const hasMoreData = computed(() => nextCursor.value !== null);
+
+const tableHeaders = computed(() => {
+    return shownHeaders.value.map(header => ({
+        key: header.key,
+        title: header.title,
+        width: "140px"
+    }));
+});
+
+const selectedCrushers = ref<number[]>([]);
+const hasSelectedCrushers = computed(() => selectedCrushers.value.length > 0);
+
+const showAdvancedFilters = ref(false);
+const filterBusinessName = ref("");
+const filterOwnerName = ref("");
+const filterBuisnessNumber = ref("");
+const filterTaxNumber = ref("");
+const filterLicenseNumber = ref("");
+const filterCrusherType = ref<string | null>(null);
+const filterCity = ref<string | null>(null);
+const filterStatus = ref<string | null>(null);
+const filterLicenseIssueDate = ref("");
+const filterLicenseExpiryDate = ref("");
+
+const cityItems = ["الرياض", "جدة", "الطائف", "مكة", "المدينة"];
+const crusherTypeItems = ["صلبة", "متنقلة", "ثابتة"];
+
+const toggleAdvancedFilters = () => {
+    showAdvancedFilters.value = !showAdvancedFilters.value;
+};
+
+const showDeleteDialog = ref(false);
+const showBulkDeleteDialog = ref(false);
+const deleteLoading = ref(false);
+const itemToDelete = ref<Crusher | null>(null);
+
+const showStatusChangeDialog = ref(false);
+const statusChangeLoading = ref(false);
+const itemToChangeStatus = ref<Crusher | null>(null);
+
+const showHeadersMenu = ref(false);
+const updatingHeaders = ref(false);
+
+const headerCheckStates = computed(() => {
+    const states: Record<string, boolean> = {};
+    allHeaders.value.forEach(header => {
+        states[header.key] = shownHeaders.value.some(sh => sh.key === header.key);
+    });
+    return states;
+});
+
+const fetchCrushers = async (cursor?: string | null, append = false) => {
+    try {
+        if (append) {
+            loadingMore.value = true;
+        } else {
+            loading.value = true;
+        }
+
+        const filters: CrusherFilters = {
+            per_page: perPage.value,
+            cursor: cursor || undefined,
+        };
+
+        if (filterBusinessName.value) filters.business_name = filterBusinessName.value;
+        if (filterOwnerName.value) filters.owner_name = filterOwnerName.value;
+        if (filterBuisnessNumber.value) filters.buisness_number = filterBuisnessNumber.value;
+        if (filterTaxNumber.value) filters.tax_number = filterTaxNumber.value;
+        if (filterLicenseNumber.value) filters.license_number = filterLicenseNumber.value;
+        if (filterCity.value) filters.city_id = filterCity.value;
+        if (filterCrusherType.value) filters.crusher_type = filterCrusherType.value;
+        if (filterStatus.value) filters.status = filterStatus.value;
+        if (filterLicenseIssueDate.value) filters.license_issue_date = filterLicenseIssueDate.value;
+        if (filterLicenseExpiryDate.value) filters.license_expiry_date = filterLicenseExpiryDate.value;
+
+        const params = new URLSearchParams();
+        Object.entries(filters).forEach(([key, value]) => {
+            if (value !== null && value !== undefined && value !== '') {
+                params.append(key, String(value));
+            }
+        });
+
+        const queryString = params.toString();
+        const url = queryString ? `/admin/api/crushers?${queryString}` : '/admin/api/crushers';
+
+        const response = await api.get<CrushersResponse>(url);
+
+        if (append) {
+            tableItems.value = [...tableItems.value, ...response.data];
+        } else {
+            tableItems.value = response.data;
+            allHeaders.value = response.headers;
+            shownHeaders.value = response.shownHeaders;
+            canCreate.value = response.actions.can_create;
+        }
+
+        nextCursor.value = response.pagination.next_cursor;
+        previousCursor.value = response.pagination.previous_cursor;
+        perPage.value = response.pagination.per_page;
+    } catch (err: any) {
+        console.error('Error fetching crushers:', err);
+        error(err?.response?.data?.message || 'Failed to fetch crushers');
+    } finally {
+        loading.value = false;
+        loadingMore.value = false;
+    }
+};
+
+const loadMore = () => {
+    if (hasMoreData.value && !loadingMore.value) {
+        fetchCrushers(nextCursor.value, true);
+    }
+};
+
+const applyFilters = () => {
+    fetchCrushers();
+};
+
+const toggleHeader = async (headerKey: string) => {
+    const isCurrentlyShown = shownHeaders.value.some(h => h.key === headerKey);
+
+    if (isCurrentlyShown) {
+        shownHeaders.value = shownHeaders.value.filter(h => h.key !== headerKey);
+    } else {
+        const headerToAdd = allHeaders.value.find(h => h.key === headerKey);
+        if (headerToAdd) {
+            shownHeaders.value.push(headerToAdd);
+        }
+    }
+
+    await updateHeadersOnServer();
+};
+
+const updateHeadersOnServer = async () => {
+    try {
+        updatingHeaders.value = true;
+        const headerKeys = shownHeaders.value.map(h => h.key);
+
+        const formData = new FormData();
+        formData.append('table', 'crushers');
+        headerKeys.forEach((header, index) => {
+            formData.append(`header[${index}]`, header);
+        });
+
+        await api.post('/admin/api/headers', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+    } catch (err: any) {
+        console.error('Error updating headers:', err);
+        error(err?.response?.data?.message || 'Failed to update headers');
+    } finally {
+        updatingHeaders.value = false;
+    }
+};
+
+const handleEdit = (item: any) => {
+    router.push({ name: "CrushersEdit", params: { id: item.id } });
+};
+
+const handleDelete = (item: any) => {
+    itemToDelete.value = item;
+    showDeleteDialog.value = true;
+};
+
+const handleStatusChange = (item: any) => {
+    itemToChangeStatus.value = item;
+    showStatusChangeDialog.value = true;
+};
+
+const confirmStatusChange = async () => {
+    if (!itemToChangeStatus.value) return;
+
+    try {
+        statusChangeLoading.value = true;
+        const newStatus = !itemToChangeStatus.value.status;
+
+        await api.patch(`/admin/api/crushers/${itemToChangeStatus.value.id}/change-status`, {
+            status: newStatus
+        });
+
+        success(`تم ${newStatus ? 'تفعيل' : 'تعطيل'} الكسارة بنجاح`);
+
+        const index = tableItems.value.findIndex(c => c.id === itemToChangeStatus.value!.id);
+        if (index !== -1) {
+            tableItems.value[index].status = newStatus;
+            tableItems.value[index].status_value = newStatus ? 'فعال' : 'غير فعال';
+        }
+
+        itemToChangeStatus.value = null;
+    } catch (err: any) {
+        console.error('Error changing crusher status:', err);
+        error(err?.response?.data?.message || 'فشل تغيير حالة الكسارة');
+    } finally {
+        statusChangeLoading.value = false;
+        showStatusChangeDialog.value = false;
+    }
+};
+
+const confirmDelete = async () => {
+    if (!itemToDelete.value) return;
+
+    try {
+        deleteLoading.value = true;
+        await api.delete(`/admin/api/crushers/${itemToDelete.value.id}`);
+        success('تم حذف الكسارة بنجاح');
+        await fetchCrushers();
+        itemToDelete.value = null;
+    } catch (err: any) {
+        console.error('Error deleting crusher:', err);
+        error(err?.response?.data?.message || 'Failed to delete crusher');
+    } finally {
+        deleteLoading.value = false;
+        showDeleteDialog.value = false;
+    }
+};
+
+const handleBulkDelete = () => {
+    if (selectedCrushers.value.length === 0) return;
+    showBulkDeleteDialog.value = true;
+};
+
+const confirmBulkDelete = async () => {
+    try {
+        deleteLoading.value = true;
+        await api.post('/admin/api/crushers/bulk-delete', { ids: selectedCrushers.value });
+        success(`تم حذف ${selectedCrushers.value.length} كسارة بنجاح`);
+        selectedCrushers.value = [];
+        await fetchCrushers();
+    } catch (err: any) {
+        console.error('Error bulk deleting crushers:', err);
+        error(err?.response?.data?.message || 'Failed to delete crushers');
+    } finally {
+        deleteLoading.value = false;
+        showBulkDeleteDialog.value = false;
+    }
+};
+
+const handleSelectCrusher = (item: any, selected: boolean) => {
+    if (selected) {
+        selectedCrushers.value.push(item.id);
+    } else {
+        selectedCrushers.value = selectedCrushers.value.filter((id) => id !== item.id);
+    }
+};
+
+const handleSelectAllCrushers = (checked: boolean) => {
+    if (checked) {
+        selectedCrushers.value = tableItems.value.map((item) => item.id);
+    } else {
+        selectedCrushers.value = [];
+    }
+};
+
+const openCreateCrusher = () => {
+    router.push({ name: "CrushersCreate" });
+};
+
+const loadMoreTrigger = ref<HTMLElement | null>(null);
+const observer = ref<IntersectionObserver | null>(null);
+
+const setupInfiniteScroll = () => {
+    if (!loadMoreTrigger.value) return;
+
+    observer.value = new IntersectionObserver(
+        (entries) => {
+            const entry = entries[0];
+            if (entry.isIntersecting && hasMoreData.value && !loadingMore.value && !loading.value) {
+                loadMore();
+            }
+        },
+        {
+            root: null,
+            rootMargin: '100px',
+            threshold: 0.1,
+        }
+    );
+
+    observer.value.observe(loadMoreTrigger.value);
+};
+
+const cleanupInfiniteScroll = () => {
+    if (observer.value && loadMoreTrigger.value) {
+        observer.value.unobserve(loadMoreTrigger.value);
+        observer.value.disconnect();
+    }
+};
+
+onMounted(() => {
+    fetchCrushers();
+    nextTick(() => {
+        setupInfiniteScroll();
+    });
+});
+
+onBeforeUnmount(() => {
+    cleanupInfiniteScroll();
+});
+</script>
+
+<template>
+    <default-layout>
+        <div class="crushers-page">
+            <PageHeader :icon="crushersIcon" title-key="pages.crushers.title" description-key="pages.crushers.description" />
+
+            <div class="flex justify-end pb-2 gap-3">
+                <v-btn variant="outlined" height="40"
+                    class="font-semibold text-base border-gray-300 bg-primary-100 !text-primary-900">
+                    <template #prepend>
+                        <span v-html="importIcon"></span>
+                    </template>
+                    استيراد
+                </v-btn>
+                <v-btn variant="outlined" height="40"
+                    class="font-semibold text-base border-gray-300 bg-primary-50 !text-primary-900">
+                    <template #prepend>
+                        <span v-html="exportIcon"></span>
+                    </template>
+                    تصدير
+                </v-btn>
+            </div>
+
+            <div class="bg-gray-50 rounded-md -mx-6">
+                <div :class="hasSelectedCrushers ? 'justify-between' : 'justify-end'"
+                    class="flex flex-wrap items-center gap-3 border-y border-y-slate-300 px-4 sm:px-6 py-3">
+                    <!-- Actions when rows are selected -->
+                    <div v-if="hasSelectedCrushers"
+                        class="flex flex-wrap items-stretch rounded-lg overflow-hidden border border-gray-200 bg-white text-sm">
+                        <v-btn class="px-4 font-semibold text-primary-600 hover:bg-primary-50 !rounded-none">
+                            <template #prepend>
+                                <span v-html="editIcon"></span>
+                            </template>
+                            <span>تعديل</span>
+                        </v-btn>
+                        <div class="w-px bg-gray-200"></div>
+                        <v-btn class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
+                            @click="handleBulkDelete">
+                            <template #prepend>
+                                <span v-html="trash_1_icon"></span>
+                            </template>
+                            <span>حذف المحدد</span>
+                        </v-btn>
+                        <div class="w-px bg-gray-200"></div>
+                        <v-btn class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
+                            @click="handleBulkDelete">
+                            <template #prepend>
+                                <span v-html="trash_2_icon"></span>
+                            </template>
+                            <span>حذف الجميع</span>
+                        </v-btn>
+                    </div>
+
+                    <!-- Main header controls -->
+                    <div class="flex flex-wrap gap-3">
+                        <v-menu v-model="showHeadersMenu" :close-on-content-click="false">
+                            <template v-slot:activator="{ props }">
+                                <v-btn v-bind="props" variant="outlined" append-icon="mdi-chevron-down" color="gray-500"
+                                    height="40" class="font-semibold text-base border-gray-400">
+                                    <template #prepend>
+                                        <span v-html="columnIcon"></span>
+                                    </template>
+                                    الأعمدة
+                                </v-btn>
+                            </template>
+                            <v-list>
+                                <v-list-item v-for="header in allHeaders" :key="header.key"
+                                    @click="toggleHeader(header.key)">
+                                    <template v-slot:prepend>
+                                        <v-checkbox-btn :model-value="headerCheckStates[header.key]"
+                                            :disabled="updatingHeaders"
+                                            @click.stop="toggleHeader(header.key)"></v-checkbox-btn>
+                                    </template>
+                                    <v-list-item-title>{{ header.title }}</v-list-item-title>
+                                </v-list-item>
+                            </v-list>
+                        </v-menu>
+
+                        <v-btn variant="outlined" color="primary-50" height="40"
+                            class="px-7 font-semibold text-base text-primary-700" prepend-icon="mdi-magnify"
+                            @click="toggleAdvancedFilters">
+                            بحث متقدم
+                        </v-btn>
+                        <v-btn variant="flat" color="primary" height="40" class="px-7 font-semibold text-base"
+                            prepend-icon="mdi-plus-circle-outline" @click="openCreateCrusher">
+                            أضف كسارة
+                        </v-btn>
+                    </div>
+                </div>
+
+                <!-- Advanced filters row -->
+                <div v-if="showAdvancedFilters"
+                    class="border-y border-y-primary-100 bg-primary-50 px-4 sm:px-6 py-3 flex flex-col gap-3 sm:gap-2">
+                    <div class="flex flex-wrap gap-3 justify-end sm:justify-start">
+                        <v-text-field v-model="filterBusinessName" density="comfortable" variant="outlined" hide-details
+                            placeholder="الاسم التجاري" class="w-full sm:w-40 bg-white" @keyup.enter="applyFilters" />
+                        <v-text-field v-model="filterOwnerName" density="comfortable" variant="outlined" hide-details
+                            placeholder="اسم المالك" class="w-full sm:w-40 bg-white" @keyup.enter="applyFilters" />
+                        <v-text-field v-model="filterBuisnessNumber" density="comfortable" variant="outlined" hide-details
+                            placeholder="رقم السجل التجاري" class="w-full sm:w-40 bg-white" @keyup.enter="applyFilters" />
+                        <v-text-field v-model="filterTaxNumber" density="comfortable" variant="outlined" hide-details
+                            placeholder="الرقم الضريبي" class="w-full sm:w-40 bg-white" @keyup.enter="applyFilters" />
+                        <v-text-field v-model="filterLicenseNumber" density="comfortable" variant="outlined" hide-details
+                            placeholder="رقم رخصة الكسارة" class="w-full sm:w-40 bg-white" @keyup.enter="applyFilters" />
+                        <v-select v-model="filterCrusherType" :items="crusherTypeItems" density="comfortable"
+                            variant="outlined" hide-details placeholder="نوع الكسارة" class="w-full sm:w-40 bg-white"
+                            @update:model-value="applyFilters" />
+                        <v-select v-model="filterCity" :items="cityItems" density="comfortable" variant="outlined"
+                            hide-details placeholder="المدينة" class="w-full sm:w-40 bg-white"
+                            @update:model-value="applyFilters" />
+                        <v-select v-model="filterStatus" :items="['فعال', 'غير فعال']" density="comfortable"
+                            variant="outlined" hide-details placeholder="الحالة" class="w-full sm:w-40 bg-white"
+                            @update:model-value="applyFilters" />
+
+                        <div class="flex gap-2 justify-start sm:justify-start">
+                            <v-btn variant="flat" color="primary" height="45" @click="applyFilters" :loading="loading"
+                                class="px-5 font-semibold text-sm sm:text-base" prepend-icon="mdi-magnify">
+                                ابحث
+                            </v-btn>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Crushers Table -->
+                <DataTable :headers="tableHeaders" :items="tableItems" :loading="loading" show-checkbox show-actions
+                    @edit="handleEdit" @delete="handleDelete" @select="handleSelectCrusher"
+                    @selectAll="handleSelectAllCrushers">
+                    <template #item.status="{ item }">
+                        <v-switch :model-value="item.status" hide-details inset density="compact" color="primary"
+                            @click="handleStatusChange(item)" />
+                    </template>
+
+                </DataTable>
+
+                <!-- Infinite Scroll Trigger & Loading Indicator -->
+                <div ref="loadMoreTrigger" class="flex justify-center py-4">
+                    <v-progress-circular v-if="loadingMore" indeterminate color="primary" size="32" />
+                    <span v-else-if="!hasMoreData && tableItems.length > 0" class="text-gray-500 text-sm">
+                        لا توجد المزيد من البيانات
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delete Confirmation Dialog -->
+        <DeleteConfirmDialog v-model="showDeleteDialog" :loading="deleteLoading" :item-name="itemToDelete?.business_name"
+            title="حذف الكسارة" message="هل أنت متأكد من حذف الكسارة" @confirm="confirmDelete" />
+
+        <!-- Bulk Delete Confirmation Dialog -->
+        <DeleteConfirmDialog v-model="showBulkDeleteDialog" :loading="deleteLoading" title="حذف الكسارات"
+            :message="`هل أنت متأكد من حذف ${selectedCrushers.length} كسارة؟`" @confirm="confirmBulkDelete" />
+
+        <!-- Status Change Confirmation Dialog -->
+        <StatusChangeDialog v-model="showStatusChangeDialog" :loading="statusChangeLoading"
+            :item-name="itemToChangeStatus?.business_name" :current-status="itemToChangeStatus?.status || false"
+            @confirm="confirmStatusChange" />
+    </default-layout>
+</template>
+
+<style scoped></style>
