@@ -6,7 +6,7 @@
 
         <v-main class="pb-15 !pe-4 md:!pe-6 lg:ms-5 h-full overflow-hidden">
             <v-container fluid
-                class="bg-white p-0 !border border-gray-300 rounded-[24px] m-1 h-full flex flex-col overflow-hidden">
+                class="bg-white p-0 !border border-gray-100 rounded-[24px] m-1 h-full flex flex-col overflow-hidden">
                 <div class="flex-1 overflow-y-auto overflow-x-hidden main-scroll">
                     <div class="px-6 py-6">
                         <slot />
