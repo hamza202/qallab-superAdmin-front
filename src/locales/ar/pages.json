@@ -142,6 +142,10 @@
     "servicesSettings": {
       "title": "إعدادات الخدمات",
       "description": "تمكنك من ادارة إعدادات الخدمات"
+    },
+    "productVariables": {
+      "title": "متغيرات المنتج",
+      "description": "تمكنك من ادارة متغيرات المنتجات"
     }
   }
 }
