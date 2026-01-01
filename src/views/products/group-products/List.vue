@@ -39,24 +39,84 @@ const importIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" 
 <path d="M16 11V12C16 13.4001 16 14.1002 15.7275 14.635C15.4878 15.1054 15.1054 15.4878 14.635 15.7275C14.1002 16 13.4001 16 12 16H5C3.59987 16 2.8998 16 2.36502 15.7275C1.89462 15.4878 1.51217 15.1054 1.27248 14.635C1 14.1002 1 13.4001 1 12V11M12.6667 6.83333L8.5 11M8.5 11L4.33333 6.83333M8.5 11V1" stroke="#194185" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`
 
-// Table headers based on Figma design
+// Table headers based on API response
 const tableHeaders = [
-  { key: 'productName', title: 'اسم المنتج', width: '180px' },
-  { key: 'skuCode', title: 'كود SKU', width: '120px' },
-  { key: 'unit', title: 'الوحدة', width: '100px' },
-  { key: 'category', title: 'التصنيف', width: '100px' },
-  { key: 'purchasePrice', title: 'سعر الشراء', width: '100px' },
-  { key: 'salePrice', title: 'سعر البيع', width: '100px' },
-  { key: 'minQuantity', title: 'اقل كمية', width: '100px' },
-  { key: 'updatedAt', title: 'تاريخ التحديث', width: '120px' },
-  { key: 'status', title: 'الحالة', width: '100px' },
+  { key: 'name', title: 'اسم المنتج', width: '303px' },
+  { key: 'code', title: 'كود SKU', width: '120px' },
+  { key: 'unit', title: 'الوحدة', width: '120px' },
+  { key: 'category', title: 'التصنيف', width: '120px' },
+  { key: 'purchase_price', title: 'سعر الشراء', width: '120px' },
+  { key: 'sell_price', title: 'سعر البيع', width: '120px' },
+  { key: 'status', title: 'الحالة', width: '120px' },
 ]
 
-// Sample data based on Figma design
+// Sub item headers for expanded rows
+const subItemHeaders = [
+  { key: 'name', title: 'اسم المنتج الفرعي', width: '218px' },
+  { key: 'code', title: 'كود المنتج', width: '150px' },
+  { key: 'sell_price', title: 'سعر البيع', width: '150px' },
+  { key: 'purchase_price', title: 'سعر الشراء', width: '150px' },
+  { key: 'quantity', title: 'الكمية', width: '150px' },
+  { key: 'total_amount', title: 'المبلغ الاجمالي', width: '150px' },
+]
+
+// Sample data based on API response structure
 const tableItems = ref([
-  { id: 1, productName: 'اسم المنتج', skuCode: 'AfgEHJ', unit: 'قطعة', category: '150', purchasePrice: 150, salePrice: 150, minQuantity: 150, updatedAt: '150', status: true },
-  { id: 2, productName: 'اسم المنتج', skuCode: '1f5fgh', unit: 'قطعة', category: '150', purchasePrice: 150, salePrice: 150, minQuantity: 150, updatedAt: '150', status: false },
-  { id: 3, productName: 'اسم المنتج', skuCode: 'GFkns', unit: 'قطعة', category: '150', purchasePrice: 150, salePrice: 150, minQuantity: 150, updatedAt: '150', status: true },
+  {
+    id: 13,
+    name: 'اسم المنتج',
+    code: 'ITEMS-00013',
+    category: 'قطعة',
+    unit: 'قطعة',
+    purchase_price: 1200,
+    sell_price: 200,
+    status: 1,
+    sub_items: []
+  },
+  {
+    id: 11,
+    name: 'اسم المنتج',
+    code: 'ITEMS-00011',
+    category: 'قطعة',
+    unit: 'قطعة',
+    purchase_price: 1200,
+    sell_price: 200,
+    status: 1,
+    sub_items: [
+      {
+        id: 12,
+        name: 'بحص احمر _ كبير',
+        code: 'BR-S-BAG-50KG',
+        purchase_price: 12,
+        sell_price: 122,
+        quantity: 500,
+        total_amount: '4,000.00 ريال',
+        status: 1
+      }
+    ]
+  },
+  {
+    id: 9,
+    name: 'اسم المنتج',
+    code: 'ITEMS-00009',
+    category: 'قطعة',
+    unit: 'قطعة',
+    purchase_price: 1200,
+    sell_price: 200,
+    status: 0,
+    sub_items: [
+      {
+        id: 10,
+        name: 'بحص اصفر _ كبير',
+        code: 'BR-S-BAG-50KG',
+        purchase_price: 12,
+        sell_price: 122,
+        quantity: 500,
+        total_amount: '8,000.00 ريال',
+        status: 1
+      }
+    ]
+  },
 ])
 
 // Selection state
@@ -66,7 +126,6 @@ const hasSelected = computed(() => selectedRows.value.length > 0)
 // Filters
 const showAdvancedFilters = ref(false)
 const filterStatus = ref<string | null>(null)
-const filterUpdatedAt = ref('')
 const filterProductName = ref('')
 const filterSkuCode = ref('')
 const filterUnit = ref('')
@@ -172,7 +231,6 @@ const openCreate = () => {
         <div v-if="showAdvancedFilters" class="border-y border-y-primary-100 bg-primary-50 px-4 sm:px-6 py-3 flex flex-col gap-3 sm:gap-2">
           <div class="flex flex-wrap gap-3 flex-1 order-1 sm:order-2 justify-end sm:justify-start">
             <v-select v-model="filterStatus" :items="['فعال', 'غير فعال']" density="comfortable" variant="outlined" hide-details :placeholder="t('common.status')" class="w-full sm:w-40 bg-white" />
-            <v-text-field v-model="filterUpdatedAt" type="date" density="comfortable" variant="outlined" hide-details :placeholder="t('common.updatedAt')" class="w-full sm:w-40 bg-white" />
             <v-text-field v-model="filterProductName" density="comfortable" variant="outlined" hide-details :placeholder="t('common.productName')" class="w-full sm:w-40 bg-white" />
             <v-text-field v-model="filterSkuCode" density="comfortable" variant="outlined" hide-details :placeholder="t('common.skuCode')" class="w-full sm:w-40 bg-white" />
             <v-text-field v-model="filterUnit" density="comfortable" variant="outlined" hide-details :placeholder="t('common.unit')" class="w-full sm:w-40 bg-white" />
@@ -181,9 +239,10 @@ const openCreate = () => {
         </div>
 
         <!-- Group Products Table -->
-        <DataTable
+        <GroupedDataTable
           :headers="tableHeaders"
           :items="tableItems"
+          :sub-item-headers="subItemHeaders"
           show-checkbox
           show-actions
           @edit="handleEdit"
