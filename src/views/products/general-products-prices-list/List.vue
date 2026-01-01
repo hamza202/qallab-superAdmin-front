@@ -117,7 +117,7 @@ const deletePriceList = async (priceListId: number) => {
 
 // Handlers
 const handleEdit = (item: any) => {
-  router.push({ name: 'ProductPriceListEdit', params: { id: item.id } })
+  router.push({ name: 'ProductBuildingMaterialPriceListEdit', params: { id: item.id } })
 }
 
 const handleDelete = async (item: any) => {
@@ -148,7 +148,7 @@ onMounted(() => {
 <template>
   <default-layout>
     <div class="price-lists-page">
-      <PageHeader :icon="priceListsIcon" title-key="pages.ProductsPriceLists.title" description-key="pages.ProductsPriceLists.description" />
+      <PageHeader :icon="priceListsIcon" title-key="pages.GeneralProductsPriceLists.title" description-key="pages.GeneralProductsPriceLists.description" />
 
       <div class="flex justify-end pb-2 gap-3">
         <v-btn variant="outlined" height="40" class="font-semibold text-base border-gray-300 bg-primary-100 !text-primary-900">

@@ -13,14 +13,14 @@ interface BankAccount {
 interface Props {
   bankAccounts?: BankAccount[];
   bankItems: Array<{ title: string; value: number }>;
-  debitLimit?: string;
-  creditLimit?: string;
+  debitLimit?: number | string | null;
+  creditLimit?: number | string | null;
 }
 
 const props = defineProps<Props>();
 
 const emit = defineEmits<{
-  'update:formData': [data: { bankAccounts: BankAccount[]; debitLimit?: string; creditLimit?: string }];
+  'update:formData': [data: { bankAccounts: BankAccount[]; debitLimit?: number | string | null; creditLimit?: number | string | null }];
 }>();
 
 const bankAccounts = ref<BankAccount[]>(props.bankAccounts || []);
@@ -58,25 +58,20 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
 
 const addIcon = `<svg width="22" height="18" viewBox="0 0 22 18" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M18 17V11M15 14H21M21 6H1M21 8V4.2C21 3.0799 21 2.51984 20.782 2.09202C20.5903 1.7157 20.2843 1.40974 19.908 1.21799C19.4802 1 18.9201 1 17.8 1H4.2C3.0799 1 2.51984 1 2.09202 1.21799C1.7157 1.40973 1.40973 1.71569 1.21799 2.09202C1 2.51984 1 3.0799 1 4.2V11.8C1 12.9201 1 13.4802 1.21799 13.908C1.40973 14.2843 1.71569 14.5903 2.09202 14.782C2.51984 15 3.0799 15 4.2 15H11" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>
-`
-const editIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M8.33301 2.60175H4.83301C3.43288 2.60175 2.73281 2.60175 2.19803 2.87424C1.72763 3.11392 1.34517 3.49637 1.10549 3.96678C0.833008 4.50156 0.833008 5.20162 0.833008 6.60175V13.6018C0.833008 15.0019 0.833008 15.7019 1.10549 16.2367C1.34517 16.7071 1.72763 17.0896 2.19803 17.3293C2.73281 17.6018 3.43288 17.6018 4.83301 17.6018H11.833C13.2331 17.6018 13.9332 17.6018 14.468 17.3293C14.9384 17.0896 15.3208 16.7071 15.5605 16.2367C15.833 15.7019 15.833 15.0019 15.833 13.6018V10.1018M5.83299 12.6018H7.22844C7.63609 12.6018 7.83992 12.6018 8.03173 12.5557C8.20179 12.5149 8.36436 12.4475 8.51348 12.3562C8.68168 12.2531 8.8258 12.109 9.11406 11.8207L17.083 3.85175C17.7734 3.1614 17.7734 2.04211 17.083 1.35175C16.3927 0.661396 15.2734 0.661395 14.583 1.35175L6.61404 9.3207C6.32578 9.60896 6.18166 9.75308 6.07859 9.92128C5.9872 10.0704 5.91986 10.233 5.87904 10.403C5.83299 10.5948 5.83299 10.7987 5.83299 11.2063V12.6018Z" stroke="#175CD3" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`;
 </script>
 
 <template>
   <div class="mb-6 bg-gray-50 -mx-6">
-    <!-- Credit and Debt Limits -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 px-6 pt-6 pb-4">
-      <TextInput v-model="creditLimit" @blur="emitUpdate"
-        label="الحد الأعلى للائتمان" placeholder="ادخل الحد">
+      <TextInput v-model="debitLimit" @blur="emitUpdate"
+        label="الحد الأعلى للدين" placeholder="ادخل الحد">
         <template #prepend-inner>
           <v-icon size="small" color="gray">mdi-help-circle-outline</v-icon>
         </template>
       </TextInput>
-      <TextInput v-model="debitLimit" @blur="emitUpdate"
-        label="الحد الأعلى للدين" placeholder="ادخل الحد">
+      <TextInput v-model="creditLimit" @blur="emitUpdate"
+        label="الحد الأعلى للائتمان" placeholder="ادخل الحد">
         <template #prepend-inner>
           <v-icon size="small" color="gray">mdi-help-circle-outline</v-icon>
         </template>
@@ -93,7 +88,6 @@ const editIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none" xm
       </v-btn>
     </div>
 
-    <!-- Bank Accounts Table with Editable Inputs -->
     <v-table v-if="bankAccounts.length > 0" class="bg-white rounded-none">
       <thead>
         <tr class="bg-gray-100">
@@ -118,6 +112,9 @@ const editIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none" xm
           <td class="py-3 px-4">
             <TextInput v-model="account.iban" density="compact" variant="outlined" hide-details
               placeholder="الآيبان/IBAN" @blur="emitUpdate">
+              <template #append-inner>
+                <v-icon size="small" color="gray">mdi-help-circle-outline</v-icon>
+              </template>
             </TextInput>
           </td>
           <td class="py-3 px-4">

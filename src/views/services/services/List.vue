@@ -500,6 +500,7 @@ onBeforeUnmount(() => {
           @edit="handleEdit"
           @delete="handleDelete"
           @select="handleSelect"
+          @view="handleView"
           @selectAll="handleSelectAll"
         >
           <template #item.is_active="{ item }">
