@@ -22,7 +22,7 @@
                     active-class="bg-white !text-qallab-blue !font-bold relative before:absolute before:content-[''] before:inset-y-1 before:start-[-16px] before:bottom-[5px] before:w-1.5 before:bg-qallab-yellow before:rounded-e-lg ">
 
                     <!-- الرئيسية -->
-                    <v-list-item to="/" value="home"  :class="{ '!mx-1 gap-5': !isSidebarExpanded }"
+                    <v-list-item to="/" value="home" :class="{ '!mx-1 gap-5': !isSidebarExpanded }"
                         class="mx-4 px-2 py-1.5 !ps-[11px] rounded-lg text-white hover:bg-primary-700/40 transition flex items-center justify-start gap-2">
                         <template #title>
                             الرئيسية
@@ -38,14 +38,16 @@
                     <!-- المنتجات -->
                     <v-list-group value="products" class="mt-1">
                         <template #activator="{ props, isOpen }">
-                            <v-list-item v-bind="props" :class="[{ '!mx-1 gap-5': !isSidebarExpanded }, isProductsActive ? 'bg-white !text-[#1570EF]' : '', '!ps-[11px]']"
+                            <v-list-item v-bind="props"
+                                :class="[{ '!mx-1 gap-5': !isSidebarExpanded }, isProductsActive ? 'bg-white !text-[#1570EF]' : '', '!ps-[11px]']"
                                 class="px-2 py-1.5 mx-4 rounded-lg hover:bg-primary-700/40 text-white flex items-center justify-between gap-2">
                                 <template #append>
                                     <v-icon size="20"
                                         :class="['ms-auto transition-transform', isOpen ? 'rotate-180' : '', isProductsActive ? '!text-[#1570EF]' : '']">mdi-chevron-down</v-icon>
                                 </template>
                                 <template #title>
-                                    <div class="flex-1"><span class="font-semibold" :class="isProductsActive ? '!text-[#1570EF]' : ''">المنتجات</span></div>
+                                    <div class="flex-1"><span class="font-semibold"
+                                            :class="isProductsActive ? '!text-[#1570EF]' : ''">المنتجات</span></div>
                                 </template>
                                 <template #prepend>
                                     <div
@@ -69,14 +71,19 @@
                                         منتجات المجموعة</router-link>
                                 </li>
                                 <li class="relative">
-                                    <router-link to="/products/prices-list"
-                                        :class="[isMenuItemActive('/products/prices-list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
-                                        قوائم الاسعار</router-link>
+                                    <router-link to="/products/building-material-products-prices"
+                                        :class="[isMenuItemActive('/products/building-material-products-prices') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        قوائم أسعار مواد البناء</router-link>
                                 </li>
                                 <li class="relative">
-                                    <router-link to="/products/production-capacity-list"
-                                        :class="[isMenuItemActive('/products/production-capacity-list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
-                                        القدرة الإنتاجية</router-link>
+                                    <router-link to="/products/general-products-prices"
+                                        :class="[isMenuItemActive('/products/general-products-prices') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        قوائم أسعار المنتجات العامة</router-link>
+                                </li>
+                                <li class="relative">
+                                    <router-link to="/products/production-capacity"
+                                        :class="[isMenuItemActive('/products/production-capacity') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        قوائم القدرة الإنتاجية</router-link>
                                 </li>
                             </ul>
                             <h2 class="text-sm font-medium leading-5 my-2">إعدادات المنتجات</h2>
@@ -98,14 +105,16 @@
                     <!-- الخدمات -->
                     <v-list-group value="services" class="mt-1">
                         <template #activator="{ props, isOpen }">
-                            <v-list-item v-bind="props" :class="[{ '!mx-1 gap-5': !isSidebarExpanded }, isServicesActive ? 'bg-white !text-[#1570EF]' : '','!ps-[11px]']"
+                            <v-list-item v-bind="props"
+                                :class="[{ '!mx-1 gap-5': !isSidebarExpanded }, isServicesActive ? 'bg-white !text-[#1570EF]' : '', '!ps-[11px]']"
                                 class="px-2 py-1.5 mx-4 rounded-lg hover:bg-primary-700/40 text-white flex items-center justify-between gap-2">
                                 <template #append>
                                     <v-icon size="20"
                                         :class="['ms-auto transition-transform', isOpen ? 'rotate-180' : '', isServicesActive ? '!text-[#1570EF]' : '']">mdi-chevron-down</v-icon>
                                 </template>
                                 <template #title>
-                                    <div class="flex-1"><span class="font-semibold" :class="isServicesActive ? '!text-[#1570EF]' : ''">الخدمات</span></div>
+                                    <div class="flex-1"><span class="font-semibold"
+                                            :class="isServicesActive ? '!text-[#1570EF]' : ''">الخدمات</span></div>
                                 </template>
                                 <template #prepend>
                                     <div
@@ -145,14 +154,16 @@
                     <!-- المبيعات -->
                     <v-list-group value="sales" class="mt-1">
                         <template #activator="{ props, isOpen }">
-                            <v-list-item v-bind="props" :class="[{ '!mx-1 gap-5': !isSidebarExpanded }, isSalesActive ? 'bg-white !text-[#1570EF]' : '', '!ps-[11px]']"
+                            <v-list-item v-bind="props"
+                                :class="[{ '!mx-1 gap-5': !isSidebarExpanded }, isSalesActive ? 'bg-white !text-[#1570EF]' : '', '!ps-[11px]']"
                                 class="px-2 py-1.5 mx-4 rounded-lg hover:bg-primary-700/40 text-white flex items-center justify-between gap-2">
                                 <template #append>
                                     <v-icon size="20"
                                         :class="['ms-auto transition-transform', isOpen ? 'rotate-180' : '', isSalesActive ? '!text-[#1570EF]' : '']">mdi-chevron-down</v-icon>
                                 </template>
                                 <template #title>
-                                    <div class="flex-1"><span class="font-semibold" :class="isSalesActive ? '!text-[#1570EF]' : ''">المبيعات</span></div>
+                                    <div class="flex-1"><span class="font-semibold"
+                                            :class="isSalesActive ? '!text-[#1570EF]' : ''">المبيعات</span></div>
                                 </template>
                                 <template #prepend>
                                     <div
@@ -238,14 +249,16 @@
                     <!-- المشاريع -->
                     <v-list-group value="projects" class="mt-1">
                         <template #activator="{ props, isOpen }">
-                            <v-list-item v-bind="props" :class="[{ '!mx-1 gap-5': !isSidebarExpanded }, isProjectsActive ? 'bg-white !text-[#1570EF]' : '', '!ps-[11px]']"
+                            <v-list-item v-bind="props"
+                                :class="[{ '!mx-1 gap-5': !isSidebarExpanded }, isProjectsActive ? 'bg-white !text-[#1570EF]' : '', '!ps-[11px]']"
                                 class="px-2 py-1.5 mx-4 rounded-lg hover:bg-primary-700/40 text-white flex items-center justify-between gap-2">
                                 <template #append>
                                     <v-icon size="20"
                                         :class="['ms-auto transition-transform', isOpen ? 'rotate-180' : '', isProjectsActive ? '!text-[#1570EF]' : '']">mdi-chevron-down</v-icon>
                                 </template>
                                 <template #title>
-                                    <div class="flex-1"><span class="font-semibold" :class="isProjectsActive ? '!text-[#1570EF]' : ''">المشاريع</span></div>
+                                    <div class="flex-1"><span class="font-semibold"
+                                            :class="isProjectsActive ? '!text-[#1570EF]' : ''">المشاريع</span></div>
                                 </template>
                                 <template #prepend>
                                     <div
@@ -276,14 +289,16 @@
                     <!-- المشتريات -->
                     <v-list-group value="purchases" class="mt-1">
                         <template #activator="{ props, isOpen }">
-                            <v-list-item v-bind="props" :class="[{ '!mx-1 gap-5': !isSidebarExpanded }, isPurchasesActive ? 'bg-white !text-[#1570EF]' : '', '!ps-[11px]']"
+                            <v-list-item v-bind="props"
+                                :class="[{ '!mx-1 gap-5': !isSidebarExpanded }, isPurchasesActive ? 'bg-white !text-[#1570EF]' : '', '!ps-[11px]']"
                                 class="px-2 py-1.5 mx-4 rounded-lg hover:bg-primary-700/40 text-white flex items-center justify-between gap-2">
                                 <template #append>
                                     <v-icon size="20"
                                         :class="['ms-auto transition-transform', isOpen ? 'rotate-180' : '', isPurchasesActive ? '!text-[#1570EF]' : '']">mdi-chevron-down</v-icon>
                                 </template>
                                 <template #title>
-                                    <div class="flex-1"><span class="font-semibold" :class="isPurchasesActive ? '!text-[#1570EF]' : ''">المشتريات</span></div>
+                                    <div class="flex-1"><span class="font-semibold"
+                                            :class="isPurchasesActive ? '!text-[#1570EF]' : ''">المشتريات</span></div>
                                 </template>
                                 <template #prepend>
                                     <div
@@ -313,14 +328,16 @@
                     <!-- المالية -->
                     <v-list-group value="finance" class="mt-1">
                         <template #activator="{ props, isOpen }">
-                            <v-list-item v-bind="props" :class="[{ '!mx-1 gap-5': !isSidebarExpanded }, isFinanceActive ? 'bg-white !text-[#1570EF]' : '', '!ps-[11px]']"
+                            <v-list-item v-bind="props"
+                                :class="[{ '!mx-1 gap-5': !isSidebarExpanded }, isFinanceActive ? 'bg-white !text-[#1570EF]' : '', '!ps-[11px]']"
                                 class="px-2 py-1.5 mx-4 rounded-lg hover:bg-primary-700/40 text-white flex items-center justify-between gap-2">
                                 <template #append>
                                     <v-icon size="20"
                                         :class="['ms-auto transition-transform', isOpen ? 'rotate-180' : '', isFinanceActive ? '!text-[#1570EF]' : '']">mdi-chevron-down</v-icon>
                                 </template>
                                 <template #title>
-                                    <div class="flex-1"><span class="font-semibold" :class="isFinanceActive ? '!text-[#1570EF]' : ''">المالية</span></div>
+                                    <div class="flex-1"><span class="font-semibold"
+                                            :class="isFinanceActive ? '!text-[#1570EF]' : ''">المالية</span></div>
                                 </template>
                                 <template #prepend>
                                     <div
@@ -356,14 +373,16 @@
                     <!-- المستخدمين -->
                     <v-list-group value="users" class="mt-1">
                         <template #activator="{ props, isOpen }">
-                            <v-list-item v-bind="props" :class="[{ '!mx-1 gap-5': !isSidebarExpanded }, isUsersActive ? 'bg-white !text-[#1570EF]' : '', '!ps-[11px]']"
+                            <v-list-item v-bind="props"
+                                :class="[{ '!mx-1 gap-5': !isSidebarExpanded }, isUsersActive ? 'bg-white !text-[#1570EF]' : '', '!ps-[11px]']"
                                 class="px-2 py-1.5 mx-4 rounded-lg hover:bg-primary-700/40 text-white flex items-center justify-between gap-2">
                                 <template #append>
                                     <v-icon size="20"
                                         :class="['ms-auto transition-transform', isOpen ? 'rotate-180' : '', isUsersActive ? '!text-[#1570EF]' : '']">mdi-chevron-down</v-icon>
                                 </template>
                                 <template #title>
-                                    <div class="flex-1"><span class="font-semibold" :class="isUsersActive ? '!text-[#1570EF]' : ''">المستخدمين</span></div>
+                                    <div class="flex-1"><span class="font-semibold"
+                                            :class="isUsersActive ? '!text-[#1570EF]' : ''">المستخدمين</span></div>
                                 </template>
                                 <template #prepend>
                                     <div
@@ -373,29 +392,28 @@
                                 </template>
                             </v-list-item>
                         </template>
-                        <div class="relative mt-3 ps-15 pe-4 text-sm">
-                            <div
-                                class="absolute top-1 bottom-1 right-[30px] border-r-2 border-dotted border-white -translate-y-3 h-[100.5%]">
-                            </div>
-                            <ul class="space-y-2">
+
+                        <div class="relative mt-1 ps-10 pe-4 text-sm">
+                            <ul class="space-y-2 text-slate-100">
                                 <li class="relative">
                                     <router-link to="/users/list"
-                                        :class="[$route.path.includes('/users/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">المستخدمين</router-link>
-                                    <span
-                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
+                                        :class="[isMenuItemActive('/users/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        المستخدمين </router-link>
                                 </li>
                                 <li class="relative">
                                     <router-link to="/users/roles"
-                                        :class="[$route.path.includes('/users/roles') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">الأدوار
+                                        :class="[isMenuItemActive('/users/roles') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">الأدوار
                                         والصلاحيات</router-link>
-                                    <span
-                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
                                 </li>
                                 <li class="relative">
                                     <router-link to="/crushers/list"
-                                        :class="[$route.path.includes('/crushers') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">الكسارات</router-link>
-                                    <span
-                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
+                                        :class="[isMenuItemActive('/crushers/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
+                                        الكسارات</router-link>
+                                </li>
+                                <li class="relative">
+                                    <router-link to="/contractors/list"
+                                        :class="[isMenuItemActive('/contractors/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
+                                        المقاولين</router-link>
                                 </li>
                             </ul>
                         </div>
@@ -404,14 +422,16 @@
                     <!-- اللوجستيات -->
                     <v-list-group value="logistics" class="mt-1">
                         <template #activator="{ props, isOpen }">
-                            <v-list-item v-bind="props" :class="[{ '!mx-1 gap-5': !isSidebarExpanded }, isLogisticsActive ? 'bg-white !text-[#1570EF]' : '', '!ps-[11px]']"
+                            <v-list-item v-bind="props"
+                                :class="[{ '!mx-1 gap-5': !isSidebarExpanded }, isLogisticsActive ? 'bg-white !text-[#1570EF]' : '', '!ps-[11px]']"
                                 class="px-2 py-1.5 mx-4 rounded-lg hover:bg-primary-700/40 text-white flex items-center justify-between gap-2">
                                 <template #append>
                                     <v-icon size="20"
                                         :class="['ms-auto transition-transform', isOpen ? 'rotate-180' : '', isLogisticsActive ? '!text-[#1570EF]' : '']">mdi-chevron-down</v-icon>
                                 </template>
                                 <template #title>
-                                    <div class="flex-1"><span class="font-semibold" :class="isLogisticsActive ? '!text-[#1570EF]' : ''">اللوجستيات</span></div>
+                                    <div class="flex-1"><span class="font-semibold"
+                                            :class="isLogisticsActive ? '!text-[#1570EF]' : ''">اللوجستيات</span></div>
                                 </template>
                                 <template #prepend>
                                     <div
@@ -447,14 +467,16 @@
                     <!-- التقارير -->
                     <v-list-group value="reports" class="mt-1">
                         <template #activator="{ props, isOpen }">
-                            <v-list-item v-bind="props" :class="[{ '!mx-1 gap-5': !isSidebarExpanded }, isReportsActive ? 'bg-white !text-[#1570EF]' : '', '!ps-[11px]']"
+                            <v-list-item v-bind="props"
+                                :class="[{ '!mx-1 gap-5': !isSidebarExpanded }, isReportsActive ? 'bg-white !text-[#1570EF]' : '', '!ps-[11px]']"
                                 class="px-2 py-1.5 mx-4 rounded-lg hover:bg-primary-700/40 text-white flex items-center justify-between gap-2">
                                 <template #append>
                                     <v-icon size="20"
                                         :class="['ms-auto transition-transform', isOpen ? 'rotate-180' : '', isReportsActive ? '!text-[#1570EF]' : '']">mdi-chevron-down</v-icon>
                                 </template>
                                 <template #title>
-                                    <div class="flex-1"><span class="font-semibold" :class="isReportsActive ? '!text-[#1570EF]' : ''">التقارير</span></div>
+                                    <div class="flex-1"><span class="font-semibold"
+                                            :class="isReportsActive ? '!text-[#1570EF]' : ''">التقارير</span></div>
                                 </template>
                                 <template #prepend>
                                     <div
@@ -490,14 +512,16 @@
                     <!-- الإعدادات -->
                     <v-list-group value="settings" class="mt-1">
                         <template #activator="{ props, isOpen }">
-                            <v-list-item v-bind="props" :class="[{ '!mx-1 gap-5': !isSidebarExpanded }, isSettingsActive ? 'bg-white !text-[#1570EF]' : '', '!ps-[11px]']"
+                            <v-list-item v-bind="props"
+                                :class="[{ '!mx-1 gap-5': !isSidebarExpanded }, isSettingsActive ? 'bg-white !text-[#1570EF]' : '', '!ps-[11px]']"
                                 class="px-2 py-1.5 mx-4 rounded-lg hover:bg-primary-700/40 text-white flex items-center justify-between gap-2">
                                 <template #append>
                                     <v-icon size="20"
                                         :class="['ms-auto transition-transform', isOpen ? 'rotate-180' : '', isSettingsActive ? '!text-[#1570EF]' : '']">mdi-chevron-down</v-icon>
                                 </template>
                                 <template #title>
-                                    <div class="flex-1"><span class="font-semibold" :class="isSettingsActive ? '!text-[#1570EF]' : ''">الإعدادات</span></div>
+                                    <div class="flex-1"><span class="font-semibold"
+                                            :class="isSettingsActive ? '!text-[#1570EF]' : ''">الإعدادات</span></div>
                                 </template>
                                 <template #prepend>
                                     <div
@@ -521,12 +545,12 @@
                                         قائمة تصنيفات الخدمات</router-link>
                                 </li>
                                 <li class="relative">
-                                    <router-link to="/products-categories/list"
+                                    <router-link to="/products-categories/create"
                                         :class="[isMenuItemActive('/products-categories/create') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         تصنيفات المنتجات </router-link>
                                 </li>
                                 <li class="relative">
-                                    <router-link to="/services-categories/list"
+                                    <router-link to="/services-categories/create"
                                         :class="[isMenuItemActive('/services-categories/create') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         تصنيفات الخدمات</router-link>
                                 </li>
@@ -655,7 +679,7 @@ const salesRoutes = ['/customers', '/sales'];
 const projectsRoutes = ['/projects'];
 const purchasesRoutes = ['/suppliers'];
 const financeRoutes = ['/finance'];
-const usersRoutes = ['/users', '/crushers'];
+const usersRoutes = ['/users', '/crushers', '/contractors'];
 const logisticsRoutes = ['/logistics'];
 const reportsRoutes = ['/reports'];
 const settingsRoutes = ['/products-categories', '/services-categories', '/units', '/factories', '/brands', '/geo-areas', '/geo-segments', '/tax-rules', '/taxes', '/cities', '/codes', '/account-types'];
@@ -673,58 +697,68 @@ const isRouteActive = (basePath) => {
 // Dynamic function to check if a menu item should be active based on its link path
 const isMenuItemActive = (menuLinkPath) => {
     const currentPath = route.path;
-    
+
     // Direct match
     if (currentPath === menuLinkPath) return true;
-    
-    // Extract the base path from the menu link (e.g., '/services/list' -> '/services')
+
+    // Extract the base path from the menu link
     const pathParts = menuLinkPath.split('/').filter(p => p);
     if (pathParts.length === 0) return false;
-    
+
+    // For nested routes like /products/building-material-products-prices
+    // Check if current path starts with the full menu link path
+    if (currentPath.startsWith(menuLinkPath)) {
+        return true;
+    }
+
     const basePath = '/' + pathParts[0];
-    
+
     // Check if we're in the same parent route
     if (currentPath.startsWith(basePath + '/') || currentPath === basePath) {
         // Special handling for different types of routes
-        
-        // 1. Price-related routes: keep them separate
+
+        // 1. For nested product/service price routes (e.g., /products/building-material-products-prices)
         if (pathParts.length > 1 && pathParts[1].includes('price')) {
-            return currentPath.includes('price');
+            // Build the full nested path from menu link
+            const nestedPath = '/' + pathParts.join('/');
+            // Check if current path starts with this nested path
+            return currentPath.startsWith(nestedPath);
         }
-        
+
         // 2. Main list routes (e.g., /services/list, /customers/list)
         if (pathParts.length > 1 && pathParts[1] === 'list') {
             // Active for: list, create, edit, view, form pages
             // NOT active for: price-related or other sub-features
             const isMainRoute = currentPath === menuLinkPath ||
-                              currentPath === basePath + '/create' ||
-                              currentPath.startsWith(basePath + '/edit/') ||
-                              currentPath === basePath + '/form' ||
-                              currentPath.startsWith(basePath + '/view/') ||
-                              currentPath === basePath + '/new';
-            
+                currentPath === basePath + '/create' ||
+                currentPath.startsWith(basePath + '/edit/') ||
+                currentPath === basePath + '/form' ||
+                currentPath.startsWith(basePath + '/view/') ||
+                currentPath === basePath + '/new';
+
             // Don't activate for price or other special routes
             if (currentPath.includes('price') || currentPath.includes('scheduling')) {
                 return false;
             }
-            
+
             return isMainRoute;
         }
-        
-        // 3. Special sub-features (scheduling, etc.)
-        if (pathParts.length > 1 && pathParts[1] === 'scheduling') {
-            return currentPath.includes('scheduling');
+
+        // 3. Special sub-features (scheduling, production-capacity, etc.)
+        if (pathParts.length > 1 && (pathParts[1] === 'scheduling' || pathParts[1] === 'production-capacity')) {
+            const nestedPath = '/' + pathParts.join('/');
+            return currentPath.startsWith(nestedPath);
         }
-        
+
         // 4. For simple paths without /list (like /codes)
         if (pathParts.length === 1) {
             return currentPath.startsWith(basePath);
         }
-        
+
         // Default: match if same path structure
         return currentPath.startsWith(menuLinkPath.replace('/list', ''));
     }
-    
+
     return false;
 };
 

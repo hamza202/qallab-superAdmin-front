@@ -31,6 +31,15 @@ export const servicesRoutes: RouteRecordRaw[] = [
         },
       },
       {
+        path: "view/:id",
+        name: "ServicesView",
+        component: () => import("@/views/services/services/view.vue"),
+        meta: {
+          title: "pages.services.view",
+        },
+      },
+
+      {
         path: "prices-list",
         name: "ServicesPriceListsList",
         component: () => import("@/views/services/services-prices/List.vue"),

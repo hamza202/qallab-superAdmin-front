@@ -2,37 +2,67 @@ import type { RouteRecordRaw } from "vue-router";
 
 export const productsRoutes: RouteRecordRaw[] = [
   {
-    path: "/products",
-    name: "Products",
-    redirect: "/products/prices-list",
+    path: "/products/building-material-products-prices",
+    name: "ProductsBuildingMaterialPriceLists",
+    redirect: "/products/building-material-products-prices/list",
     children: [
       {
-        path: "prices-list",
-        name: "ProductsPriceList",
-        component: () => import("@/views/products/price-lists/List.vue"),
+        path: "list",
+        name: "ProductsBuildingMaterialPriceList",
+        component: () =>
+          import(
+            "@/views/products/building-material-products-price-lists/List.vue"
+          ),
         meta: {
-          title: "pages.ProductsPriceLists.title",
+          title: "pages.ProductsBuildingMaterialPriceLists.title",
         },
       },
       {
-        path: "price-list-edit/:id",
-        name: "ProductPriceListEdit",
-        component: () => import("@/views/products/price-lists/Form.vue"),
+        path: "edit/:id",
+        name: "ProductsBuildingMaterialPriceListEdit",
+        component: () =>
+          import(
+            "@/views/products/building-material-products-price-lists/Form.vue"
+          ),
         meta: {
-          title: "pages.ProductsPriceList.title",
+          title: "pages.ProductsBuildingMaterialPriceList.title",
+        },
+      },
+    ],
+  },
+  {
+    path: "/products/general-products-prices",
+    name: "GeneralProductPriceLists",
+    redirect: "/products/general-products-prices/list",
+    children: [
+      {
+        path: "list",
+        name: "GeneralProductPriceList",
+        component: () =>
+          import("@/views/products/general-products-prices-list/List.vue"),
+        meta: {
+          title: "pages.GeneralProductsPriceLists.title",
         },
       },
       {
-        path: "price-list-create",
-        name: "ProductPriceListCreate",
-        component: () => import("@/views/products/price-lists/Form.vue"),
+        path: "edit/:id",
+        name: "GeneralProductPriceListEdit",
+        component: () =>
+          import("@/views/products/general-products-prices-list/Form.vue"),
         meta: {
-          title: "pages.ProductsPriceList.title",
+          title: "pages.GeneralProductPriceList.title",
         },
       },
+    ],
+  },
+  {
+    path: "/products/production-capacity",
+    name: "ProductsProductionCapacityList",
+    redirect: "/products/production-capacity/list",
+    children: [
       {
-        path: "production-capacity-list",
-        name: "ProductsProductionCapacityList",
+        path: "list",
+        name: "ProductProductionCapacityList",
         component: () =>
           import("@/views/products/production-capacity/List.vue"),
         meta: {
@@ -40,17 +70,8 @@ export const productsRoutes: RouteRecordRaw[] = [
         },
       },
       {
-        path: "production-capacity-edit/:id",
+        path: "edit/:id",
         name: "ProductsProductionCapacityEdit",
-        component: () =>
-          import("@/views/products/production-capacity/Form.vue"),
-        meta: {
-          title: "pages.productionCapacityList.title",
-        },
-      },
-      {
-        path: "production-capacity-create",
-        name: "ProductsProductionCapacityCreate",
         component: () =>
           import("@/views/products/production-capacity/Form.vue"),
         meta: {
@@ -86,6 +107,14 @@ export const productsRoutes: RouteRecordRaw[] = [
         component: () => import("@/views/products/simple-products/Form.vue"),
         meta: {
           title: "pages.simpleProducts.title",
+        },
+      },
+      {
+        path: "view/:id",
+        name: "SimpleProductView",
+        component: () => import("@/views/products/simple-products/View.vue"),
+        meta: {
+          title: "pages.simpleProducts.view",
         },
       },
     ],

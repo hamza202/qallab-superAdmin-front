@@ -88,6 +88,14 @@
       "create": "إضافة كسارة",
       "edit": "تعديل كسارة"
     },
+    "contractors": {
+      "title": "المقاولين ",
+      "description": "تمكنك من إدارة المقاولين ",
+      "editDescription": "تستطيع تعديل بيانات المقاولين  من هنا",
+      "list": "قائمة المقاولين ",
+      "create": "إضافة كسارة",
+      "edit": "تعديل كسارة"
+    },
     "projects": {
       "title": "جدول المشاريع",
       "description": "عرض المشاريع",
@@ -95,13 +103,21 @@
       "create": "إضافة مشروع",
       "edit": "تعديل مشروع"
     },
-    "ProductsPriceLists": {
-      "title": "قوائم أسعار المنتجات",
-      "description": "تمكنك من ادارة أسعار المنتجات"
+    "ProductsBuildingMaterialPriceLists": {
+      "title": "قوائم أسعار منتجات مواد البناء الأولية",
+      "description": "تمكنك من ادارة أسعار منتجات مواد البناء الأولية"
     },
-    "ProductsPriceList": {
-      "title": "قائمة أسعار المنتجات",
-      "description": "تمكنك من ادارة أسعار المنتجات"
+    "ProductsBuildingMaterialPriceList": {
+      "title": "قائمة أسعار منتجات مواد البناء الأولية",
+      "description": "تمكنك من ادارة أسعار منتجات مواد البناء الأولية"
+    },
+    "GeneralProductsPriceLists": {
+      "title": "قوائم أسعار المنتجات العامة",
+      "description": "تمكنك من ادارة اسعار المنتجات العامة"
+    },
+    "GeneralProductPriceList": {
+      "title": "قائمة أسعار المنتجات العامة",
+      "description": "تمكنك من ادارة اسعار المنتجات العامة"
     },
     "productionCapacityLists": {
       "title": "قوائم  القدرة الانتاجية",

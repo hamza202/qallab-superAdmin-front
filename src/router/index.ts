@@ -14,6 +14,7 @@ import { authRoutes } from "./modules/auth.routes";
 import { errorRoutes } from "./modules/errors.routes";
 import { servicesRoutes } from "./modules/services.routes";
 import { crushersRoutes } from "./modules/crushers.routes";
+import { contractorsRoutes } from "./modules/contractors.routes";
 
 const routes: RouteRecordRaw[] = [
   ...dashboardRoutes,
@@ -24,6 +25,7 @@ const routes: RouteRecordRaw[] = [
   ...customersRoutes,
   ...projectsRoutes,
   ...crushersRoutes,
+  ...contractorsRoutes,
   ...errorRoutes,
   ...servicesRoutes,
   {

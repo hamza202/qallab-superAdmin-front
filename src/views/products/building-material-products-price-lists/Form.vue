@@ -281,8 +281,8 @@ onMounted(async () => {
 <template>
   <default-layout>
     <div class="price-list-page">
-      <PageHeader :icon="priceListIcon" title-key="pages.ProductsPriceList.title"
-        description-key="pages.ProductsPriceList.description" />
+      <PageHeader :icon="priceListIcon" title-key="pages.ProductsBuildingMaterialPriceList.title"
+        description-key="pages.ProductsBuildingMaterialPriceList.description" />
 
       <div class="-mx-6">
         <div class="pb-2">
