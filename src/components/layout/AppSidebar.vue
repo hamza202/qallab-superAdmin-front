@@ -89,8 +89,8 @@
                             <h2 class="text-sm font-medium leading-5 my-2">إعدادات المنتجات</h2>
                             <ul class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
                                 <li class="relative">
-                                    <router-link to="/customers/list"
-                                        :class="[isMenuItemActive('/customers/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                    <router-link to="/product-variables/list"
+                                        :class="[isMenuItemActive('/product-variables/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         متغيرات المنتج </router-link>
                                 </li>
                                 <li class="relative">

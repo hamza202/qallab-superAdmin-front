@@ -150,4 +150,35 @@ export const productsRoutes: RouteRecordRaw[] = [
       },
     ],
   },
+  {
+    path: "/product-variables",
+    name: "ProductVariables",
+    redirect: "/product-variables/list",
+    children: [
+      {
+        path: "list",
+        name: "ProductVariableList",
+        component: () => import("@/views/products/product-variables/List.vue"),
+        meta: {
+          title: "pages.productVariables.title",
+        },
+      },
+      {
+        path: "create",
+        name: "ProductVariableCreate",
+        component: () => import("@/views/products/product-variables/Form.vue"),
+        meta: {
+          title: "pages.productVariables.create",
+        },
+      },
+      {
+        path: "edit/:id",
+        name: "ProductVariableEdit",
+        component: () => import("@/views/products/product-variables/Form.vue"),
+        meta: {
+          title: "pages.productVariables.edit",
+        },
+      },
+    ],
+  },
 ];
