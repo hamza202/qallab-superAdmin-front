@@ -20,6 +20,7 @@ declare module 'vue' {
     EditableDataTable: typeof import('./components/common/tables/EditableDataTable.vue')['default']
     FileUploadInput: typeof import('./components/common/forms/FileUploadInput.vue')['default']
     GroupedDataTable: typeof import('./components/common/tables/GroupedDataTable.vue')['default']
+    LanguageTabs: typeof import('./components/common/forms/LanguageTabs.vue')['default']
     MapDialog: typeof import('./components/common/MapDialog.vue')['default']
     PageHeader: typeof import('./components/common/PageHeader.vue')['default']
     PriceInput: typeof import('./components/common/forms/PriceInput.vue')['default']

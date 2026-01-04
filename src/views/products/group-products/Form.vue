@@ -24,8 +24,6 @@ const purchasePrice = ref("");
 const salePrice = ref("");
 const maxSalePrice = ref("");
 const minSalePrice = ref("");
-const branchPrice = ref("");
-const wholesalePrice = ref("");
 const halfWholesalePrice = ref("");
 const discountType = ref(null);
 const discountValue = ref("506.64");
@@ -50,6 +48,12 @@ const discountTypeItems = [
   { title: "نسبة مئوية", value: "percentage" },
   { title: "قيمة ثابتة", value: "fixed" },
 ];
+
+// Available languages (will be fetched from API in the future)
+const availableLanguages = ref([
+  { code: "en", name: "En", flag: "/img/en.svg", dir: "ltr" as const },
+  { code: "ar", name: "AR", flag: "/img/sa.svg", dir: "rtl" as const },
+]);
 
 // Tax data
 const taxType = ref(null);
@@ -92,6 +96,11 @@ const isReturnable = ref(false);
 const isRentable = ref(false);
 const sellNegative = ref(false);
 const isManufacturingProduct = ref(false);
+const isHostable = ref(false);
+const isNegotiable = ref(false);
+const isAvailableForSale = ref(false);
+const isAvailableForPurchase = ref(false);
+const isAvailableForProjects = ref(false);
 
 // Sample items for new selects
 const countryItems = [
@@ -512,7 +521,7 @@ const plusIcon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xm
                           label="أعلى سعر بيع"
                           placeholder="ادخل السعر"
                           :rules="[numeric(), positive()]"
-                          :hide-details="false"
+                          :hide-details="true"
                         />
                       </div>
                       <PriceInput
@@ -520,7 +529,7 @@ const plusIcon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xm
                         label="هامش الربح"
                         placeholder="هامش الربح"
                         :rules="[numeric(), positive()]"
-                        :hide-details="false"
+                        :hide-details="true"
                       />
 
                       <!-- Discount Section -->
@@ -598,22 +607,37 @@ const plusIcon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xm
                     </div>
 
                     <!-- Name Fields with Language Tabs -->
-                    <div class="mb-[20px]">
-                      <div class="mb-[6px]">
-                        <p class="text-sm font-medium text-gray-700">الإسم</p>
-                      </div>
-                      <TextInput
-                        v-model="arabicName"
-                        placeholder="ادخل الاسم"
-                        :rules="[
-                          required('arabicNameRequired'),
-                          minLength(2),
-                          maxLength(100),
-                          arabicOnly(),
-                        ]"
-                        :hide-details="false"
-                      />
-                    </div>
+                    <LanguageTabs
+                      :languages="availableLanguages"
+                      label="الإسم"
+                      class="mb-[20px]"
+                    >
+                      <template #en>
+                        <TextInput
+                          v-model="englishName"
+                          placeholder="Enter name in English"
+                          :rules="[
+                            required('englishNameRequired'),
+                            minLength(2),
+                            maxLength(100),
+                          ]"
+                          :hide-details="true"
+                        />
+                      </template>
+                      <template #ar>
+                        <TextInput
+                          v-model="arabicName"
+                          placeholder="ادخل الاسم بالعربية"
+                          :rules="[
+                            required('arabicNameRequired'),
+                            minLength(2),
+                            maxLength(100),
+                            arabicOnly(),
+                          ]"
+                          :hide-details="true"
+                        />
+                      </template>
+                    </LanguageTabs>
 
                     <!-- Category and Unit -->
                     <div
@@ -650,17 +674,28 @@ const plusIcon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xm
                     </div>
 
                     <!-- Description with Language Tabs -->
-                    <div class="mb-[20px]">
-                      <div class="mb-[6px]">
-                        <p class="text-sm font-medium text-gray-700">الوصف</p>
-                      </div>
-                      <RichTextEditor
-                        v-model="englishDescription"
-                        placeholder="Enter description in English"
-                        min-height="120px"
-                        :hide-details="false"
-                      />
-                    </div>
+                    <LanguageTabs
+                      :languages="availableLanguages"
+                      label="الوصف"
+                      class="mb-[20px]"
+                    >
+                      <template #en>
+                        <RichTextEditor
+                          v-model="englishDescription"
+                          placeholder="Enter description in English"
+                          min-height="120px"
+                          :hide-details="false"
+                        />
+                      </template>
+                      <template #ar>
+                        <RichTextEditor
+                          v-model="arabicDescription"
+                          placeholder="ادخل الوصف بالعربية"
+                          min-height="120px"
+                          :hide-details="false"
+                        />
+                      </template>
+                    </LanguageTabs>
 
                     <!-- Product Image Section -->
                     <div>
@@ -904,6 +939,31 @@ const plusIcon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xm
             </h2>
 
             <div class="flex flex-wrap gap-8">
+              <CheckboxInput
+                v-model="isAvailableForProjects"
+                label="متاح للمشاريع"
+                color="primary"
+              />
+              <CheckboxInput
+                v-model="isAvailableForPurchase"
+                label="متاح للشراء"
+                color="primary"
+              />
+              <CheckboxInput
+                v-model="isAvailableForSale"
+                label="متاح للبيع"
+                color="primary"
+              />
+              <CheckboxInput
+                v-model="isNegotiable"
+                label="قابل للمفاضلة"
+                color="primary"
+              />
+              <CheckboxInput
+                v-model="isHostable"
+                label="قابل للاستضافة"
+                color="primary"
+              />
               <CheckboxInput
                 v-model="isReturnable"
                 label="قابل للارجاع"

@@ -7,3 +7,5 @@ export { default as FileUploadInput } from "./FileUploadInput.vue";
 export { default as PriceInput } from "./PriceInput.vue";
 export { default as SelectWithIconInput } from "./SelectWithIconInput.vue";
 export { default as RichTextEditor } from "./RichTextEditor.vue";
+export { default as LanguageTabs } from "./LanguageTabs.vue";
+export type { Language } from "./LanguageTabs.vue";

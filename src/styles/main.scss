@@ -137,11 +137,33 @@ $shadow-focus: 0px 0px 0px 4px rgb(var(--v-theme-primary-25)),
   }
 }
 .v-input {
-  @apply rounded-md overflow-hidden;
+  @apply rounded-md;
 }
 .v-input.v-switch {
   @apply min-w-14;
 }
 .dir-ltr {
   direction: ltr !important;
+}
+html[dir="rtl"] .language-tabs-wrapper{
+  .text-input-wrapper .v-input{
+    @apply rounded-tl-[0] !important;
+    .v-field{
+      @apply rounded-tl-[0] !important;
+    }
+  }
+  .editor-container{
+    @apply rounded-tl-[0] !important;
+  }
+} 
+html[dir="ltr"] .language-tabs-wrapper{
+  .text-input-wrapper .v-input{
+    @apply rounded-tr-[0] !important;
+    .v-field{
+      @apply rounded-tr-[0] !important;
+    }
+  }
+  .editor-container{
+    @apply rounded-tr-[0] !important;
+  }
 }
