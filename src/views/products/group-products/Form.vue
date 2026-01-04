@@ -772,8 +772,8 @@ const plusIcon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xm
                 <h3 class="text-lg font-bold text-primary-800 text-right mb-6">
                   متغيرات المنتج
                 </h3>
-                <div class="flex gap-5 items-end flex-wrap">
-                  <div class="max-w-[320px]">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-5 items-end">
+                  <div class="w-full">
                     <MultipleSelectInput
                       v-model="selectedSizes"
                       label="المقاس"
@@ -781,7 +781,7 @@ const plusIcon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xm
                       placeholder="اختر المقاس"
                     />
                   </div>
-                  <div class="max-w-[320px]">
+                  <div class="w-full">
                     <MultipleSelectInput
                       v-model="selectedColors"
                       label="اللون"
@@ -789,7 +789,7 @@ const plusIcon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xm
                       placeholder="اختر اللون"
                     />
                   </div>
-                  <div class="max-w-[320px]">
+                  <div class="w-full">
                     <v-btn
                       variant="flat"
                       color="primary"
