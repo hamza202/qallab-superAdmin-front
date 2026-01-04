@@ -24,8 +24,8 @@ $shadow-focus: 0px 0px 0px 4px rgb(var(--v-theme-primary-25)),
   @apply text-gray-500 opacity-100 !important;
 }
 
-.v-textarea .v-field__input{
-    mask-image: none !important;
+.v-textarea .v-field__input {
+  mask-image: none !important;
 }
 
 // Form field label styles
@@ -40,11 +40,11 @@ $shadow-focus: 0px 0px 0px 4px rgb(var(--v-theme-primary-25)),
   .v-list-item-title {
     @apply text-sm;
   }
-  
+
   // Selected item styles
   .v-list-item--active {
     @apply bg-primary-500 !important;
-    
+
     .v-list-item-title {
       @apply text-white !important;
     }
@@ -57,28 +57,29 @@ $shadow-focus: 0px 0px 0px 4px rgb(var(--v-theme-primary-25)),
   @apply bg-no-repeat bg-center opacity-100 !important;
   width: 12px;
   height: 7px;
-  
+
   &.mdi {
     font-size: 0;
   }
 }
-.v-selection-control__input > .mdi-checkbox-blank-outline{
+.v-selection-control__input > .mdi-checkbox-blank-outline {
   @apply text-gray-300 opacity-100 !important;
 }
-.v-selection-control__input .mdi-checkbox-blank-outline::before,.v-selection-control__input .mdi-checkbox-marked::before {
+.v-selection-control__input .mdi-checkbox-blank-outline::before,
+.v-selection-control__input .mdi-checkbox-marked::before {
   @apply bg-gray-100 flex justify-center items-center rounded-[4px] overflow-hidden;
   width: 19px;
   height: 19px;
 }
-.v-checkbox .v-selection-control{
+.v-checkbox .v-selection-control {
   @apply min-h-0;
 }
-.v-field{
+.v-field {
   box-shadow: 0px 1px 2px rgba(16, 24, 40, 0.05);
 }
-.v-field--disabled.bg-background{
+.v-field--disabled.bg-background {
   @apply opacity-100 bg-gray-200 text-primary-900 font-semibold !important;
-  .v-field__outline{
+  .v-field__outline {
     @apply text-gray-300;
   }
 }
@@ -111,29 +112,58 @@ $shadow-focus: 0px 0px 0px 4px rgb(var(--v-theme-primary-25)),
   }
 }
 
-.v-table__wrapper{
+.v-table__wrapper {
   @apply rounded-none;
 }
-.v-window{
+.v-window {
   @apply overflow-visible !important;
 }
-.text-input-wrapper, .textarea-input-wrapper, .select-input-wrapper, .select-icon-wrapper,.v-text-field {
+.text-input-wrapper,
+.textarea-input-wrapper,
+.select-input-wrapper,
+.select-icon-wrapper,
+.v-text-field {
   @apply relative;
-  .v-input__details{
-    @apply absolute bottom-[-20px] end-0 text-sm ;
+  .v-input__details {
+    @apply absolute bottom-[-20px] end-0 text-sm;
   }
 }
-.v-text-field input[type=date]{
+.v-text-field input[type="date"] {
   @apply block;
 }
-.v-navigation-drawer{
-  .v-list-item__append{
-    @apply max-w-5
+.v-navigation-drawer {
+  .v-list-item__append {
+    @apply max-w-5;
   }
 }
-.v-input{
-  @apply rounded-md overflow-hidden;
+.v-input {
+  @apply rounded-md;
 }
-.v-input.v-switch{
-  @apply min-w-14
+.v-input.v-switch {
+  @apply min-w-14;
+}
+.dir-ltr {
+  direction: ltr !important;
+}
+html[dir="rtl"] .language-tabs-wrapper{
+  .text-input-wrapper .v-input{
+    @apply rounded-tl-[0] !important;
+    .v-field{
+      @apply rounded-tl-[0] !important;
+    }
+  }
+  .editor-container{
+    @apply rounded-tl-[0] !important;
+  }
+} 
+html[dir="ltr"] .language-tabs-wrapper{
+  .text-input-wrapper .v-input{
+    @apply rounded-tr-[0] !important;
+    .v-field{
+      @apply rounded-tr-[0] !important;
+    }
+  }
+  .editor-container{
+    @apply rounded-tr-[0] !important;
+  }
 }

@@ -19,7 +19,7 @@
                     <v-icon>mdi-google</v-icon>
                 </v-btn>
             </div>
-            <span class="text-center">All rights reserved to Qallab company 2019</span>
+            <span class="text-center">All rights reserved to Qallab company 2026</span>
         </div>
     </v-footer>
 </template>

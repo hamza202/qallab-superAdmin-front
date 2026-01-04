@@ -285,11 +285,11 @@ const eyeIcon = `<svg width="22" height="16" viewBox="0 0 22 16" fill="none" xml
                       <th
                         v-for="subHeader in subItemHeaders"
                         :key="subHeader.key"
-                        class="!font-bold !text-gray-600 !text-xs !bg-white !py-3 !px-6 border border-gray-200 text-center"
+                        class="!font-bold !text-gray-600 !text-xs !bg-white !py-3 !px-6 text-center"
                       >
                         {{ subHeader.title }}
                       </th>
-                      <th class="!font-bold !text-gray-600 !text-xs !bg-white !py-3 !px-6 border border-gray-200 text-center w-[130px]">
+                      <th class="!font-bold !text-gray-600 !text-xs !bg-white !py-3 !px-6 text-center w-[130px]">
                         الاجراءات
                       </th>
                     </tr>
@@ -298,12 +298,12 @@ const eyeIcon = `<svg width="22" height="16" viewBox="0 0 22 16" fill="none" xml
                     <tr
                       v-for="subItem in item.sub_items"
                       :key="subItem.id"
-                      class="bg-white border-b border-gray-200"
+                      class="bg-white"
                     >
                       <td
                         v-for="subHeader in subItemHeaders"
                         :key="subHeader.key"
-                        class="!py-4 !px-6 border-x border-gray-200 text-center"
+                        class="!py-4 !px-6 text-center"
                       >
                         <!-- Status for sub items -->
                         <template v-if="subHeader.key === 'status'">
@@ -325,7 +325,7 @@ const eyeIcon = `<svg width="22" height="16" viewBox="0 0 22 16" fill="none" xml
                         </template>
                       </td>
                       <!-- Sub Item Actions -->
-                      <td class="!py-4 !px-6 border-x border-gray-200">
+                      <td class="!py-4 !px-6">
                         <div class="flex items-center justify-center gap-1">
                           <v-switch
                             :model-value="isStatusActive(subItem.status)"
