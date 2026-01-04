@@ -134,6 +134,90 @@ const supplierItems = [
   { title: "مورد 2", value: "supplier2" },
 ];
 
+// Product Variants Data
+const selectedSizes = ref<(string | number)[]>([]);
+const selectedColors = ref<(string | number)[]>([]);
+const subProductsGenerated = ref(false);
+const editingRowId = ref<number | null>(null);
+
+const sizeItems = [
+  { title: "صغير", value: "small" },
+  { title: "وسط", value: "medium" },
+  { title: "كبير", value: "large" },
+];
+
+const colorItems = [
+  { title: "احمر", value: "red" },
+  { title: "ابيض", value: "white" },
+  { title: "اصفر", value: "yellow" },
+];
+
+// Computed to check if category is selected
+const isCategorySelected = computed(() => {
+  return category.value !== null && category.value !== "";
+});
+
+// Get category title
+const getCategoryTitle = computed(() => {
+  const selectedCategory = categoryItems.find((item) => item.value === category.value);
+  return selectedCategory?.title || "منتج";
+});
+
+// Get item title by value
+const getColorTitle = (value: string | number) => {
+  const item = colorItems.find((i) => i.value === value);
+  return item?.title || String(value);
+};
+
+const getSizeTitle = (value: string | number) => {
+  const item = sizeItems.find((i) => i.value === value);
+  return item?.title || String(value);
+};
+
+// Generate sub products
+const generateSubProducts = () => {
+  if (selectedColors.value.length === 0 || selectedSizes.value.length === 0) {
+    return;
+  }
+
+  const products: any[] = [];
+  let id = 1;
+
+  selectedColors.value.forEach((color) => {
+    selectedSizes.value.forEach((size) => {
+      products.push({
+        id: id++,
+        name: `${getCategoryTitle.value} ${getColorTitle(color)} _ ${getSizeTitle(size)}`,
+        sku: "BR-S-BAG-50KG",
+        salePrice: "",
+        purchasePrice: "",
+        isEditing: false,
+      });
+    });
+  });
+
+  subProductsTableItems.value = products;
+  subProductsGenerated.value = true;
+};
+
+// Start editing a row
+const startEditingRow = (item: any) => {
+  editingRowId.value = item.id;
+};
+
+// Save editing row
+const saveEditingRow = () => {
+  editingRowId.value = null;
+};
+
+// Delete sub product row
+const deleteSubProductRow = (item: any) => {
+  subProductsTableItems.value = subProductsTableItems.value.filter((p) => p.id !== item.id);
+  if (subProductsTableItems.value.length === 0) {
+    subProductsGenerated.value = false;
+  }
+};
+
 // Handlers for new section
 const handleAddCountry = () => {
   console.log("Add new country");
@@ -188,62 +272,7 @@ const handleDeleteTax = (item: any) => {
 };
 
 // Sub Products table data
-const subProductsTableHeaders = [
-  { key: "name", title: "اسم الصنف" },
-  { key: "sku", title: "Sku" },
-  { key: "salePrice", title: "سعر البيع" },
-  { key: "purchasePrice", title: "سعر الشراء" },
-  { key: "quantity", title: "الكمية" },
-  { key: "totalAmount", title: "المبلغ الاجمالي" },
-];
-
-const subProductsTableItems = ref([
-  {
-    id: 1,
-    name: "بحص احمر _ صغير",
-    sku: "BR-S-BAG-50KG",
-    salePrice: "18.00 ريال",
-    purchasePrice: "12.00 ريال",
-    quantity: "500",
-    totalAmount: "6,000.00 ريال",
-  },
-  {
-    id: 2,
-    name: "بحص احمر _ وسط",
-    sku: "BR-S-BAG-50KG",
-    salePrice: "18.00 ريال",
-    purchasePrice: "12.00 ريال",
-    quantity: "500",
-    totalAmount: "6,000.00 ريال",
-  },
-  {
-    id: 3,
-    name: "بحص احمر _ كبير",
-    sku: "BR-S-BAG-50KG",
-    salePrice: "18.00 ريال",
-    purchasePrice: "12.00 ريال",
-    quantity: "500",
-    totalAmount: "6,000.00 ريال",
-  },
-  {
-    id: 4,
-    name: "بحص اصفر _ كبير",
-    sku: "BR-S-BAG-50KG",
-    salePrice: "18.00 ريال",
-    purchasePrice: "12.00 ريال",
-    quantity: "500",
-    totalAmount: "6,000.00 ريال",
-  },
-  {
-    id: 5,
-    name: "بحص ابيض _ كبير",
-    sku: "BR-S-BAG-50KG",
-    salePrice: "18.00 ريال",
-    purchasePrice: "12.00 ريال",
-    quantity: "500",
-    totalAmount: "6,000.00 ريال",
-  },
-]);
+const subProductsTableItems = ref<any[]>([]);
 
 // Tabs
 const activeTab = ref(0);
@@ -711,8 +740,9 @@ const plusIcon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xm
                 </div>
               </div>
 
-              <!-- Warning Message -->
+              <!-- Warning Message - Only show when category is NOT selected -->
               <div
+                v-if="!isCategorySelected"
                 class="bg-warning-50 border border-warning-200 rounded-lg p-4 mb-6 flex items-center gap-3"
               >
                 <svg
@@ -736,16 +766,155 @@ const plusIcon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xm
               </div>
             </div>
 
-            <!-- Sub Products Table Section -->
-            <div class="mt-6 -mx-6">
-              <DataTable
-                title="المنتجات الفرعية"
-                :headers="subProductsTableHeaders"
-                :items="subProductsTableItems"
-                :show-checkbox="false"
-                :show-actions="false"
-              />
-            </div>
+            <!-- Product Variants Section - Only show when category is selected -->
+            <template v-if="isCategorySelected">
+              <div class="bg-primary-50 rounded-lg p-6 mb-6">
+                <h3 class="text-lg font-bold text-primary-800 text-right mb-6">
+                  متغيرات المنتج
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-5 items-end">
+                  <div class="w-full">
+                    <MultipleSelectInput
+                      v-model="selectedSizes"
+                      label="المقاس"
+                      :items="sizeItems"
+                      placeholder="اختر المقاس"
+                    />
+                  </div>
+                  <div class="w-full">
+                    <MultipleSelectInput
+                      v-model="selectedColors"
+                      label="اللون"
+                      :items="colorItems"
+                      placeholder="اختر اللون"
+                    />
+                  </div>
+                  <div class="w-full">
+                    <v-btn
+                      variant="flat"
+                      color="primary"
+                      height="44"
+                      class="font-semibold text-sm w-full"
+                      @click="generateSubProducts"
+                    >
+                      <template #append>
+                        <svg
+                          width="20"
+                          height="20"
+                          viewBox="0 0 20 20"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M10 4.16667V15.8333M4.16667 10H15.8333"
+                            stroke="white"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                          />
+                        </svg>
+                      </template>
+                      انشاء منتجات فرعية
+                    </v-btn>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Sub Products Table Section - Only show after generate -->
+              <div v-if="subProductsGenerated" class="mb-6">
+                <div class="rounded-lg overflow-hidden border border-gray-200">
+                  <!-- Table Header -->
+                  <div class="bg-primary-50 px-4 py-3">
+                    <h3 class="text-lg font-bold text-gray-900 text-right">
+                      المنتجات الفرعية
+                    </h3>
+                  </div>
+                  
+                  <!-- Table -->
+                  <table class="w-full">
+                    <thead class="bg-gray-50 border-b border-gray-200">
+                      <tr>
+                        <th class="px-6 py-3 text-right text-xs font-bold text-gray-600">اسم المنتج</th>
+                        <th class="px-6 py-3 text-center text-xs font-bold text-gray-600">كود المنتج</th>
+                        <th class="px-6 py-3 text-center text-xs font-bold text-gray-600">سعر البيع</th>
+                        <th class="px-6 py-3 text-center text-xs font-bold text-gray-600">سعر الشراء</th>
+                        <th class="px-6 py-3 text-center text-xs font-bold text-gray-600">الاجراءات</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr 
+                        v-for="item in subProductsTableItems" 
+                        :key="item.id"
+                        class="border-b border-gray-200 hover:bg-gray-50"
+                      >
+                        <td class="px-6 py-4 text-right text-sm font-medium text-gray-600">{{ item.name }}</td>
+                        <td class="px-6 py-4 text-center text-sm font-medium text-gray-600">{{ item.sku }}</td>
+                        <td class="px-2 py-4 text-center">
+                          <template v-if="editingRowId === item.id">
+                            <input
+                              v-model="item.salePrice"
+                              type="number"
+                              class="w-[110px] px-3 py-2 text-center text-sm border-2 border-solid bg-white border-primary-400 rounded-lg focus:outline-none focus:border-primary-500"
+                              placeholder="0"
+                            />
+                          </template>
+                          <template v-else>
+                            <span class="text-sm font-medium text-gray-600">
+                              {{ item.salePrice ? item.salePrice + ' ريال' : '-' }}
+                            </span>
+                          </template>
+                        </td>
+                        <td class="px-2 py-4 text-center">
+                          <template v-if="editingRowId === item.id">
+                            <input
+                              v-model="item.purchasePrice"
+                              type="number"
+                              class="w-[110px] px-3 py-2 text-center text-sm border-2 border-solid bg-white border-primary-400 rounded-lg focus:outline-none focus:border-primary-500"
+                              placeholder="0"
+                            />
+                          </template>
+                          <template v-else>
+                            <span class="text-sm font-medium text-gray-600">
+                              {{ item.purchasePrice ? item.purchasePrice + ' ريال' : '-' }}
+                            </span>
+                          </template>
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                          <div class="flex items-center justify-center gap-1">
+                            <template v-if="editingRowId === item.id">
+                              <button
+                                @click="saveEditingRow"
+                                class="bg-primary-500 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-primary-600 transition-colors"
+                              >
+                                تعديل
+                              </button>
+                            </template>
+                            <template v-else>
+                              <button
+                                @click="startEditingRow(item)"
+                                class="p-2 rounded hover:bg-gray-100 transition-colors"
+                              >
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  <path d="M2.39735 15.0963C2.43564 14.7517 2.45478 14.5794 2.50691 14.4184C2.55316 14.2755 2.61851 14.1396 2.70118 14.0142C2.79436 13.8729 2.91694 13.7503 3.16209 13.5052L14.1673 2.49992C15.0878 1.57945 16.5802 1.57945 17.5007 2.49993C18.4211 3.4204 18.4211 4.91279 17.5007 5.83326L6.49542 16.8385C6.25027 17.0836 6.1277 17.2062 5.98639 17.2994C5.86102 17.3821 5.72506 17.4474 5.58219 17.4937C5.42115 17.5458 5.24887 17.5649 4.90429 17.6032L2.08398 17.9166L2.39735 15.0963Z" stroke="#1570EF" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                              </button>
+                              <button
+                                @click="deleteSubProductRow(item)"
+                                class="p-2 rounded hover:bg-gray-100 transition-colors"
+                              >
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  <path d="M13.3333 4.99984V4.33317C13.3333 3.39975 13.3333 2.93304 13.1517 2.57652C12.9919 2.26292 12.7369 2.00795 12.4233 1.84816C12.0668 1.6665 11.6001 1.6665 10.6667 1.6665H9.33333C8.39991 1.6665 7.9332 1.6665 7.57668 1.84816C7.26308 2.00795 7.00811 2.26292 6.84832 2.57652C6.66667 2.93304 6.66667 3.39975 6.66667 4.33317V4.99984M8.33333 9.58317V13.7498M11.6667 9.58317V13.7498M2.5 4.99984H17.5M15.8333 4.99984V14.3332C15.8333 15.7333 15.8333 16.4334 15.5608 16.9681C15.3212 17.4386 14.9387 17.821 14.4683 18.0607C13.9335 18.3332 13.2335 18.3332 11.8333 18.3332H8.16667C6.76654 18.3332 6.06647 18.3332 5.53169 18.0607C5.06129 17.821 4.67883 17.4386 4.43915 16.9681C4.16667 16.4334 4.16667 15.7333 4.16667 14.3332V4.99984" stroke="#D92D20" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                              </button>
+                            </template>
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </template>
             <!-- Action Buttons -->
             <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col">
               <v-btn
