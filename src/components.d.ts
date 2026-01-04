@@ -23,6 +23,7 @@ declare module 'vue' {
     MapDialog: typeof import('./components/common/MapDialog.vue')['default']
     PageHeader: typeof import('./components/common/PageHeader.vue')['default']
     PriceInput: typeof import('./components/common/forms/PriceInput.vue')['default']
+    RichTextEditor: typeof import('./components/common/forms/RichTextEditor.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     SelectInput: typeof import('./components/common/forms/selectInput.vue')['default']
