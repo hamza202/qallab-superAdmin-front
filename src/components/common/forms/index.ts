@@ -9,3 +9,4 @@ export { default as SelectWithIconInput } from "./SelectWithIconInput.vue";
 export { default as RichTextEditor } from "./RichTextEditor.vue";
 export { default as LanguageTabs } from "./LanguageTabs.vue";
 export type { Language } from "./LanguageTabs.vue";
+export { default as MultipleSelectInput } from "./MultipleSelectInput.vue";

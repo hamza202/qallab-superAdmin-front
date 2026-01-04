@@ -22,6 +22,7 @@ declare module 'vue' {
     GroupedDataTable: typeof import('./components/common/tables/GroupedDataTable.vue')['default']
     LanguageTabs: typeof import('./components/common/forms/LanguageTabs.vue')['default']
     MapDialog: typeof import('./components/common/MapDialog.vue')['default']
+    MultipleSelectInput: typeof import('./components/common/forms/MultipleSelectInput.vue')['default']
     PageHeader: typeof import('./components/common/PageHeader.vue')['default']
     PriceInput: typeof import('./components/common/forms/PriceInput.vue')['default']
     RichTextEditor: typeof import('./components/common/forms/RichTextEditor.vue')['default']
