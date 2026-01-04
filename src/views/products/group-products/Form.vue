@@ -853,7 +853,7 @@ const plusIcon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xm
                           <template v-if="editingRowId === item.id">
                             <input
                               v-model="item.salePrice"
-                              type="text"
+                              type="number"
                               class="w-[110px] px-3 py-2 text-center text-sm border-2 border-solid bg-white border-primary-400 rounded-lg focus:outline-none focus:border-primary-500"
                               placeholder="0"
                             />
@@ -868,7 +868,7 @@ const plusIcon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xm
                           <template v-if="editingRowId === item.id">
                             <input
                               v-model="item.purchasePrice"
-                              type="text"
+                              type="number"
                               class="w-[110px] px-3 py-2 text-center text-sm border-2 border-solid bg-white border-primary-400 rounded-lg focus:outline-none focus:border-primary-500"
                               placeholder="0"
                             />
@@ -891,19 +891,19 @@ const plusIcon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xm
                             </template>
                             <template v-else>
                               <button
-                                @click="deleteSubProductRow(item)"
-                                class="p-2 rounded hover:bg-gray-100 transition-colors"
-                              >
-                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                  <path d="M7.5 2.5H12.5M2.5 5H17.5M15.8333 5L15.2489 13.7661C15.1612 15.0813 15.1174 15.7389 14.8333 16.2375C14.5833 16.6765 14.206 17.0294 13.7514 17.2497C13.235 17.5 12.5759 17.5 11.2578 17.5H8.74221C7.42409 17.5 6.76503 17.5 6.24861 17.2497C5.79396 17.0294 5.41674 16.6765 5.16665 16.2375C4.88259 15.7389 4.83875 15.0813 4.75107 13.7661L4.16667 5M8.33333 8.75V12.9167M11.6667 8.75V12.9167" stroke="#D92D20" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                                </svg>
-                              </button>
-                              <button
                                 @click="startEditingRow(item)"
                                 class="p-2 rounded hover:bg-gray-100 transition-colors"
                               >
                                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                  <path d="M14.1667 2.49993C14.3856 2.28106 14.6454 2.10744 14.9314 1.98899C15.2173 1.87054 15.5238 1.80957 15.8334 1.80957C16.1429 1.80957 16.4494 1.87054 16.7353 1.98899C17.0213 2.10744 17.2812 2.28106 17.5 2.49993C17.7189 2.7188 17.8925 2.97863 18.011 3.2646C18.1294 3.55057 18.1904 3.85706 18.1904 4.16659C18.1904 4.47612 18.1294 4.78262 18.011 5.06859C17.8925 5.35455 17.7189 5.61439 17.5 5.83326L6.25002 17.0833L1.66669 18.3333L2.91669 13.7499L14.1667 2.49993Z" stroke="#1570EF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                  <path d="M2.39735 15.0963C2.43564 14.7517 2.45478 14.5794 2.50691 14.4184C2.55316 14.2755 2.61851 14.1396 2.70118 14.0142C2.79436 13.8729 2.91694 13.7503 3.16209 13.5052L14.1673 2.49992C15.0878 1.57945 16.5802 1.57945 17.5007 2.49993C18.4211 3.4204 18.4211 4.91279 17.5007 5.83326L6.49542 16.8385C6.25027 17.0836 6.1277 17.2062 5.98639 17.2994C5.86102 17.3821 5.72506 17.4474 5.58219 17.4937C5.42115 17.5458 5.24887 17.5649 4.90429 17.6032L2.08398 17.9166L2.39735 15.0963Z" stroke="#1570EF" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                              </button>
+                              <button
+                                @click="deleteSubProductRow(item)"
+                                class="p-2 rounded hover:bg-gray-100 transition-colors"
+                              >
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  <path d="M13.3333 4.99984V4.33317C13.3333 3.39975 13.3333 2.93304 13.1517 2.57652C12.9919 2.26292 12.7369 2.00795 12.4233 1.84816C12.0668 1.6665 11.6001 1.6665 10.6667 1.6665H9.33333C8.39991 1.6665 7.9332 1.6665 7.57668 1.84816C7.26308 2.00795 7.00811 2.26292 6.84832 2.57652C6.66667 2.93304 6.66667 3.39975 6.66667 4.33317V4.99984M8.33333 9.58317V13.7498M11.6667 9.58317V13.7498M2.5 4.99984H17.5M15.8333 4.99984V14.3332C15.8333 15.7333 15.8333 16.4334 15.5608 16.9681C15.3212 17.4386 14.9387 17.821 14.4683 18.0607C13.9335 18.3332 13.2335 18.3332 11.8333 18.3332H8.16667C6.76654 18.3332 6.06647 18.3332 5.53169 18.0607C5.06129 17.821 4.67883 17.4386 4.43915 16.9681C4.16667 16.4334 4.16667 15.7333 4.16667 14.3332V4.99984" stroke="#D92D20" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
                                 </svg>
                               </button>
                             </template>
