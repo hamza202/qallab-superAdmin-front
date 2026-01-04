@@ -24,6 +24,7 @@
     "skuCode": "كود SKU",
     "unit": "الوحدة",
     "category": "التصنيف",
+    "addNew": "أضف جديد",
     "deleteConfirm": {
       "title": "تأكيد الحذف",
       "message": "هل تريد بالتأكيد الحذف",

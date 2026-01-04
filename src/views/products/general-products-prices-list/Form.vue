@@ -46,12 +46,50 @@ interface PriceListRow {
   image: string | null
   category: ItemCategory
   unit: ItemUnit
-  salePriceTon: string | null
-  salePriceM3: string | null
-  salePriceRd: string | null
+  priceMin: string | null
+  priceMax: string | null
   isActive: boolean
   isAvailable: boolean
   originalData?: PriceListItem
+}
+
+interface PriceListData {
+  id: number
+  name: string
+  translations: {
+    name: {
+      ar: string
+      en: string
+    }
+  }
+  notes: string | null
+  is_active: boolean
+  is_assigned: boolean
+  user_id: number
+  item_price_lists: Array<{
+    id: number
+    item_id: number
+    price_list_id: number
+    price_m3: string | null
+    price_ton: string | null
+    price_rd: string | null
+    price_min: string | null
+    price_max: string | null
+    is_active: boolean
+    item: {
+      id: number
+      name: string
+      translations: {
+        name: {
+          ar: string
+          en: string
+        }
+      }
+      code: string
+      category: ItemCategory
+      unit: ItemUnit
+    }
+  }>
 }
 
 type BulkEditMode = "percentage" | "value"
@@ -68,7 +106,8 @@ const router = useRouter()
 const api = useApi()
 const { success, error } = useNotification()
 
-const supplierId = computed(() => route.params.id ? Number(route.params.id) : null)
+const priceListId = computed(() => route.params.id ? Number(route.params.id) : null)
+const supplierId = ref<number | null>(null)
 const loading = ref(false)
 const saving = ref(false)
 
@@ -116,27 +155,52 @@ const fetchCategories = async () => {
   }
 }
 
-const fetchPriceListItems = async (supplierId: number) => {
+const fetchPriceListItems = async (priceListId: number) => {
   try {
     loading.value = true
-    const response = await api.get<ApiResponse<PriceListItem[]>>(`/api/suppliers/${supplierId}/price-list/items`)
-    const items = response.data
+    const response = await api.get<ApiResponse<PriceListData>>(
+      `/api/price-lists/${priceListId}`,
+      { params: { is_building_material: 0 } }
+    )
+    const priceListData = response.data
 
-    if (items && items.length > 0) {
-      allRows.value = items.map((item: PriceListItem) => ({
-        id: item.id,
-        itemId: item.item_id,
-        name: item.name,
-        code: item.code,
-        image: item.image,
-        category: item.category,
-        unit: item.unit,
-        salePriceTon: item.prices.price_ton,
-        salePriceM3: item.prices.price_m3,
-        salePriceRd: item.prices.price_rd,
-        isActive: item.prices.is_active,
-        isAvailable: item.is_available,
-        originalData: item
+    // Store supplier ID for sync operation
+    if (priceListData.item_price_lists && priceListData.item_price_lists.length > 0) {
+      supplierId.value = priceListData.user_id
+    }
+
+    if (priceListData.item_price_lists && priceListData.item_price_lists.length > 0) {
+      allRows.value = priceListData.item_price_lists.map((itemPrice) => ({
+        id: itemPrice.id,
+        itemId: itemPrice.item_id,
+        name: itemPrice.item.translations?.name?.ar || itemPrice.item.name,
+        code: itemPrice.item.code,
+        image: null,
+        category: itemPrice.item.category,
+        unit: itemPrice.item.unit,
+        priceMin: itemPrice.price_min,
+        priceMax: itemPrice.price_max,
+        isActive: itemPrice.is_active,
+        isAvailable: true,
+        originalData: {
+          id: itemPrice.id,
+          item_id: itemPrice.item_id,
+          name: itemPrice.item.name,
+          code: itemPrice.item.code,
+          image: null,
+          category: itemPrice.item.category,
+          unit: itemPrice.item.unit,
+          is_active: itemPrice.is_active,
+          is_available: true,
+          prices: {
+            price_m3: itemPrice.price_m3,
+            price_ton: itemPrice.price_ton,
+            price_rd: itemPrice.price_rd,
+            price_min: itemPrice.price_min,
+            price_max: itemPrice.price_max,
+            is_active: itemPrice.is_active
+          }
+        }
       }))
     }
   } catch (err: any) {
@@ -155,9 +219,13 @@ const bulkSyncItems = async (supplierId: number, items: PriceListRow[]) => {
         is_active: row.isActive
       }
 
-      if (row.salePriceM3) item.price_m3 = parseFloat(row.salePriceM3)
-      if (row.salePriceTon) item.price_ton = parseFloat(row.salePriceTon)
-      if (row.salePriceRd) item.price_rd = parseFloat(row.salePriceRd)
+      // For general products, send price_min and price_max
+      if (row.priceMin !== null && row.priceMin !== '') {
+        item.price_min = parseFloat(row.priceMin)
+      }
+      if (row.priceMax !== null && row.priceMax !== '') {
+        item.price_max = parseFloat(row.priceMax)
+      }
 
       return item
     })
@@ -204,9 +272,8 @@ const applyBulkEdit = () => {
 
   // Apply to filtered rows only
   rows.value.forEach((r) => {
-    r.salePriceTon = applyToValue(r.salePriceTon)
-    r.salePriceM3 = applyToValue(r.salePriceM3)
-    r.salePriceRd = applyToValue(r.salePriceRd)
+    r.priceMin = applyToValue(r.priceMin)
+    r.priceMax = applyToValue(r.priceMax)
     modifiedItemIds.value.add(r.itemId)
   })
 }
@@ -271,10 +338,10 @@ const handleClose = () => {
 
 // Lifecycle
 onMounted(async () => {
-  await Promise.all([
-    fetchCategories(),
-    supplierId.value ? fetchPriceListItems(supplierId.value) : Promise.resolve()
-  ])
+  await fetchCategories()
+  if (priceListId.value) {
+    await fetchPriceListItems(priceListId.value)
+  }
 })
 </script>
 
@@ -372,18 +439,13 @@ onMounted(async () => {
 
           <template #item.salePrice="{ item }">
             <div class="flex items-center gap-2">
-              <div class="w-[130px]">
-                <PriceInput v-model="(item as PriceListRow).salePriceTon" currency="طن" keep-currency-visible placeholder="0"
+              <div class="w-[180px]">
+                <PriceInput v-model="(item as PriceListRow).priceMin" currency="الحد الأدنى" keep-currency-visible placeholder="0"
                   :hide-details="true" :input-props="{ class: 'bg-white' }" 
                   @update:model-value="handlePriceChange(item as PriceListRow)" />
               </div>
-              <div class="w-[130px]">
-                <PriceInput v-model="(item as PriceListRow).salePriceM3" currency="م^3" keep-currency-visible placeholder="0"
-                  :hide-details="true" :input-props="{ class: 'bg-white' }" 
-                  @update:model-value="handlePriceChange(item as PriceListRow)" />
-              </div>
-              <div class="w-[130px]">
-                <PriceInput v-model="(item as PriceListRow).salePriceRd" currency="رد" keep-currency-visible placeholder="0"
+              <div class="w-[180px]">
+                <PriceInput v-model="(item as PriceListRow).priceMax" currency="الحد الأقصى" keep-currency-visible placeholder="0"
                   :hide-details="true" :input-props="{ class: 'bg-white' }" 
                   @update:model-value="handlePriceChange(item as PriceListRow)" />
               </div>

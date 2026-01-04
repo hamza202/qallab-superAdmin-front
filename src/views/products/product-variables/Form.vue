@@ -20,10 +20,10 @@
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <SelectInput v-model="formData.value_type" label="نوع القيمة" :items="classificationItems"
-                placeholder="اختر نوع القيمة" :hide-details="false" />
+                placeholder="اختر نوع القيمة" :hide-details="false" :loading="loadingConstants" />
 
               <SelectInput v-model="formData.category_ids" label="الفئات" :items="categoryItems"
-                placeholder="اختر الفئات" :hide-details="false" multiple chips />
+                placeholder="اختر الفئات" :hide-details="false" multiple chips :loading="loadingCategories" />
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
               <div class="col-span-2">
@@ -205,23 +205,20 @@ interface ApiAspect {
   created_at: string
 }
 
-const classificationItems = [
-  { title: 'نوع 1', value: '1' },
-  { title: 'نوع 2', value: '2' },
-  { title: 'نوع 3', value: '3' },
-]
+interface ValueType {
+  key: number
+  label: string
+}
 
-const elementTypeItems = [
-  { title: 'نمط 1', value: '1' },
-  { title: 'نمط 2', value: '2' },
-  { title: 'نمط 3', value: '3' },
-]
+interface Category {
+  id: number
+  name: string
+}
 
-// Sample category items - replace with actual API data
-const categoryItems = [
-  { title: 'فئة 1', value: '1' },
-  { title: 'فئة 2', value: '2' },
-]
+const classificationItems = ref<Array<{ title: string; value: string }>>([])
+const categoryItems = ref<Array<{ title: string; value: string }>>([])
+const loadingConstants = ref(false)
+const loadingCategories = ref(false)
 
 const formData = ref<FormData>({
   name_ar: '',
@@ -299,6 +296,60 @@ const handleSaveAndReturn = async () => {
   }
 }
 
+// Fetch constants (value_types)
+const fetchConstants = async () => {
+  try {
+    loadingConstants.value = true
+    const response = await api.get<{
+      status: number
+      code: number
+      locale: string
+      message: string
+      data: {
+        value_types: ValueType[]
+      }
+    }>('/api/aspects/constants')
+
+    if (response.data && response.data.value_types) {
+      classificationItems.value = response.data.value_types.map(vt => ({
+        title: vt.label,
+        value: vt.key.toString()
+      }))
+    }
+  } catch (err: any) {
+    console.error('Fetch constants error:', err)
+    error.value = err.response?.data?.message || err.message || 'فشل تحميل الثوابت'
+  } finally {
+    loadingConstants.value = false
+  }
+}
+
+// Fetch categories
+const fetchCategories = async () => {
+  try {
+    loadingCategories.value = true
+    const response = await api.get<{
+      status: number
+      code: number
+      locale: string
+      message: string
+      data: Category[]
+    }>('/admin/api/categories/list')
+
+    if (response.data) {
+      categoryItems.value = response.data.map(cat => ({
+        title: cat.name,
+        value: cat.id.toString()
+      }))
+    }
+  } catch (err: any) {
+    console.error('Fetch categories error:', err)
+    error.value = err.response?.data?.message || err.message || 'فشل تحميل الفئات'
+  } finally {
+    loadingCategories.value = false
+  }
+}
+
 // Fetch aspect data for editing
 const fetchAspect = async () => {
   if (!isEditMode.value) return
@@ -332,7 +383,14 @@ const fetchAspect = async () => {
   }
 }
 
-onMounted(() => {
-  fetchAspect()
+onMounted(async () => {
+  // Fetch constants and categories first
+  await Promise.all([
+    fetchConstants(),
+    fetchCategories()
+  ])
+  
+  // Then fetch aspect data if in edit mode
+  await fetchAspect()
 })
 </script>
