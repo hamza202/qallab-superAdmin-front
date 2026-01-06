@@ -60,7 +60,6 @@ const handleDeleteTestGroup = (item: any) => {
   testGroupTableItems.value = testGroupTableItems.value.filter((g) => g.id !== item.id);
 };
 
-
 // filters
 const showAdvancedFilters = ref(false);
 
