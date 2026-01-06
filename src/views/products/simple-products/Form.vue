@@ -5,6 +5,7 @@
 // - Validators (required, minLength, etc.) from '@/utils/validators'
 
 import { useNotification } from "@/composables/useNotification";
+import TestFormDialog from "@/views/products/simple-products/components/TestFormDialog.vue";
 
 // Form ref
 const formRef = ref<any>(null);
@@ -191,6 +192,60 @@ const handleDeleteTax = (item: any) => {
   taxTableItems.value = taxTableItems.value.filter((t) => t.id !== item.id);
 };
 
+// Tests data
+const testsList = ref([
+  {
+    id: 1,
+    testName: "اختبار 1",
+    testsCount: 2,
+    samplesCount: 22,
+    sampleQuantity: 255,
+    status: true,
+  },
+  {
+    id: 2,
+    testName: "اختبار 2",
+    testsCount: 25,
+    samplesCount: 5,
+    sampleQuantity: 852,
+    status: false,
+  },
+  {
+    id: 3,
+    testName: "اختبار 3",
+    testsCount: 78,
+    samplesCount: 26,
+    sampleQuantity: 666,
+    status: true,
+  },
+]);
+
+const testForm = reactive({
+  testName: null,
+  testsCount: "",
+  samplesCount: "",
+  sampleQuantity: "",
+  status: true,
+});
+
+const showTestDialog = ref(false);
+const editingTest = ref<any>(null);
+
+const testItems = [
+  { title: "اختر", value: null },
+  { title: "اختبار 1", value: "test1" },
+  { title: "اختبار 2", value: "test2" },
+  { title: "اختبار 3", value: "test3" },
+];
+
+const testsTableHeaders = [
+  { key: "testName", title: "الاختبار", width: "200px" },
+  { key: "testsCount", title: "عدد الاختبارات", width: "150px" },
+  { key: "samplesCount", title: "عدد العينات", width: "150px" },
+  { key: "sampleQuantity", title: "كمية العينات", width: "150px" },
+  { key: "status", title: "الحالة", width: "120px" },
+];
+
 // Tabs
 const activeTab = ref(0);
 const tabs = [
@@ -214,6 +269,14 @@ const tabs = [
     icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M20.5 7.27783L12 12.0001M12 12.0001L3.49997 7.27783M12 12.0001L12 21.5001M21 16.0586V7.94153C21 7.59889 21 7.42757 20.9495 7.27477C20.9049 7.13959 20.8318 7.01551 20.7354 6.91082C20.6263 6.79248 20.4766 6.70928 20.177 6.54288L12.777 2.43177C12.4934 2.27421 12.3516 2.19543 12.2015 2.16454C12.0685 2.13721 11.9315 2.13721 11.7986 2.16454C11.6484 2.19543 11.5066 2.27421 11.223 2.43177L3.82297 6.54288C3.52345 6.70928 3.37369 6.79248 3.26463 6.91082C3.16816 7.01551 3.09515 7.13959 3.05048 7.27477C3 7.42757 3 7.59889 3 7.94153V16.0586C3 16.4013 3 16.5726 3.05048 16.7254C3.09515 16.8606 3.16816 16.9847 3.26463 17.0893C3.37369 17.2077 3.52345 17.2909 3.82297 17.4573L11.223 21.5684C11.5066 21.726 11.6484 21.8047 11.7986 21.8356C11.9315 21.863 12.0685 21.863 12.2015 21.8356C12.3516 21.8047 12.4934 21.726 12.777 21.5684L20.177 17.4573C20.4766 17.2909 20.6263 17.2077 20.7354 17.0893C20.8318 16.9847 20.9049 16.8606 20.9495 16.7254C21 16.5726 21 16.4013 21 16.0586Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 <path d="M16.5 9.5L7.5 4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+`,
+  },
+  {
+    title: "قائمة الاختبارات",
+    value: 3,
+    icon: `<svg width="18" height="22" viewBox="0 0 18 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M11 1.26953V5.40007C11 5.96012 11 6.24015 11.109 6.45406C11.2049 6.64222 11.3578 6.7952 11.546 6.89108C11.7599 7.00007 12.0399 7.00007 12.6 7.00007H16.7305M13 12H5M13 16H5M7 8H5M11 1H5.8C4.11984 1 3.27976 1 2.63803 1.32698C2.07354 1.6146 1.6146 2.07354 1.32698 2.63803C1 3.27976 1 4.11984 1 5.8V16.2C1 17.8802 1 18.7202 1.32698 19.362C1.6146 19.9265 2.07354 20.3854 2.63803 20.673C3.27976 21 4.11984 21 5.8 21H12.2C13.8802 21 14.7202 21 15.362 20.673C15.9265 20.3854 16.3854 19.9265 16.673 19.362C17 18.7202 17 17.8802 17 16.2V7L11 1Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
 `,
   },
@@ -262,6 +325,61 @@ const handleAddTaxType = () => {
 
 const handleAddTax = () => {
   console.log("Add tax");
+};
+
+const handleAddTest = () => {
+  const newTest = {
+    id: testsList.value.length + 1,
+    testName: testForm.testName || "اختبار",
+    testsCount: parseInt(testForm.testsCount) || 0,
+    samplesCount: parseInt(testForm.samplesCount) || 0,
+    sampleQuantity: parseInt(testForm.sampleQuantity) || 0,
+    status: testForm.status,
+  };
+  testsList.value.push(newTest);
+  resetTestForm();
+};
+
+const handleEditTest = (item: any) => {
+  editingTest.value = {
+    testName: item.testName,
+    testsCount: item.testsCount.toString(),
+    samplesCount: item.samplesCount.toString(),
+    sampleQuantity: item.sampleQuantity.toString(),
+    status: item.status,
+    id: item.id,
+  };
+  showTestDialog.value = true;
+};
+
+const handleSaveTest = (payload: any) => {
+  if (editingTest.value && editingTest.value.id) {
+    const index = testsList.value.findIndex((t) => t.id === editingTest.value.id);
+    if (index !== -1) {
+      testsList.value[index] = {
+        ...testsList.value[index],
+        testName: payload.testName || "اختبار",
+        testsCount: parseInt(payload.testsCount) || 0,
+        samplesCount: parseInt(payload.samplesCount) || 0,
+        sampleQuantity: parseInt(payload.sampleQuantity) || 0,
+        status: payload.status,
+      };
+    }
+  }
+  editingTest.value = null;
+  showTestDialog.value = false;
+};
+
+const handleDeleteTest = (item: any) => {
+  testsList.value = testsList.value.filter((t) => t.id !== item.id);
+};
+
+const resetTestForm = () => {
+  testForm.testName = null;
+  testForm.testsCount = "";
+  testForm.samplesCount = "";
+  testForm.sampleQuantity = "";
+  testForm.status = true;
 };
 
 const handleSaveAndReturn = async () => {
@@ -509,18 +627,7 @@ const plusIcon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xm
                       </div>
                     </div>
 
-                    <!-- Description with Language Tabs -->
-                    <LanguageTabs :languages="availableLanguages" label="الوصف" class="mb-[20px]">
-                      <template #en>
-                        <RichTextEditor v-model="englishDescription" placeholder="Enter description in English"
-                          min-height="120px" :hide-details="false" />
-                      </template>
-                      <template #ar>
-                        <RichTextEditor v-model="arabicDescription" placeholder="ادخل الوصف بالعربية" min-height="120px"
-                          :hide-details="false" />
-                      </template>
-                    </LanguageTabs>
-
+                    cc
                     <!-- Product Image Section -->
                     <div>
                       <FileUploadInput v-model="productImages" label="صورة المنتج"
@@ -654,6 +761,95 @@ const plusIcon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xm
               <span>حفظ / انشاء جديد</span>
             </v-btn>
           </div>
+        </v-tabs-window-item>
+
+        <!-- Tab 4: قائمة الاختبارات -->
+        <v-tabs-window-item :value="3">
+          <div class="mx-auto">
+            <!-- Form Section (Separate from table) -->
+            <div class="bg-white rounded-lg p-6 mb-6">
+              <h3 class="text-lg font-bold text-gray-900 mb-4">قائمة الاختبارات</h3>
+
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 mb-2">الاختبار</label>
+                  <SelectInput v-model="testForm.testName" placeholder="اختر" :items="testItems" :hide-details="true" />
+                </div>
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 mb-2">عدد الاختبارات</label>
+                  <TextInput v-model="testForm.testsCount" placeholder="عدد الاختبارات" :hide-details="true"
+                    type="number" />
+                </div>
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 mb-2">عدد العينات</label>
+                  <TextInput v-model="testForm.samplesCount" placeholder="عدد العينات" :hide-details="true"
+                    type="number" />
+                </div>
+
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 mb-2">كمية العينات</label>
+                  <TextInput v-model="testForm.sampleQuantity" placeholder="كمية العينات" :hide-details="true"
+                    type="number" />
+                </div>
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 mb-2">الحالة</label>
+                  <v-radio-group v-model="testForm.status" inline hide-details class="mt-0">
+                    <v-radio :value="true" color="primary">
+                      <template #label>
+                        <span class="text-sm text-gray-700">فعال</span>
+                      </template>
+                    </v-radio>
+                    <v-radio :value="false" color="primary">
+                      <template #label>
+                        <span class="text-sm text-gray-700">غير فعال</span>
+                      </template>
+                    </v-radio>
+                  </v-radio-group>
+                </div>
+                <v-btn variant="flat" color="primary" height="48" class="font-semibold text-base w-full md:col-span-2"
+                  @click="handleAddTest">
+                  <span>+ اضف جديد</span>
+                </v-btn>
+
+              </div>
+
+            </div>
+
+            <!-- Tests Table -->
+            <div class="-mx-6">
+              <DataTable :headers="testsTableHeaders" :items="testsList" show-actions @edit="handleEditTest"
+                @delete="handleDeleteTest">
+                <template #item.status="{ item }">
+                  <v-switch v-model="item.status" color="primary" hide-details density="compact" :true-value="true"
+                    :false-value="false" />
+                </template>
+              </DataTable>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col">
+
+              <v-btn variant="flat" color="primary" height="48" class="font-semibold text-base px-12"
+                @click="handleSaveAndContinue">
+                <template #prepend>
+                  <v-icon>mdi-content-save-outline</v-icon>
+                </template>
+                <span>حفظ</span>
+              </v-btn>
+
+              <v-btn variant="outlined" color="primary" height="48" class="font-semibold text-base px-12"
+                @click="resetTestForm">
+                <template #prepend>
+                  <v-icon>mdi-close</v-icon>
+                </template>
+                <span>إلغاء</span>
+              </v-btn>
+
+            </div>
+          </div>
+
+          <!-- Edit Test Dialog -->
+          <TestFormDialog v-model="showTestDialog" :test="editingTest" @save="handleSaveTest" />
         </v-tabs-window-item>
       </v-tabs-window>
     </div>

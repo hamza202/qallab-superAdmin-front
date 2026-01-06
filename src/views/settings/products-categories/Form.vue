@@ -2,6 +2,12 @@
 import { useNotification } from '@/composables/useNotification';
 import { useApi } from '@/composables/useApi';
 
+// Available languages
+const availableLanguages = ref([
+  { code: "en", name: "En", flag: "/img/en.svg", dir: "ltr" as const },
+  { code: "ar", name: "AR", flag: "/img/sa.svg", dir: "rtl" as const },
+]);
+
 const { notification, success, error: showError } = useNotification();
 const api = useApi();
 
@@ -925,12 +931,18 @@ const categoriesIcon = `<svg width="52" height="52" viewBox="0 0 52 52" fill="no
               </div>
 
               <div class="grid gap-4 mb-4 grid-cols-1 md:grid-cols-[repeat(auto-fit,minmax(250px,1fr))]">
-                <TextInput v-model="categoryNameAr" :label="$t('form.labels.name_ar')"
-                  :placeholder="$t('form.placeholders.name_ar')" :rules="[required(), maxLength(100)]"
-                  :hide-details="false" />
-                <TextInput v-model="categoryNameEn" :label="$t('form.labels.name_en')"
-                  :placeholder="$t('form.placeholders.name_en')" :rules="[required(), maxLength(100)]"
-                  :hide-details="false" />
+                <div class="md:col-span-2">
+                  <LanguageTabs :languages="availableLanguages" label="الإسم">
+                    <template #en>
+                      <TextInput v-model="categoryNameEn" placeholder="Enter name in English"
+                        :rules="[required(), maxLength(100)]" :hide-details="true" />
+                    </template>
+                    <template #ar>
+                      <TextInput v-model="categoryNameAr" placeholder="ادخل الاسم بالعربية"
+                        :rules="[required(), maxLength(100)]" :hide-details="true" />
+                    </template>
+                  </LanguageTabs>
+                </div>
 
                 <SelectWithIconInput v-model="parentCategory" label="التصنيف الرئيسي" placeholder="اختر التصنيف الرئيسي"
                   :items="parentCategoryItems" :hide-details="false" :disabled="isSubcategoryMode" />

@@ -73,6 +73,22 @@
     "productionCapacity": {
       "title": "Production Capacity",
       "description": "Allows you to manage product production capacity"
+    },
+    "testGroup": {
+      "title": "Test Groups",
+      "description": "Allows you to manage test groups"
+    },
+    "tests": {
+      "title": "Tests",
+      "description": "Allows you to manage tests"
+    },
+    "testMethodology": {
+      "title": "Test Methodology",
+      "description": "Allows you to manage test methodology"
+    },
+    "sampleTypes": {
+      "title": "Sample Types",
+      "description": "Allows you to manage sample types"
     }
   }
 }

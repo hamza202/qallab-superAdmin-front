@@ -30,6 +30,14 @@ export const settingsRoutes: RouteRecordRaw[] = [
           title: "pages.ProductsCategories.title",
         },
       },
+      {
+        path: "view/:id",
+        name: "ProductsCategoriesView",
+        component: () => import("@/views/settings/products-categories/view.vue"),
+        meta: {
+          title: "pages.ProductsCategories.title",
+        },
+      },
     ],
   },
   {
@@ -57,6 +65,14 @@ export const settingsRoutes: RouteRecordRaw[] = [
         path: "edit/:id",
         name: "ServicesCategoriesEdit",
         component: () => import("@/views/settings/services-categories/Form.vue"),
+        meta: {
+          title: "pages.ServicesCategories.title",
+        },
+      },
+      {
+        path: "view/:id",
+        name: "ServicesCategoriesView",
+        component: () => import("@/views/settings/services-categories/view.vue"),
         meta: {
           title: "pages.ServicesCategories.title",
         },
@@ -222,4 +238,130 @@ export const settingsRoutes: RouteRecordRaw[] = [
       title: "pages.codes.title",
     },
   },
+  {
+    path: "/test-group",
+    name: "TestGroup",
+    redirect: "/test-group/list",
+    children: [
+      {
+        path: "list",
+        name: "TestGroupList",
+        component: () => import("@/views/settings/test-group/List.vue"),
+        meta: {
+          title: "pages.testGroup.title",
+        },
+      },
+      {
+        path: "create",
+        name: "TestGroupCreate",
+        component: () => import("@/views/settings/test-group/Form.vue"),
+        meta: {
+          title: "pages.testGroup.title",
+        },
+      },
+      {
+        path: "edit/:id",
+        name: "TestGroupEdit",
+        component: () => import("@/views/settings/test-group/Form.vue"),
+        meta: {
+          title: "pages.testGroup.title",
+        },
+      },
+    ],
+  },
+  {
+    path: "/tests",
+    name: "Tests",
+    redirect: "/tests/list",
+    children: [
+      {
+        path: "list",
+        name: "TestsList",
+        component: () => import("@/views/settings/tests/List.vue"),
+        meta: {
+          title: "pages.tests.title",
+        },
+      },
+      {
+        path: "create",
+        name: "TestsCreate",
+        component: () => import("@/views/settings/tests/Form.vue"),
+        meta: {
+          title: "pages.tests.title",
+        },
+      },
+      {
+        path: "edit/:id",
+        name: "TestsEdit",
+        component: () => import("@/views/settings/tests/Form.vue"),
+        meta: {
+          title: "pages.tests.title",
+        },
+      },
+    ],
+  },
+  {
+    path: "/test-methodology",
+    name: "TestMethodology",
+    redirect: "/test-methodology/list",
+    children: [
+      {
+        path: "list",
+        name: "TestMethodologyList",
+        component: () => import("@/views/settings/test-methodology/List.vue"),
+        meta: {
+          title: "pages.testMethodology.title",
+        },
+      },
+      {
+        path: "create",
+        name: "TestMethodologyCreate",
+        component: () => import("@/views/settings/test-methodology/Form.vue"),
+        meta: {
+          title: "pages.testMethodology.title",
+        },
+      },
+      {
+        path: "edit/:id",
+        name: "TestMethodologyEdit",
+        component: () => import("@/views/settings/test-methodology/Form.vue"),
+        meta: {
+          title: "pages.testMethodology.title",
+        },
+      },
+    ],
+  },
+  {
+    path: "/sample-types",
+    name: "SampleTypes",
+    redirect: "/sample-types/list",
+    children: [
+      {
+        path: "list",
+        name: "SampleTypesList",
+        component: () => import("@/views/settings/sample-types/List.vue"),
+        meta: {
+          title: "pages.sampleTypes.title",
+        },
+      },
+      {
+        path: "create",
+        name: "SampleTypesCreate",
+        component: () => import("@/views/settings/sample-types/Form.vue"),
+        meta: {
+          title: "pages.sampleTypes.title",
+        },
+      },
+      {
+        path: "edit/:id",
+        name: "SampleTypesEdit",
+        component: () => import("@/views/settings/sample-types/Form.vue"),
+        meta: {
+          title: "pages.sampleTypes.title",
+        },
+      },
+    ],
+  },
 ];
+
+export default settingsRoutes;

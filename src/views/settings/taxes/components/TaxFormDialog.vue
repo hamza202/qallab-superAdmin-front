@@ -1,6 +1,12 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from "vue";
 
+// Available languages
+const availableLanguages = ref([
+  { code: "en", name: "En", flag: "/img/en.svg", dir: "ltr" as const },
+  { code: "ar", name: "AR", flag: "/img/sa.svg", dir: "rtl" as const },
+]);
+
 interface TaxForm {
   nameAr: string;
   nameEn: string;
@@ -110,22 +116,19 @@ watch(
     </template>
 
     <v-form ref="formRef" v-model="isFormValid" @submit.prevent>
+      <div class="mb-4">
+        <LanguageTabs :languages="availableLanguages" label="الإسم">
+          <template #en>
+            <TextInput v-model="form.nameEn" placeholder="Enter name in English" :hide-details="true" />
+          </template>
+          <template #ar>
+            <TextInput v-model="form.nameAr" placeholder="ادخل الاسم بالعربية" :hide-details="true" />
+          </template>
+        </LanguageTabs>
+      </div>
+
       <div class="grid grid-cols-1 md:grid-cols-2 gap-x-3 gap-y-2 mb-4">
-        <TextInput v-model="form.nameAr" label="الاسم بالعربية" placeholder="ادخل الاسم بالعربية"
-          :hide-details="true" />
-
-        <TextInput v-model="form.nameEn" label="الاسم بالانجليزية" placeholder="ادخل الاسم بالانجليزية"
-          :hide-details="true" />
-
         <div class="md:col-span-2">
-          <v-btn variant="text" color="primary-700 mb-3" height="40" class="font-semibold text-base">
-            أضف لغة جديدة
-            <template #prepend>
-              <v-icon>
-                mdi-plus-circle-outline
-              </v-icon>
-            </template>
-          </v-btn>
 
           <TextInput v-model="form.percentage" label="النسبة" placeholder="النسبة" :hide-details="false" />
 

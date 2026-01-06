@@ -2,6 +2,12 @@
 import { ref } from "vue";
 import GeoSegmentFormDialog from "@/views/settings/geo-segments/components/GeoSegmentFormDialog.vue";
 
+// Available languages
+const availableLanguages = ref([
+  { code: "en", name: "En", flag: "/img/en.svg", dir: "ltr" as const },
+  { code: "ar", name: "AR", flag: "/img/sa.svg", dir: "rtl" as const },
+]);
+
 const formRef = ref<any | null>(null);
 const isFormValid = ref(false);
 
@@ -167,19 +173,24 @@ const handleToggleStatus = (item: any, value: boolean) => {
           <div
             class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4 mb-6"
           >
-            <TextInput
-              v-model="nameAr"
-              label="الاسم بالعربية"
-              placeholder="ادخل الاسم بالعربية"
-              :hide-details="false"
-            />
-
-            <TextInput
-              v-model="nameEn"
-              label="الاسم بالانجليزية"
-              placeholder="ادخل الاسم بالانجليزية"
-              :hide-details="false"
-            />
+            <div class="md:col-span-2">
+              <LanguageTabs :languages="availableLanguages" label="الإسم">
+                <template #en>
+                  <TextInput
+                    v-model="nameEn"
+                    placeholder="Enter name in English"
+                    :hide-details="true"
+                  />
+                </template>
+                <template #ar>
+                  <TextInput
+                    v-model="nameAr"
+                    placeholder="ادخل الاسم بالعربية"
+                    :hide-details="true"
+                  />
+                </template>
+              </LanguageTabs>
+            </div>
 
             <SelectInput
               v-model="segmentType"

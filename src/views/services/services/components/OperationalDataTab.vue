@@ -1,6 +1,12 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 
+// Available languages
+const availableLanguages = ref([
+  { code: "en", name: "En", flag: "/img/en.svg", dir: "ltr" as const },
+  { code: "ar", name: "AR", flag: "/img/sa.svg", dir: "rtl" as const },
+])
+
 const props = defineProps<{
     modelValue: any
     durationUnits: Array<{ key: string; label: string }>
@@ -141,9 +147,16 @@ const handleFileUpload = (event: any) => {
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">الوصف بالعربية</label>
-                    <v-textarea v-model="formData.notes" variant="outlined" density="comfortable"
-                        placeholder="تفاصيل المنتج" rows="4" hide-details @update:model-value="updateFormData" />
+                    <LanguageTabs :languages="availableLanguages" label="ملاحظات">
+                        <template #en>
+                            <RichTextEditor v-model="formData.notes_en" placeholder="Enter notes in English"
+                                min-height="120px" hide-details @update:model-value="updateFormData" />
+                        </template>
+                        <template #ar>
+                            <RichTextEditor v-model="formData.notes" placeholder="ادخل الملاحظات بالعربية"
+                                min-height="120px" hide-details @update:model-value="updateFormData" />
+                        </template>
+                    </LanguageTabs>
                 </div>
 
                 <!-- <div>

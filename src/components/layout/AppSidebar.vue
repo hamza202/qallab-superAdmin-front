@@ -622,6 +622,30 @@
                                         أنواع الحسابات
                                     </router-link>
                                 </li>
+                                <li class="relative">
+                                    <router-link to="/test-group/list"
+                                        :class="[isMenuItemActive('/test-group/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        مجموعات الاختبارات
+                                    </router-link>
+                                </li>
+                                <li class="relative">
+                                    <router-link to="/tests/list"
+                                        :class="[isMenuItemActive('/tests/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        الاختبارات
+                                    </router-link>
+                                </li>
+                                <li class="relative">
+                                    <router-link to="/test-methodology/list"
+                                        :class="[isMenuItemActive('/test-methodology/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        منهجية الاختبارات
+                                    </router-link>
+                                </li>
+                                <li class="relative">
+                                    <router-link to="/sample-types/list"
+                                        :class="[isMenuItemActive('/sample-types/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        أنواع العينات
+                                    </router-link>
+                                </li>
                             </ul>
 
                         </div>
@@ -682,7 +706,7 @@ const financeRoutes = ['/finance'];
 const usersRoutes = ['/users', '/crushers', '/contractors'];
 const logisticsRoutes = ['/logistics'];
 const reportsRoutes = ['/reports'];
-const settingsRoutes = ['/products-categories', '/services-categories', '/units', '/factories', '/brands', '/geo-areas', '/geo-segments', '/tax-rules', '/taxes', '/cities', '/codes', '/account-types'];
+const settingsRoutes = ['/products-categories', '/services-categories', '/units', '/factories', '/brands', '/geo-areas', '/geo-segments', '/tax-rules', '/taxes', '/cities', '/codes', '/account-types', '/test-group', '/tests', '/test-methodology', '/sample-types'];
 
 // Helper function to check if route matches (including child routes like /form, /create, /edit/:id, /view/:id)
 const isRouteActive = (basePath) => {

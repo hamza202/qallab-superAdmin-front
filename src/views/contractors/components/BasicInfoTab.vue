@@ -1,5 +1,11 @@
 <script setup lang="ts">
-import { reactive, watch } from 'vue';
+import { reactive, watch, ref } from 'vue';
+
+// Available languages
+const availableLanguages = ref([
+  { code: "en", name: "En", flag: "/img/en.svg", dir: "ltr" as const },
+  { code: "ar", name: "AR", flag: "/img/sa.svg", dir: "rtl" as const },
+]);
 
 interface Props {
   fullNameTranslations: { ar: string; en: string };
@@ -89,16 +95,32 @@ const emitUpdate = () => {
     <h2 class="text-lg font-bold text-primary-900 mb-4">المعلومات العامة</h2>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-      <TextInput v-model="formData.fullNameTranslations.ar" @blur="emitUpdate" label="الاسم كامل بالعربية"
-        placeholder="الاسم كامل" required />
+      <div class="md:col-span-2">
+        <LanguageTabs :languages="availableLanguages" label="الاسم كامل">
+          <template #en>
+            <TextInput v-model="formData.fullNameTranslations.en" @blur="emitUpdate"
+              placeholder="Enter full name in English" :hide-details="true" />
+          </template>
+          <template #ar>
+            <TextInput v-model="formData.fullNameTranslations.ar" @blur="emitUpdate"
+              placeholder="ادخل الاسم كامل بالعربية" :hide-details="true" required />
+          </template>
+        </LanguageTabs>
+      </div>
+      <div class="hidden md:block"></div>
 
-      <TextInput v-model="formData.fullNameTranslations.en" @blur="emitUpdate" label="الاسم كامل بالانجليزية"
-        placeholder="Full Name" />
-
-      <TextInput v-model="formData.tradeNameTranslations.ar" @blur="emitUpdate" label="الاسم التجاري بالعربية"
-        placeholder="العد" required />
-      <TextInput v-model="formData.tradeNameTranslations.en" @blur="emitUpdate" label="الاسم التجاري بالانجليزية"
-        placeholder="AL- ED" />
+      <div class="md:col-span-2">
+        <LanguageTabs :languages="availableLanguages" label="الاسم التجاري">
+          <template #en>
+            <TextInput v-model="formData.tradeNameTranslations.en" @blur="emitUpdate"
+              placeholder="Enter trade name in English" :hide-details="true" />
+          </template>
+          <template #ar>
+            <TextInput v-model="formData.tradeNameTranslations.ar" @blur="emitUpdate"
+              placeholder="ادخل الاسم التجاري بالعربية" :hide-details="true" required />
+          </template>
+        </LanguageTabs>
+      </div>
       <TextInput v-model="formData.commercialRegister" @blur="emitUpdate" label="السجل التجاري" placeholder="32655451"
         required />
 
