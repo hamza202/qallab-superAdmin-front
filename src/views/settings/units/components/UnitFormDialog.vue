@@ -1,4 +1,10 @@
 <script setup lang="ts">
+// Available languages
+const availableLanguages = ref([
+  { code: "en", name: "En", flag: "/img/en.svg", dir: "ltr" as const },
+  { code: "ar", name: "AR", flag: "/img/sa.svg", dir: "rtl" as const },
+]);
+
 interface UnitForm {
   nameAr: string;
   nameEn: string;
@@ -119,22 +125,28 @@ watch(
     </template>
 
     <v-form ref="formRef" v-model="isFormValid" @submit.prevent>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-x-3 gap-y-5 mb-4">
-        <TextInput
-          v-model="form.nameAr"
-          label="الاسم بالعربية"
-          placeholder="ادخل الاسم بالعربية"
-          :rules="[required(), maxLength(100)]"
-          :hide-details="false"
-        />
+      <div class="mb-4">
+        <LanguageTabs :languages="availableLanguages" label="الإسم">
+          <template #en>
+            <TextInput
+              v-model="form.nameEn"
+              placeholder="Enter name in English"
+              :rules="[required(), maxLength(100)]"
+              :hide-details="true"
+            />
+          </template>
+          <template #ar>
+            <TextInput
+              v-model="form.nameAr"
+              placeholder="ادخل الاسم بالعربية"
+              :rules="[required(), maxLength(100)]"
+              :hide-details="true"
+            />
+          </template>
+        </LanguageTabs>
+      </div>
 
-        <TextInput
-          v-model="form.nameEn"
-          label="الاسم بالانجليزية"
-          placeholder="ادخل الاسم بالانجليزية"
-          :rules="[required(), maxLength(100)]"
-          :hide-details="false"
-        />
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-x-3 gap-y-5 mb-4">
 
         <TextInput
           v-model="form.code"

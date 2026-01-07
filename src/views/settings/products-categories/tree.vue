@@ -11,13 +11,13 @@ const availableLanguages = ref([
 const { notification, success, error: showError } = useNotification();
 const api = useApi();
 
-// API Endpoints - Update these URLs when backend is ready
+// API Endpoints
 const API_ENDPOINTS = {
-  categories: '/api/categories', // GET: list, POST: create
-  categoryById: (id: number) => `/api/categories/${id}`, // GET: details, PUT: update, DELETE: delete
-  bulkTaxes: '/api/categories/bulk-taxes', // POST: apply taxes to multiple categories
-  taxes: '/api/taxes', // GET: list of taxes
-  units: '/api/units', // GET: list of units
+  categories: '/admin/api/categories',
+  categoryById: (id: number) => `/admin/api/categories/${id}`,
+  taxes: '/admin/api/taxes',
+  units: '/admin/api/units',
+  constants: '/admin/api/constants',
 };
 
 // =====================
@@ -26,7 +26,7 @@ const API_ENDPOINTS = {
 const MOCK_CATEGORIES = [
   {
     id: 49,
-    name: "Clothing",
+    name: "الملابس",
     sup_category: [
       { id: 55, name: "Men's Clothing" },
       { id: 56, name: "Women's Clothing" },
@@ -35,7 +35,7 @@ const MOCK_CATEGORIES = [
   },
   {
     id: 50,
-    name: "Electronics",
+    name: "الإلكترونيات",
     sup_category: [
       { id: 58, name: "Phones" },
       { id: 59, name: "Laptops" },
@@ -44,16 +44,16 @@ const MOCK_CATEGORIES = [
   },
   {
     id: 51,
-    name: "Food & Beverages",
+    name: "الطعام والمشروبات",
     sup_category: [
       { id: 61, name: "Hot Drinks" },
       { id: 62, name: "Cold Drinks" },
       { id: 63, name: "Snacks" },
     ],
   },
-  { id: 52, name: "Furniture" },
-  { id: 53, name: "Home Supplies" },
-  { id: 54, name: "Sports" },
+  { id: 52, name: "أحذية" },
+  { id: 53, name: "مستلزمات المنزل" },
+  { id: 54, name: "الرياضة" },
 ];
 
 const MOCK_CATEGORY_DETAILS: Record<number, any> = {
@@ -75,7 +75,7 @@ const MOCK_CATEGORY_DETAILS: Record<number, any> = {
 };
 
 // Set to true to use mock data, false to use real API
-const USE_MOCK_DATA = true; // Change to false when API is ready
+const USE_MOCK_DATA = false; // Using real API
 
 // =====================
 // Types & Interfaces
@@ -85,6 +85,7 @@ interface CategoryListItem {
   name: string;
   parentId?: number | null;
   children?: CategoryListItem[];
+  taxes?: any[];
 }
 
 interface TaxRule {
@@ -167,6 +168,7 @@ const parentCategoryForSubcategory = ref<CategoryListItem | null>(null);
 
 // Delete confirmation dialog
 const showDeleteDialog = ref(false);
+const showBulkDeleteDialog = ref(false);
 
 // =====================
 // Form Fields
@@ -191,21 +193,7 @@ const expandedCategoryIds = ref<number[]>([]);
 // =====================
 const unitItems = ref<Array<{ title: string; value: number | string }>>([{ title: "اختر الوحدة", value: "" }]);
 const taxNameItems = ref<Array<{ title: string; value: number | string }>>([{ title: "اختر الضريبة", value: "" }]);
-
-// Priority is static 1-10
-const priorityItems = [
-  { title: "اختر الأولوية", value: "" },
-  { title: "الأولى (1)", value: 1 },
-  { title: "الثانية (2)", value: 2 },
-  { title: "الثالثة (3)", value: 3 },
-  { title: "الرابعة (4)", value: 4 },
-  { title: "الخامسة (5)", value: 5 },
-  { title: "السادسة (6)", value: 6 },
-  { title: "السابعة (7)", value: 7 },
-  { title: "الثامنة (8)", value: 8 },
-  { title: "التاسعة (9)", value: 9 },
-  { title: "العاشرة (10)", value: 10 },
-];
+const priorityItems = ref<Array<{ title: string; value: number | string }>>([{ title: "اختر الأولوية", value: "" }]);
 
 const valuesItems = [
   { title: "اختر القيمة", value: "" },
@@ -379,7 +367,7 @@ const getTaxNameLabel = (value: string | number | null) => {
 
 const getPriorityLabel = (value: string | number | null) => {
   if (!value) return "";
-  const item = priorityItems.find((i) => i.value === value);
+  const item = priorityItems.value.find((i) => i.value === value);
   return item ? item.title : String(value);
 };
 
@@ -480,7 +468,37 @@ const fetchUnits = async () => {
 };
 
 // =====================
-// API: Fetch Categories List
+// API: Fetch Constants (Priorities)
+// =====================
+const fetchConstants = async () => {
+  try {
+    if (USE_MOCK_DATA) {
+      // Mock constants data
+      priorityItems.value = [
+        { title: "اختر الأولوية", value: "" },
+        { title: "High", value: 1 },
+        { title: "Low", value: 2 },
+      ];
+    } else {
+      // Real API call
+      const response = await api.get<{ data: { priorities: Array<{ key: number; label: string }> } }>(API_ENDPOINTS.constants);
+
+      priorityItems.value = [
+        { title: "اختر الأولوية", value: "" },
+        ...response.data.priorities.map((priority) => ({
+          title: priority.label,
+          value: priority.key,
+        })),
+      ];
+    }
+  } catch (error) {
+    console.error('Failed to fetch constants:', error);
+    showError('حدث خطأ أثناء تحميل الثوابت');
+  }
+};
+
+// =====================
+// API: Fetch Categories Tree List with Taxes
 // =====================
 const fetchCategories = async () => {
   isLoading.value = true;
@@ -498,23 +516,21 @@ const fetchCategories = async () => {
         })) || [],
       }));
     } else {
-      // Real API call
-      const response = await api.get<{ data: ApiCategory[] }>(API_ENDPOINTS.categories);
+      // Real API call - get tree structure with taxes
+      const response = await api.get('/admin/api/categories/tree?with_taxes=true');
 
-      // Transform API response to internal format
-      // Filter only main categories (those without parent)
-      const mainCategories = response.data.filter(cat => !cat.parent);
+      // Transform API tree response to internal format recursively
+      const transformTree = (items: any[], parentId: number | null = null): CategoryListItem[] => {
+        return items.map((item) => ({
+          id: item.id,
+          name: item.name,
+          parentId: parentId,
+          children: item.children ? transformTree(item.children, item.id) : [],
+          taxes: item.taxes || [],
+        }));
+      };
 
-      categoriesList.value = mainCategories.map((cat) => ({
-        id: cat.id,
-        name: cat.translations?.name?.ar || cat.name,
-        parentId: null,
-        children: cat.children?.map((child) => ({
-          id: child.id,
-          name: child.translations?.name?.ar || child.name,
-          parentId: cat.id,
-        })) || [],
-      }));
+      categoriesList.value = transformTree(response.data);
     }
   } catch (error) {
     console.error('Failed to fetch categories:', error);
@@ -544,20 +560,26 @@ const fetchCategoryDetails = async (id: number) => {
       }
     } else {
       // Real API call
-      const response = await api.get<{ data: ApiCategory }>(API_ENDPOINTS.categoryById(id));
+      const response = await api.get(`/admin/api/categories/${id}`);
       const cat = response.data;
 
       if (cat) {
         // Populate form with API data
-        categoryNameAr.value = cat.translations?.name?.ar || "";
-        categoryNameEn.value = cat.translations?.name?.en || "";
-        categoryDescription.value = cat.description || "";
-        parentCategory.value = cat.parent?.id || null;
+        categoryNameAr.value = cat.name_translations?.ar || "";
+        categoryNameEn.value = cat.name_translations?.en || "";
+        categoryDescription.value = cat.description_translations?.ar || cat.description || "";
+        parentCategory.value = cat.parent_id;
         isActive.value = Boolean(cat.is_active);
-        unit.value = null; // Map unit_id if needed
+        unit.value = cat.unit_id;
 
-        // Transform taxes if they exist in response
-        taxRules.value = []; // Map from API taxes structure if available
+        // Transform taxes from API structure
+        taxRules.value = cat.taxes.map((tax: any) => ({
+          id: tax.id,
+          name: tax.tax_id.toString(),
+          percentage: tax.percentage,
+          minValue: tax.minimum || "",
+          maxValue: tax.priority.toString(),
+        }));
       }
     }
   } catch (error) {
@@ -581,6 +603,9 @@ const handleCategorySelect = async (category: CategoryListItem, isSubcategory: b
     resetForm();
     return;
   }
+
+  // Clear multi-select when selecting single category
+  selectedCategoryIds.value = [];
 
   // Select the category
   selectedCategory.value = { ...category, parentId: isSubcategory ? category.parentId : null };
@@ -649,60 +674,115 @@ const handleSave = async () => {
   try {
     // Bulk mode - apply taxes to multiple categories
     if (isBulkMode.value) {
-      const taxData = {
-        category_ids: selectedCategoryIds.value,
-        taxes: taxRules.value.map((tax, index) => ({
-          tax_id: parseInt(tax.name || '1'), // Map tax name to tax_id
-          tax_percentage: parseFloat(tax.percentage) || 0,
-          min_tax_amount: parseFloat(tax.minValue || '0'),
-          priority: index + 1,
-        })),
+      const payload = {
+        ids: selectedCategoryIds.value,
+        taxes: taxRules.value.map((tax, index) => {
+          const taxObj: any = {
+            tax_id: parseInt(tax.name || '1'),
+            percentage: parseFloat(tax.percentage) || 0,
+            minimum: tax.minValue ? parseFloat(tax.minValue) : null,
+            priority: parseInt(tax.maxValue || (index + 1).toString()),
+          };
+          
+          // Include id only if it exists (for updating existing tax rules)
+          if (tax.id && tax.id > 0) {
+            taxObj.id = tax.id;
+          }
+          
+          return taxObj;
+        }),
       };
 
       if (USE_MOCK_DATA) {
-        console.log('Mock: Applying bulk taxes', taxData);
+        console.log('Mock: Applying bulk taxes', payload);
       } else {
-        await api.post(API_ENDPOINTS.bulkTaxes, taxData);
+        await api.post('/admin/api/categories/tree/tax-bulk', payload);
       }
       success(`تم تطبيق الضرائب على ${selectedCategoryIds.value.length} تصنيف بنجاح`);
 
-      // Clear selections
       selectedCategoryIds.value = [];
+      taxRules.value = [];
     } else {
       // Single category mode - prepare payload matching API structure
-      const formData: CategoryFormData = {
-        name: {
+      const payload = {
+        name_translations: {
           ar: categoryNameAr.value,
           en: categoryNameEn.value,
         },
-        description: categoryDescription.value,
+        description_translations: {
+          ar: categoryDescription.value,
+          en: categoryDescription.value,
+        },
         parent_id: parentCategory.value,
-        user_id: 1, // TODO: Get from auth context
-        unit_id: unit.value ? parseInt(unit.value) : null,
+        unit_id: unit.value ? parseInt(unit.value.toString()) : 1,
         image: categoryImage.value?.[0] || null,
         is_active: isActive.value,
         taxes: taxRules.value.map((tax, index) => ({
-          tax_id: parseInt(tax.name || '1'), // Map tax name to tax_id
-          tax_percentage: parseFloat(tax.percentage) || 0,
-          min_tax_amount: parseFloat(tax.minValue || '0'),
-          priority: index + 1,
+          tax_id: parseInt(tax.name || '1'),
+          percentage: tax.percentage,
+          minimum: tax.minValue || null,
+          priority: parseInt(tax.maxValue || (index + 1).toString()),
+          is_active: true,
         })),
       };
 
       if (isEditing.value && selectedCategory.value) {
         // Update existing category
         if (USE_MOCK_DATA) {
-          console.log('Mock: Updating category', selectedCategory.value.id, formData);
+          console.log('Mock: Updating category', selectedCategory.value.id, payload);
         } else {
-          await api.put(API_ENDPOINTS.categoryById(selectedCategory.value.id), formData);
+          if (payload.image) {
+            const formData = new FormData();
+            formData.append('_method', 'PUT');
+            formData.append('name_translations[ar]', payload.name_translations.ar);
+            formData.append('name_translations[en]', payload.name_translations.en);
+            formData.append('description_translations[ar]', payload.description_translations.ar);
+            formData.append('description_translations[en]', payload.description_translations.en);
+            if (payload.parent_id) formData.append('parent_id', payload.parent_id.toString());
+            formData.append('unit_id', payload.unit_id.toString());
+            formData.append('is_active', payload.is_active ? '1' : '0');
+            formData.append('image', payload.image);
+            
+            payload.taxes.forEach((tax: any, index: number) => {
+              formData.append(`taxes[${index}][tax_id]`, tax.tax_id.toString());
+              formData.append(`taxes[${index}][percentage]`, tax.percentage);
+              if (tax.minimum) formData.append(`taxes[${index}][minimum]`, tax.minimum);
+              formData.append(`taxes[${index}][priority]`, tax.priority.toString());
+              formData.append(`taxes[${index}][is_active]`, tax.is_active ? '1' : '0');
+            });
+            await api.upload(`/admin/api/categories/${selectedCategory.value.id}`, formData);
+          } else {
+            await api.put(`/admin/api/categories/${selectedCategory.value.id}`, payload);
+          }
         }
         success('تم تحديث التصنيف بنجاح');
       } else {
         // Create new category
         if (USE_MOCK_DATA) {
-          console.log('Mock: Creating category', formData);
+          console.log('Mock: Creating category', payload);
         } else {
-          await api.post(API_ENDPOINTS.categories, formData);
+          if (payload.image) {
+            const formData = new FormData();
+            formData.append('name_translations[ar]', payload.name_translations.ar);
+            formData.append('name_translations[en]', payload.name_translations.en);
+            formData.append('description_translations[ar]', payload.description_translations.ar);
+            formData.append('description_translations[en]', payload.description_translations.en);
+            if (payload.parent_id) formData.append('parent_id', payload.parent_id.toString());
+            formData.append('unit_id', payload.unit_id.toString());
+            formData.append('is_active', payload.is_active ? '1' : '0');
+            formData.append('image', payload.image);
+            
+            payload.taxes.forEach((tax: any, index: number) => {
+              formData.append(`taxes[${index}][tax_id]`, tax.tax_id.toString());
+              formData.append(`taxes[${index}][percentage]`, tax.percentage);
+              if (tax.minimum) formData.append(`taxes[${index}][minimum]`, tax.minimum);
+              formData.append(`taxes[${index}][priority]`, tax.priority.toString());
+              formData.append(`taxes[${index}][is_active]`, tax.is_active ? '1' : '0');
+            });
+            await api.upload('/admin/api/categories', formData);
+          } else {
+            await api.post('/admin/api/categories', payload);
+          }
         }
         success(isSubcategoryMode.value ? 'تم إضافة التصنيف الفرعي بنجاح' : 'تم إضافة التصنيف بنجاح');
       }
@@ -746,6 +826,47 @@ const openDeleteDialog = () => {
   showDeleteDialog.value = true;
 };
 
+// =====================
+// Bulk Delete Categories
+// =====================
+const openBulkDeleteDialog = () => {
+  if (!selectedCategoryIds.value.length) return;
+  showBulkDeleteDialog.value = true;
+};
+
+const confirmBulkDelete = async () => {
+  if (!selectedCategoryIds.value.length) return;
+
+  showBulkDeleteDialog.value = false;
+  isDeleting.value = true;
+
+  try {
+    if (USE_MOCK_DATA) {
+      console.log('Mock: Bulk deleting categories', selectedCategoryIds.value);
+    } else {
+      await api.post('/admin/api/categories/bulk-delete', { ids: selectedCategoryIds.value });
+    }
+    success(`تم حذف ${selectedCategoryIds.value.length} تصنيف بنجاح`);
+
+    // Refresh categories list
+    await fetchCategories();
+
+    // Reset state
+    selectedCategoryIds.value = [];
+    resetForm();
+    selectedCategory.value = null;
+    isEditing.value = false;
+    isSubcategoryMode.value = false;
+    parentCategoryForSubcategory.value = null;
+
+  } catch (err) {
+    console.error('Failed to bulk delete categories:', err);
+    showError('حدث خطأ أثناء حذف التصنيفات');
+  } finally {
+    isDeleting.value = false;
+  }
+};
+
 const confirmDelete = async () => {
   if (!selectedCategory.value) return;
 
@@ -756,7 +877,7 @@ const confirmDelete = async () => {
     if (USE_MOCK_DATA) {
       console.log('Mock: Deleting category', selectedCategory.value.id);
     } else {
-      await api.delete(API_ENDPOINTS.categoryById(selectedCategory.value.id));
+      await api.delete(`/admin/api/categories/${selectedCategory.value.id}`);
     }
     success('تم حذف التصنيف بنجاح');
 
@@ -786,6 +907,7 @@ onMounted(() => {
   fetchCategories();
   fetchTaxes();
   fetchUnits();
+  fetchConstants();
 });
 
 const categoriesIcon = `<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -799,190 +921,329 @@ const categoriesIcon = `<svg width="48" height="48" viewBox="0 0 48 48" fill="no
 <template>
   <default-layout>
     <div class="categories-page">
-      <PageHeader :icon="categoriesIcon" title-key="pages.ServicesCategories.title"
-        description-key="pages.ServicesCategories.description" />
+      <div class="flex items-center flex-wrap justify-between">
+        <PageHeader :icon="categoriesIcon" title-key="pages.ProductsCategories.title"
+          description-key="pages.ProductsCategories.description" />
 
+        <div class="flex flex-wrap gap-3 mb-6">
+          <!-- Add New Category Button - visible when not editing -->
+          <v-btn v-if="showAddCategoryButton" variant="flat" color="primary" height="44"
+            class="font-semibold text-base px-6" prepend-icon="mdi-plus-circle-outline" @click="handleAddNewCategory">
+            <span>إضافة تصنيف جديد</span>
+          </v-btn>
+
+          <!-- Add Subcategory Button - visible only when a main category is selected -->
+          <v-btn v-if="showAddSubcategoryButton" variant="flat" prepend-icon="mdi-plus-circle-outline"
+            color="primary-50" height="44" class="font-semibold text-base text-primary px-6"
+            @click="handleAddSubcategory">
+            <span>إضافة تصنيف فرعي جديد</span>
+          </v-btn>
+        </div>
+      </div>
 
       <v-form ref="formRef" v-model="isFormValid" @submit.prevent>
-        <div class="space-y-6">
-          <!-- Bulk Mode Header - shown when multiple categories selected -->
-          <div v-if="isBulkMode" class="bg-primary-50 border border-primary-200 rounded-md p-4">
-            <div class="flex items-center gap-3">
-              <v-icon color="primary" size="24">mdi-checkbox-multiple-marked</v-icon>
-              <div>
-                <h3 class="text-base font-bold text-primary-800">
-                  تم تحديد {{ selectedCategoryIds.length }} تصنيف
-                </h3>
-                <p class="text-sm text-primary-600">
-                  سيتم تطبيق الضرائب على جميع التصنيفات المحددة
-                </p>
-              </div>
-            </div>
-          </div>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-          <!-- Single Category Form - hidden in bulk mode -->
-          <div v-if="!isBulkMode" class="bg-gray-50 rounded-md p-4 sm:p-6">
-            <div class="mb-4">
-              <h2 class="text-lg font-bold text-primary-900">التصنيفات</h2>
+          <div class="bg-white rounded-lg shadow-sm">
+            <!-- Header -->
+            <div class="px-6">
+              <h2 class="text-base font-bold text-gray-900 mb-1">شجرة التصنيفات</h2>
+              <p class="text-xs text-gray-600">اختر تصنيف لعرض التفاصيل</p>
             </div>
 
-            <div class="grid gap-4 mb-4 grid-cols-1 md:grid-cols-[repeat(auto-fit,minmax(250px,1fr))]">
-              <div class="md:col-span-2">
-                <LanguageTabs :languages="availableLanguages" label="الإسم">
-                  <template #en>
-                    <TextInput v-model="categoryNameEn" placeholder="Enter name in English"
-                      :rules="[required(), maxLength(100)]" :hide-details="true" />
-                  </template>
-                  <template #ar>
-                    <TextInput v-model="categoryNameAr" placeholder="ادخل الاسم بالعربية"
-                      :rules="[required(), maxLength(100)]" :hide-details="true" />
-                  </template>
-                </LanguageTabs>
+            <!-- Loading indicator -->
+            <div v-if="isLoading" class="flex justify-center py-8">
+              <v-progress-circular indeterminate color="primary" size="32" />
+            </div>
+
+            <template v-else>
+              <!-- Search Box -->
+              <div class="px-6 pt-4">
+                <v-text-field v-model="categoriesSearch" density="comfortable" variant="outlined" hide-details
+                  placeholder="بحث" prepend-inner-icon="mdi-magnify" class="mb-4" bg-color="gray-50" rounded="lg" />
               </div>
 
-              <SelectWithIconInput v-model="parentCategory" label="التصنيف الرئيسي" placeholder="اختر التصنيف الرئيسي"
-                :items="parentCategoryItems" :hide-details="false" :disabled="isSubcategoryMode" />
+              <!-- Categories List -->
+              <div class="px-6 pb-4 max-h-[600px] overflow-y-auto space-y-2">
+                <div v-for="category in filteredCategories" :key="category.id" class="space-y-2">
+                  <!-- Main Category Row -->
+                  <div class="flex items-center gap-2 px-2 py-1 text-white rounded-lg transition-all cursor-pointer"
+                    :class="[
+                      isCategorySelected(category.id)
+                        ? 'bg-primary-900 shadow-md'
+                        : 'bg-primary-500 hover:bg-primary-600'
+                    ]" @click="handleCategorySelect(category, false)">
 
-              <SelectWithIconInput v-model="unit" label="الوحدة" placeholder="اختر الوحدة" :items="unitItems"
-                :hide-details="false" />
-            </div>
+                    <!-- Action Icons -->
+                    <div class="flex items-center">
+                      <v-checkbox v-model="selectedCategoryIds" :value="category.id" density="compact" hide-details
+                        :color="isCategorySelected(category.id) ? 'gray-500' : 'gray-500'" class="m-0" @click.stop />
+                    </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-              <div class="md:col-span-2 flex flex-col gap-3">
-                <TextareaInput v-model="categoryDescription" label="تفاصيل التصنيف" placeholder="الوصف" :rows="5"
-                  :hide-details="true" />
+                    <!-- Category Name -->
+                    <span class="flex-1 font-normal text-base">
+                      {{ category.name }}
+                    </span>
 
-                <div>
-                  <span class="text-gray-700 text-sm font-semibold">
-                    فعال \ غير فعال</span>
-                  <v-switch v-model="isActive" :label="`${isActive ? 'فعال' : 'غير فعال'}`" color="primary" inset
-                    hide-details />
+
+                    <!-- Expand/Collapse Icon -->
+                    <button v-if="category.children && category.children.length" type="button" class="flex-shrink-0"
+                      @click.stop="toggleCategoryExpand(category.id)">
+                      <v-icon size="20" :color="isCategorySelected(category.id) ? 'white' : 'gray'">
+                        {{ isCategoryExpanded(category.id) ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
+                      </v-icon>
+                    </button>
+                    <div v-else class="w-5"></div>
+
+                  </div>
+
+                  <!-- Subcategories -->
+                  <div v-if="category.children && category.children.length && isCategoryExpanded(category.id)"
+                    class="space-y-2 ps-0">
+                    <div v-for="child in category.children" :key="child.id"
+                      class="flex items-center gap-2 px-2 py-1 border rounded-lg transition-all cursor-pointer" :class="[
+                        isCategorySelected(child.id)
+                          ? 'bg-gray-300 border-gray-400 text-white shadow-sm'
+                          : 'bg-gray-100 border-gray-100 text-gray-700 hover:bg-gray-200'
+                      ]" @click="handleCategorySelect({ ...child, parentId: category.id }, true)">
+
+                      <!-- Action Icons -->
+                      <div class="flex items-center gap-2">
+                        <v-checkbox v-model="selectedCategoryIds" :value="child.id" density="compact" hide-details
+                          :color="isCategorySelected(child.id) ? 'white' : 'primary'" class="m-0" @click.stop />
+                      </div>
+
+                      <!-- Subcategory Name -->
+                      <span class="flex-1 font-semibold text-base">
+                        {{ child.name }}
+                      </span>
+
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Empty state -->
+                <div v-if="!filteredCategories.length" class="text-center text-gray-500 py-8">
+                  لا توجد تصنيفات
                 </div>
               </div>
-              <div>
-                <FileUploadInput v-model="categoryImage" label="أرفق صورة" hint="PNG, JPG or GIF (max. 400x400px)"
-                  :max-files="1" />
+            </template>
+          </div>
+
+          <div class="lg:col-span-2 space-y-6">
+            <!-- Bulk Mode Header - shown when multiple categories selected -->
+            <div v-if="isBulkMode" class="bg-primary-50 border border-primary-200 rounded-md p-4">
+              <div class="flex items-center gap-3">
+                <v-icon color="primary" size="24">mdi-checkbox-multiple-marked</v-icon>
+                <div>
+                  <h3 class="text-base font-bold text-primary-800">
+                    تم تحديد {{ selectedCategoryIds.length }} تصنيف
+                  </h3>
+                  <p class="text-sm text-primary-600">
+                    سيتم تطبيق الضرائب على جميع التصنيفات المحددة
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Single Category Form - hidden in bulk mode -->
+            <div v-if="!isBulkMode" class="bg-gray-50 rounded-md p-4 sm:p-6">
+              <div class="mb-4">
+                <h2 class="text-lg font-bold text-primary-900">التصنيفات</h2>
               </div>
 
+              <div class="grid gap-4 mb-4 grid-cols-1 md:grid-cols-[repeat(auto-fit,minmax(250px,1fr))]">
+                <div class="md:col-span-2">
+                  <LanguageTabs :languages="availableLanguages" label="الإسم">
+                    <template #en>
+                      <TextInput v-model="categoryNameEn" placeholder="Enter name in English"
+                        :rules="[required(), maxLength(100)]" :hide-details="true" />
+                    </template>
+                    <template #ar>
+                      <TextInput v-model="categoryNameAr" placeholder="ادخل الاسم بالعربية"
+                        :rules="[required(), maxLength(100)]" :hide-details="true" />
+                    </template>
+                  </LanguageTabs>
+                </div>
+
+                <SelectWithIconInput v-model="parentCategory" label="التصنيف الرئيسي" placeholder="اختر التصنيف الرئيسي"
+                  :items="parentCategoryItems" :hide-details="false" :disabled="isSubcategoryMode" />
+
+                <SelectWithIconInput v-model="unit" label="الوحدة" placeholder="اختر الوحدة" :items="unitItems"
+                  :hide-details="false" />
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                <div class="md:col-span-2 flex flex-col gap-3">
+                  <TextareaInput v-model="categoryDescription" label="تفاصيل التصنيف" placeholder="الوصف" :rows="5"
+                    :hide-details="true" />
+
+                  <div>
+                    <span class="text-gray-700 text-sm font-semibold">
+                      فعال \ غير فعال</span>
+                    <v-switch v-model="isActive" :label="`${isActive ? 'فعال' : 'غير فعال'}`" color="primary" inset
+                      hide-details />
+                  </div>
+                </div>
+                <div>
+                  <FileUploadInput v-model="categoryImage" label="أرفق صورة" hint="PNG, JPG or GIF (max. 400x400px)"
+                    :max-files="1" />
+                </div>
+
+              </div>
+            </div>
+
+            <!-- Taxes Section - always visible -->
+            <div class="bg-gray-50 rounded-md p-4 sm:p-6">
+              <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-bold text-primary-900">
+                  {{ isBulkMode ? 'الضرائب للتصنيفات المحددة' : 'الضرائب' }}
+                </h2>
+                <div class="w-auto flex justify-start lg:justify-end">
+                  <v-btn variant="flat" color="primary" height="40" class="font-semibold text-sm px-4 w-full lg:w-auto"
+                    :disabled="!isNewTaxValid" @click="addTaxRule">
+                    <template #append>
+                      <v-icon size="22">mdi-plus</v-icon>
+                    </template>
+                    <span>اضافة ضريبة</span>
+                  </v-btn>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div class="w-full lg:w-auto lg:flex-1 min-w-[250px]">
+                  <SelectWithIconInput v-model="newTaxRule.name" label="الضريبة" placeholder="اختر النوع"
+                    :items="taxNameItems" show-add-button :hide-details="true" />
+                </div>
+
+                <div class="w-full sm:flex-1 lg:w-auto min-w-[100px]">
+                  <TextInput v-model="newTaxRule.percentage" label="النسبة" placeholder="10%" :rules="[numeric()]"
+                    :hide-details="true" />
+                </div>
+
+                <div class="w-full sm:flex-1 lg:w-auto min-w-[140px]">
+                  <SelectWithIconInput v-model="newTaxRule.minValue" label="أقل قيمة" placeholder="اختر القيمة"
+                    :items="valuesItems" :hide-details="true" />
+                </div>
+
+                <div class="w-full sm:flex-1 lg:w-auto min-w-[140px]">
+                  <SelectWithIconInput v-model="newTaxRule.maxValue" label="الأولوية" placeholder="اختر الأولوية"
+                    :items="priorityItems" :hide-details="true" />
+                </div>
+              </div>
+
+              <div
+                class="mt-4 bg-white !rounded-xl shadow-[0px_1px_2px_0px_rgba(16,24,40,0.06)] shadow-[0px_1px_3px_0px_rgba(16,24,40,0.10)] outline outline-1 outline-offset-[-1px] outline-slate-200 overflow-hidden">
+                <h3 class="text-base sm:text-lg font-bold text-gray-900 px-6 py-5">
+                  الضرائب المطبقة على المنتج
+                </h3>
+
+                <v-table class="rounded-none overflow-hidden border border-gray-200">
+                  <thead>
+                    <tr class="bg-gray-50 text-gray-600">
+                      <th class="!font-bold">الضريبة</th>
+                      <th class="!font-bold">النسبة</th>
+                      <th class="!font-bold">أقل قيمة</th>
+                      <th class="!font-bold">الأولوية</th>
+                      <th class="text-center w-[120px] !font-bold">إجراءات</th>
+                    </tr>
+                  </thead>
+                  <tbody class="bg-white">
+                    <tr v-for="(tax, index) in taxRules" :key="tax.id">
+                      <td>
+                        {{ getTaxNameLabel(tax.name) }}
+                      </td>
+                      <td>
+                        {{ tax.percentage || '-' }}
+                      </td>
+                      <td>
+                        {{ tax.minValue || '-' }}
+                      </td>
+                      <td>
+                        <v-chip v-if="tax.maxValue" size="small" color="primary-50" class="font-semibold"
+                          variant="flat">
+                          {{ getPriorityLabel(tax.maxValue) }}
+                        </v-chip>
+                      </td>
+                      <td class="text-center">
+                        <v-btn icon variant="text" color="primary" size="small">
+                          <v-icon>mdi-pencil-outline</v-icon>
+                        </v-btn>
+                        <v-btn icon variant="text" color="error" size="small" @click="removeTaxRule(index)">
+                          <v-icon>mdi-trash-can-outline</v-icon>
+                        </v-btn>
+                      </td>
+                    </tr>
+
+                    <tr v-if="!taxRules.length">
+                      <td colspan="5" class="text-center text-gray-500 py-4">
+                        لا توجد ضرائب مضافة بعد
+                      </td>
+                    </tr>
+                  </tbody>
+                </v-table>
+              </div>
+            </div>
+
+            <div class="flex justify-center gap-3 mt-6 sm:flex-row flex-col">
+              <!-- Save/Apply Button -->
+              <v-btn variant="flat" color="primary" height="48" class="sm:flex-1 font-semibold text-base"
+                :prepend-icon="isBulkMode ? 'mdi-check-all' : 'mdi-content-save-all-outline'" :loading="isSaving"
+                :disabled="isSaving || isDeleting || (isBulkMode && !taxRules.length)" @click="handleSave">
+                {{ isBulkMode ? 'تطبيق الضرائب على التصنيفات المحددة' : isEditing ? 'تحديث' : 'حفظ' }}
+              </v-btn>
+
+              <!-- Close/Cancel Button -->
+              <v-btn variant="flat" color="primary-100" height="48"
+                class="sm:flex-1 font-semibold text-base text-primary-700" prepend-icon="mdi-close"
+                :disabled="isSaving || isDeleting" @click="handleClose">
+                {{ isBulkMode ? 'إلغاء التحديد' : 'إغلاق' }}
+              </v-btn>
+
+              <!-- Bulk Delete Button - visible when multiple categories selected -->
+              <v-btn v-if="isBulkMode" variant="flat" color="error-50" height="48"
+                class="sm:flex-1 font-semibold text-base text-error-700" prepend-icon="mdi-delete-multiple"
+                :loading="isDeleting" :disabled="isSaving || isDeleting" @click="openBulkDeleteDialog">
+                حذف المحدد ({{ selectedCategoryIds.length }})
+              </v-btn>
+
+              <!-- Delete Button - only visible when editing single category -->
+              <v-btn v-if="isEditing && selectedCategory && !isBulkMode" variant="flat" color="error-50" height="48"
+                class="sm:flex-1 font-semibold text-base text-error-700" prepend-icon="mdi-trash-can-outline"
+                :loading="isDeleting" :disabled="isSaving || isDeleting" @click="openDeleteDialog">
+                حذف
+              </v-btn>
             </div>
           </div>
 
-          <!-- Taxes Section - always visible -->
-          <div class="bg-gray-50 rounded-md p-4 sm:p-6">
-            <div class="flex items-center justify-between mb-4">
-              <h2 class="text-lg font-bold text-primary-900">
-                {{ isBulkMode ? 'الضرائب للتصنيفات المحددة' : 'الضرائب' }}
-              </h2>
-              <div class="w-full lg:w-auto flex justify-start lg:justify-end">
-                <v-btn variant="flat" color="primary" height="40" class="font-semibold text-sm px-4 w-full lg:w-auto"
-                  :disabled="!isNewTaxValid" @click="addTaxRule">
-                  <template #append>
-                    <v-icon size="22">mdi-plus</v-icon>
-                  </template>
-                  <span>اضافة ضريبة</span>
-                </v-btn>
-              </div>
-            </div>
-
-            <div class="flex flex-wrap gap-4 items-end mb-6">
-              <div class="w-full lg:w-auto lg:flex-1 min-w-[250px]">
-                <SelectWithIconInput v-model="newTaxRule.name" label="الضريبة" placeholder="اختر النوع"
-                  :items="taxNameItems" show-add-button :hide-details="true" />
-              </div>
-
-              <div class="w-full sm:flex-1 lg:w-auto min-w-[100px]">
-                <TextInput v-model="newTaxRule.percentage" label="النسبة" placeholder="10%" :rules="[numeric()]"
-                  :hide-details="true" />
-              </div>
-
-              <div class="w-full sm:flex-1 lg:w-auto min-w-[140px]">
-                <SelectWithIconInput v-model="newTaxRule.minValue" label="أقل قيمة" placeholder="اختر القيمة"
-                  :items="valuesItems" :hide-details="true" />
-              </div>
-
-              <div class="w-full sm:flex-1 lg:w-auto min-w-[140px]">
-                <SelectWithIconInput v-model="newTaxRule.maxValue" label="الأولوية" placeholder="اختر الأولوية"
-                  :items="priorityItems" :hide-details="true" />
-              </div>
-            </div>
-
-            <div
-              class="mt-4 bg-white !rounded-xl shadow-[0px_1px_2px_0px_rgba(16,24,40,0.06)] shadow-[0px_1px_3px_0px_rgba(16,24,40,0.10)] outline outline-1 outline-offset-[-1px] outline-slate-200 overflow-hidden">
-              <h3 class="text-base sm:text-lg font-bold text-gray-900 px-6 py-5">
-                الضرائب المطبقة على الخدمة
-              </h3>
-
-              <v-table class="rounded-none overflow-hidden border border-gray-200">
-                <thead>
-                  <tr class="bg-gray-50 text-gray-600">
-                    <th class="!font-bold">الضريبة</th>
-                    <th class="!font-bold">النسبة</th>
-                    <th class="!font-bold">أقل قيمة</th>
-                    <th class="!font-bold">الأولوية</th>
-                    <th class="text-center w-[120px] !font-bold">إجراءات</th>
-                  </tr>
-                </thead>
-                <tbody class="bg-white">
-                  <tr v-for="(tax, index) in taxRules" :key="tax.id">
-                    <td>
-                      {{ getTaxNameLabel(tax.name) }}
-                    </td>
-                    <td>
-                      {{ tax.percentage || '-' }}
-                    </td>
-                    <td>
-                      {{ tax.minValue || '-' }}
-                    </td>
-                    <td>
-                      <v-chip v-if="tax.maxValue" size="small" color="primary-50" class="font-semibold" variant="flat">
-                        {{ getPriorityLabel(tax.maxValue) }}
-                      </v-chip>
-                    </td>
-                    <td class="text-center">
-                      <v-btn icon variant="text" color="primary" size="small">
-                        <v-icon>mdi-pencil-outline</v-icon>
-                      </v-btn>
-                      <v-btn icon variant="text" color="error" size="small" @click="removeTaxRule(index)">
-                        <v-icon>mdi-trash-can-outline</v-icon>
-                      </v-btn>
-                    </td>
-                  </tr>
-
-                  <tr v-if="!taxRules.length">
-                    <td colspan="5" class="text-center text-gray-500 py-4">
-                      لا توجد ضرائب مضافة بعد
-                    </td>
-                  </tr>
-                </tbody>
-              </v-table>
-            </div>
-          </div>
-
-          <div class="flex justify-center gap-3 mt-6 sm:flex-row flex-col">
-            <!-- Save/Apply Button -->
-            <v-btn variant="flat" color="primary" height="48" class="sm:flex-1 font-semibold text-base"
-              :prepend-icon="isBulkMode ? 'mdi-check-all' : 'mdi-content-save-all-outline'" :loading="isSaving"
-              :disabled="isSaving || isDeleting || (isBulkMode && !taxRules.length)" @click="handleSave">
-              {{ isBulkMode ? 'تطبيق الضرائب على التصنيفات المحددة' : isEditing ? 'تحديث' : 'حفظ' }}
-            </v-btn>
-
-            <!-- Close/Cancel Button -->
-            <v-btn variant="flat" color="primary-100" height="48"
-              class="sm:flex-1 font-semibold text-base text-primary-700" prepend-icon="mdi-close"
-              :disabled="isSaving || isDeleting" @click="handleClose">
-              {{ isBulkMode ? 'إلغاء التحديد' : 'إغلاق' }}
-            </v-btn>
-
-            <!-- Delete Button - only visible when editing -->
-            <v-btn v-if="isEditing && selectedCategory" variant="flat" color="error-50" height="48"
-              class="sm:flex-1 font-semibold text-base text-error-700" prepend-icon="mdi-trash-can-outline"
-              :loading="isDeleting" :disabled="isSaving || isDeleting" @click="openDeleteDialog">
-              حذف
-            </v-btn>
-          </div>
         </div>
       </v-form>
     </div>
+    <!-- Delete Confirmation Dialog -->
+    <DeleteConfirmDialog v-model="showDeleteDialog" :loading="isDeleting" :persistent="true" @confirm="confirmDelete">
+      <p class="text-gray-700 text-center">
+        هل أنت متأكد من حذف التصنيف
+        <strong class="text-primary-700">{{ selectedCategory?.name }}</strong>؟
+      </p>
+      <p v-if="selectedCategory?.children?.length" class="text-error-600 text-sm mt-2 text-center">
+        <v-icon size="16" class="me-1">mdi-information-outline</v-icon>
+        سيتم حذف جميع التصنيفات الفرعية المرتبطة بهذا التصنيف.
+      </p>
+    </DeleteConfirmDialog>
+
+    <!-- Bulk Delete Confirmation Dialog -->
+    <DeleteConfirmDialog v-model="showBulkDeleteDialog" :loading="isDeleting" :persistent="true" @confirm="confirmBulkDelete">
+      <p class="text-gray-700 text-center">
+        هل أنت متأكد من حذف
+        <strong class="text-error-700">{{ selectedCategoryIds.length }}</strong>
+        تصنيف؟
+      </p>
+      <p class="text-error-600 text-sm mt-2 text-center">
+        <v-icon size="16" class="me-1">mdi-alert-circle-outline</v-icon>
+        سيتم حذف جميع التصنيفات المحددة وجميع التصنيفات الفرعية المرتبطة بها.
+      </p>
+    </DeleteConfirmDialog>
+
     <!-- Notification Snackbar -->
     <v-snackbar v-model="notification.show" :timeout="notification.timeout"
       :color="notification.type === 'success' ? 'success' : notification.type === 'error' ? 'error' : notification.type === 'warning' ? 'warning' : 'info'"

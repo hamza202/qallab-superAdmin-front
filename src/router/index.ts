@@ -15,6 +15,7 @@ import { errorRoutes } from "./modules/errors.routes";
 import { servicesRoutes } from "./modules/services.routes";
 import { crushersRoutes } from "./modules/crushers.routes";
 import { contractorsRoutes } from "./modules/contractors.routes";
+import { financeRoutes } from "./modules/finance.routes";
 
 const routes: RouteRecordRaw[] = [
   ...dashboardRoutes,
@@ -28,6 +29,7 @@ const routes: RouteRecordRaw[] = [
   ...contractorsRoutes,
   ...errorRoutes,
   ...servicesRoutes,
+  ...financeRoutes,
   {
     path: "/form-and-validation",
     name: "FormAndValidation",
@@ -49,7 +51,7 @@ let sidebarScrollTop = 0;
 
 // Save sidebar scroll position before each navigation
 router.beforeEach(() => {
-  const sidebar = document.querySelector('.q-sidebar-scroll');
+  const sidebar = document.querySelector(".q-sidebar-scroll");
   if (sidebar) {
     sidebarScrollTop = sidebar.scrollTop;
   }
@@ -59,7 +61,7 @@ router.beforeEach(() => {
 // Restore sidebar scroll position after each navigation
 router.afterEach(() => {
   setTimeout(() => {
-    const sidebar = document.querySelector('.q-sidebar-scroll');
+    const sidebar = document.querySelector(".q-sidebar-scroll");
     if (sidebar && sidebarScrollTop > 0) {
       sidebar.scrollTop = sidebarScrollTop;
     }
