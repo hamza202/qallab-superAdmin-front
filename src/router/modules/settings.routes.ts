@@ -23,6 +23,14 @@ export const settingsRoutes: RouteRecordRaw[] = [
         },
       },
       {
+        path: "tree",
+        name: "ProductsCategoriesTree",
+        component: () => import("@/views/settings/products-categories/tree.vue"),
+        meta: {
+          title: "pages.ProductsCategories.title",
+        },
+      },
+      {
         path: "edit/:id",
         name: "ProductsCategoriesEdit",
         component: () => import("@/views/settings/products-categories/Form.vue"),
@@ -57,6 +65,14 @@ export const settingsRoutes: RouteRecordRaw[] = [
         path: "create",
         name: "ServicesCategoriesCreate",
         component: () => import("@/views/settings/services-categories/Form.vue"),
+        meta: {
+          title: "pages.ServicesCategories.title",
+        },
+      },
+      {
+        path: "tree",
+        name: "ServicesCategoriesTree",
+        component: () => import("@/views/settings/services-categories/tree.vue"),
         meta: {
           title: "pages.ServicesCategories.title",
         },

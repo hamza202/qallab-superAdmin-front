@@ -353,6 +353,13 @@
                             </div>
                             <ul class="space-y-2">
                                 <li class="relative">
+                                    <router-link to="/vouchers/list"
+                                        :class="[$route.path.includes('/vouchers') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">لوحة
+                                        التحكم المالية</router-link>
+                                    <span
+                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
+                                </li>
+                                <li class="relative">
                                     <router-link to="/finance/payment-vouchers"
                                         :class="[$route.path.includes('/finance/payment-vouchers') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
                                         سندات الصرف</router-link>
@@ -545,13 +552,13 @@
                                         قائمة تصنيفات الخدمات</router-link>
                                 </li>
                                 <li class="relative">
-                                    <router-link to="/products-categories/create"
-                                        :class="[isMenuItemActive('/products-categories/create') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                    <router-link to="/products-categories/tree"
+                                        :class="[isMenuItemActive('/products-categories/tree') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         تصنيفات المنتجات </router-link>
                                 </li>
                                 <li class="relative">
-                                    <router-link to="/services-categories/create"
-                                        :class="[isMenuItemActive('/services-categories/create') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                    <router-link to="/services-categories/tree"
+                                        :class="[isMenuItemActive('/services-categories/tree') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         تصنيفات الخدمات</router-link>
                                 </li>
                                 <li class="relative">
@@ -706,7 +713,7 @@ const financeRoutes = ['/finance'];
 const usersRoutes = ['/users', '/crushers', '/contractors'];
 const logisticsRoutes = ['/logistics'];
 const reportsRoutes = ['/reports'];
-const settingsRoutes = ['/products-categories', '/services-categories', '/units', '/factories', '/brands', '/geo-areas', '/geo-segments', '/tax-rules', '/taxes', '/cities', '/codes', '/account-types', '/test-group', '/tests', '/test-methodology', '/sample-types'];
+const settingsRoutes = ['/products-categories', '/services-categories', '/products-categories/tree', '/units', '/factories', '/brands', '/geo-areas', '/geo-segments', '/tax-rules', '/taxes', '/cities', '/codes', '/account-types', '/test-group', '/tests', '/test-methodology', '/sample-types'];
 
 // Helper function to check if route matches (including child routes like /form, /create, /edit/:id, /view/:id)
 const isRouteActive = (basePath) => {
@@ -721,7 +728,7 @@ const isRouteActive = (basePath) => {
 // Dynamic function to check if a menu item should be active based on its link path
 const isMenuItemActive = (menuLinkPath) => {
     const currentPath = route.path;
-
+    
     // Direct match
     if (currentPath === menuLinkPath) return true;
 
