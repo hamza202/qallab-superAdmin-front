@@ -2,6 +2,12 @@
 import { ref, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
+// Available languages
+const availableLanguages = ref([
+  { code: "en", name: "En", flag: "/img/en.svg", dir: "ltr" as const },
+  { code: "ar", name: "AR", flag: "/img/sa.svg", dir: "rtl" as const },
+]);
+
 const route = useRoute();
 const router = useRouter();
 
@@ -256,12 +262,20 @@ const plusIcon = `<svg width="12" height="12" viewBox="0 0 12 12" fill="none" xm
                   :hide-details="false" />
               </div>
 
-              <!-- Row 2: Project Name Arabic, Project Name English, Start Date -->
+              <!-- Row 2: Project Name with Language Tabs, Start Date -->
               <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                <TextInput v-model="projectNameArabic" label="اسم المشروع بالعربية" placeholder="اسم المشروع"
-                  :rules="[required()]" :hide-details="false" />
-                <TextInput v-model="projectNameEnglish" label="اسم المشروع بالانجليزية" placeholder="name company"
-                  :rules="[required()]" :hide-details="false" />
+                <div class="md:col-span-2">
+                  <LanguageTabs :languages="availableLanguages" label="اسم المشروع">
+                    <template #en>
+                      <TextInput v-model="projectNameEnglish" placeholder="Enter project name in English"
+                        :rules="[required()]" :hide-details="true" />
+                    </template>
+                    <template #ar>
+                      <TextInput v-model="projectNameArabic" placeholder="ادخل اسم المشروع بالعربية"
+                        :rules="[required()]" :hide-details="true" />
+                    </template>
+                  </LanguageTabs>
+                </div>
                 <TextInput v-model="startDate" type="date" label="تاريخ البدء" placeholder="22/05/2025"
                   :hide-details="false">
                   <template #prepend-inner>
@@ -270,7 +284,7 @@ const plusIcon = `<svg width="12" height="12" viewBox="0 0 12 12" fill="none" xm
                 </TextInput>
               </div>
 
-              <!-- Row 3: End Date, Address Arabic, Address English -->
+              <!-- Row 3: End Date, Address with Language Tabs -->
               <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                 <TextInput v-model="endDate" type="date" label="تاريخ الانتهاء" placeholder="22/05/2025"
                   :hide-details="false">
@@ -278,18 +292,26 @@ const plusIcon = `<svg width="12" height="12" viewBox="0 0 12 12" fill="none" xm
                     <v-icon size="small" color="gray">mdi-help-circle-outline</v-icon>
                   </template>
                 </TextInput>
-                <TextInput v-model="addressArabic" label="العنوان بالعربية" placeholder="ادخل العنوان"
-                  :hide-details="false">
-                  <template #prepend-inner>
-                    <v-icon size="small" color="gray">mdi-help-circle-outline</v-icon>
-                  </template>
-                </TextInput>
-                <TextInput v-model="addressEnglish" label="العنوان بالانجليزية" placeholder="address"
-                  :hide-details="false">
-                  <template #prepend-inner>
-                    <v-icon size="small" color="gray">mdi-help-circle-outline</v-icon>
-                  </template>
-                </TextInput>
+                <div class="md:col-span-2">
+                  <LanguageTabs :languages="availableLanguages" label="العنوان">
+                    <template #en>
+                      <TextInput v-model="addressEnglish" placeholder="Enter address in English"
+                        :hide-details="true">
+                        <template #prepend-inner>
+                          <v-icon size="small" color="gray">mdi-help-circle-outline</v-icon>
+                        </template>
+                      </TextInput>
+                    </template>
+                    <template #ar>
+                      <TextInput v-model="addressArabic" placeholder="ادخل العنوان بالعربية"
+                        :hide-details="true">
+                        <template #prepend-inner>
+                          <v-icon size="small" color="gray">mdi-help-circle-outline</v-icon>
+                        </template>
+                      </TextInput>
+                    </template>
+                  </LanguageTabs>
+                </div>
               </div>
 
               <!-- Row 4: Commercial Register, Description Arabic, Description English -->
@@ -300,10 +322,16 @@ const plusIcon = `<svg width="12" height="12" viewBox="0 0 12 12" fill="none" xm
                     <v-icon size="small" color="gray">mdi-help-circle-outline</v-icon>
                   </template>
                 </TextInput>
-                <v-textarea v-model="descriptionArabic" label="الوصف بالعربية" placeholder="تفاصيل المنتج"
-                  variant="outlined" density="comfortable" rows="3" hide-details class="bg-white" />
-                <v-textarea v-model="descriptionEnglish" label="الوصف بالانجليزية" placeholder="details"
-                  variant="outlined" density="comfortable" rows="3" hide-details class="bg-white" />
+                <LanguageTabs :languages="availableLanguages" label="الوصف">
+                  <template #en>
+                    <RichTextEditor v-model="descriptionEnglish" placeholder="Enter description in English"
+                      min-height="120px" hide-details />
+                  </template>
+                  <template #ar>
+                    <RichTextEditor v-model="descriptionArabic" placeholder="ادخل الوصف بالعربية"
+                      min-height="120px" hide-details />
+                  </template>
+                </LanguageTabs>
               </div>
 
               <!-- Row 5: Geo Location -->

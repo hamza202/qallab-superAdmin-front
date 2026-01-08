@@ -1,5 +1,11 @@
 <script setup lang="ts">
-import { reactive, watch } from 'vue';
+import { reactive, watch, ref } from 'vue';
+
+// Available languages
+const availableLanguages = ref([
+  { code: "en", name: "En", flag: "/img/en.svg", dir: "ltr" as const },
+  { code: "ar", name: "AR", flag: "/img/sa.svg", dir: "rtl" as const },
+]);
 
 interface Props {
   businessNameTranslations: { ar: string; en: string };
@@ -78,10 +84,18 @@ const emitUpdate = () => {
 
     <!-- Row 1: Business Name and Owner Name -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-      <TextInput v-model="formData.businessNameTranslations.ar" @blur="emitUpdate"
-        label="الاسم التجاري بالعربية" placeholder="العد" />
-      <TextInput v-model="formData.businessNameTranslations.en" @blur="emitUpdate"
-        label="الاسم التجاري بالانجليزية" placeholder="AL- ED" />
+      <div class="md:col-span-2">
+        <LanguageTabs :languages="availableLanguages" label="الاسم التجاري">
+          <template #en>
+            <TextInput v-model="formData.businessNameTranslations.en" @blur="emitUpdate"
+              placeholder="Enter business name in English" :hide-details="true" />
+          </template>
+          <template #ar>
+            <TextInput v-model="formData.businessNameTranslations.ar" @blur="emitUpdate"
+              placeholder="ادخل الاسم التجاري بالعربية" :hide-details="true" />
+          </template>
+        </LanguageTabs>
+      </div>
       <TextInput v-model="formData.ownerName" @blur="emitUpdate"
         label="اسم المالك / الشركة المالكة" placeholder="AL- ED" required />
       <TextInput v-model="formData.buisnessno" @blur="emitUpdate" label="السجل التجاري"

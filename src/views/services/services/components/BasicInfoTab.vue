@@ -1,6 +1,12 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 
+// Available languages
+const availableLanguages = ref([
+  { code: "en", name: "En", flag: "/img/en.svg", dir: "ltr" as const },
+  { code: "ar", name: "AR", flag: "/img/sa.svg", dir: "rtl" as const },
+])
+
 const props = defineProps<{
   modelValue: any
   domains: Array<{ key: string; label: string }>
@@ -48,15 +54,18 @@ const taxItems = computed(() =>
 <template>
   <div class="bg-gray-50 rounded-lg p-6">
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <!-- Row 1 -->
-      <div>
-        <TextInput v-model="formData.name_ar" variant="outlined" label="الاسم بالعربية" density="comfortable"
-          placeholder="ادخل الاسم" hide-details @update:model-value="updateFormData" />
-      </div>
-
-      <div>
-        <TextInput v-model="formData.name_en" variant="outlined" density="comfortable" label="الاسم بالانجليزية"
-          placeholder="ادخل الاسم" hide-details @update:model-value="updateFormData" />
+      <!-- Row 1 - Name with Language Tabs -->
+      <div class="md:col-span-2">
+        <LanguageTabs :languages="availableLanguages" label="الإسم">
+          <template #en>
+            <TextInput v-model="formData.name_en" variant="outlined" density="comfortable"
+              placeholder="Enter name in English" hide-details @update:model-value="updateFormData" />
+          </template>
+          <template #ar>
+            <TextInput v-model="formData.name_ar" variant="outlined" density="comfortable"
+              placeholder="ادخل الاسم بالعربية" hide-details @update:model-value="updateFormData" />
+          </template>
+        </LanguageTabs>
       </div>
 
       <div>
@@ -84,19 +93,18 @@ const taxItems = computed(() =>
         </v-radio-group>
       </div>
 
-      <!-- Row 3 -->
-
-      <div class="md:row-span-2">
-        <TextareaInput v-model="formData.description_ar" variant="outlined" density="comfortable"
-          label="الوصف بالعربية" placeholder="تفاصيل الخدمة" hide-details rows="5"
-          @update:model-value="updateFormData" />
-      </div>
-
-      <!-- Row 4 -->
-      <div class="md:row-span-2">
-        <TextareaInput v-model="formData.description_en" variant="outlined" density="comfortable"
-          label="الوصف بالانجليزية" placeholder="Service details" rows="5" hide-details
-          @update:model-value="updateFormData" />
+      <!-- Row 3 - Description with Language Tabs -->
+      <div class="md:col-span-2 md:row-span-2">
+        <LanguageTabs :languages="availableLanguages" label="الوصف">
+          <template #en>
+            <RichTextEditor v-model="formData.description_en" placeholder="Enter description in English"
+              min-height="120px" hide-details @update:model-value="updateFormData" />
+          </template>
+          <template #ar>
+            <RichTextEditor v-model="formData.description_ar" placeholder="ادخل الوصف بالعربية"
+              min-height="120px" hide-details @update:model-value="updateFormData" />
+          </template>
+        </LanguageTabs>
       </div>
 
       <div>

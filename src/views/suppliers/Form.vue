@@ -4,6 +4,12 @@ import { useRoute, useRouter } from "vue-router";
 import { useApi } from "@/composables/useApi";
 import { useNotification } from "@/composables/useNotification";
 
+// Available languages
+const availableLanguages = ref([
+  { code: "en", name: "En", flag: "/img/en.svg", dir: "ltr" as const },
+  { code: "ar", name: "AR", flag: "/img/sa.svg", dir: "rtl" as const },
+]);
+
 const route = useRoute();
 const router = useRouter();
 const api = useApi();
@@ -515,24 +521,40 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
             <div class="mb-6 bg-gray-50 rounded-lg p-6">
               <h2 class="text-lg font-bold text-primary-900 mb-4">{{ pageTitle }} - بيانات المورد</h2>
 
-              <!-- Row 1: Business Name (AR), First Name (AR), Last Name (AR) -->
+              <!-- Row 1: Business Name, First Name, Last Name with Language Tabs -->
               <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                <TextInput v-model="businessNameAr" label="الاسم التجاري (عربي)" placeholder="الاسم التجاري"
-                  :rules="[required()]" :hide-details="false" />
-                <TextInput v-model="firstNameAr" label="الاسم الاول (عربي)" placeholder="الاسم الاول"
-                  :rules="[required()]" :hide-details="false" />
-                <TextInput v-model="lastNameAr" label="الاسم الاخير (عربي)" placeholder="الاسم الاخير"
-                  :hide-details="false" />
-              </div>
+                <LanguageTabs :languages="availableLanguages" label="الاسم التجاري">
+                  <template #en>
+                    <TextInput v-model="businessNameEn" placeholder="Enter business name in English"
+                      :hide-details="true" />
+                  </template>
+                  <template #ar>
+                    <TextInput v-model="businessNameAr" placeholder="ادخل الاسم التجاري بالعربية"
+                      :rules="[required()]" :hide-details="true" />
+                  </template>
+                </LanguageTabs>
 
-              <!-- Row 1.5: Business Name (EN), First Name (EN), Last Name (EN) -->
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                <TextInput v-model="businessNameEn" label="الاسم التجاري (انجليزي)" placeholder="Business Name"
-                  :hide-details="false" />
-                <TextInput v-model="firstNameEn" label="الاسم الاول (انجليزي)" placeholder="First Name"
-                  :hide-details="false" />
-                <TextInput v-model="lastNameEn" label="الاسم الاخير (انجليزي)" placeholder="Last Name"
-                  :hide-details="false" />
+                <LanguageTabs :languages="availableLanguages" label="الاسم الأول">
+                  <template #en>
+                    <TextInput v-model="firstNameEn" placeholder="Enter first name in English"
+                      :hide-details="true" />
+                  </template>
+                  <template #ar>
+                    <TextInput v-model="firstNameAr" placeholder="ادخل الاسم الأول بالعربية"
+                      :rules="[required()]" :hide-details="true" />
+                  </template>
+                </LanguageTabs>
+
+                <LanguageTabs :languages="availableLanguages" label="الاسم الأخير">
+                  <template #en>
+                    <TextInput v-model="lastNameEn" placeholder="Enter last name in English"
+                      :hide-details="true" />
+                  </template>
+                  <template #ar>
+                    <TextInput v-model="lastNameAr" placeholder="ادخل الاسم الأخير بالعربية"
+                      :hide-details="true" />
+                  </template>
+                </LanguageTabs>
               </div>
 
               <!-- Row 2: Supplier Code, Currency -->

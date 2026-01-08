@@ -1,6 +1,12 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from "vue";
 
+// Available languages
+const availableLanguages = ref([
+  { code: "en", name: "En", flag: "/img/en.svg", dir: "ltr" as const },
+  { code: "ar", name: "AR", flag: "/img/sa.svg", dir: "rtl" as const },
+]);
+
 interface CityForm {
   nameAr: string;
   nameEn: string;
@@ -98,12 +104,18 @@ watch(
     </template>
 
     <v-form ref="formRef" v-model="isFormValid" @submit.prevent>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-x-3 gap-y-2 mb-4">
-        <TextInput v-model="form.nameAr" label="الاسم بالعربية" placeholder="ادخل الاسم بالعربية"
-          :hide-details="false" />
+      <div class="mb-4">
+        <LanguageTabs :languages="availableLanguages" label="الإسم">
+          <template #en>
+            <TextInput v-model="form.nameEn" placeholder="Enter name in English" :hide-details="true" />
+          </template>
+          <template #ar>
+            <TextInput v-model="form.nameAr" placeholder="ادخل الاسم بالعربية" :hide-details="true" />
+          </template>
+        </LanguageTabs>
+      </div>
 
-        <TextInput v-model="form.nameEn" label="الاسم بالانجليزية" placeholder="ادخل الاسم بالانجليزية"
-          :hide-details="false" />
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-x-3 gap-y-2 mb-4">
 
         <TextInput v-model="form.code_1" label="الرمز 1" placeholder="ادخل الرمز" :hide-details="false" />
 

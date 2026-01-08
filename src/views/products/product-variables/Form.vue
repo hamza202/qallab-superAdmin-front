@@ -11,19 +11,24 @@
           <div class="mb-3 bg-primary-50 border !border-gray-200 rounded-lg px-6 py-4">
             <h2 class="text-lg font-bold text-primary-900 mb-4">المعلومات الأساسية</h2>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-              <TextInput v-model="formData.name_ar" label="اسم متغير المنتج (عربي)" placeholder="المقياس"
-                :rules="[required('الاسم بالعربي مطلوب')]" :hide-details="false" />
-
-              <TextInput v-model="formData.name_en" label="اسم متغير المنتج (إنجليزي)" placeholder="Size"
-                :rules="[required('الاسم بالإنجليزي مطلوب')]" :hide-details="false" />
+            <div class="mb-4">
+              <LanguageTabs :languages="availableLanguages" label="اسم متغير المنتج">
+                <template #en>
+                  <TextInput v-model="formData.name_en" placeholder="Enter variable name in English"
+                    :rules="[required('الاسم بالإنجليزي مطلوب')]" :hide-details="true" />
+                </template>
+                <template #ar>
+                  <TextInput v-model="formData.name_ar" placeholder="ادخل اسم المتغير بالعربية"
+                    :rules="[required('الاسم بالعربي مطلوب')]" :hide-details="true" />
+                </template>
+              </LanguageTabs>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <SelectInput v-model="formData.value_type" label="نوع القيمة" :items="classificationItems"
-                placeholder="اختر نوع القيمة" :hide-details="false" />
+                placeholder="اختر نوع القيمة" :hide-details="false" :loading="loadingConstants" />
 
               <SelectInput v-model="formData.category_ids" label="الفئات" :items="categoryItems"
-                placeholder="اختر الفئات" :hide-details="false" multiple chips />
+                placeholder="اختر الفئات" :hide-details="false" multiple chips :loading="loadingCategories" />
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
               <div class="col-span-2">
@@ -173,6 +178,12 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
 <path d="M12.3333 5.00033V4.33366C12.3333 3.40024 12.3333 2.93353 12.1517 2.57701C11.9919 2.2634 11.7369 2.00844 11.4233 1.84865C11.0668 1.66699 10.6001 1.66699 9.66667 1.66699H8.33333C7.39991 1.66699 6.9332 1.66699 6.57668 1.84865C6.26308 2.00844 6.00811 2.2634 5.84832 2.57701C5.66667 2.93353 5.66667 3.40024 5.66667 4.33366V5.00033M7.33333 9.58366V13.7503M10.6667 9.58366V13.7503M1.5 5.00033H16.5M14.8333 5.00033V14.3337C14.8333 15.7338 14.8333 16.4339 14.5608 16.9686C14.3212 17.439 13.9387 17.8215 13.4683 18.0612C12.9335 18.3337 12.2335 18.3337 10.8333 18.3337H7.16667C5.76654 18.3337 5.06647 18.3337 4.53169 18.0612C4.06129 17.8215 3.67883 17.439 3.43915 16.9686C3.16667 16.4339 3.16667 15.7338 3.16667 14.3337V5.00033" stroke="#B42318" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`;
 
+// Available languages
+const availableLanguages = ref([
+  { code: "en", name: "En", flag: "/img/en.svg", dir: "ltr" as const },
+  { code: "ar", name: "AR", flag: "/img/sa.svg", dir: "rtl" as const },
+]);
+
 
 interface VariableValue {
   id?: number | null
@@ -205,23 +216,20 @@ interface ApiAspect {
   created_at: string
 }
 
-const classificationItems = [
-  { title: 'نوع 1', value: '1' },
-  { title: 'نوع 2', value: '2' },
-  { title: 'نوع 3', value: '3' },
-]
+interface ValueType {
+  key: number
+  label: string
+}
 
-const elementTypeItems = [
-  { title: 'نمط 1', value: '1' },
-  { title: 'نمط 2', value: '2' },
-  { title: 'نمط 3', value: '3' },
-]
+interface Category {
+  id: number
+  name: string
+}
 
-// Sample category items - replace with actual API data
-const categoryItems = [
-  { title: 'فئة 1', value: '1' },
-  { title: 'فئة 2', value: '2' },
-]
+const classificationItems = ref<Array<{ title: string; value: string }>>([])
+const categoryItems = ref<Array<{ title: string; value: string }>>([])
+const loadingConstants = ref(false)
+const loadingCategories = ref(false)
 
 const formData = ref<FormData>({
   name_ar: '',
@@ -299,6 +307,60 @@ const handleSaveAndReturn = async () => {
   }
 }
 
+// Fetch constants (value_types)
+const fetchConstants = async () => {
+  try {
+    loadingConstants.value = true
+    const response = await api.get<{
+      status: number
+      code: number
+      locale: string
+      message: string
+      data: {
+        value_types: ValueType[]
+      }
+    }>('/api/aspects/constants')
+
+    if (response.data && response.data.value_types) {
+      classificationItems.value = response.data.value_types.map(vt => ({
+        title: vt.label,
+        value: vt.key.toString()
+      }))
+    }
+  } catch (err: any) {
+    console.error('Fetch constants error:', err)
+    error.value = err.response?.data?.message || err.message || 'فشل تحميل الثوابت'
+  } finally {
+    loadingConstants.value = false
+  }
+}
+
+// Fetch categories
+const fetchCategories = async () => {
+  try {
+    loadingCategories.value = true
+    const response = await api.get<{
+      status: number
+      code: number
+      locale: string
+      message: string
+      data: Category[]
+    }>('/admin/api/categories/list')
+
+    if (response.data) {
+      categoryItems.value = response.data.map(cat => ({
+        title: cat.name,
+        value: cat.id.toString()
+      }))
+    }
+  } catch (err: any) {
+    console.error('Fetch categories error:', err)
+    error.value = err.response?.data?.message || err.message || 'فشل تحميل الفئات'
+  } finally {
+    loadingCategories.value = false
+  }
+}
+
 // Fetch aspect data for editing
 const fetchAspect = async () => {
   if (!isEditMode.value) return
@@ -332,7 +394,14 @@ const fetchAspect = async () => {
   }
 }
 
-onMounted(() => {
-  fetchAspect()
+onMounted(async () => {
+  // Fetch constants and categories first
+  await Promise.all([
+    fetchConstants(),
+    fetchCategories()
+  ])
+  
+  // Then fetch aspect data if in edit mode
+  await fetchAspect()
 })
 </script>

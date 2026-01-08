@@ -4,6 +4,12 @@ import { useRoute, useRouter } from "vue-router";
 import { useApi } from "@/composables/useApi";
 import { useNotification } from "@/composables/useNotification";
 
+// Available languages
+const availableLanguages = ref([
+  { code: "en", name: "En", flag: "/img/en.svg", dir: "ltr" as const },
+  { code: "ar", name: "AR", flag: "/img/sa.svg", dir: "rtl" as const },
+]);
+
 const route = useRoute();
 const router = useRouter();
 const api = useApi();
@@ -630,10 +636,18 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
 
               <!-- Row 1: Full Name, Customer Code -->
               <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                <TextInput v-model="fullNameAr" label="الاسم كامل بالعربية" placeholder="الاسم كامل بالعربية"
-                  :rules="[required()]" :hide-details="false" />
-                <TextInput v-model="fullNameEn" label="الاسم كامل بالإنحليزية" placeholder="الاسم كامل بالإنحليزية"
-                  :rules="[required()]" :hide-details="false" />
+                <div class="md:col-span-2">
+                  <LanguageTabs :languages="availableLanguages" label="الاسم كامل">
+                    <template #en>
+                      <TextInput v-model="fullNameEn" placeholder="Enter full name in English"
+                        :rules="[required()]" :hide-details="true" />
+                    </template>
+                    <template #ar>
+                      <TextInput v-model="fullNameAr" placeholder="ادخل الاسم كامل بالعربية"
+                        :rules="[required()]" :hide-details="true" />
+                    </template>
+                  </LanguageTabs>
+                </div>
                 <div>
                   <div class="mb-[7px] text-sm font-semibold text-gray-700">الكود</div>
                   <div class="bg-gray-200 text-primary-900 rounded-lg px-4 py-2.5 font-bold text-end">
