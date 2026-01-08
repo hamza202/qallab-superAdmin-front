@@ -1224,7 +1224,7 @@ const plusIcon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xm
               سمات/خصائص المنتج المتقدمة
             </h2>
 
-            <div class="flex flex-wrap gap-8">
+            <div class="flex flex-wrap gap-5">
               <CheckboxInput
                 v-model="isAvailableForProjects"
                 label="متاح للمشاريع"
@@ -1242,12 +1242,12 @@ const plusIcon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xm
               />
               <CheckboxInput
                 v-model="isNegotiable"
-                label="قابل للمفاضلة"
+                label="قابل للمقاصة"
                 color="primary"
               />
               <CheckboxInput
                 v-model="isHostable"
-                label="قابل للاستضافة"
+                label="قابل للمقايضة"
                 color="primary"
               />
               <CheckboxInput
