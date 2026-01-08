@@ -142,10 +142,18 @@ export const productsRoutes: RouteRecordRaw[] = [
       },
       {
         path: "edit/:id",
-        name: "GroupProductsEdit",
+        name: "GroupProductEdit",
         component: () => import("@/views/products/group-products/Form.vue"),
         meta: {
           title: "pages.groupProducts.title",
+        },
+      },
+      {
+        path: "view/:id",
+        name: "GroupProductView",
+        component: () => import("@/views/products/group-products/view.vue"),
+        meta: {
+          title: "pages.groupProducts.view",
         },
       },
     ],
