@@ -818,10 +818,24 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
                 :hide-details="false" />
               <div>
                 <span class="text-sm font-semibold text-gray-700 mb-1 block">الحالة الافتراضية</span>
-                <v-radio-group v-model="defaultStatus" inline hide-details>
-                  <v-radio label="فعال" :value="true" color="primary" />
-                  <v-radio label="غير فعال" :value="false" color="primary" />
-                </v-radio-group>
+                <div class="flex items-center gap-3 mt-1">
+                  <v-radio-group v-model="defaultStatus" inline hide-details>
+                    <v-radio :value="true" color="primary">
+                      <template #label>
+                        <span :class="defaultStatus ? 'text-primary font-semibold' : 'text-gray-600'">
+                          فعال
+                        </span>
+                      </template>
+                    </v-radio>
+                    <v-radio :value="false" color="primary">
+                      <template #label>
+                        <span :class="!defaultStatus ? 'text-primary font-semibold' : 'text-gray-600'">
+                          غير فعال
+                        </span>
+                      </template>
+                    </v-radio>
+                  </v-radio-group>
+                </div>
               </div>
             </div>
 

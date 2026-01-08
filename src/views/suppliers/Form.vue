@@ -601,10 +601,22 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
                 </TextInput>
                 <div>
                   <div class="mb-[7px] text-sm font-semibold text-gray-700">الحالة</div>
-                  <div class="flex items-center gap-4">
-                    <v-radio-group v-model="status" inline hide-details class="mt-0">
-                      <v-radio label="فعال" :value="true" color="primary" />
-                      <v-radio label="غير فعال" :value="false" color="primary" />
+                  <div class="flex items-center gap-3 mt-1">
+                    <v-radio-group v-model="status" inline hide-details>
+                      <v-radio :value="true" color="primary">
+                        <template #label>
+                          <span :class="status ? 'text-primary font-semibold' : 'text-gray-600'">
+                            فعال
+                          </span>
+                        </template>
+                      </v-radio>
+                      <v-radio :value="false" color="primary">
+                        <template #label>
+                          <span :class="!status ? 'text-primary font-semibold' : 'text-gray-600'">
+                            غير فعال
+                          </span>
+                        </template>
+                      </v-radio>
                     </v-radio-group>
                   </div>
                 </div>

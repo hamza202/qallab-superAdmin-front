@@ -357,10 +357,22 @@ onMounted(() => {
             <!-- Status -->
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-3">الحالة</label>
-              <div class="flex items-center gap-4">
-                <v-radio-group v-model="form.status" inline hide-details class="mt-0">
-                  <v-radio label="غير فعال" :value="false" color="error"></v-radio>
-                  <v-radio label="فعال" :value="true" color="primary"></v-radio>
+              <div class="flex items-center gap-3 mt-1">
+                <v-radio-group v-model="form.status" inline hide-details>
+                  <v-radio :value="true" color="primary">
+                    <template #label>
+                      <span :class="form.status ? 'text-primary font-semibold' : 'text-gray-600'">
+                        فعال
+                      </span>
+                    </template>
+                  </v-radio>
+                  <v-radio :value="false" color="primary">
+                    <template #label>
+                      <span :class="!form.status ? 'text-primary font-semibold' : 'text-gray-600'">
+                        غير فعال
+                      </span>
+                    </template>
+                  </v-radio>
                 </v-radio-group>
               </div>
             </div>
