@@ -515,10 +515,10 @@
       <div v-if="activeTab === 'tests'">
         <!-- Test 1: اختبار التدرج الحبيبي -->
         <div class="p-6 border-b border-gray-200">
-          <h2 class="text-xl font-bold text-primary-900 mb-6">
+          <h2 class="text-xl font-bold text-primary-900 mb-4">
             اختبار التدرج الحبيبي
           </h2>
-          <div class="flex flex-wrap gap-4">
+          <div class="flex flex-wrap gap-4 -mx-6">
             <div class="info-item-bordered  px-6 py-4">
               <label class="font-semibold text-sm text-gray-500 mb-2 block"
                 >عدد الاختبارات</label
@@ -550,10 +550,10 @@
 
         <!-- Test 2: اختبار الصلابة -->
         <div class="p-6 border-b border-gray-200">
-          <h2 class="text-xl font-bold text-primary-900 mb-6">
+          <h2 class="text-xl font-bold text-primary-900 mb-4">
             اختبار الصلابة
           </h2>
-          <div class="flex flex-wrap gap-4">
+          <div class="flex flex-wrap gap-4 -mx-6">
             <div class="info-item-bordered  px-6 py-4">
               <label class="font-semibold text-sm text-gray-500 mb-2 block"
                 >عدد الاختبارات</label
@@ -585,8 +585,8 @@
 
         <!-- Test 3: اختبار التحمل -->
         <div class="p-6 border-b border-gray-200">
-          <h2 class="text-xl font-bold text-primary-900 mb-6">اختبار التحمل</h2>
-          <div class="flex flex-wrap gap-4">
+          <h2 class="text-xl font-bold text-primary-900 mb-4">اختبار التحمل</h2>
+          <div class="flex flex-wrap gap-4 -mx-6">
             <div class="info-item-bordered  px-6 py-4">
               <label class="font-semibold text-sm text-gray-500 mb-2 block"
                 >عدد الاختبارات</label
