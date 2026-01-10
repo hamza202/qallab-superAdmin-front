@@ -416,7 +416,7 @@
               v-if="product.is_manufacturable"
               class="flex items-center gap-3"
             >
-              <p class="text-base font-semibold text-gray-900 py-2">
+              <p class="text-base text-gray-900 py-2">
                 منتج تصنيع
               </p>
             </div>
@@ -426,7 +426,7 @@
               class="my-2 border-gray-300"
             ></v-divider>
             <div v-if="product.is_sellable" class="flex items-center gap-3">
-              <p class="text-base font-semibold text-gray-900 py-2">
+              <p class="text-base text-gray-900 py-2">
                 متاح للبيع
               </p>
             </div>
@@ -436,7 +436,7 @@
               class="my-2 border-gray-300"
             ></v-divider>
             <div v-if="product.is_purchasable" class="flex items-center gap-3">
-              <p class="text-base font-semibold text-gray-900 py-2">
+              <p class="text-base text-gray-900 py-2">
                 متاح للشراء
               </p>
             </div>
@@ -446,7 +446,7 @@
               class="my-2 border-gray-300"
             ></v-divider>
             <div v-if="product.is_barterable" class="flex items-center gap-3">
-              <p class="text-base font-semibold text-gray-900 py-2">
+              <p class="text-base text-gray-900 py-2">
                 قابل للمقايضة
               </p>
             </div>
@@ -456,7 +456,7 @@
               class="my-2 border-gray-300"
             ></v-divider>
             <div v-if="product.is_clearable" class="flex items-center gap-3">
-              <p class="text-base font-semibold text-gray-900 py-2">
+              <p class="text-base text-gray-900 py-2">
                 قابل للمقاصة
               </p>
             </div>
@@ -466,7 +466,7 @@
               class="my-2 border-gray-300"
             ></v-divider>
             <div v-if="product.is_rentable" class="flex items-center gap-3">
-              <p class="text-base font-semibold text-gray-900 py-2">
+              <p class="text-base text-gray-900 py-2">
                 قابل للإيجار
               </p>
             </div>
@@ -479,7 +479,7 @@
               v-if="product.allow_negative_sales"
               class="flex items-center gap-3"
             >
-              <p class="text-base font-semibold text-gray-900 py-2">
+              <p class="text-base text-gray-900 py-2">
                 البيع بالسالب
               </p>
             </div>
