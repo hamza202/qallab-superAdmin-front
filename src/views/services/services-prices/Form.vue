@@ -72,9 +72,13 @@ const { success, error } = useNotification()
 const loading = ref(false)
 const saving = ref(false)
 
-const priceListIcon = `<svg width="52" height="52" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path fill-rule="evenodd" clip-rule="evenodd" d="M10.8333 6.5C8.4401 6.5 6.5 8.4401 6.5 10.8333V41.1667C6.5 43.5599 8.4401 45.5 10.8333 45.5H41.1667C43.5599 45.5 45.5 43.5599 45.5 41.1667V10.8333C45.5 8.4401 43.5599 6.5 41.1667 6.5H10.8333ZM15.1667 18.4167C15.1667 17.2201 16.1367 16.25 17.3333 16.25H34.6667C35.8633 16.25 36.8333 17.2201 36.8333 18.4167C36.8333 19.6133 35.8633 20.5833 34.6667 20.5833H17.3333C16.1367 20.5833 15.1667 19.6133 15.1667 18.4167ZM15.1667 29.25C15.1667 28.0534 16.1367 27.0833 17.3333 27.0833H34.6667C35.8633 27.0833 36.8333 28.0534 36.8333 29.25C36.8333 30.4466 35.8633 31.4167 34.6667 31.4167H17.3333C16.1367 31.4167 15.1667 30.4466 15.1667 29.25Z" fill="#1570EF"/>
+const priceListIcon = `<svg width="43" height="35" viewBox="0 0 43 35" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M2 8.5L28 8.5M28 8.5C28 12.0899 30.9102 15 34.5 15C38.0899 15 41 12.0899 41 8.5C41 4.91015 38.0899 2 34.5 2C30.9102 2 28 4.91015 28 8.5ZM15 25.8333L41 25.8333M15 25.8333C15 29.4232 12.0899 32.3333 8.5 32.3333C4.91015 32.3333 2 29.4232 2 25.8333C2 22.2435 4.91015 19.3333 8.5 19.3333C12.0899 19.3333 15 22.2435 15 25.8333Z" stroke="#1570EF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`;
+
+const saveIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M4.16536 0.833496H10.5608C10.9684 0.833496 11.1723 0.833496 11.3641 0.879546C11.5341 0.920374 11.6967 0.987715 11.8458 1.0791C12.014 1.18217 12.1582 1.32629 12.4464 1.61454L15.051 4.21911C15.3392 4.50737 15.4834 4.65149 15.5864 4.81969C15.6778 4.96881 15.7452 5.13138 15.786 5.30144C15.832 5.49326 15.832 5.69708 15.832 6.10473V12.5002M8.7487 6.66683H5.4987C5.03199 6.66683 4.79863 6.66683 4.62037 6.576C4.46357 6.49611 4.33609 6.36862 4.25619 6.21182C4.16536 6.03356 4.16536 5.80021 4.16536 5.3335V3.75016M9.58203 15.8335V12.1668C9.58203 11.7001 9.58203 11.4668 9.4912 11.2885C9.41131 11.1317 9.28383 11.0042 9.12702 10.9243C8.94876 10.8335 8.71541 10.8335 8.2487 10.8335H5.4987C5.03199 10.8335 4.79863 10.8335 4.62037 10.9243C4.46357 11.0042 4.33609 11.1317 4.25619 11.2885C4.16536 11.4668 4.16536 11.7001 4.16536 12.1668V15.8335M12.9154 6.80245V13.1668C12.9154 14.1002 12.9154 14.567 12.7337 14.9235C12.5739 15.2371 12.319 15.4921 12.0053 15.6518C11.6488 15.8335 11.1821 15.8335 10.2487 15.8335H3.4987C2.56528 15.8335 2.09857 15.8335 1.74205 15.6518C1.42844 15.4921 1.17348 15.2371 1.01369 14.9235C0.832031 14.567 0.832031 14.1003 0.832031 13.1668V6.41683C0.832031 5.48341 0.832031 5.0167 1.01369 4.66018C1.17348 4.34658 1.42844 4.09161 1.74205 3.93182C2.09857 3.75016 2.56528 3.75016 3.4987 3.75016H9.86308C10.0669 3.75016 10.1688 3.75016 10.2647 3.77319C10.3498 3.7936 10.431 3.82727 10.5056 3.87296C10.5897 3.9245 10.6618 3.99656 10.8059 4.14069L12.5248 5.85964C12.669 6.00376 12.741 6.07583 12.7926 6.15993C12.8383 6.23449 12.8719 6.31577 12.8923 6.4008C12.9154 6.49671 12.9154 6.59862 12.9154 6.80245Z" stroke="white" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`
 
 const supplierId = computed(() => route.params.supplierId ? Number(route.params.supplierId) : 1)
 const searchQuery = ref("")
@@ -309,7 +313,7 @@ onMounted(async () => {
                     </v-btn>
                   </v-btn-toggle>
                 </div>
-                <v-btn variant="flat" color="primary" height="40" class="px-7 font-semibold text-base"
+                <v-btn variant="flat" rounded="4" color="primary-500" border="sm"  height="40" class="px-7 !border-primary-200 text-white font-semibold text-base"
                   @click="applyBulkEdit">
                   تطبيق
                 </v-btn>
@@ -376,14 +380,14 @@ onMounted(async () => {
         </EditableDataTable>
 
         <div class="flex flex-col sm:flex-row gap-3 sm:justify-center mt-6">
-          <v-btn variant="flat" color="primary" height="44" class="font-semibold text-base sm:min-w-[200px]"
+          <v-btn variant="flat" rounded="4" color="primary" height="44" class="font-semibold text-base sm:min-w-[200px]"
             @click="handleSave" :loading="saving" :disabled="loading">
             <template #prepend>
-              <v-icon>mdi-content-save-all-outline</v-icon>
+              <span v-html="saveIcon"></span>
             </template>
             حفظ
           </v-btn>
-          <v-btn variant="flat" color="primary-50" height="44"
+          <v-btn variant="flat" rounded="4" color="primary-50" height="44"
             class="font-semibold text-base text-primary-700 sm:min-w-[200px]" @click="handleClose" :disabled="saving">
             <template #prepend>
               <v-icon>mdi-close</v-icon>

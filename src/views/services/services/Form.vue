@@ -28,18 +28,27 @@ const units = ref<Array<{ id: number; name: string }>>([])
 const taxes = ref<Array<{ id: number; tax_name: string }>>([])
 const pricingMethodsList = ref<Array<{ id: number; name: string }>>([])
 
-const servicesIcon = `<svg width="52" height="52" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect x="6" y="6" width="40" height="40" rx="4" stroke="#1570EF" stroke-width="3"/>
-<path d="M14 16H38" stroke="#1570EF" stroke-width="3"/>
-<path d="M14 24H38" stroke="#1570EF" stroke-width="3"/>
-<path d="M14 32H30" stroke="#1570EF" stroke-width="3"/>
+const servicesIcon = `<svg width="43" height="35" viewBox="0 0 43 35" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M2 8.5L28 8.5M28 8.5C28 12.0899 30.9102 15 34.5 15C38.0899 15 41 12.0899 41 8.5C41 4.91015 38.0899 2 34.5 2C30.9102 2 28 4.91015 28 8.5ZM15 25.8333L41 25.8333M15 25.8333C15 29.4232 12.0899 32.3333 8.5 32.3333C4.91015 32.3333 2 29.4232 2 25.8333C2 22.2435 4.91015 19.3333 8.5 19.3333C12.0899 19.3333 15 22.2435 15 25.8333Z" stroke="#1570EF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`
+const saveIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M10.8333 5.00016H5.49992C5.03321 5.00016 4.79985 5.00016 4.62159 4.90933C4.46479 4.82944 4.33731 4.70196 4.25741 4.54515C4.16659 4.3669 4.16659 4.13354 4.16659 3.66683V0.833496M12.4999 15.8335V10.5002C12.4999 10.0335 12.4999 9.8001 12.4091 9.62184C12.3292 9.46504 12.2017 9.33755 12.0449 9.25766C11.8667 9.16683 11.6333 9.16683 11.1666 9.16683H5.49992C5.03321 9.16683 4.79985 9.16683 4.62159 9.25766C4.46479 9.33755 4.33731 9.46504 4.25741 9.62184C4.16659 9.8001 4.16659 10.0335 4.16659 10.5002V15.8335M15.8333 6.10473V11.8335C15.8333 13.2336 15.8333 13.9337 15.5608 14.4685C15.3211 14.9389 14.9386 15.3213 14.4682 15.561C13.9334 15.8335 13.2334 15.8335 11.8333 15.8335H4.83325C3.43312 15.8335 2.73306 15.8335 2.19828 15.561C1.72787 15.3213 1.34542 14.9389 1.10574 14.4685C0.833252 13.9337 0.833252 13.2336 0.833252 11.8335V4.8335C0.833252 3.43336 0.833252 2.7333 1.10574 2.19852C1.34542 1.72811 1.72787 1.34566 2.19828 1.10598C2.73306 0.833496 3.43312 0.833496 4.83325 0.833496H10.562C10.9697 0.833496 11.1735 0.833496 11.3653 0.879546C11.5354 0.920374 11.6979 0.987715 11.8471 1.0791C12.0153 1.18217 12.1594 1.32629 12.4476 1.61454L15.0522 4.21911C15.3405 4.50737 15.4846 4.65149 15.5877 4.81969C15.679 4.96881 15.7464 5.13138 15.7872 5.30144C15.8333 5.49326 15.8333 5.69708 15.8333 6.10473Z" stroke="white" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`;
+
 
 const activeTab = ref(0)
 
 const tabs = [
-    { title: "البيانات الأساسية", value: 0 },
-    { title: "البيانات التشغيلية", value: 1 },
+    {
+        title: "البيانات الأساسية", value: 0, icon: `<svg width="19" height="22" viewBox="0 0 19 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M17 11.5V5.8C17 4.11984 17 3.27976 16.673 2.63803C16.3854 2.07354 15.9265 1.6146 15.362 1.32698C14.7202 1 13.8802 1 12.2 1H5.8C4.11984 1 3.27976 1 2.63803 1.32698C2.07354 1.6146 1.6146 2.07354 1.32698 2.63803C1 3.27976 1 4.11984 1 5.8V16.2C1 17.8802 1 18.7202 1.32698 19.362C1.6146 19.9265 2.07354 20.3854 2.63803 20.673C3.27976 21 4.11984 21 5.8 21H9M11 10H5M7 14H5M13 6H5M11.5 18L13.5 20L18 15.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+` },
+    {
+        title: "البيانات التشغيلية", value: 1, icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M12 4V15.2C12 16.8802 12 17.7202 12.327 18.362C12.6146 18.9265 13.0735 19.3854 13.638 19.673C14.2798 20 15.1198 20 16.8 20H17M17 20C17 21.1046 17.8954 22 19 22C20.1046 22 21 21.1046 21 20C21 18.8954 20.1046 18 19 18C17.8954 18 17 18.8954 17 20ZM7 4L17 4M7 4C7 5.10457 6.10457 6 5 6C3.89543 6 3 5.10457 3 4C3 2.89543 3.89543 2 5 2C6.10457 2 7 2.89543 7 4ZM17 4C17 5.10457 17.8954 6 19 6C20.1046 6 21 5.10457 21 4C21 2.89543 20.1046 2 19 2C17.8954 2 17 2.89543 17 4ZM12 12H17M17 12C17 13.1046 17.8954 14 19 14C20.1046 14 21 13.1046 21 12C21 10.8954 20.1046 10 19 10C17.8954 10 17 10.8954 17 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+` },
 ]
 
 // Form data matching API payload structure
@@ -334,59 +343,53 @@ const checkCircleIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
                 description-key="pages.services.description" />
 
             <div class="-mx-6">
-                <div class="bg-white px-6">
-                    <v-tabs v-model="activeTab" color="primary" class="custom-tabs mb-6" hide-slider>
-                        <v-tab v-for="tab in tabs" :key="tab.value" :value="tab.value" :class="[
-                            'custom-tab',
-                            {
-                                'custom-tab--active': isTabActive(tab.value),
-                                'custom-tab--completed': isTabCompleted(tab.value),
-                            },
-                        ]" @click="handleTabChange(tab.value, $event)">
-                            {{ tab.title }}
-                            <span v-if="isTabCompleted(tab.value)" class="ms-2" v-html="checkCircleIcon"></span>
-                        </v-tab>
-                    </v-tabs>
+                <div class="flex gap-2 overflow-y-auto py-4 px-6 border-y border-gray-200">
+                    <button v-for="tab in tabs" :key="tab.value" @click="activeTab = tab.value" :class="[
+                        'flex items-center gap-2 px-3.5 py-2.5 rounded-md transition-all',
+                        isTabActive(tab.value)
+                            ? 'bg-primary-500 text-white'
+                            : 'text-gray-400 hover:bg-gray-50',
+                    ]">
+                        <span v-html="tab.icon" class="w-6 h-6"></span>
+                        <span class="text-base font-semibold whitespace-nowrap">{{
+                            tab.title
+                            }}</span>
+                    </button>
+                </div>
 
+                <div class="bg-white px-6 py-3">
                     <v-tabs-window v-model="activeTab">
                         <v-tabs-window-item :value="0">
-                            <BasicInfoTab 
-                                v-model="basicInfoData" 
-                                :domains="domains"
-                                :types="types"
-                                :units="units"
-                                :pricing-methods="pricingMethodsList"
-                                :taxes="taxes"
-                            />
+                            <BasicInfoTab v-model="basicInfoData" :domains="domains" :types="types" :units="units"
+                                :pricing-methods="pricingMethodsList" :taxes="taxes" />
                         </v-tabs-window-item>
 
                         <v-tabs-window-item :value="1">
-                            <OperationalDataTab 
-                                v-model="operationalData"
-                                :duration-units="durationUnits"
-                                :visibility-levels="visibilityLevels"
-                            />
+                            <OperationalDataTab v-model="operationalData" :duration-units="durationUnits"
+                                :visibility-levels="visibilityLevels" />
                         </v-tabs-window-item>
                     </v-tabs-window>
                 </div>
 
-                <div class="flex flex-col sm:flex-row gap-3 sm:justify-center mt-6 px-6">
-                    <v-btn variant="flat" color="primary" height="44" class="font-semibold text-base sm:min-w-[200px]"
-                        @click="handleSave" :loading="saving">
+                <!-- Action Buttons -->
+                <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col">
+                    <v-btn variant="flat" color="primary" rounded="4" height="48" class="min-w-56"
+                        @click="handleSave">
                         <template #prepend>
-                            <v-icon>mdi-content-save-all-outline</v-icon>
+                            <span v-html="saveIcon"></span>
                         </template>
-                        حفظ
+
+                        <span>حفظ</span>
                     </v-btn>
-                    <v-btn variant="flat" color="primary-50" height="44"
-                        class="font-semibold text-base text-primary-700 sm:min-w-[200px]" @click="handleClose"
-                        :disabled="saving">
+                    <v-btn variant="flat" color="primary-50" rounded="4" height="48"
+                        class="font-semibold text-base text-primary-700 px-6 min-w-56" @click="handleClose">
                         <template #prepend>
                             <v-icon>mdi-close</v-icon>
                         </template>
-                        اغلاق
+                        <span>إغلاق</span>
                     </v-btn>
                 </div>
+
             </div>
         </div>
     </default-layout>

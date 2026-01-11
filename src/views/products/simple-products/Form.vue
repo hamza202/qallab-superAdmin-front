@@ -456,7 +456,6 @@ const plusIcon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xm
   <default-layout>
     <div class="form-validation-page">
       <!-- Main Card -->
-
       <!-- Header -->
       <PageHeader :icon="gridIcon" title-key="pages.simpleProducts.title"
         description-key="pages.simpleProducts.description" />
