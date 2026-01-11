@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { reactive, watch, ref } from 'vue';
+import DatePickerInput from '@/components/common/forms/DatePickerInput.vue';
 
 // Available languages
 const availableLanguages = ref([
@@ -88,6 +89,28 @@ watch(() => props, (newProps) => {
 const emitUpdate = () => {
   emit('update:formData', { ...formData });
 };
+
+const markIcon = `<svg width="18" height="22" viewBox="0 0 18 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M9 12C10.6569 12 12 10.6569 12 9C12 7.34315 10.6569 6 9 6C7.34315 6 6 7.34315 6 9C6 10.6569 7.34315 12 9 12Z" stroke="#4B5565" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M9 21C13 17 17 13.4183 17 9C17 4.58172 13 1 9 1C4.58172 1 1 4.58172 1 9C1 13.4183 5 17 9 21Z" stroke="#4B5565" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`
+
+const infoIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_1892_22688)">
+<path d="M6.06065 6.00016C6.21739 5.55461 6.52675 5.1789 6.93395 4.93958C7.34116 4.70027 7.81991 4.61279 8.28543 4.69264C8.75096 4.77249 9.17319 5.01451 9.47737 5.37585C9.78154 5.73718 9.94802 6.19451 9.94732 6.66683C9.94732 8.00016 7.94732 8.66683 7.94732 8.66683M8.00065 11.3335H8.00732M14.6673 8.00016C14.6673 11.6821 11.6825 14.6668 8.00065 14.6668C4.31875 14.6668 1.33398 11.6821 1.33398 8.00016C1.33398 4.31826 4.31875 1.3335 8.00065 1.3335C11.6825 1.3335 14.6673 4.31826 14.6673 8.00016Z" stroke="#9AA4B2" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<defs>
+<clipPath id="clip0_1892_22688">
+<rect width="16" height="16" fill="white"/>
+</clipPath>
+</defs>
+</svg>
+`;
+
+const datepickerInput = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M13.3333 2.66683H12.6667V1.3335H11.3333V2.66683H4.66667V1.3335H3.33333V2.66683H2.66667C1.93333 2.66683 1.33333 3.26683 1.33333 4.00016V13.3335C1.33333 14.0668 1.93333 14.6668 2.66667 14.6668H13.3333C14.0667 14.6668 14.6667 14.0668 14.6667 13.3335V4.00016C14.6667 3.26683 14.0667 2.66683 13.3333 2.66683ZM13.3333 13.3335H2.66667V6.00016H13.3333V13.3335Z" fill="#4B5565"/>
+</svg>
+`
 </script>
 
 <template>
@@ -107,7 +130,8 @@ const emitUpdate = () => {
           </template>
         </LanguageTabs>
       </div>
-      <div class="hidden md:block"></div>
+      <TextInput v-model="formData.commercialRegister" @blur="emitUpdate" label="السجل التجاري" placeholder="32655451"
+        required />
 
       <div class="md:col-span-2">
         <LanguageTabs :languages="availableLanguages" label="الاسم التجاري">
@@ -121,31 +145,62 @@ const emitUpdate = () => {
           </template>
         </LanguageTabs>
       </div>
-      <TextInput v-model="formData.commercialRegister" @blur="emitUpdate" label="السجل التجاري" placeholder="32655451"
-        required />
-
       <TextInput v-model="formData.taxRegister" @blur="emitUpdate" label="الرقم الضريبي" placeholder="216623263" />
       <SelectWithIconInput v-model="formData.entityType" @update:model-value="emitUpdate" label="نوع الكيان"
         placeholder="شركة مساهمة" :items="entityTypeItems" />
 
       <TextInput v-model="formData.phone" @blur="emitUpdate" label="الهاتف" placeholder="+966 (555) 000-0000" dir="ltr">
-        <template #append-inner>
+        <template #prepend-inner>
           <span class="text-gray-900 font-semibold me-2 block text-sm">KSA</span>
         </template>
       </TextInput>
       <TextInput v-model="formData.mobile" @blur="emitUpdate" label="الجوال" placeholder="+966 (555) 000-0000"
         dir="ltr">
-        <template #append-inner>
+        <template #prepend-inner>
           <span class="text-gray-900 font-semibold me-2 block text-sm">KSA</span>
         </template>
       </TextInput>
 
-      <TextInput v-model="formData.crIssueDate" @blur="emitUpdate" type="date" label="تاريخ إصدار السجل التجاري"
-        placeholder="2024-03-01" />
-      <TextInput v-model="formData.crExpiryDate" @blur="emitUpdate" type="date" label="تاريخ انتهاء السجل التجاري"
-        placeholder="2024-03-01" />
+      <DatePickerInput v-model="formData.crIssueDate" @blur="emitUpdate" label="تاريخ إصدار السجل التجاري"
+        placeholder="اختر التاريخ">
+        <template #append-inner>
+          <v-tooltip location="top" content-class="custom-tooltip">
+            <template #activator="{ props: tooltipProps }">
+              <v-btn class="!min-w-0 p-0" size="small" density="compact"
+                v-bind="tooltipProps">
+                <span v-html="infoIcon"></span>
+              </v-btn>
+            </template>
+            <div>
+              تاريخ إصدار السجل التجاري للمؤسسة
+            </div>
+          </v-tooltip>
+        </template>
+        <template #prepend-inner>
+          <span v-html="datepickerInput"></span>
+        </template>
+      </DatePickerInput>
+      <DatePickerInput v-model="formData.crExpiryDate" @blur="emitUpdate" label="تاريخ انتهاء السجل التجاري"
+        placeholder="اختر التاريخ">
+        <template #append-inner>
+          <v-tooltip location="top" content-class="custom-tooltip">
+            <template #activator="{ props: tooltipProps }">
+              <v-btn class="!min-w-0 p-0" size="small" density="compact"
+                v-bind="tooltipProps">
+                <span v-html="infoIcon"></span>
+              </v-btn>
+            </template>
+            <div>
+              تاريخ انتهاء صلاحية السجل التجاري
+            </div>
+          </v-tooltip>
+        </template>
+        <template #prepend-inner>
+          <span v-html="datepickerInput"></span>
+        </template>
+      </DatePickerInput>
 
-      <SelectWithIconInput v-model="formData.languageId" @update:model-value="emitUpdate" label="اللغة"
+      <SelectWithIconInput show-add-button v-model="formData.languageId" @update:model-value="emitUpdate" label="اللغة"
         placeholder="English" :items="languageItems" />
       <TextInput v-model="formData.email" @blur="emitUpdate" label="البريد الإلكتروني" placeholder="info@buildtrans.sa"
         required dir="ltr" />
@@ -161,17 +216,29 @@ const emitUpdate = () => {
       <TextInput v-model="formData.postalCode" @blur="emitUpdate" label="الرمز البريدي" placeholder="966" />
       <TextInput v-model="formData.buildingNumber" @blur="emitUpdate" label="رقم المبنى" placeholder="25544" />
 
-      <TextInput v-model="formData.address1" @blur="emitUpdate" label="العنوان الوطني" placeholder="Industrial Area">
-        <template #prepend-inner>
-          <v-icon size="small" color="gray">mdi-map-marker</v-icon>
+      <TextInput v-model="formData.address1" dir="ltr" @blur="emitUpdate" label="العنوان الوطني" placeholder="Industrial Area">
+        <template #append-inner>
+          <span v-html="markIcon"></span>
         </template>
       </TextInput>
       <div>
         <span class="text-gray-700 text-sm font-semibold mb-2 block">حالة المقاول ؟</span>
         <div class="flex gap-4">
           <v-radio-group v-model="formData.isActive" @update:model-value="emitUpdate" inline hide-details>
-            <v-radio label="غير فعال" :value="false" color="primary" />
-            <v-radio label="فعال" :value="true" color="primary" />
+            <v-radio :value="true" color="primary">
+              <template #label>
+                <span :class="formData.isActive ? 'text-primary font-semibold' : 'text-gray-600'">
+                  فعال
+                </span>
+              </template>
+            </v-radio>
+            <v-radio :value="false" color="primary">
+              <template #label>
+                <span :class="!formData.isActive ? 'text-primary font-semibold' : 'text-gray-600'">
+                  غير فعال
+                </span>
+              </template>
+            </v-radio>
           </v-radio-group>
         </div>
       </div>

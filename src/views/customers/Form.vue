@@ -121,8 +121,15 @@ const isFormValid = ref(false);
 // Tabs
 const activeTab = ref(0);
 const tabs = [
-  { title: "المعلومات الاساسية", value: 0 },
-  { title: "المعلومات المحاسبية", value: 1 },
+  {
+    title: "المعلومات الاساسية", value: 0, icon: `<svg width="19" height="22" viewBox="0 0 19 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M17 11.5V5.8C17 4.11984 17 3.27976 16.673 2.63803C16.3854 2.07354 15.9265 1.6146 15.362 1.32698C14.7202 1 13.8802 1 12.2 1H5.8C4.11984 1 3.27976 1 2.63803 1.32698C2.07354 1.6146 1.6146 2.07354 1.32698 2.63803C1 3.27976 1 4.11984 1 5.8V16.2C1 17.8802 1 18.7202 1.32698 19.362C1.6146 19.9265 2.07354 20.3854 2.63803 20.673C3.27976 21 4.11984 21 5.8 21H9M11 10H5M7 14H5M13 6H5M11.5 18L13.5 20L18 15.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>` },
+  {
+    title: "المعلومات المحاسبية", value: 1, icon: `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M15.5 4.5L4.5 15.5M6.5 8.5V4.5M4.5 6.5H8.5M11.5 13.5H15.5M5.8 19H14.2C15.8802 19 16.7202 19 17.362 18.673C17.9265 18.3854 18.3854 17.9265 18.673 17.362C19 16.7202 19 15.8802 19 14.2V5.8C19 4.11984 19 3.27976 18.673 2.63803C18.3854 2.07354 17.9265 1.6146 17.362 1.32698C16.7202 1 15.8802 1 14.2 1H5.8C4.11984 1 3.27976 1 2.63803 1.32698C2.07354 1.6146 1.6146 2.07354 1.32698 2.63803C1 3.27976 1 4.11984 1 5.8V14.2C1 15.8802 1 16.7202 1.32698 17.362C1.6146 17.9265 2.07354 18.3854 2.63803 18.673C3.27976 19 4.11984 19 5.8 19Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+` },
 ];
 
 const isTabActive = (value: number) => activeTab.value === value;
@@ -571,12 +578,13 @@ onMounted(async () => {
 
 // Icons
 const customersIcon = `<svg width="52" height="52" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path fill-rule="evenodd" clip-rule="evenodd" d="M26 6.5C18.5442 6.5 12.5 12.5442 12.5 20C12.5 27.4558 18.5442 33.5 26 33.5C33.4558 33.5 39.5 27.4558 39.5 20C39.5 12.5442 33.4558 6.5 26 6.5ZM16.8333 20C16.8333 14.9374 20.9374 10.8333 26 10.8333C31.0626 10.8333 35.1667 14.9374 35.1667 20C35.1667 25.0626 31.0626 29.1667 26 29.1667C20.9374 29.1667 16.8333 25.0626 16.8333 20Z" fill="#1570EF"/>
-<path fill-rule="evenodd" clip-rule="evenodd" d="M26 37.8333C19.7211 37.8333 14.0289 39.7344 9.88167 42.8177C7.81306 44.3555 6.5 46.9289 6.5 49.8333C6.5 51.0299 7.47005 52 8.66667 52H43.3333C44.5299 52 45.5 51.0299 45.5 49.8333C45.5 46.9289 44.1869 44.3555 42.1183 42.8177C37.9711 39.7344 32.2789 37.8333 26 37.8333ZM10.8333 47.6667C11.1844 46.5889 11.9156 45.6111 12.9817 44.8177C16.3711 42.2989 20.9456 40.6667 26 40.6667C31.0544 40.6667 35.6289 42.2989 39.0183 44.8177C40.0844 45.6111 40.8156 46.5889 41.1667 47.6667H10.8333Z" fill="#1570EF"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M32.85 26H36.4837C37.6258 26 38.6112 25.9999 39.4227 26.0662C40.2793 26.1362 41.1313 26.2907 41.9511 26.7085C43.1742 27.3316 44.1685 28.326 44.7917 29.5491C45.2094 30.3689 45.3639 31.2209 45.4339 32.0774C45.5002 32.889 45.5002 33.8743 45.5002 35.0164V36.4836C45.5002 37.6257 45.5002 38.611 45.4339 39.4226C45.3639 40.2791 45.2094 41.1311 44.7917 41.9509C44.1685 43.174 43.1742 44.1684 41.9511 44.7915C41.1313 45.2093 40.2793 45.3638 39.4227 45.4338C38.6111 45.5001 37.6258 45.5 36.4836 45.5H32.85C31.7079 45.5 30.7225 45.5001 29.9109 45.4338C29.0544 45.3638 28.2024 45.2093 27.3826 44.7915C26.1595 44.1684 25.1651 43.174 24.542 41.9509C24.1242 41.1311 23.9697 40.2791 23.8997 39.4226C23.8334 38.611 23.8335 37.6257 23.8335 36.4835V35.0165C23.8335 33.8743 23.8334 32.889 23.8997 32.0774C23.9697 31.2209 24.1242 30.3689 24.542 29.5491C25.1651 28.326 26.1595 27.3316 27.3826 26.7085C28.2024 26.2907 29.0544 26.1362 29.9109 26.0662C30.7225 25.9999 31.7078 26 32.85 26ZM30.2638 30.3852C29.6752 30.4333 29.457 30.5149 29.3499 30.5695C28.9422 30.7772 28.6107 31.1087 28.403 31.5164C28.3484 31.6235 28.2668 31.8417 28.2187 32.4303C28.1685 33.0442 28.1668 33.8508 28.1668 35.1V36.4C28.1668 37.6492 28.1685 38.4558 28.2187 39.0697C28.2668 39.6583 28.3484 39.8765 28.403 39.9836C28.6107 40.3913 28.9422 40.7228 29.3499 40.9305C29.457 40.9851 29.6752 41.0667 30.2638 41.1148C30.8777 41.165 31.6843 41.1667 32.9335 41.1667H36.4002C37.6494 41.1667 38.456 41.165 39.0699 41.1148C39.6585 41.0667 39.8767 40.9851 39.9838 40.9305C40.3915 40.7228 40.723 40.3913 40.9307 39.9836C40.9853 39.8765 41.0669 39.6583 41.115 39.0697C41.1652 38.4558 41.1668 37.6492 41.1668 36.4V35.1C41.1668 33.8508 41.1652 33.0442 41.115 32.4303C41.0669 31.8417 40.9853 31.6235 40.9307 31.5164C40.723 31.1087 40.3915 30.7772 39.9838 30.5695C39.8767 30.5149 39.6585 30.4333 39.0699 30.3852C38.456 30.335 37.6494 30.3333 36.4002 30.3333H32.9335C31.6843 30.3333 30.8777 30.335 30.2638 30.3852Z" fill="#1570EF"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M13.9018 6.50009C13.0769 6.49944 12.3666 6.49887 11.7321 6.62508C9.15361 7.13798 7.13798 9.15361 6.62508 11.7321C6.49887 12.3666 6.49944 13.0769 6.50009 13.9018L6.50019 14.0835L6.50009 14.2653C6.49944 15.0901 6.49887 15.8004 6.62508 16.4349C7.13798 19.0134 9.15361 21.0291 11.7321 21.542C12.3666 21.6682 13.0769 21.6676 13.9018 21.667H38.0986C38.9235 21.6676 39.6338 21.6682 40.2683 21.542C42.8468 21.0291 44.8624 19.0134 45.3753 16.4349C45.5015 15.8005 45.5009 15.0902 45.5003 14.2654L45.5002 14.0835L45.5003 13.9017C45.5009 13.0769 45.5015 12.3666 45.3753 11.7321C44.8624 9.15361 42.8468 7.13798 40.2683 6.62508C39.6338 6.49887 38.9235 6.49944 38.0986 6.50009H13.9018ZM12.5775 10.8752C12.734 10.844 12.9729 10.8335 14.0835 10.8335H37.9169C39.0275 10.8335 39.2663 10.844 39.4229 10.8752C40.2824 11.0461 40.9543 11.718 41.1252 12.5775C41.1564 12.734 41.1669 12.9729 41.1669 14.0835C41.1669 15.1941 41.1564 15.433 41.1252 15.5896C40.9543 16.449 40.2824 17.1209 39.4229 17.2919C39.2663 17.323 39.0275 17.3335 37.9169 17.3335H14.0835C12.9729 17.3335 12.734 17.323 12.5775 17.2919C11.718 17.1209 11.0461 16.449 10.8752 15.5896C10.844 15.433 10.8335 15.1941 10.8335 14.0835C10.8335 12.9729 10.844 12.734 10.8752 12.5775C11.0461 11.718 11.718 11.0461 12.5775 10.8752Z" fill="#1570EF"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M13.0002 26.0003C9.41035 26.0003 6.5002 28.9104 6.5002 32.5003V39.0003C6.5002 42.5901 9.41035 45.5003 13.0002 45.5003C16.59 45.5003 19.5002 42.5901 19.5002 39.0003V32.5003C19.5002 28.9104 16.5901 26.0003 13.0002 26.0003ZM10.8335 32.5003C10.8335 31.3036 11.8036 30.3336 13.0002 30.3336C14.1968 30.3336 15.1669 31.3036 15.1669 32.5003V39.0003C15.1669 40.1969 14.1968 41.1669 13.0002 41.1669C11.8036 41.1669 10.8335 40.1969 10.8335 39.0003V32.5003Z" fill="#1570EF"/>
 </svg>`;
 
 const plusIcon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M10 4.16667V15.8333M4.16667 10H15.8333" stroke="white" stroke-width="1.67" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M10 4.16667V15.8333M4.16667 10H15.8333" stroke="currentColor" stroke-width="1.67" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`;
 
 const checkCircleIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -589,9 +597,21 @@ const checkCircleIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
 </clipPath>
 </defs>
 </svg>`;
+const locationIcon = `<svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M4 13.2864C2.14864 14.1031 1 15.2412 1 16.5C1 18.9853 5.47715 21 11 21C16.5228 21 21 18.9853 21 16.5C21 15.2412 19.8514 14.1031 18 13.2864M17 7C17 11.0637 12.5 13 11 16C9.5 13 5 11.0637 5 7C5 3.68629 7.68629 1 11 1C14.3137 1 17 3.68629 17 7ZM12 7C12 7.55228 11.5523 8 11 8C10.4477 8 10 7.55228 10 7C10 6.44772 10.4477 6 11 6C11.5523 6 12 6.44772 12 7Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+`
+const listIcon = `<svg width="20" height="16" viewBox="0 0 20 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M19 8L7 8M19 2L7 2M19 14L7 14M3 8C3 8.55228 2.55228 9 2 9C1.44772 9 1 8.55228 1 8C1 7.44772 1.44772 7 2 7C2.55228 7 3 7.44772 3 8ZM3 2C3 2.55228 2.55228 3 2 3C1.44772 3 1 2.55228 1 2C1 1.44772 1.44772 1 2 1C2.55228 1 3 1.44772 3 2ZM3 14C3 14.5523 2.55228 15 2 15C1.44772 15 1 14.5523 1 14C1 13.4477 1.44772 13 2 13C2.55228 13 3 13.4477 3 14Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+`
+const saveIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M10.8333 5.00016H5.49992C5.03321 5.00016 4.79985 5.00016 4.62159 4.90933C4.46479 4.82944 4.33731 4.70196 4.25741 4.54515C4.16659 4.3669 4.16659 4.13354 4.16659 3.66683V0.833496M12.4999 15.8335V10.5002C12.4999 10.0335 12.4999 9.8001 12.4091 9.62184C12.3292 9.46504 12.2017 9.33755 12.0449 9.25766C11.8667 9.16683 11.6333 9.16683 11.1666 9.16683H5.49992C5.03321 9.16683 4.79985 9.16683 4.62159 9.25766C4.46479 9.33755 4.33731 9.46504 4.25741 9.62184C4.16659 9.8001 4.16659 10.0335 4.16659 10.5002V15.8335M15.8333 6.10473V11.8335C15.8333 13.2336 15.8333 13.9337 15.5608 14.4685C15.3211 14.9389 14.9386 15.3213 14.4682 15.561C13.9334 15.8335 13.2334 15.8335 11.8333 15.8335H4.83325C3.43312 15.8335 2.73306 15.8335 2.19828 15.561C1.72787 15.3213 1.34542 14.9389 1.10574 14.4685C0.833252 13.9337 0.833252 13.2336 0.833252 11.8335V4.8335C0.833252 3.43336 0.833252 2.7333 1.10574 2.19852C1.34542 1.72811 1.72787 1.34566 2.19828 1.10598C2.73306 0.833496 3.43312 0.833496 4.83325 0.833496H10.562C10.9697 0.833496 11.1735 0.833496 11.3653 0.879546C11.5354 0.920374 11.6979 0.987715 11.8471 1.0791C12.0153 1.18217 12.1594 1.32629 12.4476 1.61454L15.0522 4.21911C15.3405 4.50737 15.4846 4.65149 15.5877 4.81969C15.679 4.96881 15.7464 5.13138 15.7872 5.30144C15.8333 5.49326 15.8333 5.69708 15.8333 6.10473Z" stroke="white" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`;
+
 
 const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M12.3333 5.00033V4.33366C12.3333 3.40024 12.3333 2.93353 12.1517 2.57701C11.9919 2.2634 11.7369 2.00844 11.4233 1.84865C11.0668 1.66699 10.6001 1.66699 9.66667 1.66699H8.33333C7.39991 1.66699 6.9332 1.66699 6.57668 1.84865C6.26308 2.00844 6.00811 2.2634 5.84832 2.57701C5.66667 2.93353 5.66667 3.40024 5.66667 4.33366V5.00033M7.33333 9.58366V13.7503M10.6667 9.58366V13.7503M1.5 5.00033H16.5M14.8333 5.00033V14.3337C14.8333 15.7338 14.8333 16.4339 14.5608 16.9686C14.3212 17.439 13.9387 17.8215 13.4683 18.0612C12.9335 18.3337 12.2335 18.3337 10.8333 18.3337H7.16667C5.76654 18.3337 5.06647 18.3337 4.53169 18.0612C4.06129 17.8215 3.67883 17.439 3.43915 16.9686C3.16667 16.4339 3.16667 15.7338 3.16667 14.3337V5.00033" stroke="#B42318" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M12.3333 5.00033V4.33366C12.3333 3.40024 12.3333 2.93353 12.1517 2.57701C11.9919 2.2634 11.7369 2.00844 11.4233 1.84865C11.0668 1.66699 10.6001 1.66699 9.66667 1.66699H8.33333C7.39991 1.66699 6.9332 1.66699 6.57668 1.84865C6.26308 2.00844 6.00811 2.2634 5.84832 2.57701C5.66667 2.93353 5.66667 3.40024 5.66667 4.33366V5.00033M7.33333 9.58366V13.7503M10.6667 9.58366V13.7503M1.5 5.00033H16.5M14.8333 5.00033V14.3337C14.8333 15.7338 14.8333 16.4339 14.5608 16.9686C14.3212 17.439 13.9387 17.8215 13.4683 18.0612C12.9335 18.3337 12.2335 18.3337 10.8333 18.3337H7.16667C5.76654 18.3337 5.06647 18.3337 4.53169 18.0612C4.06129 17.8215 3.67883 17.439 3.43915 16.9686C3.16667 16.4339 3.16667 15.7338 3.16667 14.3337V5.00033" stroke="currentColor" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`;
 
 </script>
@@ -604,18 +624,19 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
         description-key="pages.customers.description" />
 
       <!-- Tabs -->
-      <v-tabs v-model="activeTab" class="custom-tabs mb-6" hide-slider>
-        <v-tab v-for="tab in tabs" :key="tab.value" :value="tab.value" :class="[
-          'custom-tab',
-          {
-            'custom-tab--active': isTabActive(tab.value),
-            'custom-tab--completed': isTabCompleted(tab.value),
-          },
-        ]" @click="handleTabChange(tab.value, $event)">
-          {{ tab.title }}
-          <span v-if="isTabCompleted(tab.value)" class="ms-2" v-html="checkCircleIcon"></span>
-        </v-tab>
-      </v-tabs>
+      <div class="flex gap-2 overflow-y-auto py-4 px-6 border-y border-gray-200 -mx-6 mb-3">
+        <button v-for="tab in tabs" :key="tab.value" @click="activeTab = tab.value" :class="[
+          'flex items-center gap-2 px-3.5 py-2.5 rounded-md transition-all',
+          isTabActive(tab.value)
+            ? 'bg-primary-500 text-white'
+            : 'text-gray-400 hover:bg-gray-50',
+        ]">
+          <span v-html="tab.icon" class="w-6 h-6"></span>
+          <span class="text-base font-semibold whitespace-nowrap">{{
+            tab.title
+          }}</span>
+        </button>
+      </div>
 
       <v-tabs-window v-model="activeTab">
         <!-- Tab 1: المعلومات الاساسية -->
@@ -639,12 +660,12 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
                 <div class="md:col-span-2">
                   <LanguageTabs :languages="availableLanguages" label="الاسم كامل">
                     <template #en>
-                      <TextInput v-model="fullNameEn" placeholder="Enter full name in English"
-                        :rules="[required()]" :hide-details="true" />
+                      <TextInput v-model="fullNameEn" placeholder="Enter full name in English" :rules="[required()]"
+                        :hide-details="true" />
                     </template>
                     <template #ar>
-                      <TextInput v-model="fullNameAr" placeholder="ادخل الاسم كامل بالعربية"
-                        :rules="[required()]" :hide-details="true" />
+                      <TextInput v-model="fullNameAr" placeholder="ادخل الاسم كامل بالعربية" :rules="[required()]"
+                        :hide-details="true" />
                     </template>
                   </LanguageTabs>
                 </div>
@@ -657,12 +678,13 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
 
                 <TextInput v-model="mobile" label="الجوال" placeholder="+966 (555) 000-0000" :rules="[required()]"
                   :hide-details="false" dir="ltr">
-                  <template #append-inner>
+                  <template #prepend-inner>
                     <span class="text-gray-900 font-semibold me-2 block text-sm">KSA</span>
                   </template>
                 </TextInput>
-                <TextInput v-model="phone" dir="ltr" label="الهاتف" placeholder="+966 (555) 000-0000" :hide-details="false">
-                  <template #append-inner>
+                <TextInput v-model="phone" dir="ltr" label="الهاتف" placeholder="+966 (555) 000-0000"
+                  :hide-details="false">
+                  <template #prepend-inner>
                     <span class="text-gray-900 font-semibold me-2 block text-sm">KSA</span>
                   </template>
                 </TextInput>
@@ -672,7 +694,7 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
                   :hide-details="false" />
                 <TextInput v-model="legalName" label="الاسم القانوني" placeholder="Al-Nahda Construction LLC"
                   :hide-details="false" />
-                <SelectWithIconInput v-model="entityType" label="نوع الكيان" placeholder="Establishment"
+                <SelectWithIconInput show-add-button v-model="entityType" label="نوع الكيان" placeholder="Establishment"
                   :items="entityTypeItems" :hide-details="false" />
 
                 <TextInput v-model="taxNumber" label="السجل التجاري" placeholder="1255" :hide-details="false" />
@@ -681,27 +703,29 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
 
             <!-- Sub-tabs: Address Info / Contact List -->
             <div class="mb-6">
-              <div class="flex gap-2 mb-4">
-                <v-btn variant="flat" height="56" :class="[
-                  'sm:min-w-[200px] text-base px-10  !shadow-none',
+              <div class="flex gap-2 overflow-y-auto py-4 px-6 border-y border-gray-200 -mx-6">
+                <button @click="basicInfoSubTab = 0" :class="[
+                  'flex items-center gap-2 px-3.5 py-2.5 rounded-md transition-all',
                   basicInfoSubTab === 0
-                    ? '!bg-primary-600 !text-white'
-                    : '!bg-primary-50 !text-primary-700',
-                ]" @click="basicInfoSubTab = 0">
-                  معلومات العنوان
-                </v-btn>
-                <v-btn variant="flat" height="56" :class="[
-                  'sm:min-w-[200px] text-base px-10 !shadow-none',
+                    ? 'bg-primary-500 text-white'
+                    : 'text-gray-400 hover:bg-gray-50',
+                ]">
+                  <span v-html="locationIcon"></span>
+                  <span class="text-base font-semibold whitespace-nowrap"> معلومات العنوان </span>
+                </button>
+                <button @click="basicInfoSubTab = 1" :class="[
+                  'flex items-center gap-2 px-3.5 py-2.5 rounded-md transition-all',
                   basicInfoSubTab === 1
-                    ? '!bg-primary-600 !text-white'
-                    : '!bg-primary-50 !text-primary-700',
-                ]" @click="basicInfoSubTab = 1">
-                  قائمة الاتصال
-                </v-btn>
+                    ? 'bg-primary-500 text-white'
+                    : 'text-gray-400 hover:bg-gray-50',
+                ]">
+                  <span v-html="listIcon"></span>
+                  <span class="text-base font-semibold whitespace-nowrap"> قائمة الاتصال </span>
+                </button>
               </div>
 
               <!-- Address Info Sub-tab -->
-              <div v-if="basicInfoSubTab === 0" class="bg-gray-50 rounded-lg p-6">
+              <div v-if="basicInfoSubTab === 0" class="bg-gray-50 rounded-lg p-6 mt-4">
                 <!-- Row 1: Country, City, Postal Code -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                   <SelectInput v-model="country" label="الدولة" placeholder="الدولة" :items="countryItems"
@@ -723,17 +747,21 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
               </div>
 
               <!-- Contact List Sub-tab -->
-              <div v-if="basicInfoSubTab === 1" class="bg-gray-50 rounded-lg p-6">
-                <div class="flex justify-between items-center mb-4">
+              <div v-if="basicInfoSubTab === 1" class="bg-gray-50 -mx-6">
+                <div class="flex justify-between items-center px-6 border-y border-gray-200 py-3">
                   <h2 class="text-lg font-bold text-primary-900">قائمة عملاء العميل</h2>
-                  <v-btn variant="flat" color="primary" height="40" class="font-semibold" @click="addContact"
-                    prepend-icon="mdi-plus">
-                    اضف
+                  <v-btn variant="flat" color="primary-500" border="sm" height="40"
+                    class="font-semibold px-6 !text-white !border-primary-200" @click="addContact">
+                    <template #prepend>
+                      <span v-html="plusIcon"></span>
+                    </template>
+
+                    أضف جديد
                   </v-btn>
                 </div>
 
                 <!-- Contacts Table with Editable Inputs -->
-                <v-table v-if="contacts.length > 0" class="bg-white rounded-lg">
+                <v-table v-if="contacts.length > 0" class="bg-white">
                   <thead>
                     <tr class="bg-gray-100">
                       <th class="text-right font-semibold text-gray-700 py-3 px-4">الاسم الاول</th>
@@ -768,7 +796,7 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
                       </td>
                       <td class="py-3 px-4">
                         <div class="flex items-center gap-2">
-                          <v-btn icon size="small" variant="text" @click="deleteContact(index)">
+                          <v-btn icon color="error" size="small" variant="text" @click="deleteContact(index)">
                             <span v-html="trashIcon"></span>
                           </v-btn>
                         </div>
@@ -793,10 +821,12 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
                 :hide-details="false" />
               <!-- <SelectWithIconInput v-model="priceList" label="قائمة الاسعار" placeholder="قائمة الاسعار"
                 :items="priceListItems" :hide-details="false"  @add-click="handleAddPriceList" /> -->
-              <SelectWithIconInput v-model="customerClassification" label="تصنيف العميل" placeholder="تصنيف العميل"
-                :items="customerClassificationItems" :hide-details="false" @add-click="handleAddClassification" />
-              <SelectWithIconInput v-model="salesRepresentative" label="مندوب المبيعات" placeholder="مندوب المبيعات"
-                :items="salesRepresentativeItems" :hide-details="false" @add-click="handleAddSalesRep" />
+              <SelectWithIconInput show-add-button v-model="customerClassification" label="تصنيف العميل"
+                placeholder="تصنيف العميل" :items="customerClassificationItems" :hide-details="false"
+                @add-click="handleAddClassification" />
+              <SelectWithIconInput show-add-button v-model="salesRepresentative" label="مندوب المبيعات"
+                placeholder="مندوب المبيعات" :items="salesRepresentativeItems" :hide-details="false"
+                @add-click="handleAddSalesRep" />
               <div>
                 <span class="text-sm font-semibold text-gray-700 mb-1 block">انشاء حساب خاص في شجرة المحاسبة</span>
                 <v-radio-group v-model="createAccountInTree" inline hide-details>
@@ -818,10 +848,24 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
                 :hide-details="false" />
               <div>
                 <span class="text-sm font-semibold text-gray-700 mb-1 block">الحالة الافتراضية</span>
-                <v-radio-group v-model="defaultStatus" inline hide-details>
-                  <v-radio label="فعال" :value="true" color="primary" />
-                  <v-radio label="غير فعال" :value="false" color="primary" />
-                </v-radio-group>
+                <div class="flex items-center gap-3 mt-1">
+                  <v-radio-group v-model="defaultStatus" inline hide-details>
+                    <v-radio :value="true" color="primary">
+                      <template #label>
+                        <span :class="defaultStatus ? 'text-primary font-semibold' : 'text-gray-600'">
+                          فعال
+                        </span>
+                      </template>
+                    </v-radio>
+                    <v-radio :value="false" color="primary">
+                      <template #label>
+                        <span :class="!defaultStatus ? 'text-primary font-semibold' : 'text-gray-600'">
+                          غير فعال
+                        </span>
+                      </template>
+                    </v-radio>
+                  </v-radio-group>
+                </div>
               </div>
             </div>
 
@@ -874,15 +918,20 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
       </v-tabs-window>
 
       <!-- Action Buttons -->
-      <div class="flex justify-center gap-4 mt-6">
-        <v-btn variant="flat" color="primary" prepend-icon="mdi-content-save-all-outline" height="48"
-          class="font-semibold text-base  px-8 sm:!px-20" @click="handleSave" :loading="saving" :disabled="loading">
-          <span>{{ activeTab === 0 ? 'حفظ والمتابعة' : 'حفظ' }}</span>
-        </v-btn>
+      <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col">
+        <v-btn variant="flat" color="primary" rounded="4" height="48" class="min-w-56" @click="handleSave">
+          <template #prepend>
+            <span v-html="saveIcon"></span>
+          </template>
 
-        <v-btn variant="outlined" height="48" prepend-icon="mdi-close" color="primary"
-          class="font-semibold text-base px-8 border-gray-300 bg-primary-50 px-8 sm:!px-20" @click="handleClose">
-          <span>اغلاق</span>
+          <span>حفظ</span>
+        </v-btn>
+        <v-btn variant="flat" color="primary-50" rounded="4" height="48"
+          class="font-semibold text-base text-primary-700 px-6 min-w-56" @click="handleClose">
+          <template #prepend>
+            <v-icon>mdi-close</v-icon>
+          </template>
+          <span>إغلاق</span>
         </v-btn>
       </div>
     </div>

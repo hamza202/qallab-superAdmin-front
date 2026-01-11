@@ -30,23 +30,23 @@ const updateFormData = () => {
 }
 
 // Convert API data to select items format
-const domainItems = computed(() => 
+const domainItems = computed(() =>
   props.domains.map(d => ({ title: d.label, value: d.key }))
 )
 
-const typeItems = computed(() => 
+const typeItems = computed(() =>
   props.types.map(t => ({ title: t.label, value: t.key }))
 )
 
-const unitItems = computed(() => 
+const unitItems = computed(() =>
   props.units.map(u => ({ title: u.name, value: u.id }))
 )
 
-const pricingMethodItems = computed(() => 
+const pricingMethodItems = computed(() =>
   props.pricingMethods.map(p => ({ title: p.name, value: p.id }))
 )
 
-const taxItems = computed(() => 
+const taxItems = computed(() =>
   props.taxes.map(t => ({ title: t.tax_name, value: t.id }))
 )
 </script>
@@ -75,22 +75,19 @@ const taxItems = computed(() =>
 
       <!-- Row 2 -->
       <div>
-        <selectInput v-model="formData.service_category_id" :items="domainItems" variant="outlined"
-          label="فئة الخدمة" density="comfortable" placeholder="اختر الفئة" hide-details
+        <selectInput v-model="formData.service_category_id" :items="domainItems" variant="outlined" label="فئة الخدمة"
+          density="comfortable" placeholder="اختر الفئة" hide-details @update:model-value="updateFormData" />
+      </div>
+
+      <div>
+        <selectWithIconInput show-add-button v-model="formData.service_type" :items="typeItems" variant="outlined"
+          label="نوع الخدمة" density="comfortable" placeholder="داخلية" hide-details
           @update:model-value="updateFormData" />
       </div>
 
       <div>
-        <selectInput v-model="formData.service_type" :items="typeItems" variant="outlined" label="نوع الخدمة"
-          density="comfortable" placeholder="داخلية" hide-details @update:model-value="updateFormData" />
-      </div>
-
-      <div>
-        <label class="block text-sm font-semibold text-gray-900 mb-2">حالة الخدمة</label>
-        <v-radio-group v-model="formData.is_active" inline hide-details @update:model-value="updateFormData">
-          <v-radio label="نشط" :value="true" color="primary" />
-          <v-radio label="غير نشط" :value="false" color="primary" />
-        </v-radio-group>
+        <selectInput v-model="formData.service_category_id" :items="domainItems" variant="outlined" label="حالة الخدمة"
+          density="comfortable" placeholder="اختر الحالة" hide-details @update:model-value="updateFormData" />
       </div>
 
       <!-- Row 3 - Description with Language Tabs -->
@@ -101,16 +98,15 @@ const taxItems = computed(() =>
               min-height="120px" hide-details @update:model-value="updateFormData" />
           </template>
           <template #ar>
-            <RichTextEditor v-model="formData.description_ar" placeholder="ادخل الوصف بالعربية"
-              min-height="120px" hide-details @update:model-value="updateFormData" />
+            <RichTextEditor v-model="formData.description_ar" placeholder="ادخل الوصف بالعربية" min-height="120px"
+              hide-details @update:model-value="updateFormData" />
           </template>
         </LanguageTabs>
       </div>
 
       <div>
-        <selectInput v-model="formData.unit_id" :items="unitItems" variant="outlined"
-          density="comfortable" label="وحدة القياس" placeholder="اختر الوحدة" hide-details
-          @update:model-value="updateFormData" />
+        <selectInput v-model="formData.unit_id" :items="unitItems" variant="outlined" density="comfortable"
+          label="وحدة القياس" placeholder="اختر الوحدة" hide-details @update:model-value="updateFormData" />
       </div>
 
 
@@ -128,27 +124,41 @@ const taxItems = computed(() =>
       </div>
 
       <div>
-        <TextInput v-model="formData.min_quantity" type="number" variant="outlined" density="comfortable" label="حد أدنى للكمية"
-          placeholder="0" hide-details @update:model-value="updateFormData" />
+        <TextInput v-model="formData.min_quantity" type="number" variant="outlined" density="comfortable"
+          label="حد أدنى للكمية" placeholder="0" hide-details @update:model-value="updateFormData" />
+      </div>
+
+
+      <div>
+        <selectInput v-model="formData.tax_id" :items="taxItems" variant="outlined" density="comfortable"
+          label="الضريبة" placeholder="اختر الضريبة" hide-details @update:model-value="updateFormData"
+          :disabled="!formData.is_taxable" />
+      </div>
+
+      <div>
+        <TextInput v-model="formData.tax_percentage" type="number" variant="outlined" label="نسبة الضريبة"
+          density="comfortable" placeholder="0" hide-details @update:model-value="updateFormData"
+          :disabled="!formData.is_taxable" />
       </div>
 
       <div>
         <label class="block text-sm font-semibold text-gray-900 mb-2">خاضعة للضريبة</label>
         <v-radio-group v-model="formData.is_taxable" inline hide-details @update:model-value="updateFormData">
-          <v-radio label="نعم" :value="true" color="primary" />
-          <v-radio label="لا" :value="false" color="primary" />
+          <v-radio :value="true" color="primary">
+            <template #label>
+              <span :class="formData.is_taxable ? 'text-primary font-semibold' : 'text-gray-600'">
+                نعم
+              </span>
+            </template>
+          </v-radio>
+          <v-radio :value="false" color="primary">
+            <template #label>
+              <span :class="!formData.is_taxable ? 'text-primary font-semibold' : 'text-gray-600'">
+                لا
+              </span>
+            </template>
+          </v-radio>
         </v-radio-group>
-      </div>
-
-      <div>
-        <selectInput v-model="formData.tax_id" :items="taxItems" variant="outlined"
-          density="comfortable" label="الضريبة" placeholder="اختر الضريبة" hide-details
-          @update:model-value="updateFormData" :disabled="!formData.is_taxable" />
-      </div>
-
-      <div>
-        <TextInput v-model="formData.tax_percentage" type="number" variant="outlined" label="نسبة الضريبة"
-          density="comfortable" placeholder="0" hide-details @update:model-value="updateFormData" :disabled="!formData.is_taxable" />
       </div>
     </div>
   </div>

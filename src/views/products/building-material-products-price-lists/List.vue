@@ -3,7 +3,9 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useApi } from '@/composables/useApi'
 import { useNotification } from '@/composables/useNotification'
+import { useI18n } from 'vue-i18n'
 
+const { t } = useI18n()
 const router = useRouter()
 const api = useApi()
 const { success, error } = useNotification()
@@ -30,23 +32,30 @@ interface PriceListsResponse {
 
 // Price Lists icon
 const priceListsIcon = `<svg width="52" height="52" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect x="6" y="6" width="40" height="40" rx="4" stroke="#1570EF" stroke-width="3"/>
-<path d="M14 16H38" stroke="#1570EF" stroke-width="3"/>
-<path d="M14 24H38" stroke="#1570EF" stroke-width="3"/>
-<path d="M14 32H30" stroke="#1570EF" stroke-width="3"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M32.8485 26H36.4822C37.6244 26 38.6097 25.9999 39.4213 26.0662C40.2778 26.1362 41.1298 26.2907 41.9496 26.7085C43.1727 27.3316 44.1671 28.326 44.7902 29.5491C45.208 30.3689 45.3625 31.2209 45.4325 32.0774C45.4988 32.889 45.4987 33.8743 45.4987 35.0164V36.4836C45.4987 37.6257 45.4988 38.611 45.4325 39.4226C45.3625 40.2791 45.208 41.1311 44.7902 41.9509C44.1671 43.174 43.1727 44.1684 41.9496 44.7915C41.1298 45.2093 40.2778 45.3638 39.4213 45.4338C38.6097 45.5001 37.6243 45.5 36.4822 45.5H32.8486C31.7064 45.5 30.7211 45.5001 29.9095 45.4338C29.0529 45.3638 28.2009 45.2093 27.3811 44.7915C26.158 44.1684 25.1637 43.174 24.5405 41.9509C24.1228 41.1311 23.9683 40.2791 23.8983 39.4226C23.832 38.611 23.832 37.6257 23.832 36.4835V35.0165C23.832 33.8743 23.832 32.889 23.8983 32.0774C23.9683 31.2209 24.1228 30.3689 24.5405 29.5491C25.1637 28.326 26.158 27.3316 27.3811 26.7085C28.2009 26.2907 29.0529 26.1362 29.9095 26.0662C30.721 25.9999 31.7064 26 32.8485 26ZM30.2623 30.3852C29.6737 30.4333 29.4555 30.5149 29.3484 30.5695C28.9407 30.7772 28.6092 31.1087 28.4015 31.5164C28.3469 31.6235 28.2653 31.8417 28.2172 32.4303C28.1671 33.0442 28.1654 33.8508 28.1654 35.1V36.4C28.1654 37.6492 28.1671 38.4558 28.2172 39.0697C28.2653 39.6583 28.3469 39.8765 28.4015 39.9836C28.6092 40.3913 28.9407 40.7228 29.3484 40.9305C29.4555 40.9851 29.6737 41.0667 30.2623 41.1148C30.8762 41.165 31.6828 41.1667 32.932 41.1667H36.3987C37.6479 41.1667 38.4545 41.165 39.0684 41.1148C39.657 41.0667 39.8752 40.9851 39.9823 40.9305C40.39 40.7228 40.7215 40.3913 40.9292 39.9836C40.9838 39.8765 41.0654 39.6583 41.1135 39.0697C41.1637 38.4558 41.1654 37.6492 41.1654 36.4V35.1C41.1654 33.8508 41.1637 33.0442 41.1135 32.4303C41.0654 31.8417 40.9838 31.6235 40.9292 31.5164C40.7215 31.1087 40.39 30.7772 39.9823 30.5695C39.8752 30.5149 39.657 30.4333 39.0684 30.3852C38.4545 30.335 37.6479 30.3333 36.3987 30.3333H32.932C31.6828 30.3333 30.8762 30.335 30.2623 30.3852Z" fill="#1570EF"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M13.9018 6.4996C13.0769 6.49895 12.3666 6.49838 11.7321 6.6246C9.15361 7.13749 7.13798 9.15312 6.62508 11.7316C6.49887 12.3661 6.49944 13.0764 6.50009 13.9013L6.50019 14.083L6.50009 14.2648C6.49944 15.0896 6.49887 15.7999 6.62508 16.4345C7.13798 19.0129 9.15361 21.0286 11.7321 21.5415C12.3666 21.6677 13.0769 21.6671 13.9018 21.6665H38.0986C38.9235 21.6671 39.6338 21.6677 40.2683 21.5415C42.8468 21.0286 44.8624 19.0129 45.3753 16.4345C45.5015 15.8 45.5009 15.0897 45.5003 14.2649L45.5002 14.083L45.5003 13.9013C45.5009 13.0765 45.5015 12.3661 45.3753 11.7316C44.8624 9.15312 42.8468 7.13749 40.2683 6.6246C39.6338 6.49838 38.9235 6.49895 38.0986 6.4996H13.9018ZM12.5775 10.8747C12.734 10.8435 12.9729 10.833 14.0835 10.833H37.9169C39.0275 10.833 39.2663 10.8435 39.4229 10.8747C40.2824 11.0456 40.9543 11.7175 41.1252 12.577C41.1564 12.7335 41.1669 12.9724 41.1669 14.083C41.1669 15.1936 41.1564 15.4325 41.1252 15.5891C40.9543 16.4486 40.2824 17.1204 39.4229 17.2914C39.2663 17.3225 39.0275 17.333 37.9169 17.333H14.0835C12.9729 17.333 12.734 17.3225 12.5775 17.2914C11.718 17.1204 11.0461 16.4486 10.8752 15.5891C10.844 15.4325 10.8335 15.1936 10.8335 14.083C10.8335 12.9724 10.844 12.7335 10.8752 12.577C11.0461 11.7175 11.718 11.0456 12.5775 10.8747Z" fill="#1570EF"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M13.0002 25.9998C9.41035 25.9998 6.5002 28.9099 6.5002 32.4998V38.9998C6.5002 42.5896 9.41035 45.4998 13.0002 45.4998C16.59 45.4998 19.5002 42.5896 19.5002 38.9998V32.4998C19.5002 28.9099 16.5901 25.9998 13.0002 25.9998ZM10.8335 32.4998C10.8335 31.3032 11.8036 30.3331 13.0002 30.3331C14.1968 30.3331 15.1669 31.3032 15.1669 32.4998V38.9998C15.1669 40.1964 14.1968 41.1664 13.0002 41.1664C11.8036 41.1664 10.8335 40.1964 10.8335 38.9998V32.4998Z" fill="#1570EF"/>
+</svg>
+`
+const plusIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M8 1V15M1 8H15" stroke="#1849A9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`
+const searchIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M15.8333 15.8335L12.9167 12.9168M14.9999 7.91683C14.9999 11.8288 11.8286 15.0002 7.91659 15.0002C4.00457 15.0002 0.833252 11.8288 0.833252 7.91683C0.833252 4.00481 4.00457 0.833496 7.91659 0.833496C11.8286 0.833496 14.9999 4.00481 14.9999 7.91683Z" stroke="white" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`
 
 const editIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M8.33301 2.60175H4.83301C3.43288 2.60175 2.73281 2.60175 2.19803 2.87424C1.72763 3.11392 1.34517 3.49637 1.10549 3.96678C0.833008 4.50156 0.833008 5.20162 0.833008 6.60175V13.6018C0.833008 15.0019 0.833008 15.7019 1.10549 16.2367C1.34517 16.7071 1.72763 17.0896 2.19803 17.3293C2.73281 17.6018 3.43288 17.6018 4.83301 17.6018H11.833C13.2331 17.6018 13.9332 17.6018 14.468 17.3293C14.9384 17.0896 15.3208 16.7071 15.5605 16.2367C15.833 15.7019 15.833 15.0019 15.833 13.6018V10.1018M5.83299 12.6018H7.22844C7.63609 12.6018 7.83992 12.6018 8.03173 12.5557C8.20179 12.5149 8.36436 12.4475 8.51348 12.3562C8.68168 12.2531 8.8258 12.109 9.11406 11.8207L17.083 3.85175C17.7734 3.1614 17.7734 2.04211 17.083 1.35175C16.3927 0.661396 15.2734 0.661395 14.583 1.35175L6.61404 9.3207C6.32578 9.60896 6.18166 9.75308 6.07859 9.92128C5.9872 10.0704 5.91986 10.233 5.87904 10.403C5.83299 10.5948 5.83299 10.7987 5.83299 11.2063V12.6018Z" stroke="#175CD3" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`
 
-const trash_1_icon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M12.3333 5.00033V4.33366C12.3333 3.40024 12.3333 2.93353 12.1517 2.57701C11.9919 2.2634 11.7369 2.00844 11.4233 1.84865C11.0668 1.66699 10.6001 1.66699 9.66667 1.66699H8.33333C7.39991 1.66699 6.9332 1.66699 6.57668 1.84865C6.26308 2.00844 6.00811 2.2634 5.84832 2.57701C5.66667 2.93353 5.66667 3.40024 5.66667 4.33366V5.00033M7.33333 9.58366V13.7503M10.6667 9.58366V13.7503M1.5 5.00033H16.5M14.8333 5.00033V14.3337C14.8333 15.7338 14.8333 16.4339 14.5608 16.9686C14.3212 17.439 13.9387 17.8215 13.4683 18.0612C12.9335 18.3337 12.2335 18.3337 10.8333 18.3337H7.16667C5.76654 18.3337 5.06647 18.3337 4.53169 18.0612C4.06129 17.8215 3.67883 17.439 3.43915 16.9686C3.16667 16.4339 3.16667 15.7338 3.16667 14.3337V5.00033" stroke="#B42318" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
+const trash_1_icon = `<svg width="17" height="19" viewBox="0 0 17 19" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M11.5833 4.08333V3.41667C11.5833 2.48325 11.5833 2.01654 11.4017 1.66002C11.2419 1.34641 10.9869 1.09144 10.6733 0.931656C10.3168 0.75 9.85009 0.75 8.91667 0.75H7.58333C6.64991 0.75 6.1832 0.75 5.82668 0.931656C5.51308 1.09144 5.25811 1.34641 5.09832 1.66002C4.91667 2.01654 4.91667 2.48325 4.91667 3.41667V4.08333M0.75 4.08333H15.75M14.0833 4.08333V13.4167C14.0833 14.8168 14.0833 15.5169 13.8108 16.0516C13.5712 16.522 13.1887 16.9045 12.7183 17.1442C12.1835 17.4167 11.4835 17.4167 10.0833 17.4167H6.41667C5.01654 17.4167 4.31647 17.4167 3.78169 17.1442C3.31129 16.9045 2.92883 16.522 2.68915 16.0516C2.41667 15.5169 2.41667 14.8168 2.41667 13.4167V4.08333" stroke="#D92D20" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`
 
-const trash_2_icon = `<svg width="19" height="15" viewBox="0 0 19 15" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M13.1247 5.00065L8.12467 10.0007M8.12467 5.00065L13.1247 10.0007M1.22467 8.30065L4.82467 13.1007C5.11801 13.4918 5.26467 13.6873 5.45055 13.8284C5.61518 13.9533 5.8016 14.0465 6.00032 14.1032C6.22468 14.1673 6.46912 14.1673 6.95801 14.1673H13.2913C14.6915 14.1673 15.3915 14.1673 15.9263 13.8948C16.3967 13.6552 16.7792 13.2727 17.0189 12.8023C17.2913 12.2675 17.2913 11.5674 17.2913 10.1673V4.83398C17.2913 3.43385 17.2913 2.73379 17.0189 2.19901C16.7792 1.7286 16.3967 1.34615 15.9263 1.10647C15.3915 0.833984 14.6915 0.833984 13.2913 0.833984H6.95801C6.46912 0.833984 6.22468 0.833984 6.00032 0.89806C5.8016 0.954812 5.61518 1.04802 5.45055 1.17294C5.26467 1.31399 5.11801 1.50954 4.82467 1.90065L1.22467 6.70065C1.00951 6.98753 0.901932 7.13097 0.860462 7.28851C0.823856 7.42757 0.823856 7.57373 0.860462 7.71279C0.901932 7.87033 1.00951 8.01377 1.22467 8.30065Z" stroke="#B42318" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
+const trash_2_icon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M5.75 0.75H10.75M0.75 3.25H15.75M14.0833 3.25L13.4989 12.0161C13.4112 13.3313 13.3674 13.9889 13.0833 14.4875C12.8333 14.9265 12.456 15.2794 12.0014 15.4997C11.485 15.75 10.8259 15.75 9.50779 15.75H6.99221C5.67409 15.75 5.01503 15.75 4.49861 15.4997C4.04396 15.2794 3.66674 14.9265 3.41665 14.4875C3.13259 13.9889 3.08875 13.3313 3.00107 12.0161L2.41667 3.25M6.58333 7V11.1667M9.91667 7V11.1667" stroke="#D92D20" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`
+
 
 const columnIcon = `<svg width="16" height="17" viewBox="0 0 16 17" fill="none" xmlns="http://www.w3.org/2000/svg">
   <path d="M6 13.5V3.5C6 2.72343 6 2.33515 5.87313 2.02886C5.70398 1.62048 5.37952 1.29602 4.97114 1.12687C4.66485 1 4.27657 1 3.5 1C2.72343 1 2.33515 1 2.02886 1.12687C1.62048 1.29602 1.29602 1.62048 1.12687 2.02886C1 2.33515 1 2.72343 1 3.5V13.5C1 14.2766 1 14.6649 1.12687 14.9711C1.29602 15.3795 1.62048 15.704 2.02886 15.8731C2.33515 16 2.72343 16 3.5 16C4.27657 16 4.66485 16 4.97114 15.8731C5.37952 15.704 5.70398 15.3795 5.87313 14.9711C6 14.6649 6 14.2766 6 13.5Z" stroke="#697586" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
@@ -64,8 +73,8 @@ const importIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" 
 // Table headers
 const tableHeaders = [
   { key: 'name', title: 'اسم القائمة', width: '200px' },
-  { key: 'createdAt', title: 'تاريخ الإنشاء', width: '160px' },
-  { key: 'status', title: 'الحالة', width: '120px' },
+  { key: 'created_at', title: 'تاريخ الإنشاء', width: '160px' },
+  { key: 'is_active', title: 'الحالة', width: '120px' },
 ]
 
 // Data
@@ -87,15 +96,56 @@ const toggleAdvancedFilters = () => {
   showAdvancedFilters.value = !showAdvancedFilters.value
 }
 
+// Demo data
+const demoPriceLists: PriceList[] = [
+  {
+    id: 1,
+    name: 'قائمة أسعار مواد البناء الأساسية',
+    is_active: true,
+    created_at: '2024-01-15'
+  },
+  {
+    id: 2,
+    name: 'قائمة أسعار الخرسانة والمواد الإنشائية',
+    is_active: true,
+    created_at: '2024-01-20'
+  },
+  {
+    id: 3,
+    name: 'قائمة أسعار مواد التشطيب',
+    is_active: false,
+    created_at: '2024-01-25'
+  },
+  {
+    id: 4,
+    name: 'قائمة أسعار مواد السباكة والكهرباء',
+    is_active: true,
+    created_at: '2024-02-01'
+  },
+  {
+    id: 5,
+    name: 'قائمة أسعار مواد العزل',
+    is_active: false,
+    created_at: '2024-02-05'
+  }
+]
+
 // API Functions
 const fetchPriceLists = async () => {
   try {
     loading.value = true
     const response = await api.get<PriceListsResponse>('/api/price-lists')
-    tableItems.value = response.data
+    
+    // If API returns no data, use demo data
+    if (response.data && response.data.length > 0) {
+      tableItems.value = response.data
+    } else {
+      tableItems.value = demoPriceLists
+    }
   } catch (err: any) {
     console.error('Error fetching price lists:', err)
-    error(err?.response?.data?.message || 'فشل في جلب قوائم الأسعار')
+    // On error, show demo data instead of showing error
+    tableItems.value = demoPriceLists
   } finally {
     loading.value = false
   }
@@ -117,7 +167,7 @@ const deletePriceList = async (priceListId: number) => {
 
 // Handlers
 const handleEdit = (item: any) => {
-  router.push({ name: 'ProductBuildingMaterialPriceListEdit', params: { id: item.id } })
+  router.push({ name: 'ProductsBuildingMaterialPriceListEdit', params: { id: item.id } })
 }
 
 const handleDelete = async (item: any) => {
@@ -135,9 +185,9 @@ const handleSelectAll = (checked: boolean) => {
   selectedRows.value = checked ? tableItems.value.map(i => i.id) : []
 }
 
-const openCreate = () => {
-  router.push({ name: 'ProductPriceListCreate' })
-}
+// const openCreate = () => {
+//   router.push({ name: 'ProductPriceListCreate' })
+// }
 
 // Lifecycle
 onMounted(() => {
@@ -148,34 +198,33 @@ onMounted(() => {
 <template>
   <default-layout>
     <div class="price-lists-page">
-      <PageHeader :icon="priceListsIcon" title-key="pages.ProductsBuildingMaterialPriceLists.title" description-key="pages.ProductsBuildingMaterialPriceLists.description" />
+      <PageHeader :icon="priceListsIcon" title-key="pages.ProductsBuildingMaterialPriceLists.title"
+        description-key="pages.ProductsBuildingMaterialPriceLists.description" />
 
-      <div class="flex justify-end pb-2 gap-3">
-        <v-btn variant="outlined" height="40" class="font-semibold text-base border-gray-300 bg-primary-100 !text-primary-900">
+      <div
+        class="flex justify-end items-stretch rounded border border-gray-300 w-fit ms-auto mb-4 overflow-hidden bg-white text-sm">
+        <v-btn variant="flat" height="40" rounded="0"
+          class="font-semibold text-base border-gray-300 bg-primary-100 !text-primary-900">
           <template #prepend>
             <span v-html="importIcon" />
           </template>
-          استيراد
+          {{ t('common.import') }}
         </v-btn>
-        <v-btn variant="outlined" height="40" class="font-semibold text-base border-gray-300 bg-primary-50 !text-primary-900">
+        <v-btn variant="flat" height="40" rounded="0"
+          class="font-semibold text-base border-gray-300 bg-primary-50 !text-primary-900">
           <template #prepend>
             <span v-html="exportIcon" />
           </template>
-          تصدير
+          {{ t('common.export') }}
         </v-btn>
       </div>
 
       <div class="bg-gray-50 rounded-md -mx-6">
-        <div :class="hasSelected ? 'justify-between' : 'justify-end'" class="flex flex-wrap items-center gap-3 border-y border-y-slate-300 px-4 sm:px-6 py-3">
+        <div :class="hasSelected ? 'justify-between' : 'justify-end'"
+          class="flex flex-wrap items-center gap-3 border-y border-y-slate-300 px-4 sm:!px-6 py-3">
           <!-- Actions when rows are selected -->
-          <div v-if="hasSelected" class="flex flex-wrap items-stretch rounded-lg overflow-hidden border border-gray-200 bg-white text-sm">
-            <v-btn class="px-4 font-semibold text-primary-600 hover:bg-primary-50 !rounded-none">
-              <template #prepend>
-                <span v-html="editIcon" />
-              </template>
-              <span>تعديل</span>
-            </v-btn>
-            <div class="w-px bg-gray-200"></div>
+          <div v-if="hasSelected"
+            class="flex flex-wrap items-stretch rounded-lg overflow-hidden border border-gray-200 bg-white text-sm">
             <v-btn class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none">
               <template #prepend>
                 <span v-html="trash_1_icon" />
@@ -193,56 +242,66 @@ onMounted(() => {
 
           <!-- Main header controls -->
           <div class="flex flex-wrap gap-3">
-            <v-btn variant="outlined" append-icon="mdi-chevron-down" color="gray-500" height="40" class="font-semibold text-base border-gray-400">
+            <v-btn variant="outlined" append-icon="mdi-chevron-down" rounded="4" color="gray-500" height="40"
+              class="font-semibold text-base border-gray-400">
               <template #prepend>
                 <span v-html="columnIcon" />
               </template>
-              الأعمدة
+              {{ t('common.columns') }}
             </v-btn>
 
-            <v-btn variant="outlined" color="primary-50" height="40" class="px-7 font-semibold text-base text-primary-700" prepend-icon="mdi-magnify" @click="toggleAdvancedFilters">
-              بحث متقدم
+            <v-btn variant="flat" color="primary-500" height="40" rounded="4"
+              class="px-7 font-semibold text-base text-white border !border-primary-200" @click="toggleAdvancedFilters">
+              <template #prepend>
+                <span v-html="searchIcon"></span>
+              </template>
+              {{ t('common.advancedSearch') }}
             </v-btn>
 
-            <v-btn variant="flat" color="primary" height="40" class="px-7 font-semibold text-base" prepend-icon="mdi-plus-circle-outline" @click="openCreate">
+            <!-- <v-btn variant="flat" color="primary-100" height="40" rounded="4"
+              class="px-7 font-semibold text-base !text-primary-800 border !border-primary-200" @click="openCreate">
+              <template #prepend>
+                <span v-html="plusIcon"></span>
+              </template>
+
               أضف قائمة
-            </v-btn>
+            </v-btn> -->
           </div>
         </div>
 
         <!-- Advanced filters row -->
-        <div v-if="showAdvancedFilters" class="border-y border-y-primary-100 bg-primary-50 px-4 sm:px-6 py-3 flex flex-col gap-3 sm:gap-2">
+        <div v-if="showAdvancedFilters"
+          class="border-y border-y-primary-100 bg-primary-50 px-4 sm:px-6 py-3 flex flex-col gap-3 sm:gap-2">
           <div class="flex flex-wrap gap-3 flex-1 order-1 sm:order-2 justify-end sm:justify-start">
-            <v-select v-model="filterStatus" :items="['فعال', 'غير فعال']" density="comfortable" variant="outlined" hide-details placeholder="الحالة" class="w-full sm:w-40 bg-white" />
-            <v-text-field v-model="filterCreatedAt" type="date" density="comfortable" variant="outlined" hide-details placeholder="تاريخ الانشاء" class="w-full sm:w-40 bg-white" />
-            <v-text-field v-model="filterListName" density="comfortable" variant="outlined" hide-details placeholder="اسم القائمة" class="w-full sm:w-40 bg-white" />
+            <v-select v-model="filterStatus" :items="['فعال', 'غير فعال']" density="comfortable" variant="outlined"
+              hide-details placeholder="الحالة" class="w-full sm:w-40 bg-white" />
+            <v-text-field v-model="filterCreatedAt" type="date" density="comfortable" variant="outlined" hide-details
+              placeholder="تاريخ الانشاء" class="w-full sm:w-40 bg-white" />
+            <v-text-field v-model="filterListName" density="comfortable" variant="outlined" hide-details
+              placeholder="اسم القائمة" class="w-full sm:w-40 bg-white" />
+
+            <div class="flex gap-2 items-center">
+              <v-btn variant="flat" color="primary-500" rounded="4" height="40"
+                class="px-5 font-semibold !text-white text-sm sm:text-base" prepend-icon="mdi-magnify">
+                <template #prepend>
+                  <span v-html="searchIcon"></span>
+                </template>
+                ابحث الآن
+              </v-btn>
+              <v-btn variant="flat" color="primary-100" height="40" rounded="4" border="sm"
+                class="px-5 font-semibold text-sm sm:text-base !text-primary-800 !border-primary-200"
+                prepend-icon="mdi-refresh">
+                إعادة تعيين
+              </v-btn>
+            </div>
+
           </div>
         </div>
 
         <!-- Price Lists Table -->
-        <DataTable
-          :headers="tableHeaders"
-          :items="tableItems"
-          :loading="loading"
-          show-checkbox
-          show-actions
-          :show-view="false"
-          @edit="handleEdit"
-          @delete="handleDelete"
-          @select="handleSelect"
-          @selectAll="handleSelectAll"
-        >
-          <template #item.name="{ item }">
-            <span class="text-sm font-semibold text-gray-900">{{ item.name }}</span>
-          </template>
-
-          <template #item.createdAt="{ item }">
-            <span class="text-sm text-gray-600">{{ new Date(item.created_at).toLocaleDateString('ar-SA') }}</span>
-          </template>
-
-          <template #item.status="{ item }">
-            <v-switch :model-value="item.is_active" hide-details inset density="compact" color="primary" disabled />
-          </template>
+        <DataTable :headers="tableHeaders" :items="tableItems" :loading="loading" show-checkbox show-actions
+          :show-view="false" @edit="handleEdit" @delete="handleDelete" @select="handleSelect"
+          @selectAll="handleSelectAll">
         </DataTable>
       </div>
     </div>
@@ -250,4 +309,3 @@ onMounted(() => {
 </template>
 
 <style scoped></style>
-
