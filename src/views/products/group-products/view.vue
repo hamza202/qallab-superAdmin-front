@@ -48,7 +48,7 @@
 
       <!-- Tabs -->
       <div class="bg-white border-b border-gray-200 px-6 py-3">
-        <div class="flex gap-2 items-center">
+        <div class="flex gap-2 items-center overflow-x-auto no-scroll-style">
           <button
             @click="activeTab = 'general'"
             :class="
@@ -56,7 +56,7 @@
                 ? 'bg-primary-500 text-white'
                 : 'text-gray-400 hover:text-gray-600'
             "
-            class="flex items-center gap-2 px-4 py-2.5 rounded-md font-semibold text-base transition-colors"
+            class="flex items-center gap-2 px-4 py-2.5 rounded-md font-semibold text-base transition-colors whitespace-nowrap"
           >
             <span v-html="fileIcon"></span>
             المعلومات العامة للمنتج
@@ -68,7 +68,7 @@
                 ? 'bg-primary-500 text-white'
                 : 'text-gray-400 hover:text-gray-600'
             "
-            class="flex items-center gap-2 px-4 py-2.5 rounded-md font-semibold text-base transition-colors"
+            class="flex items-center gap-2 px-4 py-2.5 rounded-md font-semibold text-base transition-colors whitespace-nowrap"
           >
             <span v-html="fileCheckIcon"></span>
             الاختبارات على المنتج
@@ -84,7 +84,7 @@
             المعلومات العامة
           </h2>
           <div class="flex flex-wrap gap-4 -mx-6">
-            <div class="info-item-bordered flex-1 px-6 py-4 ">
+            <div class="info-item-bordered  px-6 py-4 ">
               <label class="font-semibold text-sm text-gray-500 mb-2 block"
                 >الاسم بالعربية</label
               >
@@ -93,7 +93,7 @@
               </p>
             </div>
             <v-divider vertical class="my-6 border-gray-300"></v-divider>
-            <div class="info-item-bordered flex-1 px-6 py-4 ">
+            <div class="info-item-bordered  px-6 py-4 ">
               <label class="font-semibold text-sm text-gray-500 mb-2 block"
                 >الاسم بالإنجليزية</label
               >
@@ -102,7 +102,7 @@
               </p>
             </div>
             <v-divider vertical class="my-6 border-gray-300"></v-divider>
-            <div class="info-item-bordered flex-1 px-6 py-4 ">
+            <div class="info-item-bordered  px-6 py-4 ">
               <label class="font-semibold text-sm text-gray-500 mb-2 block"
                 >كود المنتج</label
               >
@@ -111,7 +111,7 @@
               </p>
             </div>
             <v-divider vertical class="my-6 border-gray-300"></v-divider>
-            <div class="info-item-bordered flex-1 px-6 py-4 ">
+            <div class="info-item-bordered  px-6 py-4 ">
               <label class="font-semibold text-sm text-gray-500 mb-2 block"
                 >حالة المنتج</label
               >
@@ -124,7 +124,7 @@
               </p>
             </div>
             <v-divider vertical class="my-6 border-gray-300"></v-divider>
-            <div class="info-item-bordered flex-1 px-6 py-4 ">
+            <div class="info-item-bordered  px-6 py-4 ">
               <label class="font-semibold text-sm text-gray-500 mb-2 block"
                 >نوع المنتج</label
               >
@@ -133,7 +133,7 @@
               </p>
             </div>
             <v-divider vertical class="my-6 border-gray-300"></v-divider>
-            <div class="info-item-bordered flex-1 px-6 py-4 ">
+            <div class="info-item-bordered  px-6 py-4 ">
               <label class="font-semibold text-sm text-gray-500 mb-2 block"
                 >فئة المنتج</label
               >
@@ -167,7 +167,7 @@
         <div class="p-6 border-b border-gray-200">
           <h2 class="text-xl font-bold text-primary-900 mb-6">الأسعار</h2>
           <div class="flex flex-wrap gap-4 -mx-6">
-            <div class="info-item-bordered flex-1 px-6 py-4 ">
+            <div class="info-item-bordered  px-6 py-4 ">
               <label class="font-semibold text-sm text-gray-500 mb-2 block"
                 >سعر البيع</label
               >
@@ -176,7 +176,7 @@
               </p>
             </div>
             <v-divider vertical class="my-6 border-gray-300"></v-divider>
-            <div class="info-item-bordered flex-1 px-6 py-4 ">
+            <div class="info-item-bordered  px-6 py-4 ">
               <label class="font-semibold text-sm text-gray-500 mb-2 block"
                 >اعلى سعر بيع</label
               >
@@ -185,7 +185,7 @@
               </p>
             </div>
             <v-divider vertical class="my-6 border-gray-300"></v-divider>
-            <div class="info-item-bordered flex-1 px-6 py-4 ">
+            <div class="info-item-bordered  px-6 py-4 ">
               <label class="font-semibold text-sm text-gray-500 mb-2 block"
                 >اقل سعر بيع</label
               >
@@ -194,7 +194,7 @@
               </p>
             </div>
             <v-divider vertical class="my-6 border-gray-300"></v-divider>
-            <div class="info-item-bordered flex-1 px-6 py-4 ">
+            <div class="info-item-bordered  px-6 py-4 ">
               <label class="font-semibold text-sm text-gray-500 mb-2 block"
                 >سعر الجملة</label
               >
@@ -204,7 +204,7 @@
             </div>
           </div>
           <div class="flex flex-wrap gap-4 mt-4 -mx-6">
-            <div class="info-item-bordered flex-1 px-6 py-4 ">
+            <div class="info-item-bordered  px-6 py-4 ">
               <label class="font-semibold text-sm text-gray-500 mb-2 block"
                 >سعر نصف الجملة</label
               >
@@ -213,7 +213,7 @@
               </p>
             </div>
             <v-divider vertical class="my-6 border-gray-300"></v-divider>
-            <div class="info-item-bordered flex-1 px-6 py-4 ">
+            <div class="info-item-bordered  px-6 py-4 ">
               <label class="font-semibold text-sm text-gray-500 mb-2 block"
                 >نوع الخصم</label
               >
@@ -222,7 +222,7 @@
               </p>
             </div>
             <v-divider vertical class="my-6 border-gray-300"></v-divider>
-            <div class="info-item-bordered flex-1 px-6 py-4 ">
+            <div class="info-item-bordered  px-6 py-4 ">
               <label class="font-semibold text-sm text-gray-500 mb-2 block"
                 >قيمة الخصم</label
               >
@@ -231,7 +231,7 @@
               </p>
             </div>
             <v-divider vertical class="my-6 border-gray-300"></v-divider>
-            <div class="info-item-bordered flex-1 px-6 py-4 ">
+            <div class="info-item-bordered  px-6 py-4 ">
               <label class="font-semibold text-sm text-gray-500 mb-2 block"
                 >ضريبة</label
               >
@@ -254,7 +254,7 @@
           <div class="mb-6">
             <h3 class="text-base font-bold text-primary-600 mb-4">ضريبة 1</h3>
             <div class="flex flex-wrap gap-4 -mx-6">
-              <div class="info-item-bordered flex-1 px-6 py-4 ">
+              <div class="info-item-bordered  px-6 py-4 ">
                 <label class="font-semibold text-sm text-gray-500 mb-2 block"
                   >اسم الضريبة المضافة</label
                 >
@@ -263,7 +263,7 @@
                 </p>
               </div>
               <v-divider vertical class="my-6 border-gray-300"></v-divider>
-              <div class="info-item-bordered flex-1 px-6 py-4 ">
+              <div class="info-item-bordered  px-6 py-4 ">
                 <label class="font-semibold text-sm text-gray-500 mb-2 block"
                   >قيمة الضريبة</label
                 >
@@ -272,7 +272,7 @@
                 </p>
               </div>
               <v-divider vertical class="my-6 border-gray-300"></v-divider>
-              <div class="info-item-bordered flex-1 px-6 py-4 ">
+              <div class="info-item-bordered  px-6 py-4 ">
                 <label class="font-semibold text-sm text-gray-500 mb-2 block"
                   >الأولوية</label
                 >
@@ -281,7 +281,7 @@
                 </p>
               </div>
               <v-divider vertical class="my-6 border-gray-300"></v-divider>
-              <div class="info-item-bordered flex-1 px-6 py-4 ">
+              <div class="info-item-bordered  px-6 py-4 ">
                 <label class="font-semibold text-sm text-gray-500 mb-2 block"
                   >الحد الأدنى</label
                 >
@@ -296,7 +296,7 @@
           <div>
             <h3 class="text-base font-bold text-primary-600 mb-4">ضريبة 2</h3>
             <div class="flex flex-wrap gap-4 -mx-6">
-              <div class="info-item-bordered flex-1 px-6 py-4 ">
+              <div class="info-item-bordered  px-6 py-4 ">
                 <label class="font-semibold text-sm text-gray-500 mb-2 block"
                   >اسم الضريبة المضافة</label
                 >
@@ -305,7 +305,7 @@
                 </p>
               </div>
               <v-divider vertical class="my-6 border-gray-300"></v-divider>
-              <div class="info-item-bordered flex-1 px-6 py-4 ">
+              <div class="info-item-bordered  px-6 py-4 ">
                 <label class="font-semibold text-sm text-gray-500 mb-2 block"
                   >قيمة الضريبة</label
                 >
@@ -314,7 +314,7 @@
                 </p>
               </div>
               <v-divider vertical class="my-6 border-gray-300"></v-divider>
-              <div class="info-item-bordered flex-1 px-6 py-4 ">
+              <div class="info-item-bordered  px-6 py-4 ">
                 <label class="font-semibold text-sm text-gray-500 mb-2 block"
                   >الأولوية</label
                 >
@@ -323,7 +323,7 @@
                 </p>
               </div>
               <v-divider vertical class="my-6 border-gray-300"></v-divider>
-              <div class="info-item-bordered flex-1 px-6 py-4 ">
+              <div class="info-item-bordered  px-6 py-4 ">
                 <label class="font-semibold text-sm text-gray-500 mb-2 block"
                   >الحد الأدنى</label
                 >
@@ -341,7 +341,7 @@
             التوريد والعلاقات الداخلية للمنتج
           </h2>
           <div class="flex flex-wrap gap-4 -mx-4">
-            <div class="info-item-bordered flex-1 px-4 py-4 min-w-[120px]">
+            <div class="info-item-bordered  px-4 py-4 min-w-[120px]">
               <label class="font-semibold text-sm text-gray-500 mb-2 block"
                 >العلامة التجارية</label
               >
@@ -350,7 +350,7 @@
               </p>
             </div>
             <v-divider vertical class="my-6 border-gray-300"></v-divider>
-            <div class="info-item-bordered flex-1 px-4 py-4 min-w-[120px]">
+            <div class="info-item-bordered  px-4 py-4 min-w-[120px]">
               <label class="font-semibold text-sm text-gray-500 mb-2 block"
                 >المصنع</label
               >
@@ -359,7 +359,7 @@
               </p>
             </div>
             <v-divider vertical class="my-6 border-gray-300"></v-divider>
-            <div class="info-item-bordered flex-1 px-4 py-4 min-w-[120px]">
+            <div class="info-item-bordered  px-4 py-4 min-w-[120px]">
               <label class="font-semibold text-sm text-gray-500 mb-2 block"
                 >بلد المنشأ</label
               >
@@ -368,7 +368,7 @@
               </p>
             </div>
             <v-divider vertical class="my-6 border-gray-300"></v-divider>
-            <div class="info-item-bordered flex-1 px-4 py-4 min-w-[120px]">
+            <div class="info-item-bordered  px-4 py-4 min-w-[120px]">
               <label class="font-semibold text-sm text-gray-500 mb-2 block"
                 >المنتجات البديلة</label
               >
@@ -377,7 +377,7 @@
               </p>
             </div>
             <v-divider vertical class="my-6 border-gray-300"></v-divider>
-            <div class="info-item-bordered flex-1 px-4 py-4 min-w-[120px]">
+            <div class="info-item-bordered  px-4 py-4 min-w-[120px]">
               <label class="font-semibold text-sm text-gray-500 mb-2 block"
                 >المنتجات الملحقة</label
               >
@@ -386,7 +386,7 @@
               </p>
             </div>
             <v-divider vertical class="my-6 border-gray-300"></v-divider>
-            <div class="info-item-bordered flex-1 px-4 py-4 min-w-[120px]">
+            <div class="info-item-bordered  px-4 py-4 min-w-[120px]">
               <label class="font-semibold text-sm text-gray-500 mb-2 block"
                 >المنتجات المرتبطة</label
               >
@@ -395,7 +395,7 @@
               </p>
             </div>
             <v-divider vertical class="my-6 border-gray-300"></v-divider>
-            <div class="info-item-bordered flex-1 px-4 py-4 min-w-[120px]">
+            <div class="info-item-bordered  px-4 py-4 min-w-[120px]">
               <label class="font-semibold text-sm text-gray-500 mb-2 block"
                 >أفضل الموردين</label
               >
@@ -416,7 +416,7 @@
               v-if="product.is_manufacturable"
               class="flex items-center gap-3"
             >
-              <p class="text-base font-semibold text-gray-900 py-2">
+              <p class="text-base text-gray-900 py-2">
                 منتج تصنيع
               </p>
             </div>
@@ -426,7 +426,7 @@
               class="my-2 border-gray-300"
             ></v-divider>
             <div v-if="product.is_sellable" class="flex items-center gap-3">
-              <p class="text-base font-semibold text-gray-900 py-2">
+              <p class="text-base text-gray-900 py-2">
                 متاح للبيع
               </p>
             </div>
@@ -436,7 +436,7 @@
               class="my-2 border-gray-300"
             ></v-divider>
             <div v-if="product.is_purchasable" class="flex items-center gap-3">
-              <p class="text-base font-semibold text-gray-900 py-2">
+              <p class="text-base text-gray-900 py-2">
                 متاح للشراء
               </p>
             </div>
@@ -446,7 +446,7 @@
               class="my-2 border-gray-300"
             ></v-divider>
             <div v-if="product.is_barterable" class="flex items-center gap-3">
-              <p class="text-base font-semibold text-gray-900 py-2">
+              <p class="text-base text-gray-900 py-2">
                 قابل للمقايضة
               </p>
             </div>
@@ -456,7 +456,7 @@
               class="my-2 border-gray-300"
             ></v-divider>
             <div v-if="product.is_clearable" class="flex items-center gap-3">
-              <p class="text-base font-semibold text-gray-900 py-2">
+              <p class="text-base text-gray-900 py-2">
                 قابل للمقاصة
               </p>
             </div>
@@ -466,7 +466,7 @@
               class="my-2 border-gray-300"
             ></v-divider>
             <div v-if="product.is_rentable" class="flex items-center gap-3">
-              <p class="text-base font-semibold text-gray-900 py-2">
+              <p class="text-base text-gray-900 py-2">
                 قابل للإيجار
               </p>
             </div>
@@ -479,7 +479,7 @@
               v-if="product.allow_negative_sales"
               class="flex items-center gap-3"
             >
-              <p class="text-base font-semibold text-gray-900 py-2">
+              <p class="text-base text-gray-900 py-2">
                 البيع بالسالب
               </p>
             </div>
@@ -515,11 +515,11 @@
       <div v-if="activeTab === 'tests'">
         <!-- Test 1: اختبار التدرج الحبيبي -->
         <div class="p-6 border-b border-gray-200">
-          <h2 class="text-xl font-bold text-primary-900 mb-6">
+          <h2 class="text-xl font-bold text-primary-900 mb-4">
             اختبار التدرج الحبيبي
           </h2>
-          <div class="flex flex-wrap gap-4">
-            <div class="info-item-bordered flex-1 px-6 py-4">
+          <div class="flex flex-wrap gap-4 -mx-6">
+            <div class="info-item-bordered  px-6 py-4">
               <label class="font-semibold text-sm text-gray-500 mb-2 block"
                 >عدد الاختبارات</label
               >
@@ -528,7 +528,7 @@
               </p>
             </div>
             <v-divider vertical class="my-6 border-gray-300"></v-divider>
-            <div class="info-item-bordered flex-1 px-6 py-4">
+            <div class="info-item-bordered  px-6 py-4">
               <label class="font-semibold text-sm text-gray-500 mb-2 block"
                 >عدد العينات</label
               >
@@ -537,7 +537,7 @@
               </p>
             </div>
             <v-divider vertical class="my-6 border-gray-300"></v-divider>
-            <div class="info-item-bordered flex-1 px-6 py-4">
+            <div class="info-item-bordered  px-6 py-4">
               <label class="font-semibold text-sm text-gray-500 mb-2 block"
                 >كمية العينات</label
               >
@@ -550,11 +550,11 @@
 
         <!-- Test 2: اختبار الصلابة -->
         <div class="p-6 border-b border-gray-200">
-          <h2 class="text-xl font-bold text-primary-900 mb-6">
+          <h2 class="text-xl font-bold text-primary-900 mb-4">
             اختبار الصلابة
           </h2>
-          <div class="flex flex-wrap gap-4">
-            <div class="info-item-bordered flex-1 px-6 py-4">
+          <div class="flex flex-wrap gap-4 -mx-6">
+            <div class="info-item-bordered  px-6 py-4">
               <label class="font-semibold text-sm text-gray-500 mb-2 block"
                 >عدد الاختبارات</label
               >
@@ -563,7 +563,7 @@
               </p>
             </div>
             <v-divider vertical class="my-6 border-gray-300"></v-divider>
-            <div class="info-item-bordered flex-1 px-6 py-4">
+            <div class="info-item-bordered  px-6 py-4">
               <label class="font-semibold text-sm text-gray-500 mb-2 block"
                 >عدد العينات</label
               >
@@ -572,7 +572,7 @@
               </p>
             </div>
             <v-divider vertical class="my-6 border-gray-300"></v-divider>
-            <div class="info-item-bordered flex-1 px-6 py-4">
+            <div class="info-item-bordered  px-6 py-4">
               <label class="font-semibold text-sm text-gray-500 mb-2 block"
                 >كمية العينات</label
               >
@@ -585,9 +585,9 @@
 
         <!-- Test 3: اختبار التحمل -->
         <div class="p-6 border-b border-gray-200">
-          <h2 class="text-xl font-bold text-primary-900 mb-6">اختبار التحمل</h2>
-          <div class="flex flex-wrap gap-4">
-            <div class="info-item-bordered flex-1 px-6 py-4">
+          <h2 class="text-xl font-bold text-primary-900 mb-4">اختبار التحمل</h2>
+          <div class="flex flex-wrap gap-4 -mx-6">
+            <div class="info-item-bordered  px-6 py-4">
               <label class="font-semibold text-sm text-gray-500 mb-2 block"
                 >عدد الاختبارات</label
               >
@@ -596,7 +596,7 @@
               </p>
             </div>
             <v-divider vertical class="my-6 border-gray-300"></v-divider>
-            <div class="info-item-bordered flex-1 px-6 py-4">
+            <div class="info-item-bordered  px-6 py-4">
               <label class="font-semibold text-sm text-gray-500 mb-2 block"
                 >عدد العينات</label
               >
@@ -605,7 +605,7 @@
               </p>
             </div>
             <v-divider vertical class="my-6 border-gray-300"></v-divider>
-            <div class="info-item-bordered flex-1 px-6 py-4">
+            <div class="info-item-bordered  px-6 py-4">
               <label class="font-semibold text-sm text-gray-500 mb-2 block"
                 >كمية العينات</label
               >

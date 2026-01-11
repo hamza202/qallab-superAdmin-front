@@ -51,7 +51,6 @@ $shadow-focus: 0px 0px 0px 4px rgb(var(--v-theme-primary-25)),
   }
 }
 
-
 // Custom select dropdown arrow
 .v-select .v-field__append-inner .v-icon {
   background-image: url("data:image/svg+xml,%3Csvg width='12' height='7' viewBox='0 0 12 7' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0.833328 0.833344L5.83333 5.83334L10.8333 0.833344' stroke='%23697586' stroke-width='1.66667' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
@@ -146,29 +145,28 @@ $shadow-focus: 0px 0px 0px 4px rgb(var(--v-theme-primary-25)),
 .dir-ltr {
   direction: ltr !important;
 }
-html[dir="rtl"] .language-tabs-wrapper{
-  .text-input-wrapper .v-input{
+html[dir="rtl"] .language-tabs-wrapper {
+  .text-input-wrapper .v-input {
     @apply rounded-tl-[0] !important;
-    .v-field{
+    .v-field {
       @apply rounded-tl-[0] !important;
     }
   }
-  .editor-container{
+  .editor-container {
     @apply rounded-tl-[0] !important;
   }
-} 
-html[dir="ltr"] .language-tabs-wrapper{
-  .text-input-wrapper .v-input{
+}
+html[dir="ltr"] .language-tabs-wrapper {
+  .text-input-wrapper .v-input {
     @apply rounded-tr-[0] !important;
-    .v-field{
+    .v-field {
       @apply rounded-tr-[0] !important;
     }
   }
-  .editor-container{
+  .editor-container {
     @apply rounded-tr-[0] !important;
   }
 }
-
 // ===================================
 // HIDE THE SPINNERS FOR NUMBER INPUT
 // ===================================
@@ -182,8 +180,10 @@ html[dir="ltr"] .language-tabs-wrapper{
   -moz-appearance: textfield;
 }
 
-
 // custom tooltip
-.v-tooltip > .v-overlay__content.custom-tooltip{
+.v-tooltip > .v-overlay__content.custom-tooltip {
   @apply bg-primary-500 text-white opacity-95 !important;
+}
+
+.no-scroll-style {
 }
