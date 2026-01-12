@@ -31,7 +31,7 @@
       <div class="bg-white px-6 py-4 border-y border-gray-200">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-4">
-            <div class="w-16 h-16 rounded-lg flex items-center justify-center">
+            <div class="w-16 h-16 rounded-lg flex items-center justify-center bg-primary-50">
               <span v-html="productIcon" class="text-primary-600"></span>
             </div>
             <div>
