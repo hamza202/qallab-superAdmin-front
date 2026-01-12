@@ -11,49 +11,58 @@
           <div class="mb-3 bg-primary-50 border !border-gray-200 rounded-lg px-6 py-4">
             <h2 class="text-lg font-bold text-primary-900 mb-4">المعلومات الأساسية</h2>
 
-            <div class="mb-4">
-              <LanguageTabs :languages="availableLanguages" label="اسم متغير المنتج">
-                <template #en>
-                  <TextInput v-model="formData.name_en" placeholder="Enter variable name in English"
-                    :rules="[required('الاسم بالإنجليزي مطلوب')]" :hide-details="true" />
-                </template>
-                <template #ar>
-                  <TextInput v-model="formData.name_ar" placeholder="ادخل اسم المتغير بالعربية"
-                    :rules="[required('الاسم بالعربي مطلوب')]" :hide-details="true" />
-                </template>
-              </LanguageTabs>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-              <SelectInput v-model="formData.value_type" label="نوع القيمة" :items="classificationItems"
-                placeholder="اختر نوع القيمة" :hide-details="false" :loading="loadingConstants" />
-
-              <SelectInput v-model="formData.category_ids" label="الفئات" :items="categoryItems"
-                placeholder="اختر الفئات" :hide-details="false" multiple chips :loading="loadingCategories" />
-            </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+              <div class="mb-4">
+                <LanguageTabs :languages="availableLanguages" label="اسم متغير المنتج">
+                  <template #en>
+                    <TextInput v-model="formData.name_en" placeholder="Enter variable name in English"
+                      :rules="[required('الاسم بالإنجليزي مطلوب')]" :hide-details="true" />
+                  </template>
+                  <template #ar>
+                    <TextInput v-model="formData.name_ar" placeholder="ادخل اسم المتغير بالعربية"
+                      :rules="[required('الاسم بالعربي مطلوب')]" :hide-details="true" />
+                  </template>
+                </LanguageTabs>
+              </div>
+
+              <SelectWithIconInput v-model="formData.category_ids" label="التصنيف" :items="categoryItems" showAddButton
+                placeholder="اختر الصنيف" :hide-details="false" multiple chips :loading="loadingCategories" />
+
+              <SelectInput v-model="formData.value_type" label="نوع العنصر" :items="classificationItems"
+                placeholder="اختر نوع العنصر" :hide-details="false" :loading="loadingConstants" />
+
               <div class="col-span-2">
                 <!-- Notes -->
                 <TextareaInput v-model="formData.notes" label="الملاحظات" placeholder="أدخل الملاحظات هنا..." rows="4"
                   :hide-details="false" />
-
               </div>
 
               <!-- Status Radio Buttons -->
               <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-3">الحالة</label>
-                <div class="flex items-center gap-6">
-                  <label class="flex items-center gap-2 cursor-pointer">
-                    <input v-model="formData.is_active" type="radio" :value="true"
-                      class="w-4 h-4 text-primary-600 border-gray-300 focus:ring-primary-500" />
-                    <span class="text-sm text-gray-700">فعال</span>
-                  </label>
-                  <label class="flex items-center gap-2 cursor-pointer">
-                    <input v-model="formData.is_active" type="radio" :value="false"
-                      class="w-4 h-4 text-primary-600 border-gray-300 focus:ring-primary-500" />
-                    <span class="text-sm text-gray-700">غير فعال</span>
-                  </label>
+                <div class="flex items-center gap-3 mt-1">
+                  <v-radio-group v-model="formData.is_active" inline hide-details>
+                    <v-radio :value="true" color="primary">
+                      <template #label>
+                        <span :class="formData.is_active ? 'text-primary font-semibold' : 'text-gray-600'">
+                          فعال
+                        </span>
+                      </template>
+                    </v-radio>
+                    <v-radio :value="false" color="primary">
+                      <template #label>
+                        <span :class="!formData.is_active ? 'text-primary font-semibold' : 'text-gray-600'">
+                          غير فعال
+                        </span>
+                      </template>
+                    </v-radio>
+                  </v-radio-group>
                 </div>
               </div>
+                <v-btn variant="flat" color="primary" rounded="4" height="48"
+                  class="font-semibold text-base w-full md:col-span-2 mt-4" @click="handleAddTest">
+                  <span>+ اضف جديد</span>
+                </v-btn>
 
 
             </div>
@@ -61,21 +70,17 @@
 
           <!-- Variable Values Section -->
           <div class="mb-3 bg-gray-50 border !border-gray-200 rounded-lg">
-            <div class="flex justify-between items-center border-b !border-gray-200 px-6 py-4">
+            <div class="border-b !border-gray-200 px-6 py-4">
               <h2 class="text-lg font-bold text-primary-900">قيم المتغير</h2>
-              <v-btn variant="flat" color="primary" height="40" class="font-bold px-5" @click="addVariableValue">
-                <template #prepend>
-                  <span v-html="addIcon"></span>
-                </template>
-                أضف جديد
-              </v-btn>
             </div>
 
             <!-- Variable Values Table with Editable Inputs -->
             <v-table v-if="formData.values.length > 0" class="bg-white rounded-none">
               <thead>
                 <tr class="bg-gray-100">
-                  <th class="text-right font-semibold text-gray-700 py-3 px-4">{{ formData.name_ar || formData.name_en || 'القيمة' }}</th>
+                  <th class="text-right font-semibold text-gray-700 py-3 px-4">{{ formData.name_ar || formData.name_en
+                    || 'القيمة'
+                  }}</th>
                   <th class="text-right font-semibold text-gray-700 py-3 px-4">الحالة</th>
                   <th class="text-right font-semibold text-gray-700 py-3 px-4">الإجراءات</th>
                 </tr>
@@ -111,14 +116,14 @@
 
           <!-- Form Actions -->
           <div class="flex flex-col sm:flex-row gap-3 sm:justify-center mt-6 px-6">
-            <v-btn variant="flat" color="primary" height="44" class="font-semibold text-base sm:min-w-[200px]"
+            <v-btn variant="flat" rounded="4" color="primary" height="44" class="font-semibold text-base sm:min-w-[200px]"
               @click="handleSaveAndReturn">
-              <template #prepend>
-                <v-icon>mdi-content-save-all-outline</v-icon>
-              </template>
+                <template #prepend>
+                  <span v-html="saveIcon"></span>
+                </template>
               {{ t('common.save') }}
             </v-btn>
-            <v-btn variant="flat" color="primary-50" height="44"
+            <v-btn variant="flat" rounded="4" color="primary-50" height="44"
               class="font-semibold text-base text-primary-700 sm:min-w-[200px]" @click="handleBack">
               <template #prepend>
                 <v-icon>mdi-close</v-icon>
@@ -162,7 +167,7 @@ const gridIcon = `<svg width="52" height="52" viewBox="0 0 52 52" fill="none" xm
 `
 
 const saveIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M4.08333 0.750122H10.4788C10.8864 0.750122 11.0902 0.750122 11.2821 0.796172C11.4521 0.837 11.6147 0.904341 11.7638 0.995722C11.932 1.09879 12.0761 1.24292 12.3644 1.53117L14.969 4.13574C15.2572 4.42399 15.4013 4.56812 15.5044 4.73631C15.5958 4.88543 15.6631 5.04801 15.7039 5.21807C15.75 5.40988 15.75 5.61371 15.75 6.02136V12.4168M8.66667 6.58346H5.41667C4.94996 6.58346 4.7166 6.58346 4.53834 6.49263C4.38154 6.41273 4.25406 6.28525 4.17416 6.12845C4.08333 5.95019 4.08333 5.71683 4.08333 5.25012V3.66679M9.5 15.7501V12.0835C9.5 11.6167 9.5 11.3834 9.40917 11.2051C9.32928 11.0483 9.20179 10.9208 9.04499 10.8409C8.86673 10.7501 8.63338 10.7501 8.16667 10.7501H5.41667C4.94996 10.7501 4.7166 10.7501 4.53834 10.8409C4.38154 10.9208 4.25406 11.0483 4.17416 11.2051C4.08333 11.3834 4.08333 11.6167 4.08333 12.0835V15.7501M12.8333 6.71907V13.0835C12.8333 14.0169 12.8333 14.4836 12.6517 14.8401C12.4919 15.1537 12.2369 15.4087 11.9233 15.5685C11.5668 15.7501 11.1001 15.7501 10.1667 15.7501H3.41667C2.48325 15.7501 2.01654 15.7501 1.66002 15.5685C1.34641 15.4087 1.09144 15.1537 0.931656 14.8401C0.75 14.4836 0.75 14.0169 0.75 13.0835V6.33346C0.75 5.40003 0.75 4.93332 0.931656 4.5768C1.09144 4.2632 1.34641 4.00823 1.66002 3.84844C2.01654 3.66679 2.48325 3.66679 3.41667 3.66679H9.78105C9.98487 3.66679 10.0868 3.66679 10.1827 3.68981C10.2677 3.71023 10.349 3.7439 10.4236 3.78959C10.5077 3.84112 10.5797 3.91319 10.7239 4.05731L12.4428 5.77626C12.5869 5.92039 12.659 5.99245 12.7105 6.07655C12.7562 6.15111 12.7899 6.2324 12.8103 6.31743C12.8333 6.41333 12.8333 6.51525 12.8333 6.71907Z" stroke="#175CD3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M4.08333 0.750122H10.4788C10.8864 0.750122 11.0902 0.750122 11.2821 0.796172C11.4521 0.837 11.6147 0.904341 11.7638 0.995722C11.932 1.09879 12.0761 1.24292 12.3644 1.53117L14.969 4.13574C15.2572 4.42399 15.4013 4.56812 15.5044 4.73631C15.5958 4.88543 15.6631 5.04801 15.7039 5.21807C15.75 5.40988 15.75 5.61371 15.75 6.02136V12.4168M8.66667 6.58346H5.41667C4.94996 6.58346 4.7166 6.58346 4.53834 6.49263C4.38154 6.41273 4.25406 6.28525 4.17416 6.12845C4.08333 5.95019 4.08333 5.71683 4.08333 5.25012V3.66679M9.5 15.7501V12.0835C9.5 11.6167 9.5 11.3834 9.40917 11.2051C9.32928 11.0483 9.20179 10.9208 9.04499 10.8409C8.86673 10.7501 8.63338 10.7501 8.16667 10.7501H5.41667C4.94996 10.7501 4.7166 10.7501 4.53834 10.8409C4.38154 10.9208 4.25406 11.0483 4.17416 11.2051C4.08333 11.3834 4.08333 11.6167 4.08333 12.0835V15.7501M12.8333 6.71907V13.0835C12.8333 14.0169 12.8333 14.4836 12.6517 14.8401C12.4919 15.1537 12.2369 15.4087 11.9233 15.5685C11.5668 15.7501 11.1001 15.7501 10.1667 15.7501H3.41667C2.48325 15.7501 2.01654 15.7501 1.66002 15.5685C1.34641 15.4087 1.09144 15.1537 0.931656 14.8401C0.75 14.4836 0.75 14.0169 0.75 13.0835V6.33346C0.75 5.40003 0.75 4.93332 0.931656 4.5768C1.09144 4.2632 1.34641 4.00823 1.66002 3.84844C2.01654 3.66679 2.48325 3.66679 3.41667 3.66679H9.78105C9.98487 3.66679 10.0868 3.66679 10.1827 3.68981C10.2677 3.71023 10.349 3.7439 10.4236 3.78959C10.5077 3.84112 10.5797 3.91319 10.7239 4.05731L12.4428 5.77626C12.5869 5.92039 12.659 5.99245 12.7105 6.07655C12.7562 6.15111 12.7899 6.2324 12.8103 6.31743C12.8333 6.41333 12.8333 6.51525 12.8333 6.71907Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`
 
 const arrowLeftIcon = `<svg width="15" height="12" viewBox="0 0 15 12" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -194,18 +199,18 @@ interface VariableValue {
 interface FormData {
   name_ar: string
   name_en: string
-  value_type: string
+  value_type: string | null
   is_active: boolean
   notes: string
-  category_ids: string[]
+  category_ids: string[] | null
   values: VariableValue[]
 }
 
 interface ApiAspect {
   id: number
   name: string
-  value_type: number
-  category_ids: string[]
+  value_type: number | null
+  category_ids: string[] | null
   notes: string
   is_active: boolean
   values: Array<{
@@ -234,10 +239,10 @@ const loadingCategories = ref(false)
 const formData = ref<FormData>({
   name_ar: '',
   name_en: '',
-  value_type: '1',
+  value_type: null,
   is_active: true,
   notes: '',
-  category_ids: [],
+  category_ids: null,
   values: []
 })
 
@@ -400,7 +405,7 @@ onMounted(async () => {
     fetchConstants(),
     fetchCategories()
   ])
-  
+
   // Then fetch aspect data if in edit mode
   await fetchAspect()
 })

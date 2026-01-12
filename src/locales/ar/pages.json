@@ -99,6 +99,7 @@
     "projects": {
       "title": "جدول المشاريع",
       "description": "عرض المشاريع",
+      "formDescription": "تمكنك من إدراة المشاريع",
       "list": "قائمة المشاريع",
       "create": "إضافة مشروع",
       "edit": "تعديل مشروع"
@@ -168,7 +169,9 @@
       "description": "تمكنك من ادارة  السندات المالية "
     },
     "vouchers_form": {
-      "title": "سندات القبض",
+      "title":"لوحة التحكم المالية",
+      "receiptVoucherTitle": "سندات القبض",
+      "paymentVoucherTitle": "سندات الصرف",
       "description": "تمكنك من ادارة  السندات المالية "
     }
   }

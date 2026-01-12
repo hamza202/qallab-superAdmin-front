@@ -61,38 +61,64 @@ const emitUpdate = () => {
     <h2 class="text-lg font-bold text-primary-900 mb-4">المعلومات التشغيلية</h2>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-      <TextInput v-model="formData.ongoingProjects" @blur="emitUpdate"
-        label="عدد المشاريع الجارية" placeholder="ادخل العدد" type="number" />
-      <TextInput v-model="formData.completedProjects" @blur="emitUpdate"
-        label="عدد المشاريع المكتملة" placeholder="ادخل العدد" type="number" />
-      <TextInput v-model="formData.employeesCount" @blur="emitUpdate"
-        label="إجمالي عدد الموظفين" placeholder="ادخل العدد" type="number" />
-      <TextInput v-model="formData.engineersCount" @blur="emitUpdate"
-        label="عدد المهندسين" placeholder="ادخل العدد" type="number" />
-      <TextInput v-model="formData.techniciansCount" @blur="emitUpdate"
-        label="عدد الفنيين" placeholder="ادخل العدد" type="number" />
+      <TextInput v-model="formData.ongoingProjects" @blur="emitUpdate" label="عدد المشاريع الجارية"
+        placeholder="ادخل العدد" type="number" />
+      <TextInput v-model="formData.completedProjects" @blur="emitUpdate" label="عدد المشاريع المكتملة"
+        placeholder="ادخل العدد" type="number" />
+      <TextInput v-model="formData.employeesCount" @blur="emitUpdate" label="إجمالي عدد الموظفين"
+        placeholder="ادخل العدد" type="number" />
+      <TextInput v-model="formData.engineersCount" @blur="emitUpdate" label="عدد المهندسين" placeholder="ادخل العدد"
+        type="number" />
+      <TextInput v-model="formData.techniciansCount" @blur="emitUpdate" label="عدد الفنيين" placeholder="ادخل العدد"
+        type="number" />
       <SelectWithIconInput v-model="formData.operationalCapacity" @update:model-value="emitUpdate"
         label="القدرة التشغيلية للمقاول" placeholder="اختر" :items="operationalCapacityItems" />
       <SelectWithIconInput v-model="formData.specialization" @update:model-value="emitUpdate"
         label="التخصص الرئيسي المقاول" placeholder="اختر" :items="specializationItems" />
-      <SelectWithIconInput v-model="formData.siteReadiness" @update:model-value="emitUpdate"
-        label="جاهزية مواقع العمل" placeholder="اختر" :items="siteReadinessItems" />
+      <SelectWithIconInput v-model="formData.siteReadiness" @update:model-value="emitUpdate" label="جاهزية مواقع العمل"
+        placeholder="اختر" :items="siteReadinessItems" />
       <div>
         <span class="text-gray-700 text-sm font-semibold mb-2 block">نظام إدارة السلامة</span>
         <div class="flex gap-4">
           <v-radio-group v-model="formData.safetyManagementSystem" @update:model-value="emitUpdate" inline hide-details>
-            <v-radio label="نعم" :value="true" color="primary" />
-            <v-radio label="لا" :value="false" color="primary" />
+            <v-radio :value="true" color="primary">
+              <template #label>
+                <span :class="formData.safetyManagementSystem ? 'text-primary font-semibold' : 'text-gray-600'">
+                  نعم
+                </span>
+              </template>
+            </v-radio>
+            <v-radio :value="false" color="primary">
+              <template #label>
+                <span :class="!formData.safetyManagementSystem ? 'text-primary font-semibold' : 'text-gray-600'">
+                  لا
+                </span>
+              </template>
+            </v-radio>
           </v-radio-group>
         </div>
       </div>
       <div>
         <span class="text-gray-700 text-sm font-semibold mb-2 block">الالتزام بالأنظمة البيئية</span>
         <div class="flex gap-4">
-          <v-radio-group v-model="formData.environmentalCompliance" @update:model-value="emitUpdate" inline hide-details>
-            <v-radio label="نعم" :value="true" color="primary" />
-            <v-radio label="لا" :value="false" color="primary" />
+          <v-radio-group v-model="formData.environmentalCompliance" @update:model-value="emitUpdate" inline
+            hide-details>
+            <v-radio :value="true" color="primary">
+              <template #label>
+                <span :class="formData.environmentalCompliance ? 'text-primary font-semibold' : 'text-gray-600'">
+                  نعم
+                </span>
+              </template>
+            </v-radio>
+            <v-radio :value="false" color="primary">
+              <template #label>
+                <span :class="!formData.environmentalCompliance ? 'text-primary font-semibold' : 'text-gray-600'">
+                  لا
+                </span>
+              </template>
+            </v-radio>
           </v-radio-group>
+
         </div>
       </div>
     </div>

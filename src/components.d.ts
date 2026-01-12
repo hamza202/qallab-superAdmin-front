@@ -15,6 +15,7 @@ declare module 'vue' {
     AuthLayout: typeof import('./layouts/AuthLayout.vue')['default']
     CheckboxInput: typeof import('./components/common/forms/checkboxInput.vue')['default']
     DataTable: typeof import('./components/common/tables/DataTable.vue')['default']
+    DatePickerInput: typeof import('./components/common/forms/DatePickerInput.vue')['default']
     DefaultLayout: typeof import('./layouts/DefaultLayout.vue')['default']
     DeleteConfirmDialog: typeof import('./components/common/DeleteConfirmDialog.vue')['default']
     EditableDataTable: typeof import('./components/common/tables/EditableDataTable.vue')['default']

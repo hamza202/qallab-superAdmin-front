@@ -59,6 +59,18 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
 const addIcon = `<svg width="22" height="18" viewBox="0 0 22 18" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M18 17V11M15 14H21M21 6H1M21 8V4.2C21 3.0799 21 2.51984 20.782 2.09202C20.5903 1.7157 20.2843 1.40974 19.908 1.21799C19.4802 1 18.9201 1 17.8 1H4.2C3.0799 1 2.51984 1 2.09202 1.21799C1.7157 1.40973 1.40973 1.71569 1.21799 2.09202C1 2.51984 1 3.0799 1 4.2V11.8C1 12.9201 1 13.4802 1.21799 13.908C1.40973 14.2843 1.71569 14.5903 2.09202 14.782C2.51984 15 3.0799 15 4.2 15H11" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`;
+
+const infoIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_1892_22688)">
+<path d="M6.06065 6.00016C6.21739 5.55461 6.52675 5.1789 6.93395 4.93958C7.34116 4.70027 7.81991 4.61279 8.28543 4.69264C8.75096 4.77249 9.17319 5.01451 9.47737 5.37585C9.78154 5.73718 9.94802 6.19451 9.94732 6.66683C9.94732 8.00016 7.94732 8.66683 7.94732 8.66683M8.00065 11.3335H8.00732M14.6673 8.00016C14.6673 11.6821 11.6825 14.6668 8.00065 14.6668C4.31875 14.6668 1.33398 11.6821 1.33398 8.00016C1.33398 4.31826 4.31875 1.3335 8.00065 1.3335C11.6825 1.3335 14.6673 4.31826 14.6673 8.00016Z" stroke="#9AA4B2" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<defs>
+<clipPath id="clip0_1892_22688">
+<rect width="16" height="16" fill="white"/>
+</clipPath>
+</defs>
+</svg>
+`;
 </script>
 
 <template>
@@ -66,21 +78,42 @@ const addIcon = `<svg width="22" height="18" viewBox="0 0 22 18" fill="none" xml
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 px-6 pt-6 pb-4">
       <TextInput v-model="debitLimit" @blur="emitUpdate"
         label="الحد الأعلى للدين" placeholder="ادخل الحد">
-        <template #prepend-inner>
-          <v-icon size="small" color="gray">mdi-help-circle-outline</v-icon>
+        <template #append-inner>
+          <v-tooltip location="top" content-class="custom-tooltip">
+            <template #activator="{ props: tooltipProps }">
+              <v-btn class="!min-w-0 p-0" size="small" density="compact"
+                v-bind="tooltipProps">
+                <span v-html="infoIcon"></span>
+              </v-btn>
+            </template>
+            <div>
+              الحد الأقصى المسموح به للديون
+            </div>
+          </v-tooltip>
         </template>
       </TextInput>
       <TextInput v-model="creditLimit" @blur="emitUpdate"
         label="الحد الأعلى للائتمان" placeholder="ادخل الحد">
-        <template #prepend-inner>
-          <v-icon size="small" color="gray">mdi-help-circle-outline</v-icon>
+        <template #append-inner>
+          <v-tooltip location="top" content-class="custom-tooltip">
+            <template #activator="{ props: tooltipProps }">
+              <v-btn class="!min-w-0 p-0" size="small" density="compact"
+                v-bind="tooltipProps">
+                <span v-html="infoIcon"></span>
+              </v-btn>
+            </template>
+            <div>
+              الحد الأقصى المسموح به للائتمان
+            </div>
+          </v-tooltip>
         </template>
       </TextInput>
     </div>
 
     <div class="flex justify-between items-center mb-4 border-y border-gray-200 px-6 py-2">
       <h2 class="text-lg font-bold text-primary-900">الحسابات البنكية</h2>
-      <v-btn variant="flat" color="primary" height="40" class="font-bold px-5" @click="addAccount">
+      <v-btn variant="flat" color="primary-500" height="40" rounded="4" class="font-bold px-5 !text-white"
+        @click="addAccount">
         <template #prepend>
           <span v-html="addIcon"></span>
         </template>
@@ -113,7 +146,17 @@ const addIcon = `<svg width="22" height="18" viewBox="0 0 22 18" fill="none" xml
             <TextInput v-model="account.iban" density="compact" variant="outlined" hide-details
               placeholder="الآيبان/IBAN" @blur="emitUpdate">
               <template #append-inner>
-                <v-icon size="small" color="gray">mdi-help-circle-outline</v-icon>
+                <v-tooltip location="top" content-class="custom-tooltip">
+                  <template #activator="{ props: tooltipProps }">
+                    <v-btn class="!min-w-0 p-0" size="small" density="compact"
+                      v-bind="tooltipProps">
+                      <span v-html="infoIcon"></span>
+                    </v-btn>
+                  </template>
+                  <div>
+                    الرقم التعريفي الدولي للحساب البنكي
+                  </div>
+                </v-tooltip>
               </template>
             </TextInput>
           </td>

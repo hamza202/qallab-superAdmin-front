@@ -347,31 +347,23 @@
                                 </template>
                             </v-list-item>
                         </template>
-                        <div class="relative mt-3 ps-15 pe-4 text-sm">
-                            <div
-                                class="absolute top-1 bottom-1 right-[30px] border-r-2 border-dotted border-white -translate-y-3 h-[100.5%]">
-                            </div>
-                            <ul class="space-y-2">
+                        <div class="relative mt-1 ps-10 pe-4 text-sm pb-2">
+                            <ul class="space-y-2 text-slate-100">
                                 <li class="relative">
                                     <router-link to="/vouchers/list"
-                                        :class="[$route.path.includes('/vouchers') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">لوحة
-                                        التحكم المالية</router-link>
-                                    <span
-                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
+                                        :class="[isMenuItemActive('/vouchers/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        لوحة
+                                        التحكم المالية </router-link>
                                 </li>
                                 <li class="relative">
                                     <router-link to="/finance/payment-vouchers"
-                                        :class="[$route.path.includes('/finance/payment-vouchers') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
+                                        :class="[isMenuItemActive('/finance/payment-vouchers') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
                                         سندات الصرف</router-link>
-                                    <span
-                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
                                 </li>
                                 <li class="relative">
                                     <router-link to="/finance/receipt-vouchers"
-                                        :class="[$route.path.includes('/finance/receipt-vouchers') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
+                                        :class="[isMenuItemActive('/finance/receipt-vouchers') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
                                         سندات القبض</router-link>
-                                    <span
-                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
                                 </li>
                             </ul>
                         </div>
@@ -448,26 +440,21 @@
                                 </template>
                             </v-list-item>
                         </template>
-                        <div class="relative mt-3 ps-15 pe-4 text-sm">
-                            <div
-                                class="absolute top-1 bottom-1 right-[30px] border-r-2 border-dotted border-white -translate-y-3 h-[100.5%]">
-                            </div>
-                            <ul class="space-y-2">
+                        <div class="relative mt-1 ps-10 pe-4 text-sm">
+                            <ul class="space-y-2 text-slate-100">
                                 <li class="relative">
                                     <router-link to="/logistics/transport-orders"
-                                        :class="[isMenuItemActive('/logistics/transport-orders') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">طلبات
-                                        النقل</router-link>
-                                    <span
-                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
+                                        :class="[isMenuItemActive('/logistics/transport-orders') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        طلبات
+                                        النقل </router-link>
                                 </li>
                                 <li class="relative">
                                     <router-link to="/logistics/transport-invoices"
                                         :class="[isMenuItemActive('/logistics/transport-invoices') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">فواتير
                                         النقل</router-link>
-                                    <span
-                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
                                 </li>
                             </ul>
+
                         </div>
                     </v-list-group>
 
@@ -493,24 +480,17 @@
                                 </template>
                             </v-list-item>
                         </template>
-                        <div class="relative mt-3 ps-15 pe-4 text-sm">
-                            <div
-                                class="absolute top-1 bottom-1 right-[30px] border-r-2 border-dotted border-white -translate-y-3 h-[100.5%]">
-                            </div>
-                            <ul class="space-y-2">
+                        <div class="relative mt-1 ps-10 pe-4 text-sm">
+                            <ul class="space-y-2 text-slate-100">
                                 <li class="relative">
                                     <router-link to="/reports/sales"
                                         :class="[isMenuItemActive('/reports/sales') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">تقارير
                                         المبيعات</router-link>
-                                    <span
-                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
                                 </li>
                                 <li class="relative">
                                     <router-link to="/reports/purchases"
                                         :class="[isMenuItemActive('/reports/purchases') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">تقارير
                                         المشتريات</router-link>
-                                    <span
-                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
                                 </li>
                             </ul>
                         </div>
@@ -728,7 +708,7 @@ const isRouteActive = (basePath) => {
 // Dynamic function to check if a menu item should be active based on its link path
 const isMenuItemActive = (menuLinkPath) => {
     const currentPath = route.path;
-    
+
     // Direct match
     if (currentPath === menuLinkPath) return true;
 

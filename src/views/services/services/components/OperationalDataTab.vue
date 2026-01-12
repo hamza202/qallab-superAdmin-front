@@ -56,10 +56,21 @@ const handleFileUpload = (event: any) => {
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="mb-6">
                     <label class="block text-sm font-semibold text-gray-900 mb-2">هل تحتاج موعد؟</label>
-                    <v-radio-group v-model="formData.requires_scheduling" inline hide-details
-                        @update:model-value="updateFormData">
-                        <v-radio label="نعم" :value="true" color="primary" />
-                        <v-radio label="لا" :value="false" color="primary" />
+                    <v-radio-group v-model="formData.requires_scheduling" inline hide-details @update:model-value="updateFormData">
+                        <v-radio :value="true" color="primary">
+                            <template #label>
+                                <span :class="formData.requires_scheduling ? 'text-primary font-semibold' : 'text-gray-600'">
+                                    نعم
+                                </span>
+                            </template>
+                        </v-radio>
+                        <v-radio :value="false" color="primary">
+                            <template #label>
+                                <span :class="!formData.requires_scheduling ? 'text-primary font-semibold' : 'text-gray-600'">
+                                    لا
+                                </span>
+                            </template>
+                        </v-radio>
                     </v-radio-group>
                 </div>
                 <div>
@@ -77,7 +88,6 @@ const handleFileUpload = (event: any) => {
                     </v-text-field>
                 </div>
             </div>
-
         </div>
 
         <!-- حالة الخدمة Section -->
@@ -86,52 +96,118 @@ const handleFileUpload = (event: any) => {
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
                     <label class="block text-sm font-semibold text-gray-900 mb-2">تتطلب موافقة</label>
-                    <v-radio-group v-model="formData.requires_approval" inline hide-details
-                        @update:model-value="updateFormData">
-                        <v-radio label="نعم" :value="true" color="primary" />
-                        <v-radio label="لا" :value="false" color="primary" />
+                    <v-radio-group v-model="formData.requires_approval" inline hide-details @update:model-value="updateFormData">
+                        <v-radio :value="true" color="primary">
+                            <template #label>
+                                <span :class="formData.requires_approval ? 'text-primary font-semibold' : 'text-gray-600'">
+                                    نعم
+                                </span>
+                            </template>
+                        </v-radio>
+                        <v-radio :value="false" color="primary">
+                            <template #label>
+                                <span :class="!formData.requires_approval ? 'text-primary font-semibold' : 'text-gray-600'">
+                                    لا
+                                </span>
+                            </template>
+                        </v-radio>
                     </v-radio-group>
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-900 mb-2">قابلة للمقايضة</label>
-                    <v-radio-group v-model="formData.is_barter" inline hide-details
-                        @update:model-value="updateFormData">
-                        <v-radio label="نعم" :value="true" color="primary" />
-                        <v-radio label="لا" :value="false" color="primary" />
+                    <v-radio-group v-model="formData.is_barter" inline hide-details @update:model-value="updateFormData">
+                        <v-radio :value="true" color="primary">
+                            <template #label>
+                                <span :class="formData.is_barter ? 'text-primary font-semibold' : 'text-gray-600'">
+                                    نعم
+                                </span>
+                            </template>
+                        </v-radio>
+                        <v-radio :value="false" color="primary">
+                            <template #label>
+                                <span :class="!formData.is_barter ? 'text-primary font-semibold' : 'text-gray-600'">
+                                    لا
+                                </span>
+                            </template>
+                        </v-radio>
                     </v-radio-group>
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-900 mb-2">قابلة للتجزئة</label>
-                    <v-radio-group v-model="formData.is_partial_allowed" inline hide-details
-                        @update:model-value="updateFormData">
-                        <v-radio label="نعم" :value="true" color="primary" />
-                        <v-radio label="لا" :value="false" color="primary" />
+                    <v-radio-group v-model="formData.is_partial_allowed" inline hide-details @update:model-value="updateFormData">
+                        <v-radio :value="true" color="primary">
+                            <template #label>
+                                <span :class="formData.is_partial_allowed ? 'text-primary font-semibold' : 'text-gray-600'">
+                                    نعم
+                                </span>
+                            </template>
+                        </v-radio>
+                        <v-radio :value="false" color="primary">
+                            <template #label>
+                                <span :class="!formData.is_partial_allowed ? 'text-primary font-semibold' : 'text-gray-600'">
+                                    لا
+                                </span>
+                            </template>
+                        </v-radio>
                     </v-radio-group>
                 </div>
 
                 <div>
                     <label class="block text-sm font-semibold text-gray-900 mb-2">متاحة للبيع</label>
-                    <v-radio-group v-model="formData.sales_enabled" inline hide-details
-                        @update:model-value="updateFormData">
-                        <v-radio label="نعم" :value="true" color="primary" />
-                        <v-radio label="لا" :value="false" color="primary" />
+                    <v-radio-group v-model="formData.sales_enabled" inline hide-details @update:model-value="updateFormData">
+                        <v-radio :value="true" color="primary">
+                            <template #label>
+                                <span :class="formData.sales_enabled ? 'text-primary font-semibold' : 'text-gray-600'">
+                                    نعم
+                                </span>
+                            </template>
+                        </v-radio>
+                        <v-radio :value="false" color="primary">
+                            <template #label>
+                                <span :class="!formData.sales_enabled ? 'text-primary font-semibold' : 'text-gray-600'">
+                                    لا
+                                </span>
+                            </template>
+                        </v-radio>
                     </v-radio-group>
                 </div>
 
                 <div>
                     <label class="block text-sm font-semibold text-gray-900 mb-2">متاحة للشراء</label>
-                    <v-radio-group v-model="formData.purchase_enabled" inline hide-details
-                        @update:model-value="updateFormData">
-                        <v-radio label="نعم" :value="true" color="primary" />
-                        <v-radio label="لا" :value="false" color="primary" />
+                    <v-radio-group v-model="formData.purchase_enabled" inline hide-details @update:model-value="updateFormData">
+                        <v-radio :value="true" color="primary">
+                            <template #label>
+                                <span :class="formData.purchase_enabled ? 'text-primary font-semibold' : 'text-gray-600'">
+                                    نعم
+                                </span>
+                            </template>
+                        </v-radio>
+                        <v-radio :value="false" color="primary">
+                            <template #label>
+                                <span :class="!formData.purchase_enabled ? 'text-primary font-semibold' : 'text-gray-600'">
+                                    لا
+                                </span>
+                            </template>
+                        </v-radio>
                     </v-radio-group>
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-900 mb-2">متاحة للمشاريع</label>
-                    <v-radio-group v-model="formData.project_enabled" inline hide-details
-                        @update:model-value="updateFormData">
-                        <v-radio label="نعم" :value="true" color="primary" />
-                        <v-radio label="لا" :value="false" color="primary" />
+                    <v-radio-group v-model="formData.project_enabled" inline hide-details @update:model-value="updateFormData">
+                        <v-radio :value="true" color="primary">
+                            <template #label>
+                                <span :class="formData.project_enabled ? 'text-primary font-semibold' : 'text-gray-600'">
+                                    نعم
+                                </span>
+                            </template>
+                        </v-radio>
+                        <v-radio :value="false" color="primary">
+                            <template #label>
+                                <span :class="!formData.project_enabled ? 'text-primary font-semibold' : 'text-gray-600'">
+                                    لا
+                                </span>
+                            </template>
+                        </v-radio>
                     </v-radio-group>
                 </div>
 
@@ -147,13 +223,13 @@ const handleFileUpload = (event: any) => {
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <LanguageTabs :languages="availableLanguages" label="ملاحظات">
+                    <LanguageTabs :languages="availableLanguages" label="الوصف">
                         <template #en>
-                            <RichTextEditor v-model="formData.notes_en" placeholder="Enter notes in English"
+                            <RichTextEditor v-model="formData.notes_en" placeholder="Enter Description in English"
                                 min-height="120px" hide-details @update:model-value="updateFormData" />
                         </template>
                         <template #ar>
-                            <RichTextEditor v-model="formData.notes" placeholder="ادخل الملاحظات بالعربية"
+                            <RichTextEditor v-model="formData.notes" placeholder="ادخل الوصف بالعربية"
                                 min-height="120px" hide-details @update:model-value="updateFormData" />
                         </template>
                     </LanguageTabs>

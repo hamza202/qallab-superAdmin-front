@@ -76,6 +76,24 @@ watch(() => props, (newProps) => {
 const emitUpdate = () => {
   emit('update:formData', { ...formData });
 };
+
+const infoIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_1892_22688)">
+<path d="M6.06065 6.00016C6.21739 5.55461 6.52675 5.1789 6.93395 4.93958C7.34116 4.70027 7.81991 4.61279 8.28543 4.69264C8.75096 4.77249 9.17319 5.01451 9.47737 5.37585C9.78154 5.73718 9.94802 6.19451 9.94732 6.66683C9.94732 8.00016 7.94732 8.66683 7.94732 8.66683M8.00065 11.3335H8.00732M14.6673 8.00016C14.6673 11.6821 11.6825 14.6668 8.00065 14.6668C4.31875 14.6668 1.33398 11.6821 1.33398 8.00016C1.33398 4.31826 4.31875 1.3335 8.00065 1.3335C11.6825 1.3335 14.6673 4.31826 14.6673 8.00016Z" stroke="#9AA4B2" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<defs>
+<clipPath id="clip0_1892_22688">
+<rect width="16" height="16" fill="white"/>
+</clipPath>
+</defs>
+</svg>
+`
+
+const markIcon = `<svg width="18" height="22" viewBox="0 0 18 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M9 12C10.6569 12 12 10.6569 12 9C12 7.34315 10.6569 6 9 6C7.34315 6 6 7.34315 6 9C6 10.6569 7.34315 12 9 12Z" stroke="#4B5565" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M9 21C13 17 17 13.4183 17 9C17 4.58172 13.4183 1 9 1C4.58172 1 1 4.58172 1 9C1 13.4183 5 17 9 21Z" stroke="#4B5565" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`
+
 </script>
 
 <template>
@@ -105,19 +123,19 @@ const emitUpdate = () => {
 
       <TextInput v-model="formData.mobile" @blur="emitUpdate" label="الهاتف المحمول"
         placeholder="+966 (555) 000-0000" required dir="ltr">
-        <template #append-inner>
+        <template #prepend-inner>
           <span class="text-gray-900 font-semibold me-2 block text-sm">KSA</span>
         </template>
       </TextInput>
       <TextInput v-model="formData.phone" @blur="emitUpdate" label="الهاتف"
         placeholder="+966 (555) 000-0000" dir="ltr">
-        <template #append-inner>
+        <template #prepend-inner>
           <span class="text-gray-900 font-semibold me-2 block text-sm">KSA</span>
         </template>
       </TextInput>
       <TextInput v-model="formData.email" @blur="emitUpdate" label="البريد الإلكتروني"
         placeholder="info@buildtrans.sa" dir="ltr" />
-      <SelectWithIconInput v-model="formData.languageId" @update:model-value="emitUpdate" label="اللغة"
+      <SelectWithIconInput show-add-button v-model="formData.languageId" @update:model-value="emitUpdate" label="اللغة"
         placeholder="اختر اللغة" :items="languageItems" />
 
     <h2 class="text-lg font-bold text-primary-900 mt-6 mb-2 md:col-span-3">معلومات العنوان</h2>
@@ -134,10 +152,9 @@ const emitUpdate = () => {
         label="الرمز البريدي" placeholder="966" />
       <TextInput v-model="formData.buildingNumber" @blur="emitUpdate"
         label="رقم المبنى" placeholder="25544" />
-      <TextInput v-model="formData.address1" @blur="emitUpdate"
-        label="العنوان الوطني" placeholder="أدخل العنوان">
-        <template #prepend-inner>
-          <v-icon size="small" color="gray">mdi-map-marker</v-icon>
+      <TextInput v-model="formData.address1" dir="ltr" @blur="emitUpdate" label="العنوان الوطني" placeholder="Industrial Area">
+        <template #append-inner>
+          <span v-html="markIcon"></span>
         </template>
       </TextInput>
     </div>
