@@ -167,11 +167,11 @@ const editIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none" xm
             class="flex flex-wrap items-stretch rounded-lg overflow-hidden border border-gray-200 bg-white text-sm">
             <ButtonWithIcon variant="flat" height="40" rounded="0"
               custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-              :prepend-icon="trash_1_icon" :label="t('common.delete')" />
+              :prepend-icon="trash_1_icon" color="white" :label="t('common.delete')" />
             <div class="w-px bg-gray-200"></div>
             <ButtonWithIcon variant="flat" height="40" rounded="0"
               custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-              :prepend-icon="trash_2_icon" :label="t('common.deleteAll')" />
+              :prepend-icon="trash_2_icon" color="white" :label="t('common.deleteAll')" />
           </div>
           <h3 v-else class="text-gray-900 text-lg font-bold">تقسيم النطاقات الجغرافية</h3>
 

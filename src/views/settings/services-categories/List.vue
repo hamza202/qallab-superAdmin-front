@@ -434,11 +434,11 @@ const exportIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" 
                         class="flex flex-wrap items-stretch rounded overflow-hidden border border-gray-200 bg-white text-sm">
                         <ButtonWithIcon variant="flat" height="40" rounded="0"
                             custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-                            :prepend-icon="trash_1_icon" :label="t('common.delete')" />
+                            :prepend-icon="trash_1_icon" color="white" :label="t('common.delete')" />
                         <div class="w-px bg-gray-200"></div>
                         <ButtonWithIcon variant="flat" height="40" rounded="0"
                             custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-                            :prepend-icon="trash_2_icon" :label="t('common.deleteAll')" />
+                            :prepend-icon="trash_2_icon" color="white" :label="t('common.deleteAll')" />
                     </div>
 
 
@@ -479,15 +479,16 @@ const exportIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" 
                 <!-- Advanced filters row -->
                 <div v-if="showAdvancedFilters"
                     class="border-y border-y-primary-100 bg-primary-50 px-4 sm:px-6 py-3 flex flex-col gap-3 sm:gap-2">
-                    <div class="flex flex-wrap gap-3 justify-end sm:justify-start">
-                        <v-text-field v-model="filterName" density="comfortable" variant="outlined" hide-details
-                            placeholder="اسم التصنيف" class="w-full sm:w-40 bg-white" @keyup.enter="applyFilters" />
-                        <v-text-field v-model="filterUnit" density="comfortable" variant="outlined" hide-details
-                            placeholder="الوحدة" class="w-full sm:w-40 bg-white" @keyup.enter="applyFilters" />
-                        <v-select v-model="filterStatus" :items="['فعال', 'غير فعال']" density="comfortable"
-                            variant="outlined" hide-details placeholder="الحالة" class="w-full sm:w-40 bg-white"
-                            @update:model-value="applyFilters" />
-
+                    <div class="flex flex-wrap gap-3 justify-between">
+                        <div class="flex gap-3 flex-wrap">
+                            <TextInput v-model="filterName" density="comfortable" variant="outlined" hide-details
+                                placeholder="اسم التصنيف" class="w-full sm:w-40 bg-white" @keyup.enter="applyFilters" />
+                            <TextInput v-model="filterUnit" density="comfortable" variant="outlined" hide-details
+                                placeholder="الوحدة" class="w-full sm:w-40 bg-white" @keyup.enter="applyFilters" />
+                            <SelectInput v-model="filterStatus" :items="['فعال', 'غير فعال']" density="comfortable"
+                                variant="outlined" hide-details placeholder="الحالة" class="w-full sm:w-40 bg-white"
+                                @update:model-value="applyFilters" />
+                        </div>
                         <div class="flex gap-2 items-center">
                             <ButtonWithIcon variant="flat" color="primary-500" rounded="4" height="40"
                                 custom-class="px-5 font-semibold !text-white text-sm sm:text-base"

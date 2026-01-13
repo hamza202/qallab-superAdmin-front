@@ -124,11 +124,11 @@ const handleSelectAll = (checked: boolean) => {
             class="flex flex-wrap items-stretch rounded-lg overflow-hidden border border-gray-200 bg-white text-sm">
             <ButtonWithIcon variant="flat" height="40" rounded="0"
               custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-              :prepend-icon="trash_1_icon" label="حذف" />
+              :prepend-icon="trash_1_icon" color="white" label="حذف" />
             <div class="w-px bg-gray-200"></div>
             <ButtonWithIcon variant="flat" height="40" rounded="0"
               custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-              :prepend-icon="trash_2_icon" label="حذف الجميع" />
+              :prepend-icon="trash_2_icon" color="white" label="حذف الجميع" />
           </div>
                     <!-- Main header controls -->
           <div class="flex flex-wrap gap-3">
