@@ -112,7 +112,7 @@ export const productsRoutes: RouteRecordRaw[] = [
       {
         path: "view/:id",
         name: "SimpleProductView",
-        component: () => import("@/views/products/simple-products/View.vue"),
+        component: () => import("@/views/products/simple-products/view.vue"),
         meta: {
           title: "pages.simpleProducts.view",
         },
