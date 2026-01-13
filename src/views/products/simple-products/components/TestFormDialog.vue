@@ -137,16 +137,13 @@ watch(
     </v-form>
 
     <template #actions>
-      <v-btn variant="flat" color="primary" height="44" class="font-semibold text-base sm:flex-1" @click="handleSave">
-        <template #prepend>
-          <span v-html="saveIcon"></span>
-        </template>
-        حفظ
-      </v-btn>
-      <v-btn variant="flat" prepend-icon="mdi-close" color="primary-50" height="44" class="font-semibold text-base text-primary-700 sm:flex-1"
-        @click="closeDialog">
-        إغلاق
-      </v-btn>
+      <ButtonWithIcon variant="flat" color="primary" height="44"
+        custom-class="font-semibold text-base sm:flex-1" :prepend-icon="saveIcon"
+        label="حفظ" @click="handleSave" />
+      
+      <ButtonWithIcon variant="flat" color="primary-50" height="44"
+        custom-class="font-semibold text-base text-primary-700 sm:flex-1"
+        label="إغلاق" prepend-icon="mdi-close" @click="closeDialog" />
     </template>
   </AppDialog>
 </template>

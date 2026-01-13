@@ -3,6 +3,7 @@ import { ref, computed, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useApi } from "@/composables/useApi";
 import { useNotification } from "@/composables/useNotification";
+import DatePickerInput from '@/components/common/forms/DatePickerInput.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -197,23 +198,13 @@ const saveIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xm
 
             <!-- Entity Type Toggle Buttons -->
             <div class="flex gap-2 mb-6 border-y border-gray-200 -mx-6 px-6 py-3">
-                <v-btn variant="flat" :color="entityType === 'customer' ? 'primary-500' : 'white'" height="50"
-                    class="px-5 font-semibold text-base"
-                    :class="entityType === 'customer' ? '!text-white' : '!text-gray-400'"
-                    @click="entityType = 'customer'">
-                    <template #prepend>
-                        <span v-html="customerIcon"></span>
-                    </template>
-                    عميل
-                </v-btn>
-                <v-btn variant="flat" :color="entityType === 'supplier' ? 'primary-500' : 'white'"
-                    :class="entityType === 'supplier' ? '!text-white' : '!text-gray-400'" height="50"
-                    class="px-5 font-semibold text-base" @click="entityType = 'supplier'">
-                    <template #prepend>
-                        <span v-html="supplierIcon"></span>
-                    </template>
-                    مورد
-                </v-btn>
+                <ButtonWithIcon variant="flat" :color="entityType === 'customer' ? 'primary-500' : 'white'" height="50"
+                    :custom-class="`px-5 font-semibold text-base ${entityType === 'customer' ? '!text-white' : '!text-gray-400'}`"
+                    :prepend-icon="customerIcon" label="عميل" @click="entityType = 'customer'" />
+                
+                <ButtonWithIcon variant="flat" :color="entityType === 'supplier' ? 'primary-500' : 'white'" height="50"
+                    :custom-class="`px-5 font-semibold text-base ${entityType === 'supplier' ? '!text-white' : '!text-gray-400'}`"
+                    :prepend-icon="supplierIcon" label="مورد" @click="entityType = 'supplier'" />
             </div>
 
 
@@ -223,15 +214,15 @@ const saveIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xm
                 <div class="bg-gray-50 rounded-lg p-6 mb-6">
                     <h3 class="text-lg font-bold text-primary-900 mb-5">البيانات الأساسية للسند</h3>
 
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 gap-y-6">
                         <!-- Client/Supplier Name -->
                         <SelectWithIconInput show-add-button v-model="formData.client_name" :label="`اسم ال${entityLabel} *`"
                             :placeholder="`ال${entityLabel} `" :rules="[rules.required]"
                             :items="clients" :hide-details="false"/>
 
                         <!-- Voucher Date -->
-                        <TextInput v-model="formData.voucher_date" type="date" label="تاريخ السند *"
-                            :rules="[rules.required]" hide-details="auto" />
+                        <DatePickerInput v-model="formData.voucher_date" label="تاريخ السند *"
+                            :rules="[rules.required]" placeholder="اختر التاريخ" hide-details="auto" />
 
                         <!-- Amount -->
                         <TextInput v-model="formData.amount" label="المبلغ *" placeholder="00.00 ريس"
@@ -364,20 +355,12 @@ const saveIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xm
 
             <!-- Action Buttons -->
       <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col">
-        <v-btn variant="flat" color="primary" rounded="4" height="48" class="min-w-56" @click="handleSave">
-          <template #prepend>
-            <span v-html="saveIcon"></span>
-          </template>
-
-          <span>حفظ</span>
-        </v-btn>
-        <v-btn variant="flat" color="primary-50" rounded="4" height="48"
-          class="font-semibold text-base text-primary-700 px-6 min-w-56" @click="handleCancel">
-          <template #prepend>
-            <v-icon>mdi-close</v-icon>
-          </template>
-          <span>إغلاق</span>
-        </v-btn>
+        <ButtonWithIcon variant="flat" color="primary" rounded="4" height="48" custom-class="min-w-56"
+          :prepend-icon="saveIcon" label="حفظ" @click="handleSave" />
+        
+        <ButtonWithIcon prepend-icon="mdi-close" variant="flat" color="primary-50" rounded="4" height="48"
+          custom-class="font-semibold text-base text-primary-700 px-6 min-w-56"
+          label="إلغاء" @click="handleCancel" />
       </div>
 
 

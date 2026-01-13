@@ -683,12 +683,12 @@ const handleSave = async () => {
             minimum: tax.minValue ? parseFloat(tax.minValue) : null,
             priority: parseInt(tax.maxValue || (index + 1).toString()),
           };
-          
+
           // Include id only if it exists (for updating existing tax rules)
           if (tax.id && tax.id > 0) {
             taxObj.id = tax.id;
           }
-          
+
           return taxObj;
         }),
       };
@@ -742,7 +742,7 @@ const handleSave = async () => {
             formData.append('unit_id', payload.unit_id.toString());
             formData.append('is_active', payload.is_active ? '1' : '0');
             formData.append('image', payload.image);
-            
+
             payload.taxes.forEach((tax: any, index: number) => {
               formData.append(`taxes[${index}][tax_id]`, tax.tax_id.toString());
               formData.append(`taxes[${index}][percentage]`, tax.percentage);
@@ -771,7 +771,7 @@ const handleSave = async () => {
             formData.append('unit_id', payload.unit_id.toString());
             formData.append('is_active', payload.is_active ? '1' : '0');
             formData.append('image', payload.image);
-            
+
             payload.taxes.forEach((tax: any, index: number) => {
               formData.append(`taxes[${index}][tax_id]`, tax.tax_id.toString());
               formData.append(`taxes[${index}][percentage]`, tax.percentage);
@@ -916,6 +916,17 @@ const categoriesIcon = `<svg width="48" height="48" viewBox="0 0 48 48" fill="no
 </svg>
 `;
 
+const saveIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M4.16732 0.833984H10.5627C10.9704 0.833984 11.1742 0.833984 11.366 0.880035C11.5361 0.920862 11.6987 0.988203 11.8478 1.07958C12.016 1.18265 12.1601 1.32678 12.4484 1.61503L15.0529 4.2196C15.3412 4.50786 15.4853 4.65198 15.5884 4.82018C15.6798 4.9693 15.7471 5.13187 15.7879 5.30193C15.834 5.49374 15.834 5.69757 15.834 6.10522V12.5007M8.75065 6.66732H5.50065C5.03394 6.66732 4.80059 6.66732 4.62233 6.57649C4.46552 6.4966 4.33804 6.36911 4.25815 6.21231C4.16732 6.03405 4.16732 5.80069 4.16732 5.33398V3.75065M9.58398 15.834V12.1673C9.58398 11.7006 9.58398 11.4673 9.49316 11.289C9.41326 11.1322 9.28578 11.0047 9.12898 10.9248C8.95072 10.834 8.71736 10.834 8.25065 10.834H5.50065C5.03394 10.834 4.80059 10.834 4.62233 10.9248C4.46552 11.0047 4.33804 11.1322 4.25815 11.289C4.16732 11.4673 4.16732 11.7006 4.16732 12.1673V15.834M12.9173 6.80294V13.1673C12.9173 14.1007 12.9173 14.5674 12.7357 14.924C12.5759 15.2376 12.3209 15.4925 12.0073 15.6523C11.6508 15.834 11.1841 15.834 10.2507 15.834H3.50065C2.56723 15.834 2.10052 15.834 1.744 15.6523C1.4304 15.4925 1.17543 15.2376 1.01564 14.924C0.833984 14.5674 0.833984 14.1007 0.833984 13.1673V6.41732C0.833984 5.4839 0.833984 5.01719 1.01564 4.66067C1.17543 4.34706 1.4304 4.0921 1.744 3.93231C2.10052 3.75065 2.56723 3.75065 3.50065 3.75065H9.86503C10.0689 3.75065 10.1708 3.75065 10.2667 3.77368C10.3517 3.79409 10.433 3.82776 10.5076 3.87345C10.5917 3.92499 10.6637 3.99705 10.8078 4.14118L12.5268 5.86013C12.6709 6.00425 12.743 6.07632 12.7945 6.16041C12.8402 6.23497 12.8739 6.31626 12.8943 6.40129C12.9173 6.4972 12.9173 6.59911 12.9173 6.80294Z" stroke="white" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`
+
+const deleteIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M5.5 1H10M1 3.25H14.5M13 3.25L12.474 11.1395C12.3951 12.3232 12.3557 12.915 12.1 13.3638C11.8749 13.7588 11.5354 14.0765 11.1262 14.2748C10.6615 14.5 10.0683 14.5 8.88201 14.5H6.61799C5.43168 14.5 4.83852 14.5 4.37375 14.2748C3.96457 14.0765 3.62507 13.7588 3.39999 13.3638C3.14433 12.915 3.10488 12.3232 3.02596 11.1395L2.5 3.25" stroke="#B42318" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`
+
+const searchIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M15.8333 15.8335L12.9167 12.9168M14.9999 7.91683C14.9999 11.8288 11.8286 15.0002 7.91659 15.0002C4.00457 15.0002 0.833252 11.8288 0.833252 7.91683C0.833252 4.00481 4.00457 0.833496 7.91659 0.833496C11.8286 0.833496 14.9999 4.00481 14.9999 7.91683Z" stroke="currentColor" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`
 </script>
 
 <template>
@@ -927,17 +938,15 @@ const categoriesIcon = `<svg width="48" height="48" viewBox="0 0 48 48" fill="no
 
         <div class="flex flex-wrap gap-3 mb-6">
           <!-- Add New Category Button - visible when not editing -->
-          <v-btn v-if="showAddCategoryButton" variant="flat" color="primary" height="44"
-            class="font-semibold text-base px-6" prepend-icon="mdi-plus-circle-outline" @click="handleAddNewCategory">
-            <span>إضافة تصنيف جديد</span>
-          </v-btn>
+          <ButtonWithIcon v-if="showAddCategoryButton" variant="flat" color="primary" height="44" rounded="4"
+            custom-class="font-semibold text-base px-8" label="إضافة تصنيف جديد"
+            prepend-icon="mdi-plus-circle-outline" @click="handleAddNewCategory" />
 
           <!-- Add Subcategory Button - visible only when a main category is selected -->
-          <v-btn v-if="showAddSubcategoryButton" variant="flat" prepend-icon="mdi-plus-circle-outline"
-            color="primary-50" height="44" class="font-semibold text-base text-primary px-6"
-            @click="handleAddSubcategory">
-            <span>إضافة تصنيف فرعي جديد</span>
-          </v-btn>
+          <ButtonWithIcon v-if="showAddSubcategoryButton" variant="flat" rounded="4"
+            color="primary-50" height="44" custom-class="font-semibold text-base text-primary-700 px-8"
+            label="إضافة تصنيف فرعي جديد" prepend-icon="mdi-plus-circle-outline"
+            @click="handleAddSubcategory" />
         </div>
       </div>
 
@@ -959,8 +968,12 @@ const categoriesIcon = `<svg width="48" height="48" viewBox="0 0 48 48" fill="no
             <template v-else>
               <!-- Search Box -->
               <div class="px-6 pt-4">
-                <v-text-field v-model="categoriesSearch" density="comfortable" variant="outlined" hide-details
-                  placeholder="بحث" prepend-inner-icon="mdi-magnify" class="mb-4" bg-color="gray-50" rounded="lg" />
+                <TextInput v-model="categoriesSearch" density="comfortable" variant="outlined" hide-details
+                  placeholder="بحث" class="mb-4 !text-gray-500" bg-color="gray-50" rounded="lg">
+                  <template #prepend-inner>
+                    <span class="text-gray-500" v-html="searchIcon"></span>
+                  </template>
+                  </TextInput>
               </div>
 
               <!-- Categories List -->
@@ -994,7 +1007,6 @@ const categoriesIcon = `<svg width="48" height="48" viewBox="0 0 48 48" fill="no
                       </v-icon>
                     </button>
                     <div v-else class="w-5"></div>
-
                   </div>
 
                   <!-- Subcategories -->
@@ -1017,11 +1029,9 @@ const categoriesIcon = `<svg width="48" height="48" viewBox="0 0 48 48" fill="no
                       <span class="flex-1 font-semibold text-base">
                         {{ child.name }}
                       </span>
-
                     </div>
                   </div>
                 </div>
-
                 <!-- Empty state -->
                 <div v-if="!filteredCategories.length" class="text-center text-gray-500 py-8">
                   لا توجد تصنيفات
@@ -1066,10 +1076,10 @@ const categoriesIcon = `<svg width="48" height="48" viewBox="0 0 48 48" fill="no
                   </LanguageTabs>
                 </div>
 
-                <SelectWithIconInput v-model="parentCategory" label="التصنيف الرئيسي" placeholder="اختر التصنيف الرئيسي"
+                <SelectWithIconInput show-add-button v-model="parentCategory" label="التصنيف الرئيسي" placeholder="اختر التصنيف الرئيسي"
                   :items="parentCategoryItems" :hide-details="false" :disabled="isSubcategoryMode" />
 
-                <SelectWithIconInput v-model="unit" label="الوحدة" placeholder="اختر الوحدة" :items="unitItems"
+                <SelectWithIconInput show-add-button v-model="unit" label="الوحدة" placeholder="اختر الوحدة" :items="unitItems"
                   :hide-details="false" />
               </div>
 
@@ -1100,13 +1110,13 @@ const categoriesIcon = `<svg width="48" height="48" viewBox="0 0 48 48" fill="no
                   {{ isBulkMode ? 'الضرائب للتصنيفات المحددة' : 'الضرائب' }}
                 </h2>
                 <div class="w-auto flex justify-start lg:justify-end">
-                  <v-btn variant="flat" color="primary" height="40" class="font-semibold text-sm px-4 w-full lg:w-auto"
+                  <ButtonWithIcon variant="flat" color="primary" height="40"
+                    custom-class="font-semibold text-sm px-4 w-full lg:w-auto" label="إضافة ضريبة"
                     :disabled="!isNewTaxValid" @click="addTaxRule">
                     <template #append>
                       <v-icon size="22">mdi-plus</v-icon>
                     </template>
-                    <span>اضافة ضريبة</span>
-                  </v-btn>
+                  </ButtonWithIcon>
                 </div>
               </div>
 
@@ -1166,12 +1176,8 @@ const categoriesIcon = `<svg width="48" height="48" viewBox="0 0 48 48" fill="no
                         </v-chip>
                       </td>
                       <td class="text-center">
-                        <v-btn icon variant="text" color="primary" size="small">
-                          <v-icon>mdi-pencil-outline</v-icon>
-                        </v-btn>
-                        <v-btn icon variant="text" color="error" size="small" @click="removeTaxRule(index)">
-                          <v-icon>mdi-trash-can-outline</v-icon>
-                        </v-btn>
+                        <ButtonWithIcon :icon="'mdi-pencil-outline'" icon-only variant="text" color="primary" size="small" />
+                        <ButtonWithIcon :icon="'mdi-trash-can-outline'" icon-only variant="text" color="error" size="small" @click="removeTaxRule(index)" />
                       </td>
                     </tr>
 
@@ -1187,32 +1193,26 @@ const categoriesIcon = `<svg width="48" height="48" viewBox="0 0 48 48" fill="no
 
             <div class="flex justify-center gap-3 mt-6 sm:flex-row flex-col">
               <!-- Save/Apply Button -->
-              <v-btn variant="flat" color="primary" height="48" class="sm:flex-1 font-semibold text-base"
-                :prepend-icon="isBulkMode ? 'mdi-check-all' : 'mdi-content-save-all-outline'" :loading="isSaving"
-                :disabled="isSaving || isDeleting || (isBulkMode && !taxRules.length)" @click="handleSave">
-                {{ isBulkMode ? 'تطبيق الضرائب على التصنيفات المحددة' : isEditing ? 'تحديث' : 'حفظ' }}
-              </v-btn>
+              <ButtonWithIcon variant="flat" color="primary" height="48" rounded="4"
+                custom-class="sm:flex-1 font-semibold text-base" :prepend-icon="saveIcon"
+                :label="isBulkMode ? 'تطبيق على المحدد' : (isEditing ? 'تحديث' : 'حفظ')" @click="handleSave"
+                :loading="isSaving" :disabled="isSaving || isDeleting || (isBulkMode && !taxRules.length)" />
 
               <!-- Close/Cancel Button -->
-              <v-btn variant="flat" color="primary-100" height="48"
-                class="sm:flex-1 font-semibold text-base text-primary-700" prepend-icon="mdi-close"
-                :disabled="isSaving || isDeleting" @click="handleClose">
-                {{ isBulkMode ? 'إلغاء التحديد' : 'إغلاق' }}
-              </v-btn>
+              <ButtonWithIcon variant="flat" color="primary-50" height="48" rounded="4"
+                custom-class="sm:flex-1 font-semibold text-base text-primary-700" :label="isBulkMode ? 'إلغاء التحديد' : 'إغلاق'"
+                prepend-icon="mdi-close" :disabled="isSaving || isDeleting" @click="handleClose" />
 
               <!-- Bulk Delete Button - visible when multiple categories selected -->
-              <v-btn v-if="isBulkMode" variant="flat" color="error-50" height="48"
-                class="sm:flex-1 font-semibold text-base text-error-700" prepend-icon="mdi-delete-multiple"
-                :loading="isDeleting" :disabled="isSaving || isDeleting" @click="openBulkDeleteDialog">
-                حذف المحدد ({{ selectedCategoryIds.length }})
-              </v-btn>
+              <ButtonWithIcon v-if="isBulkMode" variant="flat" color="error-50" height="48" rounded="4"
+                custom-class="sm:flex-1 font-semibold text-base text-error-700" :prepend-icon="deleteIcon"
+                label="حذف المحدد" @click="openBulkDeleteDialog" :loading="isDeleting"
+                :disabled="isSaving || isDeleting" />
 
               <!-- Delete Button - only visible when editing single category -->
-              <v-btn v-if="isEditing && selectedCategory && !isBulkMode" variant="flat" color="error-50" height="48"
-                class="sm:flex-1 font-semibold text-base text-error-700" prepend-icon="mdi-trash-can-outline"
-                :loading="isDeleting" :disabled="isSaving || isDeleting" @click="openDeleteDialog">
-                حذف
-              </v-btn>
+              <ButtonWithIcon v-if="isEditing && selectedCategory && !isBulkMode" variant="flat" color="error-50" height="48"
+                rounded="4" custom-class="sm:flex-1 font-semibold text-base text-error-700" :prepend-icon="deleteIcon"
+                label="حذف" @click="openDeleteDialog" :loading="isDeleting" :disabled="isSaving || isDeleting" />
             </div>
           </div>
 
@@ -1232,7 +1232,8 @@ const categoriesIcon = `<svg width="48" height="48" viewBox="0 0 48 48" fill="no
     </DeleteConfirmDialog>
 
     <!-- Bulk Delete Confirmation Dialog -->
-    <DeleteConfirmDialog v-model="showBulkDeleteDialog" :loading="isDeleting" :persistent="true" @confirm="confirmBulkDelete">
+    <DeleteConfirmDialog v-model="showBulkDeleteDialog" :loading="isDeleting" :persistent="true"
+      @confirm="confirmBulkDelete">
       <p class="text-gray-700 text-center">
         هل أنت متأكد من حذف
         <strong class="text-error-700">{{ selectedCategoryIds.length }}</strong>
@@ -1250,9 +1251,7 @@ const categoriesIcon = `<svg width="48" height="48" viewBox="0 0 48 48" fill="no
       location="top end">
       {{ notification.message }}
       <template #actions>
-        <v-btn variant="text" @click="notification.show = false">
-          إغلاق
-        </v-btn>
+        <ButtonWithIcon variant="text" label="إغلاق" @click="notification.show = false" />
       </template>
     </v-snackbar>
   </default-layout>

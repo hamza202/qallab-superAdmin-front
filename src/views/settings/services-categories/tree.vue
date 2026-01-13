@@ -673,12 +673,12 @@ const handleSave = async () => {
             minimum: tax.minValue ? parseFloat(tax.minValue) : null,
             priority: parseInt(tax.maxValue || (index + 1).toString()),
           };
-          
+
           // Include id only if it exists (for updating existing tax rules)
           if (tax.id && tax.id > 0) {
             taxObj.id = tax.id;
           }
-          
+
           return taxObj;
         }),
       };
@@ -818,6 +818,17 @@ const categoriesIcon = `<svg width="48" height="48" viewBox="0 0 48 48" fill="no
 <path d="M38.2424 29.5758C37.9802 30.1698 37.902 30.8289 38.0179 31.4678C38.1337 32.1068 38.4383 32.6964 38.8924 33.1606L39.0106 33.2788C39.3769 33.6446 39.6674 34.0791 39.8657 34.5574C40.0639 35.0356 40.166 35.5482 40.166 36.0659C40.166 36.5836 40.0639 37.0962 39.8657 37.5745C39.6674 38.0527 39.3769 38.4872 39.0106 38.853C38.6447 39.2193 38.2103 39.5099 37.732 39.7081C37.2538 39.9064 36.7412 40.0084 36.2235 40.0084C35.7058 40.0084 35.1932 39.9064 34.7149 39.7081C34.2367 39.5099 33.8022 39.2193 33.4364 38.853L33.3182 38.7348C32.854 38.2808 32.2644 37.9761 31.6254 37.8603C30.9864 37.7444 30.3274 37.8226 29.7333 38.0848C29.1508 38.3345 28.6539 38.7491 28.3039 39.2776C27.954 39.806 27.7662 40.4253 27.7636 41.0591V41.3939C27.7636 42.4387 27.3486 43.4407 26.6098 44.1795C25.871 44.9183 24.869 45.3333 23.8242 45.3333C22.7794 45.3333 21.7774 44.9183 21.0387 44.1795C20.2999 43.4407 19.8848 42.4387 19.8848 41.3939V41.2167C19.8696 40.5647 19.6586 39.9324 19.2792 39.402C18.8998 38.8716 18.3696 38.4675 17.7576 38.2424C17.1635 37.9802 16.5045 37.902 15.8655 38.0179C15.2265 38.1337 14.6369 38.4383 14.1727 38.8924L14.0545 39.0106C13.6887 39.3769 13.2542 39.6674 12.776 39.8657C12.2977 40.0639 11.7851 40.166 11.2674 40.166C10.7497 40.166 10.2371 40.0639 9.75887 39.8657C9.28064 39.6674 8.84617 39.3769 8.4803 39.0106C8.11403 38.6447 7.82347 38.2103 7.62522 37.732C7.42697 37.2538 7.32493 36.7412 7.32493 36.2235C7.32493 35.7058 7.42697 35.1932 7.62522 34.7149C7.82347 34.2367 8.11403 33.8022 8.4803 33.4364L8.59848 33.3182C9.05257 32.854 9.35718 32.2644 9.47304 31.6254C9.58889 30.9864 9.51068 30.3274 9.24848 29.7333C8.9988 29.1508 8.58422 28.6539 8.05576 28.3039C7.52731 27.954 6.90806 27.7662 6.27424 27.7636H5.93939C4.8946 27.7636 3.8926 27.3486 3.15382 26.6098C2.41504 25.871 2 24.869 2 23.8242C2 22.7794 2.41504 21.7774 3.15382 21.0387C3.8926 20.2999 4.8946 19.8848 5.93939 19.8848H6.11667C6.76863 19.8696 7.40092 19.6586 7.93135 19.2792C8.46177 18.8998 8.8658 18.3696 9.09091 17.7576C9.35311 17.1635 9.43132 16.5045 9.31546 15.8655C9.19961 15.2265 8.895 14.6369 8.44091 14.1727L8.32273 14.0545C7.95646 13.6887 7.66589 13.2542 7.46764 12.776C7.2694 12.2977 7.16736 11.7851 7.16736 11.2674C7.16736 10.7497 7.2694 10.2371 7.46764 9.75887C7.66589 9.28064 7.95646 8.84617 8.32273 8.4803C8.68859 8.11403 9.12306 7.82347 9.6013 7.62522C10.0795 7.42697 10.5922 7.32493 11.1098 7.32493C11.6275 7.32493 12.1402 7.42697 12.6184 7.62522C13.0966 7.82347 13.5311 8.11403 13.897 8.4803L14.0152 8.59848C14.4794 9.05257 15.069 9.35718 15.7079 9.47304C16.3469 9.58889 17.0059 9.51068 17.6 9.24848H17.7576C18.3402 8.9988 18.837 8.58422 19.187 8.05576C19.5369 7.52731 19.7247 6.90806 19.7273 6.27424V5.93939C19.7273 4.8946 20.1423 3.8926 20.8811 3.15382C21.6199 2.41504 22.6219 2 23.6667 2C24.7115 2 25.7135 2.41504 26.4522 3.15382C27.191 3.8926 27.6061 4.8946 27.6061 5.93939V6.11667C27.6086 6.75049 27.7964 7.36974 28.1464 7.89819C28.4963 8.42664 28.9932 8.84122 29.5758 9.09091C30.1698 9.35311 30.8289 9.43132 31.4678 9.31546C32.1068 9.19961 32.6964 8.895 33.1606 8.44091L33.2788 8.32273C33.6446 7.95646 34.0791 7.66589 34.5574 7.46764C35.0356 7.2694 35.5482 7.16736 36.0659 7.16736C36.5836 7.16736 37.0962 7.2694 37.5745 7.46764C38.0527 7.66589 38.4872 7.95646 38.853 8.32273C39.2193 8.68859 39.5099 9.12306 39.7081 9.6013C39.9064 10.0795 40.0084 10.5922 40.0084 11.1098C40.0084 11.6275 39.9064 12.1402 39.7081 12.6184C39.5099 13.0966 39.2193 13.5311 38.853 13.897L38.7348 14.0152C38.2808 14.4794 37.9761 15.069 37.8603 15.7079C37.7444 16.3469 37.8226 17.0059 38.0848 17.6V17.7576C38.3345 18.3402 38.7491 18.837 39.2776 19.187C39.806 19.5369 40.4253 19.7247 41.0591 19.7273H41.3939C42.4387 19.7273 43.4407 20.1423 44.1795 20.8811C44.9183 21.6199 45.3333 22.6219 45.3333 23.6667C45.3333 24.7115 44.9183 25.7135 44.1795 26.4522C43.4407 27.191 42.4387 27.6061 41.3939 27.6061H41.2167C40.5828 27.6086 39.9636 27.7964 39.4351 28.1464C38.9067 28.4963 38.4921 28.9932 38.2424 29.5758Z" stroke="#1570EF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
 `;
+const saveIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M4.16732 0.833984H10.5627C10.9704 0.833984 11.1742 0.833984 11.366 0.880035C11.5361 0.920862 11.6987 0.988203 11.8478 1.07958C12.016 1.18265 12.1601 1.32678 12.4484 1.61503L15.0529 4.2196C15.3412 4.50786 15.4853 4.65198 15.5884 4.82018C15.6798 4.9693 15.7471 5.13187 15.7879 5.30193C15.834 5.49374 15.834 5.69757 15.834 6.10522V12.5007M8.75065 6.66732H5.50065C5.03394 6.66732 4.80059 6.66732 4.62233 6.57649C4.46552 6.4966 4.33804 6.36911 4.25815 6.21231C4.16732 6.03405 4.16732 5.80069 4.16732 5.33398V3.75065M9.58398 15.834V12.1673C9.58398 11.7006 9.58398 11.4673 9.49316 11.289C9.41326 11.1322 9.28578 11.0047 9.12898 10.9248C8.95072 10.834 8.71736 10.834 8.25065 10.834H5.50065C5.03394 10.834 4.80059 10.834 4.62233 10.9248C4.46552 11.0047 4.33804 11.1322 4.25815 11.289C4.16732 11.4673 4.16732 11.7006 4.16732 12.1673V15.834M12.9173 6.80294V13.1673C12.9173 14.1007 12.9173 14.5674 12.7357 14.924C12.5759 15.2376 12.3209 15.4925 12.0073 15.6523C11.6508 15.834 11.1841 15.834 10.2507 15.834H3.50065C2.56723 15.834 2.10052 15.834 1.744 15.6523C1.4304 15.4925 1.17543 15.2376 1.01564 14.924C0.833984 14.5674 0.833984 14.1007 0.833984 13.1673V6.41732C0.833984 5.4839 0.833984 5.01719 1.01564 4.66067C1.17543 4.34706 1.4304 4.0921 1.744 3.93231C2.10052 3.75065 2.56723 3.75065 3.50065 3.75065H9.86503C10.0689 3.75065 10.1708 3.75065 10.2667 3.77368C10.3517 3.79409 10.433 3.82776 10.5076 3.87345C10.5917 3.92499 10.6637 3.99705 10.8078 4.14118L12.5268 5.86013C12.6709 6.00425 12.743 6.07632 12.7945 6.16041C12.8402 6.23497 12.8739 6.31626 12.8943 6.40129C12.9173 6.4972 12.9173 6.59911 12.9173 6.80294Z" stroke="white" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`
+
+const deleteIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M5.5 1H10M1 3.25H14.5M13 3.25L12.474 11.1395C12.3951 12.3232 12.3557 12.915 12.1 13.3638C11.8749 13.7588 11.5354 14.0765 11.1262 14.2748C10.6615 14.5 10.0683 14.5 8.88201 14.5H6.61799C5.43168 14.5 4.83852 14.5 4.37375 14.2748C3.96457 14.0765 3.62507 13.7588 3.39999 13.3638C3.14433 12.915 3.10488 12.3232 3.02596 11.1395L2.5 3.25" stroke="#B42318" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`
+
+const searchIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M15.8333 15.8335L12.9167 12.9168M14.9999 7.91683C14.9999 11.8288 11.8286 15.0002 7.91659 15.0002C4.00457 15.0002 0.833252 11.8288 0.833252 7.91683C0.833252 4.00481 4.00457 0.833496 7.91659 0.833496C11.8286 0.833496 14.9999 4.00481 14.9999 7.91683Z" stroke="currentColor" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`
 
 </script>
 
@@ -830,17 +841,15 @@ const categoriesIcon = `<svg width="48" height="48" viewBox="0 0 48 48" fill="no
 
         <div class="flex flex-wrap gap-3 mb-6">
           <!-- Add New Category Button - visible when not editing -->
-          <v-btn v-if="showAddCategoryButton" variant="flat" color="primary" height="44"
-            class="font-semibold text-base px-6" prepend-icon="mdi-plus-circle-outline" @click="handleAddNewCategory">
-            <span>إضافة تصنيف جديد</span>
-          </v-btn>
+          <ButtonWithIcon v-if="showAddCategoryButton" variant="flat" color="primary" height="44"
+            custom-class="font-semibold text-base px-6" label="إضافة تصنيف جديد"
+            prepend-icon="mdi-plus-circle-outline" @click="handleAddNewCategory" />
 
           <!-- Add Subcategory Button - visible only when a main category is selected -->
-          <v-btn v-if="showAddSubcategoryButton" variant="flat" prepend-icon="mdi-plus-circle-outline"
-            color="primary-50" height="44" class="font-semibold text-base text-primary px-6"
-            @click="handleAddSubcategory">
-            <span>إضافة تصنيف فرعي جديد</span>
-          </v-btn>
+          <ButtonWithIcon v-if="showAddSubcategoryButton" variant="flat"
+            color="primary-50" height="44" custom-class="font-semibold text-base text-primary px-6"
+            label="إضافة تصنيف فرعي جديد" prepend-icon="mdi-plus-circle-outline"
+            @click="handleAddSubcategory" />
         </div>
       </div>
 
@@ -854,8 +863,12 @@ const categoriesIcon = `<svg width="48" height="48" viewBox="0 0 48 48" fill="no
             </div>
 
             <template v-else>
-              <v-text-field v-model="categoriesSearch" density="comfortable" variant="outlined" hide-details
-                placeholder="بحث" prepend-inner-icon="mdi-magnify" class="mb-3" />
+              <TextInput v-model="categoriesSearch" density="comfortable" variant="outlined" hide-details
+                placeholder="بحث" class="mb-3">
+                <template #prepend-inner>
+                  <span class="text-gray-500" v-html="searchIcon"></span>
+                </template>
+              </TextInput>
 
               <div class="flex items-center mb-1 text-sm gap-2 text-gray-700">
                 <v-checkbox v-model="isAllSelected" density="compact" hide-details class="m-0" />
@@ -903,8 +916,7 @@ const categoriesIcon = `<svg width="48" height="48" viewBox="0 0 48 48" fill="no
                         ? 'text-primary-700 font-semibold'
                         : selectedCategoryIds.includes(child.id)
                           ? 'text-primary-600 font-medium'
-                          : 'text-gray-700'"
-                        @click="handleCategorySelect({ ...child, parentId: category.id }, true)">
+                          : 'text-gray-700'" @click="handleCategorySelect({ ...child, parentId: category.id }, true)">
                         {{ child.name }}
                       </span>
                     </div>
@@ -955,10 +967,10 @@ const categoriesIcon = `<svg width="48" height="48" viewBox="0 0 48 48" fill="no
                   </LanguageTabs>
                 </div>
 
-                <SelectWithIconInput v-model="parentCategory" label="التصنيف الرئيسي" placeholder="اختر التصنيف الرئيسي"
+                <SelectWithIconInput show-add-button v-model="parentCategory" label="التصنيف الرئيسي" placeholder="اختر التصنيف الرئيسي"
                   :items="parentCategoryItems" :hide-details="false" :disabled="isSubcategoryMode" />
 
-                <SelectWithIconInput v-model="unit" label="الوحدة" placeholder="اختر الوحدة" :items="unitItems"
+                <SelectWithIconInput show-add-button v-model="unit" label="الوحدة" placeholder="اختر الوحدة" :items="unitItems"
                   :hide-details="false" />
               </div>
 
@@ -989,19 +1001,8 @@ const categoriesIcon = `<svg width="48" height="48" viewBox="0 0 48 48" fill="no
                   {{ isBulkMode ? 'الضرائب للتصنيفات المحددة' : 'الضرائب' }}
                 </h2>
                 <div class="w-full lg:w-auto flex justify-start lg:justify-end">
-                  <v-btn
-                    variant="flat"
-                    color="primary"
-                    height="40"
-                    class="font-semibold text-sm px-4 w-full lg:w-auto"
-                    :disabled="!isNewTaxValid"
-                    @click="addTaxRule"
-                  >
-                    <template #append>
-                      <v-icon size="22">mdi-plus</v-icon>
-                    </template>
-                    <span>اضافة ضريبة</span>
-                  </v-btn>
+                  <ButtonWithIcon append-icon="mdi-plus" variant="flat" color="primary" height="40" custom-class="font-semibold text-sm px-4 w-full lg:w-auto"
+                    label="إضافة ضريبة" :disabled="!isNewTaxValid" @click="addTaxRule" />
                 </div>
               </div>
 
@@ -1061,12 +1062,8 @@ const categoriesIcon = `<svg width="48" height="48" viewBox="0 0 48 48" fill="no
                         </v-chip>
                       </td>
                       <td class="text-center">
-                        <v-btn icon variant="text" color="primary" size="small">
-                          <v-icon>mdi-pencil-outline</v-icon>
-                        </v-btn>
-                        <v-btn icon variant="text" color="error" size="small" @click="removeTaxRule(index)">
-                          <v-icon>mdi-trash-can-outline</v-icon>
-                        </v-btn>
+                        <ButtonWithIcon :icon="'mdi-pencil-outline'" icon-only variant="text" color="primary" size="small" />
+                        <ButtonWithIcon :icon="'mdi-trash-can-outline'" icon-only variant="text" color="error" size="small" @click="removeTaxRule(index)" />
                       </td>
                     </tr>
 
@@ -1082,25 +1079,22 @@ const categoriesIcon = `<svg width="48" height="48" viewBox="0 0 48 48" fill="no
 
             <div class="flex justify-center gap-3 mt-6 sm:flex-row flex-col">
               <!-- Save/Apply Button -->
-              <v-btn variant="flat" color="primary" height="48" class="sm:flex-1 font-semibold text-base"
-                :prepend-icon="isBulkMode ? 'mdi-check-all' : 'mdi-content-save-all-outline'" :loading="isSaving"
-                :disabled="isSaving || isDeleting || (isBulkMode && !taxRules.length)" @click="handleSave">
-                {{ isBulkMode ? 'تطبيق الضرائب على التصنيفات المحددة' : isEditing ? 'تحديث' : 'حفظ' }}
-              </v-btn>
+              <ButtonWithIcon variant="flat" color="primary" height="48" custom-class="sm:flex-1 font-semibold text-base"
+                rounded="4" :prepend-icon="saveIcon"
+                :label="isBulkMode ? 'تطبيق على المحدد' : (isEditing ? 'تحديث' : 'حفظ')" @click="handleSave"
+                :loading="isSaving" :disabled="isSaving || isDeleting || (isBulkMode && !taxRules.length)" />
 
               <!-- Close/Cancel Button -->
-              <v-btn variant="flat" color="primary-100" height="48"
-                class="sm:flex-1 font-semibold text-base text-primary-700" prepend-icon="mdi-close"
-                :disabled="isSaving || isDeleting" @click="handleClose">
-                {{ isBulkMode ? 'إلغاء التحديد' : 'إغلاق' }}
-              </v-btn>
+              <ButtonWithIcon variant="flat" color="primary-100" height="48" rounded="4"
+                custom-class="sm:flex-1 font-semibold text-base text-primary-700"
+                :label="isBulkMode ? 'إلغاء التحديد' : 'إغلاق'" prepend-icon="mdi-close"
+                :disabled="isSaving || isDeleting" @click="handleClose" />
 
               <!-- Delete Button - only visible when editing -->
-              <v-btn v-if="isEditing && selectedCategory" variant="flat" color="error-50" height="48"
-                class="sm:flex-1 font-semibold text-base text-error-700" prepend-icon="mdi-trash-can-outline"
-                :loading="isDeleting" :disabled="isSaving || isDeleting" @click="openDeleteDialog">
-                حذف
-              </v-btn>
+              <ButtonWithIcon v-if="isEditing && selectedCategory" variant="flat" color="error-50" height="48" rounded="4"
+                custom-class="sm:flex-1 font-semibold text-base text-error-700" :prepend-icon="deleteIcon"
+                label="حذف" @click="openDeleteDialog" :loading="isDeleting"
+                :disabled="isSaving || isDeleting" />
             </div>
           </div>
 
@@ -1125,9 +1119,7 @@ const categoriesIcon = `<svg width="48" height="48" viewBox="0 0 48 48" fill="no
       location="top end">
       {{ notification.message }}
       <template #actions>
-        <v-btn variant="text" @click="notification.show = false">
-          إغلاق
-        </v-btn>
+        <ButtonWithIcon variant="text" label="إغلاق" @click="notification.show = false" />
       </template>
     </v-snackbar>
   </default-layout>

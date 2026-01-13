@@ -92,17 +92,7 @@ const handleCreateAccount = () => {
               :hide-details="false"
             >
               <template #append-inner>
-                <v-btn
-                  icon
-                  variant="text"
-                  size="small"
-                  @click="showPassword = !showPassword"
-                  class="text-gray-500"
-                >
-                  <v-icon size="20">
-                    {{ showPassword ? 'mdi-eye-off' : 'mdi-eye' }}
-                  </v-icon>
-                </v-btn>
+                <ButtonWithIcon :icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'" icon-only variant="text" size="small" @click="showPassword = !showPassword" />
               </template>
             </TextInput>
           </div>
@@ -128,18 +118,7 @@ const handleCreateAccount = () => {
           </div>
 
           <!-- Login Button -->
-          <v-btn
-            type="submit"
-            variant="flat"
-            color="primary"
-            size="large"
-            block
-            :loading="isLoading"
-            :disabled="!isFormValid"
-            class="font-semibold text-base py-3 h-[48px]"
-          >
-            {{ t('auth.loginButton') }}
-          </v-btn>
+          <ButtonWithIcon type="submit" variant="flat" color="primary" size="large" custom-class="mt-6" label="تسجيل الدخول" block :loading="isLoading" />
 
           <!-- Create Account Link -->
           <div class="flex items-center justify-center gap-1 text-sm" :class="localeStore.isRtl ? 'flex-row' : 'flex-row-reverse'">

@@ -127,19 +127,18 @@ watch(
         </LanguageTabs>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-x-3 gap-y-2 mb-4">
-        <div class="md:col-span-2">
-
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-x-3 gap-y-4 mb-4">
           <TextInput v-model="form.percentage" label="النسبة" placeholder="النسبة" :hide-details="false" />
 
           <TextInput v-model="form.minValue" label="اقل قيمة" placeholder="اقل قيمة" :hide-details="false" />
 
           <SelectInput v-model="form.taxBase" label="القاعدة الضريبية" placeholder="اختر القاعدة الضريبية"
             :items="taxBaseItems" :hide-details="false" />
-          <SelectInput v-model="form.calculationMethod" label="طريقة الاحتساب" placeholder="اختر طريقة الاحتساب"
+          
+            <SelectInput v-model="form.calculationMethod" label="طريقة الاحتساب" placeholder="اختر طريقة الاحتساب"
             :items="calculationMethodItems" :hide-details="false" />
 
-          <div class="flex flex-wrap gap-4 items-center justify-between">
+          <div class="flex flex-wrap gap-4 items-center justify-between md:col-span-2">
 
             <div class="md:col-span-2 flex items-center md:justify-start gap-1">
               <CheckboxInput v-model="form.amountIncludesTax" :hide-details="true" />
@@ -154,20 +153,16 @@ watch(
           </div>
         </div>
 
-      </div>
     </v-form>
 
     <template #actions>
-      <v-btn variant="flat" color="primary" height="44" class="font-semibold text-base sm:flex-1" @click="handleSave">
-        <template #prepend>
-          <v-icon>mdi-plus</v-icon>
-        </template>
-        حفظ
-      </v-btn>
-      <v-btn variant="flat" color="primary-50" height="44" class="font-semibold text-base text-primary-700 sm:flex-1"
-        @click="closeDialog">
-        اغلاق
-      </v-btn>
+      <ButtonWithIcon variant="flat" color="primary" height="44" rounded="4"
+        custom-class="font-semibold text-base sm:flex-1" label="حفظ"
+        prepend-icon="mdi-plus" @click="handleSave" />
+      
+      <ButtonWithIcon variant="flat" color="primary-50" height="44" rounded="4"
+        custom-class="font-semibold text-base text-primary-700 sm:flex-1"
+        label="اغلاق" prepend-icon="mdi-close" @click="closeDialog" />
     </template>
   </AppDialog>
 </template>

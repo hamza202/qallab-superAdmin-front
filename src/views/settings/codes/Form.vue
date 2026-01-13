@@ -7,6 +7,9 @@ const codesIcon = `<svg width="52" height="52" viewBox="0 0 52 52" fill="none" x
 <path fill-rule="evenodd" clip-rule="evenodd" d="M13 26C9.41015 26 6.5 28.9102 6.5 32.5V39C6.5 42.5899 9.41015 45.5 13 45.5C16.5899 45.5 19.5 42.5899 19.5 39V32.5C19.5 28.9102 16.5899 26 13 26ZM10.8333 32.5C10.8333 31.3034 11.8034 30.3333 13 30.3333C14.1966 30.3333 15.1667 31.3034 15.1667 32.5V39C15.1667 40.1966 14.1966 41.1667 13 41.1667C11.8034 41.1667 10.8333 40.1966 10.8333 39V32.5Z" fill="#1570EF"/>
 </svg>`;
 
+const saveIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M4.16536 0.833984H10.5608C10.9684 0.833984 11.1723 0.833984 11.3641 0.880035C11.5341 0.920862 11.6967 0.988203 11.8458 1.07958C12.014 1.18265 12.1582 1.32678 12.4464 1.61503L15.051 4.2196C15.3392 4.50786 15.4834 4.65198 15.5864 4.82018C15.6778 4.9693 15.7452 5.13187 15.786 5.30193C15.832 5.49374 15.832 5.69757 15.832 6.10522V12.5007M8.7487 6.66732H5.4987C5.03199 6.66732 4.79863 6.66732 4.62037 6.57649C4.46357 6.4966 4.33609 6.36911 4.25619 6.21231C4.16536 6.03405 4.16536 5.80069 4.16536 5.33398V3.75065M9.58203 15.834V12.1673C9.58203 11.7006 9.58203 11.4673 9.4912 11.289C9.41131 11.1322 9.28383 11.0047 9.12702 10.9248C8.94876 10.834 8.71541 10.834 8.2487 10.834H5.4987C5.03199 10.834 4.79863 10.834 4.62037 10.9248C4.46357 11.0047 4.33609 11.1322 4.25619 11.289C4.16536 11.4673 4.16536 11.7006 4.16536 12.1673V15.834M12.9154 6.80294V13.1673C12.9154 14.1007 12.9154 14.5674 12.7337 14.924C12.5739 15.2376 12.319 15.4925 12.0053 15.6523C11.6488 15.834 11.1821 15.834 10.2487 15.834H3.4987C2.56528 15.834 2.09857 15.834 1.74205 15.6523C1.42844 15.4925 1.17348 15.2376 1.01369 14.924C0.832031 14.5674 0.832031 14.1007 0.832031 13.1673V6.41732C0.832031 5.4839 0.832031 5.01719 1.01369 4.66067C1.17348 4.34706 1.42844 4.0921 1.74205 3.93231C2.09857 3.75065 2.56528 3.75065 3.4987 3.75065H9.86308C10.0669 3.75065 10.1688 3.75065 10.2647 3.77368C10.3498 3.79409 10.431 3.82776 10.5056 3.87345C10.5897 3.92499 10.6618 3.99705 10.8059 4.14118L12.5248 5.86013C12.669 6.00425 12.741 6.07632 12.7926 6.16041C12.8383 6.23497 12.8719 6.31626 12.8923 6.40129C12.9154 6.4972 12.9154 6.59911 12.9154 6.80294Z" stroke="white" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`
 const typeItems = [
   { title: "اختر النوع", value: "" },
   { title: "أرقام", value: "numbers" },
@@ -50,12 +53,12 @@ const handleClose = () => {
   <default-layout>
     <div class="codes-page">
       <PageHeader :icon="codesIcon" title-key="pages.codes.title" description-key="pages.codes.description" />
-      <div class="bg-gray-50 rounded-md p-4 sm:p-6">
+      <div class="bg-gray-50 rounded-md p-4 sm:p-6 mb-8">
         <div class="flex items-center justify-between mb-4">
           <h2 class="text-lg font-bold text-primary-900">إعدادات الكود</h2>
         </div>
         <v-form>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-y-3 gap-x-4 mb-4">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-y-3 gap-x-4 ">
             <SelectInput v-model="form.type" label="النوع" placeholder="اختر النوع" :items="typeItems"
               :hide-details="false" />
 
@@ -72,25 +75,19 @@ const handleClose = () => {
               <span class="text-sm text-gray-700">تطبيق على المنتجات الموجودة مسبقاً</span>
             </div>
           </div>
-
-          <div class="flex flex-col sm:flex-row gap-3 sm:justify-center">
-            <v-btn variant="flat" color="primary" height="44" class="font-semibold text-base sm:min-w-[200px]"
-              :loading="isSaving" @click="handleSave">
-              <template #prepend>
-                <v-icon>mdi-content-save-all-outline</v-icon>
-              </template>
-              حفظ
-            </v-btn>
-            <v-btn variant="flat" color="primary-50" height="44"
-              class="font-semibold text-base text-primary-700 sm:min-w-[200px]" @click="handleClose">
-              <template #prepend>
-                <v-icon>mdi-close</v-icon>
-              </template>
-              اغلاق
-            </v-btn>
-          </div>
         </v-form>
       </div>
+
+                <div class="flex flex-col sm:flex-row gap-3 sm:justify-center">
+            <ButtonWithIcon variant="flat" color="primary" height="44" rounded="4"
+              custom-class="font-semibold text-base sm:min-w-[200px]" :prepend-icon="saveIcon"
+              label="حفظ" @click="handleSave" :loading="isSaving" />
+            
+            <ButtonWithIcon prepend-icon="mdi-close" variant="flat" color="primary-50" height="44" rounded="4"
+              custom-class="font-semibold text-base text-primary-700 sm:min-w-[200px]"
+              label="إغلاق" @click="handleClose" />
+          </div>
+
     </div>
   </default-layout>
 </template>

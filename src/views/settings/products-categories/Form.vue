@@ -10,6 +10,9 @@ const availableLanguages = ref([
 
 const { notification, success, error: showError } = useNotification();
 const api = useApi();
+const saveIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M10.8333 5.00016H5.49992C5.03321 5.00016 4.79985 5.00016 4.62159 4.90933C4.46479 4.82944 4.33731 4.70196 4.25741 4.54515C4.16659 4.3669 4.16659 4.13354 4.16659 3.66683V0.833496M12.4999 15.8335V10.5002C12.4999 10.0335 12.4999 9.8001 12.4091 9.62184C12.3292 9.46504 12.2017 9.33755 12.0449 9.25766C11.8667 9.16683 11.6333 9.16683 11.1666 9.16683H5.49992C5.03321 9.16683 4.79985 9.16683 4.62159 9.25766C4.46479 9.33755 4.33731 9.46504 4.25741 9.62184C4.16659 9.8001 4.16659 10.0335 4.16659 10.5002V15.8335M15.8333 6.10473V11.8335C15.8333 13.2336 15.8333 13.9337 15.5608 14.4685C15.3211 14.9389 14.9386 15.3213 14.4682 15.561C13.9334 15.8335 13.2334 15.8335 11.8333 15.8335H4.83325C3.43312 15.8335 2.73306 15.8335 2.19828 15.561C1.72787 15.3213 1.34542 14.9389 1.10574 14.4685C0.833252 13.9337 0.833252 13.2336 0.833252 11.8335V4.8335C0.833252 3.43336 0.833252 2.7333 1.10574 2.19852C1.34542 1.72811 1.72787 1.34566 2.19828 1.10598C2.73306 0.833496 3.43312 0.833496 4.83325 0.833496H10.562C10.9697 0.833496 11.1735 0.833496 11.3653 0.879546C11.5354 0.920374 11.6979 0.987715 11.8471 1.0791C12.0153 1.18217 12.1594 1.32629 12.4476 1.61454L15.0522 4.21911C15.3405 4.50737 15.4846 4.65149 15.5877 4.81969C15.679 4.96881 15.7464 5.13138 15.7872 5.30144C15.8333 5.49326 15.8333 5.69708 15.8333 6.10473Z" stroke="white" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`;
 
 // =====================
 // Mock Data (for testing - remove when API is ready)
@@ -538,10 +541,10 @@ const categoriesIcon = `<svg width="48" height="48" viewBox="0 0 48 48" fill="no
                 </LanguageTabs>
               </div>
 
-              <SelectWithIconInput v-model="parentCategory" label="التصنيف الرئيسي" placeholder="اختر التصنيف الرئيسي"
+              <SelectWithIconInput show-add-button v-model="parentCategory" label="التصنيف الرئيسي" placeholder="اختر التصنيف الرئيسي"
                 :items="categoriesList" :hide-details="false" />
 
-              <SelectWithIconInput v-model="unit" label="الوحدة" placeholder="اختر الوحدة" :items="unitItems"
+              <SelectWithIconInput show-add-button v-model="unit" label="الوحدة" placeholder="اختر الوحدة" :items="unitItems"
                 :hide-details="false" />
             </div>
 
@@ -570,13 +573,9 @@ const categoriesIcon = `<svg width="48" height="48" viewBox="0 0 48 48" fill="no
             <div class="flex items-center justify-between mb-4">
               <h2 class="text-lg font-bold text-primary-900">الضرائب</h2>
               <div class="w-full lg:w-auto flex justify-start lg:justify-end">
-                <v-btn variant="flat" color="primary" height="40" class="font-semibold text-sm px-4 w-full lg:w-auto"
-                  :disabled="!isNewTaxValid" @click="addTaxRule">
-                  <template #append>
-                    <v-icon size="22">mdi-plus</v-icon>
-                  </template>
-                  <span>اضافة ضريبة</span>
-                </v-btn>
+                <ButtonWithIcon append-icon="mdi-plus" variant="flat" color="primary" height="40"
+                  custom-class="font-semibold text-sm px-4 w-full lg:w-auto" label="اضافة ضريبة"
+                  :disabled="!isNewTaxValid" @click="addTaxRule" />
               </div>
             </div>
 
@@ -605,7 +604,7 @@ const categoriesIcon = `<svg width="48" height="48" viewBox="0 0 48 48" fill="no
             <div
               class="mt-4 bg-white !rounded-xl shadow-[0px_1px_2px_0px_rgba(16,24,40,0.06)] shadow-[0px_1px_3px_0px_rgba(16,24,40,0.10)] outline outline-1 outline-offset-[-1px] outline-slate-200 overflow-hidden">
               <h3 class="text-base sm:text-lg font-bold text-gray-900 px-6 py-5">
-                الضرائب المطبقة على المنتج
+                الضرائب المطبقة على التصنيف
               </h3>
 
               <v-table class="rounded-none overflow-hidden border border-gray-200">
@@ -635,12 +634,8 @@ const categoriesIcon = `<svg width="48" height="48" viewBox="0 0 48 48" fill="no
                       </v-chip>
                     </td>
                     <td class="text-center">
-                      <v-btn icon variant="text" color="primary" size="small">
-                        <v-icon>mdi-pencil-outline</v-icon>
-                      </v-btn>
-                      <v-btn icon variant="text" color="error" size="small" @click="removeTaxRule(index)">
-                        <v-icon>mdi-trash-can-outline</v-icon>
-                      </v-btn>
+                      <ButtonWithIcon :icon="'mdi-pencil-outline'" icon-only variant="text" color="primary" size="small" />
+                      <ButtonWithIcon :icon="'mdi-trash-can-outline'" icon-only variant="text" color="error" size="small" @click="removeTaxRule(index)" />
                     </td>
                   </tr>
 
@@ -654,20 +649,14 @@ const categoriesIcon = `<svg width="48" height="48" viewBox="0 0 48 48" fill="no
             </div>
           </div>
 
-          <div class="flex justify-center gap-3 mt-6 sm:flex-row flex-col">
-            <!-- Save Button -->
-            <v-btn variant="flat" color="primary" height="48" class="font-semibold text-base px-10"
-              prepend-icon="mdi-content-save-all-outline" :loading="isSaving" :disabled="isSaving || isDeleting"
-              @click="handleSave">
-              {{ isEditing ? 'تحديث' : 'حفظ' }}
-            </v-btn>
-
-            <!-- Close Button -->
-            <v-btn variant="flat" color="primary-100" height="48"
-              class="font-semibold text-base text-primary-700 px-10" prepend-icon="mdi-close"
-              :disabled="isSaving || isDeleting" @click="handleClose">
-              إغلاق
-            </v-btn>
+          <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col">
+            <ButtonWithIcon variant="flat" color="primary" rounded="4" height="48"
+              custom-class="min-w-56" :prepend-icon="saveIcon" :label="isEditing ? 'تحديث' : 'حفظ'"
+              @click="handleSave" :loading="isSaving" :disabled="isSaving || isDeleting" />
+            
+            <ButtonWithIcon prepend-icon="mdi-close" variant="flat" color="primary-50" rounded="4" height="48"
+              custom-class="font-semibold text-base text-primary-700 px-6 min-w-56" label="إغلاق"
+              :disabled="isSaving || isDeleting" @click="handleClose" />
           </div>
         </div>
       </v-form>
@@ -679,9 +668,7 @@ const categoriesIcon = `<svg width="48" height="48" viewBox="0 0 48 48" fill="no
       location="top end">
       {{ notification.message }}
       <template #actions>
-        <v-btn variant="text" @click="notification.show = false">
-          إغلاق
-        </v-btn>
+        <ButtonWithIcon variant="text" label="إغلاق" @click="notification.show = false" />
       </template>
     </v-snackbar>
   </default-layout>

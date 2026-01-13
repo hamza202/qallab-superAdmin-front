@@ -528,20 +528,12 @@ onMounted(async () => {
       </v-tabs-window>
 
       <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col">
-        <v-btn variant="flat" color="primary" rounded="4" height="48" class="min-w-56" @click="handleSave">
-          <template #prepend>
-            <span v-html="saveIcon"></span>
-          </template>
-
-          <span>حفظ التعديلات</span>
-        </v-btn>
-        <v-btn variant="flat" color="primary-50" rounded="4" height="48"
-          class="font-semibold text-base text-primary-700 px-6 min-w-56" @click="handleCancel">
-          <template #prepend>
-            <v-icon>mdi-close</v-icon>
-          </template>
-          <span>إغلاق</span>
-        </v-btn>
+        <ButtonWithIcon variant="flat" color="primary" rounded="4" height="48"
+          custom-class="min-w-56" :prepend-icon="saveIcon" label="حفظ التعديلات" @click="handleSave" />
+        
+        <ButtonWithIcon prepend-icon="mdi-close" variant="flat" color="primary-50" rounded="4" height="48"
+          custom-class="font-semibold text-base text-primary-700 px-6 min-w-56"
+          label="إغلاق" @click="handleCancel" />
       </div>
 
     </div>

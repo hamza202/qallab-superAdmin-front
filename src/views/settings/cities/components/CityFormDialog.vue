@@ -93,13 +93,13 @@ watch(
 </script>
 
 <template>
-  <AppDialog v-model="internalOpen" title="إضافة مدينة" :max-width="520">
+  <AppDialog v-model="internalOpen" title="إضافة دولة" :max-width="520">
     <template #title>
       <div class="text-base font-bold text-gray-900 flex items-center gap-2">
         <span class="bg-gray-50 border border-gray-100 rounded px-1 py-0.5 text-gray-600">
           <v-icon size="18">mdi-city-variant-outline</v-icon>
         </span>
-        إضافة مدينة
+        إضافة دولة
       </div>
     </template>
 
@@ -115,41 +115,69 @@ watch(
         </LanguageTabs>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-x-3 gap-y-2 mb-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-x-3 gap-y-4 mb-4">
 
         <TextInput v-model="form.code_1" label="الرمز 1" placeholder="ادخل الرمز" :hide-details="false" />
 
         <TextInput v-model="form.code_2" label="الرمز 2" placeholder="ادخل الرمز" :hide-details="false" />
 
-        <div class="md:col-span-2">
-          <TextInput class="w-full sm:w-1/2" v-model="form.mobile_code" label="كود الهاتف" placeholder="ادخل كود الهاتف"
-            :hide-details="false" />
-        </div>
+        <TextInput v-model="form.mobile_code" label="كود الهاتف" placeholder="ادخل كود الهاتف"
+          :hide-details="false" />
 
-        <div class="flex items-center gap-2">
-          <span class="text-sm font-semibold text-gray-700">الحالة</span>
-          <v-switch v-model="form.status" color="primary" inset hide-details />
+        <div>
+          <span class="text-sm font-semibold text-gray-700 block mb-1">الحالة</span>
+          <div class="flex items-center gap-3">
+            <v-radio-group v-model="form.status" inline hide-details>
+              <v-radio :value="true" color="primary">
+                <template #label>
+                  <span :class="form.status ? 'text-primary font-semibold' : 'text-gray-600'">
+                    فعال
+                  </span>
+                </template>
+              </v-radio>
+              <v-radio :value="false" color="primary">
+                <template #label>
+                  <span :class="!form.status ? 'text-primary font-semibold' : 'text-gray-600'">
+                    غير فعال
+                  </span>
+                </template>
+              </v-radio>
+            </v-radio-group>
+          </div>
         </div>
-        <div class="flex items-center gap-2">
-          <span class="text-sm font-semibold text-gray-700">افتراضي</span>
-          <v-switch v-model="form.is_default" color="primary" inset hide-details />
+        <div>
+          <span class="text-sm font-semibold text-gray-700 block mb-1">افتراضي</span>
+          <div class="flex items-center gap-3">
+            <v-radio-group v-model="form.is_default" inline hide-details>
+              <v-radio :value="true" color="primary">
+                <template #label>
+                  <span :class="form.is_default ? 'text-primary font-semibold' : 'text-gray-600'">
+                    نعم
+                  </span>
+                </template>
+              </v-radio>
+              <v-radio :value="false" color="primary">
+                <template #label>
+                  <span :class="!form.is_default ? 'text-primary font-semibold' : 'text-gray-600'">
+                    لا
+                  </span>
+                </template>
+              </v-radio>
+            </v-radio-group>
+          </div>
         </div>
 
       </div>
     </v-form>
 
     <template #actions>
-      <v-btn variant="flat" color="primary" height="44" class="font-semibold text-base sm:flex-1 w-full"
-        @click="handleSave">
-        <template #prepend>
-          <v-icon>mdi-plus</v-icon>
-        </template>
-        حفظ
-      </v-btn>
-      <v-btn variant="flat" color="primary-50" height="44"
-        class="font-semibold text-base text-primary-700 sm:flex-1 w-full" @click="closeDialog">
-        اغلاق
-      </v-btn>
+      <ButtonWithIcon variant="flat" color="primary" rounded="4" height="44"
+        custom-class="font-semibold text-base sm:flex-1 w-full" label="حفظ"
+        prepend-icon="mdi-plus" @click="handleSave" />
+      
+      <ButtonWithIcon variant="flat" color="primary-50" rounded="4" height="44"
+        custom-class="font-semibold text-base text-primary-700 sm:flex-1 w-full"
+        label="اغلاق" prepend-icon="mdi-close" @click="closeDialog" />
     </template>
   </AppDialog>
 </template>

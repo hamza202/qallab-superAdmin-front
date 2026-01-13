@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
 import TaxRuleFormDialog from "@/views/settings/tax-rules/components/TaxRuleFormDialog.vue";
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const taxRulesIcon = `<svg width="52" height="52" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path fill-rule="evenodd" clip-rule="evenodd" d="M32.8498 26H36.4835C37.6257 26 38.611 25.9999 39.4226 26.0662C40.2791 26.1362 41.1311 26.2907 41.9509 26.7085C43.174 27.3316 44.1684 28.326 44.7915 29.5491C45.2093 30.3689 45.3638 31.2209 45.4338 32.0774C45.5001 32.889 45.5 33.8743 45.5 35.0164V36.4836C45.5 37.6257 45.5001 38.611 45.4338 39.4226C45.3638 40.2791 45.2093 41.1311 44.7915 41.9509C44.1684 43.174 43.174 44.1684 41.9509 44.7915C41.1311 45.2093 40.2791 45.3638 39.4226 45.4338C38.611 45.5001 37.6256 45.5 36.4835 45.5H32.8499C31.7077 45.5 30.7224 45.5001 29.9108 45.4338C29.0542 45.3638 28.2022 45.2093 27.3824 44.7915C26.1593 44.1684 25.165 43.174 24.5418 41.9509C24.1241 41.1311 23.9696 40.2791 23.8996 39.4226C23.8333 38.611 23.8333 37.6257 23.8333 36.4835V35.0165C23.8333 33.8743 23.8333 32.889 23.8996 32.0774C23.9696 31.2209 24.1241 30.3689 24.5418 29.5491C25.165 28.326 26.1593 27.3316 27.3824 26.7085C28.2022 26.2907 29.0542 26.1362 29.9108 26.0662C30.7223 25.9999 31.7077 26 32.8498 26ZM30.2636 30.3852C29.675 30.4333 29.4568 30.5149 29.3497 30.5695C28.942 30.7772 28.6105 31.1087 28.4028 31.5164C28.3482 31.6235 28.2666 31.8417 28.2185 32.4303C28.1684 33.0442 28.1667 33.8508 28.1667 35.1V36.4C28.1667 37.6492 28.1684 38.4558 28.2185 39.0697C28.2666 39.6583 28.3482 39.8765 28.4028 39.9836C28.6105 40.3913 28.942 40.7228 29.3497 40.9305C29.4568 40.9851 29.675 41.0667 30.2636 41.1148C30.8775 41.165 31.6841 41.1667 32.9333 41.1667H36.4C37.6492 41.1667 38.4558 41.165 39.0697 41.1148C39.6583 41.0667 39.8765 40.9851 39.9836 40.9305C40.3913 40.7228 40.7228 40.3913 40.9305 39.9836C40.9851 39.8765 41.0667 39.6583 41.1148 39.0697C41.165 38.4558 41.1667 37.6492 41.1667 36.4V35.1C41.1667 33.8508 41.165 33.0442 41.1148 32.4303C41.0667 31.8417 40.9851 31.6235 40.9305 31.5164C40.7228 31.1087 40.3913 30.7772 39.9836 30.5695C39.8765 30.5149 39.6583 30.4333 39.0697 30.3852C38.4558 30.335 37.6492 30.3333 36.4 30.3333H32.9333C31.6841 30.3333 30.8775 30.335 30.2636 30.3852Z" fill="#1570EF"/>
@@ -157,11 +160,19 @@ const columnIcon = `<svg width="16" height="17" viewBox="0 0 16 17" fill="none" 
 
 const trash_1_icon = `<svg width="17" height="19" viewBox="0 0 17 19" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M11.5833 4.08333V3.41667C11.5833 2.48325 11.5833 2.01654 11.4017 1.66002C11.2419 1.34641 10.9869 1.09144 10.6733 0.931656C10.3168 0.75 9.85009 0.75 8.91667 0.75H7.58333C6.64991 0.75 6.1832 0.75 5.82668 0.931656C5.51308 1.09144 5.25811 1.34641 5.09832 1.66002C4.91667 2.01654 4.91667 2.48325 4.91667 3.41667V4.08333M0.75 4.08333H15.75M14.0833 4.08333V13.4167C14.0833 14.8168 14.0833 15.5169 13.8108 16.0516C13.5712 16.522 13.1887 16.9045 12.7183 17.1442C12.1835 17.4167 11.4835 17.4167 10.0833 17.4167H6.41667C5.01654 17.4167 4.31647 17.4167 3.78169 17.1442C3.31129 16.9045 2.92883 16.522 2.68915 16.0516C2.41667 15.5169 2.41667 14.8168 2.41667 13.4167V4.08333" stroke="#D92D20" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>`;
+</svg>`
 
 const trash_2_icon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M5.75 0.75H10.75M0.75 3.25H15.75M14.0833 3.25L13.4989 12.0161C13.4112 13.3313 13.3674 13.9889 13.0833 14.4875C12.8333 14.9265 12.456 15.2794 12.0014 15.4997C11.485 15.75 10.8259 15.75 9.50779 15.75H6.99221C5.67409 15.75 5.01503 15.75 4.49861 15.4997C4.04396 15.2794 3.66674 14.9265 3.41665 14.4875C3.13259 13.9889 3.08875 13.3313 3.00107 12.0161L2.41667 3.25M6.58333 7V11.1667M9.91667 7V11.1667" stroke="#D92D20" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>`;
+</svg>`
+
+const searchIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M15.8333 15.8335L12.9167 12.9168M14.9999 7.91683C14.9999 11.8288 11.8286 15.0002 7.91659 15.0002C4.00457 15.0002 0.833252 11.8288 0.833252 7.91683C0.833252 4.00481 4.00457 0.833496 7.91659 0.833496C11.8286 0.833496 14.9999 4.00481 14.9999 7.91683Z" stroke="white" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`
+
+const plusIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M8 1V15M1 8H15" stroke="#1849A9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`
 
 const editIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M8.33301 2.60175H4.83301C3.43288 2.60175 2.73281 2.60175 2.19803 2.87424C1.72763 3.11392 1.34517 3.49637 1.10549 3.96678C0.833008 4.50156 0.833008 5.20162 0.833008 6.60175V13.6018C0.833008 15.0019 0.833008 15.7019 1.10549 16.2367C1.34517 16.7071 1.72763 17.0896 2.19803 17.3293C2.73281 17.6018 3.43288 17.6018 4.83301 17.6018H11.833C13.2331 17.6018 13.9332 17.6018 14.468 17.3293C14.9384 17.0896 15.3208 16.7071 15.5605 16.2367C15.833 15.7019 15.833 15.0019 15.833 13.6018V10.1018M5.83299 12.6018H7.22844C7.63609 12.6018 7.83992 12.6018 8.03173 12.5557C8.20179 12.5149 8.36436 12.4475 8.51348 12.3562C8.68168 12.2531 8.8258 12.109 9.11406 11.8207L17.083 3.85175C17.7734 3.1614 17.7734 2.04211 17.083 1.35175C16.3927 0.661396 15.2734 0.661395 14.583 1.35175L6.61404 9.3207C6.32578 9.60896 6.18166 9.75308 6.07859 9.92128C5.9872 10.0704 5.91986 10.233 5.87904 10.403C5.83299 10.5948 5.83299 10.7987 5.83299 11.2063V12.6018Z" stroke="#175CD3" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
@@ -180,13 +191,9 @@ const exportIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" 
     <div class="tax-rules-page">
       <PageHeader :icon="taxRulesIcon" title-key="pages.taxRules.title" description-key="pages.taxRules.description" />
       <div class="flex justify-end pb-2">
-        <v-btn variant="outlined" height="40"
-          class="font-semibold text-base border-gray-300 bg-primary-50 !text-primary-900">
-          <template #prepend>
-            <span v-html="exportIcon"></span>
-          </template>
-          تصدير
-        </v-btn>
+        <ButtonWithIcon variant="outlined" height="40"
+          custom-class="font-semibold text-base border-gray-300 bg-primary-50 !text-primary-900"
+          :prepend-icon="exportIcon" :label="t('common.export')" />
       </div>
 
       <div class="bg-gray-50 rounded-md -mx-6 ">
@@ -195,48 +202,28 @@ const exportIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" 
           <!-- Actions when rows are selected -->
           <div v-if="hasSelectedTaxRules"
             class="flex flex-wrap items-stretch rounded-lg overflow-hidden border border-gray-200 bg-white text-sm">
-            <v-btn class="px-4 font-semibold text-primary-600 hover:bg-primary-50 !rounded-none">
-              <template #prepend>
-                <span v-html="editIcon"></span>
-              </template>
-              <span>تعديل</span>
-            </v-btn>
+            <ButtonWithIcon variant="flat" height="40" rounded="0"
+              custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
+              :prepend-icon="trash_1_icon" :label="t('common.delete')" />
             <div class="w-px bg-gray-200"></div>
-            <v-btn class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none">
-              <template #prepend>
-                <span v-html="trash_1_icon"></span>
-              </template>
-              <span>حذف</span>
-            </v-btn>
-            <div class="w-px bg-gray-200"></div>
-            <v-btn class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none">
-              <template #prepend>
-                <span v-html="trash_2_icon"></span>
-              </template>
-              <span>حذف الجميع</span>
-            </v-btn>
+            <ButtonWithIcon variant="flat" height="40" rounded="0"
+              custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
+              :prepend-icon="trash_2_icon" :label="t('common.deleteAll')" />
           </div>
 
           <!-- Main header controls -->
           <div class="flex flex-wrap gap-3">
-            <v-btn variant="outlined" append-icon="mdi-chevron-down" color="gray-500" height="40"
-              class="font-semibold text-base border-gray-400">
-              <template #prepend>
-                <span v-html="columnIcon"></span>
-              </template>
-              الأعمدة
-            </v-btn>
+            <ButtonWithIcon variant="outlined" rounded="4" color="gray-500" height="40"
+              custom-class="font-semibold text-base border-gray-400"
+              :prepend-icon="columnIcon" :label="t('common.columns')" append-icon="mdi-chevron-down" />
+            
+            <ButtonWithIcon variant="flat" color="primary-500" height="40" rounded="4"
+              custom-class="px-7 font-semibold text-base text-white border !border-primary-200"
+              :prepend-icon="searchIcon" :label="t('common.advancedSearch')" @click="toggleAdvancedFilters" />
 
-            <v-btn variant="outlined" color="primary-50" height="40"
-              class="px-7 font-semibold text-base text-primary-700" prepend-icon="mdi-magnify"
-              @click="toggleAdvancedFilters">
-              بحث متقدم
-            </v-btn>
-
-            <v-btn variant="flat" color="primary" height="40" class="px-7 font-semibold text-base"
-              prepend-icon="mdi-plus-circle-outline" @click="openCreateTaxRule">
-              قاعدة ضريبية جديدة
-            </v-btn>
+            <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4"
+              custom-class="px-7 font-semibold text-base !text-primary-800 border !border-primary-200"
+              :prepend-icon="plusIcon" label="قاعدة ضريبية جديدة" @click="openCreateTaxRule" />
           </div>
         </div>
 
@@ -245,15 +232,13 @@ const exportIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" 
           class="border-y border-y-primary-100 bg-primary-50 px-4 sm:px-6 py-3 flex flex-col gap-3 sm:gap-2">
           <div class="flex flex-col sm:flex-row gap-3 sm:items-center justify-between">
             <div class="flex flex-wrap gap-2 order-2 sm:order-1 justify-start sm:justify-start">
-              <v-btn variant="flat" color="primary" height="45" class="px-5 font-semibold text-sm sm:text-base"
-                prepend-icon="mdi-magnify">
-                ابحث الآن
-              </v-btn>
-              <v-btn variant="outlined" color="primary-50" height="45"
-                class="px-5 font-semibold text-sm sm:text-base text-primary-700" prepend-icon="mdi-refresh"
-                @click="resetFilters">
-                إعادة تعيين
-              </v-btn>
+              <ButtonWithIcon variant="flat" color="primary-500" rounded="4" height="40"
+                custom-class="px-5 font-semibold !text-white text-sm sm:text-base"
+                :prepend-icon="searchIcon" label="ابحث" />
+              
+              <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4" border="sm"
+                custom-class="px-5 font-semibold text-sm sm:text-base !text-primary-800 !border-primary-200"
+                prepend-icon="mdi-refresh" label="إعادة تعيين" />
             </div>
 
             <div class="flex flex-wrap gap-3 flex-1 order-1 sm:order-2 justify-end sm:justify-start">

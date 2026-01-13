@@ -107,10 +107,8 @@ const datepickerInput = `<svg width="17" height="19" viewBox="0 0 17 19" fill="n
               <template #append-inner>
                 <v-tooltip location="top" content-class="custom-tooltip">
                   <template #activator="{ props: tooltipProps }">
-                    <v-btn class="!min-w-0 p-0" size="small" density="compact"
-                      v-bind="tooltipProps">
-                        <span v-html="infoIcon"></span>
-                    </v-btn>
+                    <ButtonWithIcon variant="text" size="small" density="compact"
+                custom-class="!min-w-0 p-0" :prepend-icon="infoIcon" v-bind="tooltipProps" />
                   </template>
                   <div>
                     تاريخ إصدار رخصة الكسارة الرسمي
@@ -126,10 +124,8 @@ const datepickerInput = `<svg width="17" height="19" viewBox="0 0 17 19" fill="n
               <template #append-inner>
                 <v-tooltip location="top" content-class="custom-tooltip">
                   <template #activator="{ props: tooltipProps }">
-                    <v-btn class="!min-w-0 p-0" size="small" density="compact"
-                      v-bind="tooltipProps">
-                        <span v-html="infoIcon"></span>
-                    </v-btn>
+                    <ButtonWithIcon variant="text" size="small" density="compact"
+                custom-class="!min-w-0 p-0" :prepend-icon="infoIcon" v-bind="tooltipProps" />
                   </template>
                   <div>
                     تاريخ انتهاء صلاحية رخصة الكسارة

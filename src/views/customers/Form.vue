@@ -745,19 +745,13 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
                   <TextInput v-model="address2" label="عنوان 2" placeholder="العنوان" :hide-details="false" />
                 </div>
               </div>
-
               <!-- Contact List Sub-tab -->
               <div v-if="basicInfoSubTab === 1" class="bg-gray-50 -mx-6">
                 <div class="flex justify-between items-center px-6 border-y border-gray-200 py-3">
                   <h2 class="text-lg font-bold text-primary-900">قائمة عملاء العميل</h2>
-                  <v-btn variant="flat" color="primary-500" border="sm" height="40"
-                    class="font-semibold px-6 !text-white !border-primary-200" @click="addContact">
-                    <template #prepend>
-                      <span v-html="plusIcon"></span>
-                    </template>
-
-                    أضف جديد
-                  </v-btn>
+                  <ButtonWithIcon variant="flat" color="primary-500" border="sm" height="40"
+                    custom-class="font-semibold px-6 !text-white !border-primary-200" :prepend-icon="plusIcon"
+                    label="أضف عميل" @click="addContact" />
                 </div>
 
                 <!-- Contacts Table with Editable Inputs -->
@@ -796,9 +790,8 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
                       </td>
                       <td class="py-3 px-4">
                         <div class="flex items-center gap-2">
-                          <v-btn icon color="error" size="small" variant="text" @click="deleteContact(index)">
-                            <span v-html="trashIcon"></span>
-                          </v-btn>
+                          <ButtonWithIcon  color="error" size="small" variant="text"
+                            :icon="trashIcon" icon-only @click="deleteContact(index)" />
                         </div>
                       </td>
                     </tr>
@@ -919,20 +912,12 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
 
       <!-- Action Buttons -->
       <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col">
-        <v-btn variant="flat" color="primary" rounded="4" height="48" class="min-w-56" @click="handleSave">
-          <template #prepend>
-            <span v-html="saveIcon"></span>
-          </template>
-
-          <span>حفظ</span>
-        </v-btn>
-        <v-btn variant="flat" color="primary-50" rounded="4" height="48"
-          class="font-semibold text-base text-primary-700 px-6 min-w-56" @click="handleClose">
-          <template #prepend>
-            <v-icon>mdi-close</v-icon>
-          </template>
-          <span>إغلاق</span>
-        </v-btn>
+        <ButtonWithIcon variant="flat" color="primary" rounded="4" height="48"
+          custom-class="min-w-56" :prepend-icon="saveIcon" label="حفظ" @click="handleSave" />
+        
+        <ButtonWithIcon prepend-icon="mdi-close" variant="flat" color="primary-50" rounded="4" height="48"
+          custom-class="font-semibold text-base text-primary-700 px-6 min-w-56"
+          label="إغلاق" @click="handleClose" />
       </div>
     </div>
   </default-layout>

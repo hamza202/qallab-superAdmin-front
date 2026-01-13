@@ -11,7 +11,7 @@
                 <v-icon size="64" class="text-red-500 mb-4">mdi-alert-circle-outline</v-icon>
                 <h3 class="text-xl font-bold text-gray-900 mb-2">حدث خطأ في تحميل البيانات</h3>
                 <p class="text-gray-600 mb-4">{{ error }}</p>
-                <v-btn color="primary" @click="fetchProduct">إعادة المحاولة</v-btn>
+                <ButtonWithIcon color="primary" label="إعادة المحاولة" @click="fetchProduct" />
             </div>
 
             <!-- Content -->
