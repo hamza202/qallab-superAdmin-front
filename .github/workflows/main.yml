@@ -2,7 +2,7 @@ name: Deploy Admin Dev Frontend
 
 on:
   push:
-    branches: [ main ]
+    branches: [ dev ]
 
 jobs:
   deploy:
