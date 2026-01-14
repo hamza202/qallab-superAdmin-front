@@ -47,7 +47,19 @@ const menu = ref(false);
 
 const internalValue = computed({
     get: () => props.modelValue,
-    set: (val) => emit("update:modelValue", val),
+    set: (val) => {
+        if (!val) {
+            emit("update:modelValue", null);
+            return;
+        }
+        // Format date as MM/DD/YYYY
+        const date = new Date(val);
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const year = date.getFullYear();
+        const formattedValue = `${month}/${day}/${year}`;
+        emit("update:modelValue", formattedValue);
+    },
 });
 
 // Format date for display (optional, can be customized)

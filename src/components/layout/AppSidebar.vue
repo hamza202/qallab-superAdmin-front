@@ -174,46 +174,6 @@
                             </v-list-item>
                         </template>
                         <div class="relative mt-1 ps-10 pe-4 text-sm">
-                            <!-- <div
-                                class="absolute top-1 bottom-1 right-[30px] border-r-2 border-dotted border-white -translate-y-3 h-[100.5%]">
-                            </div>
-                            <ul class="space-y-2">
-                                <li class="relative">
-                                    <router-link to="/sales/quotations"
-                                        :class="[isMenuItemActive('/sales/quotations') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
-                                        عروض الأسعار</router-link>
-                                    <span
-                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
-                                </li>
-                                <li class="relative">
-                                    <router-link to="/sales/invoices"
-                                        :class="[isMenuItemActive('/sales/invoices') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
-                                        فواتير المبيعات</router-link>
-                                    <span
-                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
-                                </li>
-                                <li class="relative">
-                                    <router-link to="/sales/orders"
-                                        :class="[isMenuItemActive('/sales/orders') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
-                                        طلبات المبيعات</router-link>
-                                    <span
-                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
-                                </li>
-                                <li class="relative">
-                                    <router-link to="/sales/contracts"
-                                        :class="[isMenuItemActive('/sales/contracts') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
-                                        العقود</router-link>
-                                    <span
-                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
-                                </li>
-                                <li class="relative">
-                                    <router-link to="/sales/clearing"
-                                        :class="[isMenuItemActive('/sales/clearing') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
-                                        المقاصة</router-link>
-                                    <span
-                                        class="absolute top-1/2 right-[-26px] w-4 border-t-2 border-dotted border-white -translate-y-1/2"></span>
-                                </li>
-                            </ul> -->
                             <h2 class="text-sm font-medium leading-5 mb-2">إدارة العملاء</h2>
                             <ul class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
                                 <li class="relative">
@@ -522,70 +482,70 @@
                             <h2 class="text-sm font-medium leading-5 mb-2">الإعدادات الاساسية</h2>
                             <ul class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
                                 <li class="relative">
-                                    <router-link to="/products-categories/list"
-                                        :class="[isMenuItemActive('/products-categories/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                    <router-link to="/settings/products-categories/list"
+                                        :class="[isMenuItemActive('/settings/products-categories/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         قائمة تصنيفات المنتجات </router-link>
                                 </li>
                                 <li class="relative">
-                                    <router-link to="/services-categories/list"
-                                        :class="[isMenuItemActive('/services-categories/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                    <router-link to="/settings/services-categories/list"
+                                        :class="[isMenuItemActive('/settings/services-categories/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         قائمة تصنيفات الخدمات</router-link>
                                 </li>
                                 <li class="relative">
-                                    <router-link to="/products-categories/tree"
-                                        :class="[isMenuItemActive('/products-categories/tree') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                    <router-link to="/settings/products-categories/tree"
+                                        :class="[isMenuItemActive('/settings/products-categories/tree') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         تصنيفات المنتجات </router-link>
                                 </li>
                                 <li class="relative">
-                                    <router-link to="/services-categories/tree"
-                                        :class="[isMenuItemActive('/services-categories/tree') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                    <router-link to="/settings/services-categories/tree"
+                                        :class="[isMenuItemActive('/settings/services-categories/tree') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         تصنيفات الخدمات</router-link>
                                 </li>
                                 <li class="relative">
-                                    <router-link to="/units/list"
-                                        :class="[isMenuItemActive('/units/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                    <router-link to="/settings/units/list"
+                                        :class="[isMenuItemActive('/settings/units/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         الوحدات</router-link>
                                 </li>
                                 <li class="relative">
-                                    <router-link to="/factories/list"
-                                        :class="[isMenuItemActive('/factories/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                    <router-link to="/settings/factories/list"
+                                        :class="[isMenuItemActive('/settings/factories/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         المصانع</router-link>
                                 </li>
                                 <li class="relative">
-                                    <router-link to="/brands/list"
-                                        :class="[isMenuItemActive('/brands/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                    <router-link to="/settings/brands/list"
+                                        :class="[isMenuItemActive('/settings/brands/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         العلامة التجارية</router-link>
                                 </li>
                                 <li class="relative">
-                                    <router-link to="/geo-areas/list"
-                                        :class="[isMenuItemActive('/geo-areas/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                    <router-link to="/settings/geo-areas/list"
+                                        :class="[isMenuItemActive('/settings/geo-areas/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         تقسيمات المناطق الجغرافية</router-link>
                                 </li>
                                 <li class="relative">
-                                    <router-link to="/geo-segments/list"
-                                        :class="[isMenuItemActive('/geo-segments/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                    <router-link to="/settings/geo-segments/list"
+                                        :class="[isMenuItemActive('/settings/geo-segments/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         تقسيمات النطاقات الجغرافية</router-link>
                                 </li>
                             </ul>
                             <h2 class="text-sm font-medium leading-5 my-2">إدارة الضرائب</h2>
                             <ul class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
                                 <li class="relative">
-                                    <router-link to="/tax-rules/list"
-                                        :class="[isMenuItemActive('/tax-rules/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                    <router-link to="/settings/tax-rules/list"
+                                        :class="[isMenuItemActive('/settings/tax-rules/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         القواعد الضريبية
                                     </router-link>
                                 </li>
                                 <li class="relative">
-                                    <router-link to="/taxes/list"
-                                        :class="[isMenuItemActive('/taxes/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                    <router-link to="/settings/taxes/list"
+                                        :class="[isMenuItemActive('/settings/taxes/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         الضرائب</router-link>
                                 </li>
                             </ul>
                             <h2 class="text-sm font-medium leading-5 my-2">الدول والعملات</h2>
                             <ul class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
                                 <li class="relative">
-                                    <router-link to="/cities/list"
-                                        :class="[isMenuItemActive('/cities/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                    <router-link to="/settings/cities/list"
+                                        :class="[isMenuItemActive('/settings/cities/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         إدارة الدول
                                     </router-link>
                                 </li>
@@ -598,38 +558,38 @@
                             <h2 class="text-sm font-medium leading-5 my-2">إعدادات متقدمة</h2>
                             <ul class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
                                 <li class="relative">
-                                    <router-link to="/codes"
-                                        :class="[isMenuItemActive('/codes') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                    <router-link to="/settings/codes"
+                                        :class="[isMenuItemActive('/settings/codes') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         اعدادات الاكواد
                                     </router-link>
                                 </li>
                                 <li class="relative">
-                                    <router-link to="/account-types/list"
-                                        :class="[isMenuItemActive('/account-types/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                    <router-link to="/settings/account-types/list"
+                                        :class="[isMenuItemActive('/settings/account-types/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         أنواع الحسابات
                                     </router-link>
                                 </li>
                                 <li class="relative">
-                                    <router-link to="/test-group/list"
-                                        :class="[isMenuItemActive('/test-group/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                    <router-link to="/settings/test-group/list"
+                                        :class="[isMenuItemActive('/settings/test-group/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         مجموعات الاختبارات
                                     </router-link>
                                 </li>
                                 <li class="relative">
-                                    <router-link to="/tests/list"
-                                        :class="[isMenuItemActive('/tests/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                    <router-link to="/settings/tests/list"
+                                        :class="[isMenuItemActive('/settings/tests/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         الاختبارات
                                     </router-link>
                                 </li>
                                 <li class="relative">
-                                    <router-link to="/test-methodology/list"
-                                        :class="[isMenuItemActive('/test-methodology/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                    <router-link to="/settings/test-methodology/list"
+                                        :class="[isMenuItemActive('/settings/test-methodology/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         منهجية الاختبارات
                                     </router-link>
                                 </li>
                                 <li class="relative">
-                                    <router-link to="/sample-types/list"
-                                        :class="[isMenuItemActive('/sample-types/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                    <router-link to="/settings/sample-types/list"
+                                        :class="[isMenuItemActive('/settings/sample-types/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         أنواع العينات
                                     </router-link>
                                 </li>
@@ -693,7 +653,7 @@ const financeRoutes = ['/finance'];
 const usersRoutes = ['/users', '/crushers', '/contractors'];
 const logisticsRoutes = ['/logistics'];
 const reportsRoutes = ['/reports'];
-const settingsRoutes = ['/products-categories', '/services-categories', '/products-categories/tree', '/units', '/factories', '/brands', '/geo-areas', '/geo-segments', '/tax-rules', '/taxes', '/cities', '/codes', '/account-types', '/test-group', '/tests', '/test-methodology', '/sample-types'];
+const settingsRoutes = ['/products-categories', '/services-categories', '/products-categories/tree', '/units', '/factories', '/brands', '/geo-areas', '/geo-segments', '/tax-rules', '/taxes', '/cities', '/codes', '/account-types', '/test-group', '/tests', '/test-methodology', '/sample-types', '/settings'];
 
 // Helper function to check if route matches (including child routes like /form, /create, /edit/:id, /view/:id)
 const isRouteActive = (basePath) => {
@@ -720,6 +680,27 @@ const isMenuItemActive = (menuLinkPath) => {
     // Check if current path starts with the full menu link path
     if (currentPath.startsWith(menuLinkPath)) {
         return true;
+    }
+
+    // Handle settings routes (e.g., /settings/products-categories/list)
+    if (pathParts[0] === 'settings' && pathParts.length >= 3) {
+        // For settings routes, we need exact match for the last segment (list, tree, etc.)
+        // e.g., /settings/products-categories/list should only match that specific link
+        const currentParts = currentPath.split('/').filter(p => p);
+        
+        // Check if both are settings routes with same module
+        if (currentParts[0] === 'settings' && currentParts[1] === pathParts[1]) {
+            // For list routes, also match create, edit, view
+            if (pathParts[2] === 'list') {
+                return currentParts[2] === 'list' || 
+                       currentParts[2] === 'create' || 
+                       currentParts[2] === 'edit' || 
+                       currentParts[2] === 'view';
+            }
+            // For other routes (tree, etc.), require exact match of the third segment
+            return currentParts[2] === pathParts[2];
+        }
+        return false;
     }
 
     const basePath = '/' + pathParts[0];

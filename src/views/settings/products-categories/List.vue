@@ -46,6 +46,7 @@ interface CategoriesResponse {
     message: string;
     data: Category[];
     pagination: Pagination;
+    header_table: string;
     headers: TableHeader[];
     shownHeaders: TableHeader[];
     actions: {
@@ -57,8 +58,9 @@ interface CategoryFilters {
     per_page?: number;
     cursor?: string | null;
     name?: string;
-    unit_name?: string;
-    status?: string;
+    unit_id?: string;
+    status?: number | boolean;
+    created_at?: string;
 }
 const categoriesIcon = `<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M23.6667 30.1667C27.2565 30.1667 30.1667 27.2565 30.1667 23.6667C30.1667 20.0768 27.2565 17.1667 23.6667 17.1667C20.0768 17.1667 17.1667 20.0768 17.1667 23.6667C17.1667 27.2565 20.0768 30.1667 23.6667 30.1667Z" stroke="#1570EF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
@@ -77,6 +79,7 @@ const tableItems = ref<Category[]>([]);
 const allHeaders = ref<TableHeader[]>([]);
 const shownHeaders = ref<TableHeader[]>([]);
 const canCreate = ref(false);
+const header_table = ref('');
 const loading = ref(false);
 const loadingMore = ref(false);
 
@@ -102,18 +105,23 @@ const hasSelectedCategories = computed(() => selectedCategories.value.length > 0
 // Filters
 const showAdvancedFilters = ref(false);
 const filterName = ref("");
-const filterUnit = ref<string | null>(null);
-const filterStatus = ref<string | null>(null);
+const filterUnitId = ref<string | null>(null);
+const filterStatus = ref<number | null>(null);
+const filterCreatedAt = ref<string | null>(null);
 
 const toggleAdvancedFilters = () => {
     showAdvancedFilters.value = !showAdvancedFilters.value;
 };
 
-// Delete confirmation
+const StatusList = [
+    { title: 'فعال', value: 1 },
+    { title: 'غير فعال', value: 2 }
+]
+
+// Bulk delete only
 const showDeleteDialog = ref(false);
-const showBulkDeleteDialog = ref(false);
 const deleteLoading = ref(false);
-const itemToDelete = ref<Category | null>(null);
+const isBulkDelete = ref(false);
 
 // Status change confirmation
 const showStatusChangeDialog = ref(false);
@@ -148,8 +156,9 @@ const fetchCategories = async (cursor?: string | null, append = false) => {
         };
 
         if (filterName.value) filters.name = filterName.value;
-        if (filterUnit.value) filters.unit_name = filterUnit.value;
-        if (filterStatus.value) filters.status = filterStatus.value;
+        if (filterUnitId.value) filters.unit_id = filterUnitId.value;
+        if (filterStatus.value !== null) filters.status = filterStatus.value;
+        if (filterCreatedAt.value) filters.created_at = filterCreatedAt.value;
 
         const params = new URLSearchParams();
         Object.entries(filters).forEach(([key, value]) => {
@@ -159,17 +168,25 @@ const fetchCategories = async (cursor?: string | null, append = false) => {
         });
 
         const queryString = params.toString();
-        const url = queryString ? `/admin/api/categories?${queryString}` : '/admin/api/categories';
+        const url = queryString ? `/categories?${queryString}` : '/categories';
 
         const response = await api.get<CategoriesResponse>(url);
+        console.log(response);
+
+        // Convert is_active to boolean for v-switch compatibility
+        const normalizedData = response.data.map(item => ({
+            ...item,
+            is_active: Boolean(item.is_active)
+        }));
 
         if (append) {
-            tableItems.value = [...tableItems.value, ...response.data];
+            tableItems.value = [...tableItems.value, ...normalizedData];
         } else {
-            tableItems.value = response.data;
-            allHeaders.value = response.headers;
-            shownHeaders.value = response.shownHeaders;
+            tableItems.value = normalizedData;
+            allHeaders.value = response.headers.filter(h => h.key !== 'id' && h.key !== 'actions');
+            shownHeaders.value = response.shownHeaders.filter(h => h.key !== 'id' && h.key !== 'actions');
             canCreate.value = response.actions.can_create;
+            header_table.value = response.header_table
         }
 
         nextCursor.value = response.pagination.next_cursor;
@@ -196,6 +213,14 @@ const applyFilters = () => {
     fetchCategories();
 };
 
+const resetFilters = () => {
+    filterName.value = '';
+    filterUnitId.value = '';
+    filterStatus.value = null;
+    filterCreatedAt.value = null;
+    fetchCategories();
+};
+
 // Toggle header visibility
 const toggleHeader = async (headerKey: string) => {
     const isCurrentlyShown = shownHeaders.value.some(h => h.key === headerKey);
@@ -219,16 +244,12 @@ const updateHeadersOnServer = async () => {
         const headerKeys = shownHeaders.value.map(h => h.key);
 
         const formData = new FormData();
-        formData.append('table', 'admin_categories');
+        formData.append('table', header_table.value);
         headerKeys.forEach((header, index) => {
             formData.append(`header[${index}]`, header);
         });
 
-        await api.post('/admin/api/headers', formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-            },
-        });
+        await api.post('/headers', formData);
     } catch (err: any) {
         console.error('Error updating headers:', err);
         error(err?.response?.data?.message || 'Failed to update headers');
@@ -242,13 +263,13 @@ const handleView = (item: any) => {
     router.push({ name: "ProductsCategoriesView", params: { id: item.id } });
 };
 
-const handleDelete = (item: any) => {
-    itemToDelete.value = item;
-    showDeleteDialog.value = true;
+const handleEdit = (item: any) => {
+    router.push({ name: "ProductsCategoriesEdit", params: { id: item.id } });
 };
 
 const handleStatusChange = (item: any) => {
-    itemToChangeStatus.value = item;
+    // Store the item with its current status
+    itemToChangeStatus.value = { ...item };
     showStatusChangeDialog.value = true;
 };
 
@@ -259,7 +280,7 @@ const confirmStatusChange = async () => {
         statusChangeLoading.value = true;
         const newStatus = !itemToChangeStatus.value.is_active;
 
-        await api.post(`/admin/api/categories/${itemToChangeStatus.value.id}/change-status`);
+        await api.patch(`/categories/${itemToChangeStatus.value.id}/change-status`, { status: newStatus });
 
         success(`تم ${newStatus ? 'تفعيل' : 'تعطيل'} التصنيف بنجاح`);
 
@@ -276,36 +297,32 @@ const confirmStatusChange = async () => {
     } finally {
         statusChangeLoading.value = false;
         showStatusChangeDialog.value = false;
+        itemToChangeStatus.value = null;
     }
 };
 
-const confirmDelete = async () => {
-    if (!itemToDelete.value) return;
-
+const handleDelete = async (item: any) => {
     try {
-        deleteLoading.value = true;
-        await api.delete(`/admin/api/categories/bulk-delete`, { data: { ids: [itemToDelete.value.id] } });
+        await api.delete(`/categories/${item.id}`);
         success('تم حذف التصنيف بنجاح');
         await fetchCategories();
-        itemToDelete.value = null;
     } catch (err: any) {
         console.error('Error deleting category:', err);
         error(err?.response?.data?.message || 'Failed to delete category');
-    } finally {
-        deleteLoading.value = false;
-        showDeleteDialog.value = false;
     }
 };
 
 const handleBulkDelete = () => {
     if (selectedCategories.value.length === 0) return;
-    showBulkDeleteDialog.value = true;
+    showDeleteDialog.value = true;
 };
 
 const confirmBulkDelete = async () => {
+    if (deleteLoading.value) return;
+    
     try {
         deleteLoading.value = true;
-        await api.delete('/admin/api/categories/bulk-delete', { data: { ids: selectedCategories.value } });
+        await api.post('/categories/bulk-delete', { data: { ids: selectedCategories.value } });
         success(`تم حذف ${selectedCategories.value.length} تصنيف بنجاح`);
         selectedCategories.value = [];
         await fetchCategories();
@@ -314,9 +331,10 @@ const confirmBulkDelete = async () => {
         error(err?.response?.data?.message || 'Failed to delete categories');
     } finally {
         deleteLoading.value = false;
-        showBulkDeleteDialog.value = false;
+        showDeleteDialog.value = false;
     }
 };
+
 
 const handleSelectCategory = (item: any, selected: boolean) => {
     if (selected) {
@@ -440,11 +458,13 @@ const importIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" 
                         class="flex flex-wrap items-stretch rounded overflow-hidden border border-gray-200 bg-white text-sm">
                         <ButtonWithIcon variant="flat" height="40" rounded="0"
                             custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-                            :prepend-icon="trash_1_icon" color="white" :label="t('common.delete')" />
+                            :prepend-icon="trash_1_icon" color="white" :label="t('common.delete')" 
+                            @click="handleBulkDelete" />
                         <div class="w-px bg-gray-200"></div>
                         <ButtonWithIcon variant="flat" height="40" rounded="0"
                             custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-                            :prepend-icon="trash_2_icon" color="white" :label="t('common.deleteAll')" />
+                            :prepend-icon="trash_2_icon" color="white" :label="t('common.deleteAll')" 
+                            @click="handleBulkDelete" />
                     </div>
 
                     <!-- Main header controls -->
@@ -483,14 +503,20 @@ const importIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" 
                 <!-- Advanced filters row -->
                 <div v-if="showAdvancedFilters"
                     class="border-y border-y-primary-100 bg-primary-50 px-4 sm:px-6 py-3 flex flex-col gap-3 sm:gap-2">
-                    <div class="flex flex-wrap gap-3 justify-end sm:justify-start">
-                        <v-text-field v-model="filterName" density="comfortable" variant="outlined" hide-details
-                            placeholder="اسم التصنيف" class="w-full sm:w-40 bg-white" @keyup.enter="applyFilters" />
-                        <v-text-field v-model="filterUnit" density="comfortable" variant="outlined" hide-details
-                            placeholder="الوحدة" class="w-full sm:w-40 bg-white" @keyup.enter="applyFilters" />
-                        <v-select v-model="filterStatus" :items="['فعال', 'غير فعال']" density="comfortable"
-                            variant="outlined" hide-details placeholder="الحالة" class="w-full sm:w-40 bg-white"
-                            @update:model-value="applyFilters" />
+                    <div class="flex flex-wrap gap-3 justify-between">
+                        <div class="flex gap-3 flex-wrap">
+                            <TextInput v-model="filterName" density="comfortable" variant="outlined" hide-details
+                                placeholder="اسم التصنيف" class="w-full sm:w-40 bg-white" @keyup.enter="applyFilters" />
+                            <TextInput v-model="filterUnitId" density="comfortable" variant="outlined" hide-details
+                                placeholder="الوحدة" class="w-full sm:w-40 bg-white" @keyup.enter="applyFilters" />
+                            <SelectInput v-model="filterStatus" :items="StatusList" item-title="title"
+                                item-value="value" density="comfortable" variant="outlined" hide-details
+                                placeholder="الحالة" class="w-full sm:w-40 bg-white"
+                                @update:model-value="applyFilters" />
+                            <DatePickerInput v-model="filterCreatedAt" density="comfortable" hide-details
+                                placeholder="تاريخ الإنشاء" class="w-full sm:w-40 bg-white" />
+                        </div>
+
                         <div class="flex gap-2 items-center">
                             <ButtonWithIcon variant="flat" color="primary-500" rounded="4" height="40"
                                 custom-class="px-5 font-semibold !text-white text-sm sm:text-base"
@@ -498,18 +524,18 @@ const importIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" 
 
                             <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4" border="sm"
                                 custom-class="px-5 font-semibold text-sm sm:text-base !text-primary-800 !border-primary-200"
-                                prepend-icon="mdi-refresh" label="إعادة تعيين" />
+                                prepend-icon="mdi-refresh" label="إعادة تعيين" @click="resetFilters" />
                         </div>
                     </div>
                 </div>
 
                 <!-- Categories Table -->
                 <DataTable :headers="tableHeaders" :items="tableItems" :loading="loading" show-checkbox show-actions
-                    @delete="handleDelete" @view="handleView" @select="handleSelectCategory"
-                    @selectAll="handleSelectAllCategories">
+                    @delete="handleDelete" @view="handleView" @select="handleSelectCategory" @edit="handleEdit"
+                    @selectAll="handleSelectAllCategories" :confirm-delete="true">
                     <template #item.is_active="{ item }">
                         <v-switch :model-value="item.is_active" hide-details inset density="compact" color="primary"
-                            @click="handleStatusChange(item)" />
+                            @update:model-value="(value) => handleStatusChange(item)" />
                     </template>
 
                 </DataTable>
@@ -517,20 +543,21 @@ const importIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" 
                 <!-- Infinite Scroll Trigger & Loading Indicator -->
                 <div ref="loadMoreTrigger" class="flex justify-center py-4">
                     <v-progress-circular v-if="loadingMore" indeterminate color="primary" size="32" />
-                    <span v-else-if="!hasMoreData && tableItems.length > 0" class="text-gray-500 text-sm">
+                    <!-- <span v-else-if="!hasMoreData && tableItems.length > 0" class="text-gray-500 text-sm">
                         لا توجد المزيد من البيانات
-                    </span>
+                    </span> -->
                 </div>
             </div>
         </div>
 
-        <!-- Delete Confirmation Dialog -->
-        <DeleteConfirmDialog v-model="showDeleteDialog" :loading="deleteLoading" :item-name="itemToDelete?.name"
-            title="حذف التصنيف" message="هل أنت متأكد من حذف التصنيف" @confirm="confirmDelete" />
 
         <!-- Bulk Delete Confirmation Dialog -->
-        <DeleteConfirmDialog v-model="showBulkDeleteDialog" :loading="deleteLoading" title="حذف التصنيفات"
-            :message="`هل أنت متأكد من حذف ${selectedCategories.length} تصنيف؟`" @confirm="confirmBulkDelete" />
+        <DeleteConfirmDialog 
+            v-model="showDeleteDialog" 
+            :loading="deleteLoading" 
+            title="حذف التصنيفات" 
+            :message="`هل أنت متأكد من حذف ${selectedCategories.length} تصنيف؟`"
+            @confirm="confirmBulkDelete" />
 
         <!-- Status Change Confirmation Dialog -->
         <StatusChangeDialog v-model="showStatusChangeDialog" :loading="statusChangeLoading"

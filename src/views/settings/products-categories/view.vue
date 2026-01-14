@@ -80,12 +80,12 @@
                     <div class="flex gap-4 mt-4">
                         <div class="info-item-bordered flex-1 px-6 py-4">
                             <label class="font-semibold text-sm text-gray-500 mb-2 block">الوصف بالانجليزي</label>
-                            <p class="text-sm text-gray-700 leading-relaxed">{{ category.description_translations?.en || category.description || '-' }}</p>
+                            <p class="text-sm text-gray-700 leading-relaxed" v-html="category.description_translations?.en || category.description || '-'"></p>
                         </div>
                         <v-divider vertical class="my-6"></v-divider>
                         <div class="info-item-bordered flex-1 px-6 py-4">
                             <label class="font-semibold text-sm text-gray-500 mb-2 block">الوصف عربي</label>
-                            <p class="text-sm text-gray-700 leading-relaxed">{{ category.description_translations?.ar || category.description || '-' }}</p>
+                            <p class="text-sm text-gray-700 leading-relaxed" v-html="category.description_translations?.ar || category.description || '-'"></p>
                         </div>
                     </div>
                 </div>
@@ -243,7 +243,7 @@ const fetchCategory = async () => {
             code: number
             message: string
             data: CategoryData
-        }>(`/admin/api/categories/${categoryId}`)
+        }>(`/categories/${categoryId}`)
         
         if (response.status && response.data) {
             category.value = response.data

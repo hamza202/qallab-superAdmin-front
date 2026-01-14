@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 
-export const useAppStore = defineStore("app", () => {
+export const useDateFormatStore = defineStore("dateFormat", () => {
   const formatDate = (
     dateString: string | null | undefined,
     options?: {
