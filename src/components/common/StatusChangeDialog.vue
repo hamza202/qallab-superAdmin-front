@@ -30,8 +30,6 @@ const internalOpen = computed({
   set: (value) => emit('update:modelValue', value),
 });
 
-const newStatus = computed(() => !props.currentStatus);
-
 const handleConfirm = () => {
   emit('confirm');
 };

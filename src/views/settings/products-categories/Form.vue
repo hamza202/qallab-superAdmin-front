@@ -19,97 +19,14 @@ const saveIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xm
 </svg>`;
 
 // =====================
-// Mock Data (for testing - remove when API is ready)
-// =====================
-const MOCK_CATEGORIES = [
-  {
-    id: 49,
-    name: "الملابس",
-    sup_category: [
-      { id: 55, name: "Men's Clothing" },
-      { id: 56, name: "Women's Clothing" },
-      { id: 57, name: "Shoes" },
-    ],
-  },
-  {
-    id: 50,
-    name: "الإلكترونيات",
-    sup_category: [
-      { id: 58, name: "Phones" },
-      { id: 59, name: "Laptops" },
-      { id: 60, name: "Tablets" },
-    ],
-  },
-  {
-    id: 51,
-    name: "الطعام والمشروبات",
-    sup_category: [
-      { id: 61, name: "Hot Drinks" },
-      { id: 62, name: "Cold Drinks" },
-      { id: 63, name: "Snacks" },
-    ],
-  },
-  { id: 52, name: "أحذية" },
-  { id: 53, name: "مستلزمات المنزل" },
-  { id: 54, name: "الرياضة" },
-];
-
-const MOCK_CATEGORY_DETAILS: Record<number, any> = {
-  49: { id: 49, name_ar: "الملابس", name_en: "Clothing", description: "جميع أنواع الملابس", parent_id: null, is_active: true, unit: "piece" },
-  50: { id: 50, name_ar: "الإلكترونيات", name_en: "Electronics", description: "الأجهزة الإلكترونية", parent_id: null, is_active: true, unit: "piece" },
-  51: { id: 51, name_ar: "الطعام والمشروبات", name_en: "Food & Beverages", description: "", parent_id: null, is_active: true, unit: "piece" },
-  52: { id: 52, name_ar: "الأثاث", name_en: "Furniture", description: "أثاث منزلي ومكتبي", parent_id: null, is_active: true, unit: "piece" },
-  53: { id: 53, name_ar: "مستلزمات المنزل", name_en: "Home Supplies", description: "", parent_id: null, is_active: true, unit: "kg" },
-  54: { id: 54, name_ar: "الرياضة", name_en: "Sports", description: "", parent_id: null, is_active: false, unit: "piece" },
-  55: { id: 55, name_ar: "ملابس رجالية", name_en: "Men's Clothing", description: "", parent_id: 49, is_active: true, unit: "piece" },
-  56: { id: 56, name_ar: "ملابس نسائية", name_en: "Women's Clothing", description: "", parent_id: 49, is_active: true, unit: "piece" },
-  57: { id: 57, name_ar: "أحذية", name_en: "Shoes", description: "", parent_id: 49, is_active: true, unit: "piece" },
-  58: { id: 58, name_ar: "هواتف", name_en: "Phones", description: "", parent_id: 50, is_active: true, unit: "piece" },
-  59: { id: 59, name_ar: "لابتوب", name_en: "Laptops", description: "", parent_id: 50, is_active: true, unit: "piece" },
-  60: { id: 60, name_ar: "أجهزة لوحية", name_en: "Tablets", description: "", parent_id: 50, is_active: false, unit: "piece" },
-  61: { id: 61, name_ar: "مشروبات ساخنة", name_en: "Hot Drinks", description: "", parent_id: 51, is_active: true, unit: "piece" },
-  62: { id: 62, name_ar: "مشروبات باردة", name_en: "Cold Drinks", description: "", parent_id: 51, is_active: true, unit: "liter" },
-  63: { id: 63, name_ar: "وجبات خفيفة", name_en: "Snacks", description: "", parent_id: 51, is_active: true, unit: "piece" },
-};
-
-// Set to true to use mock data, false to use real API
-const USE_MOCK_DATA = false; // Using real API
-
-// =====================
 // Types & Interfaces
 // =====================
-interface CategoryListItem {
-  id: number;
-  name: string;
-  parentId?: number | null;
-  children?: CategoryListItem[];
-}
-
 interface TaxRule {
   id: number;
   tax_id: number | null;
   percentage: number | null;
   minValue: number | null;
   priority: number | null;
-}
-
-interface CategoryFormData {
-  name: {
-    ar: string;
-    en: string;
-  };
-  description: string;
-  parent_id: number | null;
-  user_id: number;
-  unit_id: number | null;
-  image: File | null;
-  is_active: boolean;
-  taxes: Array<{
-    tax_id: number;
-    tax_percentage: number;
-    min_tax_amount: number;
-    priority: number;
-  }>;
 }
 
 // =====================
@@ -154,15 +71,6 @@ const taxNameItems = ref<Array<{ title: string; value: number | string }>>([]);
 const taxesData = ref<Array<any>>([]);
 
 const priorityItems = ref<Array<{ title: string; value: number | string }>>([]);
-
-const valuesItems = [
-  { title: "عالية", value: "high" },
-  { title: "متوسطة", value: "medium" },
-  { title: "منخفضة", value: "low" },
-];
-
-
-
 
 // =====================
 // Tax Rules State
@@ -214,6 +122,7 @@ const resetNewTaxRule = () => {
 const returnToList = () => {
   router.push({ name: "ProductsCategoriesList" });
 }
+
 const getTaxNameLabel = (value: string | number | null) => {
   if (!value) return "";
   const item = taxNameItems.value.find((i) => i.value === value);
@@ -384,7 +293,6 @@ const fetchCategoryDetails = async (id: number) => {
           minValue: tax.minimum || "",
           priority: tax.priority,
         }));
-
       }
     }
   } catch (error) {
@@ -423,7 +331,7 @@ const handleSave = async () => {
       unit_id: unit.value ? parseInt(unit.value.toString()) : 1,
       image: categoryImage.value?.[0] || null,
       is_active: isActive.value,
-      taxes: taxRules.value.map((tax, index) => {
+      taxes: taxRules.value.map((tax) => {
         const taxPayload: any = {
           tax_id: tax.tax_id,
           percentage: tax.percentage,
@@ -511,6 +419,37 @@ const handleSave = async () => {
 };
 
 // =====================
+// Delete Category
+// =====================
+const showDeleteDialog = ref(false);
+const deleteLoading = ref(false);
+
+const handleDeleteClick = () => {
+  showDeleteDialog.value = true;
+};
+
+const handleDeleteConfirm = async () => {
+  if (!categoryId.value) return;
+
+  deleteLoading.value = true;
+  try {
+    await api.delete(`/categories/${categoryId.value}`);
+    success('تم حذف التصنيف بنجاح');
+    returnToList();
+  } catch (error) {
+    console.error('Failed to delete category:', error);
+    showError('حدث خطأ أثناء حذف التصنيف');
+  } finally {
+    deleteLoading.value = false;
+    showDeleteDialog.value = false;
+  }
+};
+
+const handleDeleteCancel = () => {
+  showDeleteDialog.value = false;
+};
+
+// =====================
 // Close Form
 // =====================
 const handleClose = () => {
@@ -556,6 +495,11 @@ const categoriesIcon = `<svg width="48" height="48" viewBox="0 0 48 48" fill="no
 const trashIcon = `<svg width="17" height="19" viewBox="0 0 17 19" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M11.6673 4.16732V3.50065C11.6673 2.56723 11.6673 2.10052 11.4857 1.744C11.3259 1.4304 11.0709 1.17543 10.7573 1.01564C10.4008 0.833984 9.93407 0.833984 9.00065 0.833984H7.66732C6.7339 0.833984 6.26719 0.833984 5.91067 1.01564C5.59706 1.17543 5.3421 1.4304 5.18231 1.744C5.00065 2.10052 5.00065 2.56723 5.00065 3.50065V4.16732M6.66732 8.75065V12.9173M10.0007 8.75065V12.9173M0.833984 4.16732H15.834M14.1673 4.16732V13.5007C14.1673 14.9008 14.1673 15.6008 13.8948 16.1356C13.6552 16.606 13.2727 16.9885 12.8023 17.2282C12.2675 17.5007 11.5674 17.5007 10.1673 17.5007H6.50065C5.10052 17.5007 4.40045 17.5007 3.86567 17.2282C3.39527 16.9885 3.01282 16.606 2.77313 16.1356C2.50065 15.6008 2.50065 14.9008 2.50065 13.5007V4.16732" stroke="#D92D20" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`;
+
+const trashIcon_2 = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M5.5 1H10M1 3.25H14.5M13 3.25L12.474 11.1395C12.3951 12.3232 12.3557 12.915 12.1 13.3638C11.8749 13.7588 11.5354 14.0765 11.1262 14.2748C10.6615 14.5 10.0683 14.5 8.88201 14.5H6.61799C5.43168 14.5 4.83852 14.5 4.37375 14.2748C3.96457 14.0765 3.62507 13.7588 3.39999 13.3638C3.14433 12.915 3.10488 12.3232 3.02596 11.1395L2.5 3.25" stroke="#B42318" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+`
 
 const editIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M1.14735 14.1207C1.18564 13.7761 1.20478 13.6038 1.25691 13.4428C1.30316 13.2999 1.36851 13.164 1.45118 13.0386C1.54436 12.8973 1.66694 12.7747 1.91209 12.5296L12.9173 1.52434C13.8378 0.603865 15.3302 0.603866 16.2507 1.52434C17.1711 2.44482 17.1711 3.9372 16.2507 4.85768L5.24542 15.8629C5.00027 16.1081 4.8777 16.2306 4.73639 16.3238C4.61102 16.4065 4.47506 16.4718 4.33219 16.5181C4.17115 16.5702 3.99887 16.5894 3.65429 16.6276L0.833984 16.941L1.14735 14.1207Z" stroke="#1570EF" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
@@ -737,6 +681,10 @@ const editIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xm
             <ButtonWithIcon prepend-icon="mdi-close" variant="flat" color="primary-50" rounded="4" height="48"
               custom-class="font-semibold text-base text-primary-700 px-6 min-w-56" label="إغلاق"
               :disabled="isSaving || isDeleting" @click="handleClose" />
+
+            <ButtonWithIcon v-if="isEditing" :prepend-icon="trashIcon_2" variant="flat" color="error-50" rounded="4"
+              height="48" custom-class="font-semibold text-base px-6 min-w-56 text-error-700" label="حذف"
+              @click="handleDeleteClick" :loading="deleteLoading" :disabled="isSaving || deleteLoading" />
           </div>
         </div>
       </v-form>
@@ -747,6 +695,10 @@ const editIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xm
       <v-progress-circular indeterminate color="primary" />
     </v-overlay>
 
+
+    <!-- Delete Confirmation Dialog -->
+    <DeleteConfirmDialog v-model="showDeleteDialog" :loading="deleteLoading" :persistent="true" @confirm="handleDeleteConfirm"
+      @cancel="handleDeleteCancel" @close="handleDeleteCancel" />
 
     <!-- Notification Snackbar -->
     <v-snackbar v-model="notification.show" :timeout="notification.timeout"

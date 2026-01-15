@@ -187,3 +187,9 @@ html[dir="ltr"] .language-tabs-wrapper {
 
 .no-scroll-style {
 }
+
+// checkbox
+.white-checkbox .v-selection-control__input .mdi-checkbox-blank-outline::before,
+.white-checkbox .v-selection-control__input .mdi-checkbox-marked::before {
+  background-color: white !important;
+}

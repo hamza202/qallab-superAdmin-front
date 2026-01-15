@@ -759,7 +759,7 @@ const plusIcon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xm
                             minLength(2),
                             maxLength(100),
                           ]"
-                          :hide-details="true"
+                          :hide-details="false"
                         />
                       </template>
                       <template #ar>

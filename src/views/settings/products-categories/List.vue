@@ -86,7 +86,7 @@ const loadingMore = ref(false);
 // Pagination
 const nextCursor = ref<string | null>(null);
 const previousCursor = ref<string | null>(null);
-const perPage = ref(15);
+const perPage = ref(5);
 const hasMoreData = computed(() => nextCursor.value !== null);
 
 // Computed table headers for DataTable component
@@ -121,7 +121,6 @@ const StatusList = [
 // Bulk delete only
 const showDeleteDialog = ref(false);
 const deleteLoading = ref(false);
-const isBulkDelete = ref(false);
 
 // Status change confirmation
 const showStatusChangeDialog = ref(false);
@@ -322,7 +321,7 @@ const confirmBulkDelete = async () => {
     
     try {
         deleteLoading.value = true;
-        await api.post('/categories/bulk-delete', { data: { ids: selectedCategories.value } });
+        await api.post('/categories/bulk-delete', { ids: selectedCategories.value });
         success(`تم حذف ${selectedCategories.value.length} تصنيف بنجاح`);
         selectedCategories.value = [];
         await fetchCategories();
@@ -334,7 +333,6 @@ const confirmBulkDelete = async () => {
         showDeleteDialog.value = false;
     }
 };
-
 
 const handleSelectCategory = (item: any, selected: boolean) => {
     if (selected) {
@@ -541,7 +539,7 @@ const importIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" 
                 </DataTable>
 
                 <!-- Infinite Scroll Trigger & Loading Indicator -->
-                <div ref="loadMoreTrigger" class="flex justify-center py-4">
+                <div ref="loadMoreTrigger" class="flex justify-center py-8">
                     <v-progress-circular v-if="loadingMore" indeterminate color="primary" size="32" />
                     <!-- <span v-else-if="!hasMoreData && tableItems.length > 0" class="text-gray-500 text-sm">
                         لا توجد المزيد من البيانات
