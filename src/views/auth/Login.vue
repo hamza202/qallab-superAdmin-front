@@ -1,47 +1,59 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
+import { useRouter } from "vue-router";
 import { useLocaleStore } from "@/stores/locale";
+import { useAuthStore } from "@/stores/auth";
 import AuthLayout from "@/layouts/AuthLayout.vue";
 
 const { t } = useI18n();
+const router = useRouter();
 const localeStore = useLocaleStore();
+const authStore = useAuthStore();
 
 // Form data
 const email = ref("");
 const password = ref("");
 const rememberMe = ref(false);
-const isLoading = ref(false);
 const showPassword = ref(false);
 
 // Form validation
 const formRef = ref<any>(null);
 const isFormValid = ref(false);
 
+// Loading and error states from store
+const isLoading = computed(() => authStore.isLoading);
+const loginError = computed(() => authStore.error);
+
 // Translation key for AuthLayout
-const layoutTranslationKey = 'auth.supplierDashboard';
+const layoutTranslationKey = 'auth.adminDashboard';
+
+// Redirect if already authenticated
+onMounted(() => {
+  if (authStore.isAuthenticated) {
+    router.push('/');
+  }
+});
 
 // Handle login
 const handleLogin = async () => {
   const { valid } = await formRef.value?.validate();
   if (valid) {
-    isLoading.value = true;
-    console.log("Login with:", { email: email.value, password: password.value, rememberMe: rememberMe.value });
-    // Add your login logic here
-    setTimeout(() => {
-      isLoading.value = false;
-    }, 2000);
+    const success = await authStore.login(email.value, password.value);
+    if (success) {
+      router.push('/');
+    }
   }
 };
 
 // Handle forgot password
 const handleForgotPassword = () => {
-  console.log("Forgot password clicked");
+  router.push('/forgot-password');
 };
 
 // Handle create account
 const handleCreateAccount = () => {
-  console.log("Create account clicked");
+  router.push('/register');
 };
 </script>
 
@@ -67,6 +79,18 @@ const handleCreateAccount = () => {
           {{ t('auth.loginSubtitle') }}
         </p> 
       </div>
+
+      <!-- Error Alert -->
+      <v-alert
+        v-if="loginError"
+        type="error"
+        variant="tonal"
+        class="mb-6"
+        closable
+        density="compact"
+      >
+        {{ loginError }}
+      </v-alert>
 
       <!-- Login Form -->
       <v-form ref="formRef" v-model="isFormValid" @submit.prevent="handleLogin">
