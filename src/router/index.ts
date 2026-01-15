@@ -2,6 +2,8 @@ import {
   createRouter,
   createWebHistory,
   type RouteRecordRaw,
+  type NavigationGuardNext,
+  type RouteLocationNormalized,
 } from "vue-router";
 
 import { dashboardRoutes } from "./modules/dashboard.routes";
@@ -16,6 +18,14 @@ import { servicesRoutes } from "./modules/services.routes";
 import { crushersRoutes } from "./modules/crushers.routes";
 import { contractorsRoutes } from "./modules/contractors.routes";
 import { financeRoutes } from "./modules/finance.routes";
+
+// Auth check helper
+const isAuthenticated = (): boolean => {
+  return !!localStorage.getItem('auth_token')
+}
+
+// Public routes that don't require authentication
+const publicRoutes = ['Login', 'Register', 'ForgotPassword', 'ResetPassword', 'NotFound', '404', '500']
 
 const routes: RouteRecordRaw[] = [
   ...dashboardRoutes,
@@ -49,13 +59,34 @@ const router = createRouter({
 // Store sidebar scroll position
 let sidebarScrollTop = 0;
 
-// Save sidebar scroll position before each navigation
-router.beforeEach(() => {
-  const sidebar = document.querySelector(".q-sidebar-scroll");
+// Authentication guard
+router.beforeEach((to: RouteLocationNormalized, _from: RouteLocationNormalized, next: NavigationGuardNext) => {
+  const routeName = to.name as string
+  
+  // Save sidebar scroll position
+  const sidebar = document.querySelector('.q-sidebar-scroll');
   if (sidebar) {
     sidebarScrollTop = sidebar.scrollTop;
   }
-  return true;
+
+  // Check if route requires authentication
+  if (publicRoutes.includes(routeName)) {
+    // If user is already authenticated and trying to access login page, redirect to home
+    if (routeName === 'Login' && isAuthenticated()) {
+      next({ name: 'Dashboard' })
+      return
+    }
+    next()
+    return
+  }
+
+  // Protected route - check authentication
+  if (!isAuthenticated()) {
+    next({ name: 'Login' })
+    return
+  }
+
+  next()
 });
 
 // Restore sidebar scroll position after each navigation
