@@ -99,10 +99,10 @@ const handleDelete = (item: TableItem) => {
 
 const confirmDelete = async () => {
   if (!pendingDeleteItem.value || deleteLoading.value) return;
-  
+
   deleteLoading.value = true;
   emit("delete", pendingDeleteItem.value);
-  
+
   // Wait a bit for the parent to handle the delete
   // The parent should ideally emit a success/error event, but for now we'll use a timeout
   await new Promise(resolve => setTimeout(resolve, 100));
@@ -297,8 +297,8 @@ const eyeIcon = `<svg width="22" height="16" viewBox="0 0 22 16" fill="none" xml
       <v-progress-circular indeterminate color="primary" />
     </v-overlay>
 
-    <DeleteConfirmDialog v-model="showDeleteDialog" :loading="deleteLoading" :persistent="true" 
-      @confirm="confirmDelete" @cancel="cancelDelete" @close="cancelDelete" />
+    <DeleteConfirmDialog v-model="showDeleteDialog" :loading="deleteLoading" :persistent="true" @confirm="confirmDelete"
+      @cancel="cancelDelete" @close="cancelDelete" />
   </div>
 </template>
 

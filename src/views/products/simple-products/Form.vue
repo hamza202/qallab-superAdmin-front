@@ -598,7 +598,7 @@ const plusIcon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xm
                           required('englishNameRequired'),
                           minLength(2),
                           maxLength(100),
-                        ]" :hide-details="true" />
+                        ]" :hide-details="false" />
                       </template>
                       <template #ar>
                         <TextInput v-model="arabicName" placeholder="ادخل الاسم بالعربية" :rules="[
@@ -625,11 +625,11 @@ const plusIcon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xm
                     <!-- Description with Language Tabs -->
                     <LanguageTabs :languages="availableLanguages" label="الوصف" class="mb-[20px]">
                       <template #en>
-                        <RichTextEditor v-model="englishDescription" placeholder="Enter description in English"
+                        <RichTextEditor :rules="[required()]" v-model="englishDescription" placeholder="Enter description in English"
                           min-height="120px" :hide-details="false" />
                       </template>
                       <template #ar>
-                        <RichTextEditor v-model="arabicDescription" placeholder="ادخل الوصف بالعربية" min-height="120px"
+                        <RichTextEditor :rules="[required()]" v-model="arabicDescription" placeholder="ادخل الوصف بالعربية" min-height="120px"
                           :hide-details="false" />
                       </template>
                     </LanguageTabs>

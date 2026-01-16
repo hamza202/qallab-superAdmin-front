@@ -15,6 +15,7 @@ interface Tax {
   value_rate: string;
   minimum: string;
   tax_rule_name?: string;
+  amount_with_tax: string;
   calculation_method: string;
   include_tax: boolean;
   is_active: boolean;
@@ -118,7 +119,7 @@ const itemToChangeStatus = ref<Tax | null>(null);
 
 // Tax dialog
 const showTaxDialog = ref(false);
-const editingTax = ref<any | null>(null);
+const editingTaxId = ref<number | null>(null);
 
 // Selection
 const selectedTaxes = ref<number[]>([]);
@@ -153,7 +154,7 @@ const fetchTaxes = async (append = false) => {
     });
 
     const queryString = params.toString();
-    const url = queryString ? `/taxes?${queryString}` : '/taxes';
+    const url = queryString ? `/admin/taxes?${queryString}` : '/admin/taxes';
 
     const response = await api.get<TaxesResponse>(url);
 
@@ -162,6 +163,11 @@ const fetchTaxes = async (append = false) => {
       ...item,
       is_active: Boolean(item.is_active)
     }));
+
+    // Convert amount_with_tax to fixed 2 decimal places
+    normalizedData.map(el => {
+      el.amount_with_tax = Number(el.amount_with_tax).toFixed(2);
+    })
 
     if (append) {
       tableItems.value = [...tableItems.value, ...normalizedData];
@@ -227,7 +233,7 @@ const updateHeadersOnServer = async () => {
       formData.append(`header[${index}]`, header);
     });
 
-    await api.post('/headers', formData);
+    await api.post('/admin/headers', formData);
   } catch (err: any) {
     console.error('Error updating headers:', err);
     error(err?.response?.data?.message || 'Failed to update headers');
@@ -237,38 +243,18 @@ const updateHeadersOnServer = async () => {
 };
 
 const openCreateTax = () => {
-  editingTax.value = null;
+  editingTaxId.value = null;
   showTaxDialog.value = true;
 };
 
-const handleEditTax = async (item: any) => {
-  try {
-    // Fetch full tax details
-    const response = await api.get(`/taxes/${item.id}`);
-    const tax = response.data;
-
-    editingTax.value = {
-      id: tax.id,
-      nameAr: tax.tax_name_translations?.ar || tax.tax_name,
-      nameEn: tax.tax_name_translations?.en || tax.tax_name,
-      percentage: tax.value_rate ?? "",
-      minValue: tax.minimum ?? "",
-      taxRuleId: tax.tax_rule_id ?? "",
-      calculationMethod: tax.calculation_method ?? "",
-      status: Boolean(tax.is_active),
-      amountIncludesTax: Boolean(tax.include_tax),
-    };
-
-    showTaxDialog.value = true;
-  } catch (err: any) {
-    console.error('Error fetching tax details:', err);
-    error(err?.response?.data?.message || 'Failed to fetch tax details');
-  }
+const handleEditTax = (item: any) => {
+  editingTaxId.value = item.id;
+  showTaxDialog.value = true;
 };
 
 const handleDeleteTax = async (item: any) => {
   try {
-    await api.delete(`/taxes/${item.id}`);
+    await api.delete(`/admin/taxes/${item.id}`);
     success('تم حذف الضريبة بنجاح');
     await fetchTaxes();
   } catch (err: any) {
@@ -290,7 +276,7 @@ const confirmStatusChange = async () => {
     statusChangeLoading.value = true;
     const newStatus = !itemToChangeStatus.value.is_active;
 
-    await api.patch(`/taxes/${itemToChangeStatus.value.id}/change-status`, { status: newStatus });
+    await api.patch(`/admin/taxes/${itemToChangeStatus.value.id}/change-status`, { status: newStatus });
 
     success(`تم ${newStatus ? 'تفعيل' : 'تعطيل'} الضريبة بنجاح`);
 
@@ -319,7 +305,7 @@ const confirmBulkDelete = async () => {
 
   try {
     deleteLoading.value = true;
-    await api.post('/taxes/bulk-delete', { ids: selectedTaxes.value });
+    await api.post('/admin/taxes/bulk-delete', { ids: selectedTaxes.value });
     success(`تم حذف ${selectedTaxes.value.length} ضريبة بنجاح`);
     selectedTaxes.value = [];
     await fetchTaxes();
@@ -335,7 +321,7 @@ const confirmBulkDelete = async () => {
 const handleSaveTax = async () => {
   // Refresh the list after successful save
   await fetchTaxes();
-  editingTax.value = null;
+  editingTaxId.value = null;
 };
 
 const handleSelectTax = (item: any, selected: boolean) => {
@@ -523,7 +509,7 @@ const exportIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" 
       @confirm="confirmStatusChange" />
 
     <!-- Tax Form Dialog -->
-    <TaxFormDialog v-model="showTaxDialog" :tax="editingTax" @saved="handleSaveTax" />
+    <TaxFormDialog v-model="showTaxDialog" :tax-id="editingTaxId" @saved="handleSaveTax" />
   </default-layout>
 </template>
 

@@ -20,6 +20,7 @@ interface TextInputProps {
     readonly?: boolean;
     clearable?: boolean;
     rules?: any[];
+    errorMessages?: string | string[];
     hideDetails?: boolean | "auto";
     hint?: string;
     persistentHint?: boolean;
@@ -89,7 +90,7 @@ const handleAppendInnerClick = () => {
 
         <v-text-field v-model="internalValue" :type="inputType" :placeholder="placeholder" variant="outlined"
             :color="color" :density="density" :disabled="disabled" :readonly="readonly" :rules="rules" :dir="dir"
-            :clearable="clearable" :hide-details="hideDetails" :hint="hint" :persistent-hint="persistentHint"
+            :clearable="clearable" :error-messages="errorMessages" :hide-details="hideDetails" :hint="hint" :persistent-hint="persistentHint"
             :prefix="prefix" :suffix="suffix" :prepend-inner-icon="prependInnerIcon"
             :append-inner-icon="effectiveAppendInnerIcon" :prepend-icon="prependIcon" :append-icon="appendIcon"
             v-bind="inputProps" @click:append-inner="handleAppendInnerClick">

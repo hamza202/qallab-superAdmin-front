@@ -9,6 +9,8 @@ const route = useRoute();
 const { notification, success, error: showError } = useNotification();
 const api = useApi();
 
+const formErrors = reactive<Record<string, string>>({});
+
 // Available languages
 const availableLanguages = ref([
   { code: "en", name: "En", flag: "/img/en.svg", dir: "ltr" as const },
@@ -181,6 +183,7 @@ const resetForm = () => {
   isActive.value = true;
   taxRules.value = [];
   resetNewTaxRule();
+  Object.keys(formErrors).forEach(key => delete formErrors[key]);
   formRef.value?.resetValidation();
 };
 
@@ -190,7 +193,7 @@ const resetForm = () => {
 const fetchConstants = async () => {
   try {
     // Real API call to get all constants
-    const response = await api.get('/service-categories/constants');
+    const response = await api.get('/admin/service-categories/constants');
 
     // Populate priorities dropdown
     priorityItems.value = [
@@ -208,7 +211,7 @@ const fetchConstants = async () => {
 const fetchTaxs = async () => {
   try {
     // Real API call to get all taxes
-    const response = await api.get('/taxes/list');
+    const response = await api.get('/admin/taxes/list');
 
     // Store full tax data
     taxesData.value = response.data;
@@ -230,7 +233,7 @@ const fetchTaxs = async () => {
 const fetchCategories = async () => {
   try {
     // Real API call to get all categories
-    const response = await api.get('/service-categories/list');
+    const response = await api.get('/admin/service-categories/list');
 
     // Populate categories dropdown
     categoriesList.value = [
@@ -248,7 +251,7 @@ const fetchCategories = async () => {
 const fetchUnits = async () => {
   try {
     // Real API call to get all units
-    const response = await api.get('/units/list');
+    const response = await api.get('/admin/units/list');
 
     // Populate categories dropdown
     unitItems.value = [
@@ -270,7 +273,7 @@ const fetchCategoryDetails = async (id: number) => {
   isLoading.value = true;
   try {
     // Real API call
-    const response = await api.get(`/service-categories/${id}`);
+    const response = await api.get(`/admin/service-categories/${id}`);
     const cat = response.data;
     if (cat) {
       // Populate form with API data
@@ -306,6 +309,8 @@ const fetchCategoryDetails = async (id: number) => {
 // Save Category (Create or Update)
 // =====================
 const handleSave = async () => {
+  Object.keys(formErrors).forEach(key => delete formErrors[key]);
+  
   const { valid } = await formRef.value?.validate();
   if (!valid) {
     console.log("Form has errors");
@@ -368,9 +373,9 @@ const handleSave = async () => {
           formData.append(`taxes[${index}][is_active]`, tax.is_active ? '1' : '0');
         });
 
-        await api.upload(`/service-categories/${categoryId.value}`, formData);
+        await api.upload(`/admin/service-categories/${categoryId.value}`, formData);
       } else {
-        await api.put(`/service-categories/${categoryId.value}`, payload);
+        await api.put(`/admin/service-categories/${categoryId.value}`, payload);
       }
       success('تم تحديث التصنيف بنجاح');
     } else {
@@ -395,9 +400,9 @@ const handleSave = async () => {
           formData.append(`taxes[${index}][is_active]`, tax.is_active ? '1' : '0');
         });
 
-        await api.upload('/service-categories', formData);
+        await api.upload('/admin/service-categories', formData);
       } else {
-        await api.post('/service-categories', payload);
+        await api.post('/admin/service-categories', payload);
       }
       success('تم إضافة التصنيف بنجاح');
     }
@@ -408,9 +413,19 @@ const handleSave = async () => {
     isEditing.value = false;
 
     returnToList()
-  } catch (err) {
+  } catch (err: any) {
     console.error('Failed to save category:', err);
-    showError('حدث خطأ أثناء حفظ التصنيف');
+    
+    // Handle validation errors
+    if (err?.response?.status === 422 && err?.response?.data?.errors) {
+      const apiErrors = err.response.data.errors;
+      Object.keys(apiErrors).forEach(key => {
+        formErrors[key] = apiErrors[key][0];
+      });
+      showError(err?.response?.data?.message || 'يرجى تصحيح الأخطاء في النموذج');
+    } else {
+      showError('حدث خطأ أثناء حفظ التصنيف');
+    }
   } finally {
     isSaving.value = false;
   }
@@ -431,7 +446,7 @@ const handleDeleteConfirm = async () => {
 
   deleteLoading.value = true;
   try {
-    await api.delete(`/service-categories/${categoryId.value}`);
+    await api.delete(`/admin/service-categories/${categoryId.value}`);
     success('تم حذف التصنيف بنجاح');
     returnToList();
   } catch (error) {
@@ -528,11 +543,13 @@ const saveIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xm
                 <LanguageTabs :languages="availableLanguages" label="الإسم">
                   <template #en>
                     <TextInput v-model="categoryNameEn" placeholder="Enter name in English"
-                      :rules="[required(), maxLength(100)]" :hide-details="false" />
+                      :rules="[required(), maxLength(100)]" :hide-details="false"
+                      :error-messages="formErrors['name.en']" @input="delete formErrors['name.en']" />
                   </template>
                   <template #ar>
                     <TextInput v-model="categoryNameAr" placeholder="ادخل الاسم بالعربية"
-                      :rules="[required(), maxLength(100)]" :hide-details="false" />
+                      :rules="[required(), maxLength(100)]" :hide-details="false"
+                      :error-messages="formErrors['name.ar']" @input="delete formErrors['name.ar']" />
                   </template>
                 </LanguageTabs>
               </div>
@@ -572,11 +589,13 @@ const saveIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xm
                 <LanguageTabs :languages="availableLanguages" label="تفاصيل التصنيف" class="mb-[20px]">
                   <template #en>
                     <RichTextEditor v-model="categoryDescriptionEn" placeholder="Enter Category Description in English"
-                      min-height="120px" :hide-details="false" />
+                      min-height="120px" :hide-details="false" :rules="[required()]"
+                      :error-messages="formErrors['description.en']" @input="delete formErrors['description.en']" />
                   </template>
                   <template #ar>
                     <RichTextEditor v-model="categoryDescriptionAr" placeholder="ادخل تفاصيل التصنيف بالعربية"
-                      min-height="120px" :hide-details="false" />
+                      min-height="120px" :hide-details="false" :rules="[required()]"
+                      :error-messages="formErrors['description.ar']" @input="delete formErrors['description.ar']" />
                   </template>
                 </LanguageTabs>
 
@@ -593,7 +612,10 @@ const saveIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xm
           <!-- Taxes Section -->
           <div class="bg-gray-50 rounded-md p-4 sm:p-6">
             <div class="flex items-center justify-between mb-4 gap-3">
-              <h2 class="text-lg font-bold text-primary-900">الضرائب</h2>
+              <div class="flex flex-col gap-1">
+                <h2 class="text-lg font-bold text-primary-900">الضرائب</h2>
+                <span v-if="formErrors['taxes']" class="text-sm text-red-600">{{ formErrors['taxes'] }}</span>
+              </div>
               <div class="w-full sm:w-auto flex justify-start sm:justify-end">
                 <ButtonWithIcon :append-icon="editingTaxIndex !== null ? 'mdi-pencil' : 'mdi-plus'" variant="flat"
                   color="primary" height="40" custom-class="font-semibold text-sm px-4 w-full sm:w-auto"

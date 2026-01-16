@@ -192,7 +192,7 @@ const resetForm = () => {
 const fetchConstants = async () => {
   try {
     // Real API call to get all constants
-    const response = await api.get('/categories/constants');
+    const response = await api.get('/admin/categories/constants');
 
     // Populate priorities dropdown
     priorityItems.value = [
@@ -210,7 +210,7 @@ const fetchConstants = async () => {
 const fetchTaxs = async () => {
   try {
     // Real API call to get all taxes
-    const response = await api.get('/taxes/list');
+    const response = await api.get('/admin/taxes/list');
 
     // Store full tax data
     taxesData.value = response.data;
@@ -232,7 +232,7 @@ const fetchTaxs = async () => {
 const fetchCategories = async () => {
   try {
     // Real API call to get all categories
-    const response = await api.get('/categories/list');
+    const response = await api.get('/admin/categories/list');
 
     // Populate categories dropdown
     categoriesList.value = [
@@ -250,7 +250,7 @@ const fetchCategories = async () => {
 const fetchUnits = async () => {
   try {
     // Real API call to get all units
-    const response = await api.get('/units/list');
+    const response = await api.get('/admin/units/list');
 
     // Populate categories dropdown
     unitItems.value = [
@@ -272,7 +272,7 @@ const fetchCategoryDetails = async (id: number) => {
   isLoading.value = true;
   try {
     // Real API call
-    const response = await api.get(`/categories/${id}`);
+    const response = await api.get(`/admin/categories/${id}`);
     const cat = response.data;
     if (cat) {
       // Populate form with API data
@@ -370,9 +370,9 @@ const handleSave = async () => {
           formData.append(`taxes[${index}][is_active]`, tax.is_active ? '1' : '0');
         });
 
-        await api.upload(`/categories/${categoryId.value}`, formData);
+        await api.upload(`/admin/categories/${categoryId.value}`, formData);
       } else {
-        await api.put(`/categories/${categoryId.value}`, payload);
+        await api.put(`/admin/categories/${categoryId.value}`, payload);
       }
       success('تم تحديث التصنيف بنجاح');
     } else {
@@ -397,9 +397,9 @@ const handleSave = async () => {
           formData.append(`taxes[${index}][is_active]`, tax.is_active ? '1' : '0');
         });
 
-        await api.upload('/categories', formData);
+        await api.upload('/admin/categories', formData);
       } else {
-        await api.post('/categories', payload);
+        await api.post('/admin/categories', payload);
       }
       success('تم إضافة التصنيف بنجاح');
     }
@@ -433,7 +433,7 @@ const handleDeleteConfirm = async () => {
 
   deleteLoading.value = true;
   try {
-    await api.delete(`/categories/${categoryId.value}`);
+    await api.delete(`/admin/categories/${categoryId.value}`);
     success('تم حذف التصنيف بنجاح');
     returnToList();
   } catch (error) {
@@ -570,11 +570,11 @@ const editIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xm
                 <!-- Description with Language Tabs -->
                 <LanguageTabs :languages="availableLanguages" label="تفاصيل التصنيف" class="mb-[20px]">
                   <template #en>
-                    <RichTextEditor v-model="categoryDescriptionEn" placeholder="Enter Category Description in English"
+                    <RichTextEditor :rules="[required()]" v-model="categoryDescriptionEn" placeholder="Enter Category Description in English"
                       min-height="120px" :hide-details="false" />
                   </template>
                   <template #ar>
-                    <RichTextEditor v-model="categoryDescriptionAr" placeholder="ادخل تفاصيل التصنيف بالعربية"
+                    <RichTextEditor :rules="[required()]" v-model="categoryDescriptionAr" placeholder="ادخل تفاصيل التصنيف بالعربية"
                       min-height="120px" :hide-details="false" />
                   </template>
                 </LanguageTabs>

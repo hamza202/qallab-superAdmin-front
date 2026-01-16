@@ -1,10 +1,59 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import UnitFormDialog from "@/views/settings/units/components/UnitFormDialog.vue";
 import { useI18n } from 'vue-i18n'
-import DatePickerInput from '@/components/common/forms/DatePickerInput.vue';
+import { useApi } from "@/composables/useApi";
+import { useNotification } from "@/composables/useNotification";
 
 const { t } = useI18n()
+const api = useApi();
+const { success, error } = useNotification();
+
+// Types
+interface Unit {
+  id: number;
+  name: string;
+  unit_code: string;
+  type: string;
+  parent_unit_name?: string;
+  is_active: boolean;
+}
+
+interface TableHeader {
+  key: string;
+  title: string;
+  sortable?: boolean;
+}
+
+interface Pagination {
+  current_page: number;
+  next_cursor: string | null;
+  prev_cursor: string | null;
+  per_page: number;
+}
+
+interface UnitsResponse {
+  status: boolean;
+  code: number;
+  message: string;
+  data: Unit[];
+  pagination: Pagination;
+  header_table: string;
+  headers: TableHeader[];
+  shownHeaders: TableHeader[];
+  actions: {
+    can_create: boolean;
+  };
+}
+
+interface FilterParams {
+  per_page?: number;
+  cursor?: string | null;
+  name?: string;
+  unit_code?: string;
+  type?: string;
+  status?: number | boolean;
+}
 
 const unitsIcon = `<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M23.6667 30.1667C27.2565 30.1667 30.1667 27.2565 30.1667 23.6667C30.1667 20.0768 27.2565 17.1667 23.6667 17.1667C20.0768 17.1667 17.1667 20.0768 17.1667 23.6667C17.1667 27.2565 20.0768 30.1667 23.6667 30.1667Z" stroke="#1570EF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
@@ -34,158 +83,302 @@ const editIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none" xm
 </svg>
 `
 
-const deleteIcon = `
-<svg width="19" height="15" viewBox="0 0 19 15" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M13.1247 5.00065L8.12467 10.0007M8.12467 5.00065L13.1247 10.0007M1.22467 8.30065L4.82467 13.1007C5.11801 13.4918 5.26467 13.6873 5.45055 13.8284C5.61518 13.9533 5.8016 14.0465 6.00032 14.1032C6.22468 14.1673 6.46912 14.1673 6.95801 14.1673H13.2913C14.6915 14.1673 15.3915 14.1673 15.9263 13.8948C16.3967 13.6552 16.7792 13.2727 17.0189 12.8023C17.2913 12.2675 17.2913 11.5674 17.2913 10.1673V4.83398C17.2913 3.43385 17.2913 2.73379 17.0189 2.19901C16.7792 1.7286 16.3967 1.34615 15.9263 1.10647C15.3915 0.833984 14.6915 0.833984 13.2913 0.833984H6.95801C6.46912 0.833984 6.22468 0.833984 6.00032 0.89806C5.8016 0.954812 5.61518 1.04802 5.45055 1.17294C5.26467 1.31399 5.11801 1.50954 4.82467 1.90065L1.22467 6.70065C1.00951 6.98753 0.901932 7.13097 0.860462 7.28851C0.823856 7.42757 0.823856 7.57373 0.860462 7.71279C0.901932 7.87033 1.00951 8.01377 1.22467 8.30065Z" stroke="#B42318" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>
-`
-// Units table data
-const taxTableHeaders = [
-    { key: "id", title: "#", width: "60px" },
-    { key: "unitName", title: "اسم الوحدة", width: "176px" },
-    { key: "shortName", title: "الاختصار", width: "176px" },
-    { key: "unitCode", title: "كود الوحدة", width: "176px" },
-    { key: "type", title: "النوع", width: "176px" },
-    { key: "createdAt", title: "تاريخ الإنشاء", width: "176px" },
-    { key: "status", title: "الحالة", width: "176px" },
-];
+// API Data
+const tableItems = ref<Unit[]>([]);
+const allHeaders = ref<TableHeader[]>([]);
+const shownHeaders = ref<TableHeader[]>([]);
+const canCreate = ref(false);
+const header_table = ref('');
+const loading = ref(false);
+const loadingMore = ref(false);
 
-const taxTableItems = ref([
-    {
-        id: 1,
-        unitName: "القطعة",
-        shortName: "قطعة",
-        unitCode: "U-001",
-        type: "أساسي",
-        createdAt: "2025-01-01",
-        status: "نشطة",
-    },
-    {
-        id: 2,
-        unitName: "الكرتون",
-        shortName: "كرتون",
-        unitCode: "U-002",
-        type: "مشتق",
-        createdAt: "2025-01-05",
-        status: "غير نشطة",
-    },
-    {
-        id: 3,
-        unitName: "الصندوق",
-        shortName: "صندوق",
-        unitCode: "U-003",
-        type: "أساسي",
-        createdAt: "2025-01-10",
-        status: "نشطة",
-    },
-]);
+// Pagination
+const nextCursor = ref<string | null>(null);
+const previousCursor = ref<string | null>(null);
+const perPage = ref(5);
+const hasMoreData = computed(() => nextCursor.value !== null);
 
-const editingUnit = ref<any | null>(null);
+// Computed table headers for DataTable component
+const tableHeaders = computed(() => shownHeaders.value);
 
-const handleEditTax = (item: any) => {
-    editingUnit.value = {
-        id: item.id,
-        nameAr: item.unitName,
-        nameEn: item.shortName,
-        code: item.unitCode,
-        relatedUnit: null,
-        type: item.type === "أساسي" ? "basic" : "مشتق",
-        status: item.status === "نشطة",
-        notes: "",
-    };
+// Headers dropdown
+const showHeadersMenu = ref(false);
+const updatingHeaders = ref(false);
 
-    showUnitDialog.value = true;
-};
+// Computed checked headers for menu
+const headerCheckStates = computed(() => {
+  const states: Record<string, boolean> = {};
+  allHeaders.value.forEach(header => {
+    states[header.key] = shownHeaders.value.some(sh => sh.key === header.key);
+  });
+  return states;
+});
 
-const handleDeleteTax = (item: any) => {
-    taxTableItems.value = taxTableItems.value.filter((t) => t.id !== item.id);
-};
-
-const showUnitDialog = ref(false);
-
-const handleSaveUnit = (payload: any) => {
-    if (editingUnit.value && editingUnit.value.id) {
-        const index = taxTableItems.value.findIndex((t) => t.id === editingUnit.value.id);
-        if (index !== -1) {
-            taxTableItems.value[index] = {
-                ...taxTableItems.value[index],
-                unitName: payload.nameAr,
-                shortName: payload.nameEn,
-                unitCode: payload.code,
-                type: payload.type === "basic" ? "أساسي" : "مشتق",
-                status: payload.status ? "نشطة" : "غير نشطة",
-            };
-        }
-    } else {
-        const nextId = taxTableItems.value.length
-            ? Math.max(...taxTableItems.value.map((t) => t.id)) + 1
-            : 1;
-
-        taxTableItems.value.push({
-            id: nextId,
-            unitName: payload.nameAr,
-            shortName: payload.nameEn,
-            unitCode: payload.code,
-            type: payload.type === "basic" ? "أساسي" : "مشتق",
-            createdAt: new Date().toISOString().slice(0, 10),
-            status: payload.status ? "نشطة" : "غير نشطة",
-        });
-    }
-
-    editingUnit.value = null;
-    showUnitDialog.value = false;
-};
-
-const openCreateUnit = () => {
-    editingUnit.value = null;
-    showUnitDialog.value = true;
-};
-
-// Selection and filters (similar to cities/categories pages)
-const selectedUnitIds = ref<(string | number)[]>([]);
-
+// Filters
 const showAdvancedFilters = ref(false);
-
-const filterUnitName = ref("");
-const filterShortName = ref("");
+const filterName = ref("");
 const filterUnitCode = ref("");
 const filterType = ref<string | null>(null);
-const filterStatus = ref<string | null>(null);
-const filterCreatedAt = ref<string | null>(null);
-const createdAtMenu = ref(false);
-
-const handleSelectUnit = (item: any, selected: boolean) => {
-    if (selected) {
-        if (!selectedUnitIds.value.includes(item.id)) {
-            selectedUnitIds.value.push(item.id);
-        }
-    } else {
-        selectedUnitIds.value = selectedUnitIds.value.filter((id) => id !== item.id);
-    }
-};
-
-const handleSelectAllUnits = (selected: boolean) => {
-    if (selected) {
-        selectedUnitIds.value = taxTableItems.value.map((item) => item.id);
-    } else {
-        selectedUnitIds.value = [];
-    }
-};
-
-const hasSelectedUnits = computed(() => selectedUnitIds.value.length > 0);
+const filterStatus = ref<number | null>(null);
 
 const toggleAdvancedFilters = () => {
-    showAdvancedFilters.value = !showAdvancedFilters.value;
+  showAdvancedFilters.value = !showAdvancedFilters.value;
+};
+
+const StatusList = [
+  { title: 'فعال', value: 1 },
+  { title: 'غير فعال', value: 0 }
+]
+
+// Bulk delete only
+const showDeleteDialog = ref(false);
+const deleteLoading = ref(false);
+
+// Status change confirmation
+const showStatusChangeDialog = ref(false);
+const statusChangeLoading = ref(false);
+const itemToChangeStatus = ref<Unit | null>(null);
+
+// Unit dialog
+const showUnitDialog = ref(false);
+const editingUnitId = ref<number | null>(null);
+
+// Selection
+const selectedUnits = ref<number[]>([]);
+const hasSelectedUnits = computed(() => selectedUnits.value.length > 0);
+
+// Infinite scroll
+const loadMoreTrigger = ref<HTMLElement | null>(null);
+
+// Fetch units from API
+const fetchUnits = async (append = false) => {
+  try {
+    if (append) {
+      loadingMore.value = true;
+    } else {
+      loading.value = true;
+    }
+
+    const filters: FilterParams = {
+      per_page: perPage.value,
+      cursor: append ? nextCursor.value : null,
+    };
+
+    if (filterName.value) filters.name = filterName.value;
+    if (filterUnitCode.value) filters.unit_code = filterUnitCode.value;
+    if (filterType.value) filters.type = filterType.value;
+    if (filterStatus.value !== null) filters.status = filterStatus.value;
+
+    const params = new URLSearchParams();
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== null && value !== undefined && value !== '') {
+        params.append(key, String(value));
+      }
+    });
+
+    const queryString = params.toString();
+    const url = queryString ? `admin/units?${queryString}` : 'admin/units';
+
+    const response = await api.get<UnitsResponse>(url);
+
+    // Convert is_active to boolean for v-switch compatibility
+    const normalizedData = response.data.map(item => ({
+      ...item,
+      is_active: Boolean(item.is_active)
+    }));
+
+    if (append) {
+      tableItems.value = [...tableItems.value, ...normalizedData];
+    } else {
+      tableItems.value = normalizedData;
+      allHeaders.value = response.headers.filter(h => h.key !== 'id' && h.key !== 'actions');
+      shownHeaders.value = response.shownHeaders.filter(h => h.key !== 'id' && h.key !== 'actions');
+      canCreate.value = response.actions.can_create;
+      header_table.value = response.header_table
+    }
+
+    nextCursor.value = response.pagination.next_cursor;
+    previousCursor.value = response.pagination.prev_cursor;
+  } catch (err: any) {
+    console.error('Error fetching units:', err);
+    error(err?.response?.data?.message || 'Failed to fetch units');
+  } finally {
+    loading.value = false;
+    loadingMore.value = false;
+  }
+};
+
+const loadMore = async () => {
+  if (!hasMoreData.value || loadingMore.value) return;
+  await fetchUnits(true);
+};
+
+const applyFilters = () => {
+  fetchUnits();
 };
 
 const resetFilters = () => {
-    filterUnitName.value = "";
-    filterShortName.value = "";
-    filterUnitCode.value = "";
-    filterType.value = null;
-    filterStatus.value = null;
-    filterCreatedAt.value = null;
+  filterName.value = '';
+  filterUnitCode.value = '';
+  filterType.value = null;
+  filterStatus.value = null;
+  fetchUnits();
 };
+
+// Toggle header visibility
+const toggleHeader = async (headerKey: string) => {
+  const isCurrentlyShown = shownHeaders.value.some(h => h.key === headerKey);
+
+  if (isCurrentlyShown) {
+    shownHeaders.value = shownHeaders.value.filter(h => h.key !== headerKey);
+  } else {
+    const headerToAdd = allHeaders.value.find(h => h.key === headerKey);
+    if (headerToAdd) {
+      shownHeaders.value.push(headerToAdd);
+    }
+  }
+
+  await updateHeadersOnServer();
+};
+
+const updateHeadersOnServer = async () => {
+  try {
+    updatingHeaders.value = true;
+    const headerKeys = shownHeaders.value.map(h => h.key);
+
+    const formData = new FormData();
+    formData.append('table', header_table.value);
+    headerKeys.forEach((header, index) => {
+      formData.append(`header[${index}]`, header);
+    });
+
+    await api.post('/admin/headers', formData);
+  } catch (err: any) {
+    console.error('Error updating headers:', err);
+    error(err?.response?.data?.message || 'Failed to update headers');
+  } finally {
+    updatingHeaders.value = false;
+  }
+};
+
+const openCreateUnit = () => {
+  editingUnitId.value = null;
+  showUnitDialog.value = true;
+};
+
+const handleEditUnit = (item: any) => {
+  editingUnitId.value = item.id;
+  showUnitDialog.value = true;
+};
+
+const handleDeleteUnit = async (item: any) => {
+  try {
+    await api.delete(`/admin/units/${item.id}`);
+    success('تم حذف الوحدة بنجاح');
+    await fetchUnits();
+  } catch (err: any) {
+    console.error('Error deleting unit:', err);
+    error(err?.response?.data?.message || 'Failed to delete unit');
+  }
+};
+
+const handleStatusChange = (item: any) => {
+  // Store the item with its current status
+  itemToChangeStatus.value = { ...item };
+  showStatusChangeDialog.value = true;
+};
+
+const confirmStatusChange = async () => {
+  if (!itemToChangeStatus.value) return;
+
+  try {
+    statusChangeLoading.value = true;
+    const newStatus = !itemToChangeStatus.value.is_active;
+
+    await api.patch(`/admin/units/${itemToChangeStatus.value.id}/change-status`, { status: newStatus });
+
+    success(`تم ${newStatus ? 'تفعيل' : 'تعطيل'} الوحدة بنجاح`);
+
+    // Update local state
+    const index = tableItems.value.findIndex(t => t.id === itemToChangeStatus.value!.id);
+    if (index !== -1) {
+      tableItems.value[index].is_active = newStatus;
+    }
+  } catch (err: any) {
+    console.error('Error changing status:', err);
+    error(err?.response?.data?.message || 'Failed to change status');
+  } finally {
+    statusChangeLoading.value = false;
+    showStatusChangeDialog.value = false;
+    itemToChangeStatus.value = null;
+  }
+};
+
+const handleBulkDelete = () => {
+  if (selectedUnits.value.length === 0) return;
+  showDeleteDialog.value = true;
+};
+
+const confirmBulkDelete = async () => {
+  if (deleteLoading.value) return;
+
+  try {
+    deleteLoading.value = true;
+    await api.post('/admin/units/bulk-delete', { ids: selectedUnits.value });
+    success(`تم حذف ${selectedUnits.value.length} وحدة بنجاح`);
+    selectedUnits.value = [];
+    await fetchUnits();
+  } catch (err: any) {
+    console.error('Error deleting units:', err);
+    error(err?.response?.data?.message || 'Failed to delete units');
+  } finally {
+    deleteLoading.value = false;
+    showDeleteDialog.value = false;
+  }
+};
+
+const handleSaveUnit = async () => {
+  // Refresh the list after successful save
+  await fetchUnits();
+  editingUnitId.value = null;
+};
+
+const handleSelectUnit = (item: any, selected: boolean) => {
+  if (selected) {
+    if (!selectedUnits.value.includes(item.id)) {
+      selectedUnits.value.push(item.id);
+    }
+  } else {
+    selectedUnits.value = selectedUnits.value.filter((id) => id !== item.id);
+  }
+};
+
+const handleSelectAllUnits = (selected: boolean) => {
+  if (selected) {
+    selectedUnits.value = tableItems.value.map((item) => item.id);
+  } else {
+    selectedUnits.value = [];
+  }
+};
+
+// Lifecycle
+onMounted(() => {
+  fetchUnits();
+
+  // Setup infinite scroll observer
+  const observer = new IntersectionObserver(
+    (entries) => {
+      if (entries[0].isIntersecting && hasMoreData.value && !loadingMore.value) {
+        loadMore();
+      }
+    },
+    { threshold: 0.1 }
+  );
+
+  if (loadMoreTrigger.value) {
+    observer.observe(loadMoreTrigger.value);
+  }
+});
 
 const columnIcon = `<svg width="16" height="17" viewBox="0 0 16 17" fill="none" xmlns="http://www.w3.org/2000/svg">
   <path
@@ -204,84 +397,121 @@ const exportIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" 
 </script>
 
 <template>
-    <default-layout>
-        <div class="units-page">
-            <PageHeader :icon="unitsIcon" title-key="pages.units.title" description-key="pages.units.description" />
-            <div class="flex justify-end pb-2">
-                <ButtonWithIcon variant="outlined" height="40"
-                    custom-class="font-semibold text-base border-gray-300 bg-primary-50 !text-primary-900"
-                    :prepend-icon="exportIcon" :label="t('common.export')" />
-            </div>
+  <default-layout>
+    <div class="units-page">
+      <PageHeader :icon="unitsIcon" title-key="pages.units.title" description-key="pages.units.description" />
 
-            <div class="bg-gray-50 rounded-md -mx-6">
-                <div :class="hasSelectedUnits ? 'justify-between' : 'justify-end'"
-                    class="flex flex-wrap items-center gap-3 border-y border-y-slate-300 px-4 sm:px-6 py-3">
-                    <!-- Actions when rows are selected -->
-                    <div v-if="hasSelectedUnits"
-                        class="flex flex-wrap items-stretch rounded-lg overflow-hidden border border-gray-200 bg-white text-sm">
-                        <ButtonWithIcon variant="flat" height="40" rounded="0"
-                            custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-                            :prepend-icon="trash_1_icon" color="white" :label="t('common.delete')" />
-                        <div class="w-px bg-gray-200"></div>
-                        <ButtonWithIcon variant="flat" height="40" rounded="0"
-                            custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-                            :prepend-icon="trash_2_icon" color="white" :label="t('common.deleteAll')" />
-                    </div>
+      <div
+        class="flex justify-end items-stretch rounded border border-gray-300 w-fit ms-auto mb-4 overflow-hidden bg-white text-sm">
+        <ButtonWithIcon variant="flat" height="40" rounded="0"
+          custom-class="font-semibold text-base border-gray-300 bg-primary-50 !text-primary-900"
+          :prepend-icon="exportIcon" :label="t('common.export')" />
+      </div>
 
-                    <!-- Main header controls -->
-                    <div class="flex flex-wrap gap-3">
-                        <ButtonWithIcon variant="outlined" rounded="4" color="gray-500"
-                            height="40" custom-class="font-semibold text-base border-gray-400"
-                            :prepend-icon="columnIcon" :label="t('common.columns')" append-icon="mdi-chevron-down" />
-                        <ButtonWithIcon variant="flat" color="primary-500" height="40" rounded="4"
-                            custom-class="px-7 font-semibold text-base text-white border !border-primary-200"
-                            :prepend-icon="searchIcon" :label="t('common.advancedSearch')" @click="toggleAdvancedFilters" />
+      <div class="bg-gray-50 rounded-md -mx-6">
+        <div :class="hasSelectedUnits ? 'justify-between' : 'justify-end'"
+          class="flex flex-wrap items-center gap-3 border-y border-y-slate-300 px-4 sm:px-6 py-3">
 
-                        <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4"
-                            custom-class="px-7 font-semibold text-base !text-primary-800 border !border-primary-200"
-                            :prepend-icon="plusIcon" :label="t('common.addNew')" @click="openCreateUnit" />
-                    </div>
-                </div>
+          <!-- Bulk Actions -->
+          <div v-if="hasSelectedUnits"
+            class="flex flex-wrap items-stretch rounded overflow-hidden border border-gray-200 bg-white text-sm">
+            <ButtonWithIcon variant="flat" height="40" rounded="0"
+              custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
+              :prepend-icon="trash_1_icon" color="white" :label="t('common.delete')" @click="handleBulkDelete" />
+            <div class="w-px bg-gray-200"></div>
+            <ButtonWithIcon variant="flat" height="40" rounded="0"
+              custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
+              :prepend-icon="trash_2_icon" color="white" :label="t('common.deleteAll')" @click="handleBulkDelete" />
+          </div>
 
-                <!-- Advanced filters row -->
-                <div v-if="showAdvancedFilters"
-                    class="border-y border-y-primary-100 bg-primary-50 px-4 sm:px-6 py-3 flex flex-col gap-3 sm:gap-2">
-                    <div class="flex flex-wrap xl:!flex-nowrap gap-3 flex-1">
-                        <TextInput v-model="filterUnitName" density="comfortable" variant="outlined" hide-details
-                            placeholder="اسم الوحدة" class="w-full sm:w-48 bg-white" />
-                        <TextInput v-model="filterShortName" density="comfortable" variant="outlined" hide-details
-                            placeholder="الاختصار" class="w-full sm:w-40 bg-white" />
-                        <TextInput v-model="filterUnitCode" density="comfortable" variant="outlined" hide-details
-                            placeholder="كود الوحدة" class="w-full sm:w-40 bg-white" />
-                        <SelectInput v-model="filterType" :items="['أساسي', 'مشتق']" density="comfortable"
-                            variant="outlined" hide-details placeholder="النوع" class="w-full sm:w-40 bg-white" />
-                        <SelectInput v-model="filterStatus" :items="['نشطة', 'غير نشطة']" density="comfortable"
-                            variant="outlined" hide-details placeholder="الحالة" class="w-full sm:w-40 bg-white" />
-                        <DatePickerInput v-model="filterCreatedAt" density="comfortable"
-                            hide-details placeholder="تاريخ الإنشاء" class="w-full sm:w-48 bg-white" />
+          <!-- Main header controls -->
+          <div class="flex flex-wrap gap-3">
+            <!-- Column Management -->
+            <v-menu v-model="showHeadersMenu" :close-on-content-click="false">
+              <template v-slot:activator="{ props }">
+                <ButtonWithIcon v-bind="props" variant="outlined" rounded="4" color="gray-500" height="40"
+                  custom-class="font-semibold text-base border-gray-400" :prepend-icon="columnIcon"
+                  :label="t('common.columns')" append-icon="mdi-chevron-down" />
+              </template>
+              <v-list>
+                <v-list-item v-for="header in allHeaders" :key="header.key" @click="toggleHeader(header.key)">
+                  <template v-slot:prepend>
+                    <v-checkbox-btn :model-value="headerCheckStates[header.key]" :disabled="updatingHeaders"
+                      @click.stop="toggleHeader(header.key)"></v-checkbox-btn>
+                  </template>
+                  <v-list-item-title>{{ header.title }}</v-list-item-title>
+                </v-list-item>
+              </v-list>
+            </v-menu>
 
-                        <div class="flex gap-2 items-center">
-                            <ButtonWithIcon variant="flat" color="primary-500" rounded="4" height="40"
-                                custom-class="px-5 font-semibold !text-white text-sm sm:text-base"
-                                :prepend-icon="searchIcon" label="ابحث" />
-                            
-                            <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4" border="sm"
-                                custom-class="px-5 font-semibold text-sm sm:text-base !text-primary-800 !border-primary-200"
-                                prepend-icon="mdi-refresh" label="إعادة تعيين" />
-                        </div>
+            <!-- Advanced Filters Toggle -->
+            <ButtonWithIcon variant="flat" color="primary-500" height="40" rounded="4"
+              custom-class="px-7 font-semibold text-base text-white border !border-primary-200"
+              :prepend-icon="searchIcon" :label="t('common.advancedSearch')" @click="toggleAdvancedFilters" />
 
-                    </div>
-                </div>
-
-                <!-- Units Table -->
-                <DataTable :headers="taxTableHeaders" :items="taxTableItems" show-checkbox show-actions
-                    @edit="handleEditTax" @delete="handleDeleteTax" @select="handleSelectUnit"
-                    @selectAll="handleSelectAllUnits" :show-view="false"/>
-
-                <UnitFormDialog v-model="showUnitDialog" :unit="editingUnit" @save="handleSaveUnit" />
-            </div>
+            <!-- Add New Button -->
+            <ButtonWithIcon v-if="canCreate" variant="flat" color="primary-100" height="40" rounded="4"
+              custom-class="px-7 font-semibold text-base !text-primary-800 border !border-primary-200"
+              :prepend-icon="plusIcon" :label="t('common.addNew')" @click="openCreateUnit" />
+          </div>
         </div>
-    </default-layout>
+
+        <!-- Advanced Filters -->
+        <div v-if="showAdvancedFilters" class="border-b border-gray-300 px-4 sm:px-6 py-4 bg-white">
+          <div class="flex flex-wrap gap-3 justify-between">
+            <div class="flex gap-3 flex-wrap">
+              <TextInput v-model="filterName" density="comfortable" variant="outlined" hide-details
+                placeholder="اسم الوحدة" class="w-full sm:w-40 bg-white" @keyup.enter="applyFilters" />
+              <TextInput v-model="filterUnitCode" density="comfortable" variant="outlined" hide-details
+                placeholder="كود الوحدة" class="w-full sm:w-40 bg-white" @keyup.enter="applyFilters" />
+              <TextInput v-model="filterType" density="comfortable" variant="outlined" hide-details
+                placeholder="النوع" class="w-full sm:w-40 bg-white" @keyup.enter="applyFilters" />
+              <SelectInput v-model="filterStatus" :items="StatusList" item-title="title" item-value="value"
+                density="comfortable" variant="outlined" hide-details placeholder="الحالة"
+                class="w-full sm:w-40 bg-white" @update:model-value="applyFilters" />
+            </div>
+
+            <div class="flex gap-2 items-center">
+              <ButtonWithIcon variant="flat" color="primary-500" rounded="4" height="40"
+                custom-class="px-5 font-semibold !text-white text-sm sm:text-base" :prepend-icon="searchIcon"
+                label="بحث" @click="applyFilters" />
+
+              <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4" border="sm"
+                custom-class="px-5 font-semibold text-sm sm:text-base !text-primary-800 !border-primary-200"
+                prepend-icon="mdi-refresh" label="إعادة تعيين" @click="resetFilters" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Data Table -->
+        <DataTable :headers="tableHeaders" :items="tableItems" :loading="loading" show-checkbox show-actions
+          @delete="handleDeleteUnit" @edit="handleEditUnit" @select="handleSelectUnit" @selectAll="handleSelectAllUnits"
+          :confirm-delete="true" :show-view="false">
+          <template #item.is_active="{ item }">
+            <v-switch :model-value="item.is_active" hide-details inset density="compact" color="primary"
+              @update:model-value="(value) => handleStatusChange(item)" />
+          </template>
+        </DataTable>
+
+        <!-- Infinite Scroll Trigger & Loading Indicator -->
+        <div ref="loadMoreTrigger" class="flex justify-center py-8">
+          <v-progress-circular v-if="loadingMore" indeterminate color="primary" size="32" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Bulk Delete Confirmation Dialog -->
+    <DeleteConfirmDialog v-model="showDeleteDialog" :loading="deleteLoading" title="حذف الوحدات"
+      :message="`هل أنت متأكد من حذف ${selectedUnits.length} وحدة؟`" @confirm="confirmBulkDelete" />
+
+    <!-- Status Change Confirmation Dialog -->
+    <StatusChangeDialog v-model="showStatusChangeDialog" :loading="statusChangeLoading"
+      :item-name="itemToChangeStatus?.name" :current-status="itemToChangeStatus?.is_active"
+      @confirm="confirmStatusChange" />
+
+    <!-- Unit Form Dialog -->
+    <UnitFormDialog v-model="showUnitDialog" :unit-id="editingUnitId" @saved="handleSaveUnit" />
+  </default-layout>
 </template>
 
 <style scoped></style>

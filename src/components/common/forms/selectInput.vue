@@ -25,6 +25,8 @@ interface SelectInputProps {
     disabled?: boolean;
     readonly?: boolean;
     clearable?: boolean;
+    rules?: any[];
+    errorMessages?: string | string[];
     hideDetails?: boolean | "auto";
     hint?: string;
     persistentHint?: boolean;
@@ -69,7 +71,9 @@ const internalValue = computed({
             :density="density" 
             :disabled="disabled"
             :readonly="readonly" 
-            :clearable="clearable" 
+            :clearable="clearable"
+            :rules="rules"
+            :error-messages="errorMessages" 
             :hide-details="hideDetails" 
             :hint="hint"
             :persistent-hint="persistentHint"

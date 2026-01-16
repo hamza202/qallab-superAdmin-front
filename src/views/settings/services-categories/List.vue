@@ -161,7 +161,7 @@ const fetchCategories = async (cursor?: string | null, append = false) => {
         });
 
         const queryString = params.toString();
-        const url = queryString ? `/service-categories?${queryString}` : '/service-categories';
+        const url = queryString ? `/admin/service-categories?${queryString}` : '/admin/service-categories';
 
         const response = await api.get<CategoriesResponse>(url);
         console.log(response);
@@ -242,7 +242,7 @@ const updateHeadersOnServer = async () => {
             formData.append(`header[${index}]`, header);
         });
 
-        await api.post('/headers', formData);
+        await api.post('/admin/headers', formData);
     } catch (err: any) {
         console.error('Error updating headers:', err);
         error(err?.response?.data?.message || 'Failed to update headers');
@@ -273,7 +273,7 @@ const confirmStatusChange = async () => {
         statusChangeLoading.value = true;
         const newStatus = !itemToChangeStatus.value.is_active;
 
-        await api.patch(`/service-categories/${itemToChangeStatus.value.id}/change-status`, { status: newStatus });
+        await api.patch(`/admin/service-categories/${itemToChangeStatus.value.id}/change-status`, { status: newStatus });
 
         success(`تم ${newStatus ? 'تفعيل' : 'تعطيل'} التصنيف بنجاح`);
 
@@ -296,7 +296,7 @@ const confirmStatusChange = async () => {
 
 const handleDelete = async (item: any) => {
     try {
-        await api.delete(`/service-categories/${item.id}`);
+        await api.delete(`/admin/service-categories/${item.id}`);
         success('تم حذف التصنيف بنجاح');
         await fetchCategories();
     } catch (err: any) {
@@ -315,7 +315,7 @@ const confirmBulkDelete = async () => {
 
     try {
         deleteLoading.value = true;
-        await api.post('/service-categories/bulk-delete', { ids: selectedCategories.value });
+        await api.post('/admin/service-categories/bulk-delete', { ids: selectedCategories.value });
         success(`تم حذف ${selectedCategories.value.length} تصنيف بنجاح`);
         selectedCategories.value = [];
         await fetchCategories();

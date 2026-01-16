@@ -3,7 +3,7 @@ import { useEditor, EditorContent } from "@tiptap/vue-3";
 import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
 import Placeholder from "@tiptap/extension-placeholder";
-import { watch, onBeforeUnmount } from "vue";
+import { watch, onBeforeUnmount, computed, ref } from "vue";
 
 interface RichTextEditorProps {
   modelValue: string;
@@ -15,6 +15,7 @@ interface RichTextEditorProps {
   minHeight?: string;
   maxLength?: number;
   rules?: any[];
+  errorMessages?: string | string[];
   hideDetails?: boolean | "auto";
 }
 
@@ -32,6 +33,48 @@ const props = withDefaults(defineProps<RichTextEditorProps>(), {
 const emit = defineEmits<{
   (e: "update:modelValue", value: string): void;
 }>();
+
+const validationErrors = ref<string[]>([]);
+
+// Strip HTML tags to get plain text content
+const getPlainTextContent = (html: string): string => {
+  if (!html) return '';
+  return html.replace(/<[^>]*>/g, '').trim();
+};
+
+const validateRules = () => {
+  if (!props.rules || props.rules.length === 0) {
+    validationErrors.value = [];
+    return true;
+  }
+
+  // Strip HTML tags before validation
+  const plainTextValue = getPlainTextContent(props.modelValue);
+  validationErrors.value = [];
+
+  for (const rule of props.rules) {
+    const result = rule(plainTextValue);
+    if (result !== true) {
+      validationErrors.value.push(result);
+    }
+  }
+
+  return validationErrors.value.length === 0;
+};
+
+const displayError = computed(() => {
+  if (props.errorMessages) {
+    return Array.isArray(props.errorMessages) ? props.errorMessages[0] : props.errorMessages;
+  }
+  if (validationErrors.value.length > 0) {
+    return validationErrors.value[0];
+  }
+  return null;
+});
+
+const hasError = computed(() => {
+  return !!displayError.value;
+});
 
 const editor = useEditor({
   content: props.modelValue,
@@ -54,6 +97,9 @@ const editor = useEditor({
   ],
   onUpdate: ({ editor }) => {
     emit("update:modelValue", editor.getHTML());
+    if (props.rules && props.rules.length > 0) {
+      validateRules();
+    }
   },
 });
 
@@ -115,8 +161,13 @@ const isActive = (type: string, attrs?: Record<string, any>) => {
     </label>
 
     <div
-      class="editor-container bg-white border border-gray-300 rounded-lg overflow-hidden transition-colors duration-200 shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)] focus-within:border-[#9155fd]"
-      :class="{ 'opacity-50 pointer-events-none': disabled }"
+      class="editor-container bg-white border rounded-lg overflow-hidden transition-colors duration-200 shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)]"
+      :class="{
+        'opacity-50 pointer-events-none': disabled,
+        'border-red-600': hasError,
+        'border-gray-300': !hasError,
+        'focus-within:border-[#9155fd]': !hasError
+      }"
     >
       <!-- Editor Content Area -->
       <div class="editor-content-area px-[14px] py-[12px]" :style="{ minHeight }">
@@ -304,8 +355,13 @@ const isActive = (type: string, attrs?: Record<string, any>) => {
     </div>
 
     <!-- Validation/Details -->
-    <div v-if="!hideDetails" class="mt-1 text-xs text-gray-500">
-      <slot name="details"></slot>
+    <div v-if="!hideDetails" class="mt-1 text-xs">
+      <div v-if="displayError" class="text-red-600">
+        {{ displayError }}
+      </div>
+      <div v-else class="text-gray-500">
+        <slot name="details"></slot>
+      </div>
     </div>
   </div>
 </template>

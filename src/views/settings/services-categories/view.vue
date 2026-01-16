@@ -243,7 +243,7 @@ const fetchCategory = async () => {
             code: number
             message: string
             data: CategoryData
-        }>(`/service-categories/${categoryId}`)
+        }>(`/admin/service-categories/${categoryId}`)
         
         if (response.status && response.data) {
             category.value = response.data
