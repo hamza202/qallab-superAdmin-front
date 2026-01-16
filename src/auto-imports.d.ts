@@ -84,9 +84,6 @@ declare global {
   const ref: typeof import('vue').ref
   const required: typeof import('@/utils/validators').required
   const resolveComponent: typeof import('vue').resolveComponent
-  const richTextMaxLength: typeof import('@/utils/validators').richTextMaxLength
-  const richTextMinLength: typeof import('@/utils/validators').richTextMinLength
-  const richTextRequired: typeof import('@/utils/validators').richTextRequired
   const saudiPhone: typeof import('@/utils/validators').saudiPhone
   const selectRules: typeof import('@/utils/validators').selectRules
   const setActivePinia: typeof import('pinia').setActivePinia
@@ -204,9 +201,6 @@ declare module 'vue' {
     readonly ref: UnwrapRef<typeof import('vue')['ref']>
     readonly required: UnwrapRef<typeof import('@/utils/validators')['required']>
     readonly resolveComponent: UnwrapRef<typeof import('vue')['resolveComponent']>
-    readonly richTextMaxLength: UnwrapRef<typeof import('@/utils/validators')['richTextMaxLength']>
-    readonly richTextMinLength: UnwrapRef<typeof import('@/utils/validators')['richTextMinLength']>
-    readonly richTextRequired: UnwrapRef<typeof import('@/utils/validators')['richTextRequired']>
     readonly saudiPhone: UnwrapRef<typeof import('@/utils/validators')['saudiPhone']>
     readonly setActivePinia: UnwrapRef<typeof import('pinia')['setActivePinia']>
     readonly setMapStoreSuffix: UnwrapRef<typeof import('pinia')['setMapStoreSuffix']>
