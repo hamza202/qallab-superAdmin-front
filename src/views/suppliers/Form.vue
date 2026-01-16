@@ -470,6 +470,19 @@ const suppliersIcon = `<svg width="48" height="48" viewBox="0 0 48 48" fill="non
 </svg>
 `;
 
+const infoIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_1892_22688)">
+<path d="M6.06065 6.00016C6.21739 5.55461 6.52675 5.1789 6.93395 4.93958C7.34116 4.70027 7.81991 4.61279 8.28543 4.69264C8.75096 4.77249 9.17319 5.01451 9.47737 5.37585C9.78154 5.73718 9.94802 6.19451 9.94732 6.66683C9.94732 8.00016 7.94732 8.66683 7.94732 8.66683M8.00065 11.3335H8.00732M14.6673 8.00016C14.6673 11.6821 11.6825 14.6668 8.00065 14.6668C4.31875 14.6668 1.33398 11.6821 1.33398 8.00016C1.33398 4.31826 4.31875 1.3335 8.00065 1.3335C11.6825 1.3335 14.6673 4.31826 14.6673 8.00016Z" stroke="#9AA4B2" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<defs>
+<clipPath id="clip0_1892_22688">
+<rect width="16" height="16" fill="white"/>
+</clipPath>
+</defs>
+</svg>
+`
+
+
 const saveIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M10.8333 5.00016H5.49992C5.03321 5.00016 4.79985 5.00016 4.62159 4.90933C4.46479 4.82944 4.33731 4.70196 4.25741 4.54515C4.16659 4.3669 4.16659 4.13354 4.16659 3.66683V0.833496M12.4999 15.8335V10.5002C12.4999 10.0335 12.4999 9.8001 12.4091 9.62184C12.3292 9.46504 12.2017 9.33755 12.0449 9.25766C11.8667 9.16683 11.6333 9.16683 11.1666 9.16683H5.49992C5.03321 9.16683 4.79985 9.16683 4.62159 9.25766C4.46479 9.33755 4.33731 9.46504 4.25741 9.62184C4.16659 9.8001 4.16659 10.0335 4.16659 10.5002V15.8335M15.8333 6.10473V11.8335C15.8333 13.2336 15.8333 13.9337 15.5608 14.4685C15.3211 14.9389 14.9386 15.3213 14.4682 15.561C13.9334 15.8335 13.2334 15.8335 11.8333 15.8335H4.83325C3.43312 15.8335 2.73306 15.8335 2.19828 15.561C1.72787 15.3213 1.34542 14.9389 1.10574 14.4685C0.833252 13.9337 0.833252 13.2336 0.833252 11.8335V4.8335C0.833252 3.43336 0.833252 2.7333 1.10574 2.19852C1.34542 1.72811 1.72787 1.34566 2.19828 1.10598C2.73306 0.833496 3.43312 0.833496 4.83325 0.833496H10.562C10.9697 0.833496 11.1735 0.833496 11.3653 0.879546C11.5354 0.920374 11.6979 0.987715 11.8471 1.0791C12.0153 1.18217 12.1594 1.32629 12.4476 1.61454L15.0522 4.21911C15.3405 4.50737 15.4846 4.65149 15.5877 4.81969C15.679 4.96881 15.7464 5.13138 15.7872 5.30144C15.8333 5.49326 15.8333 5.69708 15.8333 6.10473Z" stroke="white" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`;
@@ -604,13 +617,29 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
               <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                 <TextInput v-model="businessNumber" label="رقم السجل التجاري" placeholder="ادخل الرقم"
                   :hide-details="false">
-                  <template #prepend-inner>
-                    <v-icon size="small" color="gray">mdi-help-circle-outline</v-icon>
+                  <template #append-inner>
+                    <v-tooltip location="top" content-class="custom-tooltip" >
+                      <template #activator="{ props: tooltipProps }">
+                        <ButtonWithIcon variant="text" size="small" density="compact"
+                          custom-class="!min-w-0 p-0" :prepend-icon="infoIcon" v-bind="tooltipProps" />
+                      </template>
+                      <div>
+                        رقم السجل التجاري للمورد
+                      </div>
+                    </v-tooltip>
                   </template>
                 </TextInput>
                 <TextInput v-model="taxNumber" label="الرقم الضريبي" placeholder="ادخل الرقم" :hide-details="false">
-                  <template #prepend-inner>
-                    <v-icon size="small" color="gray">mdi-help-circle-outline</v-icon>
+                  <template #append-inner>
+                    <v-tooltip location="top" content-class="custom-tooltip" >
+                      <template #activator="{ props: tooltipProps }">
+                        <ButtonWithIcon variant="text" size="small" density="compact"
+                          custom-class="!min-w-0 p-0" :prepend-icon="infoIcon" v-bind="tooltipProps" />
+                      </template>
+                      <div>
+                        الرقم الضريبي للمورد
+                      </div>
+                    </v-tooltip>
                   </template>
                 </TextInput>
                 <div>
@@ -684,13 +713,9 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
                 <!-- Add Contact Form -->
                 <div class="flex items-center justify-between flex-wrap gap-4 px-6 border-y border-gray-200 py-3">
                   <h3 class="text-lg font-bold text-gray-600">قائمة جهات الاتصال</h3>
-                  <v-btn variant="flat" color="primary-500" border="sm" height="40"
-                    class="font-semibold px-6 !text-white !border-primary-200" @click="addContact">
-                    <template #prepend>
-                      <span v-html="plusIcon"></span>
-                    </template>
-                    أضف جديد
-                  </v-btn>
+                  <ButtonWithIcon variant="flat" color="primary-500" border="sm" height="40"
+                    custom-class="font-semibold px-6 !text-white !border-primary-200" :prepend-icon="plusIcon"
+                    label="أضف جهة اتصال" @click="addContact" />
                 </div>
 
                 <!-- Contacts Table -->
@@ -727,9 +752,8 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
                         <TextInput v-model="contact.mobile" placeholder="+966" :hide-details="true" density="compact" />
                       </td>
                       <td class="py-3 px-4">
-                        <v-btn icon size="small" variant="text" color="error" @click="removeContact(index)">
-                          <span v-html="trashIcon"></span>
-                        </v-btn>
+                        <ButtonWithIcon :icon="trashIcon" icon-only size="small" variant="text" color="error"
+                          @click="removeContact(index)" />
                       </td>
                     </tr>
                   </tbody>
@@ -816,20 +840,12 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
 
       <!-- Action Buttons -->
       <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col">
-        <v-btn variant="flat" color="primary" rounded="4" height="48" class="min-w-56" @click="handleSave">
-          <template #prepend>
-            <span v-html="saveIcon"></span>
-          </template>
-
-          <span>حفظ</span>
-        </v-btn>
-        <v-btn variant="flat" color="primary-50" rounded="4" height="48"
-          class="font-semibold text-base text-primary-700 px-6 min-w-56" @click="handleClose">
-          <template #prepend>
-            <v-icon>mdi-close</v-icon>
-          </template>
-          <span>إغلاق</span>
-        </v-btn>
+        <ButtonWithIcon variant="flat" color="primary" rounded="4" height="48"
+          custom-class="min-w-56" :prepend-icon="saveIcon" label="حفظ" @click="handleSave" />
+        
+        <ButtonWithIcon prepend-icon="mdi-close" variant="flat" color="primary-50" rounded="4" height="48"
+          custom-class="font-semibold text-base text-primary-700 px-6 min-w-56"
+          label="إغلاق" @click="handleClose" />
       </div>
     </div>
   </default-layout>

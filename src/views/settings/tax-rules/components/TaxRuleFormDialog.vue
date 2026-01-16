@@ -123,55 +123,42 @@ watch(
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-x-3 gap-y-2 mb-4">
         <div class="md:col-span-2">
-          <v-btn variant="text" color="primary-700" height="40" class="font-semibold text-base" style="display: none;">
-            أضف لغة جديدة
-            <template #prepend>
-              <v-icon>
-                mdi-plus-circle-outline
-              </v-icon>
-            </template>
-          </v-btn>
+          <ButtonWithIcon variant="text" color="primary-700" height="40"
+            custom-class="font-semibold text-base" label="أضف لغة جديدة"
+            prepend-icon="mdi-plus-circle-outline" style="display: none;" />
 
         </div>
+        <SelectInput v-model="form.type" label="النوع" placeholder="اختر النوع" :items="typeItems"
+          :hide-details="false" />
 
-        <div class="md:col-span-2">
+        <TextInput v-model="form.key" label="المفتاح" placeholder="المفتاح" :hide-details="false" />
 
-          <SelectInput v-model="form.type" label="النوع" placeholder="اختر النوع" :items="typeItems"
-            :hide-details="false" />
-
-          <TextInput v-model="form.key" label="المفتاح" placeholder="المفتاح" :hide-details="false" />
-
-          <TextareaInput v-model="form.description" label="الوصف" placeholder="الوصف" :hide-details="false" />
-          <TextareaInput v-model="form.example" label="المثال" placeholder="المثال" :hide-details="false" />
+        <TextareaInput v-model="form.description" label="الوصف" placeholder="الوصف" :hide-details="false" />
+        <TextareaInput v-model="form.example" label="المثال" placeholder="المثال" :hide-details="false" />
 
 
-          <div class="flex flex-wrap gap-4 items-center justify-between mt-2">
+        <div class="flex flex-wrap gap-4 items-center justify-between mt-2 md:col-span-2">
 
-            <div class="flex items-center gap-2">
-              <span class="text-sm font-semibold text-gray-700">الحالة</span>
-              <v-switch v-model="form.status" color="primary" inset hide-details />
-            </div>
-            <div class="flex items-center gap-2">
-              <span class="text-sm font-semibold text-gray-700">التطبيق التلقائي</span>
-              <v-switch v-model="form.autoApply" color="primary" inset hide-details />
-            </div>
-
+          <div class="flex items-center gap-2">
+            <span class="text-sm font-semibold text-gray-700">الحالة</span>
+            <v-switch v-model="form.status" color="primary" inset hide-details />
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-sm font-semibold text-gray-700">التطبيق التلقائي</span>
+            <v-switch v-model="form.autoApply" color="primary" inset hide-details />
           </div>
         </div>
       </div>
     </v-form>
 
     <template #actions>
-      <v-btn variant="flat" color="primary" height="44" class="font-semibold text-base sm:flex-1" @click="handleSave">
-        <template #prepend>
-          <v-icon>mdi-plus</v-icon>
-        </template>
-        حفظ
-      </v-btn>
-      <v-btn variant="flat" color="primary-50" height="44" class="font-semibold text-base text-primary-700 sm:flex-1"
-        @click="closeDialog">
-        اغلاق
-      </v-btn>
+      <ButtonWithIcon variant="flat" color="primary" height="44" rounded="4"
+        custom-class="font-semibold text-base sm:flex-1" label="حفظ"
+        prepend-icon="mdi-plus" @click="handleSave" />
+      
+      <ButtonWithIcon variant="flat" color="primary-50" height="44" rounded="4"
+        custom-class="font-semibold text-base text-primary-700 sm:flex-1"
+        label="اغلاق" prepend-icon="mdi-close" @click="closeDialog" />
     </template>
   </AppDialog>
 </template>

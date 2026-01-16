@@ -182,8 +182,14 @@ html[dir="ltr"] .language-tabs-wrapper {
 
 // custom tooltip
 .v-tooltip > .v-overlay__content.custom-tooltip {
-  @apply bg-primary-500 text-white opacity-95 !important;
+  @apply bg-white text-gray-500 rounded-md shadow-lg;
 }
 
 .no-scroll-style {
+}
+
+// checkbox
+.white-checkbox .v-selection-control__input .mdi-checkbox-blank-outline::before,
+.white-checkbox .v-selection-control__input .mdi-checkbox-marked::before {
+  background-color: white !important;
 }

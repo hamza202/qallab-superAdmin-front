@@ -2,9 +2,9 @@ import type { RouteRecordRaw } from "vue-router";
 
 export const settingsRoutes: RouteRecordRaw[] = [
   {
-    path: "/products-categories",
+    path: "/settings/products-categories",
     name: "ProductsCategories",
-    redirect: "/products-categories/list",
+    redirect: "/settings/products-categories/list",
     children: [
       {
         path: "list",
@@ -49,9 +49,9 @@ export const settingsRoutes: RouteRecordRaw[] = [
     ],
   },
   {
-    path: "/services-categories",
+    path: "/settings/services-categories",
     name: "ServicesCategories",
-    redirect: "/services-categories/list",
+    redirect: "/settings/services-categories/list",
     children: [
       {
         path: "list",
@@ -96,9 +96,9 @@ export const settingsRoutes: RouteRecordRaw[] = [
     ],
   },
   {
-    path: "/units",
+    path: "/settings/units",
     name: "Units",
-    redirect: "/units/list",
+    redirect: "/settings/units/list",
     children: [
       {
         path: "list",
@@ -111,9 +111,9 @@ export const settingsRoutes: RouteRecordRaw[] = [
     ],
   },
   {
-    path: "/brands",
+    path: "/settings/brands",
     name: "Brands",
-    redirect: "/brands/list",
+    redirect: "/settings/brands/list",
     children: [
       {
         path: "list",
@@ -126,9 +126,9 @@ export const settingsRoutes: RouteRecordRaw[] = [
     ],
   },
   {
-    path: "/factories",
+    path: "/settings/factories",
     name: "Factories",
-    redirect: "/factories/list",
+    redirect: "/settings/factories/list",
     children: [
       {
         path: "list",
@@ -141,9 +141,9 @@ export const settingsRoutes: RouteRecordRaw[] = [
     ],
   },
   {
-    path: "/cities",
+    path: "/settings/cities",
     name: "Cities",
-    redirect: "/cities/list",
+    redirect: "/settings/cities/list",
     children: [
       {
         path: "list",
@@ -156,9 +156,9 @@ export const settingsRoutes: RouteRecordRaw[] = [
     ],
   },
   {
-    path: "/taxes",
+    path: "/settings/taxes",
     name: "Taxes",
-    redirect: "/taxes/list",
+    redirect: "/settings/taxes/list",
     children: [
       {
         path: "list",
@@ -171,9 +171,9 @@ export const settingsRoutes: RouteRecordRaw[] = [
     ],
   },
   {
-    path: "/geo-areas",
+    path: "/settings/geo-areas",
     name: "GeoAreas",
-    redirect: "/geo-areas/list",
+    redirect: "/settings/geo-areas/list",
     children: [
       {
         path: "list",
@@ -186,9 +186,9 @@ export const settingsRoutes: RouteRecordRaw[] = [
     ],
   },
   {
-    path: "/geo-segments",
+    path: "/settings/geo-segments",
     name: "GeoSegments",
-    redirect: "/geo-segments/list",
+    redirect: "/settings/geo-segments/list",
     children: [
       {
         path: "list",
@@ -217,9 +217,9 @@ export const settingsRoutes: RouteRecordRaw[] = [
     ],
   },
   {
-    path: "/account-types",
+    path: "/settings/account-types",
     name: "AccountTypes",
-    redirect: "/account-types/list",
+    redirect: "/settings/account-types/list",
     children: [
       {
         path: "list",
@@ -232,9 +232,9 @@ export const settingsRoutes: RouteRecordRaw[] = [
     ],
   },
   {
-    path: "/tax-rules",
+    path: "/settings/tax-rules",
     name: "TaxRules",
-    redirect: "/tax-rules/list",
+    redirect: "/settings/tax-rules/list",
     children: [
       {
         path: "list",
@@ -247,7 +247,7 @@ export const settingsRoutes: RouteRecordRaw[] = [
     ],
   },
   {
-    path: "/codes",
+    path: "/settings/codes",
     name: "Codes",
     component: () => import("@/views/settings/codes/Form.vue"),
     meta: {
@@ -255,9 +255,9 @@ export const settingsRoutes: RouteRecordRaw[] = [
     },
   },
   {
-    path: "/test-group",
+    path: "/settings/test-group",
     name: "TestGroup",
-    redirect: "/test-group/list",
+    redirect: "/settings/test-group/list",
     children: [
       {
         path: "list",
@@ -286,9 +286,9 @@ export const settingsRoutes: RouteRecordRaw[] = [
     ],
   },
   {
-    path: "/tests",
+    path: "/settings/tests",
     name: "Tests",
-    redirect: "/tests/list",
+    redirect: "/settings/tests/list",
     children: [
       {
         path: "list",
@@ -317,9 +317,9 @@ export const settingsRoutes: RouteRecordRaw[] = [
     ],
   },
   {
-    path: "/test-methodology",
+    path: "/settings/test-methodology",
     name: "TestMethodology",
-    redirect: "/test-methodology/list",
+    redirect: "/settings/test-methodology/list",
     children: [
       {
         path: "list",
@@ -348,9 +348,9 @@ export const settingsRoutes: RouteRecordRaw[] = [
     ],
   },
   {
-    path: "/sample-types",
+    path: "/settings/sample-types",
     name: "SampleTypes",
-    redirect: "/sample-types/list",
+    redirect: "/settings/sample-types/list",
     children: [
       {
         path: "list",

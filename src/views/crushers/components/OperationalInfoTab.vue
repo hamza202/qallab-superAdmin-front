@@ -88,10 +88,8 @@ const infoIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
                 <template #append-inner>
                     <v-tooltip location="top" content-class="custom-tooltip">
                       <template #activator="{ props: tooltipProps }">
-                        <v-btn class="!min-w-0 p-0" size="small" density="compact"
-                          v-bind="tooltipProps">
-                          <span v-html="infoIcon"></span>
-                        </v-btn>
+                        <ButtonWithIcon variant="text" size="small" density="compact"
+                          custom-class="!min-w-0 p-0" :prepend-icon="infoIcon" v-bind="tooltipProps" />
                       </template>
                       <div>
                         سرعة تغذية المواد الخام للكسارة
@@ -103,10 +101,8 @@ const infoIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
                 <template #append-inner>
                     <v-tooltip location="top" content-class="custom-tooltip">
                       <template #activator="{ props: tooltipProps }">
-                        <v-btn class="!min-w-0 p-0" size="small" density="compact"
-                          v-bind="tooltipProps">
-                          <span v-html="infoIcon"></span>
-                        </v-btn>
+                        <ButtonWithIcon variant="text" size="small" density="compact"
+                          custom-class="!min-w-0 p-0" :prepend-icon="infoIcon" v-bind="tooltipProps" />
                       </template>
                       <div>
                         أقصى قدرة إنتاجية للكسارة

@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const router = useRouter();
 
 const testMethodologyIcon = `<svg width="39" height="48" viewBox="0 0 39 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M23.6667 21.5H10.6667M15 30.1667H10.6667M28 12.8333H10.6667M36.6667 12.4V34.9333C36.6667 38.5737 36.6667 40.3938 35.9582 41.7843C35.335 43.0073 34.3407 44.0017 33.1176 44.6249C31.7272 45.3333 29.907 45.3333 26.2667 45.3333H12.4C8.75966 45.3333 6.93949 45.3333 5.54906 44.6249C4.32601 44.0017 3.33163 43.0073 2.70846 41.7843C2 40.3938 2 38.5737 2 34.9333V12.4C2 8.75966 2 6.93949 2.70846 5.54906C3.33163 4.32601 4.32601 3.33163 5.54906 2.70846C6.93949 2 8.75966 2 12.4 2H26.2667C29.907 2 31.7272 2 33.1176 2.70846C34.3407 3.33163 35.335 4.32601 35.9582 5.54906C36.6667 6.93949 36.6667 8.75966 36.6667 12.4Z" stroke="#1570EF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>
-`;
+<path d="M23.6667 2.58398V11.5335C23.6667 12.7469 23.6667 13.3537 23.9028 13.8171C24.1105 14.2248 24.442 14.5563 24.8497 14.764C25.3132 15.0002 25.9199 15.0002 27.1333 15.0002H36.0828M28 25.8333H10.6667M28 34.5H10.6667M15 17.1667H10.6667M23.6667 2H12.4C8.75966 2 6.93949 2 5.54906 2.70846C4.32601 3.33163 3.33163 4.32601 2.70846 5.54906C2 6.93949 2 8.75966 2 12.4V34.9333C2 38.5737 2 40.3938 2.70846 41.7843C3.33163 43.0073 4.32601 44.0017 5.54906 44.6249C6.93949 45.3333 8.75966 45.3333 12.4 45.3333H26.2667C29.907 45.3333 31.7272 45.3333 33.1176 44.6249C34.3407 44.0017 35.335 43.0073 35.9582 41.7843C36.6667 40.3938 36.6667 38.5737 36.6667 34.9333V15L23.6667 2Z" stroke="#1570EF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`;
 
 const testMethodologyTableHeaders = [
   { key: "id", title: "#", width: "60px" },
@@ -58,7 +60,7 @@ const handleDeleteTestMethodology = (item: any) => {
 const showAdvancedFilters = ref(false);
 
 const filterName = ref("");
-const filterStatus = ref("");
+const filterStatus = ref(null);
 
 const toggleAdvancedFilters = () => {
   showAdvancedFilters.value = !showAdvancedFilters.value;
@@ -73,7 +75,7 @@ const handleSearch = () => {
 
 const resetFilters = () => {
   filterName.value = "";
-  filterStatus.value = "";
+  filterStatus.value = null;
 };
 
 const columnIcon = `<svg width="16" height="17" viewBox="0 0 16 17" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -85,125 +87,73 @@ const columnIcon = `<svg width="16" height="17" viewBox="0 0 16 17" fill="none" 
     stroke="#344054" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
 </svg>
 `;
+
+const searchIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M15.8333 15.8335L12.9167 12.9168M14.9999 7.91683C14.9999 11.8288 11.8286 15.0002 7.91659 15.0002C4.00457 15.0002 0.833252 11.8288 0.833252 7.91683C0.833252 4.00481 4.00457 0.833496 7.91659 0.833496C11.8286 0.833496 14.9999 4.00481 14.9999 7.91683Z" stroke="white" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`
+
+const plusIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M8 1V15M1 8H15" stroke="#1849A9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`
+
 </script>
 
 <template>
   <default-layout>
     <div class="test-methodology-list-page">
-      <PageHeader
-        :icon="testMethodologyIcon"
-        title-key="منهجية الاختبارات"
-        description-key="تمكنك من إدارة منهجية الاختبارات"
-      />
+      <PageHeader :icon="testMethodologyIcon" title-key="منهجية الاختبارات"
+        description-key="تمكنك من إدارة منهجية الاختبارات" />
 
       <div class="bg-gray-50 rounded-md -mx-6">
-        <div
-          class="flex flex-wrap items-center justify-between gap-3 border-y border-y-slate-300 px-4 sm:px-6 py-3"
-        >
+        <div class="flex flex-wrap items-center justify-between gap-3 border-y border-y-slate-300 px-4 sm:px-6 py-3">
           <h3 class="text-lg font-bold text-gray-900">جدول منهجيات الاختبار</h3>
 
           <div class="flex flex-wrap gap-3">
-            <v-btn
-              variant="outlined"
-              append-icon="mdi-chevron-down"
-              color="gray-500"
-              height="40"
-              class="font-semibold text-base border-gray-400"
-            >
-              <template #prepend>
-                <span v-html="columnIcon"></span>
-              </template>
-              الأعمدة
-            </v-btn>
-
-            <v-btn
-              variant="outlined"
-              color="primary-50"
-              height="40"
-              class="px-7 font-semibold text-base text-primary-700"
-              prepend-icon="mdi-magnify"
-              @click="toggleAdvancedFilters"
-            >
-              بحث متقدم
-            </v-btn>
-
-            <v-btn
-              variant="flat"
-              color="primary"
-              height="40"
-              class="px-7 font-semibold text-base"
-              prepend-icon="mdi-plus-circle-outline"
-              @click="openCreateTestMethodology"
-            >
-              إضافة منهجية
-            </v-btn>
+            <ButtonWithIcon variant="outlined" rounded="4" color="gray-500" height="40"
+              custom-class="font-semibold text-base border-gray-400"
+              :prepend-icon="columnIcon" :label="t('common.columns')" append-icon="mdi-chevron-down" />
+            
+            <ButtonWithIcon variant="flat" color="primary-500" height="40" rounded="4"
+              custom-class="px-7 font-semibold text-base text-white border !border-primary-200"
+              :prepend-icon="searchIcon" :label="t('common.advancedSearch')" @click="toggleAdvancedFilters" />
+            
+            <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4"
+              custom-class="px-7 font-semibold text-base !text-primary-800 border !border-primary-200"
+              :prepend-icon="plusIcon" label="إضافة منهجية" @click="openCreateTestMethodology" />
           </div>
         </div>
 
-        <div
-          v-if="showAdvancedFilters"
-          class="border-y border-y-primary-100 bg-primary-50 px-4 sm:px-6 py-3 flex flex-col gap-3 sm:gap-2"
-        >
-          <div class="flex flex-wrap gap-3 flex-1 order-1 sm:order-2 items-center justify-end sm:justify-start">
-            <v-text-field
-              v-model="filterName"
-              density="comfortable"
-              variant="outlined"
-              hide-details
-              placeholder="الاسم"
-              class="w-full sm:w-60 bg-white"
-            />
-            <v-select
-              v-model="filterStatus"
-              :items="['فعال', 'غير فعال']"
-              density="comfortable"
-              variant="outlined"
-              hide-details
-              placeholder="الحالة"
-              class="w-full sm:w-40 bg-white"
-            />
-            <v-btn
-              variant="flat"
-              color="primary"
-              height="40"
-              class="font-semibold text-base px-6"
-              prepend-icon="mdi-magnify"
-              @click="handleSearch"
-            >
-              بحث
-            </v-btn>
-            <v-btn
-              variant="outlined"
-              color="primary"
-              height="40"
-              class="font-semibold text-base"
-              prepend-icon="mdi-refresh"
-              @click="resetFilters"
-            >
-              إعادة تعيين
-            </v-btn>
+        <div v-if="showAdvancedFilters"
+          class="border-y border-y-primary-100 bg-primary-50 px-4 sm:px-6 py-3 flex flex-col gap-3 sm:gap-2">
+          <div class="flex flex-wrap gap-3 flex-1 justify-between">
+            <div class="flex gap-3 flex-1">
+              <TextInput v-model="filterName" density="comfortable" variant="outlined" hide-details
+                placeholder="الاسم" class="w-full sm:w-60 bg-white" />
+              <SelectInput v-model="filterStatus" :items="['فعال', 'غير فعال']" density="comfortable" variant="outlined"
+                hide-details placeholder="الحالة" class="w-full sm:w-40 bg-white" />
+            </div>
+            <div class="flex gap-2 items-center">
+              <ButtonWithIcon variant="flat" color="primary-500" rounded="4" height="40"
+                custom-class="px-5 font-semibold !text-white text-sm sm:text-base"
+                :prepend-icon="searchIcon" label="ابحث" @click="handleSearch" />
+              
+              <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4" border="sm"
+                custom-class="px-5 font-semibold text-sm sm:text-base !text-primary-800 !border-primary-200"
+                prepend-icon="mdi-refresh" label="إعادة تعيين" />
+            </div>
+
           </div>
         </div>
 
-        <DataTable
-          :headers="testMethodologyTableHeaders"
-          :items="testMethodologyTableItems"
-          show-actions
-          :show-view="false"
-          @edit="handleEditTestMethodology"
-          @delete="handleDeleteTestMethodology"
-        >
+        <DataTable :headers="testMethodologyTableHeaders" :items="testMethodologyTableItems" show-actions
+          :show-view="false" @edit="handleEditTestMethodology" @delete="handleDeleteTestMethodology">
           <template #item.status="{ item }">
-            <span
-              v-if="item.status === 'فعال'"
-              class="inline-flex items-center px-3 py-1 rounded-full bg-success-50 text-success-700 text-sm font-medium"
-            >
+            <span v-if="item.status === 'فعال'"
+              class="inline-flex items-center px-3 py-1 rounded-full bg-success-50 text-success-700 text-sm font-medium">
               فعال
             </span>
-            <span
-              v-else
-              class="inline-flex items-center px-3 py-1 rounded-full bg-error-100 text-error-600 text-sm font-medium"
-            >
+            <span v-else
+              class="inline-flex items-center px-3 py-1 rounded-full bg-error-100 text-error-600 text-sm font-medium">
               غير فعال
             </span>
           </template>

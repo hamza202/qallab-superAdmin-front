@@ -34,6 +34,7 @@ interface SelectWithIconInputProps {
     readonly?: boolean;
     clearable?: boolean;
     rules?: any[];
+    errorMessages?: string | string[];
     hideDetails?: boolean | "auto";
     hint?: string;
     persistentHint?: boolean;
@@ -96,6 +97,7 @@ const plusCircleIcon = `<svg width="22" height="22" viewBox="0 0 20 20" fill="no
             :readonly="readonly"
             :clearable="clearable"
             :rules="rules"
+            :error-messages="errorMessages"
             :hide-details="hideDetails"
             :hint="hint"
             :persistent-hint="persistentHint"

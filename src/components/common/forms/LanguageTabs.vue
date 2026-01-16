@@ -57,7 +57,7 @@ const getTabClasses = (lang: Language) => {
 const getContentClasses = (langCode: string) => {
   const hasError = validationState.value[langCode] === false;
   return [
-    "overflow-hidden",
+    // "overflow-hidden",
     hasError ? "border-red-500" : "",
   ];
 };

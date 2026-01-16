@@ -189,18 +189,15 @@ const arrowLeftIcon = `<svg width="15" height="12" viewBox="0 0 15 12" fill="non
                 :hide-details="false"
               />
               <div class="flex items-center gap-4">
-                <v-btn
+                <ButtonWithIcon
                   variant="text"
                   color="primary-700"
                   height="40"
-                  class="font-semibold text-base"
+                  custom-class="font-semibold text-base"
+                  label="أضف لغة جديدة"
+                  :prepend-icon="plusCircleIcon"
                   @click="handleAddLanguage"
-                >
-                  <span>أضف لغة جديدة</span>
-                  <template #prepend>
-                    <span v-html="plusCircleIcon"></span>
-                  </template>
-                </v-btn>
+                />
               </div>
             </div>
 
@@ -348,44 +345,35 @@ const arrowLeftIcon = `<svg width="15" height="12" viewBox="0 0 15 12" fill="non
 
       <!-- Action Buttons -->
       <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col">
-        <v-btn
+        <ButtonWithIcon
           variant="flat"
           color="primary"
           height="48"
-          class="font-semibold text-base px-6"
+          custom-class="font-semibold text-base px-6"
+          label="حفظ والعودة للرئيسية"
+          :prepend-icon="returnIcon"
           @click="handleSaveAndReturn"
-        >
-          <template #prepend>
-            <span v-html="returnIcon"></span>
-          </template>
-          <span>حفظ والعودة للرئيسية</span>
-        </v-btn>
+        />
 
-        <v-btn
+        <ButtonWithIcon
           variant="flat"
           color="primary-50"
           height="48"
-          class="font-semibold text-base text-primary-700 px-6"
+          custom-class="font-semibold text-base text-primary-700 px-6"
+          label="حفظ وإنشاء جديد"
+          :prepend-icon="saveIcon"
           @click="handleSaveAndCreate"
-        >
-          <template #prepend>
-            <span v-html="saveIcon"></span>
-          </template>
-          <span>حفظ وإنشاء جديد</span>
-        </v-btn>
+        />
 
-        <v-btn
+        <ButtonWithIcon
           variant="flat"
           color="primary-50"
           height="48"
-          class="font-semibold text-base text-primary-700 px-6"
+          custom-class="font-semibold text-base text-primary-700 px-6"
+          label="حفظ وإكمال"
+          :prepend-icon="arrowLeftIcon"
           @click="handleSaveAndContinue"
-        >
-          <template #prepend>
-            <span v-html="arrowLeftIcon"></span>
-          </template>
-          <span>حفظ وإكمال</span>
-        </v-btn>
+        />
       </div>
     </div>
   </default-layout>

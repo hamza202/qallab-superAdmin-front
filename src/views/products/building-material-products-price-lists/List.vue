@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { useApi } from '@/composables/useApi'
 import { useNotification } from '@/composables/useNotification'
 import { useI18n } from 'vue-i18n'
+import DatePickerInput from '@/components/common/forms/DatePickerInput.vue';
 
 const { t } = useI18n()
 const router = useRouter()
@@ -203,20 +204,12 @@ onMounted(() => {
 
       <div
         class="flex justify-end items-stretch rounded border border-gray-300 w-fit ms-auto mb-4 overflow-hidden bg-white text-sm">
-        <v-btn variant="flat" height="40" rounded="0"
-          class="font-semibold text-base border-gray-300 bg-primary-100 !text-primary-900">
-          <template #prepend>
-            <span v-html="importIcon" />
-          </template>
-          {{ t('common.import') }}
-        </v-btn>
-        <v-btn variant="flat" height="40" rounded="0"
-          class="font-semibold text-base border-gray-300 bg-primary-50 !text-primary-900">
-          <template #prepend>
-            <span v-html="exportIcon" />
-          </template>
-          {{ t('common.export') }}
-        </v-btn>
+        <ButtonWithIcon variant="flat" height="40" rounded="0"
+          custom-class="font-semibold text-base border-gray-300 bg-primary-100 !text-primary-900"
+          :prepend-icon="importIcon" :label="t('common.import')" />
+        <ButtonWithIcon variant="flat" height="40" rounded="0"
+          custom-class="font-semibold text-base border-gray-300 bg-primary-50 !text-primary-900"
+          :prepend-icon="exportIcon" :label="t('common.export')" />
       </div>
 
       <div class="bg-gray-50 rounded-md -mx-6">
@@ -225,38 +218,24 @@ onMounted(() => {
           <!-- Actions when rows are selected -->
           <div v-if="hasSelected"
             class="flex flex-wrap items-stretch rounded-lg overflow-hidden border border-gray-200 bg-white text-sm">
-            <v-btn class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none">
-              <template #prepend>
-                <span v-html="trash_1_icon" />
-              </template>
-              <span>حذف</span>
-            </v-btn>
+            <ButtonWithIcon variant="flat" height="40" rounded="0"
+              custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
+              :prepend-icon="trash_1_icon" color="white" label="حذف" />
             <div class="w-px bg-gray-200"></div>
-            <v-btn class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none">
-              <template #prepend>
-                <span v-html="trash_2_icon" />
-              </template>
-              <span>حذف الجميع</span>
-            </v-btn>
+            <ButtonWithIcon variant="flat" height="40" rounded="0"
+              custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
+              :prepend-icon="trash_2_icon" color="white" label="حذف الجميع" />
           </div>
 
           <!-- Main header controls -->
           <div class="flex flex-wrap gap-3">
-            <v-btn variant="outlined" append-icon="mdi-chevron-down" rounded="4" color="gray-500" height="40"
-              class="font-semibold text-base border-gray-400">
-              <template #prepend>
-                <span v-html="columnIcon" />
-              </template>
-              {{ t('common.columns') }}
-            </v-btn>
+            <ButtonWithIcon variant="outlined" rounded="4" color="gray-500" height="40"
+              custom-class="font-semibold text-base border-gray-400"
+              :prepend-icon="columnIcon" :label="t('common.columns')" append-icon="mdi-chevron-down" />
 
-            <v-btn variant="flat" color="primary-500" height="40" rounded="4"
-              class="px-7 font-semibold text-base text-white border !border-primary-200" @click="toggleAdvancedFilters">
-              <template #prepend>
-                <span v-html="searchIcon"></span>
-              </template>
-              {{ t('common.advancedSearch') }}
-            </v-btn>
+            <ButtonWithIcon variant="flat" color="primary-500" height="40" rounded="4"
+              custom-class="px-7 font-semibold text-base text-white border !border-primary-200"
+              :prepend-icon="searchIcon" :label="t('common.advancedSearch')" @click="toggleAdvancedFilters" />
 
             <!-- <v-btn variant="flat" color="primary-100" height="40" rounded="4"
               class="px-7 font-semibold text-base !text-primary-800 border !border-primary-200" @click="openCreate">
@@ -275,24 +254,19 @@ onMounted(() => {
           <div class="flex flex-wrap gap-3 flex-1 order-1 sm:order-2 justify-end sm:justify-start">
             <v-select v-model="filterStatus" :items="['فعال', 'غير فعال']" density="comfortable" variant="outlined"
               hide-details placeholder="الحالة" class="w-full sm:w-40 bg-white" />
-            <v-text-field v-model="filterCreatedAt" type="date" density="comfortable" variant="outlined" hide-details
+            <DatePickerInput v-model="filterCreatedAt" density="comfortable" hide-details
               placeholder="تاريخ الانشاء" class="w-full sm:w-40 bg-white" />
             <v-text-field v-model="filterListName" density="comfortable" variant="outlined" hide-details
               placeholder="اسم القائمة" class="w-full sm:w-40 bg-white" />
 
             <div class="flex gap-2 items-center">
-              <v-btn variant="flat" color="primary-500" rounded="4" height="40"
-                class="px-5 font-semibold !text-white text-sm sm:text-base" prepend-icon="mdi-magnify">
-                <template #prepend>
-                  <span v-html="searchIcon"></span>
-                </template>
-                ابحث الآن
-              </v-btn>
-              <v-btn variant="flat" color="primary-100" height="40" rounded="4" border="sm"
-                class="px-5 font-semibold text-sm sm:text-base !text-primary-800 !border-primary-200"
-                prepend-icon="mdi-refresh">
-                إعادة تعيين
-              </v-btn>
+              <ButtonWithIcon variant="flat" color="primary-500" rounded="4" height="40"
+                custom-class="px-5 font-semibold !text-white text-sm sm:text-base"
+                :prepend-icon="searchIcon" label="ابحث الآن" />
+              
+              <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4" border="sm"
+                custom-class="px-5 font-semibold text-sm sm:text-base !text-primary-800 !border-primary-200"
+                prepend-icon="mdi-refresh" label="إعادة تعيين" />
             </div>
 
           </div>

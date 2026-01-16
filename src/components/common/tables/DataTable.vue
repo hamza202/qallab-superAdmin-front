@@ -1,4 +1,8 @@
 <script setup lang="ts">
+import { useAppStore } from "@/stores/app";
+
+const appStore = useAppStore();
+
 interface TableHeader {
   key: string;
   title: string;
@@ -48,6 +52,7 @@ const selectedItems = ref<(string | number)[]>([]);
 const selectAll = ref(false);
 
 const showDeleteDialog = ref(false);
+const deleteLoading = ref(false);
 const pendingDeleteItem = ref<TableItem | null>(null);
 
 const toggleSelectAll = () => {
@@ -92,15 +97,36 @@ const handleDelete = (item: TableItem) => {
   showDeleteDialog.value = true;
 };
 
-const confirmDelete = () => {
-  if (!pendingDeleteItem.value) return;
+const confirmDelete = async () => {
+  if (!pendingDeleteItem.value || deleteLoading.value) return;
+
+  deleteLoading.value = true;
   emit("delete", pendingDeleteItem.value);
-  pendingDeleteItem.value = null;
+
+  // Wait a bit for the parent to handle the delete
+  // The parent should ideally emit a success/error event, but for now we'll use a timeout
+  await new Promise(resolve => setTimeout(resolve, 100));
 };
 
 const cancelDelete = () => {
+  if (deleteLoading.value) return;
   pendingDeleteItem.value = null;
+  showDeleteDialog.value = false;
 };
+
+// Watch for when the pending item is cleared externally (after successful delete)
+watch(() => props.items, () => {
+  if (deleteLoading.value && pendingDeleteItem.value) {
+    // Check if the item still exists in the list
+    const itemExists = props.items.some(item => item.id === pendingDeleteItem.value?.id);
+    if (!itemExists) {
+      // Item was successfully deleted
+      deleteLoading.value = false;
+      showDeleteDialog.value = false;
+      pendingDeleteItem.value = null;
+    }
+  }
+}, { deep: true });
 
 // Priority badge colors
 const getPriorityClass = (priority: string) => {
@@ -149,10 +175,7 @@ const eyeIcon = `<svg width="22" height="16" viewBox="0 0 22 16" fill="none" xml
 <template>
   <div class="bg-white overflow-hidden">
     <!-- Header -->
-    <div
-      v-if="title"
-      class="px-3 py-3 border-b border-gray-300 border-t bg-gray-50 border-t-gray-300"
-    >
+    <div v-if="title" class="px-3 py-3 border-b border-gray-300 border-t bg-gray-50 border-t-gray-300">
       <h3 class="font-bold text-gray-900">{{ title }}</h3>
     </div>
 
@@ -162,22 +185,13 @@ const eyeIcon = `<svg width="22" height="16" viewBox="0 0 22 16" fill="none" xml
         <tr class="bg-gray-50">
           <!-- Checkbox Header (Right side for RTL) -->
           <th v-if="showCheckbox" class="w-[60px] !bg-gray-50">
-            <v-checkbox
-              v-model="selectAll"
-              hide-details
-              density="compact"
-              class="justify-end"
-              @change="toggleSelectAll"
-            />
+            <v-checkbox v-model="selectAll" hide-details density="compact" class="justify-end"
+              @change="toggleSelectAll" />
           </th>
 
           <!-- Dynamic Headers (original order for RTL) -->
-          <th
-            v-for="header in headers"
-            :key="header.key"
-            class="!font-bold !text-gray-600 !text-xs !bg-gray-50"
-            :style="header.width ? { width: header.width } : {}"
-          >
+          <th v-for="header in headers" :key="header.key" class="!font-bold !text-gray-600 !text-xs !bg-gray-50"
+            :style="header.width ? { width: header.width } : {}">
             {{ header.title }}
           </th>
 
@@ -186,28 +200,15 @@ const eyeIcon = `<svg width="22" height="16" viewBox="0 0 22 16" fill="none" xml
         </tr>
       </thead>
       <tbody>
-        <tr
-          v-for="item in items"
-          :key="item.id"
-          class="border-b border-gray-200 bg-white"
-        >
+        <tr v-for="item in items" :key="item.id" class="border-b border-gray-200 bg-white">
           <!-- Checkbox Column (Right side for RTL) -->
           <td v-if="showCheckbox" class="!text-start !py-4 !bg-white">
-            <v-checkbox
-              :model-value="isSelected(item.id)"
-              hide-details
-              density="compact"
-              class="justify-end"
-              @change="toggleSelect(item)"
-            />
+            <v-checkbox :model-value="isSelected(item.id)" hide-details density="compact" class="justify-end"
+              @change="toggleSelect(item)" />
           </td>
 
           <!-- Dynamic Columns (original order for RTL) -->
-          <td
-            v-for="header in headers"
-            :key="header.key"
-            class="!text-start !py-4 !bg-white"
-          >
+          <td v-for="header in headers" :key="header.key" class="!text-start !py-4 !bg-white">
             <!-- Custom Cell Slot -->
             <template v-if="$slots[`item.${header.key}`]">
               <slot :name="`item.${header.key}`" :item="item" />
@@ -215,47 +216,45 @@ const eyeIcon = `<svg width="22" height="16" viewBox="0 0 22 16" fill="none" xml
 
             <!-- Priority Badge -->
             <template v-else-if="header.key === 'priority'">
-              <span
-                class="inline-block px-2 py-0.5 rounded-full text-xs font-medium"
-                :class="getPriorityClass(item[header.key])"
-              >
+              <span class="inline-block px-2 py-0.5 rounded-full text-xs font-medium"
+                :class="getPriorityClass(item[header.key])">
                 {{ item[header.key] }}
               </span>
             </template>
 
             <!-- Taxes Pills -->
             <template v-else-if="header.key === 'taxes'">
-              <div class="flex flex-wrap gap-2">
-                <span
-                  v-for="(tax, index) in Array.isArray(item[header.key])
-                    ? item[header.key]
-                    : [item[header.key]]"
-                  :key="index"
-                  class="px-3 py-1 rounded-full bg-primary-50 text-primary-700 text-xs font-medium"
-                >
+              <div v-if="item[header.key] && item[header.key].length > 0" class="flex flex-wrap gap-2">
+                <span v-for="(tax, index) in Array.isArray(item[header.key])
+                  ? item[header.key]
+                  : [item[header.key]]" :key="index"
+                  class="px-3 py-1 rounded-full bg-primary-50 text-primary-700 text-xs font-medium">
                   {{ tax }}
                 </span>
+              </div>
+              <div v-else>
+                <span class="text-sm text-gray-600">--</span>
               </div>
             </template>
 
             <!-- Status Switch (fallback when no custom slot provided) -->
             <template v-else-if="header.key === 'status' || header.key === 'is_active'">
               <div class="flex">
-                <v-switch
-                  :model-value="isStatusActive(item[header.key])"
-                  hide-details
-                  inset
-                  density="compact"
-                  color="primary"
-                  readonly
-                  class="small-switch"
-                />
+                <v-switch :model-value="isStatusActive(item[header.key])" hide-details inset density="compact"
+                  color="primary" readonly class="small-switch" />
               </div>
+            </template>
+
+            <!-- Date Formatting for created_at, updated_at, etc. -->
+            <template
+              v-else-if="header.key === 'created_at' || header.key === 'updated_at' || header.key.includes('_at')">
+              <span class="text-sm text-gray-600">{{ appStore.formatDate(item[header.key], { format: 'short' })
+              }}</span>
             </template>
 
             <!-- Regular Text -->
             <template v-else>
-              <span class="text-sm text-gray-600">{{ item[header.key] }}</span>
+              <span class="text-sm text-gray-600">{{ item[header.key] || '--' }}</span>
             </template>
           </td>
 
@@ -267,33 +266,16 @@ const eyeIcon = `<svg width="22" height="16" viewBox="0 0 22 16" fill="none" xml
             </template>
             <!-- Default Actions -->
             <div v-else class="flex items-center gap-1">
-              <v-btn
-                icon
-                variant="text"
-                v-if="showView"
-                size="small"
-                @click="handleView(item)"
-              >
+              <v-btn icon variant="text" v-if="showView && item.actions?.can_view" size="small"
+                @click="handleView(item)">
                 <span v-html="eyeIcon"></span>
               </v-btn>
-              <v-btn
-                icon
-                variant="text"
-                v-if="showEdit"
-                color="primary"
-                size="small"
-                @click="handleEdit(item)"
-              >
+              <v-btn icon variant="text" v-if="showEdit && item.actions?.can_update" color="primary" size="small"
+                @click="handleEdit(item)">
                 <span v-html="editIcon"></span>
               </v-btn>
-              <v-btn
-                icon
-                variant="text"
-                v-if="showDelete"
-                size="small"
-                color="error"
-                @click="handleDelete(item)"
-              >
+              <v-btn icon variant="text" v-if="showDelete && item.actions?.can_delete" size="small" color="error"
+                @click="handleDelete(item)">
                 <span v-html="trashIcon"></span>
               </v-btn>
             </div>
@@ -302,12 +284,8 @@ const eyeIcon = `<svg width="22" height="16" viewBox="0 0 22 16" fill="none" xml
 
         <!-- Empty State -->
         <tr v-if="items.length === 0">
-          <td
-            :colspan="
-              headers.length + (showActions ? 1 : 0) + (showCheckbox ? 1 : 0)
-            "
-            class="text-center py-8 text-gray-500"
-          >
+          <td :colspan="headers.length + (showActions ? 1 : 0) + (showCheckbox ? 1 : 0)
+            " class="text-center py-8 text-gray-500">
             لا توجد بيانات
           </td>
         </tr>
@@ -315,21 +293,12 @@ const eyeIcon = `<svg width="22" height="16" viewBox="0 0 22 16" fill="none" xml
     </v-table>
 
     <!-- Loading Overlay -->
-    <v-overlay
-      :model-value="loading"
-      contained
-      class="align-center justify-center"
-    >
+    <v-overlay :model-value="loading" contained class="align-center justify-center">
       <v-progress-circular indeterminate color="primary" />
     </v-overlay>
 
-    <DeleteConfirmDialog
-      v-model="showDeleteDialog"
-      :persistent="true"
-      @confirm="confirmDelete"
-      @cancel="cancelDelete"
-      @close="cancelDelete"
-    />
+    <DeleteConfirmDialog v-model="showDeleteDialog" :loading="deleteLoading" :persistent="true" @confirm="confirmDelete"
+      @cancel="cancelDelete" @close="cancelDelete" />
   </div>
 </template>
 
@@ -350,6 +319,7 @@ const eyeIcon = `<svg width="22" height="16" viewBox="0 0 22 16" fill="none" xml
   transform: scale(0.8);
   transform-origin: left;
 }
+
 html[dir="rtl"] .small-switch {
   transform-origin: right;
 }

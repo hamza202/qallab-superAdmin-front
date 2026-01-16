@@ -97,13 +97,8 @@ const saveIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xm
             <FileUploadInput v-model="documentFile" :innerLabel="'أختر ملف'" label="إرفاق الملف"
                 hint="لا يتجاوز حجم الملف (10 MB)" />
             <div class="flex items-end pb-4">
-                <v-btn variant="flat" color="primary" height="40" class="font-bold px-8" @click="addDocument">
-                    <template #prepend>
-                        <span v-html="saveIcon"></span>
-                    </template>
-                    إضافة
-                </v-btn>
-
+                <ButtonWithIcon variant="flat" color="primary" custom-class="mb-6"
+      label="إضافة" @click="addDocument" />
             </div>
 
 
@@ -141,12 +136,9 @@ const saveIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xm
                     </td>
                     <td class="py-3 px-4">
                         <div class="flex items-center gap-2">
-                            <v-btn icon size="small" variant="text" color="primary">
-                                <span v-html="editIcon"></span>
-                            </v-btn> 
-                            <v-btn icon size="small" variant="text" color="error" @click="deleteDocument(index)">
-                                <span v-html="trashIcon"></span>
-                            </v-btn>
+                            <ButtonWithIcon :icon="editIcon" icon-only size="small" variant="text" />
+                            <ButtonWithIcon :icon="trashIcon" icon-only size="small" variant="text" @click="deleteDocument(index)" />
+                            <ButtonWithIcon :icon="eyeIcon" icon-only size="small" variant="text" />
                         </div>
                     </td>
                 </tr>

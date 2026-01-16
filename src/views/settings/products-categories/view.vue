@@ -11,7 +11,7 @@
                 <v-icon size="64" class="text-red-500 mb-4">mdi-alert-circle-outline</v-icon>
                 <h3 class="text-xl font-bold text-gray-900 mb-2">حدث خطأ في تحميل البيانات</h3>
                 <p class="text-gray-600 mb-4">{{ error }}</p>
-                <v-btn color="primary" @click="fetchCategory">إعادة المحاولة</v-btn>
+                <ButtonWithIcon color="primary" label="إعادة المحاولة" @click="fetchCategory" />
             </div>
 
             <!-- Content -->
@@ -80,12 +80,12 @@
                     <div class="flex gap-4 mt-4">
                         <div class="info-item-bordered flex-1 px-6 py-4">
                             <label class="font-semibold text-sm text-gray-500 mb-2 block">الوصف بالانجليزي</label>
-                            <p class="text-sm text-gray-700 leading-relaxed">{{ category.description_translations?.en || category.description || '-' }}</p>
+                            <p class="text-sm text-gray-700 leading-relaxed" v-html="category.description_translations?.en || category.description || '-'"></p>
                         </div>
                         <v-divider vertical class="my-6"></v-divider>
                         <div class="info-item-bordered flex-1 px-6 py-4">
                             <label class="font-semibold text-sm text-gray-500 mb-2 block">الوصف عربي</label>
-                            <p class="text-sm text-gray-700 leading-relaxed">{{ category.description_translations?.ar || category.description || '-' }}</p>
+                            <p class="text-sm text-gray-700 leading-relaxed" v-html="category.description_translations?.ar || category.description || '-'"></p>
                         </div>
                     </div>
                 </div>
@@ -143,18 +143,10 @@
                                 </div>
                             </div>
                             <div class="flex items-center gap-2">
-                                <v-btn icon size="small" variant="text" color="success">
-                                    <v-icon>mdi-download</v-icon>
-                                </v-btn>
-                                <v-btn icon size="small" variant="text" color="primary">
-                                    <v-icon>mdi-pencil</v-icon>
-                                </v-btn>
-                                <v-btn icon size="small" variant="text" color="error">
-                                    <v-icon>mdi-link-variant</v-icon>
-                                </v-btn>
-                                <v-btn icon size="small" variant="text" color="success">
-                                    <v-icon>mdi-code-tags</v-icon>
-                                </v-btn>
+                                <ButtonWithIcon :icon="'mdi-download'" icon-only size="small" variant="text" color="success" />
+                                <ButtonWithIcon :icon="'mdi-pencil'" icon-only size="small" variant="text" color="primary" />
+                                <ButtonWithIcon :icon="'mdi-link-variant'" icon-only size="small" variant="text" color="error" />
+                                <ButtonWithIcon :icon="'mdi-code-tags'" icon-only size="small" variant="text" color="success" />
                             </div>
                         </div>
                     </div>
@@ -251,7 +243,7 @@ const fetchCategory = async () => {
             code: number
             message: string
             data: CategoryData
-        }>(`/admin/api/categories/${categoryId}`)
+        }>(`/admin/categories/${categoryId}`)
         
         if (response.status && response.data) {
             category.value = response.data

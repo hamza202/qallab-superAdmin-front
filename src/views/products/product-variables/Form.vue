@@ -59,10 +59,9 @@
                   </v-radio-group>
                 </div>
               </div>
-                <v-btn variant="flat" color="primary" rounded="4" height="48"
-                  class="font-semibold text-base w-full md:col-span-2 mt-4" @click="handleAddTest">
-                  <span>+ اضف جديد</span>
-                </v-btn>
+              <ButtonWithIcon variant="flat" color="primary" rounded="4" height="48" prepend-icon="mdi-plus"
+                custom-class="font-semibold text-base w-full md:col-span-2 mt-4" label="أضف جديد"
+                @click="addVariableValue" />
 
 
             </div>
@@ -96,9 +95,8 @@
                   </td>
                   <td class="py-3 px-4">
                     <div class="flex items-center gap-2">
-                      <v-btn icon size="small" color="error" variant="text" @click="removeVariableValue(index)">
-                        <span v-html="trashIcon"></span>
-                      </v-btn>
+                      <ButtonWithIcon :icon="trashIcon" icon-only size="small" color="error" variant="text"
+                        @click="removeVariableValue(index)" />
                     </div>
                   </td>
                 </tr>
@@ -116,20 +114,14 @@
 
           <!-- Form Actions -->
           <div class="flex flex-col sm:flex-row gap-3 sm:justify-center mt-6 px-6">
-            <v-btn variant="flat" rounded="4" color="primary" height="44" class="font-semibold text-base sm:min-w-[200px]"
-              @click="handleSaveAndReturn">
-                <template #prepend>
-                  <span v-html="saveIcon"></span>
-                </template>
-              {{ t('common.save') }}
-            </v-btn>
-            <v-btn variant="flat" rounded="4" color="primary-50" height="44"
-              class="font-semibold text-base text-primary-700 sm:min-w-[200px]" @click="handleBack">
-              <template #prepend>
-                <v-icon>mdi-close</v-icon>
-              </template>
-              {{ t('common.cancel') }}
-            </v-btn>
+            <ButtonWithIcon variant="flat" rounded="4" color="primary" height="44"
+              custom-class="font-semibold text-base sm:min-w-[200px]" :prepend-icon="saveIcon" :label="t('common.save')"
+              @click="handleSaveAndReturn" />
+
+            <ButtonWithIcon variant="flat" prepend-icon="mdi-close" rounded="4" color="primary-50" height="44"
+              custom-class="font-semibold text-base text-primary-700 sm:min-w-[200px]" :label="t('common.close')"
+              @click="handleBack">
+            </ButtonWithIcon>
           </div>
 
 

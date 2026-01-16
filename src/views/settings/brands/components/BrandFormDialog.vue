@@ -114,20 +114,39 @@ watch(
         <TextareaInput v-model="form.notes" label="الملاحظات" placeholder="الملاحظات" :rows="4" :hide-details="true" />
       </div>
 
-        <v-switch v-model="form.status" color="primary" label="الحالة" inset hide-details />
+        <div class="mb-4">
+        <div>
+          <span class="text-sm font-semibold text-gray-700 block mb-1">الحالة</span>
+          <div class="flex items-center gap-3">
+            <v-radio-group v-model="form.status" inline hide-details>
+              <v-radio :value="true" color="primary">
+                <template #label>
+                  <span :class="form.status ? 'text-primary font-semibold' : 'text-gray-600'">
+                    فعال
+                  </span>
+                </template>
+              </v-radio>
+              <v-radio :value="false" color="primary">
+                <template #label>
+                  <span :class="!form.status ? 'text-primary font-semibold' : 'text-gray-600'">
+                    غير فعال
+                  </span>
+                </template>
+              </v-radio>
+            </v-radio-group>
+          </div>
+        </div>
+      </div>
     </v-form>
 
     <template #actions>
-      <v-btn variant="flat" color="primary" height="44" class="font-semibold text-base sm:flex-1" @click="handleSave">
-        <template #prepend>
-          <v-icon>mdi-plus</v-icon>
-        </template>
-        إضافة
-      </v-btn>
-      <v-btn variant="flat" color="primary-50" height="44" class="font-semibold text-base text-primary-700 sm:flex-1"
-        @click="closeDialog">
-        إلغاء
-      </v-btn>
+      <ButtonWithIcon variant="flat" color="primary" height="44"
+        custom-class="font-semibold text-base sm:flex-1" label="إضافة"
+        prepend-icon="mdi-plus" @click="handleSave" />
+      
+      <ButtonWithIcon variant="flat" color="primary-50" height="44"
+        custom-class="font-semibold text-base text-primary-700 sm:flex-1"
+        label="إغلاق" prepend-icon="mdi-close" @click="closeDialog" />
 
     </template>
   </AppDialog>

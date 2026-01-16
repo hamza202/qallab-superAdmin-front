@@ -120,34 +120,37 @@ watch(
         />
       </div>
 
-      <div class="flex items-center gap-2">
-        <span class="text-sm font-semibold text-gray-700">فعال</span>
-        <v-switch v-model="form.status" color="primary" inset hide-details />
+      <div class="mb-4">
+        <label class="block text-sm font-semibold text-gray-700 mb-1">الحالة</label>
+        <div class="flex items-center gap-3 mt-1">
+          <v-radio-group v-model="form.status" inline hide-details>
+            <v-radio :value="true" color="primary">
+              <template #label>
+                <span :class="form.status ? 'text-primary font-semibold' : 'text-gray-600'">
+                  فعال
+                </span>
+              </template>
+            </v-radio>
+            <v-radio :value="false" color="primary">
+              <template #label>
+                <span :class="!form.status ? 'text-primary font-semibold' : 'text-gray-600'">
+                  غير فعال
+                </span>
+              </template>
+            </v-radio>
+          </v-radio-group>
+        </div>
       </div>
     </v-form>
 
     <template #actions>
-      <v-btn
-        variant="flat"
-        color="primary"
-        height="44"
-        class="font-semibold text-base sm:flex-1 w-full sm:w-auto"
-        @click="handleSave"
-      >
-        <template #prepend>
-          <v-icon>mdi-plus</v-icon>
-        </template>
-        حفظ
-      </v-btn>
-      <v-btn
-        variant="flat"
-        color="primary-50"
-        height="44"
-        class="font-semibold text-base text-primary-700 sm:flex-1 w-full sm:w-auto"
-        @click="closeDialog"
-      >
-        اغلاق
-      </v-btn>
+      <ButtonWithIcon variant="flat" color="primary" height="44"
+        custom-class="font-semibold text-base sm:flex-1" label="حفظ"
+        prepend-icon="mdi-plus" @click="handleSave" />
+      
+      <ButtonWithIcon variant="flat" color="primary-50" height="44"
+        custom-class="font-semibold text-base text-primary-700 sm:flex-1"
+        label="إغلاق" prepend-icon="mdi-close" @click="closeDialog" />
     </template>
   </AppDialog>
 </template>

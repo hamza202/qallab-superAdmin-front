@@ -585,13 +585,9 @@ const plusIcon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xm
                         </h2>
                       </div>
                       <div class="flex items-center gap-4">
-                        <v-btn variant="flat" color="primary-700" height="40" class="font-semibold text-base"
-                          @click="handleAddLanguage">
-                          <span>أضف لغة جديدة</span>
-                          <template #prepend>
-                            <span v-html="langIcon"></span>
-                          </template>
-                        </v-btn>
+                        <ButtonWithIcon variant="flat" color="primary-700" height="40"
+                          custom-class="font-semibold text-base" :prepend-icon="langIcon"
+                          label="أضف لغة جديدة" @click="handleAddLanguage" />
                       </div>
                     </div>
 
@@ -602,7 +598,7 @@ const plusIcon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xm
                           required('englishNameRequired'),
                           minLength(2),
                           maxLength(100),
-                        ]" :hide-details="true" />
+                        ]" :hide-details="false" />
                       </template>
                       <template #ar>
                         <TextInput v-model="arabicName" placeholder="ادخل الاسم بالعربية" :rules="[
@@ -629,11 +625,11 @@ const plusIcon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xm
                     <!-- Description with Language Tabs -->
                     <LanguageTabs :languages="availableLanguages" label="الوصف" class="mb-[20px]">
                       <template #en>
-                        <RichTextEditor v-model="englishDescription" placeholder="Enter description in English"
+                        <RichTextEditor :rules="[required()]" v-model="englishDescription" placeholder="Enter description in English"
                           min-height="120px" :hide-details="false" />
                       </template>
                       <template #ar>
-                        <RichTextEditor v-model="arabicDescription" placeholder="ادخل الوصف بالعربية" min-height="120px"
+                        <RichTextEditor :rules="[required()]" v-model="arabicDescription" placeholder="ادخل الوصف بالعربية" min-height="120px"
                           :hide-details="false" />
                       </template>
                     </LanguageTabs>
@@ -649,29 +645,17 @@ const plusIcon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xm
             </div>
             <!-- Action Buttons -->
             <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col">
-              <v-btn variant="flat" color="primary" height="48" rounded="4"
-                class="font-semibold text-base px-6 md:!px-10" @click="handleSaveAndReturn">
-                <template #prepend>
-                  <span v-html="returnIcon"></span>
-                </template>
-                <span>حفظ والعودة للرئيسية</span>
-              </v-btn>
+              <ButtonWithIcon variant="flat" color="primary" height="48" rounded="4"
+                custom-class="font-semibold text-base px-6 md:!px-10" :prepend-icon="returnIcon"
+                label="حفظ والعودة للرئيسية" @click="handleSaveAndReturn" />
 
-              <v-btn variant="flat" color="primary-50" height="48" rounded="4"
-                class="font-semibold text-base text-primary-700 px-6 md:!px-10" @click="handleSaveAndCreate">
-                <template #prepend>
-                  <span v-html="saveIcon"></span>
-                </template>
-                <span>حفظ وإنشاء جديد</span>
-              </v-btn>
+              <ButtonWithIcon variant="flat" color="primary-50" height="48" rounded="4"
+                custom-class="font-semibold text-base text-primary-700 px-6 md:!px-10" :prepend-icon="saveIcon"
+                label="حفظ وإنشاء جديد" @click="handleSaveAndCreate" />
 
-              <v-btn variant="flat" color="primary-50" height="48" rounded="4"
-                class="font-semibold text-base text-primary-700 px-6 md:!px-10" @click="handleSaveAndContinue">
-                <template #prepend>
-                  <span v-html="arrowLeftIcon"></span>
-                </template>
-                <span>حفظ وإكمال</span>
-              </v-btn>
+              <ButtonWithIcon variant="flat" color="primary-50" height="48" rounded="4"
+                custom-class="font-semibold text-base text-primary-700 px-6 md:!px-10" :prepend-icon="arrowLeftIcon"
+                label="حفظ والمتابعة" @click="handleSaveAndContinue" />
             </div>
           </v-form>
         </v-tabs-window-item>
@@ -693,13 +677,9 @@ const plusIcon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xm
                   :hide-details="true" />
                 <SelectInput v-model="taxPriority" placeholder="اختر الأولوية" :items="taxPriorityItems"
                   :hide-details="true" />
-                <v-btn variant="flat" color="primary-500" border="sm" rounded="4" height="44"
-                  class="font-semibold !text-white text-sm !border-primary-200" @click="handleAddTax">
-                  <template #prepend>
-                    <span v-html="plusIcon"></span>
-                  </template>
-                  <span>اضافة ضريبة</span>
-                </v-btn>
+                <ButtonWithIcon variant="flat" color="primary-500" border="sm" rounded="4" height="44"
+                  custom-class="font-semibold !text-white text-sm !border-primary-200" :prepend-icon="plusIcon"
+                  label="أضف ضريبة" @click="handleAddTax" />
               </div>
 
               <!-- Tax Table -->
@@ -763,14 +743,12 @@ const plusIcon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xm
             </div>
           </div>
           <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col">
-            <v-btn variant="flat" color="primary-50" rounded="4" height="48"
-              class="font-semibold text-base text-primary-700 px-6 min-w-56" @click="handleSaveAndContinue">
-              <span>حفظ</span>
-            </v-btn>
+            <ButtonWithIcon variant="flat" color="primary-50" rounded="4" height="48"
+              custom-class="font-semibold text-base text-primary-700 px-6 min-w-56"
+              label="حفظ" @click="handleSaveAndContinue" />
 
-            <v-btn variant="flat" color="primary" rounded="4" height="48" class="min-w-56" @click="handleSaveAndCreate">
-              <span>حفظ / انشاء جديد</span>
-            </v-btn>
+            <ButtonWithIcon variant="flat" color="primary" rounded="4" height="48"
+              custom-class="min-w-56" label="حفظ / انشاء جديد" @click="handleSaveAndCreate" />
           </div>
         </v-tabs-window-item>
 
@@ -823,10 +801,9 @@ const plusIcon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xm
                     </v-radio-group>
                   </div>
                 </div>
-                <v-btn variant="flat" color="primary" rounded="4" height="48"
-                  class="font-semibold text-base w-full md:col-span-2" @click="handleAddTest">
-                  <span>+ اضف جديد</span>
-                </v-btn>
+                <ButtonWithIcon variant="flat" color="primary" rounded="4" height="48"
+                  custom-class="font-semibold text-base w-full md:col-span-2" :prepend-icon="plusIcon"
+                  label="أضف جديد" @click="handleAddTest" />
 
               </div>
 
@@ -841,22 +818,16 @@ const plusIcon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xm
 
             <!-- Action Buttons -->
             <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col">
-              <v-btn variant="flat" color="primary" rounded="4" height="48" class="min-w-56"
-                @click="handleSaveAndCreate">
-                <template #prepend>
-                  <span v-html="saveIcon"></span>
-                </template>
+              <ButtonWithIcon variant="flat" color="primary" rounded="4" height="48"
+                custom-class="min-w-56" :prepend-icon="saveIcon" label="حفظ" @click="handleSaveAndCreate" />
 
-                <span>حفظ</span>
-              </v-btn>
-              <v-btn variant="flat" color="primary-50" rounded="4" height="48"
-                class="font-semibold text-base text-primary-700 px-6 min-w-56" @click="handleSaveAndContinue">
+              <ButtonWithIcon variant="flat" color="primary-50" rounded="4" height="48"
+                custom-class="font-semibold text-base text-primary-700 px-6 min-w-56"
+                label="إغلاق" @click="handleSaveAndContinue">
                 <template #prepend>
                   <v-icon>mdi-close</v-icon>
                 </template>
-
-                <span>إغلاق</span>
-              </v-btn>
+              </ButtonWithIcon>
             </div>
           </div>
 

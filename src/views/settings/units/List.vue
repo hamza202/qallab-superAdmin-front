@@ -1,12 +1,81 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import UnitFormDialog from "@/views/settings/units/components/UnitFormDialog.vue";
+import { useI18n } from 'vue-i18n'
+import { useApi } from "@/composables/useApi";
+import { useNotification } from "@/composables/useNotification";
 
-const unitsIcon = `<svg width="52" height="52" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path fill-rule="evenodd" clip-rule="evenodd" d="M32.8498 26H36.4835C37.6257 26 38.611 25.9999 39.4226 26.0662C40.2791 26.1362 41.1311 26.2907 41.9509 26.7085C43.174 27.3316 44.1684 28.326 44.7915 29.5491C45.2093 30.3689 45.3638 31.2209 45.4338 32.0774C45.5001 32.889 45.5 33.8743 45.5 35.0164V36.4836C45.5 37.6257 45.5001 38.611 45.4338 39.4226C45.3638 40.2791 45.2093 41.1311 44.7915 41.9509C44.1684 43.174 43.174 44.1684 41.9509 44.7915C41.1311 45.2093 40.2791 45.3638 39.4226 45.4338C38.611 45.5001 37.6256 45.5 36.4835 45.5H32.8499C31.7077 45.5 30.7224 45.5001 29.9108 45.4338C29.0542 45.3638 28.2022 45.2093 27.3824 44.7915C26.1593 44.1684 25.165 43.174 24.5418 41.9509C24.1241 41.1311 23.9696 40.2791 23.8996 39.4226C23.8333 38.611 23.8333 37.6257 23.8333 36.4835V35.0165C23.8333 33.8743 23.8333 32.889 23.8996 32.0774C23.9696 31.2209 24.1241 30.3689 24.5418 29.5491C25.165 28.326 26.1593 27.3316 27.3824 26.7085C28.2022 26.2907 29.0542 26.1362 29.9108 26.0662C30.7223 25.9999 31.7077 26 32.8498 26ZM30.2636 30.3852C29.675 30.4333 29.4568 30.5149 29.3497 30.5695C28.942 30.7772 28.6105 31.1087 28.4028 31.5164C28.3482 31.6235 28.2666 31.8417 28.2185 32.4303C28.1684 33.0442 28.1667 33.8508 28.1667 35.1V36.4C28.1667 37.6492 28.1684 38.4558 28.2185 39.0697C28.2666 39.6583 28.3482 39.8765 28.4028 39.9836C28.6105 40.3913 28.942 40.7228 29.3497 40.9305C29.4568 40.9851 29.675 41.0667 30.2636 41.1148C30.8775 41.165 31.6841 41.1667 32.9333 41.1667H36.4C37.6492 41.1667 38.4558 41.165 39.0697 41.1148C39.6583 41.0667 39.8765 40.9851 39.9836 40.9305C40.3913 40.7228 40.7228 40.3913 40.9305 39.9836C40.9851 39.8765 41.0667 39.6583 41.1148 39.0697C41.165 38.4558 41.1667 37.6492 41.1667 36.4V35.1C41.1667 33.8508 41.165 33.0442 41.1148 32.4303C41.0667 31.8417 40.9851 31.6235 40.9305 31.5164C40.7228 31.1087 40.3913 30.7772 39.9836 30.5695C39.8765 30.5149 39.6583 30.4333 39.0697 30.3852C38.4558 30.335 37.6492 30.3333 36.4 30.3333H32.9333C31.6841 30.3333 30.8775 30.335 30.2636 30.3852Z" fill="#1570EF"/>
-<path fill-rule="evenodd" clip-rule="evenodd" d="M13.9016 6.49983C13.0767 6.49918 12.3664 6.49861 11.7319 6.62483C9.15341 7.13772 7.13778 9.15335 6.62489 11.7318C6.49867 12.3664 6.49924 13.0767 6.49989 13.9015L6.49999 14.0833L6.49989 14.265C6.49924 15.0899 6.49867 15.8002 6.62489 16.4347C7.13778 19.0132 9.15341 21.0288 11.7319 21.5417C12.3664 21.6679 13.0767 21.6673 13.9016 21.6667H38.0984C38.9233 21.6673 39.6336 21.6679 40.2681 21.5417C42.8466 21.0288 44.8622 19.0132 45.3751 16.4347C45.5013 15.8002 45.5007 15.0899 45.5001 14.2651L45.5 14.0833L45.5001 13.9015C45.5007 13.0767 45.5013 12.3663 45.3751 11.7318C44.8622 9.15335 42.8466 7.13772 40.2681 6.62483C39.6336 6.49861 38.9233 6.49918 38.0984 6.49983H13.9016ZM12.5773 10.8749C12.7338 10.8438 12.9727 10.8333 14.0833 10.8333H37.9167C39.0273 10.8333 39.2662 10.8438 39.4227 10.8749C40.2822 11.0459 40.9541 11.7177 41.125 12.5772C41.1562 12.7338 41.1667 12.9727 41.1667 14.0833C41.1667 15.1939 41.1562 15.4328 41.125 15.5893C40.9541 16.4488 40.2822 17.1207 39.4227 17.2916C39.2662 17.3228 39.0273 17.3333 37.9167 17.3333H14.0833C12.9727 17.3333 12.7338 17.3228 12.5773 17.2916C11.7178 17.1207 11.0459 16.4488 10.875 15.5893C10.8438 15.4328 10.8333 15.1939 10.8333 14.0833C10.8333 12.9727 10.8438 12.7338 10.875 12.5772C11.0459 11.7177 11.7178 11.0459 12.5773 10.8749Z" fill="#1570EF"/>
-<path fill-rule="evenodd" clip-rule="evenodd" d="M13 26C9.41015 26 6.5 28.9102 6.5 32.5V39C6.5 42.5899 9.41015 45.5 13 45.5C16.5899 45.5 19.5 42.5899 19.5 39V32.5C19.5 28.9102 16.5899 26 13 26ZM10.8333 32.5C10.8333 31.3034 11.8034 30.3333 13 30.3333C14.1966 30.3333 15.1667 31.3034 15.1667 32.5V39C15.1667 40.1966 14.1966 41.1667 13 41.1667C11.8034 41.1667 10.8333 40.1966 10.8333 39V32.5Z" fill="#1570EF"/>
-</svg>`;
+const { t } = useI18n()
+const api = useApi();
+const { success, error } = useNotification();
+
+// Types
+interface Unit {
+  id: number;
+  name: string;
+  unit_code: string;
+  type: string;
+  parent_unit_name?: string;
+  is_active: boolean;
+}
+
+interface TableHeader {
+  key: string;
+  title: string;
+  sortable?: boolean;
+}
+
+interface Pagination {
+  current_page: number;
+  next_cursor: string | null;
+  prev_cursor: string | null;
+  per_page: number;
+}
+
+interface UnitsResponse {
+  status: boolean;
+  code: number;
+  message: string;
+  data: Unit[];
+  pagination: Pagination;
+  header_table: string;
+  headers: TableHeader[];
+  shownHeaders: TableHeader[];
+  actions: {
+    can_create: boolean;
+  };
+}
+
+interface FilterParams {
+  per_page?: number;
+  cursor?: string | null;
+  name?: string;
+  unit_code?: string;
+  type?: string;
+  status?: number | boolean;
+}
+
+const unitsIcon = `<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M23.6667 30.1667C27.2565 30.1667 30.1667 27.2565 30.1667 23.6667C30.1667 20.0768 27.2565 17.1667 23.6667 17.1667C20.0768 17.1667 17.1667 20.0768 17.1667 23.6667C17.1667 27.2565 20.0768 30.1667 23.6667 30.1667Z" stroke="#1570EF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M38.2424 29.5758C37.9802 30.1698 37.902 30.8289 38.0179 31.4678C38.1337 32.1068 38.4383 32.6964 38.8924 33.1606L39.0106 33.2788C39.3769 33.6446 39.6674 34.0791 39.8657 34.5574C40.0639 35.0356 40.166 35.5482 40.166 36.0659C40.166 36.5836 40.0639 37.0962 39.8657 37.5745C39.6674 38.0527 39.3769 38.4872 39.0106 38.853C38.6447 39.2193 38.2103 39.5099 37.732 39.7081C37.2538 39.9064 36.7412 40.0084 36.2235 40.0084C35.7058 40.0084 35.1932 39.9064 34.7149 39.7081C34.2367 39.5099 33.8022 39.2193 33.4364 38.853L33.3182 38.7348C32.854 38.2808 32.2644 37.9761 31.6254 37.8603C30.9864 37.7444 30.3274 37.8226 29.7333 38.0848C29.1508 38.3345 28.6539 38.7491 28.3039 39.2776C27.954 39.806 27.7662 40.4253 27.7636 41.0591V41.3939C27.7636 42.4387 27.3486 43.4407 26.6098 44.1795C25.871 44.9183 24.869 45.3333 23.8242 45.3333C22.7794 45.3333 21.7774 44.9183 21.0387 44.1795C20.2999 43.4407 19.8848 42.4387 19.8848 41.3939V41.2167C19.8696 40.5647 19.6586 39.9324 19.2792 39.402C18.8998 38.8716 18.3696 38.4675 17.7576 38.2424C17.1635 37.9802 16.5045 37.902 15.8655 38.0179C15.2265 38.1337 14.6369 38.4383 14.1727 38.8924L14.0545 39.0106C13.6887 39.3769 13.2542 39.6674 12.776 39.8657C12.2977 40.0639 11.7851 40.166 11.2674 40.166C10.7497 40.166 10.2371 40.0639 9.75887 39.8657C9.28064 39.6674 8.84617 39.3769 8.4803 39.0106C8.11403 38.6447 7.82347 38.2103 7.62522 37.732C7.42697 37.2538 7.32493 36.7412 7.32493 36.2235C7.32493 35.7058 7.42697 35.1932 7.62522 34.7149C7.82347 34.2367 8.11403 33.8022 8.4803 33.4364L8.59848 33.3182C9.05257 32.854 9.35718 32.2644 9.47304 31.6254C9.58889 30.9864 9.51068 30.3274 9.24848 29.7333C8.9988 29.1508 8.58422 28.6539 8.05576 28.3039C7.52731 27.954 6.90806 27.7662 6.27424 27.7636H5.93939C4.8946 27.7636 3.8926 27.3486 3.15382 26.6098C2.41504 25.871 2 24.869 2 23.8242C2 22.7794 2.41504 21.7774 3.15382 21.0387C3.8926 20.2999 4.8946 19.8848 5.93939 19.8848H6.11667C6.76863 19.8696 7.40092 19.6586 7.93135 19.2792C8.46177 18.8998 8.8658 18.3696 9.09091 17.7576C9.35311 17.1635 9.43132 16.5045 9.31546 15.8655C9.19961 15.2265 8.895 14.6369 8.44091 14.1727L8.32273 14.0545C7.95646 13.6887 7.66589 13.2542 7.46764 12.776C7.2694 12.2977 7.16736 11.7851 7.16736 11.2674C7.16736 10.7497 7.2694 10.2371 7.46764 9.75887C7.66589 9.28064 7.95646 8.84617 8.32273 8.4803C8.68859 8.11403 9.12306 7.82347 9.6013 7.62522C10.0795 7.42697 10.5922 7.32493 11.1098 7.32493C11.6275 7.32493 12.1402 7.42697 12.6184 7.62522C13.0966 7.82347 13.5311 8.11403 13.897 8.4803L14.0152 8.59848C14.4794 9.05257 15.069 9.35718 15.7079 9.47304C16.3469 9.58889 17.0059 9.51068 17.6 9.24848H17.7576C18.3402 8.9988 18.837 8.58422 19.187 8.05576C19.5369 7.52731 19.7247 6.90806 19.7273 6.27424V5.93939C19.7273 4.8946 20.1423 3.8926 20.8811 3.15382C21.6199 2.41504 22.6219 2 23.6667 2C24.7115 2 25.7135 2.41504 26.4522 3.15382C27.191 3.8926 27.6061 4.8946 27.6061 5.93939V6.11667C27.6086 6.75049 27.7964 7.36974 28.1464 7.89819C28.4963 8.42664 28.9932 8.84122 29.5758 9.09091C30.1698 9.35311 30.8289 9.43132 31.4678 9.31546C32.1068 9.19961 32.6964 8.895 33.1606 8.44091L33.2788 8.32273C33.6446 7.95646 34.0791 7.66589 34.5574 7.46764C35.0356 7.2694 35.5482 7.16736 36.0659 7.16736C36.5836 7.16736 37.0962 7.2694 37.5745 7.46764C38.0527 7.66589 38.4872 7.95646 38.853 8.32273C39.2193 8.68859 39.5099 9.12306 39.7081 9.6013C39.9064 10.0795 40.0084 10.5922 40.0084 11.1098C40.0084 11.6275 39.9064 12.1402 39.7081 12.6184C39.5099 13.0966 39.2193 13.5311 38.853 13.897L38.7348 14.0152C38.2808 14.4794 37.9761 15.069 37.8603 15.7079C37.7444 16.3469 37.8226 17.0059 38.0848 17.6V17.7576C38.3345 18.3402 38.7491 18.837 39.2776 19.187C39.806 19.5369 40.4253 19.7247 41.0591 19.7273H41.3939C42.4387 19.7273 43.4407 20.1423 44.1795 20.8811C44.9183 21.6199 45.3333 22.6219 45.3333 23.6667C45.3333 24.7115 44.9183 25.7135 44.1795 26.4522C43.4407 27.191 42.4387 27.6061 41.3939 27.6061H41.2167C40.5828 27.6086 39.9636 27.7964 39.4351 28.1464C38.9067 28.4963 38.4921 28.9932 38.2424 29.5758Z" stroke="#1570EF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+`;
+
+const trash_1_icon = `<svg width="17" height="19" viewBox="0 0 17 19" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M11.5833 4.08333V3.41667C11.5833 2.48325 11.5833 2.01654 11.4017 1.66002C11.2419 1.34641 10.9869 1.09144 10.6733 0.931656C10.3168 0.75 9.85009 0.75 8.91667 0.75H7.58333C6.64991 0.75 6.1832 0.75 5.82668 0.931656C5.51308 1.09144 5.25811 1.34641 5.09832 1.66002C4.91667 2.01654 4.91667 2.48325 4.91667 3.41667V4.08333M0.75 4.08333H15.75M14.0833 4.08333V13.4167C14.0833 14.8168 14.0833 15.5169 13.8108 16.0516C13.5712 16.522 13.1887 16.9045 12.7183 17.1442C12.1835 17.4167 11.4835 17.4167 10.0833 17.4167H6.41667C5.01654 17.4167 4.31647 17.4167 3.78169 17.1442C3.31129 16.9045 2.92883 16.522 2.68915 16.0516C2.41667 15.5169 2.41667 14.8168 2.41667 13.4167V4.08333" stroke="#D92D20" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`
+
+const trash_2_icon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M5.75 0.75H10.75M0.75 3.25H15.75M14.0833 3.25L13.4989 12.0161C13.4112 13.3313 13.3674 13.9889 13.0833 14.4875C12.8333 14.9265 12.456 15.2794 12.0014 15.4997C11.485 15.75 10.8259 15.75 9.50779 15.75H6.99221C5.67409 15.75 5.01503 15.75 4.49861 15.4997C4.04396 15.2794 3.66674 14.9265 3.41665 14.4875C3.13259 13.9889 3.08875 13.3313 3.00107 12.0161L2.41667 3.25M6.58333 7V11.1667M9.91667 7V11.1667" stroke="#D92D20" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`
+
+const searchIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M15.8333 15.8335L12.9167 12.9168M14.9999 7.91683C14.9999 11.8288 11.8286 15.0002 7.91659 15.0002C4.00457 15.0002 0.833252 11.8288 0.833252 7.91683C0.833252 4.00481 4.00457 0.833496 7.91659 0.833496C11.8286 0.833496 14.9999 4.00481 14.9999 7.91683Z" stroke="white" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`
+
+const plusIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M8 1V15M1 8H15" stroke="#1849A9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`
 
 
 const editIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -14,158 +83,302 @@ const editIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none" xm
 </svg>
 `
 
-const deleteIcon = `
-<svg width="19" height="15" viewBox="0 0 19 15" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M13.1247 5.00065L8.12467 10.0007M8.12467 5.00065L13.1247 10.0007M1.22467 8.30065L4.82467 13.1007C5.11801 13.4918 5.26467 13.6873 5.45055 13.8284C5.61518 13.9533 5.8016 14.0465 6.00032 14.1032C6.22468 14.1673 6.46912 14.1673 6.95801 14.1673H13.2913C14.6915 14.1673 15.3915 14.1673 15.9263 13.8948C16.3967 13.6552 16.7792 13.2727 17.0189 12.8023C17.2913 12.2675 17.2913 11.5674 17.2913 10.1673V4.83398C17.2913 3.43385 17.2913 2.73379 17.0189 2.19901C16.7792 1.7286 16.3967 1.34615 15.9263 1.10647C15.3915 0.833984 14.6915 0.833984 13.2913 0.833984H6.95801C6.46912 0.833984 6.22468 0.833984 6.00032 0.89806C5.8016 0.954812 5.61518 1.04802 5.45055 1.17294C5.26467 1.31399 5.11801 1.50954 4.82467 1.90065L1.22467 6.70065C1.00951 6.98753 0.901932 7.13097 0.860462 7.28851C0.823856 7.42757 0.823856 7.57373 0.860462 7.71279C0.901932 7.87033 1.00951 8.01377 1.22467 8.30065Z" stroke="#B42318" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>
-`
-// Units table data
-const taxTableHeaders = [
-    { key: "id", title: "#", width: "60px" },
-    { key: "unitName", title: "اسم الوحدة", width: "176px" },
-    { key: "shortName", title: "الاختصار", width: "176px" },
-    { key: "unitCode", title: "كود الوحدة", width: "176px" },
-    { key: "type", title: "النوع", width: "176px" },
-    { key: "createdAt", title: "تاريخ الإنشاء", width: "176px" },
-    { key: "status", title: "الحالة", width: "176px" },
-];
+// API Data
+const tableItems = ref<Unit[]>([]);
+const allHeaders = ref<TableHeader[]>([]);
+const shownHeaders = ref<TableHeader[]>([]);
+const canCreate = ref(false);
+const header_table = ref('');
+const loading = ref(false);
+const loadingMore = ref(false);
 
-const taxTableItems = ref([
-    {
-        id: 1,
-        unitName: "القطعة",
-        shortName: "قطعة",
-        unitCode: "U-001",
-        type: "أساسي",
-        createdAt: "2025-01-01",
-        status: "نشطة",
-    },
-    {
-        id: 2,
-        unitName: "الكرتون",
-        shortName: "كرتون",
-        unitCode: "U-002",
-        type: "مشتق",
-        createdAt: "2025-01-05",
-        status: "غير نشطة",
-    },
-    {
-        id: 3,
-        unitName: "الصندوق",
-        shortName: "صندوق",
-        unitCode: "U-003",
-        type: "أساسي",
-        createdAt: "2025-01-10",
-        status: "نشطة",
-    },
-]);
+// Pagination
+const nextCursor = ref<string | null>(null);
+const previousCursor = ref<string | null>(null);
+const perPage = ref(5);
+const hasMoreData = computed(() => nextCursor.value !== null);
 
-const editingUnit = ref<any | null>(null);
+// Computed table headers for DataTable component
+const tableHeaders = computed(() => shownHeaders.value);
 
-const handleEditTax = (item: any) => {
-    editingUnit.value = {
-        id: item.id,
-        nameAr: item.unitName,
-        nameEn: item.shortName,
-        code: item.unitCode,
-        relatedUnit: null,
-        type: item.type === "أساسي" ? "basic" : "مشتق",
-        status: item.status === "نشطة",
-        notes: "",
-    };
+// Headers dropdown
+const showHeadersMenu = ref(false);
+const updatingHeaders = ref(false);
 
-    showUnitDialog.value = true;
-};
+// Computed checked headers for menu
+const headerCheckStates = computed(() => {
+  const states: Record<string, boolean> = {};
+  allHeaders.value.forEach(header => {
+    states[header.key] = shownHeaders.value.some(sh => sh.key === header.key);
+  });
+  return states;
+});
 
-const handleDeleteTax = (item: any) => {
-    taxTableItems.value = taxTableItems.value.filter((t) => t.id !== item.id);
-};
-
-const showUnitDialog = ref(false);
-
-const handleSaveUnit = (payload: any) => {
-    if (editingUnit.value && editingUnit.value.id) {
-        const index = taxTableItems.value.findIndex((t) => t.id === editingUnit.value.id);
-        if (index !== -1) {
-            taxTableItems.value[index] = {
-                ...taxTableItems.value[index],
-                unitName: payload.nameAr,
-                shortName: payload.nameEn,
-                unitCode: payload.code,
-                type: payload.type === "basic" ? "أساسي" : "مشتق",
-                status: payload.status ? "نشطة" : "غير نشطة",
-            };
-        }
-    } else {
-        const nextId = taxTableItems.value.length
-            ? Math.max(...taxTableItems.value.map((t) => t.id)) + 1
-            : 1;
-
-        taxTableItems.value.push({
-            id: nextId,
-            unitName: payload.nameAr,
-            shortName: payload.nameEn,
-            unitCode: payload.code,
-            type: payload.type === "basic" ? "أساسي" : "مشتق",
-            createdAt: new Date().toISOString().slice(0, 10),
-            status: payload.status ? "نشطة" : "غير نشطة",
-        });
-    }
-
-    editingUnit.value = null;
-    showUnitDialog.value = false;
-};
-
-const openCreateUnit = () => {
-    editingUnit.value = null;
-    showUnitDialog.value = true;
-};
-
-// Selection and filters (similar to cities/categories pages)
-const selectedUnitIds = ref<(string | number)[]>([]);
-
+// Filters
 const showAdvancedFilters = ref(false);
-
-const filterUnitName = ref("");
-const filterShortName = ref("");
+const filterName = ref("");
 const filterUnitCode = ref("");
 const filterType = ref<string | null>(null);
-const filterStatus = ref<string | null>(null);
-const filterCreatedAt = ref<string | null>(null);
-const createdAtMenu = ref(false);
-
-const handleSelectUnit = (item: any, selected: boolean) => {
-    if (selected) {
-        if (!selectedUnitIds.value.includes(item.id)) {
-            selectedUnitIds.value.push(item.id);
-        }
-    } else {
-        selectedUnitIds.value = selectedUnitIds.value.filter((id) => id !== item.id);
-    }
-};
-
-const handleSelectAllUnits = (selected: boolean) => {
-    if (selected) {
-        selectedUnitIds.value = taxTableItems.value.map((item) => item.id);
-    } else {
-        selectedUnitIds.value = [];
-    }
-};
-
-const hasSelectedUnits = computed(() => selectedUnitIds.value.length > 0);
+const filterStatus = ref<number | null>(null);
 
 const toggleAdvancedFilters = () => {
-    showAdvancedFilters.value = !showAdvancedFilters.value;
+  showAdvancedFilters.value = !showAdvancedFilters.value;
+};
+
+const StatusList = [
+  { title: 'فعال', value: 1 },
+  { title: 'غير فعال', value: 0 }
+]
+
+// Bulk delete only
+const showDeleteDialog = ref(false);
+const deleteLoading = ref(false);
+
+// Status change confirmation
+const showStatusChangeDialog = ref(false);
+const statusChangeLoading = ref(false);
+const itemToChangeStatus = ref<Unit | null>(null);
+
+// Unit dialog
+const showUnitDialog = ref(false);
+const editingUnitId = ref<number | null>(null);
+
+// Selection
+const selectedUnits = ref<number[]>([]);
+const hasSelectedUnits = computed(() => selectedUnits.value.length > 0);
+
+// Infinite scroll
+const loadMoreTrigger = ref<HTMLElement | null>(null);
+
+// Fetch units from API
+const fetchUnits = async (append = false) => {
+  try {
+    if (append) {
+      loadingMore.value = true;
+    } else {
+      loading.value = true;
+    }
+
+    const filters: FilterParams = {
+      per_page: perPage.value,
+      cursor: append ? nextCursor.value : null,
+    };
+
+    if (filterName.value) filters.name = filterName.value;
+    if (filterUnitCode.value) filters.unit_code = filterUnitCode.value;
+    if (filterType.value) filters.type = filterType.value;
+    if (filterStatus.value !== null) filters.status = filterStatus.value;
+
+    const params = new URLSearchParams();
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== null && value !== undefined && value !== '') {
+        params.append(key, String(value));
+      }
+    });
+
+    const queryString = params.toString();
+    const url = queryString ? `admin/units?${queryString}` : 'admin/units';
+
+    const response = await api.get<UnitsResponse>(url);
+
+    // Convert is_active to boolean for v-switch compatibility
+    const normalizedData = response.data.map(item => ({
+      ...item,
+      is_active: Boolean(item.is_active)
+    }));
+
+    if (append) {
+      tableItems.value = [...tableItems.value, ...normalizedData];
+    } else {
+      tableItems.value = normalizedData;
+      allHeaders.value = response.headers.filter(h => h.key !== 'id' && h.key !== 'actions');
+      shownHeaders.value = response.shownHeaders.filter(h => h.key !== 'id' && h.key !== 'actions');
+      canCreate.value = response.actions.can_create;
+      header_table.value = response.header_table
+    }
+
+    nextCursor.value = response.pagination.next_cursor;
+    previousCursor.value = response.pagination.prev_cursor;
+  } catch (err: any) {
+    console.error('Error fetching units:', err);
+    error(err?.response?.data?.message || 'Failed to fetch units');
+  } finally {
+    loading.value = false;
+    loadingMore.value = false;
+  }
+};
+
+const loadMore = async () => {
+  if (!hasMoreData.value || loadingMore.value) return;
+  await fetchUnits(true);
+};
+
+const applyFilters = () => {
+  fetchUnits();
 };
 
 const resetFilters = () => {
-    filterUnitName.value = "";
-    filterShortName.value = "";
-    filterUnitCode.value = "";
-    filterType.value = null;
-    filterStatus.value = null;
-    filterCreatedAt.value = null;
+  filterName.value = '';
+  filterUnitCode.value = '';
+  filterType.value = null;
+  filterStatus.value = null;
+  fetchUnits();
 };
+
+// Toggle header visibility
+const toggleHeader = async (headerKey: string) => {
+  const isCurrentlyShown = shownHeaders.value.some(h => h.key === headerKey);
+
+  if (isCurrentlyShown) {
+    shownHeaders.value = shownHeaders.value.filter(h => h.key !== headerKey);
+  } else {
+    const headerToAdd = allHeaders.value.find(h => h.key === headerKey);
+    if (headerToAdd) {
+      shownHeaders.value.push(headerToAdd);
+    }
+  }
+
+  await updateHeadersOnServer();
+};
+
+const updateHeadersOnServer = async () => {
+  try {
+    updatingHeaders.value = true;
+    const headerKeys = shownHeaders.value.map(h => h.key);
+
+    const formData = new FormData();
+    formData.append('table', header_table.value);
+    headerKeys.forEach((header, index) => {
+      formData.append(`header[${index}]`, header);
+    });
+
+    await api.post('/admin/headers', formData);
+  } catch (err: any) {
+    console.error('Error updating headers:', err);
+    error(err?.response?.data?.message || 'Failed to update headers');
+  } finally {
+    updatingHeaders.value = false;
+  }
+};
+
+const openCreateUnit = () => {
+  editingUnitId.value = null;
+  showUnitDialog.value = true;
+};
+
+const handleEditUnit = (item: any) => {
+  editingUnitId.value = item.id;
+  showUnitDialog.value = true;
+};
+
+const handleDeleteUnit = async (item: any) => {
+  try {
+    await api.delete(`/admin/units/${item.id}`);
+    success('تم حذف الوحدة بنجاح');
+    await fetchUnits();
+  } catch (err: any) {
+    console.error('Error deleting unit:', err);
+    error(err?.response?.data?.message || 'Failed to delete unit');
+  }
+};
+
+const handleStatusChange = (item: any) => {
+  // Store the item with its current status
+  itemToChangeStatus.value = { ...item };
+  showStatusChangeDialog.value = true;
+};
+
+const confirmStatusChange = async () => {
+  if (!itemToChangeStatus.value) return;
+
+  try {
+    statusChangeLoading.value = true;
+    const newStatus = !itemToChangeStatus.value.is_active;
+
+    await api.patch(`/admin/units/${itemToChangeStatus.value.id}/change-status`, { status: newStatus });
+
+    success(`تم ${newStatus ? 'تفعيل' : 'تعطيل'} الوحدة بنجاح`);
+
+    // Update local state
+    const index = tableItems.value.findIndex(t => t.id === itemToChangeStatus.value!.id);
+    if (index !== -1) {
+      tableItems.value[index].is_active = newStatus;
+    }
+  } catch (err: any) {
+    console.error('Error changing status:', err);
+    error(err?.response?.data?.message || 'Failed to change status');
+  } finally {
+    statusChangeLoading.value = false;
+    showStatusChangeDialog.value = false;
+    itemToChangeStatus.value = null;
+  }
+};
+
+const handleBulkDelete = () => {
+  if (selectedUnits.value.length === 0) return;
+  showDeleteDialog.value = true;
+};
+
+const confirmBulkDelete = async () => {
+  if (deleteLoading.value) return;
+
+  try {
+    deleteLoading.value = true;
+    await api.post('/admin/units/bulk-delete', { ids: selectedUnits.value });
+    success(`تم حذف ${selectedUnits.value.length} وحدة بنجاح`);
+    selectedUnits.value = [];
+    await fetchUnits();
+  } catch (err: any) {
+    console.error('Error deleting units:', err);
+    error(err?.response?.data?.message || 'Failed to delete units');
+  } finally {
+    deleteLoading.value = false;
+    showDeleteDialog.value = false;
+  }
+};
+
+const handleSaveUnit = async () => {
+  // Refresh the list after successful save
+  await fetchUnits();
+  editingUnitId.value = null;
+};
+
+const handleSelectUnit = (item: any, selected: boolean) => {
+  if (selected) {
+    if (!selectedUnits.value.includes(item.id)) {
+      selectedUnits.value.push(item.id);
+    }
+  } else {
+    selectedUnits.value = selectedUnits.value.filter((id) => id !== item.id);
+  }
+};
+
+const handleSelectAllUnits = (selected: boolean) => {
+  if (selected) {
+    selectedUnits.value = tableItems.value.map((item) => item.id);
+  } else {
+    selectedUnits.value = [];
+  }
+};
+
+// Lifecycle
+onMounted(() => {
+  fetchUnits();
+
+  // Setup infinite scroll observer
+  const observer = new IntersectionObserver(
+    (entries) => {
+      if (entries[0].isIntersecting && hasMoreData.value && !loadingMore.value) {
+        loadMore();
+      }
+    },
+    { threshold: 0.1 }
+  );
+
+  if (loadMoreTrigger.value) {
+    observer.observe(loadMoreTrigger.value);
+  }
+});
 
 const columnIcon = `<svg width="16" height="17" viewBox="0 0 16 17" fill="none" xmlns="http://www.w3.org/2000/svg">
   <path
@@ -176,16 +389,6 @@ const columnIcon = `<svg width="16" height="17" viewBox="0 0 16 17" fill="none" 
     stroke="#697586" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
 </svg>`;
 
-const trash_1_icon = `<svg width="17" height="19" viewBox="0 0 17 19" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M11.5833 4.08333V3.41667C11.5833 2.48325 11.5833 2.01654 11.4017 1.66002C11.2419 1.34641 10.9869 1.09144 10.6733 0.931656C10.3168 0.75 9.85009 0.75 8.91667 0.75H7.58333C6.64991 0.75 6.1832 0.75 5.82668 0.931656C5.51308 1.09144 5.25811 1.34641 5.09832 1.66002C4.91667 2.01654 4.91667 2.48325 4.91667 3.41667V4.08333M0.75 4.08333H15.75M14.0833 4.08333V13.4167C14.0833 14.8168 14.0833 15.5169 13.8108 16.0516C13.5712 16.522 13.1887 16.9045 12.7183 17.1442C12.1835 17.4167 11.4835 17.4167 10.0833 17.4167H6.41667C5.01654 17.4167 4.31647 17.4167 3.78169 17.1442C3.31129 16.9045 2.92883 16.522 2.68915 16.0516C2.41667 15.5169 2.41667 14.8168 2.41667 13.4167V4.08333" stroke="#D92D20" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>
-`;
-
-const trash_2_icon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M5.75 0.75H10.75M0.75 3.25H15.75M14.0833 3.25L13.4989 12.0161C13.4112 13.3313 13.3674 13.9889 13.0833 14.4875C12.8333 14.9265 12.456 15.2794 12.0014 15.4997C11.485 15.75 10.8259 15.75 9.50779 15.75H6.99221C5.67409 15.75 5.01503 15.75 4.49861 15.4997C4.04396 15.2794 3.66674 14.9265 3.41665 14.4875C3.13259 13.9889 3.08875 13.3313 3.00107 12.0161L2.41667 3.25M6.58333 7V11.1667M9.91667 7V11.1667" stroke="#D92D20" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>
-`;
-
 const exportIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M4.16732 7.50065C3.39234 7.50065 3.00485 7.50065 2.68694 7.58584C1.82421 7.817 1.15034 8.49087 0.91917 9.3536C0.833984 9.67152 0.833984 10.059 0.833984 10.834V11.834C0.833984 13.2341 0.833984 13.9342 1.10647 14.469C1.34615 14.9394 1.7286 15.3218 2.19901 15.5615C2.73379 15.834 3.43385 15.834 4.83398 15.834H11.834C13.2341 15.834 13.9342 15.834 14.469 15.5615C14.9394 15.3218 15.3218 14.9394 15.5615 14.469C15.834 13.9342 15.834 13.2341 15.834 11.834V10.834C15.834 10.059 15.834 9.67152 15.7488 9.3536C15.5176 8.49087 14.8438 7.817 13.981 7.58584C13.6631 7.50065 13.2756 7.50065 12.5007 7.50065M11.6673 4.16732L8.33398 0.833984M8.33398 0.833984L5.00065 4.16732M8.33398 0.833984V10.834" stroke="#194185" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
@@ -194,105 +397,121 @@ const exportIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" 
 </script>
 
 <template>
-    <default-layout>
-        <div class="units-page">
-            <PageHeader :icon="unitsIcon" title-key="pages.units.title" description-key="pages.units.description" />
-            <div class="flex justify-end pb-2">
-                <v-btn variant="outlined" height="40"
-                    class="font-semibold text-base border-gray-300 bg-primary-50 !text-primary-900">
-                    <template #prepend>
-                        <span v-html="exportIcon"></span>
-                    </template>
-                    تصدير
-                </v-btn>
-            </div>
+  <default-layout>
+    <div class="units-page">
+      <PageHeader :icon="unitsIcon" title-key="pages.units.title" description-key="pages.units.description" />
 
-            <div class="bg-gray-50 rounded-md -mx-6">
-                <div :class="hasSelectedUnits ? 'justify-between' : 'justify-end'"
-                    class="flex flex-wrap items-center gap-3 border-y border-y-slate-300 px-4 sm:px-6 py-3">
-                    <!-- Actions when rows are selected -->
-                    <div v-if="hasSelectedUnits"
-                        class="flex flex-wrap items-stretch rounded-lg overflow-hidden border border-gray-200 bg-white text-sm">
-                        <v-btn class="px-4 font-semibold text-primary-600 hover:bg-primary-50 !rounded-none">
-                            <template #prepend>
-                                <span v-html="editIcon"></span>
-                            </template>
-                            <span>تعديل</span>
-                        </v-btn>
-                        <div class="w-px bg-gray-200"></div>
-                        <v-btn class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none">
-                            <template #prepend>
-                                <span v-html="trash_1_icon"></span>
-                            </template>
-                            <span>حذف</span>
-                        </v-btn>
-                        <div class="w-px bg-gray-200"></div>
-                        <v-btn class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none">
-                            <template #prepend>
-                                <span v-html="trash_2_icon"></span>
-                            </template>
-                            <span>حذف الجميع</span>
-                        </v-btn>
-                    </div>
+      <div
+        class="flex justify-end items-stretch rounded border border-gray-300 w-fit ms-auto mb-4 overflow-hidden bg-white text-sm">
+        <ButtonWithIcon variant="flat" height="40" rounded="0"
+          custom-class="font-semibold text-base border-gray-300 bg-primary-50 !text-primary-900"
+          :prepend-icon="exportIcon" :label="t('common.export')" />
+      </div>
 
-                    <!-- Main header controls -->
-                    <div class="flex flex-wrap gap-3">
-                        <v-btn variant="outlined" append-icon="mdi-chevron-down" color="gray-500" height="40"
-                            class="font-semibold text-base border-gray-400">
-                            <template #prepend>
-                                <span v-html="columnIcon"></span>
-                            </template>
-                            الأعمدة
-                        </v-btn>
+      <div class="bg-gray-50 rounded-md -mx-6">
+        <div :class="hasSelectedUnits ? 'justify-between' : 'justify-end'"
+          class="flex flex-wrap items-center gap-3 border-y border-y-slate-300 px-4 sm:px-6 py-3">
 
-                        <v-btn variant="outlined" color="primary-50" height="40"
-                            class="px-7 font-semibold text-base text-primary-700" prepend-icon="mdi-magnify"
-                            @click="toggleAdvancedFilters">
-                            بحث متقدم
-                        </v-btn>
+          <!-- Bulk Actions -->
+          <div v-if="hasSelectedUnits"
+            class="flex flex-wrap items-stretch rounded overflow-hidden border border-gray-200 bg-white text-sm">
+            <ButtonWithIcon variant="flat" height="40" rounded="0"
+              custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
+              :prepend-icon="trash_1_icon" color="white" :label="t('common.delete')" @click="handleBulkDelete" />
+            <div class="w-px bg-gray-200"></div>
+            <ButtonWithIcon variant="flat" height="40" rounded="0"
+              custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
+              :prepend-icon="trash_2_icon" color="white" :label="t('common.deleteAll')" @click="handleBulkDelete" />
+          </div>
 
-                        <v-btn variant="flat" color="primary" height="40" class="px-7 font-semibold text-base"
-                            prepend-icon="mdi-plus-circle-outline" @click="openCreateUnit">
-                            اضف جديد
-                        </v-btn>
-                    </div>
-                </div>
+          <!-- Main header controls -->
+          <div class="flex flex-wrap gap-3">
+            <!-- Column Management -->
+            <v-menu v-model="showHeadersMenu" :close-on-content-click="false">
+              <template v-slot:activator="{ props }">
+                <ButtonWithIcon v-bind="props" variant="outlined" rounded="4" color="gray-500" height="40"
+                  custom-class="font-semibold text-base border-gray-400" :prepend-icon="columnIcon"
+                  :label="t('common.columns')" append-icon="mdi-chevron-down" />
+              </template>
+              <v-list>
+                <v-list-item v-for="header in allHeaders" :key="header.key" @click="toggleHeader(header.key)">
+                  <template v-slot:prepend>
+                    <v-checkbox-btn :model-value="headerCheckStates[header.key]" :disabled="updatingHeaders"
+                      @click.stop="toggleHeader(header.key)"></v-checkbox-btn>
+                  </template>
+                  <v-list-item-title>{{ header.title }}</v-list-item-title>
+                </v-list-item>
+              </v-list>
+            </v-menu>
 
-                <!-- Advanced filters row -->
-                <div v-if="showAdvancedFilters"
-                    class="border-y border-y-primary-100 bg-primary-50 px-4 sm:px-6 py-3 flex flex-col gap-3 sm:gap-2">
-                    <div class="flex flex-wrap gap-3 flex-1 order-1 sm:order-2 justify-end sm:justify-start">
-                        <v-text-field v-model="filterUnitName" density="comfortable" variant="outlined" hide-details
-                            placeholder="اسم الوحدة" class="w-full sm:w-48 bg-white" />
-                        <v-text-field v-model="filterShortName" density="comfortable" variant="outlined" hide-details
-                            placeholder="الاختصار" class="w-full sm:w-40 bg-white" />
-                        <v-text-field v-model="filterUnitCode" density="comfortable" variant="outlined" hide-details
-                            placeholder="كود الوحدة" class="w-full sm:w-40 bg-white" />
-                        <v-select v-model="filterType" :items="['أساسي', 'مشتق']" density="comfortable"
-                            variant="outlined" hide-details placeholder="النوع" class="w-full sm:w-40 bg-white" />
-                        <v-select v-model="filterStatus" :items="['نشطة', 'غير نشطة']" density="comfortable"
-                            variant="outlined" hide-details placeholder="الحالة" class="w-full sm:w-40 bg-white" />
-                        <v-menu v-model="createdAtMenu" :close-on-content-click="false" transition="scale-transition">
-                            <template #activator="{ props }">
-                                <v-text-field v-bind="props" v-model="filterCreatedAt" readonly density="comfortable"
-                                    variant="outlined" hide-details placeholder="تاريخ الإنشاء"
-                                    class="w-full sm:w-48 bg-white" />
-                            </template>
-                            <v-date-picker v-model="filterCreatedAt" color="primary"
-                                @update:model-value="createdAtMenu = false" />
-                        </v-menu>
-                    </div>
-                </div>
+            <!-- Advanced Filters Toggle -->
+            <ButtonWithIcon variant="flat" color="primary-500" height="40" rounded="4"
+              custom-class="px-7 font-semibold text-base text-white border !border-primary-200"
+              :prepend-icon="searchIcon" :label="t('common.advancedSearch')" @click="toggleAdvancedFilters" />
 
-                <!-- Units Table -->
-                <DataTable :headers="taxTableHeaders" :items="taxTableItems" show-checkbox show-actions
-                    @edit="handleEditTax" @delete="handleDeleteTax" @select="handleSelectUnit"
-                    @selectAll="handleSelectAllUnits" />
-
-                <UnitFormDialog v-model="showUnitDialog" :unit="editingUnit" @save="handleSaveUnit" />
-            </div>
+            <!-- Add New Button -->
+            <ButtonWithIcon v-if="canCreate" variant="flat" color="primary-100" height="40" rounded="4"
+              custom-class="px-7 font-semibold text-base !text-primary-800 border !border-primary-200"
+              :prepend-icon="plusIcon" :label="t('common.addNew')" @click="openCreateUnit" />
+          </div>
         </div>
-    </default-layout>
+
+        <!-- Advanced Filters -->
+        <div v-if="showAdvancedFilters" class="border-b border-gray-300 px-4 sm:px-6 py-4 bg-white">
+          <div class="flex flex-wrap gap-3 justify-between">
+            <div class="flex gap-3 flex-wrap">
+              <TextInput v-model="filterName" density="comfortable" variant="outlined" hide-details
+                placeholder="اسم الوحدة" class="w-full sm:w-40 bg-white" @keyup.enter="applyFilters" />
+              <TextInput v-model="filterUnitCode" density="comfortable" variant="outlined" hide-details
+                placeholder="كود الوحدة" class="w-full sm:w-40 bg-white" @keyup.enter="applyFilters" />
+              <TextInput v-model="filterType" density="comfortable" variant="outlined" hide-details
+                placeholder="النوع" class="w-full sm:w-40 bg-white" @keyup.enter="applyFilters" />
+              <SelectInput v-model="filterStatus" :items="StatusList" item-title="title" item-value="value"
+                density="comfortable" variant="outlined" hide-details placeholder="الحالة"
+                class="w-full sm:w-40 bg-white" @update:model-value="applyFilters" />
+            </div>
+
+            <div class="flex gap-2 items-center">
+              <ButtonWithIcon variant="flat" color="primary-500" rounded="4" height="40"
+                custom-class="px-5 font-semibold !text-white text-sm sm:text-base" :prepend-icon="searchIcon"
+                label="بحث" @click="applyFilters" />
+
+              <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4" border="sm"
+                custom-class="px-5 font-semibold text-sm sm:text-base !text-primary-800 !border-primary-200"
+                prepend-icon="mdi-refresh" label="إعادة تعيين" @click="resetFilters" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Data Table -->
+        <DataTable :headers="tableHeaders" :items="tableItems" :loading="loading" show-checkbox show-actions
+          @delete="handleDeleteUnit" @edit="handleEditUnit" @select="handleSelectUnit" @selectAll="handleSelectAllUnits"
+          :confirm-delete="true" :show-view="false">
+          <template #item.is_active="{ item }">
+            <v-switch :model-value="item.is_active" hide-details inset density="compact" color="primary"
+              @update:model-value="(value) => handleStatusChange(item)" />
+          </template>
+        </DataTable>
+
+        <!-- Infinite Scroll Trigger & Loading Indicator -->
+        <div ref="loadMoreTrigger" class="flex justify-center py-8">
+          <v-progress-circular v-if="loadingMore" indeterminate color="primary" size="32" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Bulk Delete Confirmation Dialog -->
+    <DeleteConfirmDialog v-model="showDeleteDialog" :loading="deleteLoading" title="حذف الوحدات"
+      :message="`هل أنت متأكد من حذف ${selectedUnits.length} وحدة؟`" @confirm="confirmBulkDelete" />
+
+    <!-- Status Change Confirmation Dialog -->
+    <StatusChangeDialog v-model="showStatusChangeDialog" :loading="statusChangeLoading"
+      :item-name="itemToChangeStatus?.name" :current-status="itemToChangeStatus?.is_active"
+      @confirm="confirmStatusChange" />
+
+    <!-- Unit Form Dialog -->
+    <UnitFormDialog v-model="showUnitDialog" :unit-id="editingUnitId" @saved="handleSaveUnit" />
+  </default-layout>
 </template>
 
 <style scoped></style>

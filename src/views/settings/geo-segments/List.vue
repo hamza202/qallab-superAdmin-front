@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const geoSegmentsIcon = `<svg width="52" height="52" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path fill-rule="evenodd" clip-rule="evenodd" d="M26 4.33301C18.0876 4.33301 11.6667 10.7539 11.6667 18.6663C11.6667 25.7604 17.4354 35.1195 23.0716 41.9692C24.015 43.109 24.4867 43.6789 25.122 43.9063C25.6669 44.1026 26.3331 44.1026 26.878 43.9063C27.5133 43.6789 27.985 43.109 28.9284 41.9692C34.5646 35.1195 40.3333 25.7604 40.3333 18.6663C40.3333 10.7539 33.9124 4.33301 26 4.33301ZM26 24.333C29.2216 24.333 31.8333 21.7213 31.8333 18.4997C31.8333 15.278 29.2216 12.6663 26 12.6663C22.7784 12.6663 20.1667 15.278 20.1667 18.4997C20.1667 21.7213 22.7784 24.333 26 24.333Z" fill="#1570EF"/>
@@ -121,11 +124,19 @@ const columnIcon = `<svg width="16" height="17" viewBox="0 0 16 17" fill="none" 
 
 const trash_1_icon = `<svg width="17" height="19" viewBox="0 0 17 19" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M11.5833 4.08333V3.41667C11.5833 2.48325 11.5833 2.01654 11.4017 1.66002C11.2419 1.34641 10.9869 1.09144 10.6733 0.931656C10.3168 0.75 9.85009 0.75 8.91667 0.75H7.58333C6.64991 0.75 6.1832 0.75 5.82668 0.931656C5.51308 1.09144 5.25811 1.34641 5.09832 1.66002C4.91667 2.01654 4.91667 2.48325 4.91667 3.41667V4.08333M0.75 4.08333H15.75M14.0833 4.08333V13.4167C14.0833 14.8168 14.0833 15.5169 13.8108 16.0516C13.5712 16.522 13.1887 16.9045 12.7183 17.1442C12.1835 17.4167 11.4835 17.4167 10.0833 17.4167H6.41667C5.01654 17.4167 4.31647 17.4167 3.78169 17.1442C3.31129 16.9045 2.92883 16.522 2.68915 16.0516C2.41667 15.5169 2.41667 14.8168 2.41667 13.4167V4.08333" stroke="#D92D20" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>`;
+</svg>`
 
 const trash_2_icon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M5.75 0.75H10.75M0.75 3.25H15.75M14.0833 3.25L13.4989 12.0161C13.4112 13.3313 13.3674 13.9889 13.0833 14.4875C12.8333 14.9265 12.456 15.2794 12.0014 15.4997C11.485 15.75 10.8259 15.75 9.50779 15.75H6.99221C5.67409 15.75 5.01503 15.75 4.49861 15.4997C4.04396 15.2794 3.66674 14.9265 3.41665 14.4875C3.13259 13.9889 3.08875 13.3313 3.00107 12.0161L2.41667 3.25M6.58333 7V11.1667M9.91667 7V11.1667" stroke="#D92D20" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>`;
+</svg>`
+
+const searchIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M15.8333 15.8335L12.9167 12.9168M14.9999 7.91683C14.9999 11.8288 11.8286 15.0002 7.91659 15.0002C4.00457 15.0002 0.833252 11.8288 0.833252 7.91683C0.833252 4.00481 4.00457 0.833496 7.91659 0.833496C11.8286 0.833496 14.9999 4.00481 14.9999 7.91683Z" stroke="white" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`
+
+const plusIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M8 1V15M1 8H15" stroke="#1849A9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`
 
 const exportIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M4.16732 7.50065C3.39234 7.50065 3.00485 7.50065 2.68694 7.58584C1.82421 7.817 1.15034 8.49087 0.91917 9.3536C0.833984 9.67152 0.833984 10.059 0.833984 10.834V11.834C0.833984 13.2341 0.833984 13.9342 1.10647 14.469C1.34615 14.9394 1.7286 15.3218 2.19901 15.5615C2.73379 15.834 3.43385 15.834 4.83398 15.834H11.834C13.2341 15.834 13.9342 15.834 14.469 15.5615C14.9394 15.3218 15.3218 14.9394 15.5615 14.469C15.834 13.9342 15.834 13.2341 15.834 11.834V10.834C15.834 10.059 15.834 9.67152 15.7488 9.3536C15.5176 8.49087 14.8438 7.817 13.981 7.58584C13.6631 7.50065 13.2756 7.50065 12.5007 7.50065M11.6673 4.16732L8.33398 0.833984M8.33398 0.833984L5.00065 4.16732M8.33398 0.833984V10.834" stroke="#194185" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
@@ -139,175 +150,77 @@ const editIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none" xm
 <template>
   <default-layout>
     <div class="geo-segments-page">
-      <PageHeader
-        :icon="geoSegmentsIcon"
-        title-key="pages.geoSegments.title"
-        description-key="pages.geoSegments.description"
-      />
+      <PageHeader :icon="geoSegmentsIcon" title-key="pages.geoSegments.title"
+        description-key="pages.geoSegments.description" />
 
       <div class="flex justify-end pb-2">
-        <v-btn
-          variant="outlined"
-          height="40"
-          class="font-semibold text-base border-gray-300 bg-primary-50 !text-primary-900"
-        >
-          <template #prepend>
-            <span v-html="exportIcon"></span>
-          </template>
-          تصدير
-        </v-btn>
+        <ButtonWithIcon variant="outlined" height="40"
+          custom-class="font-semibold text-base border-gray-300 bg-primary-50 !text-primary-900"
+          :prepend-icon="exportIcon" :label="t('common.export')" />
       </div>
 
       <div class="bg-gray-50 rounded-md -mx-6">
-        <div
-          :class="hasSelectedGeoSegments ? 'justify-between' : 'justify-end'"
-          class="flex flex-wrap items-center gap-3 border-y border-y-slate-300 px-4 sm:px-6 py-3"
-        >
+        <div 
+          class="flex flex-wrap items-center gap-3 border-y border-y-slate-300 px-4 sm:px-6 py-3 justify-between">
           <!-- Actions when rows are selected -->
-          <div
-            v-if="hasSelectedGeoSegments"
-            class="flex flex-wrap items-stretch rounded-lg overflow-hidden border border-gray-200 bg-white text-sm"
-          >
-            <v-btn class="px-4 font-semibold text-primary-600 hover:bg-primary-50 !rounded-none">
-              <template #prepend>
-                <span v-html="editIcon"></span>
-              </template>
-              <span>تعديل</span>
-            </v-btn>
+          <div v-if="hasSelectedGeoSegments"
+            class="flex flex-wrap items-stretch rounded-lg overflow-hidden border border-gray-200 bg-white text-sm">
+            <ButtonWithIcon variant="flat" height="40" rounded="0"
+              custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
+              :prepend-icon="trash_1_icon" color="white" :label="t('common.delete')" />
             <div class="w-px bg-gray-200"></div>
-            <v-btn class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none">
-              <template #prepend>
-                <span v-html="trash_1_icon"></span>
-              </template>
-              <span>حذف</span>
-            </v-btn>
-            <div class="w-px bg-gray-200"></div>
-            <v-btn class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none">
-              <template #prepend>
-                <span v-html="trash_2_icon"></span>
-              </template>
-              <span>حذف الجميع</span>
-            </v-btn>
+            <ButtonWithIcon variant="flat" height="40" rounded="0"
+              custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
+              :prepend-icon="trash_2_icon" color="white" :label="t('common.deleteAll')" />
           </div>
+          <h3 v-else class="text-gray-900 text-lg font-bold">تقسيم النطاقات الجغرافية</h3>
 
           <!-- Main header controls -->
           <div class="flex flex-wrap gap-3">
-            <v-btn
-              variant="outlined"
-              append-icon="mdi-chevron-down"
-              color="gray-500"
-              height="40"
-              class="font-semibold text-base border-gray-400"
-            >
-              <template #prepend>
-                <span v-html="columnIcon"></span>
-              </template>
-              الأعمدة
-            </v-btn>
+            <ButtonWithIcon variant="outlined" rounded="4" color="gray-500" height="40"
+              custom-class="font-semibold text-base border-gray-400"
+              :prepend-icon="columnIcon" :label="t('common.columns')" append-icon="mdi-chevron-down" />
+            
+            <ButtonWithIcon variant="flat" color="primary-500" height="40" rounded="4"
+              custom-class="px-7 font-semibold text-base text-white border !border-primary-200"
+              :prepend-icon="searchIcon" :label="t('common.advancedSearch')" @click="toggleAdvancedFilters" />
 
-            <v-btn
-              variant="outlined"
-              color="primary-50"
-              height="40"
-              class="px-7 font-semibold text-base text-primary-700"
-              prepend-icon="mdi-magnify"
-              @click="toggleAdvancedFilters"
-            >
-              بحث متقدم
-            </v-btn>
-
-            <v-btn
-              variant="flat"
-              color="primary"
-              height="40"
-              class="px-7 font-semibold text-base"
-              prepend-icon="mdi-plus-circle-outline"
-              @click="openCreateGeoSegment"
-            >
-              اضف جديد
-            </v-btn>
+            <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4"
+              custom-class="px-7 font-semibold text-base !text-primary-800 border !border-primary-200"
+              :prepend-icon="plusIcon" :label="t('common.addNew')" @click="openCreateGeoSegment" />
           </div>
         </div>
 
         <!-- Advanced filters row -->
-        <div
-          v-if="showAdvancedFilters"
-          class="border-y border-y-primary-100 bg-primary-50 px-4 sm:px-6 py-3 flex flex-col gap-3 sm:gap-2"
-        >
+        <div v-if="showAdvancedFilters"
+          class="border-y border-y-primary-100 bg-primary-50 px-4 sm:px-6 py-3 flex flex-col gap-3 sm:gap-2">
           <div class="flex flex-col sm:flex-row gap-3 sm:items-center justify-between">
             <div class="flex flex-wrap gap-2 order-2 sm:order-1 justify-start sm:justify-start">
-              <v-btn
-                variant="flat"
-                color="primary"
-                height="45"
-                class="px-5 font-semibold text-sm sm:text-base"
-                prepend-icon="mdi-magnify"
-              >
-                ابحث الآن
-              </v-btn>
-              <v-btn
-                variant="outlined"
-                color="primary-50"
-                height="45"
-                class="px-5 font-semibold text-sm sm:text-base text-primary-700"
-                prepend-icon="mdi-refresh"
-                @click="resetFilters"
-              >
-                إعادة تعيين
-              </v-btn>
+              <ButtonWithIcon variant="flat" color="primary-500" rounded="4" height="40"
+                custom-class="px-5 font-semibold !text-white text-sm sm:text-base"
+                :prepend-icon="searchIcon" label="ابحث" />
+              
+              <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4" border="sm"
+                custom-class="px-5 font-semibold text-sm sm:text-base !text-primary-800 !border-primary-200"
+                prepend-icon="mdi-refresh" label="إعادة تعيين" />
             </div>
 
             <div class="flex flex-wrap gap-3 flex-1 order-1 sm:order-2 justify-end sm:justify-start">
-              <v-text-field
-                v-model="filterNameAr"
-                density="comfortable"
-                variant="outlined"
-                hide-details
-                placeholder="اسم التقسيم"
-                class="w-full sm:w-60 bg-white"
-              />
-              <v-select
-                v-model="filterSegmentType"
-                :items="['نوع التقسيم 1', 'نوع التقسيم 2']"
-                density="comfortable"
-                variant="outlined"
-                hide-details
-                placeholder="نوع التقسيم"
-                class="w-full sm:w-40 bg-white"
-              />
-              <v-select
-                v-model="filterTruckType"
-                :items="['شاحنة صغيرة', 'قلاب', 'شاحنة كبيرة']"
-                density="comfortable"
-                variant="outlined"
-                hide-details
-                placeholder="نوع الشاحنة"
-                class="w-full sm:w-40 bg-white"
-              />
-              <v-select
-                v-model="filterStatus"
-                :items="['نشطة', 'غير نشطة']"
-                density="comfortable"
-                variant="outlined"
-                hide-details
-                placeholder="الحالة"
-                class="w-full sm:w-40 bg-white"
-              />
+              <v-text-field v-model="filterNameAr" density="comfortable" variant="outlined" hide-details
+                placeholder="اسم التقسيم" class="w-full sm:w-60 bg-white" />
+              <v-select v-model="filterSegmentType" :items="['نوع التقسيم 1', 'نوع التقسيم 2']" density="comfortable"
+                variant="outlined" hide-details placeholder="نوع التقسيم" class="w-full sm:w-40 bg-white" />
+              <v-select v-model="filterTruckType" :items="['شاحنة صغيرة', 'قلاب', 'شاحنة كبيرة']" density="comfortable"
+                variant="outlined" hide-details placeholder="نوع الشاحنة" class="w-full sm:w-40 bg-white" />
+              <v-select v-model="filterStatus" :items="['نشطة', 'غير نشطة']" density="comfortable" variant="outlined"
+                hide-details placeholder="الحالة" class="w-full sm:w-40 bg-white" />
             </div>
           </div>
         </div>
 
-        <DataTable
-          title="تقسيم النطاقات الجغرافية"
-          :headers="geoSegmentsTableHeaders"
-          :items="geoSegmentsTableItems"
-          show-actions
-          show-checkbox
-          @edit="handleEditGeoSegment"
-          @delete="handleDeleteGeoSegment"
-          @select="handleSelectGeoSegment"
-          @selectAll="handleSelectAllGeoSegments"
-        />
+        <DataTable :headers="geoSegmentsTableHeaders" :items="geoSegmentsTableItems" show-actions show-checkbox
+          @edit="handleEditGeoSegment" @delete="handleDeleteGeoSegment" @select="handleSelectGeoSegment"
+          @selectAll="handleSelectAllGeoSegments" />
       </div>
     </div>
   </default-layout>

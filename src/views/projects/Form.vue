@@ -204,9 +204,6 @@ const checkCircleIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
 </defs>
 </svg>`;
 
-const datepickerInput = `<svg width="17" height="19" viewBox="0 0 17 19" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M15.834 7.50016H0.833984M11.6673 0.833496V4.16683M5.00065 0.833496V4.16683M4.83398 17.5002H11.834C13.2341 17.5002 13.9342 17.5002 14.469 17.2277C14.9394 16.988 15.3218 16.6055 15.5615 16.1351C15.834 15.6004 15.834 14.9003 15.834 13.5002V6.50016C15.834 5.10003 15.834 4.39997 15.5615 3.86519C15.3218 3.39478 14.9394 3.01233 14.469 2.77265C13.9342 2.50016 13.2341 2.50016 11.834 2.50016H4.83398C3.43385 2.50016 2.73379 2.50016 2.19901 2.77265C1.7286 3.01233 1.34615 3.39478 1.10647 3.86519C0.833984 4.39997 0.833984 5.10003 0.833984 6.50016V13.5002C0.833984 14.9003 0.833984 15.6004 1.10647 16.1351C1.34615 16.6055 1.7286 16.988 2.19901 17.2277C2.73379 17.5002 3.43385 17.5002 4.83398 17.5002Z" stroke="#697586" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>`
 const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M12.3333 5.00033V4.33366C12.3333 3.40024 12.3333 2.93353 12.1517 2.57701C11.9919 2.2634 11.7369 2.00844 11.4233 1.84865C11.0668 1.66699 10.6001 1.66699 9.66667 1.66699H8.33333C7.39991 1.66699 6.9332 1.66699 6.57668 1.84865C6.26308 2.00844 6.00811 2.2634 5.84832 2.57701C5.66667 2.93353 5.66667 3.40024 5.66667 4.33366V5.00033M7.33333 9.58366V13.7503M10.6667 9.58366V13.7503M1.5 5.00033H16.5M14.8333 5.00033V14.3337C14.8333 15.7338 14.8333 16.4339 14.5608 16.9686C14.3212 17.439 13.9387 17.8215 13.4683 18.0612C12.9335 18.3337 12.2335 18.3337 10.8333 18.3337H7.16667C5.76654 18.3337 5.06647 18.3337 4.53169 18.0612C4.06129 17.8215 3.67883 17.439 3.43915 16.9686C3.16667 16.4339 3.16667 15.7338 3.16667 14.3337V5.00033" stroke="#B42318" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`;
@@ -285,18 +282,13 @@ const locationIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none
                   <template #append-inner>
                     <v-tooltip location="top" content-class="custom-tooltip" >
                       <template #activator="{ props: tooltipProps }">
-                        <v-btn class="!min-w-0 p-0" size="small" density="compact"
-                          v-bind="tooltipProps">
-                              <span v-html="infoIcon"></span>
-                          </v-btn>
+                        <ButtonWithIcon variant="text" size="small" density="compact"
+                          custom-class="!min-w-0 p-0" :prepend-icon="infoIcon" v-bind="tooltipProps" />
                       </template>
                       <div>
                         تاريخ إصدار الرخصة الرسمي للمشروع
                       </div>
                     </v-tooltip>
-                  </template>
-                  <template #prepend-inner>
-                    <span v-html="datepickerInput"></span>
                   </template>
                 </DatePickerInput>
                 <SelectInput v-model="customerName" label="اسم العميل" placeholder="اسم العميل"
@@ -318,18 +310,13 @@ const locationIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none
                   <template #append-inner>
                     <v-tooltip location="top" content-class="custom-tooltip">
                       <template #activator="{ props: tooltipProps }">
-                        <v-btn class="!min-w-0 p-0" size="small" density="compact"
-                          v-bind="tooltipProps">
-                              <span v-html="infoIcon"></span>
-                          </v-btn>
+                        <ButtonWithIcon variant="text" size="small" density="compact"
+                          custom-class="!min-w-0 p-0" :prepend-icon="infoIcon" v-bind="tooltipProps" />
                       </template>
                       <div>
                         تاريخ بدء المشروع الفعلي
                       </div>
                     </v-tooltip>
-                  </template>
-                  <template #prepend-inner>
-                    <span v-html="datepickerInput"></span>
                   </template>
                 </DatePickerInput>
                 <DatePickerInput v-model="endDate" label="تاريخ الانتهاء" placeholder="اختر التاريخ"
@@ -337,18 +324,13 @@ const locationIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none
                   <template #append-inner>
                     <v-tooltip location="top" content-class="custom-tooltip">
                       <template #activator="{ props: tooltipProps }">
-                        <v-btn class="!min-w-0 p-0" size="small" density="compact"
-                          v-bind="tooltipProps">
-                              <span v-html="infoIcon"></span>
-                          </v-btn>
+                        <ButtonWithIcon variant="text" size="small" density="compact"
+                          custom-class="!min-w-0 p-0" :prepend-icon="infoIcon" v-bind="tooltipProps" />
                       </template>
                       <div>
                         تاريخ انتهاء المشروع المتوقع
                       </div>
                     </v-tooltip>
-                  </template>
-                  <template #prepend-inner>
-                    <span v-html="datepickerInput"></span>
                   </template>
                 </DatePickerInput>
                 <div class="md:col-span-2">
@@ -358,10 +340,8 @@ const locationIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none
                         <template #append-inner>
                           <v-tooltip location="top" content-class="custom-tooltip">
                             <template #activator="{ props: tooltipProps }">
-                              <v-btn class="!min-w-0 p-0" size="small" density="compact"
-                                v-bind="tooltipProps">
-                                  <span v-html="infoIcon"></span>
-                              </v-btn>
+                              <ButtonWithIcon variant="text" size="small" density="compact"
+                                custom-class="!min-w-0 p-0" :prepend-icon="infoIcon" v-bind="tooltipProps" />
                             </template>
                             <div>
                               العنوان الكامل للمشروع باللغة الإنجليزية
@@ -375,10 +355,8 @@ const locationIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none
                         <template #append-inner>
                           <v-tooltip location="top" content-class="custom-tooltip">
                             <template #activator="{ props: tooltipProps }">
-                              <v-btn class="!min-w-0 p-0" size="small" density="compact"
-                                v-bind="tooltipProps">
-                                  <span v-html="infoIcon"></span>
-                              </v-btn>
+                              <ButtonWithIcon variant="text" size="small" density="compact"
+                                custom-class="!min-w-0 p-0" :prepend-icon="infoIcon" v-bind="tooltipProps" />
                             </template>
                             <div>
                               العنوان الكامل للمشروع باللغة العربية
@@ -396,10 +374,8 @@ const locationIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none
                   <template #append-inner>
                     <v-tooltip location="top" content-class="custom-tooltip">
                       <template #activator="{ props: tooltipProps }">
-                        <v-btn class="!min-w-0 p-0" size="small" density="compact"
-                          v-bind="tooltipProps">
-                          <span v-html="infoIcon"></span>
-                        </v-btn>
+                        <ButtonWithIcon variant="text" size="small" density="compact"
+                          custom-class="!min-w-0 p-0" :prepend-icon="infoIcon" v-bind="tooltipProps" />
                       </template>
                       <div>
                         رقم السجل التجاري الرسمي للمشروع
@@ -466,9 +442,7 @@ const locationIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none
                   </td>
                   <td class="py-3 px-4">
                     <div class="flex items-center gap-2">
-                      <v-btn icon size="small" variant="text">
-                        <span v-html="editIcon"></span>
-                      </v-btn>
+                      <ButtonWithIcon :icon="editIcon" icon-only size="small" variant="text" />
                     </div>
                   </td>
                 </tr>
@@ -482,14 +456,9 @@ const locationIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none
           <div class="mb-6">
             <!-- Add Attachment Button -->
             <div class="flex justify-end mb-4">
-              <v-btn variant="flat" color="primary-100" height="40" rounded="4"
-                class="px-5 font-semibold text-base !text-primary-800 border !border-primary-200"
-                @click="addAttachment">
-                <template #prepend>
-                  <span v-html="plusIcon"></span>
-                </template>
-                أضف مرفق
-              </v-btn>
+              <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4"
+                custom-class="px-5 font-semibold text-base !text-primary-800 border !border-primary-200"
+                :prepend-icon="plusIcon" label="أضف مرفق" @click="addAttachment" />
             </div>
 
             <!-- Attachments Table -->
@@ -523,15 +492,9 @@ const locationIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none
                   </td>
                   <td class="py-3 px-4">
                     <div class="flex items-center gap-2">
-                      <v-btn icon size="small" variant="text" @click="viewAttachment(attachment)">
-                        <span v-html="viewIcon"></span>
-                      </v-btn>
-                      <v-btn icon size="small" variant="text">
-                        <span v-html="editIcon"></span>
-                      </v-btn>
-                      <v-btn icon size="small" variant="text" @click="deleteAttachment(attachment.id)">
-                        <span v-html="trashIcon"></span>
-                      </v-btn>
+                      <ButtonWithIcon size="small" variant="text" :icon="viewIcon" icon-only @click="viewAttachment(attachment)" />
+                      <ButtonWithIcon size="small" variant="text" :icon="editIcon" icon-only />
+                      <ButtonWithIcon size="small" variant="text" :icon="trashIcon" icon-only @click="deleteAttachment(attachment.id)" />
 
                     </div>
                   </td>
@@ -544,20 +507,10 @@ const locationIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none
 
       <!-- Action Buttons -->
       <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col">
-        <v-btn variant="flat" color="primary" rounded="4" height="48" class="min-w-56" @click="handleSave">
-          <template #prepend>
-            <span v-html="saveIcon"></span>
-          </template>
-
-          <span>حفظ</span>
-        </v-btn>
-        <v-btn variant="flat" color="primary-50" rounded="4" height="48"
-          class="font-semibold text-base text-primary-700 px-6 min-w-56" @click="handleClose">
-          <template #prepend>
-            <v-icon>mdi-close</v-icon>
-          </template>
-          <span>إغلاق</span>
-        </v-btn>
+        <ButtonWithIcon variant="flat" color="primary" rounded="4" height="48"
+          custom-class="min-w-56" :prepend-icon="saveIcon" label="حفظ" @click="handleSave" />
+        <ButtonWithIcon prepend-icon="mdi-close" variant="flat" color="primary-50" rounded="4" height="48"
+          custom-class="font-semibold text-base text-primary-700 px-6 min-w-56" label="إغلاق" @click="handleClose" />
       </div>
     </div>
   </default-layout>

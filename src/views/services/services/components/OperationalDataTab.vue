@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
+import DatePickerInput from '@/components/common/forms/DatePickerInput.vue';
 
 // Available languages
 const availableLanguages = ref([
@@ -259,7 +260,7 @@ const handleFileUpload = (event: any) => {
  -->
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2">تاريخ التفعيل</label>
-                    <v-text-field v-model="formData.activation_date" type="date" variant="outlined"
+                    <DatePickerInput v-model="formData.activation_date" variant="outlined"
                         density="comfortable" placeholder="2024-03-01" hide-details
                         @update:model-value="updateFormData" />
                 </div>

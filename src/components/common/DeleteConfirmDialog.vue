@@ -60,7 +60,6 @@ const handleCancel = () => {
 };
 
 const handleConfirm = () => {
-  internalOpen.value = false;
   emit("confirm");
 };
 </script>

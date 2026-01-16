@@ -84,10 +84,8 @@ const editIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none" xm
               <template #append-inner>
                 <v-tooltip location="top" content-class="custom-tooltip">
                   <template #activator="{ props: tooltipProps }">
-                    <v-btn class="!min-w-0 p-0" size="small" density="compact"
-                      v-bind="tooltipProps">
-                      <span v-html="infoIcon"></span>
-                    </v-btn>
+                    <ButtonWithIcon variant="text" size="small" density="compact"
+                custom-class="!min-w-0 p-0" :prepend-icon="infoIcon" v-bind="tooltipProps" />
                   </template>
                   <div>
                     الحد الأقصى المسموح به للائتمان
@@ -99,10 +97,8 @@ const editIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none" xm
               <template #append-inner>
                 <v-tooltip location="top" content-class="custom-tooltip">
                   <template #activator="{ props: tooltipProps }">
-                    <v-btn class="!min-w-0 p-0" size="small" density="compact"
-                      v-bind="tooltipProps">
-                      <span v-html="infoIcon"></span>
-                    </v-btn>
+                    <ButtonWithIcon variant="text" size="small" density="compact"
+                custom-class="!min-w-0 p-0" :prepend-icon="infoIcon" v-bind="tooltipProps" />
                   </template>
                   <div>
                     الحد الأقصى المسموح به للديون
@@ -114,13 +110,9 @@ const editIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none" xm
 
     <div class="flex justify-between items-center mb-4 border-y border-gray-200 px-6 py-2">
       <h2 class="text-lg font-bold text-primary-900">الحسابات البنكية</h2>
-      <v-btn variant="flat" color="primary-500" height="40" rounded="4" class="font-bold px-5 !text-white"
-        @click="addAccount">
-        <template #prepend>
-          <span v-html="addIcon"></span>
-        </template>
-        أضف حساب بنكي
-      </v-btn>
+      <ButtonWithIcon variant="flat" color="primary-500" height="40" rounded="4"
+        custom-class="font-bold px-5 !text-white" :prepend-icon="addIcon"
+        label="إضافة حساب" @click="addAccount" />
     </div>
 
     <!-- Bank Accounts Table with Editable Inputs -->
@@ -151,10 +143,8 @@ const editIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none" xm
               <template #append-inner>
                 <v-tooltip location="top" content-class="custom-tooltip">
                   <template #activator="{ props: tooltipProps }">
-                    <v-btn class="!min-w-0 p-0" size="small" density="compact"
-                      v-bind="tooltipProps">
-                      <span v-html="infoIcon"></span>
-                    </v-btn>
+                    <ButtonWithIcon variant="text" size="small" density="compact"
+                custom-class="!min-w-0 p-0" :prepend-icon="infoIcon" v-bind="tooltipProps" />
                   </template>
                   <div>
                     الرقم التعريفي الدولي للحساب البنكي
@@ -175,9 +165,8 @@ const editIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none" xm
           </td>
           <td class="py-3 px-4">
             <div class="flex items-center gap-2">
-              <v-btn icon size="small" variant="text" @click="deleteAccount(index)">
-                <span v-html="trashIcon"></span>
-              </v-btn>
+              <ButtonWithIcon :icon="trashIcon" icon-only size="small" variant="text"
+                @click="deleteAccount(index)" />
             </div>
           </td>
         </tr>

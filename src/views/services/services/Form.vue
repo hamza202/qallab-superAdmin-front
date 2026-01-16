@@ -5,7 +5,9 @@ import { useApi } from '@/composables/useApi'
 import { useNotification } from '@/composables/useNotification'
 import BasicInfoTab from './components/BasicInfoTab.vue'
 import OperationalDataTab from './components/OperationalDataTab.vue'
+import { useI18n } from 'vue-i18n'
 
+const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const api = useApi()
@@ -353,7 +355,7 @@ const checkCircleIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
                         <span v-html="tab.icon" class="w-6 h-6"></span>
                         <span class="text-base font-semibold whitespace-nowrap">{{
                             tab.title
-                            }}</span>
+                        }}</span>
                     </button>
                 </div>
 
@@ -373,21 +375,12 @@ const checkCircleIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
 
                 <!-- Action Buttons -->
                 <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col">
-                    <v-btn variant="flat" color="primary" rounded="4" height="48" class="min-w-56"
-                        @click="handleSave">
-                        <template #prepend>
-                            <span v-html="saveIcon"></span>
-                        </template>
+                    <ButtonWithIcon variant="flat" color="primary" rounded="4" height="48" custom-class="min-w-56"
+                        :prepend-icon="saveIcon" label="حفظ" @click="handleSave" />
 
-                        <span>حفظ</span>
-                    </v-btn>
-                    <v-btn variant="flat" color="primary-50" rounded="4" height="48"
-                        class="font-semibold text-base text-primary-700 px-6 min-w-56" @click="handleClose">
-                        <template #prepend>
-                            <v-icon>mdi-close</v-icon>
-                        </template>
-                        <span>إغلاق</span>
-                    </v-btn>
+                    <ButtonWithIcon prepend-icon="mdi-close" variant="flat" color="primary-50" rounded="4" height="48"
+                        custom-class="font-semibold text-base text-primary-700 px-6 min-w-56" :label="t('common.close')"
+                        @click="handleClose" />
                 </div>
 
             </div>

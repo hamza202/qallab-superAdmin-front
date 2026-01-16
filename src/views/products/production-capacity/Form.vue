@@ -366,10 +366,9 @@ onMounted(async () => {
                   </v-btn-toggle>
                 </div>
 
-                <v-btn variant="flat" rounded="4" color="primary-500" border="sm"  height="40" class="px-7 !border-primary-200 text-white font-semibold text-base"
-                  @click="applyBulkEdit">
-                  تطبيق
-                </v-btn>
+                <ButtonWithIcon variant="flat" rounded="4" color="primary-500" border="sm" height="40"
+                  custom-class="px-7 !border-primary-200 text-white font-semibold text-base"
+                  label="تطبيق" @click="applyBulkEdit" />
               </div>
             </div>
           </div>
@@ -466,20 +465,17 @@ onMounted(async () => {
         </EditableDataTable>
 
         <div class="flex flex-col sm:flex-row gap-3 sm:justify-center mt-6">
-          <v-btn variant="flat" rounded="4" color="primary" height="44" class="font-semibold text-base sm:min-w-[200px]"
-            @click="handleSave" :loading="saving" :disabled="loading">
-            <template #prepend>
-              <span v-html="saveIcon"></span>
-            </template>
-            حفظ
-          </v-btn>
-          <v-btn variant="flat" rounded="4" color="primary-50" height="44"
-            class="font-semibold text-base text-primary-700 sm:min-w-[200px]" @click="handleClose" :disabled="saving">
+          <ButtonWithIcon variant="flat" rounded="4" color="primary" height="44"
+            custom-class="font-semibold text-base sm:min-w-[200px]" :prepend-icon="saveIcon"
+            label="حفظ" @click="handleSave" :loading="saving" :disabled="loading" />
+          
+          <ButtonWithIcon variant="flat" rounded="4" color="primary-50" height="44"
+            custom-class="font-semibold text-base text-primary-700 sm:min-w-[200px]"
+            label="إغلاق" @click="handleClose" :disabled="saving">
             <template #prepend>
               <v-icon>mdi-close</v-icon>
             </template>
-            اغلاق
-          </v-btn>
+          </ButtonWithIcon>
         </div>
       </div>
     </div>

@@ -82,9 +82,8 @@ const eyeIcon = `<svg width="20" height="14" viewBox="0 0 20 14" fill="none" xml
       <FileUploadInput v-model="documentFile" label="ارفق ملف" hint="Click to upload or drag and drop" />
     </div>
 
-    <v-btn variant="flat" color="primary" @click="addDocument" class="mb-6">
-      إضافة
-    </v-btn>
+    <ButtonWithIcon variant="flat" color="primary" custom-class="mb-6"
+      label="إضافة" @click="addDocument" />
 
     <div v-if="documents.length > 0" class="mt-6">
       <v-table class="bg-white rounded-lg">
@@ -103,21 +102,15 @@ const eyeIcon = `<svg width="20" height="14" viewBox="0 0 20 14" fill="none" xml
             <td class="py-3 px-4">{{ doc.date }}</td>
             <td class="py-3 px-4">{{ doc.type }}</td>
             <td class="py-3 px-4">
-              <v-btn size="small" variant="text" color="primary">
-                اسم المرفق<br>200 KB - 100% uploaded
-              </v-btn>
+              <ButtonWithIcon size="small" variant="text" color="primary"
+                label="اسم المرفق" />
             </td>
             <td class="py-3 px-4">
               <div class="flex items-center gap-2">
-                <v-btn icon size="small" variant="text" @click="removeDocument(doc.id)">
-                  <span v-html="trashIcon"></span>
-                </v-btn>
-                <v-btn icon size="small" variant="text">
-                  <span v-html="editIcon"></span>
-                </v-btn>
-                <v-btn icon size="small" variant="text">
-                  <span v-html="eyeIcon"></span>
-                </v-btn>
+                <ButtonWithIcon :icon="trashIcon" icon-only size="small" variant="text"
+                  @click="removeDocument(doc.id)" />
+                <ButtonWithIcon :icon="editIcon" icon-only size="small" variant="text" />
+                <ButtonWithIcon :icon="eyeIcon" icon-only size="small" variant="text" />
               </div>
             </td>
           </tr>
