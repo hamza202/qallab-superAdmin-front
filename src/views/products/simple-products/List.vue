@@ -290,7 +290,7 @@ const confirmStatusChange = async () => {
     statusChangeLoading.value = true
     const newStatus = !itemToChangeStatus.value.is_active
 
-    await api.patch(`/items/${itemToChangeStatus.value.id}/status`, { is_active: newStatus })
+    await api.patch(`/items/${itemToChangeStatus.value.id}/change-status`, { is_active: newStatus })
     success(`تم ${newStatus ? 'تفعيل' : 'تعطيل'} المنتج بنجاح`)
 
     // Update local state

@@ -35,8 +35,8 @@ const isFormValid = ref(false);
 const productCode = ref("");
 const arabicName = ref("");
 const englishName = ref("");
-const category = ref(null);
-const unit = ref(null);
+const category = ref<number | null>(null);
+const unit = ref<number | null>(null);
 const isMinUnit = ref(false);
 const arabicDescription = ref("");
 const englishDescription = ref("");
@@ -47,7 +47,7 @@ const maxSalePrice = ref("");
 const minSalePrice = ref("");
 const wholesalePrice = ref("");
 const halfWholesalePrice = ref("");
-const discountType = ref(null);
+const discountType = ref<number | null>(null);
 const discountValue = ref("");
 const profitMargin = ref("");
 
@@ -1081,6 +1081,31 @@ const fetchProduct = async (id: number) => {
       maxSalePrice.value = data.max_sell_price;
       wholesalePrice.value = data.wholesale_price;
       halfWholesalePrice.value = data.semi_wholesale_price;
+
+      // Taxes (Map API taxes to table items)
+      if (Array.isArray(data.taxes)) {
+        taxTableItems.value = data.taxes.map((tax: any) => {
+          // Find priority label from loaded constants
+          const priorityItem = taxPriorityItems.value.find(p => p.value == tax.priority);
+          const priorityLabel = priorityItem ? priorityItem.title : String(tax.priority);
+          
+          return {
+            id: tax.id,
+            taxId: tax.tax_id,
+            taxName: tax.tax_name,
+            percentage: tax.percentage ? `${parseFloat(tax.percentage)}%` : '0%',
+            minValue: tax.minimum,
+            priority: tax.priority,
+            priorityLabel: priorityLabel
+          };
+        });
+
+        // Update ID counter to prevent collisions with new local rows
+        if (taxTableItems.value.length > 0) {
+          const maxId = Math.max(...taxTableItems.value.map(t => t.id));
+          taxRowIdCounter = maxId + 1;
+        }
+      }
 
       // Discount & Profit
       discountType.value = data.discount_type ? Number(data.discount_type) : null;

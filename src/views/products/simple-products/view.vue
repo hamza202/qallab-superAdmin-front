@@ -31,7 +31,7 @@
                     </router-link>
                     <span class="text-lg text-gray-300">/</span>
 
-                    <span class="text-primary-700 font-medium bg-primary-50 px-2 py-1 rounded-md">{{ product.translations?.name?.ar || product.name }}</span>
+                    <span class="text-primary-700 font-medium bg-primary-50 px-2 py-1 rounded-md">{{ product.name_translations?.ar || product.name }}</span>
                 </div>
 
                 <!-- Page Header -->
@@ -42,8 +42,8 @@
                                 <span v-html="productIcon" class="text-primary-600"></span>
                             </div>
                             <div>
-                                <h1 class="text-lg font-bold text-gray-900 mb-1">{{ product.translations?.name?.ar || product.name }}</h1>
-                                <p class="text-sm text-gray-600">{{ product.translations?.description?.ar || product.description || 'لا يوجد وصف' }}</p>
+                                <h1 class="text-lg font-bold text-gray-900 mb-1">{{ product.name_translations?.ar || product.name }}</h1>
+                                <p class="text-sm text-gray-600"><span v-html="product.description_translations?.ar || product.description || 'لا يوجد وصف'"></span></p>
                             </div>
                         </div>
                     </div>
@@ -80,12 +80,12 @@
                             <div class="flex flex-wrap gap-4">
                                 <div class="info-item-bordered flex-1 px-6 py-4">
                                     <label class="font-semibold text-sm text-gray-500 mb-2 block">الاسم بالعربية</label>
-                                    <p class="text-base font-semibold text-gray-900">{{ product.translations?.name?.ar || product.name || '-' }}</p>
+                                    <p class="text-base font-semibold text-gray-900">{{ product.name_translations?.ar || product.name || '-' }}</p>
                                 </div>
                                 <v-divider vertical class="my-6"></v-divider>
                                 <div class="info-item-bordered flex-1 px-6 py-4">
                                     <label class="font-semibold text-sm text-gray-500 mb-2 block">الاسم بالانجليزية</label>
-                                    <p class="text-base font-semibold text-gray-900">{{ product.translations?.name?.en || product.name || '-' }}</p>
+                                    <p class="text-base font-semibold text-gray-900">{{ product.name_translations?.en || product.name || '-' }}</p>
                                 </div>
                                 <v-divider vertical class="my-6"></v-divider>
                                 <div class="info-item-bordered flex-1 px-6 py-4">
@@ -115,12 +115,12 @@
                             <div class="flex gap-4">
                                 <div class="info-item-bordered flex-1 px-6 py-4">
                                     <label class="font-semibold text-sm text-gray-500 mb-2 block">الوصف بالانجليزي</label>
-                                    <p class="text-sm text-gray-700 leading-relaxed">{{ product.translations?.description?.en || product.description || '-' }}</p>
+                                    <p class="text-sm text-gray-700 leading-relaxed"><span v-html="product.description_translations?.en || product.description || '-'"></span></p>
                                 </div>
                                 <v-divider vertical class="my-6"></v-divider>
                                 <div class="info-item-bordered flex-1 px-6 py-4">
                                     <label class="font-semibold text-sm text-gray-500 mb-2 block">الوصف عربي</label>
-                                    <p class="text-sm text-gray-700 leading-relaxed">{{ product.translations?.description?.ar || product.description || '-' }}</p>
+                                    <p class="text-sm text-gray-700 leading-relaxed"><span v-html="product.description_translations?.ar || product.description || '-'"></span></p>
                                 </div>
 
                             </div>
@@ -129,27 +129,30 @@
                         <!-- Tax Section -->
                         <div class="p-6 border-b border-gray-200">
                             <h2 class="text-xl font-bold text-primary-900 mb-6">معلومات الضريبة</h2>
-                            <div class="flex flex-wrap gap-4">
-                                <div class="info-item-bordered flex-1 px-6 py-4">
-                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">اسم الضريبة</label>
-                                    <p class="text-base font-semibold text-gray-900">{{ product.tax_name || '-' }}</p>
-                                </div>
-                                <v-divider vertical class="my-6"></v-divider>
-                                <div class="info-item-bordered flex-1 px-6 py-4">
-                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">نسبة الضريبة</label>
-                                    <p class="text-base font-semibold text-gray-900">{{ product.tax_percentage ? product.tax_percentage + '%' : '-' }}</p>
-                                </div>
-                                <v-divider vertical class="my-6"></v-divider>
-                                <div class="info-item-bordered flex-1 px-6 py-4">
-                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">الحد الأدنى للضريبة</label>
-                                    <p class="text-base font-semibold text-gray-900">{{ product.min_tax_amount || '-' }}</p>
-                                </div>
-                                <v-divider vertical class="my-6"></v-divider>
-                                <div class="info-item-bordered flex-1 px-6 py-4">
-                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">الأولوية</label>
-                                    <p class="text-base font-semibold text-gray-900">{{ product.priority || '-' }}</p>
+                            <div v-if="product.taxes && product.taxes.length > 0" class="flex flex-col gap-4">
+                                <div v-for="tax in product.taxes" :key="tax.id" class="flex flex-wrap gap-4 border-b border-gray-100 pb-4 last:border-0 last:pb-0">
+                                    <div class="info-item-bordered flex-1 px-6 py-4">
+                                        <label class="font-semibold text-sm text-gray-500 mb-2 block">اسم الضريبة</label>
+                                        <p class="text-base font-semibold text-gray-900">{{ tax.tax_name || '-' }}</p>
+                                    </div>
+                                    <v-divider vertical class="my-6"></v-divider>
+                                    <div class="info-item-bordered flex-1 px-6 py-4">
+                                        <label class="font-semibold text-sm text-gray-500 mb-2 block">نسبة الضريبة</label>
+                                        <p class="text-base font-semibold text-gray-900">{{ tax.percentage ? tax.percentage + '%' : '-' }}</p>
+                                    </div>
+                                    <v-divider vertical class="my-6"></v-divider>
+                                    <div class="info-item-bordered flex-1 px-6 py-4">
+                                        <label class="font-semibold text-sm text-gray-500 mb-2 block">الحد الأدنى للضريبة</label>
+                                        <p class="text-base font-semibold text-gray-900">{{ tax.minimum || '-' }}</p>
+                                    </div>
+                                    <v-divider vertical class="my-6"></v-divider>
+                                    <div class="info-item-bordered flex-1 px-6 py-4">
+                                        <label class="font-semibold text-sm text-gray-500 mb-2 block">الأولوية</label>
+                                        <p class="text-base font-semibold text-gray-900">{{ tax.priority || '-' }}</p>
+                                    </div>
                                 </div>
                             </div>
+                            <div v-else class="text-gray-500 text-center py-4">لا توجد معلومات ضريبية</div>
                         </div>
 
                         <!-- Product Relations Section -->
@@ -158,12 +161,12 @@
                             <div class="flex flex-wrap gap-4">
                                 <div class="info-item-bordered flex-1 px-4 py-4">
                                     <label class="font-semibold text-sm text-gray-500 mb-2 block">العلامة التجارية</label>
-                                    <p class="text-base font-semibold text-gray-900">{{ product.brands || '-' }}</p>
+                                    <p class="text-base font-semibold text-gray-900">{{ product.brand?.name || '-' }}</p>
                                 </div>
                                 <v-divider vertical class="my-6"></v-divider>
                                 <div class="info-item-bordered flex-1 px-4 py-4">
                                     <label class="font-semibold text-sm text-gray-500 mb-2 block">بلد المنشأ</label>
-                                    <p class="text-base font-semibold text-gray-900">{{ product.country_of_origin || '-' }}</p>
+                                    <p class="text-base font-semibold text-gray-900">{{ product.country_of_origin?.name || '-' }}</p>
                                 </div>
                                 <v-divider vertical class="my-6"></v-divider>
                                 <div class="info-item-bordered flex-1 px-4 py-4">
@@ -299,44 +302,47 @@ import { useNotification } from '@/composables/useNotification'
 interface ProductData {
     id: number
     name: string
-    translations: {
-        name: {
-            ar: string
-            en: string
-        }
-        description: any
+    name_translations: {
+        ar: string
+        en: string
     }
-    description: string | null
     code: string
-    brands: string | null
-    country_of_origin: string | null
-    image: string | null
-    allow_negative_sales: number
-    is_rentable: number
-    is_manufacturable: number
-    purchase_price: number
-    sell_price: number
-    min_sell_price: number | null
-    max_sell_price: number | null
-    branch_price: number | null
-    wholesale_price: number | null
-    semi_wholesale_price: number | null
-    discount_type: string | null
-    discount_value: number | null
-    tax_name: string | null
-    tax_percentage: number | null
-    min_tax_amount: number | null
-    priority: number | null
-    is_active: number
-    created_at: string
-    updated_at: string
-    parent: any
-    children: any[]
-    user: {
-        id: number
-        name: string
-        email: string
+    description: string | null
+    description_translations: {
+        ar: string
+        en: string
     }
+    image: string | null
+    country_of_origin: { name: string } | null
+    is_active: boolean
+    allow_negative_sales: boolean
+    is_rentable: boolean
+    is_manufacturable: boolean
+    purchase_price: string
+    sell_price: string
+    min_sell_price: string | null
+    max_sell_price: string | null
+    branch_price: string | null
+    wholesale_price: string | null
+    semi_wholesale_price: string | null
+    discount_type: string | null
+    discount_value: string | null
+    brand: { name: string } | null
+    category: { name: string } | null
+    manufacturer: { name: string } | null
+    unit: { name: string } | null
+    taxes: Array<{
+        id: number
+        tax_id: number
+        tax_name: string
+        percentage: string
+        minimum: string
+        priority: number
+        is_custom: boolean
+    }>
+    tests: any[]
+    parent: { name: string } | null
+    children: any[]
     has_children: boolean
 }
 
@@ -408,20 +414,18 @@ const homeIcon = `<svg width="17" height="18" viewBox="0 0 17 18" fill="none" xm
 const product = ref<ProductData>({
     id: 0,
     name: '',
-    translations: {
-        name: { ar: '', en: '' },
-        description: []
-    },
+    name_translations: { ar: '', en: '' },
     description: null,
+    description_translations: { ar: '', en: '' },
     code: '',
-    brands: null,
+    brand: null,
     country_of_origin: null,
     image: null,
-    allow_negative_sales: 0,
-    is_rentable: 0,
-    is_manufacturable: 0,
-    purchase_price: 0,
-    sell_price: 0,
+    allow_negative_sales: false,
+    is_rentable: false,
+    is_manufacturable: false,
+    purchase_price: '0',
+    sell_price: '0',
     min_sell_price: null,
     max_sell_price: null,
     branch_price: null,
@@ -429,16 +433,14 @@ const product = ref<ProductData>({
     semi_wholesale_price: null,
     discount_type: null,
     discount_value: null,
-    tax_name: null,
-    tax_percentage: null,
-    min_tax_amount: null,
-    priority: null,
-    is_active: 0,
-    created_at: '',
-    updated_at: '',
+    category: null,
+    manufacturer: null,
+    unit: null,
+    taxes: [],
+    tests: [],
+    is_active: false,
     parent: null,
     children: [],
-    user: { id: 0, name: '', email: '' },
     has_children: false
 })
 
@@ -449,14 +451,14 @@ const fetchProduct = async () => {
         const productId = route.params.id
         
         const response = await api.get<{
-            status: boolean
+            status: number
             code: number
             message: string
             data: ProductData
-            errors: any
-        }>(`/api/items/${productId}`)
+            locale: string
+        }>(`/items/${productId}`)
         
-        if (response.status && response.data) {
+        if (response.status === 200 && response.data) {
             product.value = response.data
         } else {
             throw new Error(response.message || 'فشل في تحميل بيانات المنتج')
