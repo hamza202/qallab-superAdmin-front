@@ -5,9 +5,17 @@ export interface SampleType {
     name: string
     name_ar?: string
     name_en?: string
+    name_translations?: {
+        ar: string
+        en: string
+    }
     description: string | null
     description_ar?: string
     description_en?: string
+    description_translations?: {
+        ar: string
+        en: string
+    }
     is_active: boolean
     created_at: string
     updated_at: string

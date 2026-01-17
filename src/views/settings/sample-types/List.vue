@@ -131,22 +131,24 @@ const handleCreate = () => {
   router.push("/settings/sample-types/create");
 };
 
-const handleEdit = (item: SampleType) => {
+const handleEdit = (item: any) => {
+  const sampleItem = item as SampleType;
   // Check if user can update this item
-  if (!item.actions?.can_update) {
+  if (!sampleItem.actions?.can_update) {
     error('ليس لديك صلاحية لتعديل هذا العنصر');
     return;
   }
-  router.push(`/settings/sample-types/edit/${item.id}`);
+  router.push(`/settings/sample-types/edit/${sampleItem.id}`);
 };
 
-const openDeleteDialog = (item: SampleType) => {
+const openDeleteDialog = (item: any) => {
+  const sampleItem = item as SampleType;
   // Check if user can delete this item
-  if (!item.actions?.can_delete) {
+  if (!sampleItem.actions?.can_delete) {
     error('ليس لديك صلاحية لحذف هذا العنصر');
     return;
   }
-  itemToDelete.value = item;
+  itemToDelete.value = sampleItem;
   showDeleteDialog.value = true;
 };
 
@@ -168,13 +170,14 @@ const confirmDelete = async () => {
   }
 };
 
-const handleStatusToggle = (item: SampleType) => {
+const handleStatusToggle = (item: any) => {
+  const sampleItem = item as SampleType;
   // Check if user can change status of this item
-  if (!item.actions?.can_change_status) {
+  if (!sampleItem.actions?.can_change_status) {
     error('ليس لديك صلاحية لتغيير حالة هذا العنصر');
     return;
   }
-  itemToChangeStatus.value = item;
+  itemToChangeStatus.value = sampleItem;
   showStatusDialog.value = true;
 };
 
