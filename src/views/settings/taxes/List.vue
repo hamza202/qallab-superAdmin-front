@@ -154,7 +154,7 @@ const fetchTaxes = async (append = false) => {
     });
 
     const queryString = params.toString();
-    const url = queryString ? `/admin/taxes?${queryString}` : '/admin/taxes';
+    const url = queryString ? `/taxes?${queryString}` : '/taxes';
 
     const response = await api.get<TaxesResponse>(url);
 
@@ -233,7 +233,7 @@ const updateHeadersOnServer = async () => {
       formData.append(`header[${index}]`, header);
     });
 
-    await api.post('/admin/headers', formData);
+    await api.post('/headers', formData);
   } catch (err: any) {
     console.error('Error updating headers:', err);
     error(err?.response?.data?.message || 'Failed to update headers');
@@ -254,7 +254,7 @@ const handleEditTax = (item: any) => {
 
 const handleDeleteTax = async (item: any) => {
   try {
-    await api.delete(`/admin/taxes/${item.id}`);
+    await api.delete(`/taxes/${item.id}`);
     success('تم حذف الضريبة بنجاح');
     await fetchTaxes();
   } catch (err: any) {
@@ -276,7 +276,7 @@ const confirmStatusChange = async () => {
     statusChangeLoading.value = true;
     const newStatus = !itemToChangeStatus.value.is_active;
 
-    await api.patch(`/admin/taxes/${itemToChangeStatus.value.id}/change-status`, { status: newStatus });
+    await api.patch(`/taxes/${itemToChangeStatus.value.id}/change-status`, { status: newStatus });
 
     success(`تم ${newStatus ? 'تفعيل' : 'تعطيل'} الضريبة بنجاح`);
 
@@ -305,7 +305,7 @@ const confirmBulkDelete = async () => {
 
   try {
     deleteLoading.value = true;
-    await api.post('/admin/taxes/bulk-delete', { ids: selectedTaxes.value });
+    await api.post('/taxes/bulk-delete', { ids: selectedTaxes.value });
     success(`تم حذف ${selectedTaxes.value.length} ضريبة بنجاح`);
     selectedTaxes.value = [];
     await fetchTaxes();

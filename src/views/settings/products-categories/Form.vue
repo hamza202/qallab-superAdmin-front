@@ -196,7 +196,7 @@ const resetForm = () => {
 const fetchConstants = async () => {
   try {
     // Real API call to get all constants
-    const response = await api.get('/admin/categories/constants');
+    const response = await api.get('/categories/constants');
 
     // Populate priorities dropdown
     priorityItems.value = [
@@ -214,7 +214,7 @@ const fetchConstants = async () => {
 const fetchTaxs = async () => {
   try {
     // Real API call to get all taxes
-    const response = await api.get('/admin/taxes/list');
+    const response = await api.get('/taxes/list');
 
     // Store full tax data
     taxesData.value = response.data;
@@ -236,7 +236,7 @@ const fetchTaxs = async () => {
 const fetchCategories = async () => {
   try {
     // Real API call to get all categories
-    const response = await api.get('/admin/categories/list');
+    const response = await api.get('/categories/list');
 
     // Populate categories dropdown
     categoriesList.value = [
@@ -254,7 +254,7 @@ const fetchCategories = async () => {
 const fetchUnits = async () => {
   try {
     // Real API call to get all units
-    const response = await api.get('/admin/units/list');
+    const response = await api.get('/units/list');
 
     // Populate categories dropdown
     unitItems.value = [
@@ -276,7 +276,7 @@ const fetchCategoryDetails = async (id: number) => {
   isLoading.value = true;
   try {
     // Real API call
-    const response = await api.get(`/admin/categories/${id}`);
+    const response = await api.get(`/categories/${id}`);
     const cat = response.data;
     if (cat) {
       // Populate form with API data
@@ -376,9 +376,9 @@ const handleSave = async () => {
           formData.append(`taxes[${index}][is_active]`, tax.is_active ? '1' : '0');
         });
 
-        await api.upload(`/admin/categories/${categoryId.value}`, formData);
+        await api.upload(`/categories/${categoryId.value}`, formData);
       } else {
-        await api.put(`/admin/categories/${categoryId.value}`, payload);
+        await api.put(`/categories/${categoryId.value}`, payload);
       }
       success('تم تحديث التصنيف بنجاح');
     } else {
@@ -403,9 +403,9 @@ const handleSave = async () => {
           formData.append(`taxes[${index}][is_active]`, tax.is_active ? '1' : '0');
         });
 
-        await api.upload('/admin/categories', formData);
+        await api.upload('/categories', formData);
       } else {
-        await api.post('/admin/categories', payload);
+        await api.post('/categories', payload);
       }
       success('تم إضافة التصنيف بنجاح');
     }
@@ -449,7 +449,7 @@ const handleDeleteConfirm = async () => {
 
   deleteLoading.value = true;
   try {
-    await api.delete(`/admin/categories/${categoryId.value}`);
+    await api.delete(`/categories/${categoryId.value}`);
     success('تم حذف التصنيف بنجاح');
     returnToList();
   } catch (error) {

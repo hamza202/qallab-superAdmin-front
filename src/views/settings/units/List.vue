@@ -177,7 +177,7 @@ const fetchUnits = async (append = false) => {
     });
 
     const queryString = params.toString();
-    const url = queryString ? `admin/units?${queryString}` : 'admin/units';
+    const url = queryString ? `/units?${queryString}` : '/units';
 
     const response = await api.get<UnitsResponse>(url);
 
@@ -252,7 +252,7 @@ const updateHeadersOnServer = async () => {
       formData.append(`header[${index}]`, header);
     });
 
-    await api.post('/admin/headers', formData);
+    await api.post('/headers', formData);
   } catch (err: any) {
     console.error('Error updating headers:', err);
     error(err?.response?.data?.message || 'Failed to update headers');
@@ -273,7 +273,7 @@ const handleEditUnit = (item: any) => {
 
 const handleDeleteUnit = async (item: any) => {
   try {
-    await api.delete(`/admin/units/${item.id}`);
+    await api.delete(`/units/${item.id}`);
     success('تم حذف الوحدة بنجاح');
     await fetchUnits();
   } catch (err: any) {
@@ -295,7 +295,7 @@ const confirmStatusChange = async () => {
     statusChangeLoading.value = true;
     const newStatus = !itemToChangeStatus.value.is_active;
 
-    await api.patch(`/admin/units/${itemToChangeStatus.value.id}/change-status`, { status: newStatus });
+    await api.patch(`/units/${itemToChangeStatus.value.id}/change-status`, { status: newStatus });
 
     success(`تم ${newStatus ? 'تفعيل' : 'تعطيل'} الوحدة بنجاح`);
 
@@ -324,7 +324,7 @@ const confirmBulkDelete = async () => {
 
   try {
     deleteLoading.value = true;
-    await api.post('/admin/units/bulk-delete', { ids: selectedUnits.value });
+    await api.post('/units/bulk-delete', { ids: selectedUnits.value });
     success(`تم حذف ${selectedUnits.value.length} وحدة بنجاح`);
     selectedUnits.value = [];
     await fetchUnits();
