@@ -6,6 +6,9 @@ import { useRouter } from "vue-router";
 
 const router = useRouter();
 const route = useRoute();
+
+const formErrors = reactive<Record<string, string>>({});
+
 // Available languages
 const availableLanguages = ref([
   { code: "en", name: "En", flag: "/img/en.svg", dir: "ltr" as const },
@@ -184,6 +187,7 @@ const resetForm = () => {
   taxRules.value = [];
   resetNewTaxRule();
   formRef.value?.resetValidation();
+  Object.keys(formErrors).forEach(key => delete formErrors[key]);
 };
 
 // =====================
@@ -308,6 +312,8 @@ const fetchCategoryDetails = async (id: number) => {
 // Save Category (Create or Update)
 // =====================
 const handleSave = async () => {
+  Object.keys(formErrors).forEach(key => delete formErrors[key]);
+  
   const { valid } = await formRef.value?.validate();
   if (!valid) {
     console.log("Form has errors");
@@ -410,9 +416,19 @@ const handleSave = async () => {
     isEditing.value = false;
 
     returnToList()
-  } catch (err) {
+  } catch (err: any) {
     console.error('Failed to save category:', err);
-    showError('حدث خطأ أثناء حفظ التصنيف');
+    
+    // Handle validation errors
+    if (err?.response?.status === 422 && err?.response?.data?.errors) {
+      const apiErrors = err.response.data.errors;
+      Object.keys(apiErrors).forEach(key => {
+        formErrors[key] = apiErrors[key][0];
+      });
+      showError(err?.response?.data?.message || 'يرجى تصحيح الأخطاء في النموذج');
+    } else {
+      showError(err?.response?.data?.message || 'حدث خطأ أثناء حفظ التصنيف');
+    }
   } finally {
     isSaving.value = false;
   }
@@ -527,11 +543,13 @@ const editIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xm
                 <LanguageTabs :languages="availableLanguages" label="الإسم">
                   <template #en>
                     <TextInput v-model="categoryNameEn" placeholder="Enter name in English"
-                      :rules="[required(), maxLength(100)]" :hide-details="false" />
+                      :rules="[required(), minLength(2), maxLength(100)]" :hide-details="false"
+                      :error-messages="formErrors['name.en']" @input="delete formErrors['name.en']" />
                   </template>
                   <template #ar>
                     <TextInput v-model="categoryNameAr" placeholder="ادخل الاسم بالعربية"
-                      :rules="[required(), maxLength(100)]" :hide-details="false" />
+                      :rules="[required(), minLength(2), maxLength(100)]" :hide-details="false"
+                      :error-messages="formErrors['name.ar']" @input="delete formErrors['name.ar']" />
                   </template>
                 </LanguageTabs>
               </div>
@@ -571,11 +589,13 @@ const editIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xm
                 <LanguageTabs :languages="availableLanguages" label="تفاصيل التصنيف" class="mb-[20px]">
                   <template #en>
                     <RichTextEditor :rules="[required()]" v-model="categoryDescriptionEn" placeholder="Enter Category Description in English"
-                      min-height="120px" :hide-details="false" />
+                      min-height="120px" :hide-details="false"
+                      :error-messages="formErrors['description.en']" @input="delete formErrors['description.en']" />
                   </template>
                   <template #ar>
                     <RichTextEditor :rules="[required()]" v-model="categoryDescriptionAr" placeholder="ادخل تفاصيل التصنيف بالعربية"
-                      min-height="120px" :hide-details="false" />
+                      min-height="120px" :hide-details="false"
+                      :error-messages="formErrors['description.ar']" @input="delete formErrors['description.ar']" />
                   </template>
                 </LanguageTabs>
 
@@ -604,7 +624,8 @@ const editIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xm
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
               <div class="w-full lg:w-auto lg:flex-1 min-w-[250px]">
                 <SelectWithIconInput v-model="newTaxRule.tax_id" label="الضريبة" placeholder="اختر الضريبة"
-                  :items="taxNameItems" show-add-button :hide-details="false" />
+                  :items="taxNameItems" show-add-button :hide-details="false"
+                  :error-messages="formErrors['taxes']" @update:model-value="delete formErrors['taxes']" />
               </div>
 
               <div class="w-full sm:flex-1 lg:w-auto min-w-[100px]">

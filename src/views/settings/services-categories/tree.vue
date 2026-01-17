@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch, onMounted } from 'vue';
+import { computed, ref, watch, onMounted, reactive } from 'vue';
 import { useNotification } from '@/composables/useNotification';
 import { useApi } from '@/composables/useApi';
 import CategoryTreeItem from './components/CategoryTreeItem.vue';
@@ -1028,12 +1028,12 @@ const editIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xm
                 <LanguageTabs :languages="availableLanguages" label="الإسم">
                   <template #en>
                     <TextInput v-model="categoryNameEn" placeholder="Enter name in English"
-                      :rules="[required(), maxLength(100)]" :hide-details="false"
+                      :rules="[required(), minLength(2), maxLength(100)]" :hide-details="false"
                       :error-messages="formErrors['name.en']" @input="delete formErrors['name.en']" />
                   </template>
                   <template #ar>
                     <TextInput v-model="categoryNameAr" placeholder="ادخل الاسم بالعربية"
-                      :rules="[required(), maxLength(100)]" :hide-details="false"
+                      :rules="[required(), minLength(2), maxLength(100)]" :hide-details="false"
                       :error-messages="formErrors['name.ar']" @input="delete formErrors['name.ar']" />
                   </template>
                 </LanguageTabs>
@@ -1106,7 +1106,8 @@ const editIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xm
               <div class="grid grid-cols-1 xl:grid-cols-2 gap-4 mb-6">
                 <div class="w-full lg:w-auto lg:flex-1 min-w-[250px]">
                   <SelectWithIconInput v-model="newTaxRule.tax_id" label="الضريبة" placeholder="اختر الضريبة"
-                    :items="taxNameItems" show-add-button :hide-details="false" />
+                    :items="taxNameItems" show-add-button :hide-details="false"
+                    :error-messages="formErrors['taxes']" @update:model-value="delete formErrors['taxes']" />
                 </div>
 
                 <div class="w-full sm:flex-1 lg:w-auto min-w-[100px]">
