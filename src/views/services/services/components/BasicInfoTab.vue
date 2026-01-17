@@ -9,13 +9,13 @@ const availableLanguages = ref([
 
 const props = defineProps<{
   modelValue: any
-  domains: Array<{ key: string; label: string }>
   types: Array<{ key: string; label: string }>
   units: Array<{ id: number; name: string }>
   pricingMethods: Array<{ id: number; name: string }>
   taxes: Array<{ id: number; tax_name: string; value_rate: string }>
   serviceCategories: Array<{ id: number; name: string }>
   formErrors: Record<string, string>
+  isEditing: boolean
 }>()
 
 const emit = defineEmits(['update:modelValue'])
@@ -100,11 +100,11 @@ watch(() => formData.value.is_taxable, (isTaxable) => {
         </LanguageTabs>
       </div>
 
-      <div>
+      <div v-if="isEditing">
         <TextInput v-model="formData.service_code" variant="outlined" density="comfortable" label="رمز الخدمة"
           placeholder="ادخل رمز الخدمة" :rules="[required()]" :hide-details="false"
           :error-messages="props.formErrors['service_code']" @update:model-value="updateFormData"
-          @input="delete props.formErrors['service_code']" />
+          @input="delete props.formErrors['service_code']" disabled />
       </div>
 
       <div>

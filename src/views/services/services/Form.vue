@@ -19,6 +19,7 @@ const serviceId = ref<number | null>(null)
 const isEditing = computed(() => !!route.params.id)
 const saving = ref(false)
 const loading = ref(false)
+const pageLoading = ref(false)
 
 // Constants from API
 const types = ref<Array<{ key: string; label: string }>>([])
@@ -196,48 +197,59 @@ const fetchServiceData = async () => {
 }
 
 const buildPayload = (step: number) => {
-    return {
+    const basePayload = {
         step,
         service_id: serviceId.value || undefined,
-        name: {
-            en: basicInfoData.value.name_en,
-            ar: basicInfoData.value.name_ar
-        },
-        description: {
-            en: basicInfoData.value.description_en,
-            ar: basicInfoData.value.description_ar
-        },
-        service_code: basicInfoData.value.service_code,
-        service_category_id: basicInfoData.value.service_category_id,
-        service_type: basicInfoData.value.service_type,
-        is_active: basicInfoData.value.is_active,
-        unit_id: basicInfoData.value.unit_id,
-        unit_price: parseFloat(basicInfoData.value.unit_price) || 0,
-        pricing_method_id: basicInfoData.value.pricing_method_id,
-        min_quantity: parseInt(basicInfoData.value.min_quantity) || 0,
-        is_taxable: basicInfoData.value.is_taxable,
-        tax_id: basicInfoData.value.tax_id,
-        tax_percentage: parseFloat(basicInfoData.value.tax_percentage) || 0,
-        requires_scheduling: operationalData.value.requires_scheduling,
-        service_duration: parseInt(operationalData.value.service_duration) || 0,
-        service_duration_unit: operationalData.value.service_duration_unit,
-        requires_approval: operationalData.value.requires_approval,
-        is_barter: operationalData.value.is_barter,
-        is_partial_allowed: operationalData.value.is_partial_allowed,
-        sales_enabled: operationalData.value.sales_enabled,
-        purchase_enabled: operationalData.value.purchase_enabled,
-        project_enabled: operationalData.value.project_enabled,
-        visibility_level: operationalData.value.visibility_level,
-        notes: operationalData.value.notes,
-        activation_date: operationalData.value.activation_date,
     }
+
+    if (step === 1) {
+        return {
+            ...basePayload,
+            name: {
+                en: basicInfoData.value.name_en,
+                ar: basicInfoData.value.name_ar
+            },
+            description: {
+                en: basicInfoData.value.description_en,
+                ar: basicInfoData.value.description_ar
+            },
+            service_category_id: basicInfoData.value.service_category_id,
+            service_type: basicInfoData.value.service_type,
+            is_active: basicInfoData.value.is_active,
+            unit_id: basicInfoData.value.unit_id,
+            unit_price: parseFloat(basicInfoData.value.unit_price) || 0,
+            pricing_method_id: basicInfoData.value.pricing_method_id,
+            min_quantity: parseInt(basicInfoData.value.min_quantity) || 0,
+            is_taxable: basicInfoData.value.is_taxable,
+            tax_id: basicInfoData.value.tax_id,
+            tax_percentage: parseFloat(basicInfoData.value.tax_percentage) || 0,
+        }
+    } else if (step === 2) {
+        return {
+            ...basePayload,
+            requires_scheduling: operationalData.value.requires_scheduling,
+            service_duration: parseInt(operationalData.value.service_duration) || 0,
+            service_duration_unit: operationalData.value.service_duration_unit,
+            requires_approval: operationalData.value.requires_approval,
+            is_barter: operationalData.value.is_barter,
+            is_partial_allowed: operationalData.value.is_partial_allowed,
+            sales_enabled: operationalData.value.sales_enabled,
+            purchase_enabled: operationalData.value.purchase_enabled,
+            project_enabled: operationalData.value.project_enabled,
+            visibility_level: operationalData.value.visibility_level,
+            notes: operationalData.value.notes,
+            activation_date: operationalData.value.activation_date,
+        }
+    }
+
+    return basePayload
 }
 
 const saveStep = async (step: number) => {
     try {
         saving.value = true
         Object.keys(formErrors).forEach(key => delete formErrors[key])
-        
+
         const payload = buildPayload(step)
 
         let response: any
@@ -297,6 +309,7 @@ const handleClose = () => {
 
 // Lifecycle
 onMounted(async () => {
+    pageLoading.value = true
     // Fetch all dropdown data
     await Promise.all([
         fetchConstants(),
@@ -310,6 +323,7 @@ onMounted(async () => {
     if (isEditing.value) {
         await fetchServiceData()
     }
+    pageLoading.value = false
 })
 
 </script>
@@ -339,7 +353,7 @@ onMounted(async () => {
                     <v-tabs-window v-model="activeTab">
                         <v-tabs-window-item :value="0">
                             <BasicInfoTab v-model="basicInfoData" :types="types" :units="units"
-                                :pricing-methods="pricingMethodsList" :taxes="taxes"
+                                :pricing-methods="pricingMethodsList" :taxes="taxes" :isEditing="isEditing"
                                 :service-categories="serviceCategories" :form-errors="formErrors" />
                         </v-tabs-window-item>
 
@@ -353,15 +367,20 @@ onMounted(async () => {
                 <!-- Action Buttons -->
                 <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col px-4">
                     <ButtonWithIcon variant="flat" color="primary" rounded="4" height="48" custom-class="min-w-56"
-                        :prepend-icon="saveIcon" label="حفظ" @click="handleSave" />
+                        :prepend-icon="saveIcon" label="حفظ" @click="handleSave" :loading="saving" />
 
                     <ButtonWithIcon prepend-icon="mdi-close" variant="flat" color="primary-50" rounded="4" height="48"
                         custom-class="font-semibold text-base text-primary-700 px-6 min-w-56" :label="t('common.close')"
-                        @click="handleClose" />
+                        @click="handleClose" :disabled="saving" />
                 </div>
 
             </div>
         </div>
+
+        <v-overlay :model-value="pageLoading" contained class="align-center justify-center">
+            <v-progress-circular indeterminate color="primary" />
+        </v-overlay>
+
     </default-layout>
 </template>
 

@@ -34,7 +34,7 @@
                 <span class="text-lg text-gray-300">/</span>
 
                 <span class="text-primary-700 font-medium bg-primary-50 px-2 py-1 rounded-md">{{ service.arabicName ||
-                    '--'}}</span>
+                    '--' }}</span>
             </div>
 
             <!-- Page Header -->
@@ -46,7 +46,8 @@
                         </div>
                         <div>
                             <h1 class="text-lg font-bold text-gray-900 mb-1">{{ service.arabicName || '--' }}</h1>
-                            <p class="text-sm text-gray-600" v-if="service.arabicDescription">{{ service.arabicDescription }}</p>
+                            <p class="text-sm text-gray-600" v-if="service.arabicDescription"
+                                v-html="service.arabicDescription"></p>
                         </div>
                     </div>
                 </div>
@@ -90,12 +91,17 @@
                 <div class="flex gap-4">
                     <div class="info-item-bordered flex-1 px-6 py-4">
                         <label class="font-semibold text-sm text-gray-500 mb-2 block">الوصف بالانجليزي</label>
-                        <p class="text-sm text-gray-700 leading-relaxed">{{ service.englishDescription || '--' }}</p>
+                        <p class="text-sm text-gray-700 leading-relaxed" v-if="service.englishDescription"
+                            v-html="service.englishDescription"></p>
+                        <p class="text-sm text-gray-700 leading-relaxed" v-else>--</p>
                     </div>
                     <v-divider vertical class="my-6"></v-divider>
                     <div class="info-item-bordered flex-1 px-6 py-4">
                         <label class="font-semibold text-sm text-gray-500 mb-2 block">الوصف عربي</label>
-                        <p class="text-sm text-gray-700 leading-relaxed">{{ service.arabicDescription || '--' }}</p>
+                        <p class="text-sm text-gray-700 leading-relaxed" v-if="service.arabicDescription"
+                            v-html="service.arabicDescription"></p>
+                        <p class="text-sm text-gray-700 leading-relaxed" v-else>--</p>
+
                     </div>
 
                 </div>
@@ -173,8 +179,10 @@
                 <div class="flex gap-6 flex-wrap flex-column sm:!flex-row">
                     <div class="flex-1">
                         <label class="font-semibold text-sm text-gray-500 mb-2 block">ملاحظات</label>
-                        <p class="text-sm font-semibold text-gray-900">
-                            {{ service.notes || 'لا توجد ملاحظات' }}
+                        <p class="text-sm font-semibold text-gray-900" v-html="service.notes" v-if="service.notes">
+                        </p>
+                        <p class="text-sm font-semibold text-gray-900" v-else>
+                            --
                         </p>
                     </div>
                     <!-- <v-divider vertical class="hidden sm:block"></v-divider>

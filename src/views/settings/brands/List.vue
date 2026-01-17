@@ -1,9 +1,55 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import BrandFormDialog from "@/views/settings/brands/components/BrandFormDialog.vue";
 import { useI18n } from 'vue-i18n'
+import { useApi } from "@/composables/useApi";
+import { useNotification } from "@/composables/useNotification";
 
 const { t } = useI18n()
+const api = useApi();
+const { success, error } = useNotification();
+
+// Types
+interface Brand {
+  id: number;
+  name: string;
+  is_active: boolean;
+}
+
+interface TableHeader {
+  key: string;
+  title: string;
+  sortable?: boolean;
+}
+
+interface Pagination {
+  current_page: number;
+  next_cursor: string | null;
+  prev_cursor: string | null;
+  per_page: number;
+}
+
+interface BrandsResponse {
+  status: boolean;
+  code: number;
+  message: string;
+  data: Brand[];
+  pagination: Pagination;
+  header_table: string;
+  headers: TableHeader[];
+  shownHeaders: TableHeader[];
+  actions: {
+    can_create: boolean;
+  };
+}
+
+interface FilterParams {
+  per_page?: number;
+  cursor?: string | null;
+  name?: string;
+  created_at?: string;
+  status?: number | boolean;
+}
 
 const brandsIcon = `<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M23.6667 30.1667C27.2565 30.1667 30.1667 27.2565 30.1667 23.6667C30.1667 20.0768 27.2565 17.1667 23.6667 17.1667C20.0768 17.1667 17.1667 20.0768 17.1667 23.6667C17.1667 27.2565 20.0768 30.1667 23.6667 30.1667Z" stroke="#1570EF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
@@ -11,132 +57,299 @@ const brandsIcon = `<svg width="48" height="48" viewBox="0 0 48 48" fill="none" 
 </svg>
 `;
 
-const brandsTableHeaders = [
-  { key: "id", title: "#", width: "60px" },
-  { key: "name", title: "الاسم", width: "220px" },
-  { key: "createdAt", title: "تاريخ الإنشاء", width: "176px" },
-  { key: "user", title: "المستخدم", width: "176px" },
-  { key: "status", title: "الحالة", width: "120px" },
-];
+// API Data
+const tableItems = ref<Brand[]>([]);
+const allHeaders = ref<TableHeader[]>([]);
+const shownHeaders = ref<TableHeader[]>([]);
+const canCreate = ref(false);
+const header_table = ref('');
+const loading = ref(false);
+const loadingMore = ref(false);
 
-const brandsTableItems = ref([
-  {
-    id: 1,
-    name: "اسم العلامة التجارية",
-    createdAt: "25/2/2025",
-    user: "Adg",
-    status: "نشطة",
-  },
-  {
-    id: 2,
-    name: "اسم العلامة التجارية",
-    createdAt: "25/2/2025",
-    user: "Adg",
-    status: "غير نشطة",
-  },
-  {
-    id: 3,
-    name: "اسم العلامة التجارية",
-    createdAt: "25/2/2025",
-    user: "23d",
-    status: "نشطة",
-  },
-]);
+// Pagination
+const nextCursor = ref<string | null>(null);
+const previousCursor = ref<string | null>(null);
+const perPage = ref(5);
+const hasMoreData = computed(() => nextCursor.value !== null);
 
+// Computed table headers for DataTable component
+const tableHeaders = computed(() => shownHeaders.value);
+
+// Headers dropdown
+const showHeadersMenu = ref(false);
+const updatingHeaders = ref(false);
+
+// Computed checked headers for menu
+const headerCheckStates = computed(() => {
+  const states: Record<string, boolean> = {};
+  allHeaders.value.forEach(header => {
+    states[header.key] = shownHeaders.value.some(sh => sh.key === header.key);
+  });
+  return states;
+});
+
+// Filters
+const showAdvancedFilters = ref(false);
+const filterName = ref("");
+const filterCreatedAt = ref<string | null>(null);
+const filterStatus = ref<number | null>(null);
+
+const StatusList = [
+  { title: 'فعال', value: 1 },
+  { title: 'غير فعال', value: 0 }
+]
+
+// Bulk delete only
+const showDeleteDialog = ref(false);
+const deleteLoading = ref(false);
+
+// Status change confirmation
+const showStatusChangeDialog = ref(false);
+const statusChangeLoading = ref(false);
+const itemToChangeStatus = ref<Brand | null>(null);
+
+// Brand dialog
 const showBrandDialog = ref(false);
-const editingBrand = ref<any | null>(null);
+const editingBrandId = ref<number | null>(null);
+
+// Selection
+const selectedBrands = ref<number[]>([]);
+const hasSelectedBrands = computed(() => selectedBrands.value.length > 0);
+
+// Infinite scroll
+const loadMoreTrigger = ref<HTMLElement | null>(null);
+
+// Fetch brands from API
+const fetchBrands = async (append = false) => {
+  try {
+    if (append) {
+      loadingMore.value = true;
+    } else {
+      loading.value = true;
+    }
+
+    const filters: FilterParams = {
+      per_page: perPage.value,
+      cursor: append ? nextCursor.value : null,
+    };
+
+    if (filterName.value) filters.name = filterName.value;
+    if (filterCreatedAt.value) filters.created_at = filterCreatedAt.value;
+    if (filterStatus.value !== null) filters.status = filterStatus.value;
+
+    const params = new URLSearchParams();
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== null && value !== undefined && value !== '') {
+        params.append(key, String(value));
+      }
+    });
+
+    const queryString = params.toString();
+    const url = queryString ? `/brands?${queryString}` : '/brands';
+
+    const response = await api.get<BrandsResponse>(url);
+
+    // Convert is_active to boolean for v-switch compatibility
+    const normalizedData = response.data.map(item => ({
+      ...item,
+      is_active: Boolean(item.is_active)
+    }));
+
+    if (append) {
+      tableItems.value = [...tableItems.value, ...normalizedData];
+    } else {
+      tableItems.value = normalizedData;
+      allHeaders.value = response.headers.filter(h => h.key !== 'id' && h.key !== 'actions');
+      shownHeaders.value = response.shownHeaders.filter(h => h.key !== 'id' && h.key !== 'actions');
+      canCreate.value = response.actions.can_create;
+      header_table.value = response.header_table
+    }
+
+    nextCursor.value = response.pagination.next_cursor;
+    previousCursor.value = response.pagination.prev_cursor;
+  } catch (err: any) {
+    console.error('Error fetching brands:', err);
+    error(err?.response?.data?.message || 'Failed to fetch brands');
+  } finally {
+    loading.value = false;
+    loadingMore.value = false;
+  }
+};
+
+const loadMore = async () => {
+  if (!hasMoreData.value || loadingMore.value) return;
+  await fetchBrands(true);
+};
+
+const applyFilters = () => {
+  fetchBrands();
+};
+
+const resetFilters = () => {
+  filterName.value = '';
+  filterCreatedAt.value = null;
+  filterStatus.value = null;
+  fetchBrands();
+};
+
+// Toggle header visibility
+const toggleHeader = async (headerKey: string) => {
+  const isCurrentlyShown = shownHeaders.value.some(h => h.key === headerKey);
+
+  if (isCurrentlyShown) {
+    shownHeaders.value = shownHeaders.value.filter(h => h.key !== headerKey);
+  } else {
+    const headerToAdd = allHeaders.value.find(h => h.key === headerKey);
+    if (headerToAdd) {
+      shownHeaders.value.push(headerToAdd);
+    }
+  }
+
+  await updateHeadersOnServer();
+};
+
+const updateHeadersOnServer = async () => {
+  try {
+    updatingHeaders.value = true;
+    const headerKeys = shownHeaders.value.map(h => h.key);
+
+    const formData = new FormData();
+    formData.append('table', header_table.value);
+    headerKeys.forEach((header, index) => {
+      formData.append(`header[${index}]`, header);
+    });
+
+    await api.post('/headers', formData);
+  } catch (err: any) {
+    console.error('Error updating headers:', err);
+    error(err?.response?.data?.message || 'Failed to update headers');
+  } finally {
+    updatingHeaders.value = false;
+  }
+};
 
 const openCreateBrand = () => {
-  editingBrand.value = null;
+  editingBrandId.value = null;
   showBrandDialog.value = true;
 };
 
 const handleEditBrand = (item: any) => {
-  editingBrand.value = {
-    id: item.id,
-    nameAr: item.name,
-    nameEn: item.name,
-    notes: "",
-    status: item.status === "نشطة",
-    logo: null,
-  };
-
+  editingBrandId.value = item.id;
   showBrandDialog.value = true;
 };
 
-const handleDeleteBrand = (item: any) => {
-  brandsTableItems.value = brandsTableItems.value.filter((b) => b.id !== item.id);
-};
-
-const handleSaveBrand = (payload: any) => {
-  if (editingBrand.value && editingBrand.value.id) {
-    const index = brandsTableItems.value.findIndex((b) => b.id === editingBrand.value.id);
-    if (index !== -1) {
-      brandsTableItems.value[index] = {
-        ...brandsTableItems.value[index],
-        name: payload.nameAr,
-        status: payload.status ? "نشطة" : "غير نشطة",
-      };
-    }
-  } else {
-    const nextId = brandsTableItems.value.length
-      ? Math.max(...brandsTableItems.value.map((b) => b.id)) + 1
-      : 1;
-
-    brandsTableItems.value.push({
-      id: nextId,
-      name: payload.nameAr,
-      createdAt: new Date().toLocaleDateString("ar-EG"),
-      user: "Adg",
-      status: payload.status ? "نشطة" : "غير نشطة",
-    });
+const handleDeleteBrand = async (item: any) => {
+  try {
+    await api.delete(`/brands/${item.id}`);
+    success('تم حذف العلامة التجارية بنجاح');
+    await fetchBrands();
+  } catch (err: any) {
+    console.error('Error deleting brand:', err);
+    error(err?.response?.data?.message || 'Failed to delete brand');
   }
-
-  editingBrand.value = null;
-  showBrandDialog.value = false;
 };
 
-// Selection and filters (similar to other settings pages)
-const selectedBrandIds = ref<(string | number)[]>([]);
+const handleStatusChange = (item: any) => {
+  // Store the item with its current status
+  itemToChangeStatus.value = { ...item };
+  showStatusChangeDialog.value = true;
+};
 
-const showAdvancedFilters = ref(false);
+const confirmStatusChange = async () => {
+  if (!itemToChangeStatus.value) return;
 
-const filterBrandName = ref("");
-const filterUser = ref("");
-const filterStatus = ref<string | null>(null);
-const filterCreatedAt = ref<string | null>(null);
-const createdAtMenu = ref(false);
+  try {
+    statusChangeLoading.value = true;
+    const newStatus = !itemToChangeStatus.value.is_active;
+
+    await api.patch(`/brands/${itemToChangeStatus.value.id}/change-status`, { status: newStatus });
+
+    success(`تم ${newStatus ? 'تفعيل' : 'تعطيل'} العلامة التجارية بنجاح`);
+
+    // Update local state
+    const index = tableItems.value.findIndex(t => t.id === itemToChangeStatus.value!.id);
+    if (index !== -1) {
+      tableItems.value[index].is_active = newStatus;
+    }
+  } catch (err: any) {
+    console.error('Error changing status:', err);
+    error(err?.response?.data?.message || 'Failed to change status');
+  } finally {
+    statusChangeLoading.value = false;
+    showStatusChangeDialog.value = false;
+    itemToChangeStatus.value = null;
+  }
+};
+
+const handleBulkDelete = () => {
+  if (selectedBrands.value.length === 0) return;
+  showDeleteDialog.value = true;
+};
+
+const confirmBulkDelete = async () => {
+  if (deleteLoading.value) return;
+
+  try {
+    deleteLoading.value = true;
+    await api.post('/brands/bulk-delete', { ids: selectedBrands.value });
+    success(`تم حذف ${selectedBrands.value.length} علامة تجارية بنجاح`);
+    selectedBrands.value = [];
+    await fetchBrands();
+  } catch (err: any) {
+    console.error('Error deleting brands:', err);
+    error(err?.response?.data?.message || 'Failed to delete brands');
+  } finally {
+    deleteLoading.value = false;
+    showDeleteDialog.value = false;
+  }
+};
+
+const handleSaveBrand = async () => {
+  // Refresh the list after successful save
+  await fetchBrands();
+  editingBrandId.value = null;
+};
 
 const handleSelectBrand = (item: any, selected: boolean) => {
   if (selected) {
-    if (!selectedBrandIds.value.includes(item.id)) {
-      selectedBrandIds.value.push(item.id);
+    if (!selectedBrands.value.includes(item.id)) {
+      selectedBrands.value.push(item.id);
     }
   } else {
-    selectedBrandIds.value = selectedBrandIds.value.filter((id) => id !== item.id);
+    selectedBrands.value = selectedBrands.value.filter((id) => id !== item.id);
   }
 };
 
 const handleSelectAllBrands = (selected: boolean) => {
   if (selected) {
-    selectedBrandIds.value = brandsTableItems.value.map((item) => item.id);
+    selectedBrands.value = tableItems.value.map((item) => item.id);
   } else {
-    selectedBrandIds.value = [];
+    selectedBrands.value = [];
   }
 };
-
-const hasSelectedBrands = computed(() => selectedBrandIds.value.length > 0);
 
 const toggleAdvancedFilters = () => {
   showAdvancedFilters.value = !showAdvancedFilters.value;
 };
 
-const resetFilters = () => {
-  filterBrandName.value = "";
-  filterUser.value = "";
-  filterStatus.value = null;
-  filterCreatedAt.value = null;
-};
+// Lifecycle
+onMounted(() => {
+  fetchBrands();
+
+  // Setup infinite scroll observer
+  const observer = new IntersectionObserver(
+    (entries) => {
+      if (entries[0].isIntersecting && hasMoreData.value && !loadingMore.value) {
+        loadMore();
+      }
+    },
+    { threshold: 0.1 }
+  );
+
+  if (loadMoreTrigger.value) {
+    observer.observe(loadMoreTrigger.value);
+  }
+});
 
 const columnIcon = `<svg width="16" height="17" viewBox="0 0 16 17" fill="none" xmlns="http://www.w3.org/2000/svg">
   <path
@@ -176,8 +389,9 @@ const editIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none" xm
   <default-layout>
     <div class="brands-page">
       <PageHeader :icon="brandsIcon" title-key="pages.brands.title" description-key="pages.brands.description" />
-      <div class="flex justify-end pb-2">
-        <ButtonWithIcon variant="outlined" height="40"
+      <div
+        class="flex justify-end items-stretch rounded border border-gray-300 w-fit ms-auto mb-4 overflow-hidden bg-white text-sm">
+        <ButtonWithIcon variant="flat" height="40" rounded="0"
           custom-class="font-semibold text-base border-gray-300 bg-primary-50 !text-primary-900"
           :prepend-icon="exportIcon" :label="t('common.export')" />
       </div>
@@ -185,68 +399,103 @@ const editIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none" xm
       <div class="bg-gray-50 rounded-md -mx-6">
         <div :class="hasSelectedBrands ? 'justify-between' : 'justify-end'"
           class="flex flex-wrap items-center gap-3 border-y border-y-slate-300 px-4 sm:px-6 py-3">
-          <!-- Actions when rows are selected -->
+          <!-- Bulk Actions -->
           <div v-if="hasSelectedBrands"
-            class="flex flex-wrap items-stretch rounded-lg overflow-hidden border border-gray-200 bg-white text-sm">
+            class="flex flex-wrap items-stretch rounded overflow-hidden border border-gray-200 bg-white text-sm">
             <ButtonWithIcon variant="flat" height="40" rounded="0"
               custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-              :prepend-icon="trash_1_icon" color="white" :label="t('common.delete')" />
+              :prepend-icon="trash_1_icon" color="white" :label="t('common.delete')" @click="handleBulkDelete" />
             <div class="w-px bg-gray-200"></div>
             <ButtonWithIcon variant="flat" height="40" rounded="0"
               custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-              :prepend-icon="trash_2_icon" color="white" :label="t('common.deleteAll')" />
+              :prepend-icon="trash_2_icon" color="white" :label="t('common.deleteAll')" @click="handleBulkDelete" />
           </div>
 
           <!-- Main header controls -->
           <div class="flex flex-wrap gap-3">
-            <ButtonWithIcon variant="outlined" color="gray-500" height="40" rounded="4"
-              custom-class="font-semibold text-base border-gray-400"
-              :prepend-icon="columnIcon" :label="t('common.columns')" append-icon="mdi-chevron-down" />
+            <!-- Column Management -->
+            <v-menu v-model="showHeadersMenu" :close-on-content-click="false">
+              <template v-slot:activator="{ props }">
+                <ButtonWithIcon v-bind="props" variant="outlined" rounded="4" color="gray-500" height="40"
+                  custom-class="font-semibold text-base border-gray-400" :prepend-icon="columnIcon"
+                  :label="t('common.columns')" append-icon="mdi-chevron-down" />
+              </template>
+              <v-list>
+                <v-list-item v-for="header in allHeaders" :key="header.key" @click="toggleHeader(header.key)">
+                  <template v-slot:prepend>
+                    <v-checkbox-btn :model-value="headerCheckStates[header.key]" :disabled="updatingHeaders"
+                      @click.stop="toggleHeader(header.key)"></v-checkbox-btn>
+                  </template>
+                  <v-list-item-title>{{ header.title }}</v-list-item-title>
+                </v-list-item>
+              </v-list>
+            </v-menu>
+
+            <!-- Advanced Filters Toggle -->
             <ButtonWithIcon variant="flat" color="primary-500" height="40" rounded="4"
               custom-class="px-7 font-semibold text-base text-white border !border-primary-200"
               :prepend-icon="searchIcon" :label="t('common.advancedSearch')" @click="toggleAdvancedFilters" />
-            <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4"
+
+            <!-- Add New Button -->
+            <ButtonWithIcon v-if="canCreate" variant="flat" color="primary-100" height="40" rounded="4"
               custom-class="px-7 font-semibold text-base !text-primary-800 border !border-primary-200"
               :prepend-icon="plusIcon" :label="t('common.addNew')" @click="openCreateBrand" />
           </div>
         </div>
 
-        <!-- Advanced filters row -->
-        <div v-if="showAdvancedFilters"
-          class="border-y border-y-primary-100 bg-primary-50 px-4 sm:px-6 py-3 flex flex-col gap-3 sm:gap-2">
-          <div class="flex flex-wrap gap-3 flex-1 justify-between">
-            <div class="flex gap-3">
-            <TextInput v-model="filterBrandName" density="comfortable" variant="outlined" hide-details
-              placeholder="اسم العلامة التجارية" class="w-full sm:w-60 bg-white" />
-            <TextInput v-model="filterUser" density="comfortable" variant="outlined" hide-details
-              placeholder="المستخدم" class="w-full sm:w-40 bg-white" />
-            <SelectInput v-model="filterStatus" :items="['نشطة', 'غير نشطة']" density="comfortable" variant="outlined"
-              hide-details placeholder="الحالة" class="w-full sm:w-40 bg-white" />
-            <DatePickerInput v-model="filterCreatedAt" density="comfortable"
-              hide-details placeholder="تاريخ الإنشاء" class="w-full sm:w-48 bg-white" />
-
+        <!-- Advanced Filters -->
+        <div v-if="showAdvancedFilters" class="border-b border-gray-300 px-4 sm:px-6 py-4 bg-white">
+          <div class="flex flex-wrap gap-3 justify-between">
+            <div class="flex gap-3 flex-wrap">
+              <TextInput v-model="filterName" density="comfortable" variant="outlined" hide-details
+                placeholder="اسم العلامة التجارية" class="w-full sm:w-40 bg-white" @keyup.enter="applyFilters" />
+              <SelectInput v-model="filterStatus" :items="StatusList" item-title="title" item-value="value"
+                density="comfortable" variant="outlined" hide-details placeholder="الحالة"
+                class="w-full sm:w-40 bg-white" @update:model-value="applyFilters" />
+              <DatePickerInput v-model="filterCreatedAt" placeholder="تاريخ الإنشاء" hide-details
+                class="w-full sm:w-40 bg-white" />
             </div>
 
             <div class="flex gap-2 items-center">
               <ButtonWithIcon variant="flat" color="primary-500" rounded="4" height="40"
-                custom-class="px-5 font-semibold !text-white text-sm sm:text-base" 
-                :prepend-icon="searchIcon" label="ابحث" />
-              
+                custom-class="px-5 font-semibold !text-white text-sm sm:text-base" :prepend-icon="searchIcon"
+                label="بحث" @click="applyFilters" />
+
               <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4" border="sm"
                 custom-class="px-5 font-semibold text-sm sm:text-base !text-primary-800 !border-primary-200"
-                prepend-icon="mdi-refresh" label="إعادة تعيين" />
+                prepend-icon="mdi-refresh" label="إعادة تعيين" @click="resetFilters" />
             </div>
-
           </div>
         </div>
 
-        <DataTable :headers="brandsTableHeaders" :items="brandsTableItems" show-checkbox show-actions
-          @edit="handleEditBrand" @delete="handleDeleteBrand" @select="handleSelectBrand"
-          @selectAll="handleSelectAllBrands" :show-view="false" />
+        <!-- Data Table -->
+        <DataTable :headers="tableHeaders" :items="tableItems" :loading="loading" show-checkbox show-actions
+          @delete="handleDeleteBrand" @edit="handleEditBrand" @select="handleSelectBrand"
+          @selectAll="handleSelectAllBrands" :confirm-delete="true" :show-view="false">
+          <template #item.is_active="{ item }">
+            <v-switch :model-value="item.is_active" hide-details inset density="compact" color="primary"
+              @update:model-value="(value) => handleStatusChange(item)" />
+          </template>
+        </DataTable>
 
-        <BrandFormDialog v-model="showBrandDialog" :brand="editingBrand" @save="handleSaveBrand" />
+        <!-- Infinite Scroll Trigger & Loading Indicator -->
+        <div ref="loadMoreTrigger" class="flex justify-center py-8">
+          <v-progress-circular v-if="loadingMore" indeterminate color="primary" size="32" />
+        </div>
       </div>
     </div>
+
+    <!-- Bulk Delete Confirmation Dialog -->
+    <DeleteConfirmDialog v-model="showDeleteDialog" :loading="deleteLoading" title="حذف العلامات التجارية"
+      :message="`هل أنت متأكد من حذف ${selectedBrands.length} علامة تجارية؟`" @confirm="confirmBulkDelete" />
+
+    <!-- Status Change Confirmation Dialog -->
+    <StatusChangeDialog v-model="showStatusChangeDialog" :loading="statusChangeLoading"
+      :item-name="itemToChangeStatus?.name" :current-status="itemToChangeStatus?.is_active"
+      @confirm="confirmStatusChange" />
+
+    <!-- Brand Form Dialog -->
+    <BrandFormDialog v-model="showBrandDialog" :brand-id="editingBrandId" @saved="handleSaveBrand" />
   </default-layout>
 </template>
 
