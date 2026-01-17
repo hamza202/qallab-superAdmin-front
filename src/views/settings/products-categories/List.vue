@@ -167,7 +167,7 @@ const fetchCategories = async (cursor?: string | null, append = false) => {
         });
 
         const queryString = params.toString();
-        const url = queryString ? `/categories?${queryString}` : '/categories';
+        const url = queryString ? `/admin/categories?${queryString}` : '/admin/categories';
 
         const response = await api.get<CategoriesResponse>(url);
         console.log(response);
