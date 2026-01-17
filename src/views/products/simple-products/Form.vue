@@ -1047,6 +1047,86 @@ const handleTabClick = (tabValue: number) => {
   }
 };
 
+// Fetch single product data for edit mode
+const fetchProduct = async (id: number) => {
+  try {
+    const response = await api.get<any>(`/items/${id}`);
+    const data = response.data;
+
+    if (data) {
+      productItemId.value = data.id;
+      productCode.value = data.code;
+
+      // Names
+      if (data.name_translations) {
+        arabicName.value = data.name_translations.ar || '';
+        englishName.value = data.name_translations.en || '';
+      }
+
+      // Descriptions
+      if (data.description_translations) {
+        arabicDescription.value = data.description_translations.ar || '';
+        englishDescription.value = data.description_translations.en || '';
+      }
+
+      // Category & Unit
+      category.value = data.category_id;
+      unit.value = data.unit_id;
+      isMinUnit.value = data.is_minimum_unit;
+
+      // Prices
+      purchasePrice.value = data.purchase_price;
+      salePrice.value = data.sell_price;
+      minSalePrice.value = data.min_sell_price;
+      maxSalePrice.value = data.max_sell_price;
+      wholesalePrice.value = data.wholesale_price;
+      halfWholesalePrice.value = data.semi_wholesale_price;
+
+      // Discount & Profit
+      discountType.value = data.discount_type ? Number(data.discount_type) : null;
+      discountValue.value = data.discount_value;
+      profitMargin.value = data.profit_margin;
+
+      // Relations
+      originCountry.value = data.country_of_origin_id;
+      manufacturer.value = data.manufacturer_id;
+      brand.value = data.brand_id;
+
+      // Arrays (Map string IDs to numbers)
+      if (Array.isArray(data.alternative_items)) {
+        alternativeProducts.value = data.alternative_items.map((i: any) => Number(i));
+      }
+      if (Array.isArray(data.attached_items)) {
+        attachedProducts.value = data.attached_items.map((i: any) => Number(i));
+      }
+      if (Array.isArray(data.linked_items)) {
+        relatedProducts.value = data.linked_items.map((i: any) => Number(i));
+      }
+      if (Array.isArray(data.best_suppliers)) {
+        bestSuppliers.value = data.best_suppliers.map((i: any) => Number(i));
+      }
+
+      // Boolean Flags - Mapping based on buildStep3Data logic
+      sellNegative.value = data.allow_negative_sales;
+      isManufacturingProduct.value = data.is_manufacturable;
+      isAvailableForRent.value = data.is_rentable;
+      isAvailableForReturn.value = data.is_returnable;
+      
+      // Mappings inferred from formData construction:
+      isAvailableForRefund.value = data.is_barter_sale; // formData: is_barter_sale maps to isAvailableForRefund
+      isAvailableForOffset.value = data.is_settlement_by_netting; // formData: is_settlement_by_netting maps to isAvailableForOffset
+      isAvailableForPurchase.value = data.is_available_for_projects; // formData: is_available_for_projects maps to isAvailableForPurchase
+      isAvailableForSelling.value = data.is_available_for_sale;
+      isAvailableForBuying.value = data.is_available_for_purchase;
+
+      isStep1Completed.value = true;
+    }
+  } catch (err: any) {
+    console.error('Error fetching product:', err);
+    toast.error('فشل في جلب بيانات المنتج');
+  }
+};
+
 // Lifecycle hook - fetch data on mount
 onMounted(async () => {
   loading.value = true;
@@ -1068,12 +1148,12 @@ onMounted(async () => {
     
     // If in edit mode, set step 1 as completed and load item data
     if (isEditMode.value) {
-      isStep1Completed.value = true;
       itemId.value = Number(route.params.id);
       productItemId.value = Number(route.params.id);
       // Fetch items list with ignore_id for edit mode
       await fetchItemsList();
-      // TODO: Fetch item data for editing
+      // Fetch item data for editing
+      await fetchProduct(Number(route.params.id));
     }
   } catch (err) {
     console.error('Error loading form data:', err);
