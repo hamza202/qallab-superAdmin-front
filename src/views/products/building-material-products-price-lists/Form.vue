@@ -154,7 +154,7 @@ const rows = computed(() => {
 // API Functions
 const fetchCategories = async () => {
   try {
-    const response = await api.get<ApiResponse<ItemCategory[]>>('/api/settings/categories/list')
+    const response = await api.get<ApiResponse<ItemCategory[]>>('/admin/settings/categories/list')
     categories.value = response.data
   } catch (err: any) {
     console.error('Error fetching categories:', err)
@@ -166,7 +166,7 @@ const fetchPriceListItems = async (priceListId: number) => {
   try {
     loading.value = true
     const response = await api.get<ApiResponse<PriceListData>>(
-      `/api/price-lists/${priceListId}`,
+      `/admin/price-lists/${priceListId}`,
       { params: { is_building_material: 1 } }
     )
     const priceListData = response.data
@@ -243,7 +243,7 @@ const bulkSyncItems = async (supplierId: number, items: PriceListRow[]) => {
     })
   }
 
-  return await api.put(`/api/suppliers/${supplierId}/price-list/items/sync`, payload)
+  return await api.put(`/admin/suppliers/${supplierId}/price-list/items/sync`, payload)
 }
 
 // Track price changes

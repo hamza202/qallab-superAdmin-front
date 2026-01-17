@@ -102,7 +102,7 @@ const toggleAdvancedFilters = () => {
 const fetchPriceLists = async () => {
   try {
     loading.value = true
-    const response = await api.get<PriceListsResponse>('/api/price-lists')
+    const response = await api.get<PriceListsResponse>('/admin/price-lists')
     tableItems.value = response.data
   } catch (err: any) {
     console.error('Error fetching price lists:', err)
@@ -115,7 +115,7 @@ const fetchPriceLists = async () => {
 const deletePriceList = async (priceListId: number) => {
   try {
     deleteLoading.value = true
-    await api.delete(`/api/price-lists/${priceListId}`)
+    await api.delete(`/admin/price-lists/${priceListId}`)
     success('تم حذف قائمة الأسعار بنجاح')
     await fetchPriceLists()
   } catch (err: any) {
