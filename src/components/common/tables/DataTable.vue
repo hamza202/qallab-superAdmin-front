@@ -27,6 +27,9 @@ interface Props {
   showView?: boolean;
   confirmDelete?: boolean;
   loading?: boolean;
+  forceShowEdit?: boolean;   // Force show edit without checking item.actions
+  forceShowDelete?: boolean; // Force show delete without checking item.actions
+  forceShowView?: boolean;   // Force show view without checking item.actions
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -38,6 +41,9 @@ const props = withDefaults(defineProps<Props>(), {
   showView: true,
   confirmDelete: true,
   loading: false,
+  forceShowEdit: false,
+  forceShowDelete: false,
+  forceShowView: false,
 });
 
 const emit = defineEmits<{
@@ -266,15 +272,15 @@ const eyeIcon = `<svg width="22" height="16" viewBox="0 0 22 16" fill="none" xml
             </template>
             <!-- Default Actions -->
             <div v-else class="flex items-center gap-1">
-              <v-btn icon variant="text" v-if="showView && item.actions?.can_view" size="small"
+              <v-btn icon variant="text" v-if="showView && (forceShowView || item.actions?.can_view)" size="small"
                 @click="handleView(item)">
                 <span v-html="eyeIcon"></span>
               </v-btn>
-              <v-btn icon variant="text" v-if="showEdit && item.actions?.can_update" color="primary" size="small"
+              <v-btn icon variant="text" v-if="showEdit && (forceShowEdit || item.actions?.can_update)" color="primary" size="small"
                 @click="handleEdit(item)">
                 <span v-html="editIcon"></span>
               </v-btn>
-              <v-btn icon variant="text" v-if="showDelete && item.actions?.can_delete" size="small" color="error"
+              <v-btn icon variant="text" v-if="showDelete && (forceShowDelete || item.actions?.can_delete)" size="small" color="error"
                 @click="handleDelete(item)">
                 <span v-html="trashIcon"></span>
               </v-btn>
