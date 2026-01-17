@@ -73,6 +73,7 @@ interface Supplier {
     due_amount: number;
     city: string;
     status: boolean;
+    is_active: boolean;
     created_at: string;
     actions: SupplierAction;
 }
@@ -118,6 +119,7 @@ const tableItems = ref<Supplier[]>([]);
 const allHeaders = ref<TableHeader[]>([]);
 const shownHeaders = ref<TableHeader[]>([]);
 const canCreate = ref(false);
+const header_table = ref('')
 const loading = ref(false);
 const loadingMore = ref(false);
 
@@ -136,6 +138,11 @@ const tableHeaders = computed(() => {
     }));
 });
 
+const StatusList = [
+  { title: 'فعال', value: 1 },
+  { title: 'غير فعال', value: 0 }
+]
+
 // Selection state
 const selectedSuppliers = ref<number[]>([]);
 const hasSelectedSuppliers = computed(() => selectedSuppliers.value.length > 0);
@@ -148,7 +155,7 @@ const filterFullName = ref("");
 const filterCity = ref<string | null>(null);
 const filterStatus = ref<string | null>(null);
 
-const cityItems = ["الرياض", "جدة", "الطائف", "مكة", "المدينة"];
+const cityItems = ref<{ title: string; value: number }[]>([]);
 
 const toggleAdvancedFilters = () => {
     showAdvancedFilters.value = !showAdvancedFilters.value;
@@ -179,7 +186,19 @@ const headerCheckStates = computed(() => {
 });
 
 // API Functions
-const fetchSuppliers = async (cursor?: string | null, append = false) => {
+const fetchCities = async () => {
+    try {
+        const response = await api.get<{ data: { id: number; name: string }[] }>('/cities/list');
+        cityItems.value = response.data.map(item => ({
+            title: item.name,
+            value: item.id
+        }));
+    } catch (err: any) {
+        console.error('Error fetching cities:', err);
+    }
+};
+
+const fetchSuppliers = async (append = false) => {
     try {
         if (append) {
             loadingMore.value = true;
@@ -189,7 +208,7 @@ const fetchSuppliers = async (cursor?: string | null, append = false) => {
 
         const filters: SupplierFilters = {
             per_page: perPage.value,
-            cursor: cursor || undefined,
+            cursor: append ? nextCursor.value : null,
         };
 
         if (filterBusinessName.value) filters.business_name = filterBusinessName.value;
@@ -206,17 +225,23 @@ const fetchSuppliers = async (cursor?: string | null, append = false) => {
         });
 
         const queryString = params.toString();
-        const url = queryString ? `/admin/api/suppliers?${queryString}` : '/admin/api/suppliers';
+        const url = queryString ? `/suppliers?${queryString}` : '/suppliers';
 
         const response = await api.get<SuppliersResponse>(url);
+        // Convert is_active to boolean for v-switch compatibility
+        const normalizedData = response.data.map(item => ({
+            ...item,
+            is_active: Boolean(item.status)
+        }));
 
         if (append) {
-            tableItems.value = [...tableItems.value, ...response.data];
+            tableItems.value = [...tableItems.value, ...normalizedData];
         } else {
-            tableItems.value = response.data;
-            allHeaders.value = response.headers;
-            shownHeaders.value = response.shownHeaders;
-            canCreate.value = response.actions.can_create;
+            tableItems.value = normalizedData
+            allHeaders.value = response.headers.filter(h => h.key !== 'id' && h.key !== 'actions')
+            shownHeaders.value = response.shownHeaders.filter(h => h.key !== 'id' && h.key !== 'actions')
+            canCreate.value = response.actions.can_create
+            header_table.value = response.header_table
         }
 
         nextCursor.value = response.pagination.next_cursor;
@@ -232,14 +257,23 @@ const fetchSuppliers = async (cursor?: string | null, append = false) => {
 };
 
 // Load more data (lazy loading)
-const loadMore = () => {
-    if (hasMoreData.value && !loadingMore.value) {
-        fetchSuppliers(nextCursor.value, true);
-    }
+const loadMore = async () => {
+    if (!hasMoreData.value || loadingMore.value) return;
+    await fetchSuppliers(true);
 };
 
 // Apply filters
 const applyFilters = () => {
+    fetchSuppliers();
+};
+
+// Reset filters
+const resetFilters = () => {
+    filterBusinessName.value = '';
+    filterSupplierCode.value = '';
+    filterFullName.value = '';
+    filterCity.value = null;
+    filterStatus.value = null;
     fetchSuppliers();
 };
 
@@ -266,12 +300,12 @@ const updateHeadersOnServer = async () => {
         const headerKeys = shownHeaders.value.map(h => h.key);
 
         const formData = new FormData();
-        formData.append('table', 'suppliers');
+        formData.append('table', header_table.value)
         headerKeys.forEach((header, index) => {
             formData.append(`header[${index}]`, header);
         });
 
-        await api.post('/admin/api/headers', formData, {
+        await api.post('/headers', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
@@ -289,13 +323,9 @@ const handleEdit = (item: any) => {
     router.push({ name: "SuppliersEdit", params: { id: item.id } });
 };
 
-const handleDelete = (item: any) => {
-    itemToDelete.value = item;
-    showDeleteDialog.value = true;
-};
-
 const handleStatusChange = (item: any) => {
-    itemToChangeStatus.value = item;
+    // Store the item with its current status
+    itemToChangeStatus.value = { ...item };
     showStatusChangeDialog.value = true;
 };
 
@@ -304,45 +334,43 @@ const confirmStatusChange = async () => {
 
     try {
         statusChangeLoading.value = true;
-        const newStatus = !itemToChangeStatus.value.status;
+        const newStatus = !itemToChangeStatus.value.is_active;
 
-        await api.patch(`/admin/api/suppliers/${itemToChangeStatus.value.id}/change-status`, {
+        await api.patch(`/suppliers/${itemToChangeStatus.value.id}/change-status`, {
             status: newStatus
         });
 
         success(`تم ${newStatus ? 'تفعيل' : 'تعطيل'} المورد بنجاح`);
 
-        // Update the item in the list
-        const index = tableItems.value.findIndex(s => s.id === itemToChangeStatus.value!.id);
+        // Update local state
+        const index = tableItems.value.findIndex(t => t.id === itemToChangeStatus.value!.id);
         if (index !== -1) {
-            tableItems.value[index].status = newStatus;
+            tableItems.value[index].is_active = newStatus;
         }
 
-        itemToChangeStatus.value = null;
     } catch (err: any) {
         console.error('Error changing supplier status:', err);
         error(err?.response?.data?.message || 'فشل تغيير حالة المورد');
     } finally {
         statusChangeLoading.value = false;
         showStatusChangeDialog.value = false;
+        itemToChangeStatus.value = null;
     }
 };
 
-const confirmDelete = async () => {
-    if (!itemToDelete.value) return;
-
+const confirmDelete = async (item: any) => {
     try {
         deleteLoading.value = true;
-        await api.delete(`/admin/api/suppliers/${itemToDelete.value.id}`);
+        await api.delete(`/suppliers/${item.id}`);
         success('Supplier deleted successfully');
         await fetchSuppliers();
-        itemToDelete.value = null;
     } catch (err: any) {
         console.error('Error deleting supplier:', err);
         error(err?.response?.data?.message || 'Failed to delete supplier');
     } finally {
         deleteLoading.value = false;
         showDeleteDialog.value = false;
+        itemToDelete.value = null;
     }
 };
 
@@ -354,7 +382,7 @@ const handleBulkDelete = () => {
 const confirmBulkDelete = async () => {
     try {
         deleteLoading.value = true;
-        await api.post('/admin/api/suppliers/bulk-delete', { ids: selectedSuppliers.value });
+        await api.post('/suppliers/bulk-delete', { ids: selectedSuppliers.value });
         success(`${selectedSuppliers.value.length} suppliers deleted successfully`);
         selectedSuppliers.value = [];
         await fetchSuppliers();
@@ -386,6 +414,12 @@ const handleSelectAllSuppliers = (checked: boolean) => {
 const openCreateSupplier = () => {
     router.push({ name: "SuppliersCreate" });
 };
+
+// Initialize data
+onMounted(async () => {
+    await fetchCities();
+    await fetchSuppliers();
+});
 
 // Infinite scroll with Intersection Observer
 const loadMoreTrigger = ref<HTMLElement | null>(null);
@@ -442,7 +476,7 @@ onBeforeUnmount(() => {
                 <ButtonWithIcon variant="flat" height="40" rounded="0"
                     custom-class="font-semibold text-base border-gray-300 bg-primary-100 !text-primary-900"
                     :prepend-icon="importIcon" :label="t('common.import')" />
-                
+
                 <ButtonWithIcon variant="flat" height="40" rounded="0"
                     custom-class="font-semibold text-base border-gray-300 bg-primary-50 !text-primary-900"
                     :prepend-icon="exportIcon" :label="t('common.export')" />
@@ -456,20 +490,23 @@ onBeforeUnmount(() => {
                         class="flex flex-wrap items-stretch rounded overflow-hidden border border-gray-200 bg-white text-sm">
                         <ButtonWithIcon variant="flat" height="40" rounded="0"
                             custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-                            :prepend-icon="trash_1_icon" color="white" :label="t('common.delete')" @click="handleBulkDelete" />
+                            :prepend-icon="trash_1_icon" color="white" :label="t('common.delete')"
+                            @click="handleBulkDelete" />
                         <div class="w-px bg-gray-200"></div>
                         <ButtonWithIcon variant="flat" height="40" rounded="0"
                             custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-                            :prepend-icon="trash_2_icon" color="white" :label="t('common.deleteAll')" @click="handleBulkDelete" />
+                            :prepend-icon="trash_2_icon" color="white" :label="t('common.deleteAll')"
+                            @click="handleBulkDelete" />
                     </div>
 
                     <!-- Main header controls -->
                     <div class="flex flex-wrap gap-3">
                         <v-menu v-model="showHeadersMenu" :close-on-content-click="false">
                             <template v-slot:activator="{ props }">
-                                <ButtonWithIcon v-bind="props" variant="outlined" rounded="4"
-                                    color="gray-500" height="40" custom-class="font-semibold text-base border-gray-400"
-                                    :prepend-icon="columnIcon" :label="t('common.columns')" append-icon="mdi-chevron-down" />
+                                <ButtonWithIcon v-bind="props" variant="outlined" rounded="4" color="gray-500"
+                                    height="40" custom-class="font-semibold text-base border-gray-400"
+                                    :prepend-icon="columnIcon" :label="t('common.columns')"
+                                    append-icon="mdi-chevron-down" />
                             </template>
                             <v-list>
                                 <v-list-item v-for="header in allHeaders" :key="header.key"
@@ -486,7 +523,8 @@ onBeforeUnmount(() => {
 
                         <ButtonWithIcon variant="flat" color="primary-500" height="40" rounded="4"
                             custom-class="px-7 font-semibold text-base text-white border !border-primary-200"
-                            :prepend-icon="searchIcon" :label="t('common.advancedSearch')" @click="toggleAdvancedFilters" />
+                            :prepend-icon="searchIcon" :label="t('common.advancedSearch')"
+                            @click="toggleAdvancedFilters" />
 
                         <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4"
                             custom-class="px-7 font-semibold text-base !text-primary-800 border !border-primary-200"
@@ -505,10 +543,10 @@ onBeforeUnmount(() => {
                             placeholder="كود المورد" class="w-full sm:w-40 bg-white" @keyup.enter="applyFilters" />
                         <v-text-field v-model="filterFullName" density="comfortable" variant="outlined" hide-details
                             placeholder="الاسم الكامل" class="w-full sm:w-40 bg-white" @keyup.enter="applyFilters" />
-                        <v-select v-model="filterCity" :items="cityItems" density="comfortable" variant="outlined"
+                        <v-select v-model="filterCity" :items="cityItems" item-title="title" item-value="value" density="comfortable" variant="outlined"
                             hide-details placeholder="المدينة" class="w-full sm:w-40 bg-white"
                             @update:model-value="applyFilters" />
-                        <v-select v-model="filterStatus" :items="['فعال', 'غير فعال']" density="comfortable"
+                        <v-select v-model="filterStatus" :items="StatusList" density="comfortable"
                             variant="outlined" hide-details placeholder="الحالة" class="w-full sm:w-40 bg-white"
                             @update:model-value="applyFilters" />
 
@@ -516,10 +554,10 @@ onBeforeUnmount(() => {
                             <ButtonWithIcon variant="flat" color="primary-500" rounded="4" height="40"
                                 custom-class="px-5 font-semibold !text-white text-sm sm:text-base"
                                 :prepend-icon="searchIcon" label="ابحث" @click="applyFilters" />
-                            
+
                             <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4" border="sm"
                                 custom-class="px-5 font-semibold text-sm sm:text-base !text-primary-800 !border-primary-200"
-                                prepend-icon="mdi-refresh" label="إعادة تعيين" />
+                                prepend-icon="mdi-refresh" label="إعادة تعيين" @click="resetFilters" />
                         </div>
 
                     </div>
@@ -527,29 +565,20 @@ onBeforeUnmount(() => {
 
                 <!-- Suppliers Table -->
                 <DataTable :headers="tableHeaders" :items="tableItems" :loading="loading" show-checkbox show-actions
-                    @edit="handleEdit" @delete="handleDelete" @select="handleSelectSupplier"
-                    @selectAll="handleSelectAllSuppliers">
-                    <template #item.status="{ item }">
-                        <v-switch :model-value="item.status" hide-details inset density="compact" color="primary"
-                            @click="handleStatusChange(item)" />
+                    @edit="handleEdit" @delete="confirmDelete" @select="handleSelectSupplier"
+                    @selectAll="handleSelectAllSuppliers" :show-view="false">
+                    <template #item.is_active="{ item }">
+                        <v-switch :model-value="item.is_active" hide-details inset density="compact" color="primary"
+                            @update:model-value="(value) => handleStatusChange(item)" class="small-switch" />
                     </template>
-
                 </DataTable>
 
                 <!-- Infinite Scroll Trigger & Loading Indicator -->
                 <div ref="loadMoreTrigger" class="flex justify-center py-4">
                     <v-progress-circular v-if="loadingMore" indeterminate color="primary" size="32" />
-                    <span v-else-if="!hasMoreData && tableItems.length > 0" class="text-gray-500 text-sm">
-                        لا توجد المزيد من البيانات
-                    </span>
                 </div>
             </div>
         </div>
-
-        <!-- Delete Confirmation Dialog -->
-        <DeleteConfirmDialog v-model="showDeleteDialog" :loading="deleteLoading"
-            :item-name="itemToDelete?.business_name" title="حذف المورد" message="هل أنت متأكد من حذف المورد"
-            @confirm="confirmDelete" />
 
         <!-- Bulk Delete Confirmation Dialog -->
         <DeleteConfirmDialog v-model="showBulkDeleteDialog" :loading="deleteLoading" title="حذف الموردين"
