@@ -63,7 +63,7 @@ const saving = ref(false);
 const fetchConstants = async () => {
   try {
     loadingConstants.value = true;
-    const response = await api.get('/admin/units/constants');
+    const response = await api.get('/units/constants');
 
     if (response.data.types) {
       typeItems.value = response.data.types.map((type: any) => ({
@@ -83,7 +83,7 @@ const fetchConstants = async () => {
 const fetchUnitData = async (unitId: number) => {
   try {
     loadingUnitData.value = true;
-    const response = await api.get(`/admin/units/${unitId}`);
+    const response = await api.get(`/units/${unitId}`);
     const unit = response.data;
 
     form.id = unit.id;
@@ -106,7 +106,7 @@ const fetchUnitData = async (unitId: number) => {
 const fetchUnitsList = async () => {
   try {
     loadingConstants.value = true;
-    const response = await api.get('/admin/units/list');
+    const response = await api.get('/units/list');
     parentUnitItems.value = response.data.map((unit: any) => ({
       title: unit.name,
       value: unit.id,
@@ -170,10 +170,10 @@ const handleSave = async () => {
       formData.append('notes', form.notes);
       formData.append('is_active', form.status ? '1' : '0');
 
-      await api.post(`/admin/units/${form.id}`, formData);
+      await api.post(`/units/${form.id}`, formData);
       success('تم تحديث الوحدة بنجاح');
     } else {
-      await api.post('/admin/units', payload);
+      await api.post('/units', payload);
       success('تم إضافة الوحدة بنجاح');
     }
 

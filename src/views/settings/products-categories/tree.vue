@@ -431,7 +431,7 @@ const resetForm = () => {
 const fetchConstants = async () => {
   try {
     // Real API call to get all constants
-    const response = await api.get('/admin/categories/constants');
+    const response = await api.get('/categories/constants');
 
     // Populate priorities dropdown
     priorityItems.value = [
@@ -471,7 +471,7 @@ const fetchTaxes = async () => {
 const fetchCategoriesList = async () => {
   try {
     // Real API call to get all categories
-    const response = await api.get('/admin/categories/list');
+    const response = await api.get('/categories/list');
 
     // Populate categories dropdown
     CategoryDropdownItems.value = [
@@ -489,7 +489,7 @@ const fetchCategoriesList = async () => {
 const fetchUnits = async () => {
   try {
     // Real API call to get all units
-    const response = await api.get('/admin/units/list');
+    const response = await api.get('/units/list');
 
     // Populate categories dropdown
     unitItems.value = [
@@ -509,7 +509,7 @@ const fetchCategoriesTree = async () => {
   isLoading.value = true;
   try {
     // Real API call - get tree structure with taxes
-    const response = await api.get('/admin/categories/tree?with_taxes=true');
+    const response = await api.get('/categories/tree?with_taxes=true');
 
     // Transform API tree response to internal format recursively
     const transformTree = (items: any[], parentId: number | null = null): CategoryListItem[] => {
@@ -540,7 +540,7 @@ const fetchCategoryDetails = async (id: number) => {
   isLoading.value = true;
   try {
     // Real API call
-    const response = await api.get(`/admin/categories/${id}`);
+    const response = await api.get(`/categories/${id}`);
     const cat = response.data;
     if (cat) {
       // Populate form with API data
@@ -677,7 +677,7 @@ const handleSave = async () => {
         }),
       };
 
-      await api.post('/admin/categories/tree/tax-bulk', payload);
+      await api.post('/categories/tree/tax-bulk', payload);
       success(`تم تطبيق الضرائب على ${selectedCategoryIds.value.length} تصنيف بنجاح`);
 
       selectedCategoryIds.value = [];
@@ -736,9 +736,9 @@ const handleSave = async () => {
             formData.append(`taxes[${index}][is_active]`, tax.is_active ? '1' : '0');
           });
 
-          await api.upload(`/admin/categories/${selectedCategory.value.id}`, formData);
+          await api.upload(`/categories/${selectedCategory.value.id}`, formData);
         } else {
-          await api.put(`/admin/categories/${selectedCategory.value.id}`, payload);
+          await api.put(`/categories/${selectedCategory.value.id}`, payload);
         }
         success('تم تحديث التصنيف بنجاح');
       } else {
@@ -761,9 +761,9 @@ const handleSave = async () => {
             formData.append(`taxes[${index}][priority]`, tax.priority);
             formData.append(`taxes[${index}][is_active]`, tax.is_active ? '1' : '0');
           });
-          await api.upload('/admin/categories', formData);
+          await api.upload('/categories', formData);
         } else {
-          await api.post('/admin/categories', payload);
+          await api.post('/categories', payload);
         }
 
         success(isSubcategoryMode.value ? 'تم إضافة التصنيف الفرعي بنجاح' : 'تم إضافة التصنيف بنجاح');
@@ -833,7 +833,7 @@ const confirmBulkDelete = async () => {
   isDeleting.value = true;
 
   try {
-    await api.post('/admin/categories/bulk-delete', { ids: selectedCategoryIds.value });
+    await api.post('/categories/bulk-delete', { ids: selectedCategoryIds.value });
     success(`تم حذف ${selectedCategoryIds.value.length} تصنيف بنجاح`);
 
     // Refresh categories list
@@ -862,7 +862,7 @@ const confirmDelete = async () => {
   isDeleting.value = true;
 
   try {
-    await api.delete(`/admin/categories/${selectedCategory.value.id}`);
+    await api.delete(`/categories/${selectedCategory.value.id}`);
     success('تم حذف التصنيف بنجاح');
 
     // Refresh categories list

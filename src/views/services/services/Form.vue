@@ -126,7 +126,7 @@ const handleTabChange = (newTab: number, event?: Event) => {
 // API Functions
 const fetchConstants = async () => {
     try {
-        const response = await api.get<any>('/admin/api/services/constants')
+        const response = await api.get<any>('/services/constants')
         const data = response.data
 
         domains.value = data.domains || []
@@ -142,7 +142,7 @@ const fetchConstants = async () => {
 
 const fetchUnits = async () => {
     try {
-        const response = await api.get<any>('/admin/api/units/list')
+        const response = await api.get<any>('/units/list')
         units.value = response.data || []
     } catch (err: any) {
         console.error('Error fetching units:', err)
@@ -151,7 +151,7 @@ const fetchUnits = async () => {
 
 const fetchTaxes = async () => {
     try {
-        const response = await api.get<any>('/admin/api/taxes/list')
+        const response = await api.get<any>('/taxes/list')
         taxes.value = response.data || []
     } catch (err: any) {
         console.error('Error fetching taxes:', err)
@@ -160,7 +160,7 @@ const fetchTaxes = async () => {
 
 const fetchPricingMethods = async () => {
     try {
-        const response = await api.get<any>('/admin/api/pricing-methods/list')
+        const response = await api.get<any>('/pricing-methods/list')
         pricingMethodsList.value = response.data || []
     } catch (err: any) {
         console.error('Error fetching pricing methods:', err)
@@ -172,7 +172,7 @@ const fetchServiceData = async () => {
 
     try {
         loading.value = true
-        const response = await api.get<any>(`/admin/api/services/${route.params.id}`)
+        const response = await api.get<any>(`/services/${route.params.id}`)
         const data = response.data
 
         serviceId.value = data.id
@@ -265,9 +265,9 @@ const saveStep = async (step: number) => {
         let response: any
 
         if (serviceId.value) {
-            response = await api.put(`/admin/api/services/${serviceId.value}`, payload)
+            response = await api.put(`/services/${serviceId.value}`, payload)
         } else {
-            response = await api.post('/admin/api/services', payload)
+            response = await api.post('/services', payload)
         }
 
         if (response.data.service_id) {
