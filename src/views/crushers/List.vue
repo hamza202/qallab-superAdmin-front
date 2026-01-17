@@ -564,7 +564,7 @@ onBeforeUnmount(() => {
                     @edit="handleEdit" @delete="handleDelete" @select="handleSelectCrusher"
                     @selectAll="handleSelectAllCrushers">
                     <template #item.status="{ item }">
-                        <v-switch :model-value="item.status" hide-details inset density="compact" color="primary"
+                        <v-switch :model-value="item.status" hide-details inset density="compact" class="small-switch" color="primary-600"
                             @click="handleStatusChange(item)" />
                     </template>
 

@@ -236,7 +236,7 @@ onMounted(() => {
           </template>
 
           <template #item.status="{ item }">
-            <v-switch :model-value="item.is_active" hide-details inset density="compact" color="primary" disabled />
+            <v-switch :model-value="item.is_active" hide-details inset density="compact" class="small-switch" color="primary-600" disabled />
           </template>
         </DataTable>
       </div>

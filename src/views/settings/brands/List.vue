@@ -473,7 +473,7 @@ const editIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none" xm
           @delete="handleDeleteBrand" @edit="handleEditBrand" @select="handleSelectBrand"
           @selectAll="handleSelectAllBrands" :confirm-delete="true" :show-view="false">
           <template #item.is_active="{ item }">
-            <v-switch :model-value="item.is_active" hide-details inset density="compact" color="primary"
+            <v-switch :model-value="item.is_active" hide-details inset density="compact" class="small-switch" color="primary-600"
               @update:model-value="(value) => handleStatusChange(item)" />
           </template>
         </DataTable>

@@ -19,7 +19,7 @@ interface SelectItem {
 }
 
 interface SelectWithIconInputProps {
-    modelValue: string | number | null;
+    modelValue: string | number | string[] | number[] | null;
     label?: string;
     placeholder?: string;
     items: SelectItem[] | string[];
@@ -33,6 +33,8 @@ interface SelectWithIconInputProps {
     disabled?: boolean;
     readonly?: boolean;
     clearable?: boolean;
+    multiple?: boolean;
+    chips?: boolean;
     rules?: any[];
     errorMessages?: string | string[];
     hideDetails?: boolean | "auto";
@@ -59,7 +61,7 @@ const props = withDefaults(defineProps<SelectWithIconInputProps>(), {
 });
 
 const emit = defineEmits<{
-    (e: "update:modelValue", value: string | number | null): void;
+    (e: "update:modelValue", value: string | number | string[] | number[] | null): void;
     (e: "add-click"): void;
 }>();
 
@@ -96,6 +98,8 @@ const plusCircleIcon = `<svg width="22" height="22" viewBox="0 0 20 20" fill="no
             :disabled="disabled"
             :readonly="readonly"
             :clearable="clearable"
+            :multiple="multiple"
+            :chips="chips"
             :rules="rules"
             :error-messages="errorMessages"
             :hide-details="hideDetails"

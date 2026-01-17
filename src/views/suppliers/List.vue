@@ -139,8 +139,8 @@ const tableHeaders = computed(() => {
 });
 
 const StatusList = [
-  { title: 'فعال', value: 1 },
-  { title: 'غير فعال', value: 0 }
+    { title: 'فعال', value: 1 },
+    { title: 'غير فعال', value: 0 }
 ]
 
 // Selection state
@@ -415,12 +415,6 @@ const openCreateSupplier = () => {
     router.push({ name: "SuppliersCreate" });
 };
 
-// Initialize data
-onMounted(async () => {
-    await fetchCities();
-    await fetchSuppliers();
-});
-
 // Infinite scroll with Intersection Observer
 const loadMoreTrigger = ref<HTMLElement | null>(null);
 const observer = ref<IntersectionObserver | null>(null);
@@ -453,7 +447,10 @@ const cleanupInfiniteScroll = () => {
 };
 
 // Lifecycle
-onMounted(() => {
+onMounted(async () => {
+    await fetchCities();
+    await fetchSuppliers();
+
     fetchSuppliers();
     nextTick(() => {
         setupInfiniteScroll();
@@ -530,7 +527,6 @@ onBeforeUnmount(() => {
                             custom-class="px-7 font-semibold text-base !text-primary-800 border !border-primary-200"
                             :prepend-icon="plusIcon" label="أضف مورد" @click="openCreateSupplier" />
                     </div>
-
                 </div>
 
                 <!-- Advanced filters row -->
@@ -543,11 +539,11 @@ onBeforeUnmount(() => {
                             placeholder="كود المورد" class="w-full sm:w-40 bg-white" @keyup.enter="applyFilters" />
                         <v-text-field v-model="filterFullName" density="comfortable" variant="outlined" hide-details
                             placeholder="الاسم الكامل" class="w-full sm:w-40 bg-white" @keyup.enter="applyFilters" />
-                        <v-select v-model="filterCity" :items="cityItems" item-title="title" item-value="value" density="comfortable" variant="outlined"
-                            hide-details placeholder="المدينة" class="w-full sm:w-40 bg-white"
-                            @update:model-value="applyFilters" />
-                        <v-select v-model="filterStatus" :items="StatusList" density="comfortable"
-                            variant="outlined" hide-details placeholder="الحالة" class="w-full sm:w-40 bg-white"
+                        <v-select v-model="filterCity" :items="cityItems" item-title="title" item-value="value"
+                            density="comfortable" variant="outlined" hide-details placeholder="المدينة"
+                            class="w-full sm:w-40 bg-white" @update:model-value="applyFilters" />
+                        <v-select v-model="filterStatus" :items="StatusList" density="comfortable" variant="outlined"
+                            hide-details placeholder="الحالة" class="w-full sm:w-40 bg-white"
                             @update:model-value="applyFilters" />
 
                         <div class="flex gap-2 items-center">
@@ -568,8 +564,9 @@ onBeforeUnmount(() => {
                     @edit="handleEdit" @delete="confirmDelete" @select="handleSelectSupplier"
                     @selectAll="handleSelectAllSuppliers" :show-view="false">
                     <template #item.is_active="{ item }">
-                        <v-switch :model-value="item.is_active" hide-details inset density="compact" color="primary"
-                            @update:model-value="(value) => handleStatusChange(item)" class="small-switch" />
+                        <v-switch :model-value="item.is_active" hide-details inset density="compact"
+                            @update:model-value="(value) => handleStatusChange(item)" class="small-switch"
+                            color="primary-600" />
                     </template>
                 </DataTable>
 

@@ -533,7 +533,7 @@ onBeforeUnmount(() => {
           @edit="handleEdit" @delete="confirmDelete" @select="handleSelect" @view="handleView"
           @selectAll="handleSelectAll">
           <template #item.is_active="{ item }">
-            <v-switch :model-value="item.is_active" hide-details inset density="compact" color="primary"
+            <v-switch :model-value="item.is_active" hide-details inset density="compact" class="small-switch" color="primary-600"
               @update:model-value="(value) => handleStatusChange(item)" />
           </template>
         </DataTable>

@@ -525,7 +525,7 @@ const importIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" 
                     @delete="handleDelete" @view="handleView" @select="handleSelectCategory" @edit="handleEdit"
                     @selectAll="handleSelectAllCategories" :confirm-delete="true">
                     <template #item.is_active="{ item }">
-                        <v-switch :model-value="item.is_active" hide-details inset density="compact" color="primary"
+                        <v-switch :model-value="item.is_active" hide-details inset density="compact" class="small-switch" color="primary-600"
                             @update:model-value="(value) => handleStatusChange(item)" />
                     </template>
 

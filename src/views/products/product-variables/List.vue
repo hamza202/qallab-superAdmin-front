@@ -19,18 +19,31 @@
             class="flex flex-wrap items-stretch rounded overflow-hidden border border-gray-200 bg-white text-sm">
             <ButtonWithIcon variant="flat" height="40" rounded="0"
               custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-              :prepend-icon="trash_1_icon" color="white" label="حذف المحدد" />
+              :prepend-icon="trash_1_icon" color="white" label="حذف المحدد" @click="handleBulkDelete" />
             <div class="w-px bg-gray-200"></div>
             <ButtonWithIcon variant="flat" height="40" rounded="0"
               custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-              :prepend-icon="trash_2_icon" color="white" label="حذف الجميع" />
+              :prepend-icon="trash_2_icon" color="white" label="حذف الجميع" @click="handleBulkDelete" />
           </div>
 
           <!-- Main header controls -->
           <div class="flex flex-wrap gap-3">
-            <ButtonWithIcon variant="outlined" rounded="4" color="gray-500" height="40"
-              custom-class="font-semibold text-base border-gray-400" :prepend-icon="columnIcon"
-              :label="t('common.columns')" append-icon="mdi-chevron-down" />
+            <v-menu v-model="showHeadersMenu" :close-on-content-click="false">
+              <template v-slot:activator="{ props }">
+                <ButtonWithIcon v-bind="props" variant="outlined" rounded="4" color="gray-500" height="40"
+                  custom-class="font-semibold text-base border-gray-400" :prepend-icon="columnIcon"
+                  :label="t('common.columns')" append-icon="mdi-chevron-down" />
+              </template>
+              <v-list>
+                <v-list-item v-for="header in allHeaders" :key="header.key" @click="toggleHeader(header.key)">
+                  <template v-slot:prepend>
+                    <v-checkbox-btn :model-value="headerCheckStates[header.key]" :disabled="updatingHeaders"
+                      @click.stop="toggleHeader(header.key)"></v-checkbox-btn>
+                  </template>
+                  <v-list-item-title>{{ header.title }}</v-list-item-title>
+                </v-list-item>
+              </v-list>
+            </v-menu>
 
             <ButtonWithIcon variant="flat" color="primary-500" height="40" rounded="4"
               custom-class="px-7 font-semibold text-base text-white border !border-primary-200"
@@ -38,7 +51,7 @@
 
             <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4"
               custom-class="px-7 font-semibold text-base !text-primary-800 border !border-primary-200"
-              :prepend-icon="plusIcon" :label="t('common.add')" @click="openCreate" />
+              :prepend-icon="plusIcon" :label="t('common.addNew')" @click="openCreate" />
           </div>
         </div>
 
@@ -46,39 +59,49 @@
         <div v-if="showAdvancedFilters"
           class="border-y border-y-primary-100 bg-primary-50 px-4 sm:px-6 py-3 flex flex-col gap-3 sm:gap-2">
           <div class="flex flex-wrap gap-3 flex-1">
-            <SelectInput v-model="filterStatus" :items="['فعال', 'غير فعال']" density="comfortable" variant="outlined"
-              hide-details placeholder="الحالة" class="flex-1 bg-white" />
-            <DatePickerInput v-model="filterCreatedAt" density="comfortable" hide-details
-              placeholder="تاريخ الانشاء" class="flex-1 bg-white" />
+            <SelectInput v-model="filterStatus" :items="StatusList" item-title="title" item-value="value"
+              density="comfortable" variant="outlined" hide-details placeholder="الحالة" class="flex-1 bg-white"
+              @update:model-value="applyFilters" />
             <TextInput v-model="filterName" density="comfortable" variant="outlined" hide-details
-              placeholder="اسم المتغير" class="flex-1 bg-white" />
+              placeholder="اسم المتغير" class="flex-1 bg-white" @keyup.enter="applyFilters" />
+            <DatePickerInput v-model="filterCreatedAt" density="comfortable" hide-details placeholder="تاريخ الانشاء"
+              class="flex-1 bg-white" @update:model-value="applyFilters" />
             <div class="flex gap-2 items-center">
               <ButtonWithIcon variant="flat" color="primary-500" rounded="4" height="40"
-                custom-class="px-5 font-semibold !text-white text-sm sm:text-base"
-                :prepend-icon="searchIcon" label="ابحث الآن" />
-              
+                custom-class="px-5 font-semibold !text-white text-sm sm:text-base" :prepend-icon="searchIcon"
+                label="ابحث الآن" @click="applyFilters" />
+
               <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4" border="sm"
                 custom-class="px-5 font-semibold text-sm sm:text-base !text-primary-800 !border-primary-200"
-                label="إعادة تعيين" />
+                label="إعادة تعيين" prepend-icon="mdi-refresh" @click="resetFilters" />
             </div>
-
-
           </div>
         </div>
 
         <!-- Product Variables Table -->
-        <DataTable :headers="tableHeaders" :items="tableItems" show-checkbox show-actions @edit="handleEdit"
-          @delete="handleDelete" @select="handleSelect" @selectAll="handleSelectAll" />
+        <DataTable :headers="tableHeaders" :items="tableItems" :loading="loading" show-checkbox show-actions
+          @edit="handleEdit" @delete="confirmDelete" :show-view="false" @select="handleSelect"
+          @selectAll="handleSelectAll">
+          <template #item.is_active="{ item }">
+            <v-switch :model-value="item.is_active" hide-details inset density="compact" 
+              @update:model-value="() => handleStatusChange(item)" class="small-switch" color="primary-600" />
+          </template>
+        </DataTable>
 
         <!-- Infinite Scroll Trigger & Loading Indicator -->
         <div ref="loadMoreTrigger" class="flex justify-center py-4">
           <v-progress-circular v-if="loadingMore" indeterminate color="primary" size="32" />
-          <span v-else-if="!hasMoreData && tableItems.length > 0" class="text-gray-500 text-sm">
-            لا توجد المزيد من البيانات
-          </span>
         </div>
       </div>
     </div>
+    <!-- Bulk Delete Confirmation Dialog -->
+    <DeleteConfirmDialog v-model="showBulkDeleteDialog" :loading="deleteLoading" title="حذف المتغيرات"
+      :message="`هل أنت متأكد من حذف ${selectedRows.length} متغير؟`" @confirm="confirmBulkDelete" />
+
+    <!-- Status Change Confirmation Dialog -->
+    <StatusChangeDialog v-model="showStatusChangeDialog" :loading="statusChangeLoading"
+      :item-name="itemToChangeStatus?.name" :current-status="itemToChangeStatus?.is_active || false"
+      @confirm="confirmStatusChange" />
   </default-layout>
 </template>
 
@@ -88,15 +111,16 @@ import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import DatePickerInput from '@/components/common/forms/DatePickerInput.vue';
 import { useApi } from '@/composables/useApi'
+import { useNotification } from '@/composables/useNotification'
 
 const router = useRouter()
 const { t } = useI18n()
 const api = useApi()
+const { success, error } = useNotification()
 
-// Loading and error states
+// Loading states
 const loading = ref(false)
 const loadingMore = ref(false)
-const error = ref<string | null>(null)
 
 // Pagination
 const perPage = ref(15)
@@ -124,6 +148,14 @@ interface TableHeader {
   title: string
 }
 
+interface AspectFilters {
+  per_page?: number;
+  cursor?: string | null;
+  name?: string;
+  created_at?: string;
+  status?: number | null;
+}
+
 interface ApiResponse {
   status: number
   code: number
@@ -137,7 +169,10 @@ interface ApiResponse {
   }
   headers: TableHeader[]
   shownHeaders: TableHeader[]
-  header_table?: string
+  header_table: string
+  actions: {
+    can_create: boolean
+  }
 }
 
 const variablesIcon = `<svg width="52" height="52" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -179,6 +214,8 @@ const plusIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
 const tableItems = ref<Aspect[]>([])
 const allHeaders = ref<TableHeader[]>([])
 const shownHeaders = ref<TableHeader[]>([])
+const canCreate = ref(false)
+const header_table = ref('')
 
 // Computed table headers for DataTable component
 const tableHeaders = computed(() => {
@@ -192,10 +229,39 @@ const tableHeaders = computed(() => {
 // State
 const selectedRows = ref<number[]>([])
 const showAdvancedFilters = ref(false)
-const searchQuery = ref('')
 const filterName = ref('')
 const filterCreatedAt = ref('')
-const filterStatus = ref<string | null>(null)
+const filterStatus = ref<number | null>(null)
+
+// Status list
+const StatusList = [
+  { title: 'فعال', value: 1 },
+  { title: 'غير فعال', value: 0 }
+]
+
+// Delete confirmation
+const showDeleteDialog = ref(false)
+const showBulkDeleteDialog = ref(false)
+const deleteLoading = ref(false)
+const itemToDelete = ref<Aspect | null>(null)
+
+// Status change confirmation
+const showStatusChangeDialog = ref(false)
+const statusChangeLoading = ref(false)
+const itemToChangeStatus = ref<Aspect | null>(null)
+
+// Headers dropdown
+const showHeadersMenu = ref(false)
+const updatingHeaders = ref(false)
+
+// Computed checked headers for menu
+const headerCheckStates = computed(() => {
+  const states: Record<string, boolean> = {}
+  allHeaders.value.forEach(header => {
+    states[header.key] = shownHeaders.value.some(sh => sh.key === header.key)
+  })
+  return states
+})
 
 // Computed
 const hasSelected = computed(() => selectedRows.value.length > 0)
@@ -213,44 +279,41 @@ const handleEdit = (item: any) => {
   router.push({ name: 'ProductVariableEdit', params: { id: item.id } })
 }
 
-const handleDelete = async (item: any) => {
-  if (confirm('هل أنت متأكد من حذف هذا المتغير؟')) {
-    try {
-      loading.value = true
-      await api.del(`/api/aspects/${item.id}`)
-      await fetchAspects()
-    } catch (err: any) {
-      error.value = err.message || 'فشل حذف المتغير'
-      console.error('Delete error:', err)
-    } finally {
-      loading.value = false
-    }
+
+const confirmDelete = async (item: any) => {
+  try {
+    deleteLoading.value = true
+    await api.delete(`/aspects/${item.id}`)
+    success('تم حذف المتغير بنجاح')
+    await fetchAspects()
+  } catch (err: any) {
+    console.error('Error deleting aspect:', err)
+    error(err?.response?.data?.message || 'فشل حذف المتغير')
+  } finally {
+    deleteLoading.value = false
+    showDeleteDialog.value = false
+    itemToDelete.value = null
   }
 }
 
-const handleDeleteSelected = async () => {
-  if (confirm(`هل أنت متأكد من حذف ${selectedRows.value.length} متغير؟`)) {
-    try {
-      loading.value = true
-      // Delete each selected item
-      await Promise.all(
-        selectedRows.value.map(id => api.del(`/api/aspects/${id}`))
-      )
-      selectedRows.value = []
-      await fetchAspects()
-    } catch (err: any) {
-      error.value = err.message || 'فشل حذف المتغيرات'
-      console.error('Delete selected error:', err)
-    } finally {
-      loading.value = false
-    }
-  }
+const handleBulkDelete = () => {
+  if (selectedRows.value.length === 0) return
+  showBulkDeleteDialog.value = true
 }
 
-const handleDeleteAll = () => {
-  if (confirm('هل أنت متأكد من حذف جميع المتغيرات؟')) {
-    tableItems.value = []
+const confirmBulkDelete = async () => {
+  try {
+    deleteLoading.value = true
+    await api.post('/aspects/bulk-delete', { ids: selectedRows.value })
+    success(`تم حذف ${selectedRows.value.length} متغير بنجاح`)
     selectedRows.value = []
+    await fetchAspects()
+  } catch (err: any) {
+    console.error('Error bulk deleting aspects:', err)
+    error(err?.response?.data?.message || 'فشل حذف المتغيرات')
+  } finally {
+    deleteLoading.value = false
+    showBulkDeleteDialog.value = false
   }
 }
 
@@ -266,73 +329,91 @@ const handleSelectAll = (selected: boolean) => {
   selectedRows.value = selected ? tableItems.value.map(i => i.id) : []
 }
 
-const handleStatusChange = async (item: any) => {
+const handleStatusChange = (item: any) => {
+  itemToChangeStatus.value = { ...item }
+  showStatusChangeDialog.value = true
+}
+
+const confirmStatusChange = async () => {
+  if (!itemToChangeStatus.value) return
+
   try {
-    loading.value = true
-    await api.post(`/api/aspects/${item.id}`, {
-      ...item,
-      is_active: item.is_active
+    statusChangeLoading.value = true
+    const newStatus = !itemToChangeStatus.value.is_active
+
+    await api.patch(`/aspects/${itemToChangeStatus.value.id}/change-status`, {
+      status: newStatus
     })
+
+    success(`تم ${newStatus ? 'تفعيل' : 'تعطيل'} المتغير بنجاح`)
+
+    // Update local state
+    const index = tableItems.value.findIndex(t => t.id === itemToChangeStatus.value!.id)
+    if (index !== -1) {
+      tableItems.value[index].is_active = newStatus
+    }
   } catch (err: any) {
-    error.value = err.message || 'فشل تحديث الحالة'
-    console.error('Status change error:', err)
-    // Revert the change on error
-    item.is_active = !item.is_active
+    console.error('Error changing aspect status:', err)
+    error(err?.response?.data?.message || 'فشل تغيير حالة المتغير')
   } finally {
-    loading.value = false
+    statusChangeLoading.value = false
+    showStatusChangeDialog.value = false
+    itemToChangeStatus.value = null
   }
 }
 
 // Fetch aspects from API
-const fetchAspects = async (cursor?: string | null, append = false) => {
+const fetchAspects = async (append = false) => {
   try {
     if (append) {
       loadingMore.value = true
     } else {
       loading.value = true
     }
-    error.value = null
 
-    const params = new URLSearchParams({
-      per_page: perPage.value.toString(),
-      paginate: 'true'
+    const filters: AspectFilters = {
+      per_page: perPage.value,
+      cursor: append ? nextCursor.value : null,
+    }
+
+    if (filterName.value) filters.name = filterName.value
+    if (filterStatus.value !== null) filters.status = filterStatus.value
+    if (filterCreatedAt.value) filters.created_at = filterCreatedAt.value
+
+    const params = new URLSearchParams()
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== null && value !== undefined && value !== '') {
+        params.append(key, String(value))
+      }
     })
 
-    // Add cursor for pagination
-    if (cursor) {
-      params.append('cursor', cursor)
-    }
+    const queryString = params.toString()
+    const url = queryString ? `/aspects?${queryString}` : '/aspects'
 
-    // Add filters if they exist
-    if (filterName.value) {
-      params.append('name', filterName.value)
-    }
-    if (filterStatus.value !== null) {
-      params.append('status', filterStatus.value ? '1' : '0')
-    }
-    if (filterCreatedAt.value) {
-      params.append('created_at', filterCreatedAt.value)
-    }
+    const response = await api.get<ApiResponse>(url)
 
-    const response: ApiResponse = await api.get(`/api/aspects?${params.toString()}`)
+    // Convert is_active to boolean for v-switch compatibility
+    const normalizedData = response.data.map(item => ({
+      ...item,
+      is_active: Boolean(item.is_active)
+    }))
 
     if (append) {
-      // Append data for lazy loading
-      tableItems.value = [...tableItems.value, ...response.data]
+      tableItems.value = [...tableItems.value, ...normalizedData]
     } else {
-      // Replace data for initial load or filter change
-      tableItems.value = response.data
-      allHeaders.value = response.headers
-      shownHeaders.value = response.shownHeaders
+      tableItems.value = normalizedData
+      allHeaders.value = response.headers.filter(h => h.key !== 'id' && h.key !== 'actions')
+      shownHeaders.value = response.shownHeaders.filter(h => h.key !== 'id' && h.key !== 'actions')
+      canCreate.value = response.actions.can_create
+      header_table.value = response.header_table
     }
 
     nextCursor.value = response.pagination.next_cursor
     previousCursor.value = response.pagination.previous_cursor
     perPage.value = response.pagination.per_page
-
   } catch (err: any) {
-    error.value = err.message || 'فشل تحميل البيانات'
-    console.error('Fetch error:', err)
+    console.error('Error fetching aspects:', err)
+    error(err?.response?.data?.message || 'فشل تحميل البيانات')
   } finally {
     loading.value = false
     loadingMore.value = false
@@ -340,15 +421,58 @@ const fetchAspects = async (cursor?: string | null, append = false) => {
 }
 
 // Load more data (lazy loading)
-const loadMore = () => {
-  if (hasMoreData.value && !loadingMore.value) {
-    fetchAspects(nextCursor.value, true)
-  }
+const loadMore = async () => {
+  if (!hasMoreData.value || loadingMore.value) return
+  await fetchAspects(true)
 }
 
 // Apply filters
 const applyFilters = () => {
   fetchAspects()
+}
+
+// Reset filters
+const resetFilters = () => {
+  filterName.value = ''
+  filterStatus.value = null
+  filterCreatedAt.value = ''
+  fetchAspects()
+}
+
+// Toggle header visibility
+const toggleHeader = async (headerKey: string) => {
+  const isCurrentlyShown = shownHeaders.value.some(h => h.key === headerKey)
+
+  if (isCurrentlyShown) {
+    shownHeaders.value = shownHeaders.value.filter(h => h.key !== headerKey)
+  } else {
+    const headerToAdd = allHeaders.value.find(h => h.key === headerKey)
+    if (headerToAdd) {
+      shownHeaders.value.push(headerToAdd)
+    }
+  }
+
+  await updateHeadersOnServer()
+}
+
+const updateHeadersOnServer = async () => {
+  try {
+    updatingHeaders.value = true
+    const headerKeys = shownHeaders.value.map(h => h.key)
+
+    const formData = new FormData()
+    formData.append('table', header_table.value)
+    headerKeys.forEach((header, index) => {
+      formData.append(`header[${index}]`, header)
+    })
+
+    await api.post('/headers', formData)
+  } catch (err: any) {
+    console.error('Error updating headers:', err)
+    error(err?.response?.data?.message || 'Failed to update headers')
+  } finally {
+    updatingHeaders.value = false
+  }
 }
 
 // Infinite scroll with Intersection Observer

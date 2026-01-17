@@ -388,7 +388,7 @@ const plusIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
         >
           <!-- Status column with toggle -->
           <template #item.is_active="{ item }">
-            <v-switch :model-value="item.is_active" hide-details inset density="compact" color="primary" class="small-switch"
+            <v-switch :model-value="item.is_active" hide-details inset density="compact" class="small-switch" color="primary-600"
               @update:model-value="() => handleStatusToggle(item)" />
           </template>
 
