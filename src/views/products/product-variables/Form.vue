@@ -286,11 +286,11 @@ const handleSaveAndReturn = async () => {
 
     if (isEditMode.value) {
       // Update existing aspect
-      await api.post(`/api/aspects/${route.params.id}`, payload)
+      await api.post(`/aspects/${route.params.id}`, payload)
       alert('تم تحديث المتغير بنجاح')
     } else {
       // Create new aspect
-      await api.post('/api/aspects', payload)
+      await api.post('/aspects', payload)
       alert('تم إضافة المتغير بنجاح')
     }
 
@@ -316,7 +316,7 @@ const fetchConstants = async () => {
       data: {
         value_types: ValueType[]
       }
-    }>('/api/aspects/constants')
+    }>('/aspects/constants')
 
     if (response.data && response.data.value_types) {
       classificationItems.value = response.data.value_types.map(vt => ({
@@ -366,7 +366,7 @@ const fetchAspect = async () => {
     loading.value = true
     error.value = null
 
-    const response: { data: ApiAspect } = await api.get(`/api/aspects/${route.params.id}`)
+    const response: { data: ApiAspect } = await api.get(`/aspects/${route.params.id}`)
     const aspect = response.data
 
     // Transform API data to form data

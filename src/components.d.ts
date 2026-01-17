@@ -35,6 +35,5 @@ declare module 'vue' {
     StatusChangeDialog: typeof import('./components/common/StatusChangeDialog.vue')['default']
     TextareaInput: typeof import('./components/common/forms/TextareaInput.vue')['default']
     TextInput: typeof import('./components/common/forms/textInput.vue')['default']
-    UnitFormDialog: typeof import('./views/settings/units/components/UnitFormDialog.vue')['default']
   }
 }

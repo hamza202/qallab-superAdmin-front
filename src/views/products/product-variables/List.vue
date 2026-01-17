@@ -217,7 +217,7 @@ const handleDelete = async (item: any) => {
   if (confirm('هل أنت متأكد من حذف هذا المتغير؟')) {
     try {
       loading.value = true
-      await api.del(`/api/aspects/${item.id}`)
+      await api.del(`/aspects/${item.id}`)
       await fetchAspects()
     } catch (err: any) {
       error.value = err.message || 'فشل حذف المتغير'
@@ -234,7 +234,7 @@ const handleDeleteSelected = async () => {
       loading.value = true
       // Delete each selected item
       await Promise.all(
-        selectedRows.value.map(id => api.del(`/api/aspects/${id}`))
+        selectedRows.value.map(id => api.del(`/aspects/${id}`))
       )
       selectedRows.value = []
       await fetchAspects()
@@ -269,7 +269,7 @@ const handleSelectAll = (selected: boolean) => {
 const handleStatusChange = async (item: any) => {
   try {
     loading.value = true
-    await api.post(`/api/aspects/${item.id}`, {
+    await api.post(`/aspects/${item.id}`, {
       ...item,
       is_active: item.is_active
     })
@@ -314,7 +314,7 @@ const fetchAspects = async (cursor?: string | null, append = false) => {
       params.append('created_at', filterCreatedAt.value)
     }
 
-    const response: ApiResponse = await api.get(`/api/aspects?${params.toString()}`)
+    const response: ApiResponse = await api.get(`/aspects?${params.toString()}`)
 
     if (append) {
       // Append data for lazy loading
