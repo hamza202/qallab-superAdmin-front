@@ -105,6 +105,7 @@ const tableItems = ref<Service[]>([])
 const allHeaders = ref<TableHeader[]>([])
 const shownHeaders = ref<TableHeader[]>([])
 const canCreate = ref(false)
+const header_table = ref('')
 const loading = ref(false)
 const loadingMore = ref(false)
 
@@ -131,8 +132,19 @@ const hasSelected = computed(() => selectedRows.value.length > 0)
 const showAdvancedFilters = ref(false)
 const filterName = ref('')
 const filterCode = ref('')
-const filterCategory = ref<string | null>(null)
-const filterStatus = ref<string | null>(null)
+const filterCategory = ref<number | null>(null)
+const filterStatus = ref<number | null>(null)
+const filterUnit = ref<number | null>(null)
+const filterCreatedAt = ref<string | null>(null)
+
+// Filter options
+const categories = ref<Array<{ id: number; name: string }>>([])
+const units = ref<Array<{ id: number; name: string }>>([])
+
+const StatusList = [
+  { title: 'فعال', value: 1 },
+  { title: 'غير فعال', value: 0 }
+]
 
 // Delete confirmation
 const showDeleteDialog = ref(false)
@@ -162,8 +174,28 @@ const toggleAdvancedFilters = () => {
   showAdvancedFilters.value = !showAdvancedFilters.value
 }
 
+// Fetch categories
+const fetchCategories = async () => {
+  try {
+    const response = await api.get('/service-categories/list')
+    categories.value = response.data
+  } catch (err: any) {
+    console.error('Error fetching categories:', err)
+  }
+}
+
+// Fetch units
+const fetchUnits = async () => {
+  try {
+    const response = await api.get('/units/list')
+    units.value = response.data
+  } catch (err: any) {
+    console.error('Error fetching units:', err)
+  }
+}
+
 // API Functions
-const fetchServices = async (cursor?: string | null, append = false) => {
+const fetchServices = async (append = false) => {
   try {
     if (append) {
       loadingMore.value = true
@@ -173,14 +205,16 @@ const fetchServices = async (cursor?: string | null, append = false) => {
 
     const params = new URLSearchParams()
     params.append('per_page', String(perPage.value))
-    if (cursor) params.append('cursor', cursor)
+    if (append && nextCursor.value) params.append('cursor', nextCursor.value)
     if (filterName.value) params.append('name', filterName.value)
     if (filterCode.value) params.append('service_code', filterCode.value)
-    if (filterCategory.value) params.append('service_category_id', filterCategory.value)
-    if (filterStatus.value) params.append('status', filterStatus.value)
+    if (filterCategory.value) params.append('service_category_id', String(filterCategory.value))
+    if (filterUnit.value) params.append('unit_id', String(filterUnit.value))
+    if (filterStatus.value !== null) params.append('status', String(filterStatus.value))
+    if (filterCreatedAt.value) params.append('created_at', filterCreatedAt.value)
 
     const queryString = params.toString()
-    const url = queryString ? `/admin/api/services?${queryString}` : '/admin/api/services'
+    const url = queryString ? `/services?${queryString}` : '/services'
 
     const response = await api.get<ServicesResponse>(url)
 
@@ -188,9 +222,10 @@ const fetchServices = async (cursor?: string | null, append = false) => {
       tableItems.value = [...tableItems.value, ...response.data]
     } else {
       tableItems.value = response.data
-      allHeaders.value = response.headers
-      shownHeaders.value = response.shownHeaders
+      allHeaders.value = response.headers.filter(h => h.key !== 'id' && h.key !== 'actions')
+      shownHeaders.value = response.shownHeaders.filter(h => h.key !== 'id' && h.key !== 'actions')
       canCreate.value = response.actions.can_create
+      header_table.value = response.header_table
     }
 
     nextCursor.value = response.pagination.next_cursor
@@ -206,14 +241,24 @@ const fetchServices = async (cursor?: string | null, append = false) => {
 }
 
 // Load more data (lazy loading)
-const loadMore = () => {
-  if (hasMoreData.value && !loadingMore.value) {
-    fetchServices(nextCursor.value, true)
-  }
+const loadMore = async () => {
+  if (!hasMoreData.value || loadingMore.value) return
+  await fetchServices(true)
 }
 
 // Apply filters
 const applyFilters = () => {
+  fetchServices()
+}
+
+// Reset filters
+const resetFilters = () => {
+  filterName.value = ''
+  filterCode.value = ''
+  filterCategory.value = null
+  filterStatus.value = null
+  filterUnit.value = null
+  filterCreatedAt.value = null
   fetchServices()
 }
 
@@ -240,16 +285,12 @@ const updateHeadersOnServer = async () => {
     const headerKeys = shownHeaders.value.map(h => h.key)
 
     const formData = new FormData()
-    formData.append('table', 'services')
+    formData.append('table', header_table.value)
     headerKeys.forEach((header, index) => {
       formData.append(`header[${index}]`, header)
     })
 
-    await api.post('/admin/api/headers', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    })
+    await api.post('/headers', formData)
   } catch (err: any) {
     console.error('Error updating headers:', err)
     error(err?.response?.data?.message || 'Failed to update headers')
@@ -284,7 +325,7 @@ const confirmStatusChange = async () => {
     statusChangeLoading.value = true
     const newStatus = !itemToChangeStatus.value.is_active
 
-    await api.patch(`/admin/api/services/${itemToChangeStatus.value.id}/change-status`, {
+    await api.patch(`/services/${itemToChangeStatus.value.id}/change-status`, {
       status: newStatus
     })
 
@@ -311,7 +352,7 @@ const confirmDelete = async () => {
 
   try {
     deleteLoading.value = true
-    await api.delete(`/admin/api/services/${itemToDelete.value.id}`)
+    await api.delete(`/services/${itemToDelete.value.id}`)
     success('تم حذف الخدمة بنجاح')
     await fetchServices()
     itemToDelete.value = null
@@ -332,7 +373,7 @@ const handleBulkDelete = () => {
 const confirmBulkDelete = async () => {
   try {
     deleteLoading.value = true
-    await api.post('/admin/api/services/bulk-delete', { ids: selectedRows.value })
+    await api.post('/services/bulk-delete', { ids: selectedRows.value })
     success(`تم حذف ${selectedRows.value.length} خدمة بنجاح`)
     selectedRows.value = []
     await fetchServices()
@@ -397,11 +438,10 @@ const cleanupInfiniteScroll = () => {
 }
 
 // Lifecycle
-onMounted(() => {
-  fetchServices()
-  nextTick(() => {
-    setupInfiniteScroll()
-  })
+onMounted(async () => {
+  await Promise.all([fetchServices(), fetchCategories(), fetchUnits()])
+  await nextTick()
+  setupInfiniteScroll()
 })
 
 onBeforeUnmount(() => {
@@ -441,9 +481,9 @@ onBeforeUnmount(() => {
           <div class="flex flex-wrap gap-3">
             <v-menu v-model="showHeadersMenu" :close-on-content-click="false">
               <template v-slot:activator="{ props }">
-                <ButtonWithIcon v-bind="props" variant="outlined" rounded="4" color="gray-500"
-                  height="40" custom-class="font-semibold text-base border-gray-400"
-                  :prepend-icon="columnIcon" :label="t('common.columns')" append-icon="mdi-chevron-down" />
+                <ButtonWithIcon v-bind="props" variant="outlined" rounded="4" color="gray-500" height="40"
+                  custom-class="font-semibold text-base border-gray-400" :prepend-icon="columnIcon"
+                  :label="t('common.columns')" append-icon="mdi-chevron-down" />
               </template>
               <v-list>
                 <v-list-item v-for="header in allHeaders" :key="header.key" @click="toggleHeader(header.key)">
@@ -474,18 +514,26 @@ onBeforeUnmount(() => {
               placeholder="اسم الخدمة" class="w-full sm:w-40 bg-white" @keyup.enter="applyFilters" />
             <v-text-field v-model="filterCode" density="comfortable" variant="outlined" hide-details
               placeholder="كود الخدمة" class="w-full sm:w-40 bg-white" @keyup.enter="applyFilters" />
-            <v-select v-model="filterCategory" :items="['استشارات', 'صيانة']" density="comfortable" variant="outlined"
-              hide-details placeholder="التصنيف" class="w-full sm:w-40 bg-white" @update:model-value="applyFilters" />
-            <v-select v-model="filterStatus" :items="['فعال', 'غير فعال']" density="comfortable" variant="outlined"
-              hide-details placeholder="الحالة" class="w-full sm:w-40 bg-white" @update:model-value="applyFilters" />
+            <v-select v-model="filterCategory" :items="categories" item-title="name" item-value="id"
+              density="comfortable" variant="outlined" hide-details placeholder="التصنيف"
+              class="w-full sm:w-40 bg-white" @update:model-value="applyFilters" />
+            <v-select v-model="filterUnit" :items="units" item-title="name" item-value="id" density="comfortable"
+              variant="outlined" hide-details placeholder="الوحدة" class="w-full sm:w-40 bg-white"
+              @update:model-value="applyFilters" />
+            <v-select v-model="filterStatus" :items="StatusList" item-title="title" item-value="value"
+              density="comfortable" variant="outlined" hide-details placeholder="الحالة"
+              class="w-full sm:w-40 bg-white" @update:model-value="applyFilters" />
+            <DatePickerInput v-model="filterCreatedAt" placeholder="تاريخ الإنشاء" hide-details
+              class="w-full sm:w-40 bg-white" />
             <div class="flex gap-2 items-center">
               <ButtonWithIcon variant="flat" color="primary-500" rounded="4" height="40"
-                custom-class="px-5 font-semibold !text-white text-sm sm:text-base"
-                :prepend-icon="searchIcon" label="ابحث" @click="applyFilters" />
-              
+                custom-class="px-5 font-semibold !text-white text-sm sm:text-base" :prepend-icon="searchIcon"
+                label="ابحث" @click="applyFilters" />
+
               <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4" border="sm"
+                @click="resetFilters"
                 custom-class="px-5 font-semibold text-sm sm:text-base !text-primary-800 !border-primary-200"
-                label="إعادة تعيين" />
+                label="إعادة تعيين" prepend-icon="mdi-refresh" />
             </div>
           </div>
         </div>

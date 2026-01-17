@@ -193,7 +193,7 @@ const resetForm = () => {
 const fetchConstants = async () => {
   try {
     // Real API call to get all constants
-    const response = await api.get('/admin/service-categories/constants');
+    const response = await api.get('/service-categories/constants');
 
     // Populate priorities dropdown
     priorityItems.value = [
@@ -233,7 +233,7 @@ const fetchTaxs = async () => {
 const fetchCategories = async () => {
   try {
     // Real API call to get all categories
-    const response = await api.get('/admin/service-categories/list');
+    const response = await api.get('/service-categories/list');
 
     // Populate categories dropdown
     categoriesList.value = [
@@ -251,7 +251,7 @@ const fetchCategories = async () => {
 const fetchUnits = async () => {
   try {
     // Real API call to get all units
-    const response = await api.get('/admin/units/list');
+    const response = await api.get('/units/list');
 
     // Populate categories dropdown
     unitItems.value = [
@@ -273,7 +273,7 @@ const fetchCategoryDetails = async (id: number) => {
   isLoading.value = true;
   try {
     // Real API call
-    const response = await api.get(`/admin/service-categories/${id}`);
+    const response = await api.get(`/service-categories/${id}`);
     const cat = response.data;
     if (cat) {
       // Populate form with API data
@@ -373,9 +373,9 @@ const handleSave = async () => {
           formData.append(`taxes[${index}][is_active]`, tax.is_active ? '1' : '0');
         });
 
-        await api.upload(`/admin/service-categories/${categoryId.value}`, formData);
+        await api.upload(`/service-categories/${categoryId.value}`, formData);
       } else {
-        await api.put(`/admin/service-categories/${categoryId.value}`, payload);
+        await api.put(`/service-categories/${categoryId.value}`, payload);
       }
       success('تم تحديث التصنيف بنجاح');
     } else {
@@ -400,9 +400,9 @@ const handleSave = async () => {
           formData.append(`taxes[${index}][is_active]`, tax.is_active ? '1' : '0');
         });
 
-        await api.upload('/admin/service-categories', formData);
+        await api.upload('/service-categories', formData);
       } else {
-        await api.post('/admin/service-categories', payload);
+        await api.post('/service-categories', payload);
       }
       success('تم إضافة التصنيف بنجاح');
     }
@@ -446,7 +446,7 @@ const handleDeleteConfirm = async () => {
 
   deleteLoading.value = true;
   try {
-    await api.delete(`/admin/service-categories/${categoryId.value}`);
+    await api.delete(`/service-categories/${categoryId.value}`);
     success('تم حذف التصنيف بنجاح');
     returnToList();
   } catch (error) {

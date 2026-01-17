@@ -307,7 +307,7 @@ const fetchServiceDetails = async () => {
     error.value = null
 
     try {
-        const response = await get<ServiceResponse>(`/admin/api/services/${serviceId}`)
+        const response = await get<ServiceResponse>(`/services/${serviceId}`)
         const data = response.data
 
         service.value = {
