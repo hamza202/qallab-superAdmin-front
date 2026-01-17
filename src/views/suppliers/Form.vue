@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from "vue";
+import { ref, computed, onMounted, watch, reactive } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useApi } from "@/composables/useApi";
 import { useNotification } from "@/composables/useNotification";
@@ -105,6 +105,9 @@ const supplierId = ref<number | null>(null);
 const formRef = ref<any>(null);
 const isFormValid = ref(false);
 
+// Form errors from backend validation
+const formErrors = reactive<Record<string, string>>({});
+
 // Tabs
 const activeTab = ref(0);
 const tabs = [
@@ -120,47 +123,6 @@ const tabs = [
 ];
 
 const isTabActive = (value: number) => activeTab.value === value;
-const isTabCompleted = (value: number) => {
-  if (value === 0) return basicInfoCompleted.value;
-  if (value === 1) return accountingInfoCompleted.value;
-  return false;
-};
-
-// Handle tab change with validation
-const handleTabChange = (newTab: number, event?: Event) => {
-  // Validate when creating (not editing) and trying to move to step 2
-  if (!isEditing.value && newTab === 1 && activeTab.value === 0) {
-    if (!basicInfoCompleted.value) {
-      error('يجب إكمال المعلومات الأساسية أولاً');
-      if (event) {
-        event.preventDefault();
-        event.stopPropagation();
-      }
-      // Force tab to stay on current tab
-      setTimeout(() => {
-        activeTab.value = 0;
-      }, 0);
-      return;
-    }
-  }
-  activeTab.value = newTab;
-};
-
-// Basic Info completion check
-const basicInfoCompleted = computed(() => {
-  // When editing, check if data is loaded
-  if (isEditing.value) {
-    return !!(businessNameAr.value && mobile.value && supplierId.value);
-  }
-  // When creating, only check required fields (supplierId will be set after first save)
-  return !!(businessNameAr.value && mobile.value);
-});
-
-const accountingInfoCompleted = computed(() => {
-  if (createAccountInTree.value === null) return false;
-  if (createAccountInTree.value === false) return true;
-  return !!account.value;
-});
 
 // Form data - Basic Info
 const supplierCode = ref("SUP-5478544");
@@ -203,6 +165,7 @@ const currencyItems = ref<{ title: string; value: number }[]>([]);
 const countryItems = ref<{ title: string; value: number }[]>([]);
 const cityItems = ref<{ title: string; value: number }[]>([]);
 const accountItems = ref<{ title: string; value: number }[]>([]);
+const pageLoading = ref(false)
 
 // Sub-tabs for basic info section
 const basicInfoSubTab = ref(0);
@@ -210,7 +173,7 @@ const basicInfoSubTab = ref(0);
 // API Functions
 const fetchCountries = async () => {
   try {
-    const response = await api.get<{ data: ListItem[] }>('/admin/api/countries/list');
+    const response = await api.get<{ data: ListItem[] }>('/countries/list');
     countryItems.value = response.data.map(item => ({
       title: item.name,
       value: item.id
@@ -222,7 +185,7 @@ const fetchCountries = async () => {
 
 const fetchCities = async (countryId: number) => {
   try {
-    const response = await api.get<{ data: ListItem[] }>(`/admin/api/cities/list?country_id=${countryId}`);
+    const response = await api.get<{ data: ListItem[] }>(`/cities/list?country_id=${countryId}`);
     cityItems.value = response.data.map(item => ({
       title: item.name,
       value: item.id
@@ -234,7 +197,7 @@ const fetchCities = async (countryId: number) => {
 
 const fetchCurrencies = async () => {
   try {
-    const response = await api.get<{ data: ListItem[] }>('/admin/api/currencies/list');
+    const response = await api.get<{ data: ListItem[] }>('/currencies/list');
     currencyItems.value = response.data.map(item => ({
       title: item.name,
       value: item.id
@@ -246,7 +209,7 @@ const fetchCurrencies = async () => {
 
 const fetchTreeChartCards = async () => {
   try {
-    const response = await api.get<{ data: ListItem[] }>('/admin/api/tree-chart-cards/list');
+    const response = await api.get<{ data: ListItem[] }>('/tree-chart-cards/list');
     accountItems.value = response.data.map(item => ({
       title: item.name,
       value: item.id
@@ -261,7 +224,7 @@ const fetchSupplierData = async () => {
 
   try {
     loading.value = true;
-    const response = await api.get<any>(`/admin/api/suppliers/${route.params.id}`);
+    const response = await api.get<any>(`/suppliers/${route.params.id}`);
     const data = response.data;
 
     // Set supplier ID
@@ -317,55 +280,71 @@ const fetchSupplierData = async () => {
   }
 };
 
-const buildPayload = (step: number): SupplierPayload => {
-  return {
-    step,
-    supplier_id: supplierId.value || undefined,
-    business_name: {
-      en: businessNameEn.value,
-      ar: businessNameAr.value
-    },
-    first_name: {
-      en: firstNameEn.value,
-      ar: firstNameAr.value
-    },
-    last_name: {
-      en: lastNameEn.value,
-      ar: lastNameAr.value
-    },
-    supplier_code: supplierCode.value,
-    default_currency_id: defaultCurrency.value,
-    mobile: mobile.value,
-    phone: phone.value,
-    email: email.value,
-    address_1: nationalAddress.value,
-    buisnessno: businessNumber.value,
-    taxno: taxNumber.value,
-    is_active: status.value,
-    address: {
-      country_id: country.value,
-      city_id: city.value,
-      postal_code: postalCode.value,
-      neighborhood: district.value,
-      street_name: streetName.value,
-      building_number: buildingNumber.value,
+const buildPayload = (step: number): any => {
+  // Step 1: Basic Information
+  if (step === 1) {
+    return {
+      step,
+      supplier_id: supplierId.value || undefined,
+      business_name: {
+        en: businessNameEn.value,
+        ar: businessNameAr.value
+      },
+      first_name: {
+        en: firstNameEn.value,
+        ar: firstNameAr.value
+      },
+      last_name: {
+        en: lastNameEn.value,
+        ar: lastNameAr.value
+      },
+      supplier_code: supplierCode.value,
+      default_currency_id: defaultCurrency.value,
+      mobile: mobile.value,
+      phone: phone.value,
+      email: email.value,
       address_1: nationalAddress.value,
-      address_2: address2.value
-    },
-    contact_list: contacts.value.map(contact => ({
-      id: contact.id,
-      first_name: contact.first_name,
-      last_name: contact.last_name,
-      email: contact.email,
-      mobile: contact.mobile,
-      telephone: contact.telephone
-    })),
-    tree_chart_card_id: account.value
-  };
+      buisnessno: businessNumber.value,
+      taxno: taxNumber.value,
+      is_active: status.value,
+      address: {
+        country_id: country.value,
+        city_id: city.value,
+        postal_code: postalCode.value,
+        neighborhood: district.value,
+        street_name: streetName.value,
+        building_number: buildingNumber.value,
+        address_1: nationalAddress.value,
+        address_2: address2.value
+      },
+      contact_list: contacts.value.map(contact => ({
+        id: contact.id,
+        first_name: contact.first_name,
+        last_name: contact.last_name,
+        email: contact.email,
+        mobile: contact.mobile,
+        telephone: contact.telephone
+      }))
+    };
+  }
+
+  // Step 2: Accounting Information
+  if (step === 2) {
+    return {
+      step,
+      supplier_id: supplierId.value || undefined,
+      tree_chart_card_id: account.value
+    };
+  }
+
+  return {};
 };
 
 const saveStep = async (step: number) => {
   try {
+    // Clear previous errors
+    Object.keys(formErrors).forEach(key => delete formErrors[key]);
+
     saving.value = true;
     const payload = buildPayload(step);
 
@@ -373,10 +352,10 @@ const saveStep = async (step: number) => {
 
     if (supplierId.value) {
       // Update existing supplier
-      response = await api.put(`/admin/api/suppliers/${supplierId.value}`, payload);
+      response = await api.put(`/suppliers/${supplierId.value}`, payload);
     } else {
       // Create new supplier
-      response = await api.post('/admin/api/suppliers', payload);
+      response = await api.post('/suppliers', payload);
     }
 
     // Store supplier ID for subsequent saves
@@ -384,18 +363,20 @@ const saveStep = async (step: number) => {
       supplierId.value = response.data.supplier_id;
     }
 
-    success(response.message || 'Supplier saved successfully');
+    success(response.message || 'تم حفظ المورد بنجاح');
     return true;
   } catch (err: any) {
     console.error('Error saving supplier:', err);
 
-    // Handle validation errors
-    if (err?.response?.data?.errors) {
-      const errors = err.response.data.errors;
-      const errorMessages = Object.values(errors).flat().join('\n');
-      error(errorMessages);
+    // Handle validation errors (422 status)
+    if (err?.response?.status === 422 && err?.response?.data?.errors) {
+      const apiErrors = err.response.data.errors;
+      Object.keys(apiErrors).forEach(key => {
+        formErrors[key] = apiErrors[key][0];
+      });
+      error(err?.response?.data?.message || 'يرجى تصحيح الأخطاء في النموذج');
     } else {
-      error(err?.response?.data?.message || 'Failed to save supplier');
+      error(err?.response?.data?.message || 'فشل حفظ المورد');
     }
     return false;
   } finally {
@@ -423,6 +404,15 @@ const removeContact = (index: number) => {
 };
 
 const handleSave = async () => {
+  // Validate form before saving
+  if (formRef.value && typeof formRef.value.validate === 'function') {
+    const { valid } = await formRef.value.validate();
+    if (!valid) {
+      error('يرجى تصحيح الأخطاء في النموذج');
+      return;
+    }
+  }
+
   // Save step 1 first
   const step1Success = await saveStep(1);
   if (!step1Success) return;
@@ -446,13 +436,15 @@ const handleClose = () => {
 // Watch country change to fetch cities
 watch(country, (newCountryId) => {
   if (newCountryId) {
-    city.value = null; // Reset city when country changes
     fetchCities(newCountryId);
+  }else{
+    city.value = null; // Reset city when country changes
   }
 });
 
 // Lifecycle
 onMounted(async () => {
+  pageLoading.value = true
   await Promise.all([
     fetchCountries(),
     fetchCurrencies(),
@@ -462,6 +454,8 @@ onMounted(async () => {
   if (isEditing.value) {
     await fetchSupplierData();
   }
+  pageLoading.value = false
+
 });
 
 // Icons
@@ -555,62 +549,76 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
                 <LanguageTabs :languages="availableLanguages" label="الاسم التجاري">
                   <template #en>
                     <TextInput v-model="businessNameEn" placeholder="Enter business name in English"
-                      :hide-details="true" />
+                      :rules="[required()]" :hide-details="false" :error-messages="formErrors['business_name.en']"
+                      @input="delete formErrors['business_name.en']" />
                   </template>
                   <template #ar>
                     <TextInput v-model="businessNameAr" placeholder="ادخل الاسم التجاري بالعربية" :rules="[required()]"
-                      :hide-details="true" />
+                      :hide-details="false" :error-messages="formErrors['business_name.ar']"
+                      @input="delete formErrors['business_name.ar']" />
                   </template>
                 </LanguageTabs>
 
                 <LanguageTabs :languages="availableLanguages" label="الاسم الأول">
                   <template #en>
-                    <TextInput v-model="firstNameEn" placeholder="Enter first name in English" :hide-details="true" />
+                    <TextInput v-model="firstNameEn" placeholder="Enter first name in English" :rules="[required()]"
+                      :hide-details="false" :error-messages="formErrors['first_name.en']"
+                      @input="delete formErrors['first_name.en']" />
                   </template>
                   <template #ar>
                     <TextInput v-model="firstNameAr" placeholder="ادخل الاسم الأول بالعربية" :rules="[required()]"
-                      :hide-details="true" />
+                      :hide-details="false" :error-messages="formErrors['first_name.ar']"
+                      @input="delete formErrors['first_name.ar']" />
                   </template>
                 </LanguageTabs>
 
                 <LanguageTabs :languages="availableLanguages" label="الاسم الأخير">
                   <template #en>
-                    <TextInput v-model="lastNameEn" placeholder="Enter last name in English" :hide-details="true" />
+                    <TextInput v-model="lastNameEn" placeholder="Enter last name in English" :rules="[required()]"
+                      :hide-details="false" :error-messages="formErrors['last_name.en']"
+                      @input="delete formErrors['last_name.en']" />
                   </template>
                   <template #ar>
-                    <TextInput v-model="lastNameAr" placeholder="ادخل الاسم الأخير بالعربية" :hide-details="true" />
+                    <TextInput v-model="lastNameAr" placeholder="ادخل الاسم الأخير بالعربية" :rules="[required()]"
+                      :hide-details="false" :error-messages="formErrors['last_name.ar']"
+                      @input="delete formErrors['last_name.ar']" />
                   </template>
                 </LanguageTabs>
               </div>
 
               <!-- Row 2: Supplier Code, Currency -->
               <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                <div>
+                <div v-if="isEditing">
                   <div class="mb-[7px] text-sm font-semibold text-gray-700">كود المورد</div>
                   <div class="bg-gray-200 text-primary-900 rounded-lg px-4 py-2.5 font-bold text-end">
                     {{ supplierCode }}
                   </div>
                 </div>
-                <SelectInput v-model="defaultCurrency" label="العملة الافتراضية" placeholder="ريال سعودي"
-                  :items="currencyItems" :hide-details="false" />
+                <SelectInput v-model="defaultCurrency" clearable label="العملة الافتراضية" placeholder="ريال سعودي"
+                  :items="currencyItems" :rules="[required()]" :hide-details="false"
+                  :error-messages="formErrors['default_currency_id']"
+                  @update:model-value="delete formErrors['default_currency_id']" />
               </div>
 
               <!-- Row 3: Mobile, Phone, Email -->
               <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                <TextInput v-model="mobile" label="الجوال" placeholder="+966 (555) 000-0000" :rules="[required()]"
-                  :hide-details="false" dir="ltr">
+                <TextInput v-model="mobile" label="الجوال" placeholder="+966 (555) 000-0000"
+                  :rules="[required(), saudiPhone()]" :hide-details="false" dir="ltr"
+                  :error-messages="formErrors['mobile']" @input="delete formErrors['mobile']">
                   <template #prepend-inner>
                     <span class="text-gray-900 font-semibold me-2 block text-sm">KSA</span>
                   </template>
                 </TextInput>
                 <TextInput v-model="phone" dir="ltr" label="الهاتف" placeholder="+966 (555) 000-0000"
-                  :hide-details="false">
+                  :rules="[saudiPhone()]" :hide-details="false" :error-messages="formErrors['phone']"
+                  @input="delete formErrors['phone']">
                   <template #prepend-inner>
                     <span class="text-gray-900 font-semibold me-2 block text-sm">KSA</span>
                   </template>
                 </TextInput>
                 <TextInput v-model="email" dir="ltr" label="البريد الالكتروني" placeholder="example@gmail.com"
-                  :hide-details="false" />
+                  :rules="[required()]" :hide-details="false" :error-messages="formErrors['email']"
+                  @input="delete formErrors['email']" />
               </div>
 
               <!-- Row 4: Business Number, Tax Number -->
@@ -618,10 +626,10 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
                 <TextInput v-model="businessNumber" label="رقم السجل التجاري" placeholder="ادخل الرقم"
                   :hide-details="false">
                   <template #append-inner>
-                    <v-tooltip location="top" content-class="custom-tooltip" >
+                    <v-tooltip location="top" content-class="custom-tooltip">
                       <template #activator="{ props: tooltipProps }">
-                        <ButtonWithIcon variant="text" size="small" density="compact"
-                          custom-class="!min-w-0 p-0" :prepend-icon="infoIcon" v-bind="tooltipProps" />
+                        <ButtonWithIcon variant="text" size="small" density="compact" custom-class="!min-w-0 p-0"
+                          :prepend-icon="infoIcon" v-bind="tooltipProps" />
                       </template>
                       <div>
                         رقم السجل التجاري للمورد
@@ -631,10 +639,10 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
                 </TextInput>
                 <TextInput v-model="taxNumber" label="الرقم الضريبي" placeholder="ادخل الرقم" :hide-details="false">
                   <template #append-inner>
-                    <v-tooltip location="top" content-class="custom-tooltip" >
+                    <v-tooltip location="top" content-class="custom-tooltip">
                       <template #activator="{ props: tooltipProps }">
-                        <ButtonWithIcon variant="text" size="small" density="compact"
-                          custom-class="!min-w-0 p-0" :prepend-icon="infoIcon" v-bind="tooltipProps" />
+                        <ButtonWithIcon variant="text" size="small" density="compact" custom-class="!min-w-0 p-0"
+                          :prepend-icon="infoIcon" v-bind="tooltipProps" />
                       </template>
                       <div>
                         الرقم الضريبي للمورد
@@ -693,9 +701,11 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
               <div v-if="basicInfoSubTab === 0" class="bg-gray-50 rounded-lg p-6 mt-4">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                   <SelectInput v-model="country" label="الدولة" placeholder="الدولة" :items="countryItems"
-                    :hide-details="false" />
+                    :rules="[required()]" :hide-details="false" clearable :error-messages="formErrors['country_code']"
+                    @update:model-value="delete formErrors['country_code']" />
                   <SelectInput v-model="city" label="المدينة" placeholder="المدينة" :items="cityItems"
-                    :hide-details="false" />
+                    :rules="[required()]" :hide-details="false" :disabled="!country" clearable
+                    :error-messages="formErrors['city_id']" @update:model-value="delete formErrors['city_id']" />
                   <TextInput v-model="postalCode" label="الرمز البريدي" placeholder="الرمز البريدي"
                     :hide-details="false" />
                   <TextInput v-model="district" label="اسم الحي" placeholder="اسم الحي" :hide-details="false" />
@@ -703,7 +713,8 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
                   <TextInput v-model="buildingNumber" label="رقم المبنى" placeholder="رقم المبنى"
                     :hide-details="false" />
                   <TextInput v-model="nationalAddress" label="أدخل العنوان الوطني" placeholder="العنوان الوطني"
-                    :hide-details="false" />
+                    :rules="[required()]" :hide-details="false" :error-messages="formErrors['address_1']"
+                    @input="delete formErrors['address_1']" />
                   <TextInput v-model="address2" label="العنوان 2" placeholder="العنوان الإضافي" :hide-details="false" />
                 </div>
               </div>
@@ -769,85 +780,90 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
 
         <!-- Tab 2: المعلومات المحاسبية -->
         <v-tabs-window-item :value="1">
-          <div class="mb-6 bg-gray-50 rounded-lg p-6">
-            <!-- Create Account Option -->
+          <div class="-mx-6">
 
-            <!-- Account Selection -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div class="rounded-lg px-6 py-2 mb-3">
+              <!-- Account Selection -->
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
 
-              <div class="mb-6">
-                <span class="text-sm font-semibold text-gray-700 mb-1 block">انشاء حساب خاص في شجرة المحاسبة</span>
-                <v-radio-group v-model="createAccountInTree" inline hide-details>
-                  <v-radio label="نعم" :value="true" color="primary">
-                    <template #label>
-                      <span :class="createAccountInTree ? 'text-primary font-semibold' : 'text-gray-600'">
-                        نعم
-                      </span>
-                    </template>
+                <!-- <div class="mb-6">
+                  <span class="text-sm font-semibold text-gray-700 mb-1 block">انشاء حساب خاص في شجرة المحاسبة</span>
+                  <v-radio-group v-model="createAccountInTree" inline hide-details>
+                    <v-radio label="نعم" :value="true" color="primary">
+                      <template #label>
+                        <span :class="createAccountInTree ? 'text-primary font-semibold' : 'text-gray-600'">
+                          نعم
+                        </span>
+                      </template>
 
-                  </v-radio>
-                  <v-radio label="لا" :value="false" color="primary">
-                    <template #label>
-                      <span :class="!createAccountInTree ? 'text-primary font-semibold' : 'text-gray-600'">
-                        لا
-                      </span>
-                    </template>
-                  </v-radio>
-                </v-radio-group>
+                    </v-radio>
+                    <v-radio label="لا" :value="false" color="primary">
+                      <template #label>
+                        <span :class="!createAccountInTree ? 'text-primary font-semibold' : 'text-gray-600'">
+                          لا
+                        </span>
+                      </template>
+                    </v-radio>
+                  </v-radio-group>
+                </div> -->
+
+                <SelectWithIconInput v-model="account" label="الحساب" placeholder="الحساب" :items="accountItems"
+                  :hide-details="false" @add-click="handleAddAccount" />
+              </div>
+            </div>
+
+            <!-- Balances Section -->
+            <div v-if="isEditing" class="bg-white">
+              <div class="px-6 py-4 border border-gray-200">
+                <h2 class="text-lg font-bold text-gray-900">الارصدة</h2>
               </div>
 
-              <SelectWithIconInput v-model="account" label="الحساب" placeholder="الحساب" :items="accountItems"
-                :hide-details="false" @add-click="handleAddAccount" />
+              <div v-if="supplierBalances.length === 0" class="text-center py-8">
+                <p class="text-gray-500">لا توجد أرصدة متاحة</p>
+              </div>
+
+              <div v-else class="overflow-x-auto">
+                <table class="w-full">
+                  <thead>
+                    <tr class="bg-gray-50 border-b border-gray-200">
+                      <th class="px-6 py-3 text-sm font-semibold text-gray-700">الرصيد</th>
+                      <th class="px-6 py-3 text-sm font-semibold text-gray-700">المبلغ المستحق</th>
+                      <th class="px-6 py-3 text-sm font-semibold text-gray-700">العملة</th>
+                      <th class="px-6 py-3 text-sm font-semibold text-gray-700">تاريخ التدقيق الأخير</th>
+                    </tr>
+                  </thead>
+                  <tbody class="text-center">
+                    <tr v-for="(balance, index) in supplierBalances" :key="balance.id"
+                      :class="index !== supplierBalances.length - 1 ? 'border-b border-gray-200' : ''">
+                      <td class="px-6 py-4 text-sm text-gray-900">{{ balance.balance }}</td>
+                      <td class="px-6 py-4 text-sm text-gray-900">{{ balance.last_amount }}</td>
+                      <td class="px-6 py-4 text-sm text-gray-900">{{ balance.currency }}</td>
+                      <td class="px-6 py-4 text-sm text-gray-900">{{ new
+                        Date(balance.last_validated_date).toLocaleDateString('en-GB') }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
 
-          <!-- Balances Section -->
-          <div v-if="isEditing" class="bg-gray-50 rounded-lg p-6">
-            <h2 class="text-lg font-bold text-primary-900 mb-4">الارصدة</h2>
-
-            <div v-if="supplierBalances.length === 0" class="text-center py-8">
-              <p class="text-gray-500">لا توجد أرصدة متاحة</p>
-            </div>
-
-            <div v-else class="space-y-6">
-              <div v-for="balance in supplierBalances" :key="balance.id"
-                class="bg-white rounded-lg p-4 border border-gray-200">
-                <div class="text-sm font-semibold text-primary-700 mb-3">{{ balance.currency }}</div>
-
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div class="text-center">
-                    <div class="text-xs font-semibold text-gray-600 mb-1">الرصيد</div>
-                    <div class="text-base font-bold text-gray-900">{{ balance.balance }}</div>
-                  </div>
-                  <div class="text-center">
-                    <div class="text-xs font-semibold text-gray-600 mb-1">المبلغ المستحق</div>
-                    <div class="text-base font-bold text-gray-900">{{ balance.last_amount }}</div>
-                  </div>
-                  <div class="text-center">
-                    <div class="text-xs font-semibold text-gray-600 mb-1">العملة</div>
-                    <div class="text-base font-bold text-gray-900">{{ balance.currency }}</div>
-                  </div>
-                  <div class="text-center">
-                    <div class="text-xs font-semibold text-gray-600 mb-1">تاريخ التدقيق الأخير</div>
-                    <div class="text-sm font-medium text-gray-700">{{ balance.last_validated_date }}</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
         </v-tabs-window-item>
       </v-tabs-window>
 
       <!-- Action Buttons -->
       <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col">
-        <ButtonWithIcon variant="flat" color="primary" rounded="4" height="48"
-          custom-class="min-w-56" :prepend-icon="saveIcon" label="حفظ" @click="handleSave" />
-        
+        <ButtonWithIcon variant="flat" color="primary" rounded="4" height="48" custom-class="min-w-56"
+          :prepend-icon="saveIcon" label="حفظ" @click="handleSave" />
+
         <ButtonWithIcon prepend-icon="mdi-close" variant="flat" color="primary-50" rounded="4" height="48"
-          custom-class="font-semibold text-base text-primary-700 px-6 min-w-56"
-          label="إغلاق" @click="handleClose" />
+          custom-class="font-semibold text-base text-primary-700 px-6 min-w-56" label="إغلاق" @click="handleClose" />
       </div>
     </div>
+
+    <v-overlay :model-value="pageLoading" contained class="align-center justify-center">
+      <v-progress-circular indeterminate color="primary" />
+    </v-overlay>
+
   </default-layout>
 </template>
 

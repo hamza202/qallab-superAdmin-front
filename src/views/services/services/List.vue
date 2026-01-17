@@ -215,7 +215,6 @@ const fetchServices = async (append = false) => {
 
     const queryString = params.toString()
     const url = queryString ? `/services?${queryString}` : '/services'
-
     const response = await api.get<ServicesResponse>(url)
 
     if (append) {
