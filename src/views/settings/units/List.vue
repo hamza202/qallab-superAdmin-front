@@ -488,7 +488,7 @@ const exportIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" 
           @delete="handleDeleteUnit" @edit="handleEditUnit" @select="handleSelectUnit" @selectAll="handleSelectAllUnits"
           :confirm-delete="true" :show-view="false">
           <template #item.is_active="{ item }">
-            <v-switch :model-value="item.is_active" hide-details inset density="compact" color="primary"
+            <v-switch :model-value="item.is_active" hide-details inset density="compact" class="small-switch" color="primary-600"
               @update:model-value="(value) => handleStatusChange(item)" />
           </template>
         </DataTable>

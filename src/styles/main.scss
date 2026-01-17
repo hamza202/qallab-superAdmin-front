@@ -202,3 +202,9 @@ html[dir="ltr"] .language-tabs-wrapper {
 html[dir="rtl"] .small-switch {
   transform-origin: right;
 }
+
+
+.v-switch__track {
+  @apply bg-primary-600 !important;
+  opacity: 1 !important;
+}

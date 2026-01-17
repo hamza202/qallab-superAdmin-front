@@ -11,27 +11,31 @@
           <div class="mb-3 bg-primary-50 border !border-gray-200 rounded-lg px-6 py-4">
             <h2 class="text-lg font-bold text-primary-900 mb-4">المعلومات الأساسية</h2>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mb-4">
               <div class="mb-4">
                 <LanguageTabs :languages="availableLanguages" label="اسم متغير المنتج">
                   <template #en>
                     <TextInput v-model="formData.name_en" placeholder="Enter variable name in English"
-                      :rules="[required('الاسم بالإنجليزي مطلوب')]" :hide-details="true" />
+                      :rules="[required()]" :hide-details="false" :error-messages="formErrors['name.en']"
+                      @input="delete formErrors['name.en']" />
                   </template>
                   <template #ar>
-                    <TextInput v-model="formData.name_ar" placeholder="ادخل اسم المتغير بالعربية"
-                      :rules="[required('الاسم بالعربي مطلوب')]" :hide-details="true" />
+                    <TextInput v-model="formData.name_ar" placeholder="ادخل اسم المتغير بالعربية" :rules="[required()]"
+                      :hide-details="false" :error-messages="formErrors['name.ar']"
+                      @input="delete formErrors['name.ar']" />
                   </template>
                 </LanguageTabs>
               </div>
 
               <SelectWithIconInput v-model="formData.category_ids" label="التصنيف" :items="categoryItems" showAddButton
-                placeholder="اختر الصنيف" :hide-details="false" multiple chips :loading="loadingCategories" />
+                placeholder="اختر الصنيف" :hide-details="false" multiple chips :loading="loadingCategories"
+                :error-messages="formErrors['category_ids']" @update:model-value="delete formErrors['category_ids']" />
 
               <SelectInput v-model="formData.value_type" label="نوع العنصر" :items="classificationItems"
-                placeholder="اختر نوع العنصر" :hide-details="false" :loading="loadingConstants" />
+                placeholder="اختر نوع العنصر" :hide-details="false" :loading="loadingConstants" :rules="[required()]"
+                :error-messages="formErrors['value_type']" @update:model-value="delete formErrors['value_type']" />
 
-              <div class="col-span-2">
+              <div class="md:col-span-2">
                 <!-- Notes -->
                 <TextareaInput v-model="formData.notes" label="الملاحظات" placeholder="أدخل الملاحظات هنا..." rows="4"
                   :hide-details="false" />
@@ -91,7 +95,8 @@
                       placeholder="أدخل القيمة" />
                   </td>
                   <td class="py-3 px-4">
-                    <v-switch v-model="value.is_active" hide-details inset density="compact" color="primary" />
+                    <v-switch v-model="value.is_active" hide-details inset density="compact" color="primary"
+                      class="small-switch" />
                   </td>
                   <td class="py-3 px-4">
                     <div class="flex items-center gap-2">
@@ -123,32 +128,33 @@
               @click="handleBack">
             </ButtonWithIcon>
           </div>
-
-
         </div>
       </v-form>
     </div>
+    <v-overlay :model-value="pageLoading" contained class="align-center justify-center">
+      <v-progress-circular indeterminate color="primary" />
+    </v-overlay>
   </default-layout>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, reactive } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useApi } from '@/composables/useApi'
+import { useNotification } from '@/composables/useNotification'
 
 const route = useRoute()
 const router = useRouter()
 const { t } = useI18n()
 const api = useApi()
+const { success, error } = useNotification()
 
 const formRef = ref<any>(null)
 const isFormValid = ref(false)
 const loading = ref(false)
-const error = ref<string | null>(null)
-
-// Validation rules
-const required = (message: string) => (value: any) => !!value || message
+const formErrors = reactive<Record<string, string>>({})
+const pageLoading = ref(false)
 
 const gridIcon = `<svg width="52" height="52" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M18.2 6.5H9.96667C8.75322 6.5 8.1465 6.5 7.68302 6.73615C7.27534 6.94388 6.94388 7.27534 6.73615 7.68302C6.5 8.1465 6.5 8.75322 6.5 9.96667V18.2C6.5 19.4134 6.5 20.0202 6.73615 20.4836C6.94388 20.8913 7.27534 21.2228 7.68302 21.4305C8.1465 21.6667 8.75322 21.6667 9.96667 21.6667H18.2C19.4134 21.6667 20.0202 21.6667 20.4836 21.4305C20.8913 21.2228 21.2228 20.8913 21.4305 20.4836C21.6667 20.0202 21.6667 19.4134 21.6667 18.2V9.96667C21.6667 8.75322 21.6667 8.1465 21.4305 7.68302C21.2228 7.27534 20.8913 6.94388 20.4836 6.73615C20.0202 6.5 19.4134 6.5 18.2 6.5Z" stroke="#1570EF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
@@ -257,15 +263,20 @@ const handleBack = () => {
 }
 
 const handleSaveAndReturn = async () => {
-  const { valid } = await formRef.value?.validate()
-  if (!valid) {
-    error.value = 'يرجى تصحيح الأخطاء في النموذج'
-    return
-  }
-
   try {
+    // Clear previous errors
+    Object.keys(formErrors).forEach(key => delete formErrors[key])
+
+    // Validate form
+    if (formRef.value && typeof formRef.value.validate === 'function') {
+      const { valid } = await formRef.value.validate()
+      if (!valid) {
+        error('يرجى تصحيح الأخطاء في النموذج')
+        return
+      }
+    }
+
     loading.value = true
-    error.value = null
 
     // Prepare payload according to API structure
     const payload = {
@@ -274,8 +285,9 @@ const handleSaveAndReturn = async () => {
         en: formData.value.name_en
       },
       notes: formData.value.notes,
-      value_type: formData.value.value_type,
-      category_ids: formData.value.category_ids,
+      value_type: formData.value.value_type ? parseInt(formData.value.value_type) : null,
+      attribute_style: 1,
+      category_ids: formData.value.category_ids?.map(id => parseInt(id)) || [],
       is_active: formData.value.is_active,
       values: formData.value.values.map(v => ({
         id: v.id,
@@ -284,21 +296,31 @@ const handleSaveAndReturn = async () => {
       }))
     }
 
+    let response: any
     if (isEditMode.value) {
       // Update existing aspect
-      await api.post(`/aspects/${route.params.id}`, payload)
-      alert('تم تحديث المتغير بنجاح')
+      response = await api.put(`/aspects/${route.params.id}`, payload)
+      success(response.message || 'تم تحديث المتغير بنجاح')
     } else {
       // Create new aspect
-      await api.post('/aspects', payload)
-      alert('تم إضافة المتغير بنجاح')
+      response = await api.post('/aspects', payload)
+      success(response.message || 'تم إضافة المتغير بنجاح')
     }
 
     handleBack()
   } catch (err: any) {
-    error.value = err.response?.data?.message || err.message || 'فشل حفظ البيانات'
     console.error('Save error:', err)
-    alert(error.value)
+
+    // Handle validation errors (422 status)
+    if (err?.response?.status === 422 && err?.response?.data?.errors) {
+      const apiErrors = err.response.data.errors
+      Object.keys(apiErrors).forEach(key => {
+        formErrors[key] = apiErrors[key][0]
+      })
+      error(err?.response?.data?.message || 'يرجى تصحيح الأخطاء في النموذج')
+    } else {
+      error(err?.response?.data?.message || 'فشل حفظ البيانات')
+    }
   } finally {
     loading.value = false
   }
@@ -326,7 +348,7 @@ const fetchConstants = async () => {
     }
   } catch (err: any) {
     console.error('Fetch constants error:', err)
-    error.value = err.response?.data?.message || err.message || 'فشل تحميل الثوابت'
+    error(err?.response?.data?.message || 'فشل تحميل الثوابت')
   } finally {
     loadingConstants.value = false
   }
@@ -342,7 +364,7 @@ const fetchCategories = async () => {
       locale: string
       message: string
       data: Category[]
-    }>('/admin/api/categories/list')
+    }>('/categories/list')
 
     if (response.data) {
       categoryItems.value = response.data.map(cat => ({
@@ -352,7 +374,7 @@ const fetchCategories = async () => {
     }
   } catch (err: any) {
     console.error('Fetch categories error:', err)
-    error.value = err.response?.data?.message || err.message || 'فشل تحميل الفئات'
+    error(err?.response?.data?.message || 'فشل تحميل الفئات')
   } finally {
     loadingCategories.value = false
   }
@@ -364,7 +386,6 @@ const fetchAspect = async () => {
 
   try {
     loading.value = true
-    error.value = null
 
     const response: { data: ApiAspect } = await api.get(`/aspects/${route.params.id}`)
     const aspect = response.data
@@ -373,10 +394,10 @@ const fetchAspect = async () => {
     formData.value = {
       name_ar: aspect.name || '',
       name_en: aspect.name || '',
-      value_type: aspect.value_type.toString(),
-      is_active: aspect.is_active,
+      value_type: aspect.value_type?.toString() || null,
+      is_active: Boolean(aspect.is_active),
       notes: aspect.notes || '',
-      category_ids: aspect.category_ids || [],
+      category_ids: aspect.category_ids?.map(id => id.toString()) || [],
       values: aspect.values?.map(v => ({
         id: v.id,
         name: v.name,
@@ -384,14 +405,15 @@ const fetchAspect = async () => {
       })) || []
     }
   } catch (err: any) {
-    error.value = err.message || 'فشل تحميل بيانات المتغير'
     console.error('Fetch aspect error:', err)
+    error(err?.response?.data?.message || 'فشل تحميل بيانات المتغير')
   } finally {
     loading.value = false
   }
 }
 
 onMounted(async () => {
+  pageLoading.value = true
   // Fetch constants and categories first
   await Promise.all([
     fetchConstants(),
@@ -400,5 +422,6 @@ onMounted(async () => {
 
   // Then fetch aspect data if in edit mode
   await fetchAspect()
+  pageLoading.value = false
 })
 </script>

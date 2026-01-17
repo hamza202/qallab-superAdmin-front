@@ -25,11 +25,40 @@ interface PriceList {
   created_at: string
 }
 
-interface PriceListsResponse {
-  success: boolean
-  message: string
-  data: PriceList[]
+interface TableHeader {
+  key: string;
+  title: string;
 }
+
+interface Pagination {
+  next_cursor: string | null;
+  previous_cursor: string | null;
+  per_page: number;
+}
+
+interface PriceListsResponse {
+  status: number;
+  code: number;
+  locale: string;
+  message: string;
+  data: PriceList[];
+  pagination: Pagination;
+  header_table: string;
+  headers: TableHeader[];
+  shownHeaders: TableHeader[];
+  actions: {
+    can_create: boolean;
+  };
+}
+
+interface PriceListFilters {
+  per_page?: number;
+  cursor?: string | null;
+  name?: string;
+  created_at?: string;
+  status?: string;
+}
+
 
 // Price Lists icon
 const priceListsIcon = `<svg width="52" height="52" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -71,18 +100,6 @@ const importIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" 
 <path d="M16 11V12C16 13.4001 16 14.1002 15.7275 14.635C15.4878 15.1054 15.1054 15.4878 14.635 15.7275C14.1002 16 13.4001 16 12 16H5C3.59987 16 2.8998 16 2.36502 15.7275C1.89462 15.4878 1.51217 15.1054 1.27248 14.635C1 14.1002 1 13.4001 1 12V11M12.6667 6.83333L8.5 11M8.5 11L4.33333 6.83333M8.5 11V1" stroke="#194185" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`
 
-// Table headers
-const tableHeaders = [
-  { key: 'name', title: 'اسم القائمة', width: '200px' },
-  { key: 'created_at', title: 'تاريخ الإنشاء', width: '160px' },
-  { key: 'is_active', title: 'الحالة', width: '120px' },
-]
-
-// Data
-const tableItems = ref<PriceList[]>([])
-const loading = ref(false)
-const deleteLoading = ref(false)
-
 // Selection state
 const selectedRows = ref<number[]>([])
 const hasSelected = computed(() => selectedRows.value.length > 0)
@@ -93,69 +110,125 @@ const filterStatus = ref<string | null>(null)
 const filterCreatedAt = ref('')
 const filterListName = ref('')
 
-const toggleAdvancedFilters = () => {
-  showAdvancedFilters.value = !showAdvancedFilters.value
-}
+// Status change confirmation
+const showStatusChangeDialog = ref(false);
+const statusChangeLoading = ref(false);
+const itemToChangeStatus = ref<PriceList | null>(null);
 
-// Demo data
-const demoPriceLists: PriceList[] = [
-  {
-    id: 1,
-    name: 'قائمة أسعار مواد البناء الأساسية',
-    is_active: true,
-    created_at: '2024-01-15'
-  },
-  {
-    id: 2,
-    name: 'قائمة أسعار الخرسانة والمواد الإنشائية',
-    is_active: true,
-    created_at: '2024-01-20'
-  },
-  {
-    id: 3,
-    name: 'قائمة أسعار مواد التشطيب',
-    is_active: false,
-    created_at: '2024-01-25'
-  },
-  {
-    id: 4,
-    name: 'قائمة أسعار مواد السباكة والكهرباء',
-    is_active: true,
-    created_at: '2024-02-01'
-  },
-  {
-    id: 5,
-    name: 'قائمة أسعار مواد العزل',
-    is_active: false,
-    created_at: '2024-02-05'
-  }
+// Delete confirmation
+const showDeleteDialog = ref(false);
+const showBulkDeleteDialog = ref(false);
+const deleteLoading = ref(false);
+const itemToDelete = ref<PriceList | null>(null);
+
+// API Data
+const tableItems = ref<PriceList[]>([]);
+const allHeaders = ref<TableHeader[]>([]);
+const shownHeaders = ref<TableHeader[]>([]);
+const canCreate = ref(false);
+const header_table = ref('');
+const loading = ref(false);
+const loadingMore = ref(false);
+
+// Pagination
+const nextCursor = ref<string | null>(null);
+const previousCursor = ref<string | null>(null);
+const perPage = ref(5);
+const hasMoreData = computed(() => nextCursor.value !== null);
+
+// Computed table headers for DataTable component
+const tableHeaders = computed(() => shownHeaders.value);
+
+// Headers dropdown
+const showHeadersMenu = ref(false);
+const updatingHeaders = ref(false);
+
+// Computed checked headers for menu
+const headerCheckStates = computed(() => {
+  const states: Record<string, boolean> = {};
+  allHeaders.value.forEach(header => {
+    states[header.key] = shownHeaders.value.some(sh => sh.key === header.key);
+  });
+  return states;
+});
+
+
+const StatusList = [
+  { title: 'فعال', value: 1 },
+  { title: 'غير فعال', value: 0 }
 ]
 
+// Selection state
+const selectedSuppliers = ref<number[]>([]);
+const hasSelectedSuppliers = computed(() => selectedSuppliers.value.length > 0);
+
+
+const toggleAdvancedFilters = () => {
+  showAdvancedFilters.value = !showAdvancedFilters.value;
+};
+
 // API Functions
-const fetchPriceLists = async () => {
+const fetchPriceLists = async (append = false) => {
   try {
-    loading.value = true
-    const response = await api.get<PriceListsResponse>('/admin/price-lists')
-    
-    // If API returns no data, use demo data
-    if (response.data && response.data.length > 0) {
-      tableItems.value = response.data
+    if (append) {
+      loadingMore.value = true;
     } else {
-      tableItems.value = demoPriceLists
+      loading.value = true;
     }
+
+    const filters: PriceListFilters = {
+      per_page: perPage.value,
+      cursor: append ? nextCursor.value : null,
+    };
+
+    if (filterListName.value) filters.name = filterListName.value;
+    if (filterStatus.value) filters.status = filterStatus.value;
+    if (filterCreatedAt.value) filters.created_at = filterCreatedAt.value;
+
+    const params = new URLSearchParams();
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== null && value !== undefined && value !== '') {
+        params.append(key, String(value));
+      }
+    });
+
+    const queryString = params.toString();
+    const url = queryString ? `/price-lists?${queryString}` : '/price-lists/services ';
+
+    const response = await api.get<PriceListsResponse>(url);
+    // Convert is_active to boolean for v-switch compatibility
+    const normalizedData = response.data.map(item => ({
+      ...item,
+      is_active: Boolean(item.is_active)
+    }));
+
+    if (append) {
+      tableItems.value = [...tableItems.value, ...normalizedData];
+    } else {
+      tableItems.value = normalizedData
+      allHeaders.value = response.headers.filter(h => h.key !== 'id' && h.key !== 'actions')
+      shownHeaders.value = response.shownHeaders.filter(h => h.key !== 'id' && h.key !== 'actions')
+      canCreate.value = response.actions.can_create
+      header_table.value = response.header_table
+    }
+
+    nextCursor.value = response.pagination.next_cursor;
+    previousCursor.value = response.pagination.previous_cursor;
+    perPage.value = response.pagination.per_page;
   } catch (err: any) {
-    console.error('Error fetching price lists:', err)
-    // On error, show demo data instead of showing error
-    tableItems.value = demoPriceLists
+    console.error('Error fetching suppliers:', err);
+    error(err?.response?.data?.message || 'Failed to fetch suppliers');
   } finally {
-    loading.value = false
+    loading.value = false;
+    loadingMore.value = false;
   }
+
 }
 
 const deletePriceList = async (priceListId: number) => {
   try {
     deleteLoading.value = true
-    await api.delete(`/admin/price-lists/${priceListId}`)
+    await api.delete(`/price-lists/${priceListId}`)
     success('تم حذف قائمة الأسعار بنجاح')
     await fetchPriceLists()
   } catch (err: any) {
@@ -186,14 +259,196 @@ const handleSelectAll = (checked: boolean) => {
   selectedRows.value = checked ? tableItems.value.map(i => i.id) : []
 }
 
-// const openCreate = () => {
-//   router.push({ name: 'ProductPriceListCreate' })
-// }
+const resetFilters = () => {
+  filterListName.value = '';
+  filterStatus.value = '';
+  filterStatus.value = null;
+  fetchPriceLists();
+};
+
+// Apply filters
+const applyFilters = () => {
+  fetchPriceLists();
+};
+
+
+// Toggle header visibility
+const toggleHeader = async (headerKey: string) => {
+  const isCurrentlyShown = shownHeaders.value.some(h => h.key === headerKey);
+
+  if (isCurrentlyShown) {
+    shownHeaders.value = shownHeaders.value.filter(h => h.key !== headerKey);
+  } else {
+    const headerToAdd = allHeaders.value.find(h => h.key === headerKey);
+    if (headerToAdd) {
+      shownHeaders.value.push(headerToAdd);
+    }
+  }
+
+  await updateHeadersOnServer();
+};
+
+const updateHeadersOnServer = async () => {
+  try {
+    updatingHeaders.value = true;
+    const headerKeys = shownHeaders.value.map(h => h.key);
+
+    const formData = new FormData();
+    formData.append('table', header_table.value);
+    headerKeys.forEach((header, index) => {
+      formData.append(`header[${index}]`, header);
+    });
+
+    await api.post('/headers', formData);
+  } catch (err: any) {
+    console.error('Error updating headers:', err);
+    error(err?.response?.data?.message || 'Failed to update headers');
+  } finally {
+    updatingHeaders.value = false;
+  }
+};
+
+
+const handleStatusChange = (item: any) => {
+  // Store the item with its current status
+  itemToChangeStatus.value = { ...item };
+  showStatusChangeDialog.value = true;
+};
+
+const confirmStatusChange = async () => {
+  if (!itemToChangeStatus.value) return;
+
+  try {
+    statusChangeLoading.value = true;
+    const newStatus = !itemToChangeStatus.value.is_active;
+
+    await api.patch(`/suppliers/${itemToChangeStatus.value.id}/change-status`, {
+      status: newStatus
+    });
+
+    success(`تم ${newStatus ? 'تفعيل' : 'تعطيل'} المورد بنجاح`);
+
+    // Update local state
+    const index = tableItems.value.findIndex(t => t.id === itemToChangeStatus.value!.id);
+    if (index !== -1) {
+      tableItems.value[index].is_active = newStatus;
+    }
+
+  } catch (err: any) {
+    console.error('Error changing supplier status:', err);
+    error(err?.response?.data?.message || 'فشل تغيير حالة المورد');
+  } finally {
+    statusChangeLoading.value = false;
+    showStatusChangeDialog.value = false;
+    itemToChangeStatus.value = null;
+  }
+};
+
+
+// Load more data (lazy loading)
+const loadMore = async () => {
+  if (!hasMoreData.value || loadingMore.value) return;
+  await fetchPriceLists(true);
+};
+
+
+const confirmDelete = async (item: any) => {
+  try {
+    deleteLoading.value = true;
+    await api.delete(`/suppliers/${item.id}`);
+    success('Supplier deleted successfully');
+    await fetchPriceLists();
+  } catch (err: any) {
+    console.error('Error deleting supplier:', err);
+    error(err?.response?.data?.message || 'Failed to delete supplier');
+  } finally {
+    deleteLoading.value = false;
+    showDeleteDialog.value = false;
+    itemToDelete.value = null;
+  }
+};
+
+const handleBulkDelete = () => {
+  if (selectedSuppliers.value.length === 0) return;
+  showBulkDeleteDialog.value = true;
+};
+
+const confirmBulkDelete = async () => {
+  try {
+    deleteLoading.value = true;
+    await api.post('/suppliers/bulk-delete', { ids: selectedSuppliers.value });
+    success(`${selectedSuppliers.value.length} suppliers deleted successfully`);
+    selectedSuppliers.value = [];
+    await fetchPriceLists();
+  } catch (err: any) {
+    console.error('Error bulk deleting suppliers:', err);
+    error(err?.response?.data?.message || 'Failed to delete suppliers');
+  } finally {
+    deleteLoading.value = false;
+    showBulkDeleteDialog.value = false;
+  }
+};
+
+const handleSelectSupplier = (item: any, selected: boolean) => {
+  if (selected) {
+    selectedSuppliers.value.push(item.id);
+  } else {
+    selectedSuppliers.value = selectedSuppliers.value.filter((id) => id !== item.id);
+  }
+};
+
+const handleSelectAllSuppliers = (checked: boolean) => {
+  if (checked) {
+    selectedSuppliers.value = tableItems.value.map((item) => item.id);
+  } else {
+    selectedSuppliers.value = [];
+  }
+};
+
+
+// Infinite scroll with Intersection Observer
+const loadMoreTrigger = ref<HTMLElement | null>(null);
+const observer = ref<IntersectionObserver | null>(null);
+
+const setupInfiniteScroll = () => {
+  if (!loadMoreTrigger.value) return;
+
+  observer.value = new IntersectionObserver(
+    (entries) => {
+      const entry = entries[0];
+      if (entry.isIntersecting && hasMoreData.value && !loadingMore.value && !loading.value) {
+        loadMore();
+      }
+    },
+    {
+      root: null,
+      rootMargin: '100px',
+      threshold: 0.1,
+    }
+  );
+
+  observer.value.observe(loadMoreTrigger.value);
+};
+
+const cleanupInfiniteScroll = () => {
+  if (observer.value && loadMoreTrigger.value) {
+    observer.value.unobserve(loadMoreTrigger.value);
+    observer.value.disconnect();
+  }
+};
 
 // Lifecycle
 onMounted(() => {
   fetchPriceLists()
-})
+  nextTick(() => {
+    setupInfiniteScroll();
+  });
+});
+
+onBeforeUnmount(() => {
+  cleanupInfiniteScroll();
+});
+
 </script>
 
 <template>
@@ -220,31 +475,35 @@ onMounted(() => {
             class="flex flex-wrap items-stretch rounded-lg overflow-hidden border border-gray-200 bg-white text-sm">
             <ButtonWithIcon variant="flat" height="40" rounded="0"
               custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-              :prepend-icon="trash_1_icon" color="white" label="حذف" />
+              :prepend-icon="trash_1_icon" color="white" :label="t('common.delete')" @click="handleBulkDelete" />
             <div class="w-px bg-gray-200"></div>
             <ButtonWithIcon variant="flat" height="40" rounded="0"
               custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-              :prepend-icon="trash_2_icon" color="white" label="حذف الجميع" />
+              :prepend-icon="trash_2_icon" color="white" :label="t('common.deleteAll')" @click="handleBulkDelete" />
           </div>
 
           <!-- Main header controls -->
           <div class="flex flex-wrap gap-3">
-            <ButtonWithIcon variant="outlined" rounded="4" color="gray-500" height="40"
-              custom-class="font-semibold text-base border-gray-400"
-              :prepend-icon="columnIcon" :label="t('common.columns')" append-icon="mdi-chevron-down" />
+            <v-menu v-model="showHeadersMenu" :close-on-content-click="false">
+              <template v-slot:activator="{ props }">
+                <ButtonWithIcon v-bind="props" variant="outlined" rounded="4" color="gray-500" height="40"
+                  custom-class="font-semibold text-base border-gray-400" :prepend-icon="columnIcon"
+                  :label="t('common.columns')" append-icon="mdi-chevron-down" />
+              </template>
+              <v-list>
+                <v-list-item v-for="header in allHeaders" :key="header.key" @click="toggleHeader(header.key)">
+                  <template v-slot:prepend>
+                    <v-checkbox-btn :model-value="headerCheckStates[header.key]" :disabled="updatingHeaders"
+                      @click.stop="toggleHeader(header.key)"></v-checkbox-btn>
+                  </template>
+                  <v-list-item-title>{{ header.title }}</v-list-item-title>
+                </v-list-item>
+              </v-list>
+            </v-menu>
 
             <ButtonWithIcon variant="flat" color="primary-500" height="40" rounded="4"
               custom-class="px-7 font-semibold text-base text-white border !border-primary-200"
               :prepend-icon="searchIcon" :label="t('common.advancedSearch')" @click="toggleAdvancedFilters" />
-
-            <!-- <v-btn variant="flat" color="primary-100" height="40" rounded="4"
-              class="px-7 font-semibold text-base !text-primary-800 border !border-primary-200" @click="openCreate">
-              <template #prepend>
-                <span v-html="plusIcon"></span>
-              </template>
-
-              أضف قائمة
-            </v-btn> -->
           </div>
         </div>
 
@@ -252,21 +511,22 @@ onMounted(() => {
         <div v-if="showAdvancedFilters"
           class="border-y border-y-primary-100 bg-primary-50 px-4 sm:px-6 py-3 flex flex-col gap-3 sm:gap-2">
           <div class="flex flex-wrap gap-3 flex-1 order-1 sm:order-2 justify-end sm:justify-start">
-            <v-select v-model="filterStatus" :items="['فعال', 'غير فعال']" density="comfortable" variant="outlined"
-              hide-details placeholder="الحالة" class="w-full sm:w-40 bg-white" />
-            <DatePickerInput v-model="filterCreatedAt" density="comfortable" hide-details
-              placeholder="تاريخ الانشاء" class="w-full sm:w-40 bg-white" />
-            <v-text-field v-model="filterListName" density="comfortable" variant="outlined" hide-details
-              placeholder="اسم القائمة" class="w-full sm:w-40 bg-white" />
+            <SelectInput v-model="filterStatus" @update:model-value="applyFilters" :items="['فعال', 'غير فعال']"
+              density="comfortable" variant="outlined" hide-details placeholder="الحالة"
+              class="w-full sm:w-40 bg-white" />
+            <TextField v-model="filterListName" @update:model-value="applyFilters" density="comfortable"
+              variant="outlined" hide-details placeholder="اسم القائمة" class="w-full sm:w-40 bg-white" />
+            <DatePickerInput v-model="filterCreatedAt" density="comfortable" hide-details placeholder="تاريخ الانشاء"
+              class="w-full sm:w-40 bg-white" />
 
             <div class="flex gap-2 items-center">
               <ButtonWithIcon variant="flat" color="primary-500" rounded="4" height="40"
-                custom-class="px-5 font-semibold !text-white text-sm sm:text-base"
-                :prepend-icon="searchIcon" label="ابحث الآن" />
-              
+                custom-class="px-5 font-semibold !text-white text-sm sm:text-base" :prepend-icon="searchIcon"
+                label="ابحث الآن" @click="applyFilters" />
+
               <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4" border="sm"
                 custom-class="px-5 font-semibold text-sm sm:text-base !text-primary-800 !border-primary-200"
-                prepend-icon="mdi-refresh" label="إعادة تعيين" />
+                prepend-icon="mdi-refresh" label="إعادة تعيين" @click="resetFilters" />
             </div>
 
           </div>
@@ -274,11 +534,30 @@ onMounted(() => {
 
         <!-- Price Lists Table -->
         <DataTable :headers="tableHeaders" :items="tableItems" :loading="loading" show-checkbox show-actions
-          :show-view="false" @edit="handleEdit" @delete="handleDelete" @select="handleSelect"
-          @selectAll="handleSelectAll">
+          @edit="handleEdit" @delete="confirmDelete" @select="handleSelectSupplier"
+          @selectAll="handleSelectAllSuppliers" :show-view="false">
+          <template #item.is_active="{ item }">
+            <v-switch :model-value="item.is_active" hide-details inset density="compact" class="small-switch" color="primary-600"
+              @update:model-value="(value) => handleStatusChange(item)" />
+          </template>
         </DataTable>
+
+        <!-- Infinite Scroll Trigger & Loading Indicator -->
+        <div ref="loadMoreTrigger" class="flex justify-center py-4">
+          <v-progress-circular v-if="loadingMore" indeterminate color="primary" size="32" />
+        </div>
       </div>
     </div>
+
+    <!-- Bulk Delete Confirmation Dialog -->
+    <DeleteConfirmDialog v-model="showBulkDeleteDialog" :loading="deleteLoading" title="حذف الموردين"
+      :message="`هل أنت متأكد من حذف ${selectedSuppliers.length} مورد؟`" @confirm="confirmBulkDelete" />
+
+    <!-- Status Change Confirmation Dialog -->
+    <StatusChangeDialog v-model="showStatusChangeDialog" :loading="statusChangeLoading"
+      :item-name="itemToChangeStatus?.name" :current-status="itemToChangeStatus?.is_active || false"
+      @confirm="confirmStatusChange" />
+
   </default-layout>
 </template>
 

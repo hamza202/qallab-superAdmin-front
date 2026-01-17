@@ -400,8 +400,7 @@ onBeforeUnmount(() => {
               hide-details 
               inset 
               density="compact" 
-              color="primary" 
-              class="small-switch"
+              class="small-switch" color="primary-600"
               :disabled="!item.actions?.can_change_status"
               @update:model-value="() => handleStatusToggle(item)" 
             />
