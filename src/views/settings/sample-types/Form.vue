@@ -64,10 +64,10 @@ const fetchSampleType = async (id: number) => {
     const response = await sampleTypeService.getById(id);
     const data = response.data;
     
-    form.nameAr = data.name_ar || data.name || '';
-    form.nameEn = data.name_en || '';
-    form.descriptionAr = data.description_ar || data.description || '';
-    form.descriptionEn = data.description_en || '';
+    form.nameAr = data.name_translations?.ar || data.name_ar || data.name || '';
+    form.nameEn = data.name_translations?.en || data.name_en || '';
+    form.descriptionAr = data.description_translations?.ar || data.description_ar || data.description || '';
+    form.descriptionEn = data.description_translations?.en || data.description_en || '';
     form.status = data.is_active;
   } catch (err: any) {
     console.error('Error fetching sample type:', err);
