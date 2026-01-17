@@ -81,7 +81,7 @@ const handleFileUpload = (event: any) => {
                         <template #append-inner>
                             <v-divider vertical class="mx-2" />
                             <div @mousedown.stop @click.stop>
-                                <v-select v-model="formData.service_duration_unit" :items="durationUnitItems"
+                                <v-select v-model="formData.service_duration_unit" placeholder="اختر" :items="durationUnitItems"
                                     variant="plain" density="compact" hide-details class="inner-select"
                                     style="width: 100px; min-width: 100px;" @update:model-value="updateFormData" />
                             </div>
@@ -223,18 +223,7 @@ const handleFileUpload = (event: any) => {
             <h3 class="text-lg font-bold text-gray-900 mb-4">بيانات إضافية</h3>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <LanguageTabs :languages="availableLanguages" label="الوصف">
-                        <template #en>
-                            <RichTextEditor v-model="formData.notes_en" placeholder="Enter Description in English"
-                                min-height="120px" hide-details @update:model-value="updateFormData" />
-                        </template>
-                        <template #ar>
-                            <RichTextEditor v-model="formData.notes" placeholder="ادخل الوصف بالعربية"
-                                min-height="120px" hide-details @update:model-value="updateFormData" />
-                        </template>
-                    </LanguageTabs>
-                </div>
+                <TextareaInput v-model="formData.notes" label="ملاحظات" placeholder="ملاحظات" :rows="4" :hide-details="true" @update:model-value="updateFormData" />
 
                 <!-- <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2">مستندات مرفقة</label>
