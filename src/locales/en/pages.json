@@ -76,7 +76,8 @@
     },
     "testGroup": {
       "title": "Test Groups",
-      "description": "Allows you to manage test groups"
+      "description": "Allows you to manage test groups",
+      "tableTitle": "Test Groups Table"
     },
     "tests": {
       "title": "Tests",

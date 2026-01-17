@@ -27,7 +27,7 @@ jobs:
             VITE_PORT: 3000
   
             # API Settings
-            VITE_API_BASE_URL: https://api-dev.qallab.sa/api
+            VITE_API_BASE_URL: https://api-dev.qallab.sa/api/admin
   
             # Localization
             VITE_DEFAULT_LOCALE: ar

@@ -24,6 +24,12 @@
     "skuCode": "SKU Code",
     "unit": "Unit",
     "category": "Category",
+    "active": "Active",
+    "inactive": "Inactive",
+    "name": "Name",
+    "reset": "Reset",
+    "confirmStatusChange": "Confirm Status Change",
+    "statusChangeMessage": "Are you sure you want to change the status of '{name}' to '{status}'?",
     "deleteConfirm": {
       "title": "Delete confirmation",
       "message": "Are you sure you want to delete",

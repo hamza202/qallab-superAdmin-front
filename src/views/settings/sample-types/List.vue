@@ -47,11 +47,11 @@ const sampleTypeTableItems = ref([
 ]);
 
 const openCreateSampleType = () => {
-  router.push("/sample-types/create");
+  router.push("/settings/sample-types/create");
 };
 
 const handleEditSampleType = (item: any) => {
-  router.push(`/sample-types/edit/${item.id}`);
+  router.push(`/settings/sample-types/edit/${item.id}`);
 };
 
 const handleDeleteSampleType = (item: any) => {

@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
+import api from "@/services/api";
+import { toast } from "vue3-toastify";
 
 const router = useRouter();
 const route = useRoute();
@@ -22,6 +24,7 @@ const formRef = ref<any | null>(null);
 const isFormValid = ref(false);
 const isEditMode = ref(false);
 const testMethodologyId = ref<string | null>(null);
+const isLoading = ref(false);
 
 const form = reactive<TestMethodologyForm>({
   nameAr: "",
@@ -44,7 +47,7 @@ const listIcon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xm
 </svg>`;
 
 const handleCancel = () => {
-  router.push("/test-methodology/list");
+  router.push("/settings/test-methodology/list");
 };
 
 const handleSave = async () => {
@@ -53,9 +56,37 @@ const handleSave = async () => {
     if (!valid) return;
   }
 
-  console.log("Saving test methodology:", form);
+  isLoading.value = true;
 
-  router.push("/test-methodology/list");
+  try {
+    const formData = new FormData();
+    formData.append("name[en]", form.nameEn);
+    formData.append("name[ar]", form.nameAr);
+    formData.append("description[en]", form.descriptionEn);
+    formData.append("description[ar]", form.descriptionAr);
+    formData.append("is_active", form.status ? "true" : "false");
+
+    let response;
+    if (isEditMode.value && testMethodologyId.value) {
+      formData.append("_method", "PUT");
+      response = await api.post(`/test-methodologies/${testMethodologyId.value}`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+    } else {
+      response = await api.post("/test-methodologies", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+    }
+
+    toast.success(response.data.message || "تم الحفظ بنجاح");
+    router.push("/settings/test-methodology/list");
+  } catch (error: any) {
+    console.error("Error saving test methodology:", error);
+    const errorMessage = error.response?.data?.message || "حدث خطأ أثناء الحفظ";
+    toast.error(errorMessage);
+  } finally {
+    isLoading.value = false;
+  }
 };
 
 onMounted(() => {
@@ -138,7 +169,7 @@ onMounted(() => {
           <!-- Action Buttons -->
           <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col">
             <ButtonWithIcon variant="flat" color="primary" rounded="4" height="48"
-              custom-class="min-w-56" :prepend-icon="saveIcon" label="حفظ" @click="handleSave" />
+              custom-class="min-w-56" :prepend-icon="saveIcon" label="حفظ" :loading="isLoading" :disabled="isLoading" @click="handleSave" />
             
             <ButtonWithIcon prepend-icon="mdi-close" variant="flat" color="primary-50" rounded="4" height="48"
               custom-class="font-semibold text-base text-primary-700 px-6 min-w-56"
