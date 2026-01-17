@@ -247,7 +247,6 @@ onMounted(() => {
         <v-progress-circular indeterminate color="primary" size="48" />
       </div>
       <div v-else>
-
         <div class="mb-4">
           <LanguageTabs :languages="availableLanguages" label="الإسم">
             <template #en>
