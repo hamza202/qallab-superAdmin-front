@@ -81,7 +81,7 @@ const handleFileUpload = (event: any) => {
                         <template #append-inner>
                             <v-divider vertical class="mx-2" />
                             <div @mousedown.stop @click.stop>
-                                <v-select v-model="formData.service_duration_unit" :items="durationUnitItems"
+                                <v-select v-model="formData.service_duration_unit" placeholder="اختر" :items="durationUnitItems"
                                     variant="plain" density="compact" hide-details class="inner-select"
                                     style="width: 100px; min-width: 100px;" @update:model-value="updateFormData" />
                             </div>

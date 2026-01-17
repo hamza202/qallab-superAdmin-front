@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, reactive } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useApi } from '@/composables/useApi'
 import { useNotification } from '@/composables/useNotification'
@@ -13,13 +13,14 @@ const router = useRouter()
 const api = useApi()
 const { success, error } = useNotification()
 
+const formErrors = reactive<Record<string, string>>({})
+
 const serviceId = ref<number | null>(null)
 const isEditing = computed(() => !!route.params.id)
 const saving = ref(false)
 const loading = ref(false)
 
 // Constants from API
-const domains = ref<Array<{ key: string; label: string }>>([])
 const types = ref<Array<{ key: string; label: string }>>([])
 const pricingMethods = ref<Array<{ key: string; label: string }>>([])
 const durationUnits = ref<Array<{ key: string; label: string }>>([])
@@ -27,7 +28,8 @@ const visibilityLevels = ref<Array<{ key: string; label: string }>>([])
 
 // Dropdown data from API
 const units = ref<Array<{ id: number; name: string }>>([])
-const taxes = ref<Array<{ id: number; tax_name: string }>>([])
+const taxes = ref<Array<{ id: number; tax_name: string; value_rate: string }>>([])
+const serviceCategories = ref<Array<{ id: number; name: string }>>([])
 const pricingMethodsList = ref<Array<{ id: number; name: string }>>([])
 
 const servicesIcon = `<svg width="43" height="35" viewBox="0 0 43 35" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -58,7 +60,7 @@ const basicInfoData = ref({
     name_ar: '',
     name_en: '',
     service_code: '',
-    service_type: 'internal',
+    service_type: null,
     service_category_id: null as number | null,
     description_ar: '',
     description_en: '',
@@ -69,13 +71,13 @@ const basicInfoData = ref({
     is_taxable: true,
     tax_id: null as number | null,
     tax_percentage: '',
-    is_active: true,
+    is_active: null as boolean | null,
 })
 
 const operationalData = ref({
     requires_scheduling: true,
     service_duration: '',
-    service_duration_unit: 'دقيقة',
+    service_duration_unit: null,
     requires_approval: true,
     is_barter: false,
     is_partial_allowed: false,
@@ -89,47 +91,12 @@ const operationalData = ref({
 
 const isTabActive = (value: number) => activeTab.value === value
 
-const basicInfoCompleted = computed(() => {
-    if (isEditing.value) {
-        return !!(basicInfoData.value.name_ar && basicInfoData.value.service_code && serviceId.value)
-    }
-    return !!(basicInfoData.value.name_ar && basicInfoData.value.service_code)
-})
-
-const operationalInfoCompleted = computed(() => {
-    return !!(operationalData.value.service_duration && operationalData.value.visibility_level)
-})
-
-const isTabCompleted = (value: number) => {
-    if (value === 0) return basicInfoCompleted.value
-    if (value === 1) return operationalInfoCompleted.value
-    return false
-}
-
-const handleTabChange = (newTab: number, event?: Event) => {
-    if (!isEditing.value && newTab === 1 && activeTab.value === 0) {
-        if (!basicInfoCompleted.value) {
-            error('يجب إكمال المعلومات الأساسية أولاً')
-            if (event) {
-                event.preventDefault()
-                event.stopPropagation()
-            }
-            setTimeout(() => {
-                activeTab.value = 0
-            }, 0)
-            return
-        }
-    }
-    activeTab.value = newTab
-}
-
 // API Functions
 const fetchConstants = async () => {
     try {
         const response = await api.get<any>('/services/constants')
         const data = response.data
 
-        domains.value = data.domains || []
         types.value = data.types || []
         pricingMethods.value = data.pricing_methods || []
         durationUnits.value = data.duration_units || []
@@ -164,6 +131,15 @@ const fetchPricingMethods = async () => {
         pricingMethodsList.value = response.data || []
     } catch (err: any) {
         console.error('Error fetching pricing methods:', err)
+    }
+}
+
+const fetchServiceCategories = async () => {
+    try {
+        const response = await api.get<any>('/service-categories/list')
+        serviceCategories.value = response.data || []
+    } catch (err: any) {
+        console.error('Error fetching service categories:', err)
     }
 }
 
@@ -260,6 +236,8 @@ const buildPayload = (step: number) => {
 const saveStep = async (step: number) => {
     try {
         saving.value = true
+        Object.keys(formErrors).forEach(key => delete formErrors[key])
+        
         const payload = buildPayload(step)
 
         let response: any
@@ -274,17 +252,24 @@ const saveStep = async (step: number) => {
             serviceId.value = response.data.service_id
         }
 
-        success(response.message || 'Service saved successfully')
+        success(response.message || 'تم حفظ الخدمة بنجاح')
         return true
     } catch (err: any) {
         console.error('Error saving service:', err)
 
-        if (err?.response?.data?.errors) {
+        // Handle validation errors
+        if (err?.response?.status === 422 && err?.response?.data?.errors) {
+            const apiErrors = err.response.data.errors
+            Object.keys(apiErrors).forEach(key => {
+                formErrors[key] = apiErrors[key][0]
+            })
+            error(err?.response?.data?.message || 'يرجى تصحيح الأخطاء في النموذج')
+        } else if (err?.response?.data?.errors) {
             const errors = err.response.data.errors
             const errorMessages = Object.values(errors).flat().join('\n')
             error(errorMessages)
         } else {
-            error(err?.response?.data?.message || 'Failed to save service')
+            error(err?.response?.data?.message || 'فشل في حفظ الخدمة')
         }
         return false
     } finally {
@@ -317,7 +302,8 @@ onMounted(async () => {
         fetchConstants(),
         fetchUnits(),
         fetchTaxes(),
-        fetchPricingMethods()
+        fetchPricingMethods(),
+        fetchServiceCategories()
     ])
 
     // Fetch service data if editing
@@ -326,16 +312,6 @@ onMounted(async () => {
     }
 })
 
-const checkCircleIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-<g clip-path="url(#clip0_12506_1251)">
-<path d="M16.5 8.31429V9.00429C16.4991 10.6216 15.9754 12.1953 15.007 13.4907C14.0386 14.786 12.6775 15.7337 11.1265 16.1922C9.57557 16.6508 7.91794 16.5957 6.40085 16.0352C4.88376 15.4747 3.58849 14.4389 2.70822 13.0821C1.82795 11.7253 1.40984 10.1203 1.51626 8.50653C1.62267 6.89272 2.24791 5.35654 3.29871 4.1271C4.34951 2.89766 5.76959 2.04083 7.34714 1.6844C8.92469 1.32798 10.5752 1.49105 12.0525 2.14929M16.5 3L9 10.5075L6.75 8.2575" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-</g>
-<defs>
-<clipPath id="clip0_12506_1251">
-<rect width="18" height="18" fill="white"/>
-</clipPath>
-</defs>
-</svg>`
 </script>
 
 <template>
@@ -359,11 +335,12 @@ const checkCircleIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
                     </button>
                 </div>
 
-                <div class="bg-white px-6 py-3">
+                <div class="bg-white px-3 md:px-6 py-3">
                     <v-tabs-window v-model="activeTab">
                         <v-tabs-window-item :value="0">
-                            <BasicInfoTab v-model="basicInfoData" :domains="domains" :types="types" :units="units"
-                                :pricing-methods="pricingMethodsList" :taxes="taxes" />
+                            <BasicInfoTab v-model="basicInfoData" :types="types" :units="units"
+                                :pricing-methods="pricingMethodsList" :taxes="taxes"
+                                :service-categories="serviceCategories" :form-errors="formErrors" />
                         </v-tabs-window-item>
 
                         <v-tabs-window-item :value="1">
@@ -374,7 +351,7 @@ const checkCircleIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
                 </div>
 
                 <!-- Action Buttons -->
-                <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col">
+                <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col px-4">
                     <ButtonWithIcon variant="flat" color="primary" rounded="4" height="48" custom-class="min-w-56"
                         :prepend-icon="saveIcon" label="حفظ" @click="handleSave" />
 

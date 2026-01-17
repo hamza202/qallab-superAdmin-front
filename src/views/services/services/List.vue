@@ -314,8 +314,9 @@ const handleDelete = (item: any) => {
 }
 
 const handleStatusChange = (item: any) => {
-  itemToChangeStatus.value = item
-  showStatusChangeDialog.value = true
+  // Store the item with its current status
+  itemToChangeStatus.value = { ...item };
+  showStatusChangeDialog.value = true;
 }
 
 const confirmStatusChange = async () => {
@@ -331,19 +332,18 @@ const confirmStatusChange = async () => {
 
     success(`تم ${newStatus ? 'تفعيل' : 'تعطيل'} الخدمة بنجاح`)
 
-    // Update the item in the list
-    const index = tableItems.value.findIndex(s => s.id === itemToChangeStatus.value!.id)
+    // Update local state
+    const index = tableItems.value.findIndex(t => t.id === itemToChangeStatus.value!.id);
     if (index !== -1) {
-      tableItems.value[index].is_active = newStatus
+      tableItems.value[index].is_active = newStatus;
     }
-
-    itemToChangeStatus.value = null
   } catch (err: any) {
     console.error('Error changing service status:', err)
     error(err?.response?.data?.message || 'فشل تغيير حالة الخدمة')
   } finally {
     statusChangeLoading.value = false
     showStatusChangeDialog.value = false
+    itemToChangeStatus.value = null
   }
 }
 
@@ -521,8 +521,8 @@ onBeforeUnmount(() => {
               variant="outlined" hide-details placeholder="الوحدة" class="w-full sm:w-40 bg-white"
               @update:model-value="applyFilters" />
             <v-select v-model="filterStatus" :items="StatusList" item-title="title" item-value="value"
-              density="comfortable" variant="outlined" hide-details placeholder="الحالة"
-              class="w-full sm:w-40 bg-white" @update:model-value="applyFilters" />
+              density="comfortable" variant="outlined" hide-details placeholder="الحالة" class="w-full sm:w-40 bg-white"
+              @update:model-value="applyFilters" />
             <DatePickerInput v-model="filterCreatedAt" placeholder="تاريخ الإنشاء" hide-details
               class="w-full sm:w-40 bg-white" />
             <div class="flex gap-2 items-center">
@@ -543,7 +543,7 @@ onBeforeUnmount(() => {
           @selectAll="handleSelectAll">
           <template #item.is_active="{ item }">
             <v-switch :model-value="item.is_active" hide-details inset density="compact" color="primary"
-              @click="handleStatusChange(item)" />
+              @update:model-value="(value) => handleStatusChange(item)" />
           </template>
         </DataTable>
 
