@@ -110,16 +110,16 @@ const fetchData = async (cursor?: string | null, append = false) => {
 };
 
 // === Handlers ===
-const handleView = (item: TestGroup) => {
+const handleView = (item: any) => {
   router.push({ name: 'TestGroupView', params: { id: item.id } });
 };
 
-const handleEdit = (item: TestGroup) => {
+const handleEdit = (item: any) => {
   router.push({ name: 'TestGroupEdit', params: { id: item.id } });
 };
 
-const openDeleteDialog = (item: TestGroup) => {
-  itemToDelete.value = item;
+const openDeleteDialog = (item: any) => {
+  itemToDelete.value = item as TestGroup;
   showDeleteDialog.value = true;
 };
 
@@ -139,8 +139,8 @@ const confirmDelete = async () => {
   }
 };
 
-const handleStatusToggle = (item: TestGroup) => {
-  itemToChangeStatus.value = item;
+const handleStatusToggle = (item: any) => {
+  itemToChangeStatus.value = item as TestGroup;
   showStatusDialog.value = true;
 };
 
@@ -381,6 +381,7 @@ const plusIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
           :items="tableItems"
           :loading="loading"
           :show-view="false"
+          :confirm-delete="false"
           show-actions
           @edit="handleEdit"
           @delete="openDeleteDialog"

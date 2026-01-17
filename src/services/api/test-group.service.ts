@@ -3,7 +3,11 @@ import api from './index'
 export interface TestGroup {
   id: number
   name: string
+  name_ar?: string
+  name_en?: string
   description: string | null
+  description_ar?: string
+  description_en?: string
   parent_id: number | null
   parent_name?: string
   is_active: boolean
@@ -63,7 +67,7 @@ export interface TestGroupListResponse {
 
 const testGroupService = {
   async getList(params?: TestGroupListParams): Promise<TestGroupListResponse> {
-    const response = await api.get<TestGroupListResponse>('/test-groups', { params })
+    const response = await api.get<TestGroupListResponse>('/test-groups/list', { params })
     return response.data
   },
 
@@ -72,12 +76,13 @@ const testGroupService = {
     return response.data
   },
 
-  async create(data: Partial<TestGroup>): Promise<{ data: TestGroup }> {
+  async create(data: FormData | Partial<TestGroup>): Promise<{ data: TestGroup }> {
     const response = await api.post<{ data: TestGroup }>('/test-groups', data)
     return response.data
   },
 
   async update(id: number, data: FormData): Promise<{ data: TestGroup }> {
+    // إضافة _method: PUT للتعديل عبر POST
     data.append('_method', 'PUT')
     const response = await api.post<{ data: TestGroup }>(`/test-groups/${id}`, data)
     return response.data

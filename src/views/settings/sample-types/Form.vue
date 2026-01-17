@@ -47,7 +47,7 @@ const saveIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xm
 </svg>`;
 
 const handleCancel = () => {
-  router.push("/sample-types/list");
+  router.push("/settings/sample-types/list");
 };
 
 const handleSave = async () => {
@@ -58,7 +58,7 @@ const handleSave = async () => {
 
   console.log("Saving sample type:", form);
 
-  router.push("/sample-types/list");
+  router.push("/settings/sample-types/list");
 };
 
 onMounted(() => {

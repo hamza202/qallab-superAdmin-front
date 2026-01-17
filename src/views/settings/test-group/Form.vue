@@ -67,6 +67,8 @@ const handleSave = async () => {
 
   try {
     const formData = new FormData();
+    
+    // إرسال name و description كـ arrays
     formData.append("name[en]", form.nameEn);
     formData.append("name[ar]", form.nameAr);
     formData.append("description[en]", form.descriptionEn);
@@ -78,6 +80,7 @@ const handleSave = async () => {
     }
 
     if (isEditMode.value && testGroupId.value) {
+      // في حالة التعديل، الخدمة ستضيف _method: PUT تلقائياً
       await testGroupService.update(Number(testGroupId.value), formData);
     } else {
       await testGroupService.create(formData);
