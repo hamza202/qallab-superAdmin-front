@@ -308,14 +308,10 @@ const handleView = (item: any) => {
   router.push({ name: 'ServicesView', params: { id: item.id } })
 }
 
-const handleDelete = (item: any) => {
-  itemToDelete.value = item
-  showDeleteDialog.value = true
-}
-
 const handleStatusChange = (item: any) => {
-  itemToChangeStatus.value = item
-  showStatusChangeDialog.value = true
+  // Store the item with its current status
+  itemToChangeStatus.value = { ...item };
+  showStatusChangeDialog.value = true;
 }
 
 const confirmStatusChange = async () => {
@@ -331,28 +327,25 @@ const confirmStatusChange = async () => {
 
     success(`تم ${newStatus ? 'تفعيل' : 'تعطيل'} الخدمة بنجاح`)
 
-    // Update the item in the list
-    const index = tableItems.value.findIndex(s => s.id === itemToChangeStatus.value!.id)
+    // Update local state
+    const index = tableItems.value.findIndex(t => t.id === itemToChangeStatus.value!.id);
     if (index !== -1) {
-      tableItems.value[index].is_active = newStatus
+      tableItems.value[index].is_active = newStatus;
     }
-
-    itemToChangeStatus.value = null
   } catch (err: any) {
     console.error('Error changing service status:', err)
     error(err?.response?.data?.message || 'فشل تغيير حالة الخدمة')
   } finally {
     statusChangeLoading.value = false
     showStatusChangeDialog.value = false
+    itemToChangeStatus.value = null
   }
 }
 
-const confirmDelete = async () => {
-  if (!itemToDelete.value) return
-
+const confirmDelete = async (item: any) => {
   try {
     deleteLoading.value = true
-    await api.delete(`/services/${itemToDelete.value.id}`)
+    await api.delete(`/services/${item.id}`)
     success('تم حذف الخدمة بنجاح')
     await fetchServices()
     itemToDelete.value = null
@@ -504,12 +497,11 @@ onBeforeUnmount(() => {
               custom-class="px-7 font-semibold text-base !text-primary-800 border !border-primary-200"
               :prepend-icon="plusIcon" :label="t('common.addNew')" @click="openCreate" />
           </div>
-
         </div>
 
         <div v-if="showAdvancedFilters"
           class="border-y border-y-primary-100 bg-primary-50 px-4 sm:px-6 py-3 flex flex-col gap-3 sm:gap-2">
-          <div class="flex flex-wrap gap-3 justify-end sm:justify-start">
+          <div class="flex flex-wrap xl:!flex-nowrap gap-3 justify-end sm:justify-start">
             <v-text-field v-model="filterName" density="comfortable" variant="outlined" hide-details
               placeholder="اسم الخدمة" class="w-full sm:w-40 bg-white" @keyup.enter="applyFilters" />
             <v-text-field v-model="filterCode" density="comfortable" variant="outlined" hide-details
@@ -521,8 +513,8 @@ onBeforeUnmount(() => {
               variant="outlined" hide-details placeholder="الوحدة" class="w-full sm:w-40 bg-white"
               @update:model-value="applyFilters" />
             <v-select v-model="filterStatus" :items="StatusList" item-title="title" item-value="value"
-              density="comfortable" variant="outlined" hide-details placeholder="الحالة"
-              class="w-full sm:w-40 bg-white" @update:model-value="applyFilters" />
+              density="comfortable" variant="outlined" hide-details placeholder="الحالة" class="w-full sm:w-40 bg-white"
+              @update:model-value="applyFilters" />
             <DatePickerInput v-model="filterCreatedAt" placeholder="تاريخ الإنشاء" hide-details
               class="w-full sm:w-40 bg-white" />
             <div class="flex gap-2 items-center">
@@ -539,28 +531,20 @@ onBeforeUnmount(() => {
         </div>
 
         <DataTable :headers="tableHeaders" :items="tableItems" :loading="loading" show-checkbox show-actions
-          @edit="handleEdit" @delete="handleDelete" @select="handleSelect" @view="handleView"
+          @edit="handleEdit" @delete="confirmDelete" @select="handleSelect" @view="handleView"
           @selectAll="handleSelectAll">
           <template #item.is_active="{ item }">
             <v-switch :model-value="item.is_active" hide-details inset density="compact" color="primary"
-              @click="handleStatusChange(item)" />
+              @update:model-value="(value) => handleStatusChange(item)" />
           </template>
         </DataTable>
 
         <!-- Infinite Scroll Trigger & Loading Indicator -->
         <div ref="loadMoreTrigger" class="flex justify-center py-4">
           <v-progress-circular v-if="loadingMore" indeterminate color="primary" size="32" />
-          <span v-else-if="!hasMoreData && tableItems.length > 0" class="text-gray-500 text-sm">
-            لا توجد المزيد من البيانات
-          </span>
         </div>
       </div>
     </div>
-
-    <!-- Delete Confirmation Dialog -->
-    <DeleteConfirmDialog v-model="showDeleteDialog" :loading="deleteLoading" :item-name="itemToDelete?.name"
-      title="حذف الخدمة" message="هل أنت متأكد من حذف الخدمة" @confirm="confirmDelete" />
-
     <!-- Bulk Delete Confirmation Dialog -->
     <DeleteConfirmDialog v-model="showBulkDeleteDialog" :loading="deleteLoading" title="حذف الخدمات"
       :message="`هل أنت متأكد من حذف ${selectedRows.length} خدمة؟`" @confirm="confirmBulkDelete" />
