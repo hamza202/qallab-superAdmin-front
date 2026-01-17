@@ -1041,10 +1041,10 @@ const editIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xm
 
                 <SelectWithIconInput show-add-button v-model="parentCategory" label="التصنيف الرئيسي"
                   placeholder="اختر التصنيف الرئيسي" :items="CategoryDropdownItems" :hide-details="false"
-                  :disabled="isSubcategoryMode" />
+                  :disabled="isSubcategoryMode" clearable />
 
                 <SelectWithIconInput show-add-button v-model="unit" label="الوحدة" placeholder="اختر الوحدة"
-                  :items="unitItems" :hide-details="false" />
+                  :items="unitItems" clearable :hide-details="false" />
 
                 <div>
                   <span class="text-sm font-semibold text-gray-700 mb-2 block">الحالة </span>

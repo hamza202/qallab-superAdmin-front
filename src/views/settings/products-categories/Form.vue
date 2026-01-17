@@ -555,9 +555,9 @@ const editIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xm
               </div>
 
               <SelectWithIconInput show-add-button v-model="parentCategory" label="التصنيف الرئيسي"
-                placeholder="اختر التصنيف الرئيسي" :items="categoriesList" :hide-details="false" />
+                placeholder="اختر التصنيف الرئيسي" clearable :items="categoriesList" :hide-details="false" />
 
-              <SelectWithIconInput show-add-button v-model="unit" label="الوحدة" placeholder="اختر الوحدة"
+              <SelectWithIconInput show-add-button v-model="unit" clearable label="الوحدة" placeholder="اختر الوحدة"
                 :items="unitItems" :hide-details="false" />
 
               <div>

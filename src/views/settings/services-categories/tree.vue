@@ -1038,11 +1038,11 @@ const editIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xm
                   </template>
                 </LanguageTabs>
 
-                <SelectWithIconInput show-add-button v-model="parentCategory" label="التصنيف الرئيسي"
+                <SelectWithIconInput show-add-button clearable v-model="parentCategory" label="التصنيف الرئيسي"
                   placeholder="اختر التصنيف الرئيسي" :items="CategoryDropdownItems" :hide-details="false"
                   :disabled="isSubcategoryMode" />
 
-                <SelectWithIconInput show-add-button v-model="unit" label="الوحدة" placeholder="اختر الوحدة"
+                <SelectWithIconInput show-add-button clearable v-model="unit" label="الوحدة" placeholder="اختر الوحدة"
                   :items="unitItems" :hide-details="false" />
 
                 <div>
