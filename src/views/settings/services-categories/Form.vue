@@ -554,10 +554,10 @@ const saveIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xm
                 </LanguageTabs>
               </div>
 
-              <SelectWithIconInput show-add-button v-model="parentCategory" label="التصنيف الرئيسي"
+              <SelectWithIconInput show-add-button clearable v-model="parentCategory" label="التصنيف الرئيسي"
                 placeholder="اختر التصنيف الرئيسي" :items="categoriesList" :hide-details="false" />
 
-              <SelectWithIconInput show-add-button v-model="unit" label="الوحدة" placeholder="اختر الوحدة"
+              <SelectWithIconInput show-add-button clearable v-model="unit" label="الوحدة" placeholder="اختر الوحدة"
                 :items="unitItems" :hide-details="false" />
 
               <div>
