@@ -1,4 +1,8 @@
 import api from './index'
+import axios from 'axios'
+
+// Base URL للـ login فقط (بدون /admin)
+const AUTH_BASE_URL = import.meta.env.VITE_API_BASE_URL?.replace(/\/admin$/, '') || 'https://api-dev.qallab.sa/api'
 
 export interface LoginCredentials {
   login: string
@@ -51,7 +55,8 @@ export interface ApiErrorResponse {
 
 const authService = {
   async login(credentials: LoginCredentials): Promise<LoginResponse> {
-    const response = await api.post<LoginResponse>('/auth/login', credentials)
+    // استخدام AUTH_BASE_URL للـ login فقط (بدون /admin)
+    const response = await axios.post<LoginResponse>(`${AUTH_BASE_URL}/auth/login`, credentials)
     return response.data
   },
 

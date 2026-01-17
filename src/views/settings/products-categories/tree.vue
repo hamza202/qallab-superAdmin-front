@@ -446,7 +446,7 @@ const fetchConstants = async () => {
 const fetchTaxes = async () => {
   try {
     // Real API call to get all taxes
-    const response = await api.get('/admin/taxes/list');
+    const response = await api.get('/taxes/list');
 
     // Store full tax data
     taxesData.value = response.data;

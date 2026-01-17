@@ -252,7 +252,7 @@ const updateHeadersOnServer = async () => {
       formData.append(`header[${index}]`, header);
     });
 
-    await api.post('/admin/headers', formData);
+    await api.post('/headers', formData);
   } catch (err: any) {
     console.error('Error updating headers:', err);
     error(err?.response?.data?.message || 'Failed to update headers');

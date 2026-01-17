@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
+import testGroupService, { type TestGroup } from '@/services/api/test-group.service'
+import { toast } from "vue3-toastify";
 
 const router = useRouter();
 const route = useRoute();
@@ -13,7 +15,7 @@ const availableLanguages = ref([
 interface TestGroupForm {
   nameAr: string;
   nameEn: string;
-  mainTestGroup: string | null;
+  mainTestGroup: number | null;
   descriptionAr: string;
   descriptionEn: string;
   status: boolean;
@@ -23,6 +25,7 @@ const formRef = ref<any | null>(null);
 const isFormValid = ref(false);
 const isEditMode = ref(false);
 const testGroupId = ref<string | null>(null);
+const isLoading = ref(false);
 
 const form = reactive<TestGroupForm>({
   nameAr: "",
@@ -33,10 +36,8 @@ const form = reactive<TestGroupForm>({
   status: true,
 });
 
-const mainTestGroupItems = ref([
-  { title: "مجموعة رئيسية", value: "مجموعة رئيسية" },
-  { title: "مجموعة فرعية", value: "مجموعة فرعية" },
-]);
+const mainTestGroupItems = ref<Array<{ title: string; value: number }>>([])
+const loadingParentGroups = ref(false)
 
 const testGroupIcon = `<svg width="39" height="48" viewBox="0 0 39 48" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M23.6667 21.5H10.6667M15 30.1667H10.6667M28 12.8333H10.6667M36.6667 12.4V34.9333C36.6667 38.5737 36.6667 40.3938 35.9582 41.7843C35.335 43.0073 34.3407 44.0017 33.1176 44.6249C31.7272 45.3333 29.907 45.3333 26.2667 45.3333H12.4C8.75966 45.3333 6.93949 45.3333 5.54906 44.6249C4.32601 44.0017 3.33163 43.0073 2.70846 41.7843C2 40.3938 2 38.5737 2 34.9333V12.4C2 8.75966 2 6.93949 2.70846 5.54906C3.33163 4.32601 4.32601 3.33163 5.54906 2.70846C6.93949 2 8.75966 2 12.4 2H26.2667C29.907 2 31.7272 2 33.1176 2.70846C34.3407 3.33163 35.335 4.32601 35.9582 5.54906C36.6667 6.93949 36.6667 8.75966 36.6667 12.4Z" stroke="#1570EF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
@@ -52,18 +53,8 @@ const listIcon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xm
 </svg>
 `
 
-
-const resetForm = () => {
-  form.nameAr = "";
-  form.nameEn = "";
-  form.mainTestGroup = null;
-  form.descriptionAr = "";
-  form.descriptionEn = "";
-  form.status = true;
-};
-
 const handleCancel = () => {
-  router.push("/test-group/list");
+  router.push("/settings/test-group/list");
 };
 
 const handleSave = async () => {
@@ -72,26 +63,92 @@ const handleSave = async () => {
     if (!valid) return;
   }
 
-  // TODO: Implement API call to save data
-  console.log("Saving test group:", form);
+  isLoading.value = true;
 
-  // Navigate back to list
-  router.push("/test-group/list");
+  try {
+    const formData = new FormData();
+    formData.append("name[en]", form.nameEn);
+    formData.append("name[ar]", form.nameAr);
+    formData.append("description[en]", form.descriptionEn);
+    formData.append("description[ar]", form.descriptionAr);
+    formData.append("is_active", form.status ? "true" : "false");
+    
+    if (form.mainTestGroup) {
+      formData.append("parent_id", form.mainTestGroup.toString());
+    }
+
+    if (isEditMode.value && testGroupId.value) {
+      await testGroupService.update(Number(testGroupId.value), formData);
+    } else {
+      await testGroupService.create(formData);
+    }
+
+    toast.success("تم الحفظ بنجاح");
+    router.push("/settings/test-group/list");
+  } catch (error: any) {
+    console.error("Error saving test group:", error);
+    const errorMessage = error.response?.data?.message || "حدث خطأ أثناء الحفظ";
+    toast.error(errorMessage);
+  } finally {
+    isLoading.value = false;
+  }
 };
 
-onMounted(() => {
+const fetchParentGroups = async () => {
+  try {
+    loadingParentGroups.value = true
+    const params: any = {}
+    
+    // Exclude current item when editing
+    if (isEditMode.value && testGroupId.value) {
+      params.ignore_id = Number(testGroupId.value)
+    }
+    
+    const response = await testGroupService.getList(params)
+    mainTestGroupItems.value = response.data.map((group: TestGroup) => ({
+      title: group.name,
+      value: group.id
+    }))
+  } catch (error: any) {
+    console.error('Error fetching parent groups:', error)
+    toast.error(error.response?.data?.message || 'حدث خطأ أثناء جلب المجموعات')
+  } finally {
+    loadingParentGroups.value = false
+  }
+}
+
+const fetchTestGroupData = async () => {
+  if (!testGroupId.value) return
+  
+  try {
+    isLoading.value = true
+    const response = await testGroupService.getById(Number(testGroupId.value))
+    const data = response.data
+    
+    form.nameAr = data.name_ar || data.name || ''
+    form.nameEn = data.name_en || data.name || ''
+    form.mainTestGroup = data.parent_id || null
+    form.descriptionAr = data.description_ar || data.description || ''
+    form.descriptionEn = data.description_en || data.description || ''
+    form.status = data.is_active
+  } catch (error: any) {
+    console.error('Error fetching test group:', error)
+    toast.error(error.response?.data?.message || 'حدث خطأ أثناء جلب البيانات')
+  } finally {
+    isLoading.value = false
+  }
+}
+
+onMounted(async () => {
   testGroupId.value = route.params.id as string;
   isEditMode.value = !!testGroupId.value;
 
+  // Fetch parent groups list
+  await fetchParentGroups()
+  
+  // Fetch test group data if editing
   if (isEditMode.value) {
-    // TODO: Load test group data from API
-    // For now, using mock data
-    form.nameAr = "مجموعة اختبار";
-    form.nameEn = "Test Group";
-    form.mainTestGroup = null;
-    form.descriptionAr = "وصف المجموعة بالعربية";
-    form.descriptionEn = "Group description in English";
-    form.status = true;
+    await fetchTestGroupData()
   }
 });
 </script>
@@ -128,8 +185,8 @@ onMounted(() => {
             </div>
 
             <!-- Main Test Group -->
-            <SelectWithIconInput show-add-button v-model="form.mainTestGroup" :items="mainTestGroupItems" placeholder="اختر"
-              label="مجموعة الاختبار الرئيسية" :hide-details="false" />
+            <SelectWithIconInput v-model="form.mainTestGroup" :items="mainTestGroupItems" placeholder="اختر"
+              label="مجموعة الاختبار الرئيسية" :hide-details="false" :loading="loadingParentGroups" />
 
             <!-- Description (Bilingual) -->
             <div class="md:col-span-2">

@@ -52,11 +52,11 @@ const testGroupTableItems = ref([
 ]);
 
 const openCreateTestGroup = () => {
-  router.push("/test-group/create");
+  router.push("/settings/test-group/create");
 };
 
 const handleEditTestGroup = (item: any) => {
-  router.push(`/test-group/edit/${item.id}`);
+  router.push(`/settings/test-group/edit/${item.id}`);
 };
 
 const handleDeleteTestGroup = (item: any) => {

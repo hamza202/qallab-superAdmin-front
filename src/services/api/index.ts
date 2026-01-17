@@ -1,7 +1,7 @@
 import axios, { type AxiosInstance, type AxiosError, type InternalAxiosRequestConfig } from 'axios'
 
 const api: AxiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'https://api-dev.qallab.sa/api',
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'https://api-dev.qallab.sa/api/admin',
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json',

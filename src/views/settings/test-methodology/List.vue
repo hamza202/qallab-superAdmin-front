@@ -1,11 +1,34 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from 'vue-i18n'
+import testMethodologyService, { type TestMethodology } from '@/services/api/test-methodology.service'
+import { useTableColumns } from '@/composables/useTableColumns'
+import { useNotification } from '@/composables/useNotification'
 
 const { t } = useI18n()
+const router = useRouter()
+const { success, error: showError } = useNotification()
 
-const router = useRouter();
+// Table columns composable
+const {
+  allHeaders,
+  visibleHeaders,
+  updatingHeaders,
+  showHeadersMenu,
+  headerCheckStates,
+  initHeaders,
+  toggleHeader,
+} = useTableColumns('test_methodologies')
+
+// Loading state
+const isLoading = ref(false)
+const errorMessage = ref<string | null>(null)
+
+// Status change dialog
+const showStatusChangeDialog = ref(false)
+const statusChangeLoading = ref(false)
+const itemToChangeStatus = ref<TestMethodology | null>(null)
 
 const testMethodologyIcon = `<svg width="39" height="48" viewBox="0 0 39 48" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M23.6667 2.58398V11.5335C23.6667 12.7469 23.6667 13.3537 23.9028 13.8171C24.1105 14.2248 24.442 14.5563 24.8497 14.764C25.3132 15.0002 25.9199 15.0002 27.1333 15.0002H36.0828M28 25.8333H10.6667M28 34.5H10.6667M15 17.1667H10.6667M23.6667 2H12.4C8.75966 2 6.93949 2 5.54906 2.70846C4.32601 3.33163 3.33163 4.32601 2.70846 5.54906C2 6.93949 2 8.75966 2 12.4V34.9333C2 38.5737 2 40.3938 2.70846 41.7843C3.33163 43.0073 4.32601 44.0017 5.54906 44.6249C6.93949 45.3333 8.75966 45.3333 12.4 45.3333H26.2667C29.907 45.3333 31.7272 45.3333 33.1176 44.6249C34.3407 44.0017 35.335 43.0073 35.9582 41.7843C36.6667 40.3938 36.6667 38.5737 36.6667 34.9333V15L23.6667 2Z" stroke="#1570EF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
@@ -15,47 +38,91 @@ const testMethodologyTableHeaders = [
   { key: "id", title: "#", width: "60px" },
   { key: "name", title: "الاسم", width: "300px" },
   { key: "description", title: "الوصف", width: "400px" },
-  { key: "status", title: "الحالة", width: "120px" },
+  { key: "is_active", title: "الحالة", width: "120px" },
 ];
 
-const testMethodologyTableItems = ref([
-  {
-    id: 1,
-    name: "منهجية 1",
-    description: "وصف المنهجية الأولى",
-    status: "فعال",
-  },
-  {
-    id: 2,
-    name: "منهجية 2",
-    description: "وصف المنهجية الثانية",
-    status: "غير فعال",
-  },
-  {
-    id: 3,
-    name: "منهجية 3",
-    description: "وصف المنهجية الثالثة",
-    status: "فعال",
-  },
-  {
-    id: 4,
-    name: "منهجية 4",
-    description: "وصف المنهجية الرابعة",
-    status: "فعال",
-  },
-]);
+const testMethodologyTableItems = ref<TestMethodology[]>([])
+
+// Fetch data from API
+const fetchTestMethodologies = async () => {
+  isLoading.value = true
+  errorMessage.value = null
+  try {
+    const params: any = {}
+    if (filterName.value) params.name = filterName.value
+    if (filterStatus.value) {
+      params.status = filterStatus.value === 'فعال' ? '1' : '0'
+    }
+    const response = await testMethodologyService.getList(params)
+    testMethodologyTableItems.value = response.data
+
+    // Initialize headers if available from API
+    if (response.headers && response.shownHeaders) {
+      initHeaders(response.headers, response.shownHeaders)
+    }
+  } catch (err: any) {
+    errorMessage.value = err.response?.data?.message || 'حدث خطأ أثناء جلب البيانات'
+    showError(errorMessage.value || 'حدث خطأ')
+    console.error('Error fetching test methodologies:', err)
+  } finally {
+    isLoading.value = false
+  }
+}
+
+onMounted(() => {
+  fetchTestMethodologies()
+})
 
 const openCreateTestMethodology = () => {
-  router.push("/test-methodology/create");
+  router.push("/settings/test-methodology/create");
 };
 
 const handleEditTestMethodology = (item: any) => {
-  router.push(`/test-methodology/edit/${item.id}`);
+  router.push(`/settings/test-methodology/edit/${item.id}`);
 };
 
-const handleDeleteTestMethodology = (item: any) => {
-  testMethodologyTableItems.value = testMethodologyTableItems.value.filter((t) => t.id !== item.id);
+const handleDeleteTestMethodology = async (item: any) => {
+  try {
+    await testMethodologyService.delete(item.id)
+    testMethodologyTableItems.value = testMethodologyTableItems.value.filter((t) => t.id !== item.id)
+    success('تم حذف المنهجية بنجاح')
+  } catch (err: any) {
+    showError(err.response?.data?.message || 'حدث خطأ أثناء الحذف')
+    console.error('Error deleting test methodology:', err)
+  }
 };
+
+// Handle status change - open confirmation dialog
+const handleStatusChange = (item: any) => {
+  itemToChangeStatus.value = { ...item }
+  showStatusChangeDialog.value = true
+}
+
+// Confirm status change after dialog
+const confirmStatusChange = async () => {
+  if (!itemToChangeStatus.value) return
+
+  try {
+    statusChangeLoading.value = true
+    const newStatus = !itemToChangeStatus.value.is_active
+
+    await testMethodologyService.changeStatus(itemToChangeStatus.value.id, newStatus)
+    success(`تم ${newStatus ? 'تفعيل' : 'تعطيل'} المنهجية بنجاح`)
+
+    // Update local state
+    const index = testMethodologyTableItems.value.findIndex(t => t.id === itemToChangeStatus.value!.id)
+    if (index !== -1) {
+      testMethodologyTableItems.value[index].is_active = newStatus
+    }
+  } catch (err: any) {
+    showError(err.response?.data?.message || 'حدث خطأ أثناء تغيير الحالة')
+    console.error('Error changing status:', err)
+  } finally {
+    statusChangeLoading.value = false
+    showStatusChangeDialog.value = false
+    itemToChangeStatus.value = null
+  }
+}
 
 const showAdvancedFilters = ref(false);
 
@@ -67,15 +134,13 @@ const toggleAdvancedFilters = () => {
 };
 
 const handleSearch = () => {
-  console.log("Searching with filters:", {
-    name: filterName.value,
-    status: filterStatus.value,
-  });
+  fetchTestMethodologies()
 };
 
 const resetFilters = () => {
   filterName.value = "";
   filterStatus.value = null;
+  fetchTestMethodologies()
 };
 
 const columnIcon = `<svg width="16" height="17" viewBox="0 0 16 17" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -109,9 +174,23 @@ const plusIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
           <h3 class="text-lg font-bold text-gray-900">جدول منهجيات الاختبار</h3>
 
           <div class="flex flex-wrap gap-3">
-            <ButtonWithIcon variant="outlined" rounded="4" color="gray-500" height="40"
-              custom-class="font-semibold text-base border-gray-400"
-              :prepend-icon="columnIcon" :label="t('common.columns')" append-icon="mdi-chevron-down" />
+            <!-- Column Management -->
+            <v-menu v-model="showHeadersMenu" :close-on-content-click="false">
+              <template v-slot:activator="{ props }">
+                <ButtonWithIcon v-bind="props" variant="outlined" rounded="4" color="gray-500" height="40"
+                  custom-class="font-semibold text-base border-gray-400"
+                  :prepend-icon="columnIcon" :label="t('common.columns')" append-icon="mdi-chevron-down" />
+              </template>
+              <v-list>
+                <v-list-item v-for="header in allHeaders" :key="header.key" @click="toggleHeader(header.key)">
+                  <template v-slot:prepend>
+                    <v-checkbox-btn :model-value="headerCheckStates[header.key]" :disabled="updatingHeaders"
+                      @click.stop="toggleHeader(header.key)"></v-checkbox-btn>
+                  </template>
+                  <v-list-item-title>{{ header.title }}</v-list-item-title>
+                </v-list-item>
+              </v-list>
+            </v-menu>
             
             <ButtonWithIcon variant="flat" color="primary-500" height="40" rounded="4"
               custom-class="px-7 font-semibold text-base text-white border !border-primary-200"
@@ -139,26 +218,37 @@ const plusIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
               
               <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4" border="sm"
                 custom-class="px-5 font-semibold text-sm sm:text-base !text-primary-800 !border-primary-200"
-                prepend-icon="mdi-refresh" label="إعادة تعيين" />
+                prepend-icon="mdi-refresh" label="إعادة تعيين" @click="resetFilters" />
             </div>
 
           </div>
         </div>
 
-        <DataTable :headers="testMethodologyTableHeaders" :items="testMethodologyTableItems" show-actions
+        <!-- Loading State -->
+        <div v-if="isLoading" class="flex justify-center items-center py-12">
+          <v-progress-circular indeterminate color="primary" size="48" />
+        </div>
+
+        <!-- Error State -->
+        <v-alert v-else-if="errorMessage" type="error" variant="tonal" class="mx-6 my-4" closable>
+          {{ errorMessage }}
+        </v-alert>
+
+        <!-- Data Table -->
+        <DataTable v-else :headers="visibleHeaders.length > 0 ? visibleHeaders : testMethodologyTableHeaders" 
+          :items="testMethodologyTableItems" show-actions
           :show-view="false" @edit="handleEditTestMethodology" @delete="handleDeleteTestMethodology">
-          <template #item.status="{ item }">
-            <span v-if="item.status === 'فعال'"
-              class="inline-flex items-center px-3 py-1 rounded-full bg-success-50 text-success-700 text-sm font-medium">
-              فعال
-            </span>
-            <span v-else
-              class="inline-flex items-center px-3 py-1 rounded-full bg-error-100 text-error-600 text-sm font-medium">
-              غير فعال
-            </span>
+          <template #item.is_active="{ item }">
+            <v-switch :model-value="item.is_active" hide-details inset density="compact" color="primary" class="small-switch"
+              @update:model-value="() => handleStatusChange(item)" />
           </template>
         </DataTable>
       </div>
     </div>
+
+    <!-- Status Change Confirmation Dialog -->
+    <StatusChangeDialog v-model="showStatusChangeDialog" :loading="statusChangeLoading"
+      :item-name="itemToChangeStatus?.name" :current-status="itemToChangeStatus?.is_active"
+      @confirm="confirmStatusChange" />
   </default-layout>
 </template>

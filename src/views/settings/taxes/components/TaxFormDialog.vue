@@ -65,7 +65,7 @@ const saving = ref(false);
 const fetchConstants = async () => {
   try {
     loadingConstants.value = true;
-    const response = await api.get('/admin/taxes/constants');
+    const response = await api.get('/taxes/constants');
 
     // Populate calculation methods dropdown
     if (response.data.calculation_methods) {
@@ -86,7 +86,7 @@ const fetchConstants = async () => {
 const fetchTaxRules = async () => {
   try {
     loadingConstants.value = true;
-    const response = await api.get('/admin/tax-rules/list');
+    const response = await api.get('/tax-rules/list');
 
     // Populate tax rules dropdown
     if (response.data) {
@@ -106,7 +106,7 @@ const fetchTaxRules = async () => {
 const fetchTaxData = async (taxId: number) => {
   try {
     loadingTaxData.value = true;
-    const response = await api.get(`/admin/taxes/${taxId}`);
+    const response = await api.get(`/taxes/${taxId}`);
     const tax = response.data;
 
     form.id = tax.id;
@@ -183,11 +183,11 @@ const handleSave = async () => {
       formData.append('include_tax', form.amountIncludesTax ? '1' : '0');
       formData.append('is_active', form.status ? '1' : '0');
 
-      await api.post(`/admin/taxes/${form.id}`, formData);
+      await api.post(`/taxes/${form.id}`, formData);
       success('تم تحديث الضريبة بنجاح');
     } else {
       // Create new tax
-      await api.post('/admin/taxes', payload);
+      await api.post('/taxes', payload);
       success('تم إضافة الضريبة بنجاح');
     }
 
