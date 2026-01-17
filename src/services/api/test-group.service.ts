@@ -3,15 +3,17 @@ import api from './index'
 export interface TestGroup {
   id: number
   name: string
-  name_en?: string
-  name_ar?: string
-  description?: string
-  description_en?: string
-  description_ar?: string
-  parent_id?: number | null
+  description: string | null
+  parent_id: number | null
+  parent_name?: string
   is_active: boolean
-  created_at?: string
-  updated_at?: string
+  created_at: string
+  updated_at: string
+  actions?: {
+    can_update: boolean
+    can_delete: boolean
+    can_view: boolean
+  }
 }
 
 export interface TestGroupFormData {
@@ -19,23 +21,29 @@ export interface TestGroupFormData {
   'name[ar]': string
   'description[en]'?: string
   'description[ar]'?: string
-  is_active?: boolean
   parent_id?: number | null
+  is_active?: boolean
 }
 
 export interface TestGroupListParams {
+  per_page?: number
+  cursor?: string
   name?: string
   status?: string
-  ignore_id?: number
+  parent_id?: number | null
 }
 
 export interface PaginationMeta {
-  current_page: number
-  from: number
-  last_page: number
+  path: string
   per_page: number
-  to: number
-  total: number
+  next_cursor: string | null
+  prev_cursor: string | null
+}
+
+export interface TableHeader {
+  key: string
+  title: string
+  sortable?: boolean
 }
 
 export interface TestGroupListResponse {
@@ -44,12 +52,18 @@ export interface TestGroupListResponse {
   locale: string
   message: string
   data: TestGroup[]
-  meta: PaginationMeta
+  pagination: PaginationMeta
+  headers?: TableHeader[]
+  shownHeaders?: TableHeader[]
+  header_table?: string
+  actions?: {
+    can_create: boolean
+  }
 }
 
 const testGroupService = {
   async getList(params?: TestGroupListParams): Promise<TestGroupListResponse> {
-    const response = await api.get<TestGroupListResponse>('/test-groups/list', { params })
+    const response = await api.get<TestGroupListResponse>('/test-groups', { params })
     return response.data
   },
 
@@ -58,23 +72,24 @@ const testGroupService = {
     return response.data
   },
 
-  async create(data: FormData): Promise<{ data: TestGroup }> {
-    const response = await api.post<{ data: TestGroup }>('/test-groups', data, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    })
+  async create(data: Partial<TestGroup>): Promise<{ data: TestGroup }> {
+    const response = await api.post<{ data: TestGroup }>('/test-groups', data)
     return response.data
   },
 
   async update(id: number, data: FormData): Promise<{ data: TestGroup }> {
     data.append('_method', 'PUT')
-    const response = await api.post<{ data: TestGroup }>(`/test-groups/${id}`, data, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    })
+    const response = await api.post<{ data: TestGroup }>(`/test-groups/${id}`, data)
     return response.data
   },
 
   async delete(id: number): Promise<void> {
     await api.delete(`/test-groups/${id}`)
+  },
+
+  async changeStatus(id: number, status: boolean): Promise<{ data: TestGroup }> {
+    const response = await api.patch<{ data: TestGroup }>(`/test-groups/${id}/change-status`, { status })
+    return response.data
   },
 }
 
