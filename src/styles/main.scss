@@ -1,24 +1,17 @@
 @use "./outher";
-/* ===================================
-   QALLAB FORM COMPONENTS STYLES
-   =================================== */
 
-// Shadow tokens (CSS variables from Vuetify theme)
 $shadow-xs: 0px 1px 2px rgba(16, 24, 40, 0.05);
 $shadow-focus: 0px 0px 0px 4px rgb(var(--v-theme-primary-25)),
   0px 1px 2px rgba(245, 250, 255, 0.05);
 
-// Global font override for Vuetify
 .v-application {
   font-family: "Cairo", sans-serif;
 }
 
-// Focus state enhancement
 .v-field--focused {
-  @apply shadow-[0px_0px_0px_4px_rgb(245_250_255),0px_1px_2px_rgb(245_250_255_0.05)];
+  box-shadow: 0px 0px 0px 4px rgb(245, 250, 255), 0px 1px 2px rgba(245, 250, 255, 0.05);
 }
 
-// Placeholder color
 .v-field input::placeholder,
 .v-field textarea::placeholder {
   @apply text-gray-500 opacity-100 !important;
@@ -28,12 +21,10 @@ $shadow-focus: 0px 0px 0px 4px rgb(var(--v-theme-primary-25)),
   mask-image: none !important;
 }
 
-// Form field label styles
 .qallab-label {
   @apply font-cairo text-sm font-semibold leading-5 text-gray-700 block mb-1.5 text-right;
 }
 
-// Select dropdown menu styles
 .v-overlay__content .v-list {
   @apply font-cairo;
 
@@ -41,7 +32,6 @@ $shadow-focus: 0px 0px 0px 4px rgb(var(--v-theme-primary-25)),
     @apply text-sm;
   }
 
-  // Selected item styles
   .v-list-item--active {
     @apply bg-primary-500 !important;
 
@@ -51,7 +41,6 @@ $shadow-focus: 0px 0px 0px 4px rgb(var(--v-theme-primary-25)),
   }
 }
 
-// Custom select dropdown arrow
 .v-select .v-field__append-inner .v-icon {
   background-image: url("data:image/svg+xml,%3Csvg width='12' height='7' viewBox='0 0 12 7' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0.833328 0.833344L5.83333 5.83334L10.8333 0.833344' stroke='%23697586' stroke-width='1.66667' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   @apply bg-no-repeat bg-center opacity-100 !important;
@@ -62,32 +51,35 @@ $shadow-focus: 0px 0px 0px 4px rgb(var(--v-theme-primary-25)),
     font-size: 0;
   }
 }
-.v-selection-control__input > .mdi-checkbox-blank-outline {
+
+.v-selection-control__input>.mdi-checkbox-blank-outline {
   @apply text-gray-300 opacity-100 !important;
 }
+
 .v-selection-control__input .mdi-checkbox-blank-outline::before,
 .v-selection-control__input .mdi-checkbox-marked::before {
   @apply bg-gray-100 flex justify-center items-center rounded-[4px] overflow-hidden;
   width: 19px;
   height: 19px;
 }
+
 .v-checkbox .v-selection-control {
   @apply min-h-0;
 }
+
 .v-field {
   box-shadow: 0px 1px 2px rgba(16, 24, 40, 0.05);
 }
+
 .v-field--disabled.bg-background {
   @apply opacity-100 bg-gray-200 text-primary-900 font-semibold !important;
+
   .v-field__outline {
     @apply text-gray-300;
   }
 }
-/* Custom styles */
 
-// ===================================
-// CUSTOM TABS STYLING
-// ===================================
+
 .custom-tabs {
   @apply bg-transparent;
 
@@ -115,58 +107,73 @@ $shadow-focus: 0px 0px 0px 4px rgb(var(--v-theme-primary-25)),
 .v-table__wrapper {
   @apply rounded-none;
 }
+
 .v-window {
   @apply overflow-visible !important;
 }
+
 .text-input-wrapper,
 .textarea-input-wrapper,
 .select-input-wrapper,
 .select-icon-wrapper,
 .v-text-field {
   @apply relative;
+
   .v-input__details {
     @apply absolute bottom-[-20px] end-0 text-sm;
   }
 }
+
 .v-text-field input[type="date"] {
   @apply block;
 }
+
 .v-navigation-drawer {
   .v-list-item__append {
     @apply max-w-5;
   }
 }
+
 .v-input {
   @apply rounded-md;
 }
+
 .v-input.v-switch {
   @apply min-w-14;
 }
+
 .dir-ltr {
   direction: ltr !important;
 }
+
 html[dir="rtl"] .language-tabs-wrapper {
   .text-input-wrapper .v-input {
     @apply rounded-tl-[0] !important;
+
     .v-field {
       @apply rounded-tl-[0] !important;
     }
   }
+
   .editor-container {
     @apply rounded-tl-[0] !important;
   }
 }
+
 html[dir="ltr"] .language-tabs-wrapper {
   .text-input-wrapper .v-input {
     @apply rounded-tr-[0] !important;
+
     .v-field {
       @apply rounded-tr-[0] !important;
     }
   }
+
   .editor-container {
     @apply rounded-tr-[0] !important;
   }
 }
+
 // ===================================
 // HIDE THE SPINNERS FOR NUMBER INPUT
 // ===================================
@@ -181,12 +188,11 @@ html[dir="ltr"] .language-tabs-wrapper {
 }
 
 // custom tooltip
-.v-tooltip > .v-overlay__content.custom-tooltip {
+.v-tooltip>.v-overlay__content.custom-tooltip {
   @apply bg-white text-gray-500 rounded-md shadow-lg;
 }
 
-.no-scroll-style {
-}
+.no-scroll-style {}
 
 // checkbox
 .white-checkbox .v-selection-control__input .mdi-checkbox-blank-outline::before,
@@ -201,10 +207,4 @@ html[dir="ltr"] .language-tabs-wrapper {
 
 html[dir="rtl"] .small-switch {
   transform-origin: right;
-}
-
-
-.v-switch__track {
-  @apply bg-primary-600 !important;
-  opacity: 1 !important;
 }
