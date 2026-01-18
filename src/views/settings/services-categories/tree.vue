@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed, ref, watch, onMounted, reactive } from 'vue';
-import { useNotification } from '@/composables/useNotification';
 import { useApi } from '@/composables/useApi';
 import CategoryTreeItem from './components/CategoryTreeItem.vue';
 
@@ -53,7 +52,6 @@ const availableLanguages = ref([
   { code: "ar", name: "AR", flag: "/img/sa.svg", dir: "rtl" as const },
 ]);
 
-const { notification, success, error: showError } = useNotification();
 const api = useApi();
 
 const formErrors = reactive<Record<string, string>>({});
@@ -442,7 +440,7 @@ const fetchConstants = async () => {
     ];
   } catch (error) {
     console.error('Failed to fetch constants:', error);
-    showError('حدث خطأ أثناء تحميل البيانات');
+    toast.error('حدث خطأ أثناء تحميل البيانات');
   }
 };
 
@@ -463,7 +461,7 @@ const fetchTaxes = async () => {
     ];
   } catch (error) {
     console.error('Failed to fetch constants:', error);
-    showError('حدث خطأ أثناء تحميل البيانات');
+    toast.error('حدث خطأ أثناء تحميل البيانات');
   }
 };
 
@@ -481,7 +479,7 @@ const fetchCategoriesList = async () => {
     ];
   } catch (error) {
     console.error('Failed to fetch categories:', error);
-    showError('حدث خطأ أثناء تحميل البيانات');
+    toast.error('حدث خطأ أثناء تحميل البيانات');
   }
 };
 
@@ -499,7 +497,7 @@ const fetchUnits = async () => {
     ];
   } catch (error) {
     console.error('Failed to fetch categories:', error);
-    showError('حدث خطأ أثناء تحميل البيانات');
+    toast.error('حدث خطأ أثناء تحميل البيانات');
   }
 };
 
@@ -525,7 +523,7 @@ const fetchCategoriesTree = async () => {
 
   } catch (error) {
     console.error('Failed to fetch categories:', error);
-    showError('حدث خطأ أثناء تحميل التصنيفات');
+    toast.error('حدث خطأ أثناء تحميل التصنيفات');
   } finally {
     isLoading.value = false;
   }
@@ -564,7 +562,7 @@ const fetchCategoryDetails = async (id: number) => {
     }
   } catch (error) {
     console.error('Failed to fetch category details:', error);
-    showError('حدث خطأ أثناء تحميل بيانات التصنيف');
+    toast.error('حدث خطأ أثناء تحميل بيانات التصنيف');
   } finally {
     isLoading.value = false;
   }
@@ -677,7 +675,7 @@ const handleSave = async () => {
       };
 
       await api.post('/service-categories/tree/tax-bulk', payload);
-      success(`تم تطبيق الضرائب على ${selectedCategoryIds.value.length} تصنيف بنجاح`);
+      toast.success(`تم تطبيق الضرائب على ${selectedCategoryIds.value.length} تصنيف بنجاح`);
 
       selectedCategoryIds.value = [];
       taxRules.value = [];
@@ -739,7 +737,7 @@ const handleSave = async () => {
         } else {
           await api.put(`/service-categories/${selectedCategory.value.id}`, payload);
         }
-        success('تم تحديث التصنيف بنجاح');
+        toast.success('تم تحديث التصنيف بنجاح');
       } else {
         // Create new category
         if (payload.image) {
@@ -765,7 +763,7 @@ const handleSave = async () => {
           await api.post('/service-categories', payload);
         }
 
-        success(isSubcategoryMode.value ? 'تم إضافة التصنيف الفرعي بنجاح' : 'تم إضافة التصنيف بنجاح');
+        toast.success(isSubcategoryMode.value ? 'تم إضافة التصنيف الفرعي بنجاح' : 'تم إضافة التصنيف بنجاح');
       }
     }
 
@@ -788,9 +786,9 @@ const handleSave = async () => {
       Object.keys(apiErrors).forEach(key => {
         formErrors[key] = apiErrors[key][0];
       });
-      showError(err?.response?.data?.message || 'يرجى تصحيح الأخطاء في النموذج');
+      toast.error(err?.response?.data?.message || 'يرجى تصحيح الأخطاء في النموذج');
     } else {
-      showError('حدث خطأ أثناء حفظ التصنيف');
+      toast.error('حدث خطأ أثناء حفظ التصنيف');
     }
   } finally {
     isSaving.value = false;
@@ -833,7 +831,7 @@ const confirmBulkDelete = async () => {
 
   try {
     await api.post('/service-categories/bulk-delete', { ids: selectedCategoryIds.value });
-    success(`تم حذف ${selectedCategoryIds.value.length} تصنيف بنجاح`);
+    toast.success(`تم حذف ${selectedCategoryIds.value.length} تصنيف بنجاح`);
 
     // Refresh categories list
     await fetchCategoriesTree();
@@ -848,7 +846,7 @@ const confirmBulkDelete = async () => {
 
   } catch (err) {
     console.error('Failed to bulk delete categories:', err);
-    showError('حدث خطأ أثناء حذف التصنيفات');
+    toast.error('حدث خطأ أثناء حذف التصنيفات');
   } finally {
     isDeleting.value = false;
   }
@@ -862,7 +860,7 @@ const confirmDelete = async () => {
 
   try {
     await api.delete(`/service-categories/${selectedCategory.value.id}`);
-    success('تم حذف التصنيف بنجاح');
+    toast.success('تم حذف التصنيف بنجاح');
 
     // Refresh categories list
     await fetchCategoriesTree();
@@ -877,7 +875,7 @@ const confirmDelete = async () => {
 
   } catch (err) {
     console.error('Failed to delete category:', err);
-    showError('حدث خطأ أثناء حذف التصنيف');
+    toast.error('حدث خطأ أثناء حذف التصنيف');
   } finally {
     isDeleting.value = false;
   }
@@ -1238,15 +1236,6 @@ const editIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xm
       <v-progress-circular indeterminate color="primary" />
     </v-overlay>
 
-    <!-- Notification Snackbar -->
-    <v-snackbar v-model="notification.show" :timeout="notification.timeout"
-      :color="notification.type === 'success' ? 'success' : notification.type === 'error' ? 'error' : notification.type === 'warning' ? 'warning' : 'info'"
-      location="top end">
-      {{ notification.message }}
-      <template #actions>
-        <ButtonWithIcon variant="text" label="إغلاق" @click="notification.show = false" />
-      </template>
-    </v-snackbar>
   </default-layout>
 </template>
 

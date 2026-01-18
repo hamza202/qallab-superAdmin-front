@@ -208,3 +208,8 @@ html[dir="ltr"] .language-tabs-wrapper {
 html[dir="rtl"] .small-switch {
   transform-origin: right;
 }
+
+.v-switch__track {
+  @apply bg-gray-100 !important;
+  opacity: 1 !important;
+}

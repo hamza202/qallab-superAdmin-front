@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { useNotification } from '@/composables/useNotification';
 import { useApi } from '@/composables/useApi';
 import { useRoute } from 'vue-router';
 import { useRouter } from "vue-router";
 
 const router = useRouter();
 const route = useRoute();
+const api = useApi();
 
 const formErrors = reactive<Record<string, string>>({});
 
@@ -15,11 +15,6 @@ const availableLanguages = ref([
   { code: "ar", name: "AR", flag: "/img/sa.svg", dir: "rtl" as const },
 ]);
 
-const { notification, success, error: showError } = useNotification();
-const api = useApi();
-const saveIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M10.8333 5.00016H5.49992C5.03321 5.00016 4.79985 5.00016 4.62159 4.90933C4.46479 4.82944 4.33731 4.70196 4.25741 4.54515C4.16659 4.3669 4.16659 4.13354 4.16659 3.66683V0.833496M12.4999 15.8335V10.5002C12.4999 10.0335 12.4999 9.8001 12.4091 9.62184C12.3292 9.46504 12.2017 9.33755 12.0449 9.25766C11.8667 9.16683 11.6333 9.16683 11.1666 9.16683H5.49992C5.03321 9.16683 4.79985 9.16683 4.62159 9.25766C4.46479 9.33755 4.33731 9.46504 4.25741 9.62184C4.16659 9.8001 4.16659 10.0335 4.16659 10.5002V15.8335M15.8333 6.10473V11.8335C15.8333 13.2336 15.8333 13.9337 15.5608 14.4685C15.3211 14.9389 14.9386 15.3213 14.4682 15.561C13.9334 15.8335 13.2334 15.8335 11.8333 15.8335H4.83325C3.43312 15.8335 2.73306 15.8335 2.19828 15.561C1.72787 15.3213 1.34542 14.9389 1.10574 14.4685C0.833252 13.9337 0.833252 13.2336 0.833252 11.8335V4.8335C0.833252 3.43336 0.833252 2.7333 1.10574 2.19852C1.34542 1.72811 1.72787 1.34566 2.19828 1.10598C2.73306 0.833496 3.43312 0.833496 4.83325 0.833496H10.562C10.9697 0.833496 11.1735 0.833496 11.3653 0.879546C11.5354 0.920374 11.6979 0.987715 11.8471 1.0791C12.0153 1.18217 12.1594 1.32629 12.4476 1.61454L15.0522 4.21911C15.3405 4.50737 15.4846 4.65149 15.5877 4.81969C15.679 4.96881 15.7464 5.13138 15.7872 5.30144C15.8333 5.49326 15.8333 5.69708 15.8333 6.10473Z" stroke="white" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>`;
 
 // =====================
 // Types & Interfaces
@@ -126,6 +121,10 @@ const returnToList = () => {
   router.push({ name: "ProductsCategoriesList" });
 }
 
+const removeTaxRule = (index: number) => {
+  taxRules.value.splice(index, 1);
+};
+
 const getTaxNameLabel = (value: string | number | null) => {
   if (!value) return "";
   const item = taxNameItems.value.find((i) => i.value === value);
@@ -163,18 +162,18 @@ const addTaxRule = () => {
 };
 
 const editTaxRule = (index: number) => {
-  const taxToEdit = taxRules.value[index];
-  newTaxRule.value = { ...taxToEdit };
+  const tax = taxRules.value[index];
+  newTaxRule.value = { ...tax };
   editingTaxIndex.value = index;
 };
 
-const removeTaxRule = (index: number) => {
+const deleteTaxRule = (index: number) => {
   taxRules.value.splice(index, 1);
+  if (editingTaxIndex.value === index) {
+    resetNewTaxRule();
+  }
 };
 
-// =====================
-// Form Reset
-// =====================
 const resetForm = () => {
   categoryNameAr.value = "";
   categoryNameEn.value = "";
@@ -186,16 +185,15 @@ const resetForm = () => {
   isActive.value = true;
   taxRules.value = [];
   resetNewTaxRule();
-  formRef.value?.resetValidation();
   Object.keys(formErrors).forEach(key => delete formErrors[key]);
 };
 
 // =====================
-// API: Fetch Constants (Taxes, Units, Categories)
+// API: Fetch Constants (Priorities)
 // =====================
 const fetchConstants = async () => {
   try {
-    // Real API call to get all constants
+    // Real API call to get constants
     const response = await api.get('/categories/constants');
 
     // Populate priorities dropdown
@@ -207,11 +205,11 @@ const fetchConstants = async () => {
     ];
   } catch (error) {
     console.error('Failed to fetch constants:', error);
-    showError('حدث خطأ أثناء تحميل البيانات');
+    toast.error('حدث خطأ أثناء تحميل البيانات');
   }
 };
 
-const fetchTaxs = async () => {
+const fetchTaxes = async () => {
   try {
     // Real API call to get all taxes
     const response = await api.get('/taxes/list');
@@ -228,10 +226,9 @@ const fetchTaxs = async () => {
     ];
   } catch (error) {
     console.error('Failed to fetch constants:', error);
-    showError('حدث خطأ أثناء تحميل البيانات');
+    toast.error('حدث خطأ أثناء تحميل البيانات');
   }
 };
-
 
 const fetchCategories = async () => {
   try {
@@ -247,7 +244,7 @@ const fetchCategories = async () => {
     ];
   } catch (error) {
     console.error('Failed to fetch categories:', error);
-    showError('حدث خطأ أثناء تحميل البيانات');
+    toast.error('حدث خطأ أثناء تحميل البيانات');
   }
 };
 
@@ -265,9 +262,10 @@ const fetchUnits = async () => {
     ];
   } catch (error) {
     console.error('Failed to fetch categories:', error);
-    showError('حدث خطأ أثناء تحميل البيانات');
+    toast.error('حدث خطأ أثناء تحميل البيانات');
   }
 };
+
 
 // =====================
 // API: Fetch Single Category Details
@@ -301,7 +299,7 @@ const fetchCategoryDetails = async (id: number) => {
     }
   } catch (error) {
     console.error('Failed to fetch category details:', error);
-    showError('حدث خطأ أثناء تحميل بيانات التصنيف');
+    toast.error('حدث خطأ أثناء تحميل بيانات التصنيف');
   } finally {
     isLoading.value = false;
   }
@@ -380,7 +378,7 @@ const handleSave = async () => {
       } else {
         await api.put(`/categories/${categoryId.value}`, payload);
       }
-      success('تم تحديث التصنيف بنجاح');
+      toast.success('تم تحديث التصنيف بنجاح');
     } else {
       // Create new category
       // If image exists, use FormData
@@ -407,7 +405,7 @@ const handleSave = async () => {
       } else {
         await api.post('/categories', payload);
       }
-      success('تم إضافة التصنيف بنجاح');
+      toast.success('تم إضافة التصنيف بنجاح');
     }
 
     // Reset form and redirect or close
@@ -425,9 +423,9 @@ const handleSave = async () => {
       Object.keys(apiErrors).forEach(key => {
         formErrors[key] = apiErrors[key][0];
       });
-      showError(err?.response?.data?.message || 'يرجى تصحيح الأخطاء في النموذج');
+      toast.error(err?.response?.data?.message || 'يرجى تصحيح الأخطاء في النموذج');
     } else {
-      showError(err?.response?.data?.message || 'حدث خطأ أثناء حفظ التصنيف');
+      toast.error(err?.response?.data?.message || 'حدث خطأ أثناء حفظ التصنيف');
     }
   } finally {
     isSaving.value = false;
@@ -450,11 +448,11 @@ const handleDeleteConfirm = async () => {
   deleteLoading.value = true;
   try {
     await api.delete(`/categories/${categoryId.value}`);
-    success('تم حذف التصنيف بنجاح');
+    toast.success('تم حذف التصنيف بنجاح');
     returnToList();
   } catch (error) {
     console.error('Failed to delete category:', error);
-    showError('حدث خطأ أثناء حذف التصنيف');
+    toast.error('حدث خطأ أثناء حذف التصنيف');
   } finally {
     deleteLoading.value = false;
     showDeleteDialog.value = false;
@@ -486,7 +484,7 @@ onMounted(async () => {
     await Promise.all([
       fetchConstants(),
       fetchCategories(),
-      fetchTaxs(),
+      fetchTaxes(),
       fetchUnits()
     ]);
 
@@ -519,6 +517,9 @@ const trashIcon_2 = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none"
 
 const editIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M1.14735 14.1207C1.18564 13.7761 1.20478 13.6038 1.25691 13.4428C1.30316 13.2999 1.36851 13.164 1.45118 13.0386C1.54436 12.8973 1.66694 12.7747 1.91209 12.5296L12.9173 1.52434C13.8378 0.603865 15.3302 0.603866 16.2507 1.52434C17.1711 2.44482 17.1711 3.9372 16.2507 4.85768L5.24542 15.8629C5.00027 16.1081 4.8777 16.2306 4.73639 16.3238C4.61102 16.4065 4.47506 16.4718 4.33219 16.5181C4.17115 16.5702 3.99887 16.5894 3.65429 16.6276L0.833984 16.941L1.14735 14.1207Z" stroke="#1570EF" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`;
+const saveIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M10.8333 5.00016H5.49992C5.03321 5.00016 4.79985 5.00016 4.62159 4.90933C4.46479 4.82944 4.33731 4.70196 4.25741 4.54515C4.16659 4.3669 4.16659 4.13354 4.16659 3.66683V0.833496M12.4999 15.8335V10.5002C12.4999 10.0335 12.4999 9.8001 12.4091 9.62184C12.3292 9.46504 12.2017 9.33755 12.0449 9.25766C11.8667 9.16683 11.6333 9.16683 11.1666 9.16683H5.49992C5.03321 9.16683 4.79985 9.16683 4.62159 9.25766C4.46479 9.33755 4.33731 9.46504 4.25741 9.62184C4.16659 9.8001 4.16659 10.0335 4.16659 10.5002V15.8335M15.8333 6.10473V11.8335C15.8333 13.2336 15.8333 13.9337 15.5608 14.4685C15.3211 14.9389 14.9386 15.3213 14.4682 15.561C13.9334 15.8335 13.2334 15.8335 11.8333 15.8335H4.83325C3.43312 15.8335 2.73306 15.8335 2.19828 15.561C1.72787 15.3213 1.34542 14.9389 1.10574 14.4685C0.833252 13.9337 0.833252 13.2336 0.833252 11.8335V4.8335C0.833252 3.43336 0.833252 2.7333 1.10574 2.19852C1.34542 1.72811 1.72787 1.34566 2.19828 1.10598C2.73306 0.833496 3.43312 0.833496 4.83325 0.833496H10.562C10.9697 0.833496 11.1735 0.833496 11.3653 0.879546C11.5354 0.920374 11.6979 0.987715 11.8471 1.0791C12.0153 1.18217 12.1594 1.32629 12.4476 1.61454L15.0522 4.21911C15.3405 4.50737 15.4846 4.65149 15.5877 4.81969C15.679 4.96881 15.7464 5.13138 15.7872 5.30144C15.8333 5.49326 15.8333 5.69708 15.8333 6.10473Z" stroke="white" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`;
 
 
@@ -720,16 +721,6 @@ const editIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xm
     <!-- Delete Confirmation Dialog -->
     <DeleteConfirmDialog v-model="showDeleteDialog" :loading="deleteLoading" :persistent="true" @confirm="handleDeleteConfirm"
       @cancel="handleDeleteCancel" @close="handleDeleteCancel" />
-
-    <!-- Notification Snackbar -->
-    <v-snackbar v-model="notification.show" :timeout="notification.timeout"
-      :color="notification.type === 'success' ? 'success' : notification.type === 'error' ? 'error' : notification.type === 'warning' ? 'warning' : 'info'"
-      location="top end">
-      {{ notification.message }}
-      <template #actions>
-        <ButtonWithIcon variant="text" label="إغلاق" @click="notification.show = false" />
-      </template>
-    </v-snackbar>
   </default-layout>
 </template>
 

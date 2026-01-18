@@ -97,6 +97,7 @@ declare global {
   const toRef: typeof import('vue').toRef
   const toRefs: typeof import('vue').toRefs
   const toValue: typeof import('vue').toValue
+  const toast: typeof import('vue3-toastify').toast
   const triggerRef: typeof import('vue').triggerRef
   const unref: typeof import('vue').unref
   const url: typeof import('@/utils/validators').url
@@ -213,6 +214,7 @@ declare module 'vue' {
     readonly toRef: UnwrapRef<typeof import('vue')['toRef']>
     readonly toRefs: UnwrapRef<typeof import('vue')['toRefs']>
     readonly toValue: UnwrapRef<typeof import('vue')['toValue']>
+    readonly toast: UnwrapRef<typeof import('vue3-toastify')['toast']>
     readonly triggerRef: UnwrapRef<typeof import('vue')['triggerRef']>
     readonly unref: UnwrapRef<typeof import('vue')['unref']>
     readonly url: UnwrapRef<typeof import('@/utils/validators')['url']>

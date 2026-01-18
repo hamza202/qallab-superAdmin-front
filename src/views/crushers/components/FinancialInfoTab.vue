@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 
-interface BankAccount {
-  id: number | null;
-  bank_id: number;
+export interface CrusherBankAccount {
+  id: number;
+  bank_id: number | null;
   bank_branch: string;
   iban: string;
   account_number: string;
@@ -22,26 +22,59 @@ const infoIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
 `
 
 interface Props {
-  bankAccounts?: BankAccount[];
+  bankAccounts?: CrusherBankAccount[];
   bankItems: Array<{ title: string; value: number }>;
   debitLimit?: string;
   creditLimit?: string;
+  formErrors?: Record<string, string>;
 }
 
 const props = defineProps<Props>();
 
 const emit = defineEmits<{
-  'update:formData': [data: { bankAccounts: BankAccount[]; debitLimit?: string; creditLimit?: string }];
+  'update:formData': [data: { bankAccounts: CrusherBankAccount[]; debitLimit?: string; creditLimit?: string }];
+  'clear:error': [field: string];
 }>();
 
-const bankAccounts = ref<BankAccount[]>(props.bankAccounts || []);
+const clearError = (field: string) => {
+  emit('clear:error', field);
+};
+
+// Helper function to get error message for a specific bank account field
+const getBankAccountError = (index: number, field: string): string | undefined => {
+  const errorKey = `bank_accounts.${index}.${field}`;
+  return props.formErrors?.[errorKey];
+};
+
+// Helper function to clear error for a specific bank account field
+const clearBankAccountError = (index: number, field: string) => {
+  const errorKey = `bank_accounts.${index}.${field}`;
+  clearError(errorKey);
+};
+
+const bankAccounts = ref<CrusherBankAccount[]>(props.bankAccounts || []);
 const debitLimit = ref(props.debitLimit || '');
 const creditLimit = ref(props.creditLimit || '');
 
+// Watch props to update local refs
+watch(() => props.debitLimit, (newVal) => {
+  debitLimit.value = newVal || '';
+});
+
+watch(() => props.creditLimit, (newVal) => {
+  creditLimit.value = newVal || '';
+});
+
+watch(() => props.bankAccounts, (newVal) => {
+  if (newVal) {
+    bankAccounts.value = newVal;
+  }
+}, { deep: true });
+
 const addAccount = () => {
   bankAccounts.value.push({
-    id: null,
-    bank_id: 0,
+    id: Date.now(), // Use timestamp as temporary ID for new accounts
+    bank_id: null,
     bank_branch: '',
     iban: '',
     account_number: '',
@@ -79,40 +112,43 @@ const editIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none" xm
 <template>
   <div class="mb-6 bg-gray-50 -mx-6">
     <!-- Credit and Debt Limits -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 px-6 pt-6 pb-4">
-      <TextInput v-model="creditLimit" @blur="emitUpdate" label="الحد الأعلى للائتمان" placeholder="ادخل الحد">
-              <template #append-inner>
-                <v-tooltip location="top" content-class="custom-tooltip">
-                  <template #activator="{ props: tooltipProps }">
-                    <ButtonWithIcon variant="text" size="small" density="compact"
-                custom-class="!min-w-0 p-0" :prepend-icon="infoIcon" v-bind="tooltipProps" />
-                  </template>
-                  <div>
-                    الحد الأقصى المسموح به للائتمان
-                  </div>
-                </v-tooltip>
-              </template>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 px-6 pt-6 pb-8">
+      <TextInput v-model="creditLimit" @input="emitUpdate" label="الحد الأعلى للائتمان" placeholder="ادخل الحد"
+        :rules="[numeric()]" :hide-details="false" :error-messages="props.formErrors?.['credit_limit']"
+        @update:model-value="clearError('credit_limit')">
+        <template #append-inner>
+          <v-tooltip location="top" content-class="custom-tooltip">
+            <template #activator="{ props: tooltipProps }">
+              <ButtonWithIcon variant="text" size="small" density="compact" custom-class="!min-w-0 p-0"
+                :prepend-icon="infoIcon" v-bind="tooltipProps" />
+            </template>
+            <div>
+              الحد الأقصى المسموح به للائتمان
+            </div>
+          </v-tooltip>
+        </template>
       </TextInput>
-      <TextInput v-model="debitLimit" @blur="emitUpdate" label="الحد الأعلى للدين" placeholder="ادخل الحد">
-              <template #append-inner>
-                <v-tooltip location="top" content-class="custom-tooltip">
-                  <template #activator="{ props: tooltipProps }">
-                    <ButtonWithIcon variant="text" size="small" density="compact"
-                custom-class="!min-w-0 p-0" :prepend-icon="infoIcon" v-bind="tooltipProps" />
-                  </template>
-                  <div>
-                    الحد الأقصى المسموح به للديون
-                  </div>
-                </v-tooltip>
-              </template>
+      <TextInput v-model="debitLimit" @input="emitUpdate" label="الحد الأعلى للدين" placeholder="ادخل الحد"
+        :rules="[numeric()]" :hide-details="false" :error-messages="props.formErrors?.['debit_limit']"
+        @update:model-value="clearError('debit_limit')">
+        <template #append-inner>
+          <v-tooltip location="top" content-class="custom-tooltip">
+            <template #activator="{ props: tooltipProps }">
+              <ButtonWithIcon variant="text" size="small" density="compact" custom-class="!min-w-0 p-0"
+                :prepend-icon="infoIcon" v-bind="tooltipProps" />
+            </template>
+            <div>
+              الحد الأقصى المسموح به للديون
+            </div>
+          </v-tooltip>
+        </template>
       </TextInput>
     </div>
 
     <div class="flex justify-between items-center mb-4 border-y border-gray-200 px-6 py-2">
       <h2 class="text-lg font-bold text-primary-900">الحسابات البنكية</h2>
       <ButtonWithIcon variant="flat" color="primary-500" height="40" rounded="4"
-        custom-class="font-bold px-5 !text-white" :prepend-icon="addIcon"
-        label="إضافة حساب" @click="addAccount" />
+        custom-class="font-bold px-5 !text-white" :prepend-icon="addIcon" label="إضافة حساب" @click="addAccount" />
     </div>
 
     <!-- Bank Accounts Table with Editable Inputs -->
@@ -129,22 +165,24 @@ const editIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none" xm
       </thead>
       <tbody>
         <tr v-for="(account, index) in bankAccounts" :key="index" class="border-b border-gray-200">
-          <td class="py-3 px-4">
-            <SelectInput v-model="account.bank_id" density="compact" variant="outlined" hide-details
-              placeholder="اسم البنك" :items="bankItems" @update:model-value="emitUpdate" />
+          <td class="py-6 px-4">
+            <SelectInput clearable v-model="account.bank_id" :input-props="{ class : 'min-w-40' }" :hide-details="false" :rules="[required()]"
+              :error-messages="getBankAccountError(index, 'bank_id')"
+              @update:model-value="() => { clearBankAccountError(index, 'bank_id'); emitUpdate(); }" 
+              density="compact" variant="outlined" placeholder="اسم البنك" :items="bankItems" />
           </td>
           <td class="py-3 px-4">
-            <TextInput v-model="account.bank_branch" density="compact" variant="outlined" hide-details
+            <TextInput v-model="account.bank_branch" :input-props="{ class : 'min-w-40' }" density="compact" variant="outlined" hide-details
               placeholder="فرع البنك" @blur="emitUpdate" />
           </td>
-          <td class="py-3 px-4">
-            <TextInput v-model="account.iban" density="compact" variant="outlined" hide-details
+          <td class="px-4">
+            <TextInput v-model="account.iban" :input-props="{ class : 'min-w-40' }" density="compact" variant="outlined" hide-details
               placeholder="الآيبان/IBAN" @blur="emitUpdate">
               <template #append-inner>
                 <v-tooltip location="top" content-class="custom-tooltip">
                   <template #activator="{ props: tooltipProps }">
-                    <ButtonWithIcon variant="text" size="small" density="compact"
-                custom-class="!min-w-0 p-0" :prepend-icon="infoIcon" v-bind="tooltipProps" />
+                    <ButtonWithIcon variant="text" size="small" density="compact" custom-class="!min-w-0 p-0"
+                      :prepend-icon="infoIcon" v-bind="tooltipProps" />
                   </template>
                   <div>
                     الرقم التعريفي الدولي للحساب البنكي
@@ -154,7 +192,7 @@ const editIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none" xm
             </TextInput>
           </td>
           <td class="py-3 px-4">
-            <TextInput v-model="account.account_number" density="compact" variant="outlined" hide-details
+            <TextInput v-model="account.account_number" :input-props="{ class : 'min-w-40' }" density="compact" variant="outlined" hide-details
               placeholder="رقم الحساب البنكي" @blur="emitUpdate">
             </TextInput>
 
@@ -165,8 +203,7 @@ const editIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none" xm
           </td>
           <td class="py-3 px-4">
             <div class="flex items-center gap-2">
-              <ButtonWithIcon :icon="trashIcon" icon-only size="small" variant="text"
-                @click="deleteAccount(index)" />
+              <ButtonWithIcon :icon="trashIcon" icon-only size="small" variant="text" @click="deleteAccount(index)" />
             </div>
           </td>
         </tr>

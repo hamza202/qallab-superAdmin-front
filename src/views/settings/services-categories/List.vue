@@ -2,13 +2,11 @@
 import { ref, computed, onMounted, nextTick, onBeforeUnmount } from "vue";
 import { useRouter } from "vue-router";
 import { useApi } from "@/composables/useApi";
-import { useNotification } from "@/composables/useNotification";
 import { useI18n } from 'vue-i18n'
 const { t } = useI18n()
 
 const router = useRouter();
 const api = useApi();
-const { success, error } = useNotification();
 
 // TypeScript Interfaces
 interface CategoryAction {
@@ -187,7 +185,7 @@ const fetchCategories = async (cursor?: string | null, append = false) => {
         perPage.value = response.pagination.per_page;
     } catch (err: any) {
         console.error('Error fetching categories:', err);
-        error(err?.response?.data?.message || 'Failed to fetch categories');
+        toast.error(err?.response?.data?.message || 'Failed to fetch categories');
     } finally {
         loading.value = false;
         loadingMore.value = false;
@@ -245,7 +243,7 @@ const updateHeadersOnServer = async () => {
         await api.post('/headers', formData);
     } catch (err: any) {
         console.error('Error updating headers:', err);
-        error(err?.response?.data?.message || 'Failed to update headers');
+        toast.error(err?.response?.data?.message || 'Failed to update headers');
     } finally {
         updatingHeaders.value = false;
     }
@@ -275,7 +273,7 @@ const confirmStatusChange = async () => {
 
         await api.patch(`/service-categories/${itemToChangeStatus.value.id}/change-status`, { status: newStatus });
 
-        success(`تم ${newStatus ? 'تفعيل' : 'تعطيل'} التصنيف بنجاح`);
+        toast.success(`تم ${newStatus ? 'تفعيل' : 'تعطيل'} التصنيف بنجاح`);
 
         // Update the item in the list
         const index = tableItems.value.findIndex(c => c.id === itemToChangeStatus.value!.id);
@@ -285,8 +283,8 @@ const confirmStatusChange = async () => {
 
         itemToChangeStatus.value = null;
     } catch (err: any) {
-        console.error('Error changing category status:', err);
-        error(err?.response?.data?.message || 'فشل تغيير حالة التصنيف');
+        console.error('Error changing status:', err);
+        toast.error(err?.response?.data?.message || 'Failed to change status');
     } finally {
         statusChangeLoading.value = false;
         showStatusChangeDialog.value = false;
@@ -297,11 +295,11 @@ const confirmStatusChange = async () => {
 const handleDelete = async (item: any) => {
     try {
         await api.delete(`/service-categories/${item.id}`);
-        success('تم حذف التصنيف بنجاح');
+        toast.success('تم حذف التصنيف بنجاح');
         await fetchCategories();
     } catch (err: any) {
         console.error('Error deleting category:', err);
-        error(err?.response?.data?.message || 'Failed to delete category');
+        toast.error(err?.response?.data?.message || 'Failed to delete category');
     }
 };
 
@@ -316,12 +314,12 @@ const confirmBulkDelete = async () => {
     try {
         deleteLoading.value = true;
         await api.post('/service-categories/bulk-delete', { ids: selectedCategories.value });
-        success(`تم حذف ${selectedCategories.value.length} تصنيف بنجاح`);
+        toast.success(`تم حذف ${selectedCategories.value.length} تصنيف بنجاح`);
         selectedCategories.value = [];
         await fetchCategories();
     } catch (err: any) {
         console.error('Error bulk deleting categories:', err);
-        error(err?.response?.data?.message || 'Failed to delete categories');
+        toast.error(err?.response?.data?.message || 'Failed to delete categories');
     } finally {
         deleteLoading.value = false;
         showDeleteDialog.value = false;

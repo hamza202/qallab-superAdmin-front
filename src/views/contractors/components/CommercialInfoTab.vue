@@ -78,16 +78,16 @@ const datepickerInput = `<svg width="16" height="16" viewBox="0 0 16 16" fill="n
     <h2 class="text-lg font-bold text-primary-900 mb-4">البيانات التجارية</h2>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-      <SelectWithIconInput v-model="formData.contractorClassification" @update:model-value="emitUpdate"
+      <SelectWithIconInput clearable v-model="formData.contractorClassification" @update:model-value="emitUpdate"
         label="تصنيف المقاول" placeholder="اختر" :items="contractorClassificationItems" required />
-      <SelectWithIconInput v-model="formData.classificationGrade" @update:model-value="emitUpdate"
+      <SelectWithIconInput clearable v-model="formData.classificationGrade" @update:model-value="emitUpdate"
         label="درجة تصنيف المقاول" placeholder="اختر" :items="classificationGradeItems" required />
-      <SelectWithIconInput v-model="formData.scopeOfWork" @update:model-value="emitUpdate" label="نطاق الأعمال"
+      <SelectWithIconInput clearable v-model="formData.scopeOfWork" @update:model-value="emitUpdate" label="نطاق الأعمال"
         placeholder="اختر" :items="scopeOfWorkItems" />
 
-      <TextInput v-model="formData.municipalLicenseNumber" @blur="emitUpdate" label="رقم رخصة البلدية"
+      <TextInput v-model="formData.municipalLicenseNumber" @input="emitUpdate" label="رقم رخصة البلدية"
         placeholder="ادخل الرقم" />
-      <DatePickerInput v-model="formData.municipalLicenseExpiry" @blur="emitUpdate" label="تاريخ انتهاء رخصة البلدية"
+      <DatePickerInput v-model="formData.municipalLicenseExpiry" @input="emitUpdate" label="تاريخ انتهاء رخصة البلدية"
         placeholder="اختر التاريخ">
         <template #append-inner>
           <v-tooltip location="top" content-class="custom-tooltip">
@@ -104,13 +104,13 @@ const datepickerInput = `<svg width="16" height="16" viewBox="0 0 16 16" fill="n
           <span v-html="datepickerInput"></span>
         </template>
       </DatePickerInput>
-      <SelectWithIconInput v-model="formData.municipalLicenseStatus" @update:model-value="emitUpdate"
+      <SelectWithIconInput clearable v-model="formData.municipalLicenseStatus" @update:model-value="emitUpdate"
         label="حالة رخصة البلدية" placeholder="اختر" :items="municipalLicenseStatusItems" />
 
-      <SelectWithIconInput v-model="formData.safetyCertification" @update:model-value="emitUpdate"
+      <SelectWithIconInput clearable v-model="formData.safetyCertification" @update:model-value="emitUpdate"
         label="شهادات السلامة المهنية" placeholder="اختر" :items="safetyCertificationItems" />
 
-      <SelectWithIconInput v-model="formData.environmentalCertification" @update:model-value="emitUpdate"
+      <SelectWithIconInput clearable v-model="formData.environmentalCertification" @update:model-value="emitUpdate"
         label="شهادات البيئة" placeholder="اختر" :items="environmentalCertificationItems" />
 
       <div>

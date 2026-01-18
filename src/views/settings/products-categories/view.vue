@@ -164,7 +164,6 @@
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useApi } from '@/composables/useApi'
-import { useNotification } from '@/composables/useNotification'
 
 interface CategoryData {
     id: number
@@ -202,7 +201,6 @@ interface CategoryData {
 
 const route = useRoute()
 const api = useApi()
-const { error: showError } = useNotification()
 
 const loading = ref(false)
 const error = ref<string | null>(null)
@@ -251,9 +249,9 @@ const fetchCategory = async () => {
             throw new Error(response.message || 'فشل في تحميل بيانات التصنيف')
         }
     } catch (err: any) {
-        const errorMessage = err.response?.data?.message || err.message || 'حدث خطأ أثناء تحميل البيانات'
+        const errorMessage = err?.response?.data?.message || 'Failed to fetch category details'
+        toast.error(errorMessage)
         error.value = errorMessage
-        showError(errorMessage)
     } finally {
         loading.value = false
     }

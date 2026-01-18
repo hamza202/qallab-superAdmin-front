@@ -3,11 +3,9 @@ import { ref, computed, onMounted } from "vue";
 import TaxFormDialog from "@/views/settings/taxes/components/TaxFormDialog.vue";
 import { useI18n } from 'vue-i18n'
 import { useApi } from "@/composables/useApi";
-import { useNotification } from "@/composables/useNotification";
 
 const { t } = useI18n()
 const api = useApi();
-const { success, error } = useNotification();
 // Types
 interface Tax {
   id: number;
@@ -183,7 +181,7 @@ const fetchTaxes = async (append = false) => {
     previousCursor.value = response.pagination.prev_cursor;
   } catch (err: any) {
     console.error('Error fetching taxes:', err);
-    error(err?.response?.data?.message || 'Failed to fetch taxes');
+    toast.error(err?.response?.data?.message || 'Failed to fetch taxes');
   } finally {
     loading.value = false;
     loadingMore.value = false;
@@ -236,7 +234,7 @@ const updateHeadersOnServer = async () => {
     await api.post('/headers', formData);
   } catch (err: any) {
     console.error('Error updating headers:', err);
-    error(err?.response?.data?.message || 'Failed to update headers');
+    toast.error(err?.response?.data?.message || 'Failed to update headers');
   } finally {
     updatingHeaders.value = false;
   }
@@ -255,11 +253,11 @@ const handleEditTax = (item: any) => {
 const handleDeleteTax = async (item: any) => {
   try {
     await api.delete(`/taxes/${item.id}`);
-    success('تم حذف الضريبة بنجاح');
+    toast.success('تم حذف الضريبة بنجاح');
     await fetchTaxes();
   } catch (err: any) {
     console.error('Error deleting tax:', err);
-    error(err?.response?.data?.message || 'Failed to delete tax');
+    toast.error(err?.response?.data?.message || 'Failed to delete tax');
   }
 };
 
@@ -278,7 +276,7 @@ const confirmStatusChange = async () => {
 
     await api.patch(`/taxes/${itemToChangeStatus.value.id}/change-status`, { status: newStatus });
 
-    success(`تم ${newStatus ? 'تفعيل' : 'تعطيل'} الضريبة بنجاح`);
+    toast.success(`تم ${newStatus ? 'تفعيل' : 'تعطيل'} الضريبة بنجاح`);
 
     // Update local state
     const index = tableItems.value.findIndex(t => t.id === itemToChangeStatus.value!.id);
@@ -287,7 +285,7 @@ const confirmStatusChange = async () => {
     }
   } catch (err: any) {
     console.error('Error changing status:', err);
-    error(err?.response?.data?.message || 'Failed to change status');
+    toast.error(err?.response?.data?.message || 'Failed to change status');
   } finally {
     statusChangeLoading.value = false;
     showStatusChangeDialog.value = false;
@@ -306,12 +304,12 @@ const confirmBulkDelete = async () => {
   try {
     deleteLoading.value = true;
     await api.post('/taxes/bulk-delete', { ids: selectedTaxes.value });
-    success(`تم حذف ${selectedTaxes.value.length} ضريبة بنجاح`);
+    toast.success(`تم حذف ${selectedTaxes.value.length} ضريبة بنجاح`);
     selectedTaxes.value = [];
     await fetchTaxes();
   } catch (err: any) {
     console.error('Error deleting taxes:', err);
-    error(err?.response?.data?.message || 'Failed to delete taxes');
+    toast.error(err?.response?.data?.message || 'Failed to delete taxes');
   } finally {
     deleteLoading.value = false;
     showDeleteDialog.value = false;

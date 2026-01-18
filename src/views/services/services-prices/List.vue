@@ -2,7 +2,6 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useApi } from '@/composables/useApi'
-import { useNotification } from '@/composables/useNotification'
 import { useI18n } from 'vue-i18n'
 import DatePickerInput from '@/components/common/forms/DatePickerInput.vue';
 
@@ -10,7 +9,6 @@ const { t } = useI18n()
 
 const router = useRouter()
 const api = useApi()
-const { success, error } = useNotification()
 
 // TypeScript Interfaces
 interface ServicePriceList {
@@ -104,7 +102,7 @@ const fetchServicePriceLists = async () => {
     tableItems.value = response.data
   } catch (err: any) {
     console.error('Error fetching service price lists:', err)
-    error(err?.response?.data?.message || 'فشل في جلب قوائم أسعار الخدمات')
+    toast.error(err?.response?.data?.message || 'فشل في جلب قوائم أسعار الخدمات')
   } finally {
     loading.value = false
   }
@@ -114,11 +112,11 @@ const deleteServicePriceList = async (priceListId: number) => {
   try {
     deleteLoading.value = true
     await api.delete(`/api/service-price-lists/${priceListId}`)
-    success('تم حذف قائمة الأسعار بنجاح')
+    toast.success('تم حذف قائمة الأسعار بنجاح')
     await fetchServicePriceLists()
   } catch (err: any) {
     console.error('Error deleting service price list:', err)
-    error(err?.response?.data?.message || 'فشل في حذف قائمة الأسعار')
+    toast.error(err?.response?.data?.message || 'فشل في حذف قائمة الأسعار')
   } finally {
     deleteLoading.value = false
   }

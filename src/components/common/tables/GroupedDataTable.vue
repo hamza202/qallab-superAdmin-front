@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 
 interface TableHeader {
   key: string
@@ -220,18 +220,20 @@ const eyeIcon = `<svg width="22" height="16" viewBox="0 0 22 16" fill="none" xml
                 <span class="text-sm font-medium text-gray-900">{{ item[header.key] }}</span>
               </template>
 
-              <!-- Status Switch (supports both 'status' and 'is_active' keys) -->
+              <!-- Status Switch (for both 'status' and 'is_active' keys) -->
               <template v-else-if="header.key === 'status' || header.key === 'is_active'">
                 <div class="flex">
-                  <v-switch
-                    :model-value="isStatusActive(item.status ?? item[header.key])"
-                    hide-details
-                    inset
-                    density="compact"
-                    color="primary"
-                    class="small-switch"
-                    @update:model-value="handleToggleStatus(item)"
-                  />
+                  <slot :name="`item.${header.key}`" :item="item">
+                    <v-switch
+                      :model-value="isStatusActive(item.status ?? item.is_active ?? item[header.key])"
+                      hide-details
+                      inset
+                      density="compact"
+                      color="primary"
+                      readonly
+                      class="small-switch"
+                    />
+                  </slot>
                 </div>
               </template>
 
@@ -310,11 +312,11 @@ const eyeIcon = `<svg width="22" height="16" viewBox="0 0 22 16" fill="none" xml
                         :key="subHeader.key"
                         class="!py-4 !px-6 text-center"
                       >
-                        <!-- Status for sub items -->
-                        <template v-if="subHeader.key === 'status'">
+                        <!-- Status for sub items (is_active key) -->
+                        <template v-if="subHeader.key === 'is_active'">
                           <div class="flex justify-center">
                             <v-switch
-                              :model-value="isStatusActive(subItem[subHeader.key])"
+                              :model-value="isStatusActive(subItem.is_active)"
                               hide-details
                               inset
                               density="compact"
@@ -332,15 +334,6 @@ const eyeIcon = `<svg width="22" height="16" viewBox="0 0 22 16" fill="none" xml
                       <!-- Sub Item Actions -->
                       <td class="!py-4 !px-6">
                         <div class="flex items-center justify-center gap-1">
-                          <v-switch
-                            :model-value="isStatusActive(subItem.status)"
-                            hide-details
-                            inset
-                            density="compact"
-                            color="primary"
-                            @update:model-value="handleToggleSubItem(subItem)"
-                            class="small-switch"
-                          />
                           <v-btn
                             icon
                             variant="text"

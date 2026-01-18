@@ -2,14 +2,12 @@
 import { ref, computed, onMounted, nextTick, onBeforeUnmount } from "vue";
 import { useRouter } from "vue-router";
 import { useApi } from "@/composables/useApi";
-import { useNotification } from "@/composables/useNotification";
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
 
 const router = useRouter();
 const api = useApi();
-const { success, error } = useNotification();
 
 // Suppliers icon
 const suppliersIcon = `<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -249,7 +247,7 @@ const fetchSuppliers = async (append = false) => {
         perPage.value = response.pagination.per_page;
     } catch (err: any) {
         console.error('Error fetching suppliers:', err);
-        error(err?.response?.data?.message || 'Failed to fetch suppliers');
+        toast.error(err?.response?.data?.message || 'Failed to fetch suppliers');
     } finally {
         loading.value = false;
         loadingMore.value = false;
@@ -312,7 +310,7 @@ const updateHeadersOnServer = async () => {
         });
     } catch (err: any) {
         console.error('Error updating headers:', err);
-        error(err?.response?.data?.message || 'Failed to update headers');
+        toast.error(err?.response?.data?.message || 'Failed to update headers');
     } finally {
         updatingHeaders.value = false;
     }
@@ -340,7 +338,7 @@ const confirmStatusChange = async () => {
             status: newStatus
         });
 
-        success(`تم ${newStatus ? 'تفعيل' : 'تعطيل'} المورد بنجاح`);
+        toast.success(`تم ${newStatus ? 'تفعيل' : 'تعطيل'} المورد بنجاح`);
 
         // Update local state
         const index = tableItems.value.findIndex(t => t.id === itemToChangeStatus.value!.id);
@@ -350,7 +348,7 @@ const confirmStatusChange = async () => {
 
     } catch (err: any) {
         console.error('Error changing supplier status:', err);
-        error(err?.response?.data?.message || 'فشل تغيير حالة المورد');
+        toast.error(err?.response?.data?.message || 'فشل تغيير حالة المورد');
     } finally {
         statusChangeLoading.value = false;
         showStatusChangeDialog.value = false;
@@ -362,11 +360,11 @@ const confirmDelete = async (item: any) => {
     try {
         deleteLoading.value = true;
         await api.delete(`/suppliers/${item.id}`);
-        success('Supplier deleted successfully');
+        toast.success('Supplier deleted successfully');
         await fetchSuppliers();
     } catch (err: any) {
         console.error('Error deleting supplier:', err);
-        error(err?.response?.data?.message || 'Failed to delete supplier');
+        toast.error(err?.response?.data?.message || 'Failed to delete supplier');
     } finally {
         deleteLoading.value = false;
         showDeleteDialog.value = false;
@@ -383,12 +381,12 @@ const confirmBulkDelete = async () => {
     try {
         deleteLoading.value = true;
         await api.post('/suppliers/bulk-delete', { ids: selectedSuppliers.value });
-        success(`${selectedSuppliers.value.length} suppliers deleted successfully`);
+        toast.success(`${selectedSuppliers.value.length} suppliers deleted successfully`);
         selectedSuppliers.value = [];
         await fetchSuppliers();
     } catch (err: any) {
         console.error('Error bulk deleting suppliers:', err);
-        error(err?.response?.data?.message || 'Failed to delete suppliers');
+        toast.error(err?.response?.data?.message || 'Failed to delete suppliers');
     } finally {
         deleteLoading.value = false;
         showBulkDeleteDialog.value = false;

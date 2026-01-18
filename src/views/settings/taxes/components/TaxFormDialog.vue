@@ -1,11 +1,8 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch, onMounted } from "vue";
 import { useApi } from "@/composables/useApi";
-import { useNotification } from "@/composables/useNotification";
-import { required, minLength, numeric, positive, between } from "@/utils/validators";
 
 const api = useApi();
-const { success, error: showError } = useNotification();
 
 const formErrors = reactive<Record<string, string>>({});
 
@@ -76,7 +73,7 @@ const fetchConstants = async () => {
     }
   } catch (err: any) {
     console.error('Error fetching constants:', err);
-    showError(err?.response?.data?.message || 'Failed to fetch constants');
+    toast.error(err?.response?.data?.message || 'Failed to fetch constants');
   } finally {
     loadingConstants.value = false;
   }
@@ -97,7 +94,7 @@ const fetchTaxRules = async () => {
     }
   } catch (err: any) {
     console.error('Error fetching constants:', err);
-    showError(err?.response?.data?.message || 'Failed to fetch constants');
+    toast.error(err?.response?.data?.message || 'Failed to fetch constants');
   } finally {
     loadingConstants.value = false;
   }
@@ -120,7 +117,7 @@ const fetchTaxData = async (taxId: number) => {
     form.amountIncludesTax = Boolean(tax.include_tax);
   } catch (err: any) {
     console.error('Error fetching tax details:', err);
-    showError(err?.response?.data?.message || 'Failed to fetch tax details');
+    toast.error(err?.response?.data?.message || 'Failed to fetch tax details');
     internalOpen.value = false;
   } finally {
     loadingTaxData.value = false;
@@ -184,11 +181,11 @@ const handleSave = async () => {
       formData.append('is_active', form.status ? '1' : '0');
 
       await api.post(`/taxes/${form.id}`, formData);
-      success('تم تحديث الضريبة بنجاح');
+      toast.success('تم تحديث الضريبة بنجاح');
     } else {
       // Create new tax
       await api.post('/taxes', payload);
-      success('تم إضافة الضريبة بنجاح');
+      toast.success('تم إضافة الضريبة بنجاح');
     }
 
     emit('saved');
@@ -203,9 +200,9 @@ const handleSave = async () => {
       Object.keys(apiErrors).forEach(key => {
         formErrors[key] = apiErrors[key][0];
       });
-      showError(err?.response?.data?.message || 'يرجى تصحيح الأخطاء في النموذج');
+      toast.error(err?.response?.data?.message || 'يرجى تصحيح الأخطاء في النموذج');
     } else {
-      showError(err?.response?.data?.message || 'Failed to save tax');
+      toast.error(err?.response?.data?.message || 'Failed to save tax');
     }
   } finally {
     saving.value = false;

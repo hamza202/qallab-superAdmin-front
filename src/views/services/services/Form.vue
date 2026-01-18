@@ -2,7 +2,6 @@
 import { ref, computed, onMounted, reactive } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useApi } from '@/composables/useApi'
-import { useNotification } from '@/composables/useNotification'
 import BasicInfoTab from './components/BasicInfoTab.vue'
 import OperationalDataTab from './components/OperationalDataTab.vue'
 import { useI18n } from 'vue-i18n'
@@ -11,7 +10,6 @@ const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const api = useApi()
-const { success, error } = useNotification()
 
 const formErrors = reactive<Record<string, string>>({})
 
@@ -104,7 +102,7 @@ const fetchConstants = async () => {
         visibilityLevels.value = data.visibility || []
     } catch (err: any) {
         console.error('Error fetching constants:', err)
-        error(err?.response?.data?.message || 'Failed to fetch constants')
+        toast.error(err?.response?.data?.message || 'Failed to fetch constants')
     }
 }
 
@@ -190,7 +188,7 @@ const fetchServiceData = async () => {
         }
     } catch (err: any) {
         console.error('Error fetching service data:', err)
-        error(err?.response?.data?.message || 'Failed to fetch service data')
+        toast.error(err?.response?.data?.message || 'Failed to fetch service data')
     } finally {
         loading.value = false
     }
@@ -264,7 +262,7 @@ const saveStep = async (step: number) => {
             serviceId.value = response.data.service_id
         }
 
-        success(response.message || 'تم حفظ الخدمة بنجاح')
+        toast.success(response.message || 'تم حفظ الخدمة بنجاح')
         return true
     } catch (err: any) {
         console.error('Error saving service:', err)
@@ -275,13 +273,13 @@ const saveStep = async (step: number) => {
             Object.keys(apiErrors).forEach(key => {
                 formErrors[key] = apiErrors[key][0]
             })
-            error(err?.response?.data?.message || 'يرجى تصحيح الأخطاء في النموذج')
+            toast.error(err?.response?.data?.message || 'يرجى تصحيح الأخطاء في النموذج')
         } else if (err?.response?.data?.errors) {
             const errors = err.response.data.errors
             const errorMessages = Object.values(errors).flat().join('\n')
-            error(errorMessages)
+            toast.error(errorMessages)
         } else {
-            error(err?.response?.data?.message || 'فشل في حفظ الخدمة')
+            toast.error(err?.response?.data?.message || 'فشل في حفظ الخدمة')
         }
         return false
     } finally {

@@ -3,7 +3,7 @@ import { ref } from 'vue';
 
 interface BankAccount {
   id: number | null;
-  bank_id: number;
+  bank_id: number | null;
   bank_branch: string;
   iban: string;
   account_number: string;
@@ -15,13 +15,31 @@ interface Props {
   bankItems: Array<{ title: string; value: number }>;
   debitLimit?: number | string | null;
   creditLimit?: number | string | null;
+  formErrors?: Record<string, string>;
 }
 
 const props = defineProps<Props>();
 
 const emit = defineEmits<{
   'update:formData': [data: { bankAccounts: BankAccount[]; debitLimit?: number | string | null; creditLimit?: number | string | null }];
+  'clear:error': [field: string];
 }>();
+
+const clearError = (field: string) => {
+  emit('clear:error', field);
+};
+
+// Helper function to get error message for a specific bank account field
+const getBankAccountError = (index: number, field: string): string | undefined => {
+  const errorKey = `bank_accounts.${index}.${field}`;
+  return props.formErrors?.[errorKey];
+};
+
+// Helper function to clear error for a specific bank account field
+const clearBankAccountError = (index: number, field: string) => {
+  const errorKey = `bank_accounts.${index}.${field}`;
+  clearError(errorKey);
+};
 
 const bankAccounts = ref<BankAccount[]>(props.bankAccounts || []);
 const debitLimit = ref(props.debitLimit || '');
@@ -30,7 +48,7 @@ const creditLimit = ref(props.creditLimit || '');
 const addAccount = () => {
   bankAccounts.value.push({
     id: null,
-    bank_id: 0,
+    bank_id: null,
     bank_branch: '',
     iban: '',
     account_number: '',
@@ -45,7 +63,7 @@ const deleteAccount = (index: number) => {
 };
 
 const emitUpdate = () => {
-  emit('update:formData', { 
+  emit('update:formData', {
     bankAccounts: bankAccounts.value,
     debitLimit: debitLimit.value,
     creditLimit: creditLimit.value
@@ -75,14 +93,15 @@ const infoIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
 
 <template>
   <div class="mb-6 bg-gray-50 -mx-6">
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 px-6 pt-6 pb-4">
-      <TextInput v-model="debitLimit" @blur="emitUpdate"
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 px-6 pt-6 pb-8">
+      <TextInput v-model="debitLimit" @input="emitUpdate" :rules="[numeric()]" :hide-details="false"
+        :error-messages="props.formErrors?.['debit_limit']" @update:model-value="clearError('debit_limit')"
         label="الحد الأعلى للدين" placeholder="ادخل الحد">
         <template #append-inner>
           <v-tooltip location="top" content-class="custom-tooltip">
             <template #activator="{ props: tooltipProps }">
-              <ButtonWithIcon variant="text" size="small" density="compact"
-                custom-class="!min-w-0 p-0" :prepend-icon="infoIcon" v-bind="tooltipProps" />
+              <ButtonWithIcon variant="text" size="small" density="compact" custom-class="!min-w-0 p-0"
+                :prepend-icon="infoIcon" v-bind="tooltipProps" />
             </template>
             <div>
               الحد الأقصى المسموح به للديون
@@ -90,13 +109,14 @@ const infoIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
           </v-tooltip>
         </template>
       </TextInput>
-      <TextInput v-model="creditLimit" @blur="emitUpdate"
+      <TextInput v-model="creditLimit" @input="emitUpdate" :rules="[numeric()]" :hide-details="false"
+        :error-messages="props.formErrors?.['credit_limit']" @update:model-value="clearError('credit_limit')"
         label="الحد الأعلى للائتمان" placeholder="ادخل الحد">
         <template #append-inner>
           <v-tooltip location="top" content-class="custom-tooltip">
             <template #activator="{ props: tooltipProps }">
-              <ButtonWithIcon variant="text" size="small" density="compact"
-                custom-class="!min-w-0 p-0" :prepend-icon="infoIcon" v-bind="tooltipProps" />
+              <ButtonWithIcon variant="text" size="small" density="compact" custom-class="!min-w-0 p-0"
+                :prepend-icon="infoIcon" v-bind="tooltipProps" />
             </template>
             <div>
               الحد الأقصى المسموح به للائتمان
@@ -109,8 +129,7 @@ const infoIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
     <div class="flex justify-between items-center mb-4 border-y border-gray-200 px-6 py-2">
       <h2 class="text-lg font-bold text-primary-900">الحسابات البنكية</h2>
       <ButtonWithIcon variant="flat" color="primary-500" height="40" rounded="4"
-        custom-class="font-bold px-5 !text-white" :prepend-icon="addIcon"
-        label="إضافة حساب" @click="addAccount" />
+        custom-class="font-bold px-5 !text-white" :prepend-icon="addIcon" label="إضافة حساب" @click="addAccount" />
     </div>
 
     <v-table v-if="bankAccounts.length > 0" class="bg-white rounded-none">
@@ -127,21 +146,22 @@ const infoIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
       <tbody>
         <tr v-for="(account, index) in bankAccounts" :key="index" class="border-b border-gray-200">
           <td class="py-3 px-4">
-            <SelectInput v-model="account.bank_id" density="compact" variant="outlined" hide-details
-              placeholder="اسم البنك" :items="bankItems" @update:model-value="emitUpdate" />
+            <SelectInput clearable v-model="account.bank_id" :input-props="{ class : 'min-w-40' }" density="compact" variant="outlined" :hide-details="false"
+              placeholder="اسم البنك" :items="bankItems" :error-messages="getBankAccountError(index, 'bank_id')"
+              @update:model-value="() => { clearBankAccountError(index, 'bank_id'); emitUpdate(); }" />
           </td>
           <td class="py-3 px-4">
-            <TextInput v-model="account.bank_branch" density="compact" variant="outlined" hide-details
-              placeholder="فرع البنك" @blur="emitUpdate" />
+            <TextInput v-model="account.bank_branch" :input-props="{ class : 'min-w-40' }" density="compact" variant="outlined" :hide-details="false"
+              placeholder="فرع البنك" @input="emitUpdate()" />
           </td>
           <td class="py-3 px-4">
-            <TextInput v-model="account.iban" density="compact" variant="outlined" hide-details
-              placeholder="الآيبان/IBAN" @blur="emitUpdate">
+            <TextInput v-model="account.iban" :input-props="{ class : 'min-w-40' }" density="compact" variant="outlined" :hide-details="false"
+              placeholder="الآيبان/IBAN" @input="emitUpdate()">
               <template #append-inner>
                 <v-tooltip location="top" content-class="custom-tooltip">
                   <template #activator="{ props: tooltipProps }">
-                    <ButtonWithIcon variant="text" size="small" density="compact"
-                      custom-class="!min-w-0 p-0" :prepend-icon="infoIcon" v-bind="tooltipProps" />
+                    <ButtonWithIcon variant="text" size="small" density="compact" custom-class="!min-w-0 p-0"
+                      :prepend-icon="infoIcon" v-bind="tooltipProps" />
                   </template>
                   <div>
                     الرقم التعريفي الدولي للحساب البنكي
@@ -151,17 +171,16 @@ const infoIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
             </TextInput>
           </td>
           <td class="py-3 px-4">
-            <TextInput v-model="account.account_number" density="compact" variant="outlined" hide-details
-              placeholder="رقم الحساب البنكي" @blur="emitUpdate" />
+            <TextInput v-model="account.account_number" :input-props="{ class : 'min-w-40' }" density="compact" variant="outlined" :hide-details="false"
+              placeholder="رقم الحساب البنكي" @input="emitUpdate()" />
           </td>
           <td class="py-3 px-4">
             <v-switch v-model="account.is_active" @update:model-value="emitUpdate" hide-details inset density="compact"
-              color="primary" />
+              class="small-switch" color="primary" />
           </td>
           <td class="py-3 px-4">
             <div class="flex items-center gap-2">
-              <ButtonWithIcon :icon="trashIcon" icon-only size="small" variant="text"
-                @click="deleteAccount(index)" />
+              <ButtonWithIcon :icon="trashIcon" icon-only size="small" variant="text" @click="deleteAccount(index)" />
             </div>
           </td>
         </tr>

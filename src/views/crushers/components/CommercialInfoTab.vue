@@ -13,6 +13,7 @@ interface Props {
   managerEmail: string;
   latitude: string;
   longitude: string;
+  formErrors?: Record<string, string>;
 }
 const locationIcon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g clip-path="url(#clip0_818_75719)">
@@ -30,7 +31,17 @@ const props = defineProps<Props>();
 
 const emit = defineEmits<{
   'update:formData': [data: Partial<Props>];
+  'clear:error': [field: string];
 }>();
+
+const clearError = (field: string) => {
+  emit('clear:error', field);
+};
+
+const handleInputUpdate = (field: string) => {
+  clearError(field);
+  emitUpdate();
+};
 
 const formData = reactive({
   licenseNumber: props.licenseNumber,
@@ -100,9 +111,9 @@ const datepickerInput = `<svg width="17" height="19" viewBox="0 0 17 19" fill="n
 
     <!-- License Information -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-      <TextInput v-model="formData.licenseNumber" @blur="emitUpdate" label="رقم الرخصة"
+      <TextInput v-model="formData.licenseNumber" @input="emitUpdate" label="رقم الرخصة"
         placeholder="رقم الرخصة" />
-      <DatePickerInput v-model="formData.licenseIssueDate" @blur="emitUpdate" label="تاريخ إصدار الرخصة"
+      <DatePickerInput v-model="formData.licenseIssueDate" @input="emitUpdate" label="تاريخ إصدار الرخصة"
         placeholder="اختر التاريخ">
               <template #append-inner>
                 <v-tooltip location="top" content-class="custom-tooltip">
@@ -119,7 +130,7 @@ const datepickerInput = `<svg width="17" height="19" viewBox="0 0 17 19" fill="n
                 <span v-html="datepickerInput"></span>
               </template>
         </DatePickerInput>
-      <DatePickerInput v-model="formData.licenseExpiryDate" @blur="emitUpdate" label="تاريخ انتهاء الرخصة"
+      <DatePickerInput v-model="formData.licenseExpiryDate" @input="emitUpdate" label="تاريخ انتهاء الرخصة"
         placeholder="اختر التاريخ">
               <template #append-inner>
                 <v-tooltip location="top" content-class="custom-tooltip">
@@ -156,18 +167,19 @@ const datepickerInput = `<svg width="17" height="19" viewBox="0 0 17 19" fill="n
     <h3 class="text-md font-bold text-primary-900 mb-4 mt-6">بيانات المدير</h3>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-      <TextInput v-model="formData.managerName" @blur="emitUpdate" label="اسم المدير / المسؤول"
+      <TextInput v-model="formData.managerName" @input="emitUpdate" label="اسم المدير / المسؤول"
         placeholder="اسم المدير / المسؤول" />
-      <TextInput v-model="formData.managerId" @blur="emitUpdate" label="رقم الهوية / الإقامة" placeholder="845987565" />
-      <TextInput v-model="formData.managerPhone" @blur="emitUpdate" label="الهاتف" placeholder="+966 (555) 000-0000"
-        dir="ltr">
+      <TextInput v-model="formData.managerId" @input="emitUpdate" label="رقم الهوية / الإقامة" placeholder="845987565" />
+      <TextInput v-model="formData.managerPhone" @input="() => handleInputUpdate('manager_phone')" label="الهاتف" placeholder="+966 (555) 000-0000"
+        dir="ltr" :hide-details="false" :rules="[required(), saudiPhone()]" :error-messages="props.formErrors?.['manager_phone']">
         <template #prepend-inner>
           <span class="text-gray-900 font-semibold me-2 block text-sm">KSA</span>
         </template>
       </TextInput>
-      <TextInput v-model="formData.managerEmail" @blur="emitUpdate" label="البريد الإلكتروني"
-        placeholder="info@buildtrans.sa" dir="ltr" />
-    </div>
+      <TextInput v-model="formData.managerEmail" :hide-details="false" @input="() => handleInputUpdate('manager_email')" label="البريد الإلكتروني"
+        placeholder="info@buildtrans.sa" dir="ltr" :rules="[required(), email()]" 
+        :error-messages="props.formErrors?.['manager_email']" />
+    </div> 
 
     <!-- Map Dialog -->
     <MapDialog v-model="showMapDialog" :latitude="formData.latitude" :longitude="formData.longitude"

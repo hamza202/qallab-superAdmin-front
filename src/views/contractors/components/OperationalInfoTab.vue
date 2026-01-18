@@ -61,21 +61,21 @@ const emitUpdate = () => {
     <h2 class="text-lg font-bold text-primary-900 mb-4">المعلومات التشغيلية</h2>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-      <TextInput v-model="formData.ongoingProjects" @blur="emitUpdate" label="عدد المشاريع الجارية"
+      <TextInput v-model="formData.ongoingProjects" @input="emitUpdate" label="عدد المشاريع الجارية"
         placeholder="ادخل العدد" type="number" />
-      <TextInput v-model="formData.completedProjects" @blur="emitUpdate" label="عدد المشاريع المكتملة"
+      <TextInput v-model="formData.completedProjects" @input="emitUpdate" label="عدد المشاريع المكتملة"
         placeholder="ادخل العدد" type="number" />
-      <TextInput v-model="formData.employeesCount" @blur="emitUpdate" label="إجمالي عدد الموظفين"
+      <TextInput v-model="formData.employeesCount" @input="emitUpdate" label="إجمالي عدد الموظفين"
         placeholder="ادخل العدد" type="number" />
-      <TextInput v-model="formData.engineersCount" @blur="emitUpdate" label="عدد المهندسين" placeholder="ادخل العدد"
+      <TextInput v-model="formData.engineersCount" @input="emitUpdate" label="عدد المهندسين" placeholder="ادخل العدد"
         type="number" />
-      <TextInput v-model="formData.techniciansCount" @blur="emitUpdate" label="عدد الفنيين" placeholder="ادخل العدد"
+      <TextInput v-model="formData.techniciansCount" @input="emitUpdate" label="عدد الفنيين" placeholder="ادخل العدد"
         type="number" />
-      <SelectWithIconInput v-model="formData.operationalCapacity" @update:model-value="emitUpdate"
+      <SelectWithIconInput clearable v-model="formData.operationalCapacity" @update:model-value="emitUpdate"
         label="القدرة التشغيلية للمقاول" placeholder="اختر" :items="operationalCapacityItems" />
-      <SelectWithIconInput v-model="formData.specialization" @update:model-value="emitUpdate"
+      <SelectWithIconInput clearable v-model="formData.specialization" @update:model-value="emitUpdate"
         label="التخصص الرئيسي المقاول" placeholder="اختر" :items="specializationItems" />
-      <SelectWithIconInput v-model="formData.siteReadiness" @update:model-value="emitUpdate" label="جاهزية مواقع العمل"
+      <SelectWithIconInput clearable v-model="formData.siteReadiness" @update:model-value="emitUpdate" label="جاهزية مواقع العمل"
         placeholder="اختر" :items="siteReadinessItems" />
       <div>
         <span class="text-gray-700 text-sm font-semibold mb-2 block">نظام إدارة السلامة</span>
