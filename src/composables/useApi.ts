@@ -29,8 +29,18 @@ api.interceptors.response.use(
   (error) => {
     // Handle 401 Unauthorized
     if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      window.location.href = '/login';
+      // Get the current path to avoid redirect loop on login page
+      const currentPath = window.location.pathname;
+      const isLoginPage = currentPath === '/login' || currentPath.startsWith('/login');
+
+      if (!isLoginPage) {
+        // Clear all auth data using the store's method
+        const authStore = useAuthStore();
+        authStore.clearAuthData();
+
+        // Redirect to login page
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }
