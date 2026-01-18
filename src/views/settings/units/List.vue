@@ -3,11 +3,9 @@ import { ref, computed, onMounted } from "vue";
 import UnitFormDialog from "@/views/settings/units/components/UnitFormDialog.vue";
 import { useI18n } from 'vue-i18n'
 import { useApi } from "@/composables/useApi";
-import { useNotification } from "@/composables/useNotification";
 
 const { t } = useI18n()
 const api = useApi();
-const { success, error } = useNotification();
 
 // Types
 interface Unit {
@@ -201,7 +199,7 @@ const fetchUnits = async (append = false) => {
     previousCursor.value = response.pagination.prev_cursor;
   } catch (err: any) {
     console.error('Error fetching units:', err);
-    error(err?.response?.data?.message || 'Failed to fetch units');
+    toast.error(err?.response?.data?.message || 'Failed to fetch units');
   } finally {
     loading.value = false;
     loadingMore.value = false;
@@ -255,7 +253,7 @@ const updateHeadersOnServer = async () => {
     await api.post('/headers', formData);
   } catch (err: any) {
     console.error('Error updating headers:', err);
-    error(err?.response?.data?.message || 'Failed to update headers');
+    toast.error(err?.response?.data?.message || 'Failed to update headers');
   } finally {
     updatingHeaders.value = false;
   }
@@ -274,11 +272,11 @@ const handleEditUnit = (item: any) => {
 const handleDeleteUnit = async (item: any) => {
   try {
     await api.delete(`/units/${item.id}`);
-    success('تم حذف الوحدة بنجاح');
+    toast.success('تم حذف الوحدة بنجاح');
     await fetchUnits();
   } catch (err: any) {
     console.error('Error deleting unit:', err);
-    error(err?.response?.data?.message || 'Failed to delete unit');
+    toast.error(err?.response?.data?.message || 'Failed to delete unit');
   }
 };
 
@@ -297,7 +295,7 @@ const confirmStatusChange = async () => {
 
     await api.patch(`/units/${itemToChangeStatus.value.id}/change-status`, { status: newStatus });
 
-    success(`تم ${newStatus ? 'تفعيل' : 'تعطيل'} الوحدة بنجاح`);
+    toast.success(`تم ${newStatus ? 'تفعيل' : 'تعطيل'} الوحدة بنجاح`);
 
     // Update local state
     const index = tableItems.value.findIndex(t => t.id === itemToChangeStatus.value!.id);
@@ -306,7 +304,7 @@ const confirmStatusChange = async () => {
     }
   } catch (err: any) {
     console.error('Error changing status:', err);
-    error(err?.response?.data?.message || 'Failed to change status');
+    toast.error(err?.response?.data?.message || 'Failed to change status');
   } finally {
     statusChangeLoading.value = false;
     showStatusChangeDialog.value = false;
@@ -325,12 +323,12 @@ const confirmBulkDelete = async () => {
   try {
     deleteLoading.value = true;
     await api.post('/units/bulk-delete', { ids: selectedUnits.value });
-    success(`تم حذف ${selectedUnits.value.length} وحدة بنجاح`);
+    toast.success(`تم حذف ${selectedUnits.value.length} وحدة بنجاح`);
     selectedUnits.value = [];
     await fetchUnits();
   } catch (err: any) {
     console.error('Error deleting units:', err);
-    error(err?.response?.data?.message || 'Failed to delete units');
+    toast.error(err?.response?.data?.message || 'Failed to delete units');
   } finally {
     deleteLoading.value = false;
     showDeleteDialog.value = false;

@@ -1,10 +1,9 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, reactive } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useApi } from "@/composables/useApi";
-import { useNotification } from "@/composables/useNotification";
 import BasicInfoTab from "./components/BasicInfoTab.vue";
-import FinancialInfoTab from "./components/FinancialInfoTab.vue";
+import FinancialInfoTab, { CrusherBankAccount } from './components/FinancialInfoTab.vue';
 import CommercialInfoTab from "./components/CommercialInfoTab.vue";
 import OperationalInfoTab from "./components/OperationalInfoTab.vue";
 import DocumentsTab from "./components/DocumentsTab.vue";
@@ -12,7 +11,6 @@ import DocumentsTab from "./components/DocumentsTab.vue";
 const route = useRoute();
 const router = useRouter();
 const api = useApi();
-const { success, error } = useNotification();
 
 const crushersIcon = `<svg width="52" height="52" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path opacity="0.12" fill-rule="evenodd" clip-rule="evenodd" d="M40.3519 33.8018C40.236 33.1628 40.3142 32.5038 40.5764 31.9097C40.8261 31.3272 41.2407 30.8303 41.7691 30.4803C42.2976 30.1304 42.9168 29.9426 43.5506 29.94H43.7279C44.7727 29.94 45.7747 29.525 46.5135 28.7862C47.2523 28.0474 47.6673 27.0454 47.6673 26.0006C47.6673 24.9559 47.2523 23.9539 46.5135 23.2151C45.7747 22.4763 44.7727 22.0613 43.7279 22.0613H43.3931C42.7593 22.0587 42.14 21.8709 41.6116 21.521C41.0831 21.171 40.6685 20.6741 40.4188 20.0916V19.934C40.1566 19.3399 40.0784 18.6809 40.1943 18.0419C40.3101 17.403 40.6147 16.8134 41.0688 16.3491L41.187 16.231C41.5533 15.8651 41.8438 15.4306 42.0421 14.9524C42.2403 14.4742 42.3424 13.9615 42.3424 13.4438C42.3424 12.9261 42.2403 12.4135 42.0421 11.9353C41.8438 11.457 41.5533 11.0226 41.187 10.6567C40.8211 10.2904 40.3867 9.99987 39.9084 9.80163C39.4302 9.60338 38.9176 9.50134 38.3999 9.50134C37.8822 9.50134 37.3696 9.60338 36.8913 9.80163C36.4131 9.99987 35.9786 10.2904 35.6128 10.6567L35.4946 10.7749C35.0304 11.229 34.4408 11.5336 33.8018 11.6494C33.1628 11.7653 32.5038 11.6871 31.9097 11.4249C31.3272 11.1752 30.8303 10.7606 30.4803 10.2322C30.1304 9.70372 29.9426 9.08447 29.94 8.45065V8.27338C29.94 7.22859 29.525 6.22659 28.7862 5.48781C28.0474 4.74903 27.0454 4.33398 26.0006 4.33398C24.9559 4.33398 23.9539 4.74903 23.2151 5.48781C22.4763 6.22659 22.0613 7.22859 22.0613 8.27338V8.60823C22.0587 9.24205 21.8709 9.8613 21.521 10.3897C21.171 10.9182 20.6741 11.3328 20.0916 11.5825H19.934C19.3399 11.8447 18.6809 11.9229 18.0419 11.807C17.403 11.6912 16.8134 11.3866 16.3491 10.9325L16.231 10.8143C15.8651 10.448 15.4306 10.1575 14.9524 9.9592C14.4742 9.76096 13.9615 9.65892 13.4438 9.65892C12.9261 9.65892 12.4135 9.76096 11.9353 9.9592C11.457 10.1575 11.0226 10.448 10.6567 10.8143C10.2904 11.1802 9.99987 11.6146 9.80163 12.0929C9.60338 12.5711 9.50134 13.0837 9.50134 13.6014C9.50134 14.1191 9.60338 14.6317 9.80163 15.11C9.99987 15.5882 10.2904 16.0227 10.6567 16.3885L10.7749 16.5067C11.229 16.9709 11.5336 17.5605 11.6494 18.1995C11.7653 18.8385 11.6871 19.4975 11.4249 20.0916C11.1998 20.7036 10.7958 21.2338 10.2653 21.6132C9.7349 21.9926 9.10261 22.2036 8.45065 22.2188H8.27338C7.22859 22.2188 6.22659 22.6339 5.48781 23.3727C4.74903 24.1114 4.33398 25.1134 4.33398 26.1582C4.33398 27.203 4.74903 28.205 5.48781 28.9438C6.22659 29.6826 7.22859 30.0976 8.27338 30.0976H8.60823C9.24205 30.1001 9.8613 30.288 10.3897 30.6379C10.9182 30.9879 11.3328 31.4847 11.5825 32.0673C11.8447 32.6614 11.9229 33.3204 11.807 33.9594C11.6912 34.5983 11.3866 35.1879 10.9325 35.6522L10.8143 35.7703C10.448 36.1362 10.1575 36.5707 9.9592 37.0489C9.76096 37.5271 9.65892 38.0398 9.65892 38.5575C9.65892 39.0752 9.76096 39.5878 9.9592 40.066C10.1575 40.5443 10.448 40.9787 10.8143 41.3446C11.1802 41.7109 11.6146 42.0014 12.0929 42.1997C12.5711 42.3979 13.0837 42.5 13.6014 42.5C14.1191 42.5 14.6317 42.3979 15.11 42.1997C15.5882 42.0014 16.0227 41.7109 16.3885 41.3446L16.5067 41.2264C16.9709 40.7723 17.5605 40.4677 18.1995 40.3519C18.8385 40.236 19.4975 40.3142 20.0916 40.5764C20.7036 40.8015 21.2338 41.2055 21.6132 41.736C21.9926 42.2664 22.2036 42.8987 22.2188 43.5506V43.7279C22.2188 44.7727 22.6339 45.7747 23.3727 46.5135C24.1114 47.2523 25.1134 47.6673 26.1582 47.6673C27.203 47.6673 28.205 47.2523 28.9438 46.5135C29.6826 45.7747 30.0976 44.7727 30.0976 43.7279V43.3931C30.1001 42.7593 30.288 42.14 30.6379 41.6116C30.9879 41.0831 31.4847 40.6685 32.0673 40.4188C32.6614 40.1566 33.3204 40.0784 33.9594 40.1943C34.5983 40.3101 35.1879 40.6147 35.6522 41.0688L35.7703 41.187C36.1362 41.5533 36.5707 41.8438 37.0489 42.0421C37.5271 42.2403 38.0398 42.3424 38.5575 42.3424C39.0752 42.3424 39.5878 42.2403 40.066 42.0421C40.5443 41.8438 40.9787 41.5533 41.3446 41.187C41.7109 40.8211 42.0014 40.3867 42.1997 39.9084C42.3979 39.4302 42.5 38.9176 42.5 38.3999C42.5 37.8822 42.3979 37.3696 42.1997 36.8913C42.0014 36.4131 41.7109 35.9786 41.3446 35.6128L41.2264 35.4946C40.7723 35.0304 40.4677 34.4408 40.3519 33.8018ZM32.5006 26.0006C32.5006 29.5905 29.5905 32.5006 26.0006 32.5006C22.4108 32.5006 19.5006 29.5905 19.5006 26.0006C19.5006 22.4108 22.4108 19.5006 26.0006 19.5006C29.5905 19.5006 32.5006 22.4108 32.5006 26.0006Z" fill="#1570EF"/>
@@ -41,6 +39,8 @@ const crusherId = ref<number | null>(null);
 
 const formRef = ref<any>(null);
 const isFormValid = ref(false);
+const formErrors = reactive<Record<string, string>>({});
+const hasValidationErrors = ref(false);
 
 const activeTab = ref(0);
 const tabs = [
@@ -63,7 +63,7 @@ const ownerName = ref("");
 const mobile = ref("");
 const phone = ref("");
 const email = ref("");
-const buisnessno = ref("");
+const buisnessno = ref<string>("");
 const taxno = ref("");
 const languageId = ref<number | null>(null);
 
@@ -77,14 +77,7 @@ const address1 = ref("");
 const latitude = ref("");
 const longitude = ref("");
 
-const bankAccounts = ref<Array<{
-    id: number;
-    bank_id: number;
-    bank_branch: string;
-    iban: string;
-    account_number: string;
-    is_active: boolean;
-}>>([]);
+const bankAccounts = ref<CrusherBankAccount[]>([]);
 const debitLimit = ref('');
 const creditLimit = ref('');
 
@@ -110,6 +103,7 @@ const documents = ref<any[]>([]);
 const documentName = ref("");
 const documentType = ref<string | null>(null);
 const documentFile = ref<File[] | null>(null);
+const pageLoading = ref(false)
 
 const countryItems = ref<Array<{ title: string; value: number }>>([]);
 const cityItems = ref<Array<{ title: string; value: number }>>([]);
@@ -124,11 +118,19 @@ const saving = ref(false);
 
 const handleSave = async () => {
     try {
+        // Clear previous errors
+        Object.keys(formErrors).forEach(key => delete formErrors[key]);
+
         saving.value = true;
 
         // Determine which step to save based on activeTab
         const step = activeTab.value + 1; // activeTab is 0-indexed, step is 1-indexed
         const payload: any = { step };
+
+        // Add _method for PUT requests when editing
+        if (isEditing.value) {
+            payload._method = 'PUT';
+        }
 
         // Step 1: Basic Info
         if (step === 1) {
@@ -140,8 +142,8 @@ const handleSave = async () => {
             payload.mobile = mobile.value;
             if (phone.value) payload.phone = phone.value;
             if (email.value) payload.email = email.value;
-            if (buisnessno.value) payload.buisnessno = buisnessno.value;
-            if (taxno.value) payload.taxno = taxno.value;
+            if (buisnessno.value) payload.buisnessno = String(buisnessno.value);
+            if (taxno.value) payload.taxno = String(taxno.value);
             if (countryId.value) payload.country_id = countryId.value;
             if (cityId.value) payload.city_id = cityId.value;
             if (neighborhood.value) payload.neighborhood = neighborhood.value;
@@ -157,7 +159,7 @@ const handleSave = async () => {
         // Step 2: Financial Info
         if (step === 2) {
             if (!isEditing.value) {
-                error('يجب حفظ البيانات الأساسية أولاً');
+                toast.error('يجب حفظ البيانات الأساسية أولاً');
                 saving.value = false;
                 return;
             }
@@ -182,12 +184,10 @@ const handleSave = async () => {
         // Step 3: Commercial Info
         if (step === 3) {
             if (!isEditing.value) {
-                error('يجب حفظ البيانات الأساسية أولاً');
+                toast.error('يجب حفظ البيانات الأساسية أولاً');
                 saving.value = false;
                 return;
             }
-            if (buisnessno.value) payload.buisnessno = buisnessno.value;
-            if (taxno.value) payload.taxno = taxno.value;
             if (licenseNumber.value) payload.license_number = licenseNumber.value;
             if (licenseIssueDate.value) payload.license_issue_date = licenseIssueDate.value;
             if (licenseExpiryDate.value) payload.license_expiry_date = licenseExpiryDate.value;
@@ -202,7 +202,7 @@ const handleSave = async () => {
         // Step 4: Operational Info
         if (step === 4) {
             if (!isEditing.value) {
-                error('يجب حفظ البيانات الأساسية أولاً');
+                toast.error('يجب حفظ البيانات الأساسية أولاً');
                 saving.value = false;
                 return;
             }
@@ -221,32 +221,48 @@ const handleSave = async () => {
         //     // Documents logic here
         // }
 
-        // Save based on step
-        if (step === 1) {
-            if (isEditing.value) {
-                await api.put(`/admin/api/crushers/${route.params.id}`, payload);
-                success('تم حفظ البيانات الأساسية بنجاح');
-            } else {
-                const response = await api.post('/admin/api/crushers', payload);
-                success('تم حفظ البيانات الأساسية بنجاح');
-                if (response.data?.id) {
-                    crusherId.value = response.data.id;
-                    router.replace({ name: 'CrushersEdit', params: { id: response.data.id } });
-                }
-            }
-        } else if (step === 2) {
-            await api.put(`/admin/api/crushers/${route.params.id}`, payload);
-            success('تم حفظ البيانات المالية بنجاح');
-        } else if (step === 3) {
-            await api.put(`/admin/api/crushers/${route.params.id}`, payload);
-            success('تم حفظ البيانات التجارية بنجاح');
+        // Save based on step - all steps use the same endpoint
+        let response: any;
+        if (isEditing.value) {
+            response = await api.post(`/crushers/${route.params.id}`, payload);
+        } else {
+            response = await api.post('/crushers', payload);
+        }
+
+        // Show success message based on step
+        const stepMessages = [
+            'تم حفظ البيانات الأساسية بنجاح',
+            'تم حفظ البيانات المالية بنجاح',
+            'تم حفظ البيانات التجارية بنجاح',
+            'تم حفظ المعلومات التشغيلية بنجاح'
+        ];
+        // Clear validation errors on successful save
+        hasValidationErrors.value = false;
+        Object.keys(formErrors).forEach(key => delete formErrors[key]);
+
+        toast.success(response.message || stepMessages[step - 1]);
+
+        // Auto-advance to next step after successful save
+        if (step < 4) {
+            activeTab.value = step; // Move to next step (activeTab is 0-indexed)
         } else if (step === 4) {
-            await api.put(`/admin/api/crushers/${route.params.id}`, payload);
-            success('تم حفظ المعلومات التشغيلية بنجاح');
+            // After completing all steps, redirect to list
+            router.push({ name: 'CrushersList' });
         }
     } catch (err: any) {
         console.error('Error saving crusher:', err);
-        error(err?.response?.data?.message || 'فشل حفظ الكسارة');
+
+        // Handle validation errors (422 status)
+        if (err?.response?.status === 422 && err?.response?.data?.errors) {
+            hasValidationErrors.value = true;
+            const apiErrors = err.response.data.errors;
+            Object.keys(apiErrors).forEach(key => {
+                formErrors[key] = apiErrors[key][0];
+            });
+            toast.error(err?.response?.data?.message || 'يرجى تصحيح الأخطاء في النموذج');
+        } else {
+            toast.error(err?.response?.data?.message || 'فشل حفظ الكسارة');
+        }
     } finally {
         saving.value = false;
     }
@@ -257,6 +273,8 @@ const handleCancel = () => {
 };
 
 const handleBasicInfoUpdate = (data: any) => {
+    console.log(data.mobile);
+
     if (data.businessName !== undefined) businessName.value = data.businessName;
     if (data.businessNameTranslations !== undefined) businessNameTranslations.value = data.businessNameTranslations;
     if (data.ownerName !== undefined) ownerName.value = data.ownerName;
@@ -273,6 +291,17 @@ const handleBasicInfoUpdate = (data: any) => {
     if (data.buildingNumber !== undefined) buildingNumber.value = data.buildingNumber;
     if (data.address1 !== undefined) address1.value = data.address1;
     if (data.languageId !== undefined) languageId.value = data.languageId;
+};
+
+const clearFieldError = (field: string) => {
+    if (formErrors[field]) {
+        delete formErrors[field];
+    }
+
+    // Check if all errors are cleared
+    if (Object.keys(formErrors).length === 0) {
+        hasValidationErrors.value = false;
+    }
 };
 
 const handleFinancialInfoUpdate = (data: any) => {
@@ -322,8 +351,11 @@ const handleOperationalInfoUpdate = (data: any) => {
 const fetchCrusherData = async () => {
     if (!isEditing.value) return;
 
+    // Don't fetch data if there are validation errors (to preserve user input)
+    if (hasValidationErrors.value) return;
+
     try {
-        const response = await api.get(`/admin/api/crushers/${route.params.id}`);
+        const response = await api.get(`/crushers/${route.params.id}`);
         const data = response.data;
 
         crusherId.value = data.id;
@@ -373,34 +405,34 @@ const fetchCrusherData = async () => {
         managerEmail.value = data.manager_email || '';
     } catch (err: any) {
         console.error('Error fetching crusher:', err);
-        error(err?.response?.data?.message || 'فشل تحميل بيانات الكسارة');
+        toast.error(err?.response?.data?.message || 'فشل تحميل بيانات الكسارة');
     }
 };
 
 const fetchConstants = async () => {
     try {
-        const response = await api.get('/admin/api/crushers/constants');
+        const response = await api.get('/crushers/constants');
         const constants = response.data;
 
         if (constants.rock_types) {
-            rockTypeItems.value = Object.entries(constants.rock_types).map(([value, title]) => ({
-                title: String(title),
-                value: String(value)
-            }));
+            rockTypeItems.value = constants.rock_types.map((el: { label: string; key: string | number }) => ({
+                title: el.label,
+                value: el.key.toString()
+            }))
         }
 
         if (constants.crusher_types) {
-            crusherTypeItems.value = Object.entries(constants.crusher_types).map(([value, title]) => ({
-                title: String(title),
-                value: String(value)
-            }));
+            crusherTypeItems.value = constants.crusher_types.map((el: { label: string; key: string | number }) => ({
+                title: el.label,
+                value: el.key.toString()
+            }))
         }
 
         if (constants.crusher_designs) {
-            crusherDesignItems.value = Object.entries(constants.crusher_designs).map(([value, title]) => ({
-                title: String(title),
-                value: String(value)
-            }));
+            crusherDesignItems.value = constants.crusher_designs.map((el: { label: string; key: string | number }) => ({
+                title: el.label,
+                value: el.key.toString()
+            }))
         }
     } catch (err: any) {
         console.error('Error fetching constants:', err);
@@ -409,7 +441,7 @@ const fetchConstants = async () => {
 
 const fetchBanksList = async () => {
     try {
-        const response = await api.get('/admin/api/crushers/banks-list');
+        const response = await api.get('/banks/list');
         if (response.data && Array.isArray(response.data)) {
             bankItems.value = response.data.map((bank: any) => ({
                 title: bank.name || bank.title,
@@ -423,7 +455,7 @@ const fetchBanksList = async () => {
 
 const fetchLanguagesList = async () => {
     try {
-        const response = await api.get('/admin/api/crushers/languages-list');
+        const response = await api.get('/languages/list');
         if (response.data && Array.isArray(response.data)) {
             languageItems.value = response.data.map((lang: any) => ({
                 title: lang.name || lang.title,
@@ -437,7 +469,7 @@ const fetchLanguagesList = async () => {
 
 const fetchCountriesList = async () => {
     try {
-        const response = await api.get('/admin/api/crushers/countries-list');
+        const response = await api.get('/countries/list');
         if (response.data && Array.isArray(response.data)) {
             countryItems.value = response.data.map((country: any) => ({
                 title: country.name || country.title,
@@ -452,8 +484,8 @@ const fetchCountriesList = async () => {
 const fetchCitiesList = async (countryIdParam?: number) => {
     try {
         const url = countryIdParam
-            ? `/admin/api/crushers/cities-list?country_id=${countryIdParam}`
-            : '/admin/api/crushers/cities-list';
+            ? `/cities/list?country_id=${countryIdParam}`
+            : '/cities/list';
         const response = await api.get(url);
         if (response.data && Array.isArray(response.data)) {
             cityItems.value = response.data.map((city: any) => ({
@@ -467,6 +499,7 @@ const fetchCitiesList = async (countryIdParam?: number) => {
 };
 
 onMounted(async () => {
+    pageLoading.value = true
     await Promise.all([
         fetchConstants(),
         fetchBanksList(),
@@ -475,6 +508,7 @@ onMounted(async () => {
         fetchCitiesList()
     ]);
     await fetchCrusherData();
+    pageLoading.value = false
 });
 
 </script>
@@ -509,12 +543,14 @@ onMounted(async () => {
                             :neighborhood="neighborhood" :streetName="streetName" :postalCode="postalCode"
                             :buildingNumber="buildingNumber" :address1="address1" :languageId="languageId"
                             :countryItems="countryItems" :cityItems="cityItems" :languageItems="languageItems"
-                            @update:formData="handleBasicInfoUpdate" />
+                            :formErrors="formErrors" @update:formData="handleBasicInfoUpdate"
+                            @clear:error="clearFieldError" />
                     </v-tabs-window-item>
 
                     <v-tabs-window-item :value="1">
                         <FinancialInfoTab :bankAccounts="bankAccounts" :bankItems="bankItems" :debitLimit="debitLimit"
-                            :creditLimit="creditLimit" @update:formData="handleFinancialInfoUpdate" />
+                            :creditLimit="creditLimit" :formErrors="formErrors"
+                            @update:formData="handleFinancialInfoUpdate" @clear:error="clearFieldError" />
                     </v-tabs-window-item>
 
                     <v-tabs-window-item :value="2">
@@ -522,7 +558,8 @@ onMounted(async () => {
                             :licenseIssueDate="licenseIssueDate" :licenseExpiryDate="licenseExpiryDate"
                             :geoArea="geoArea" :managerName="managerName" :managerId="managerId"
                             :managerPhone="managerPhone" :managerEmail="managerEmail" :latitude="latitude"
-                            :longitude="longitude" @update:formData="handleCommercialInfoUpdate" />
+                            :longitude="longitude" :formErrors="formErrors"
+                            @update:formData="handleCommercialInfoUpdate" @clear:error="clearFieldError" />
                     </v-tabs-window-item>
 
                     <v-tabs-window-item :value="3">
@@ -530,7 +567,8 @@ onMounted(async () => {
                             :crusherType="crusherType" :feedRate="feedRate" :maxProduction="maxProduction"
                             :currentProduction="currentProduction" :design="design" :workersCount="workersCount"
                             :rockTypeItems="rockTypeItems" :crusherTypeItems="crusherTypeItems"
-                            :crusherDesignItems="crusherDesignItems" @update:formData="handleOperationalInfoUpdate" />
+                            :crusherDesignItems="crusherDesignItems" :formErrors="formErrors"
+                            @update:formData="handleOperationalInfoUpdate" @clear:error="clearFieldError" />
                     </v-tabs-window-item>
 
                     <!-- <v-tabs-window-item :value="4">
@@ -541,15 +579,18 @@ onMounted(async () => {
             </v-form>
 
             <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col">
-                <ButtonWithIcon variant="flat" color="primary" rounded="4" height="48"
-                    custom-class="min-w-56" :prepend-icon="saveIcon" label="حفظ التعديلات" @click="handleSave" />
-                
-                <ButtonWithIcon prepend-icon="mdi-close" variant="flat" color="primary-50" rounded="4" height="48"
-                    custom-class="font-semibold text-base text-primary-700 px-6 min-w-56"
-                    label="إغلاق" @click="handleCancel" />
-            </div>
+                <ButtonWithIcon variant="flat" color="primary" rounded="4" height="48" custom-class="min-w-56"
+                    :prepend-icon="saveIcon" label="حفظ التعديلات" @click="handleSave" :loading="saving" />
 
+                <ButtonWithIcon prepend-icon="mdi-close" variant="flat" color="primary-50" rounded="4" height="48"
+                    custom-class="font-semibold text-base text-primary-700 px-6 min-w-56" label="إغلاق"
+                    :disabled="saving" @click="handleCancel" />
+            </div>
         </div>
+
+        <v-overlay :model-value="pageLoading" contained class="align-center justify-center">
+            <v-progress-circular indeterminate color="primary" />
+        </v-overlay>
     </default-layout>
 </template>
 

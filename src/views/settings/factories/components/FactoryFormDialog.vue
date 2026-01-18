@@ -1,10 +1,8 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from "vue";
 import { useApi } from "@/composables/useApi";
-import { useNotification } from "@/composables/useNotification";
 
 const api = useApi();
-const { success, error: showError } = useNotification();
 
 const formErrors = reactive<Record<string, string>>({});
 
@@ -62,7 +60,7 @@ const fetchFactoryData = async (factoryId: number) => {
     form.status = Boolean(factory.is_active);
   } catch (err: any) {
     console.error('Error fetching factory details:', err);
-    showError(err?.response?.data?.message || 'Failed to fetch factory details');
+    toast.error(err?.response?.data?.message || 'Failed to fetch factory details');
     internalOpen.value = false;
   } finally {
     loadingFactoryData.value = false;
@@ -111,10 +109,10 @@ const handleSave = async () => {
       formData.append('notes', form.notes);
       formData.append('is_active', form.status ? '1' : '0');
       await api.post(`/manufacturers/${form.id}`, formData);
-      success('تم تحديث المصنع بنجاح');
+      toast.success('تم تحديث المصنع بنجاح');
     } else {
       await api.post('/manufacturers', payload);
-      success('تم إضافة المصنع بنجاح');
+      toast.success('تم إضافة المصنع بنجاح');
     }
 
     emit('saved');
@@ -129,9 +127,9 @@ const handleSave = async () => {
       Object.keys(apiErrors).forEach(key => {
         formErrors[key] = apiErrors[key][0];
       });
-      showError(err?.response?.data?.message || 'يرجى تصحيح الأخطاء في النموذج');
+      toast.error(err?.response?.data?.message || 'يرجى تصحيح الأخطاء في النموذج');
     } else {
-      showError(err?.response?.data?.message || 'Failed to save factory');
+      toast.error(err?.response?.data?.message || 'Failed to save factory');
     }
   } finally {
     saving.value = false;

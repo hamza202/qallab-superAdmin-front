@@ -24,6 +24,7 @@ export default defineConfig(({ mode }) => {
           'vue-router',
           'pinia',
           {
+            'vue3-toastify': ['toast'],
             '@/utils/validators': [
               'useValidators',
               'required',

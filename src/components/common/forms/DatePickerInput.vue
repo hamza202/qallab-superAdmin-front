@@ -18,6 +18,7 @@ interface DatePickerInputProps {
     hideDetails?: boolean | "auto";
     hint?: string;
     persistentHint?: boolean;
+    errorMessages?: string | string[];
     min?: string;
     max?: string;
     labelClass?: string;
@@ -52,12 +53,11 @@ const internalValue = computed({
             emit("update:modelValue", null);
             return;
         }
-        // Format date as MM/DD/YYYY
         const date = new Date(val);
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const day = String(date.getDate()).padStart(2, '0');
         const year = date.getFullYear();
-        const formattedValue = `${month}/${day}/${year}`;
+        const formattedValue = `${year}-${month}-${day}`;
         emit("update:modelValue", formattedValue);
     },
 });
@@ -87,7 +87,7 @@ const formattedDate = computed(() => {
         <v-menu v-model="menu" :close-on-content-click="false" transition="scale-transition" offset-y min-width="auto">
             <template #activator="{ props: menuProps }">
                 <v-text-field v-model="formattedDate" :placeholder="placeholder" variant="outlined" :color="color"
-                    :density="density" :disabled="disabled" :readonly="true" :rules="rules" :dir="dir"
+                    :density="density" :disabled="disabled" :readonly="true" :error-messages="errorMessages"  :rules="rules" :dir="dir"
                     :clearable="clearable" :hide-details="hideDetails" :hint="hint" :persistent-hint="persistentHint"
                     v-bind="menuProps">
                     <template #prepend-inner>

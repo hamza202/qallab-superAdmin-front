@@ -2,7 +2,6 @@
 import { ref, computed, onMounted } from "vue"
 import { useRoute, useRouter } from 'vue-router'
 import { useApi } from '@/composables/useApi'
-import { useNotification } from '@/composables/useNotification'
 
 interface ItemCategory {
   id: number | null
@@ -67,7 +66,6 @@ interface ServicesListResponse {
 const route = useRoute()
 const router = useRouter()
 const api = useApi()
-const { success, error } = useNotification()
 
 const loading = ref(false)
 const saving = ref(false)
@@ -122,7 +120,7 @@ const fetchSupplierServices = async () => {
     }
   } catch (err: any) {
     console.error('Error fetching services:', err)
-    error(err?.response?.data?.message || 'فشل في جلب قائمة الخدمات')
+    toast.error(err?.response?.data?.message || 'فشل في جلب قائمة الخدمات')
   } finally {
     loading.value = false
   }
@@ -223,7 +221,7 @@ const handleSave = async () => {
     for (const row of allRows.value) {
       const validationError = validateRow(row)
       if (validationError) {
-        error(validationError)
+        toast.error(validationError)
         return
       }
     }
@@ -234,7 +232,7 @@ const handleSave = async () => {
     )
 
     if (rowsToUpdate.length === 0) {
-      error('لا توجد تغييرات للحفظ')
+      toast.error('لا توجد تغييرات للحفظ')
       return
     }
 
@@ -243,13 +241,13 @@ const handleSave = async () => {
     )
 
     await Promise.all(updatePromises)
-    success(`تم تحديث أسعار ${rowsToUpdate.length} خدمة بنجاح`)
+    toast.success(`تم تحديث أسعار ${rowsToUpdate.length} خدمة بنجاح`)
 
     // Refresh data
     await fetchSupplierServices()
   } catch (err: any) {
     console.error('Error saving service prices:', err)
-    error(err?.response?.data?.message || 'فشل في حفظ أسعار الخدمات')
+    toast.error(err?.response?.data?.message || 'فشل في حفظ أسعار الخدمات')
   } finally {
     saving.value = false
   }

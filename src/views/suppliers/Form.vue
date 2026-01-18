@@ -2,7 +2,6 @@
 import { ref, computed, onMounted, watch, reactive } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useApi } from "@/composables/useApi";
-import { useNotification } from "@/composables/useNotification";
 
 // Available languages
 const availableLanguages = ref([
@@ -13,7 +12,6 @@ const availableLanguages = ref([
 const route = useRoute();
 const router = useRouter();
 const api = useApi();
-const { success, error } = useNotification();
 
 // TypeScript Interfaces
 interface ListItem {
@@ -274,7 +272,7 @@ const fetchSupplierData = async () => {
     account.value = data.tree_chart_card_id;
   } catch (err: any) {
     console.error('Error fetching supplier data:', err);
-    error(err?.response?.data?.message || 'Failed to fetch supplier data');
+    toast.error(err?.response?.data?.message || 'Failed to fetch supplier data');
   } finally {
     loading.value = false;
   }
@@ -363,7 +361,7 @@ const saveStep = async (step: number) => {
       supplierId.value = response.data.supplier_id;
     }
 
-    success(response.message || 'تم حفظ المورد بنجاح');
+    toast.success(response.message || 'تم حفظ المورد بنجاح');
     return true;
   } catch (err: any) {
     console.error('Error saving supplier:', err);
@@ -374,9 +372,9 @@ const saveStep = async (step: number) => {
       Object.keys(apiErrors).forEach(key => {
         formErrors[key] = apiErrors[key][0];
       });
-      error(err?.response?.data?.message || 'يرجى تصحيح الأخطاء في النموذج');
+      toast.error(err?.response?.data?.message || 'يرجى تصحيح الأخطاء في النموذج');
     } else {
-      error(err?.response?.data?.message || 'فشل حفظ المورد');
+      toast.error(err?.response?.data?.message || 'فشل حفظ المورد');
     }
     return false;
   } finally {
@@ -408,7 +406,7 @@ const handleSave = async () => {
   if (formRef.value && typeof formRef.value.validate === 'function') {
     const { valid } = await formRef.value.validate();
     if (!valid) {
-      error('يرجى تصحيح الأخطاء في النموذج');
+      toast.error('يرجى تصحيح الأخطاء في النموذج');
       return;
     }
   }
@@ -785,7 +783,6 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
             <div class="rounded-lg px-6 py-2 mb-3">
               <!-- Account Selection -->
               <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-
                 <!-- <div class="mb-6">
                   <span class="text-sm font-semibold text-gray-700 mb-1 block">انشاء حساب خاص في شجرة المحاسبة</span>
                   <v-radio-group v-model="createAccountInTree" inline hide-details>
@@ -853,9 +850,9 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
       <!-- Action Buttons -->
       <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col">
         <ButtonWithIcon variant="flat" color="primary" rounded="4" height="48" custom-class="min-w-56"
-          :prepend-icon="saveIcon" label="حفظ" @click="handleSave" />
+          :prepend-icon="saveIcon" label="حفظ" @click="handleSave" :loading="saving" />
 
-        <ButtonWithIcon prepend-icon="mdi-close" variant="flat" color="primary-50" rounded="4" height="48"
+        <ButtonWithIcon prepend-icon="mdi-close" variant="flat" color="primary-50" rounded="4" :disabled="saving" height="48"
           custom-class="font-semibold text-base text-primary-700 px-6 min-w-56" label="إغلاق" @click="handleClose" />
       </div>
     </div>

@@ -142,13 +142,11 @@ import { ref, onMounted, computed, reactive } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useApi } from '@/composables/useApi'
-import { useNotification } from '@/composables/useNotification'
 
 const route = useRoute()
 const router = useRouter()
 const { t } = useI18n()
 const api = useApi()
-const { success, error } = useNotification()
 
 const formRef = ref<any>(null)
 const isFormValid = ref(false)
@@ -271,7 +269,7 @@ const handleSaveAndReturn = async () => {
     if (formRef.value && typeof formRef.value.validate === 'function') {
       const { valid } = await formRef.value.validate()
       if (!valid) {
-        error('يرجى تصحيح الأخطاء في النموذج')
+        toast.error('يرجى تصحيح الأخطاء في النموذج')
         return
       }
     }
@@ -300,11 +298,11 @@ const handleSaveAndReturn = async () => {
     if (isEditMode.value) {
       // Update existing aspect
       response = await api.put(`/aspects/${route.params.id}`, payload)
-      success(response.message || 'تم تحديث المتغير بنجاح')
+      toast.success(response.message || 'تم تحديث المتغير بنجاح')
     } else {
       // Create new aspect
       response = await api.post('/aspects', payload)
-      success(response.message || 'تم إضافة المتغير بنجاح')
+      toast.success(response.message || 'تم إضافة المتغير بنجاح')
     }
 
     handleBack()
@@ -317,9 +315,9 @@ const handleSaveAndReturn = async () => {
       Object.keys(apiErrors).forEach(key => {
         formErrors[key] = apiErrors[key][0]
       })
-      error(err?.response?.data?.message || 'يرجى تصحيح الأخطاء في النموذج')
+      toast.error(err?.response?.data?.message || 'يرجى تصحيح الأخطاء في النموذج')
     } else {
-      error(err?.response?.data?.message || 'فشل حفظ البيانات')
+      toast.error(err?.response?.data?.message || 'فشل حفظ البيانات')
     }
   } finally {
     loading.value = false
@@ -348,7 +346,7 @@ const fetchConstants = async () => {
     }
   } catch (err: any) {
     console.error('Fetch constants error:', err)
-    error(err?.response?.data?.message || 'فشل تحميل الثوابت')
+    toast.error(err?.response?.data?.message || 'فشل تحميل الثوابت')
   } finally {
     loadingConstants.value = false
   }
@@ -374,7 +372,7 @@ const fetchCategories = async () => {
     }
   } catch (err: any) {
     console.error('Fetch categories error:', err)
-    error(err?.response?.data?.message || 'فشل تحميل الفئات')
+    toast.error(err?.response?.data?.message || 'فشل تحميل الفئات')
   } finally {
     loadingCategories.value = false
   }
@@ -406,7 +404,7 @@ const fetchAspect = async () => {
     }
   } catch (err: any) {
     console.error('Fetch aspect error:', err)
-    error(err?.response?.data?.message || 'فشل تحميل بيانات المتغير')
+    toast.error(err?.response?.data?.message || 'فشل تحميل بيانات المتغير')
   } finally {
     loading.value = false
   }

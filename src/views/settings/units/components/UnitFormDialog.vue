@@ -1,11 +1,9 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch, onMounted } from "vue";
 import { useApi } from "@/composables/useApi";
-import { useNotification } from "@/composables/useNotification";
 import { required, minLength, maxLength } from "@/utils/validators";
 
 const api = useApi();
-const { success, error: showError } = useNotification();
 
 const formErrors = reactive<Record<string, string>>({});
 
@@ -24,6 +22,19 @@ interface UnitForm {
   type: number | string | null;
   status: boolean;
   notes: string;
+}
+
+interface PayloadType {
+  name: {
+    en: string;
+    ar: string;
+  };
+  unit_code: string;
+  parent_id: string | number | null;
+  type: string | number | null;
+  notes: string;
+  is_active: boolean | string;
+  _method?: string;
 }
 
 const props = defineProps<{
@@ -74,7 +85,7 @@ const fetchConstants = async () => {
 
   } catch (err: any) {
     console.error('Error fetching constants:', err);
-    showError(err?.response?.data?.message || 'Failed to fetch constants');
+    toast.error(err?.response?.data?.message || 'Failed to fetch constants');
   } finally {
     loadingConstants.value = false;
   }
@@ -96,7 +107,7 @@ const fetchUnitData = async (unitId: number) => {
     form.notes = unit.notes ?? "";
   } catch (err: any) {
     console.error('Error fetching unit details:', err);
-    showError(err?.response?.data?.message || 'Failed to fetch unit details');
+    toast.error(err?.response?.data?.message || 'Failed to fetch unit details');
     internalOpen.value = false;
   } finally {
     loadingUnitData.value = false;
@@ -113,7 +124,7 @@ const fetchUnitsList = async () => {
     }));
   } catch (err: any) {
     console.error('Error fetching constants:', err);
-    showError(err?.response?.data?.message || 'Failed to fetch constants');
+    toast.error(err?.response?.data?.message || 'Failed to fetch constants');
   } finally {
     loadingConstants.value = false;
   }
@@ -147,7 +158,7 @@ const handleSave = async () => {
   try {
     saving.value = true;
 
-    const payload = {
+    const payload: PayloadType = {
       name: {
         en: form.nameEn,
         ar: form.nameAr,
@@ -160,21 +171,13 @@ const handleSave = async () => {
     };
 
     if (form.id) {
-      const formData = new FormData();
-      formData.append('_method', 'PUT');
-      formData.append('name[en]', form.nameEn);
-      formData.append('name[ar]', form.nameAr);
-      formData.append('unit_code', form.code);
-      if (form.parentId) formData.append('parent_id', String(form.parentId));
-      if (form.type) formData.append('type', String(form.type));
-      formData.append('notes', form.notes);
-      formData.append('is_active', form.status ? '1' : '0');
-
-      await api.post(`/units/${form.id}`, formData);
-      success('تم تحديث الوحدة بنجاح');
+      payload['_method'] = 'PUT';
+      payload.is_active = form.status ? '1' : '0';
+      await api.post(`/units/${form.id}`, payload);
+      toast.success('تم تحديث الوحدة بنجاح');
     } else {
       await api.post('/units', payload);
-      success('تم إضافة الوحدة بنجاح');
+      toast.success('تم إضافة الوحدة بنجاح');
     }
 
     emit('saved');
@@ -189,9 +192,9 @@ const handleSave = async () => {
       Object.keys(apiErrors).forEach(key => {
         formErrors[key] = apiErrors[key][0];
       });
-      showError(err?.response?.data?.message || 'يرجى تصحيح الأخطاء في النموذج');
+      toast.error(err?.response?.data?.message || 'يرجى تصحيح الأخطاء في النموذج');
     } else {
-      showError(err?.response?.data?.message || 'Failed to save unit');
+      toast.error(err?.response?.data?.message || 'Failed to save unit');
     }
   } finally {
     saving.value = false;

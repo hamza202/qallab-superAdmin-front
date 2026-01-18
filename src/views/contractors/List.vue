@@ -2,13 +2,11 @@
 import { ref, computed, onMounted, nextTick, onBeforeUnmount } from "vue";
 import { useRouter } from "vue-router";
 import { useApi } from "@/composables/useApi";
-import { useNotification } from "@/composables/useNotification";
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
 const router = useRouter();
 const api = useApi();
-const { success, error } = useNotification();
 
 const contractorsIcon = `<svg width="52" height="52" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path opacity="0.12" fill-rule="evenodd" clip-rule="evenodd" d="M40.3519 33.8018C40.236 33.1628 40.3142 32.5038 40.5764 31.9097C40.8261 31.3272 41.2407 30.8303 41.7691 30.4803C42.2976 30.1304 42.9168 29.9426 43.5506 29.94H43.7279C44.7727 29.94 45.7747 29.525 46.5135 28.7862C47.2523 28.0474 47.6673 27.0454 47.6673 26.0006C47.6673 24.9559 47.2523 23.9539 46.5135 23.2151C45.7747 22.4763 44.7727 22.0613 43.7279 22.0613H43.3931C42.7593 22.0587 42.14 21.8709 41.6116 21.521C41.0831 21.171 40.6685 20.6741 40.4188 20.0916V19.934C40.1566 19.3399 40.0784 18.6809 40.1943 18.0419C40.3101 17.403 40.6147 16.8134 41.0688 16.3491L41.187 16.231C41.5533 15.8651 41.8438 15.4306 42.0421 14.9524C42.2403 14.4742 42.3424 13.9615 42.3424 13.4438C42.3424 12.9261 42.2403 12.4135 42.0421 11.9353C41.8438 11.457 41.5533 11.0226 41.187 10.6567C40.8211 10.2904 40.3867 9.99987 39.9084 9.80163C39.4302 9.60338 38.9176 9.50134 38.3999 9.50134C37.8822 9.50134 37.3696 9.60338 36.8913 9.80163C36.4131 9.99987 35.9786 10.2904 35.6128 10.6567L35.4946 10.7749C35.0304 11.229 34.4408 11.5336 33.8018 11.6494C33.1628 11.7653 32.5038 11.6871 31.9097 11.4249C31.3272 11.1752 30.8303 10.7606 30.4803 10.2322C30.1304 9.70372 29.9426 9.08447 29.94 8.45065V8.27338C29.94 7.22859 29.525 6.22659 28.7862 5.48781C28.0474 4.74903 27.0454 4.33398 26.0006 4.33398C24.9559 4.33398 23.9539 4.74903 23.2151 5.48781C22.4763 6.22659 22.0613 7.22859 22.0613 8.27338V8.60823C22.0587 9.24205 21.8709 9.8613 21.521 10.3897C21.171 10.9182 20.6741 11.3328 20.0916 11.5825H19.934C19.3399 11.8447 18.6809 11.9229 18.0419 11.807C17.403 11.6912 16.8134 11.3866 16.3491 10.9325L16.231 10.8143C15.8651 10.448 15.4306 10.1575 14.9524 9.9592C14.4742 9.76096 13.9615 9.65892 13.4438 9.65892C12.9261 9.65892 12.4135 9.76096 11.9353 9.9592C11.457 10.1575 11.0226 10.448 10.6567 10.8143C10.2904 11.1802 9.99987 11.6146 9.80163 12.0929C9.60338 12.5711 9.50134 13.0837 9.50134 13.6014C9.50134 14.1191 9.60338 14.6317 9.80163 15.11C9.99987 15.5882 10.2904 16.0227 10.6567 16.3885L10.7749 16.5067C11.229 16.9709 11.5336 17.5605 11.6494 18.1995C11.7653 18.8385 11.6871 19.4975 11.4249 20.0916C11.1998 20.7036 10.7958 21.2338 10.2653 21.6132C9.7349 21.9926 9.10261 22.2036 8.45065 22.2188H8.27338C7.22859 22.2188 6.22659 22.6339 5.48781 23.3727C4.74903 24.1114 4.33398 25.1134 4.33398 26.1582C4.33398 27.203 4.74903 28.205 5.48781 28.9438C6.22659 29.6826 7.22859 30.0976 8.27338 30.0976H8.60823C9.24205 30.1001 9.8613 30.288 10.3897 30.6379C10.9182 30.9879 11.3328 31.4847 11.5825 32.0673C11.8447 32.6614 11.9229 33.3204 11.807 33.9594C11.6912 34.5983 11.3866 35.1879 10.9325 35.6522L10.8143 35.7703C10.448 36.1362 10.1575 36.5707 9.9592 37.0489C9.76096 37.5271 9.65892 38.0398 9.65892 38.5575C9.65892 39.0752 9.76096 39.5878 9.9592 40.066C10.1575 40.5443 10.448 40.9787 10.8143 41.3446C11.1802 41.7109 11.6146 42.0014 12.0929 42.1997C12.5711 42.3979 13.0837 42.5 13.6014 42.5C14.1191 42.5 14.6317 42.3979 15.11 42.1997C15.5882 42.0014 16.0227 41.7109 16.3885 41.3446L16.5067 41.2264C16.9709 40.7723 17.5605 40.4677 18.1995 40.3519C18.8385 40.236 19.4975 40.3142 20.0916 40.5764C20.7036 40.8015 21.2338 41.2055 21.6132 41.736C21.9926 42.2664 22.2036 42.8987 22.2188 43.5506V43.7279C22.2188 44.7727 22.6339 45.7747 23.3727 46.5135C24.1114 47.2523 25.1134 47.6673 26.1582 47.6673C27.203 47.6673 28.205 47.2523 28.9438 46.5135C29.6826 45.7747 30.0976 44.7727 30.0976 43.7279V43.3931C30.1001 42.7593 30.288 42.14 30.6379 41.6116C30.9879 41.0831 31.4847 40.6685 32.0673 40.4188C32.6614 40.1566 33.3204 40.0784 33.9594 40.1943C34.5983 40.3101 35.1879 40.6147 35.6522 41.0688L35.7703 41.187C36.1362 41.5533 36.5707 41.8438 37.0489 42.0421C37.5271 42.2403 38.0398 42.3424 38.5575 42.3424C39.0752 42.3424 39.5878 42.2403 40.066 42.0421C40.5443 41.8438 40.9787 41.5533 41.3446 41.187C41.7109 40.8211 42.0014 40.3867 42.1997 39.9084C42.3979 39.4302 42.5 38.9176 42.5 38.3999C42.5 37.8822 42.3979 37.3696 42.1997 36.8913C42.0014 36.4131 41.7109 35.9786 41.3446 35.6128L41.2264 35.4946C40.7723 35.0304 40.4677 34.4408 40.3519 33.8018ZM32.5006 26.0006C32.5006 29.5905 29.5905 32.5006 26.0006 32.5006C22.4108 32.5006 19.5006 29.5905 19.5006 26.0006C19.5006 22.4108 22.4108 19.5006 26.0006 19.5006C29.5905 19.5006 32.5006 22.4108 32.5006 26.0006Z" fill="#1570EF"/>
@@ -64,8 +62,8 @@ interface Contractor {
   trade_name: string;
   commercial_register: string;
   tax_register: string;
-  license_number: string | null;
-  contractor_grade: string | null;
+  municipal_license_number: string | null;
+  classification_grade: string | null;
   scope_of_work: string;
   contractor_classification: string;
   projects: {
@@ -93,6 +91,7 @@ const shownHeaders = ref<TableHeader[]>([]);
 const canCreate = ref(false);
 const loading = ref(false);
 const loadingMore = ref(false);
+const header_table = ref('')
 
 const nextCursor = ref<string | null>(null);
 const previousCursor = ref<string | null>(null);
@@ -120,6 +119,11 @@ const filterClassification = ref<string | null>(null);
 const filterScopeOfWork = ref<string | null>(null);
 const filterStatus = ref<string | null>(null);
 
+const contractorClassificationItems = ref<Array<{ title: string; value: string }>>([]);
+const classificationGradeItems = ref<Array<{ title: string; value: string }>>([]);
+const scopeOfWorkItems = ref<Array<{ title: string; value: string }>>([]);
+const statusItems = ref<Array<{ title: string; value: boolean | number }>>([]);
+
 const showHeadersMenu = ref(false);
 const updatingHeaders = ref(false);
 const headerCheckStates = computed(() => {
@@ -129,10 +133,10 @@ const headerCheckStates = computed(() => {
   });
   return states;
 });
-const showDeleteDialog = ref(false);
-const showStatusDialog = ref(false);
-const itemToDelete = ref<number | null>(null);
-const itemToChangeStatus = ref<number | null>(null);
+const showBulkDeleteDialog = ref(false);
+const showStatusChangeDialog = ref(false);
+const statusChangeLoading = ref(false);
+const itemToChangeStatus = ref<Contractor | null>(null);
 
 const observerTarget = ref<HTMLElement | null>(null);
 let observer: IntersectionObserver | null = null;
@@ -156,119 +160,201 @@ const fetchContractors = async (cursor: string | null = null, append: boolean = 
     if (filterTradeName.value) params.trade_name = filterTradeName.value;
     if (filterCommercialRegister.value) params.commercial_register = filterCommercialRegister.value;
     if (filterTaxRegister.value) params.tax_register = filterTaxRegister.value;
-    if (filterLicenseNumber.value) params.license_number = filterLicenseNumber.value;
-    if (filterContractorGrade.value) params.contractor_grade = filterContractorGrade.value;
+    if (filterLicenseNumber.value) params.municipal_license_number = filterLicenseNumber.value;
+    if (filterContractorGrade.value) params.classification_grade = filterContractorGrade.value;
     if (filterClassification.value) params.contractor_classification = filterClassification.value;
-    if (filterScopeOfWork.value) params.scope_of_work = filterScopeOfWork.value;
+    if (filterScopeOfWork.value) params.scope_of_work_id = filterScopeOfWork.value;
     if (filterStatus.value !== null) params.status = filterStatus.value;
 
-    const response = await api.get('/admin/api/contractors', { params });
+    const response = await api.get('/contractors', { params });
 
     if (append) {
-      tableItems.value = [...tableItems.value, ...response.data.data];
+      tableItems.value = [...tableItems.value, ...response.data];
     } else {
-      tableItems.value = response.data.data;
+      tableItems.value = response.data;
+      allHeaders.value = response.headers.filter((h: TableHeader) => h.key !== 'id' && h.key !== 'actions');
+      shownHeaders.value = response.shownHeaders.filter((h: TableHeader) => h.key !== 'id' && h.key !== 'actions');
+      canCreate.value = response.actions.can_create;
+            header_table.value = response.header_table
     }
 
-    if (response.data.headers) {
-      allHeaders.value = response.data.headers;
-    }
-    if (response.data.shownHeaders) {
-      shownHeaders.value = response.data.shownHeaders;
-    }
-
-    nextCursor.value = response.data.pagination?.next_cursor || null;
-    previousCursor.value = response.data.pagination?.previous_cursor || null;
-    canCreate.value = response.data.actions?.can_create || false;
+    nextCursor.value = response.pagination?.next_cursor || null;
+    previousCursor.value = response.pagination?.previous_cursor || null;
 
   } catch (err: any) {
     console.error('Error fetching contractors:', err);
-    error(err?.response?.data?.message || 'فشل تحميل المقاولين');
+    toast.error(err?.response?.data?.message || 'فشل تحميل المقاولين');
   } finally {
     loading.value = false;
     loadingMore.value = false;
   }
 };
 
-const handleEdit = (item: Contractor) => {
+const handleEdit = (item: any) => {
   router.push({ name: 'ContractorsEdit', params: { id: item.id } });
 };
 
-const handleView = (item: Contractor) => {
-  router.push({ name: 'ContractorsEdit', params: { id: item.id } });
-};
 
-const confirmDelete = (id: number) => {
-  itemToDelete.value = id;
-  showDeleteDialog.value = true;
-};
+const deleteLoading = ref(false);
 
-const handleDelete = async () => {
-  if (!itemToDelete.value) return;
-
+const confirmDelete = async (item: any) => {
   try {
-    await api.delete(`/admin/api/contractors/${itemToDelete.value}`);
-    success('تم حذف المقاول بنجاح');
-    showDeleteDialog.value = false;
-    itemToDelete.value = null;
+    deleteLoading.value = true;
+    await api.delete(`/contractors/${item.id}`);
+    toast.success('تم حذف المقاول بنجاح');
     await fetchContractors();
   } catch (err: any) {
     console.error('Error deleting contractor:', err);
-    error(err?.response?.data?.message || 'فشل حذف المقاول');
+    toast.error(err?.response?.data?.message || 'فشل حذف المقاول');
+  } finally {
+    deleteLoading.value = false;
   }
 };
 
-const confirmStatusChange = (id: number) => {
-  itemToChangeStatus.value = id;
-  showStatusDialog.value = true;
-};
 
-const handleStatusChange = async () => {
+const handleStatusChange = (item: any) => {
+    itemToChangeStatus.value = { ...item }
+    showStatusChangeDialog.value = true
+}
+
+const confirmStatusChange = async () => {
   if (!itemToChangeStatus.value) return;
 
   try {
-    await api.post(`/admin/api/contractors/${itemToChangeStatus.value}/change-status`);
-    success('تم تغيير الحالة بنجاح');
-    showStatusDialog.value = false;
-    itemToChangeStatus.value = null;
-    await fetchContractors();
+    statusChangeLoading.value = true;
+    const newStatus = !itemToChangeStatus.value.status;
+
+    await api.patch(`/contractors/${itemToChangeStatus.value.id}/change-status`, {
+      status: newStatus
+    });
+
+    toast.success(`تم ${newStatus ? 'تفعيل' : 'تعطيل'} المقاول بنجاح`);
+
+    const index = tableItems.value.findIndex(c => c.id === itemToChangeStatus.value!.id);
+    if (index !== -1) {
+      tableItems.value[index].status = newStatus;
+    }
+
   } catch (err: any) {
-    console.error('Error changing status:', err);
-    error(err?.response?.data?.message || 'فشل تغيير الحالة');
+    console.error('Error changing crusher status:', err);
+    toast.error(err?.response?.data?.message || 'فشل تغيير حالة المقاول');
+  } finally {
+    statusChangeLoading.value = false;
+    showStatusChangeDialog.value = false;
+    itemToChangeStatus.value = null;
   }
 };
 
-const handleBulkDelete = async () => {
+
+const fetchConstants = async () => {
+  try {
+    const response = await api.get('/contractors/constants');
+    
+    contractorClassificationItems.value = response.data.contractor_classification?.map((item: any) => ({
+      title: item.label,
+      value: item.key
+    })) || [];
+
+    classificationGradeItems.value = response.data.classification_grade?.map((item: any) => ({
+      title: item.label,
+      value: item.key
+    })) || [];
+
+    scopeOfWorkItems.value = response.data.scope_of_work?.map((item: any) => ({
+      title: item.label,
+      value: item.key
+    })) || [];
+
+    statusItems.value = [
+      { title: 'فعال', value: 1 },
+      { title: 'غير فعال', value: 0 }
+    ];
+  } catch (err: any) {
+    console.error('Fetch constants error:', err);
+    toast.error(err?.response?.data?.message || 'فشل تحميل الثوابت');
+  }
+};
+
+const handleBulkDelete = () => {
+  if (selectedContractors.value.length === 0) return;
+  showBulkDeleteDialog.value = true;
+};
+
+const confirmBulkDelete = async () => {
   if (selectedContractors.value.length === 0) return;
 
   try {
-    await api.post('/admin/api/contractors/bulk-delete', {
+    deleteLoading.value = true;
+    await api.post('/contractors/bulk-delete', {
       ids: selectedContractors.value
     });
-    success('تم حذف المقاولين المحددين بنجاح');
+    toast.success(`تم حذف ${selectedContractors.value.length} مقاول بنجاح`);
     selectedContractors.value = [];
+    showBulkDeleteDialog.value = false;
     await fetchContractors();
   } catch (err: any) {
     console.error('Error bulk deleting:', err);
-    error(err?.response?.data?.message || 'فشل حذف المقاولين');
+    toast.error(err?.response?.data?.message || 'فشل حذف المقاولين');
+  } finally {
+    deleteLoading.value = false;
   }
 };
 
-const toggleSelectAll = () => {
-  if (selectedContractors.value.length === tableItems.value.length) {
+const handleSelectContractor = (item: any, selected: boolean) => {
+  if (selected) {
+    selectedContractors.value.push(item.id);
+  } else {
+    selectedContractors.value = selectedContractors.value.filter((id) => id !== item.id);
+  }
+
+};
+
+const handleSelectAllContractors = (checked: boolean) => {
+  if (checked) {
+    selectedContractors.value = tableItems.value.map((item) => item.id);
+  } else {
     selectedContractors.value = [];
-  } else {
-    selectedContractors.value = tableItems.value.map(item => item.id);
   }
+
 };
 
-const toggleHeader = (header: string) => {
-  const index = shownHeaders.value.findIndex(h => h.key === header.key);
-  if (index > -1) {
-    shownHeaders.value.splice(index, 1);
-  } else {
-    shownHeaders.value.push(header);
-  }
+const toggleHeader = async (headerKey: string) => {
+    const isCurrentlyShown = shownHeaders.value.some(h => h.key === headerKey);
+
+    if (isCurrentlyShown) {
+        shownHeaders.value = shownHeaders.value.filter(h => h.key !== headerKey);
+    } else {
+        const headerToAdd = allHeaders.value.find(h => h.key === headerKey);
+        if (headerToAdd) {
+            shownHeaders.value.push(headerToAdd);
+        }
+    }
+
+    await updateHeadersOnServer();
+};
+
+const updateHeadersOnServer = async () => {
+    try {
+        updatingHeaders.value = true;
+        const headerKeys = shownHeaders.value.map(h => h.key);
+
+        const formData = new FormData();
+        formData.append('table', header_table.value);
+        headerKeys.forEach((header, index) => {
+            formData.append(`header[${index}]`, header);
+        });
+
+        await api.post('/headers', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+    } catch (err: any) {
+        console.error('Error updating headers:', err);
+        toast.error(err?.response?.data?.message || 'Failed to update headers');
+    } finally {
+        updatingHeaders.value = false;
+    }
 };
 
 const applyFilters = () => {
@@ -311,6 +397,7 @@ const setupInfiniteScroll = () => {
 
 onMounted(() => {
   fetchContractors();
+  fetchConstants()
   setupInfiniteScroll();
 });
 
@@ -319,10 +406,6 @@ onBeforeUnmount(() => {
     observer.unobserve(observerTarget.value);
   }
 });
-
-const openCreateContractors = () => {
-  router.push({ name: 'ContractorsEdit', params: { id: 2 } });
-};
 
 const toggleAdvancedFilters = () => {
   showAdvancedFilters.value = !showAdvancedFilters.value;
@@ -355,11 +438,11 @@ const toggleAdvancedFilters = () => {
             class="flex flex-wrap items-stretch rounded overflow-hidden border border-gray-200 bg-white text-sm">
             <ButtonWithIcon variant="flat" height="40" rounded="0"
               custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-              :prepend-icon="trash_1_icon" color="white" :label="t('common.delete')" />
+              :prepend-icon="trash_1_icon" color="white" :label="t('common.delete')" @click="handleBulkDelete" />
             <div class="w-px bg-gray-200"></div>
             <ButtonWithIcon variant="flat" height="40" rounded="0"
               custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-              :prepend-icon="trash_2_icon" color="white" :label="t('common.deleteAll')" />
+              :prepend-icon="trash_2_icon" color="white" :label="t('common.deleteAll')" @click="handleBulkDelete" />
           </div>
 
           <!-- Main header controls -->
@@ -383,12 +466,7 @@ const toggleAdvancedFilters = () => {
             <ButtonWithIcon variant="flat" color="primary-500" height="40" rounded="4"
               custom-class="px-7 font-semibold text-base text-white border !border-primary-200"
               :prepend-icon="searchIcon" :label="t('common.advancedSearch')" @click="toggleAdvancedFilters" />
-
-            <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4"
-              custom-class="px-7 font-semibold text-base !text-primary-800 border !border-primary-200"
-              :prepend-icon="plusIcon" label="أضف مقاول" @click="openCreateContractors" />
           </div>
-
         </div>
 
         <!-- Advanced filters row -->
@@ -403,12 +481,14 @@ const toggleAdvancedFilters = () => {
               placeholder="الرقم الضريبي" class="w-full sm:w-40 bg-white" @keyup.enter="applyFilters" />
             <v-text-field v-model="filterLicenseNumber" density="comfortable" variant="outlined" hide-details
               placeholder="رقم رخصة البلدية" class="w-full sm:w-40 bg-white" @keyup.enter="applyFilters" />
-            <v-select v-model="filterContractorGrade" :items="[]" density="comfortable" variant="outlined" hide-details
-              placeholder="درجة المقاول" class="w-full sm:w-40 bg-white" @update:model-value="applyFilters" />
-            <v-select v-model="filterClassification" :items="[]" density="comfortable" variant="outlined" hide-details
-              placeholder="التصنيف" class="w-full sm:w-40 bg-white" @update:model-value="applyFilters" />
-            <v-select v-model="filterStatus" :items="['فعال', 'غير فعال']" density="comfortable" variant="outlined"
-              hide-details placeholder="الحالة" class="w-full sm:w-40 bg-white" @update:model-value="applyFilters" />
+            <v-select v-model="filterContractorGrade" :items="classificationGradeItems" density="comfortable"
+              variant="outlined" hide-details placeholder="درجة المقاول" class="w-full sm:w-40 bg-white"
+              @update:model-value="applyFilters" />
+            <v-select v-model="filterClassification" :items="contractorClassificationItems" density="comfortable"
+              variant="outlined" hide-details placeholder="التصنيف" class="w-full sm:w-40 bg-white"
+              @update:model-value="applyFilters" />
+            <v-select v-model="filterStatus" :items="statusItems" density="comfortable" variant="outlined" hide-details
+              placeholder="الحالة" class="w-full sm:w-40 bg-white" @update:model-value="applyFilters" />
 
             <div class="flex gap-2 items-center">
               <ButtonWithIcon variant="flat" color="primary-500" rounded="4" height="40"
@@ -416,39 +496,49 @@ const toggleAdvancedFilters = () => {
                 label="ابحث" @click="applyFilters" />
               <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4" border="sm"
                 custom-class="px-5 font-semibold text-sm sm:text-base !text-primary-800 !border-primary-200"
-                prepend-icon="mdi-refresh" label="إعادة تعيين" />
+                prepend-icon="mdi-refresh" label="إعادة تعيين" @click="resetFilters" />
             </div>
           </div>
         </div>
 
         <!-- Contractors Table -->
-        <DataTable :headers="tableHeaders" :items="tableItems" :loading="loading" show-checkbox show-actions
-          @edit="handleEdit" @delete="handleDelete" @select="handleSelectContractor"
+        <DataTable :headers="tableHeaders" :items="tableItems" :loading="loading" :show-view="false" show-checkbox
+          show-actions @edit="handleEdit" @delete="confirmDelete" @select="handleSelectContractor"
           @selectAll="handleSelectAllContractors">
-          <template #item.status="{ item }">
-            <v-switch :model-value="item.status" hide-details inset density="compact" class="small-switch" color="primary-600"
-              @click="handleStatusChange(item)" />
+          <template #item.is_active="{ item }">
+            <v-switch :model-value="item.status" hide-details inset density="compact"
+              @update:model-value="() => handleStatusChange(item)" class="small-switch" color="primary-600" />
           </template>
+          <template #item.projects="{ item }">
+            <div class="flex flex-col gap-2 items-start">
+              <v-chip color="success" variant="tonal" size="small" class="px-4">
+                {{ item.projects.completed }}
+              </v-chip>
+              <v-chip color="info" variant="tonal" size="small" class="px-4">
+                {{ item.projects.ongoing }}
+              </v-chip>
+            </div>
+          </template>
+
         </DataTable>
 
         <!-- Infinite Scroll Trigger & Loading Indicator -->
         <div ref="observerTarget" class="flex justify-center py-4">
           <v-progress-circular v-if="loading && tableItems.length > 0" indeterminate color="primary" size="32" />
-          <span v-else-if="!hasMoreData && tableItems.length > 0" class="text-gray-500 text-sm">
-            لا توجد المزيد من البيانات
-          </span>
         </div>
       </div>
 
     </div>
 
-    <!-- Delete Confirmation Dialog -->
-    <DeleteConfirmDialog v-model="showDeleteDialog" :loading="false" :item-name="''" title="حذف المقاول"
-      message="هل أنت متأكد من حذف المقاول" @confirm="confirmDelete" />
+    <!-- Bulk Delete Confirmation Dialog -->
+    <DeleteConfirmDialog v-model="showBulkDeleteDialog" :loading="deleteLoading" title="حذف المقاولين"
+      :message="`هل أنت متأكد من حذف ${selectedContractors.length} مقاول؟`" @confirm="confirmBulkDelete" />
 
     <!-- Status Change Confirmation Dialog -->
-    <DeleteConfirmDialog v-model="showStatusDialog" :loading="false" title="تغيير الحالة"
-      message="هل أنت متأكد من تغيير حالة المقاول؟" @confirm="confirmStatusChange" />
+    <StatusChangeDialog v-model="showStatusChangeDialog" :loading="statusChangeLoading"
+      :item-name="itemToChangeStatus?.trade_name" :current-status="itemToChangeStatus?.status || false"
+      @confirm="confirmStatusChange" />
+
   </default-layout>
 </template>
 

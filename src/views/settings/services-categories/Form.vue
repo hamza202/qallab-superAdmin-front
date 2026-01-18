@@ -1,12 +1,10 @@
 <script setup lang="ts">
-import { useNotification } from '@/composables/useNotification';
 import { useApi } from '@/composables/useApi';
 import { useRoute } from 'vue-router';
 import { useRouter } from "vue-router";
 
 const router = useRouter();
 const route = useRoute();
-const { notification, success, error: showError } = useNotification();
 const api = useApi();
 
 const formErrors = reactive<Record<string, string>>({});
@@ -204,7 +202,7 @@ const fetchConstants = async () => {
     ];
   } catch (error) {
     console.error('Failed to fetch constants:', error);
-    showError('حدث خطأ أثناء تحميل البيانات');
+    toast.error('Failed to fetch constants');
   }
 };
 
@@ -225,7 +223,7 @@ const fetchTaxs = async () => {
     ];
   } catch (error) {
     console.error('Failed to fetch constants:', error);
-    showError('حدث خطأ أثناء تحميل البيانات');
+    toast.error('Failed to fetch taxes');
   }
 };
 
@@ -244,7 +242,7 @@ const fetchCategories = async () => {
     ];
   } catch (error) {
     console.error('Failed to fetch categories:', error);
-    showError('حدث خطأ أثناء تحميل البيانات');
+    toast.error('Failed to fetch categories');
   }
 };
 
@@ -262,7 +260,7 @@ const fetchUnits = async () => {
     ];
   } catch (error) {
     console.error('Failed to fetch categories:', error);
-    showError('حدث خطأ أثناء تحميل البيانات');
+    toast.error('حدث خطأ أثناء تحميل البيانات');
   }
 };
 
@@ -298,7 +296,7 @@ const fetchCategoryDetails = async (id: number) => {
     }
   } catch (error) {
     console.error('Failed to fetch category details:', error);
-    showError('حدث خطأ أثناء تحميل بيانات التصنيف');
+    toast.error('حدث خطأ أثناء تحميل بيانات التصنيف');
   } finally {
     isLoading.value = false;
   }
@@ -377,7 +375,7 @@ const handleSave = async () => {
       } else {
         await api.put(`/service-categories/${categoryId.value}`, payload);
       }
-      success('تم تحديث التصنيف بنجاح');
+      toast.success('تم تحديث التصنيف بنجاح');
     } else {
       // Create new category
       // If image exists, use FormData
@@ -404,7 +402,7 @@ const handleSave = async () => {
       } else {
         await api.post('/service-categories', payload);
       }
-      success('تم إضافة التصنيف بنجاح');
+      toast.success('تم إضافة التصنيف بنجاح');
     }
 
     // Reset form and redirect or close
@@ -422,9 +420,9 @@ const handleSave = async () => {
       Object.keys(apiErrors).forEach(key => {
         formErrors[key] = apiErrors[key][0];
       });
-      showError(err?.response?.data?.message || 'يرجى تصحيح الأخطاء في النموذج');
+      toast.error(err?.response?.data?.message || 'يرجى تصحيح الأخطاء في النموذج');
     } else {
-      showError('حدث خطأ أثناء حفظ التصنيف');
+      toast.error('حدث خطأ أثناء حفظ التصنيف');
     }
   } finally {
     isSaving.value = false;
@@ -447,11 +445,11 @@ const handleDeleteConfirm = async () => {
   deleteLoading.value = true;
   try {
     await api.delete(`/service-categories/${categoryId.value}`);
-    success('تم حذف التصنيف بنجاح');
+    toast.success('تم حذف التصنيف بنجاح');
     returnToList();
   } catch (error) {
     console.error('Failed to delete category:', error);
-    showError('حدث خطأ أثناء حذف التصنيف');
+    toast.error('حدث خطأ أثناء حذف التصنيف');
   } finally {
     deleteLoading.value = false;
     showDeleteDialog.value = false;
@@ -724,15 +722,6 @@ const saveIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xm
     <DeleteConfirmDialog v-model="showDeleteDialog" :loading="deleteLoading" :persistent="true" @confirm="handleDeleteConfirm"
       @cancel="handleDeleteCancel" @close="handleDeleteCancel" />
 
-    <!-- Notification Snackbar -->
-    <v-snackbar v-model="notification.show" :timeout="notification.timeout"
-      :color="notification.type === 'success' ? 'success' : notification.type === 'error' ? 'error' : notification.type === 'warning' ? 'warning' : 'info'"
-      location="top end">
-      {{ notification.message }}
-      <template #actions>
-        <ButtonWithIcon variant="text" label="إغلاق" @click="notification.show = false" />
-      </template>
-    </v-snackbar>
   </default-layout>
 </template>
 

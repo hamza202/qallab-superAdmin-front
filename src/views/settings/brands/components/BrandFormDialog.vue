@@ -1,10 +1,8 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from "vue";
 import { useApi } from "@/composables/useApi";
-import { useNotification } from "@/composables/useNotification";
 
 const api = useApi();
-const { success, error: showError } = useNotification();
 
 const formErrors = reactive<Record<string, string>>({});
 
@@ -62,7 +60,7 @@ const fetchBrandData = async (brandId: number) => {
     form.status = Boolean(brand.is_active);
   } catch (err: any) {
     console.error('Error fetching brand details:', err);
-    showError(err?.response?.data?.message || 'Failed to fetch brand details');
+    toast.error(err?.response?.data?.message || 'Failed to fetch brand details');
     internalOpen.value = false;
   } finally {
     loadingBrandData.value = false;
@@ -112,10 +110,10 @@ const handleSave = async () => {
       formData.append('is_active', form.status ? '1' : '0');
 
       await api.post(`/brands/${form.id}`, formData);
-      success('تم تحديث العلامة التجارية بنجاح');
+      toast.success('تم تحديث العلامة التجارية بنجاح');
     } else {
       await api.post('/brands', payload);
-      success('تم إضافة العلامة التجارية بنجاح');
+      toast.success('تم إضافة العلامة التجارية بنجاح');
     }
 
     emit('saved');
@@ -130,9 +128,9 @@ const handleSave = async () => {
       Object.keys(apiErrors).forEach(key => {
         formErrors[key] = apiErrors[key][0];
       });
-      showError(err?.response?.data?.message || 'يرجى تصحيح الأخطاء في النموذج');
+      toast.error(err?.response?.data?.message || 'يرجى تصحيح الأخطاء في النموذج');
     } else {
-      showError(err?.response?.data?.message || 'Failed to save brand');
+      toast.error(err?.response?.data?.message || 'Failed to save brand');
     }
   } finally {
     saving.value = false;

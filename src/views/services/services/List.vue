@@ -2,13 +2,11 @@
 import { ref, computed, onMounted, nextTick, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { useApi } from '@/composables/useApi'
-import { useNotification } from '@/composables/useNotification'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
 const router = useRouter()
 const api = useApi()
-const { success, error } = useNotification()
 
 // TypeScript Interfaces
 interface ServiceAction {
@@ -232,7 +230,7 @@ const fetchServices = async (append = false) => {
     perPage.value = response.pagination.per_page
   } catch (err: any) {
     console.error('Error fetching services:', err)
-    error(err?.response?.data?.message || 'فشل في جلب الخدمات')
+    toast.error(err?.response?.data?.message || 'فشل في جلب الخدمات')
   } finally {
     loading.value = false
     loadingMore.value = false
@@ -292,7 +290,7 @@ const updateHeadersOnServer = async () => {
     await api.post('/headers', formData)
   } catch (err: any) {
     console.error('Error updating headers:', err)
-    error(err?.response?.data?.message || 'Failed to update headers')
+    toast.error(err?.response?.data?.message || 'Failed to update headers')
   } finally {
     updatingHeaders.value = false
   }
@@ -324,7 +322,7 @@ const confirmStatusChange = async () => {
       status: newStatus
     })
 
-    success(`تم ${newStatus ? 'تفعيل' : 'تعطيل'} الخدمة بنجاح`)
+    toast.success(`تم ${newStatus ? 'تفعيل' : 'تعطيل'} الخدمة بنجاح`)
 
     // Update local state
     const index = tableItems.value.findIndex(t => t.id === itemToChangeStatus.value!.id);
@@ -333,7 +331,7 @@ const confirmStatusChange = async () => {
     }
   } catch (err: any) {
     console.error('Error changing service status:', err)
-    error(err?.response?.data?.message || 'فشل تغيير حالة الخدمة')
+    toast.error(err?.response?.data?.message || 'فشل تغيير حالة الخدمة')
   } finally {
     statusChangeLoading.value = false
     showStatusChangeDialog.value = false
@@ -345,12 +343,12 @@ const confirmDelete = async (item: any) => {
   try {
     deleteLoading.value = true
     await api.delete(`/services/${item.id}`)
-    success('تم حذف الخدمة بنجاح')
+    toast.success('تم حذف الخدمة بنجاح')
     await fetchServices()
     itemToDelete.value = null
   } catch (err: any) {
     console.error('Error deleting service:', err)
-    error(err?.response?.data?.message || 'فشل في حذف الخدمة')
+    toast.error(err?.response?.data?.message || 'فشل في حذف الخدمة')
   } finally {
     deleteLoading.value = false
     showDeleteDialog.value = false
@@ -366,12 +364,12 @@ const confirmBulkDelete = async () => {
   try {
     deleteLoading.value = true
     await api.post('/services/bulk-delete', { ids: selectedRows.value })
-    success(`تم حذف ${selectedRows.value.length} خدمة بنجاح`)
+    toast.success(`تم حذف ${selectedRows.value.length} خدمة بنجاح`)
     selectedRows.value = []
     await fetchServices()
   } catch (err: any) {
     console.error('Error bulk deleting services:', err)
-    error(err?.response?.data?.message || 'فشل في حذف الخدمات')
+    toast.error(err?.response?.data?.message || 'فشل في حذف الخدمات')
   } finally {
     deleteLoading.value = false
     showBulkDeleteDialog.value = false

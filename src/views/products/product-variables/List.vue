@@ -111,12 +111,10 @@ import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import DatePickerInput from '@/components/common/forms/DatePickerInput.vue';
 import { useApi } from '@/composables/useApi'
-import { useNotification } from '@/composables/useNotification'
 
 const router = useRouter()
 const { t } = useI18n()
 const api = useApi()
-const { success, error } = useNotification()
 
 // Loading states
 const loading = ref(false)
@@ -284,11 +282,11 @@ const confirmDelete = async (item: any) => {
   try {
     deleteLoading.value = true
     await api.delete(`/aspects/${item.id}`)
-    success('تم حذف المتغير بنجاح')
+    toast.success('تم حذف المتغير بنجاح')
     await fetchAspects()
   } catch (err: any) {
     console.error('Error deleting aspect:', err)
-    error(err?.response?.data?.message || 'فشل حذف المتغير')
+    toast.error(err?.response?.data?.message || 'فشل حذف المتغير')
   } finally {
     deleteLoading.value = false
     showDeleteDialog.value = false
@@ -305,12 +303,12 @@ const confirmBulkDelete = async () => {
   try {
     deleteLoading.value = true
     await api.post('/aspects/bulk-delete', { ids: selectedRows.value })
-    success(`تم حذف ${selectedRows.value.length} متغير بنجاح`)
+    toast.success(`تم حذف ${selectedRows.value.length} متغير بنجاح`)
     selectedRows.value = []
     await fetchAspects()
   } catch (err: any) {
     console.error('Error bulk deleting aspects:', err)
-    error(err?.response?.data?.message || 'فشل حذف المتغيرات')
+    toast.error(err?.response?.data?.message || 'فشل حذف المتغيرات')
   } finally {
     deleteLoading.value = false
     showBulkDeleteDialog.value = false
@@ -345,7 +343,7 @@ const confirmStatusChange = async () => {
       status: newStatus
     })
 
-    success(`تم ${newStatus ? 'تفعيل' : 'تعطيل'} المتغير بنجاح`)
+    toast.success(`تم ${newStatus ? 'تفعيل' : 'تعطيل'} المتغير بنجاح`)
 
     // Update local state
     const index = tableItems.value.findIndex(t => t.id === itemToChangeStatus.value!.id)
@@ -354,7 +352,7 @@ const confirmStatusChange = async () => {
     }
   } catch (err: any) {
     console.error('Error changing aspect status:', err)
-    error(err?.response?.data?.message || 'فشل تغيير حالة المتغير')
+    toast.error(err?.response?.data?.message || 'فشل تغيير حالة المتغير')
   } finally {
     statusChangeLoading.value = false
     showStatusChangeDialog.value = false
@@ -413,7 +411,7 @@ const fetchAspects = async (append = false) => {
     perPage.value = response.pagination.per_page
   } catch (err: any) {
     console.error('Error fetching aspects:', err)
-    error(err?.response?.data?.message || 'فشل تحميل البيانات')
+    toast.error(err?.response?.data?.message || 'فشل تحميل البيانات')
   } finally {
     loading.value = false
     loadingMore.value = false
@@ -469,7 +467,7 @@ const updateHeadersOnServer = async () => {
     await api.post('/headers', formData)
   } catch (err: any) {
     console.error('Error updating headers:', err)
-    error(err?.response?.data?.message || 'Failed to update headers')
+    toast.error(err?.response?.data?.message || 'Failed to update headers')
   } finally {
     updatingHeaders.value = false
   }

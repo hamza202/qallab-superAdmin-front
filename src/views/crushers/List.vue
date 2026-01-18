@@ -2,13 +2,11 @@
 import { ref, computed, onMounted, nextTick, onBeforeUnmount } from "vue";
 import { useRouter } from "vue-router";
 import { useApi } from "@/composables/useApi";
-import { useNotification } from "@/composables/useNotification";
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
 const router = useRouter();
 const api = useApi();
-const { success, error } = useNotification();
 
 interface CrusherAction {
     can_update: boolean;
@@ -54,6 +52,7 @@ interface CrushersResponse {
     pagination: Pagination;
     headers: TableHeader[];
     shownHeaders: TableHeader[];
+    header_table: string;
     actions: {
         can_create: boolean;
     };
@@ -129,6 +128,7 @@ const shownHeaders = ref<TableHeader[]>([]);
 const canCreate = ref(false);
 const loading = ref(false);
 const loadingMore = ref(false);
+const header_table = ref('')
 
 const nextCursor = ref<string | null>(null);
 const previousCursor = ref<string | null>(null);
@@ -147,32 +147,22 @@ const selectedCrushers = ref<number[]>([]);
 const hasSelectedCrushers = computed(() => selectedCrushers.value.length > 0);
 
 const showAdvancedFilters = ref(false);
-const filterBusinessName = ref("");
-const filterOwnerName = ref("");
-const filterBuisnessNumber = ref("");
-const filterTaxNumber = ref("");
-const filterLicenseNumber = ref("");
+const filterProductionLines = ref("");
 const filterCrusherType = ref<string | null>(null);
-const filterCity = ref<string | null>(null);
-const filterStatus = ref<string | null>(null);
-const filterLicenseIssueDate = ref("");
-const filterLicenseExpiryDate = ref("");
-const filterProductionFrom = ref("");
-const filterProductionTo = ref("");
 const filterMaxProductionFrom = ref("");
 const filterMaxProductionTo = ref("");
+const filterCurrentProductionFrom = ref("");
+const filterCurrentProductionTo = ref("");
 
-const cityItems = ["الرياض", "جدة", "الطائف", "مكة", "المدينة"];
-const crusherTypeItems = ["صلبة", "متنقلة", "ثابتة"];
+const crusherTypeItems = ref<Array<{ title: string; value: string }>>([]);
+const loadingConstants = ref(false);
 
 const toggleAdvancedFilters = () => {
     showAdvancedFilters.value = !showAdvancedFilters.value;
 };
 
-const showDeleteDialog = ref(false);
 const showBulkDeleteDialog = ref(false);
 const deleteLoading = ref(false);
-const itemToDelete = ref<Crusher | null>(null);
 
 const showStatusChangeDialog = ref(false);
 const statusChangeLoading = ref(false);
@@ -202,16 +192,12 @@ const fetchCrushers = async (cursor?: string | null, append = false) => {
             cursor: cursor || undefined,
         };
 
-        if (filterBusinessName.value) filters.business_name = filterBusinessName.value;
-        if (filterOwnerName.value) filters.owner_name = filterOwnerName.value;
-        if (filterBuisnessNumber.value) filters.buisness_number = filterBuisnessNumber.value;
-        if (filterTaxNumber.value) filters.tax_number = filterTaxNumber.value;
-        if (filterLicenseNumber.value) filters.license_number = filterLicenseNumber.value;
-        if (filterCity.value) filters.city_id = filterCity.value;
+        if (filterProductionLines.value) filters.production_lines = filterProductionLines.value;
         if (filterCrusherType.value) filters.crusher_type = filterCrusherType.value;
-        if (filterStatus.value) filters.status = filterStatus.value;
-        if (filterLicenseIssueDate.value) filters.license_issue_date = filterLicenseIssueDate.value;
-        if (filterLicenseExpiryDate.value) filters.license_expiry_date = filterLicenseExpiryDate.value;
+        if (filterMaxProductionFrom.value) filters.max_production_from = filterMaxProductionFrom.value;
+        if (filterMaxProductionTo.value) filters.max_production_to = filterMaxProductionTo.value;
+        if (filterCurrentProductionFrom.value) filters.current_production_from = filterCurrentProductionFrom.value;
+        if (filterCurrentProductionTo.value) filters.current_production_to = filterCurrentProductionTo.value;
 
         const params = new URLSearchParams();
         Object.entries(filters).forEach(([key, value]) => {
@@ -221,7 +207,7 @@ const fetchCrushers = async (cursor?: string | null, append = false) => {
         });
 
         const queryString = params.toString();
-        const url = queryString ? `/admin/api/crushers?${queryString}` : '/admin/api/crushers';
+        const url = queryString ? `/crushers?${queryString}` : '/crushers';
 
         const response = await api.get<CrushersResponse>(url);
 
@@ -229,9 +215,10 @@ const fetchCrushers = async (cursor?: string | null, append = false) => {
             tableItems.value = [...tableItems.value, ...response.data];
         } else {
             tableItems.value = response.data;
-            allHeaders.value = response.headers;
-            shownHeaders.value = response.shownHeaders;
+            allHeaders.value = response.headers.filter(h => h.key !== 'id' && h.key !== 'actions')
+            shownHeaders.value = response.shownHeaders.filter(h => h.key !== 'id' && h.key !== 'actions')
             canCreate.value = response.actions.can_create;
+            header_table.value = response.header_table
         }
 
         nextCursor.value = response.pagination.next_cursor;
@@ -239,7 +226,7 @@ const fetchCrushers = async (cursor?: string | null, append = false) => {
         perPage.value = response.pagination.per_page;
     } catch (err: any) {
         console.error('Error fetching crushers:', err);
-        error(err?.response?.data?.message || 'Failed to fetch crushers');
+        toast.error(err?.response?.data?.message || 'Failed to fetch crushers');
     } finally {
         loading.value = false;
         loadingMore.value = false;
@@ -253,6 +240,16 @@ const loadMore = () => {
 };
 
 const applyFilters = () => {
+    fetchCrushers();
+};
+
+const resetFilters = () => {
+    filterProductionLines.value = '';
+    filterCrusherType.value = null;
+    filterMaxProductionFrom.value = '';
+    filterMaxProductionTo.value = '';
+    filterCurrentProductionFrom.value = '';
+    filterCurrentProductionTo.value = '';
     fetchCrushers();
 };
 
@@ -277,19 +274,19 @@ const updateHeadersOnServer = async () => {
         const headerKeys = shownHeaders.value.map(h => h.key);
 
         const formData = new FormData();
-        formData.append('table', 'crushers');
+        formData.append('table', header_table.value);
         headerKeys.forEach((header, index) => {
             formData.append(`header[${index}]`, header);
         });
 
-        await api.post('/admin/api/headers', formData, {
+        await api.post('/headers', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
         });
     } catch (err: any) {
         console.error('Error updating headers:', err);
-        error(err?.response?.data?.message || 'Failed to update headers');
+        toast.error(err?.response?.data?.message || 'Failed to update headers');
     } finally {
         updatingHeaders.value = false;
     }
@@ -299,15 +296,11 @@ const handleEdit = (item: any) => {
     router.push({ name: "CrushersEdit", params: { id: item.id } });
 };
 
-const handleDelete = (item: any) => {
-    itemToDelete.value = item;
-    showDeleteDialog.value = true;
-};
-
 const handleStatusChange = (item: any) => {
-    itemToChangeStatus.value = item;
-    showStatusChangeDialog.value = true;
-};
+    itemToChangeStatus.value = { ...item }
+    showStatusChangeDialog.value = true
+}
+
 
 const confirmStatusChange = async () => {
     if (!itemToChangeStatus.value) return;
@@ -316,43 +309,38 @@ const confirmStatusChange = async () => {
         statusChangeLoading.value = true;
         const newStatus = !itemToChangeStatus.value.status;
 
-        await api.patch(`/admin/api/crushers/${itemToChangeStatus.value.id}/change-status`, {
+        await api.patch(`/crushers/${itemToChangeStatus.value.id}/change-status`, {
             status: newStatus
         });
 
-        success(`تم ${newStatus ? 'تفعيل' : 'تعطيل'} الكسارة بنجاح`);
+        toast.success(`تم ${newStatus ? 'تفعيل' : 'تعطيل'} الكسارة بنجاح`);
 
-        const index = tableItems.value.findIndex(c => c.id === itemToChangeStatus.value!.id);
+        const index = tableItems.value.findIndex(t => t.id === itemToChangeStatus.value!.id)
         if (index !== -1) {
-            tableItems.value[index].status = newStatus;
-            tableItems.value[index].status_value = newStatus ? 'فعال' : 'غير فعال';
+            tableItems.value[index].status = newStatus
         }
 
-        itemToChangeStatus.value = null;
     } catch (err: any) {
         console.error('Error changing crusher status:', err);
-        error(err?.response?.data?.message || 'فشل تغيير حالة الكسارة');
+        toast.error(err?.response?.data?.message || 'فشل تغيير حالة الكسارة');
     } finally {
         statusChangeLoading.value = false;
         showStatusChangeDialog.value = false;
+        itemToChangeStatus.value = null;
     }
 };
 
-const confirmDelete = async () => {
-    if (!itemToDelete.value) return;
-
+const confirmDelete = async (item: any) => {
     try {
         deleteLoading.value = true;
-        await api.delete(`/admin/api/crushers/${itemToDelete.value.id}`);
-        success('تم حذف الكسارة بنجاح');
+        await api.delete(`/crushers/${item.id}`);
+        toast.success('تم حذف الكسارة بنجاح');
         await fetchCrushers();
-        itemToDelete.value = null;
     } catch (err: any) {
         console.error('Error deleting crusher:', err);
-        error(err?.response?.data?.message || 'Failed to delete crusher');
+        toast.error(err?.response?.data?.message || 'Failed to delete crusher');
     } finally {
         deleteLoading.value = false;
-        showDeleteDialog.value = false;
     }
 };
 
@@ -364,13 +352,13 @@ const handleBulkDelete = () => {
 const confirmBulkDelete = async () => {
     try {
         deleteLoading.value = true;
-        await api.post('/admin/api/crushers/bulk-delete', { ids: selectedCrushers.value });
-        success(`تم حذف ${selectedCrushers.value.length} كسارة بنجاح`);
+        await api.post('/crushers/bulk-delete', { ids: selectedCrushers.value });
+        toast.success(`تم حذف ${selectedCrushers.value.length} كسارة بنجاح`);
         selectedCrushers.value = [];
         await fetchCrushers();
     } catch (err: any) {
         console.error('Error bulk deleting crushers:', err);
-        error(err?.response?.data?.message || 'Failed to delete crushers');
+        toast.error(err?.response?.data?.message || 'Failed to delete crushers');
     } finally {
         deleteLoading.value = false;
         showBulkDeleteDialog.value = false;
@@ -393,8 +381,32 @@ const handleSelectAllCrushers = (checked: boolean) => {
     }
 };
 
-const openCreateCrusher = () => {
-    router.push({ name: "CrushersCreate" });
+
+const fetchConstants = async () => {
+    try {
+        loadingConstants.value = true;
+        const response = await api.get<{
+            status: number;
+            code: number;
+            locale: string;
+            message: string;
+            data: {
+                crusher_types: Array<{ key: string; label: string }>;
+            };
+        }>('/crushers/constants');
+
+        if (response.data && response.data.crusher_types) {
+            crusherTypeItems.value = response.data.crusher_types.map(ct => ({
+                title: ct.label,
+                value: ct.key
+            }));
+        }
+    } catch (err: any) {
+        console.error('Fetch constants error:', err);
+        toast.error(err?.response?.data?.message || 'فشل تحميل الثوابت');
+    } finally {
+        loadingConstants.value = false;
+    }
 };
 
 const loadMoreTrigger = ref<HTMLElement | null>(null);
@@ -427,8 +439,9 @@ const cleanupInfiniteScroll = () => {
     }
 };
 
-onMounted(() => {
-    fetchCrushers();
+onMounted(async () => {
+    fetchConstants();
+    await fetchCrushers();
     nextTick(() => {
         setupInfiniteScroll();
     });
@@ -464,11 +477,13 @@ onBeforeUnmount(() => {
                         class="flex flex-wrap items-stretch rounded overflow-hidden border border-gray-200 bg-white text-sm">
                         <ButtonWithIcon variant="flat" height="40" rounded="0"
                             custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-                            :prepend-icon="trash_1_icon" color="white" :label="t('common.delete')" @click="handleBulkDelete" />
+                            :prepend-icon="trash_1_icon" color="white" :label="t('common.delete')"
+                            @click="handleBulkDelete" />
                         <div class="w-px bg-gray-200"></div>
                         <ButtonWithIcon variant="flat" height="40" rounded="0"
                             custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-                            :prepend-icon="trash_2_icon" color="white" :label="t('common.deleteAll')" @click="handleBulkDelete" />
+                            :prepend-icon="trash_2_icon" color="white" :label="t('common.deleteAll')"
+                            @click="handleBulkDelete" />
                     </div>
 
 
@@ -499,9 +514,9 @@ onBeforeUnmount(() => {
                             :prepend-icon="searchIcon" :label="t('common.advancedSearch')"
                             @click="toggleAdvancedFilters" />
 
-                        <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4"
+                        <!-- <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4"
                             custom-class="px-7 font-semibold text-base !text-primary-800 border !border-primary-200"
-                            :prepend-icon="plusIcon" label="أضف كسارة" @click="openCreateCrusher" />
+                            :prepend-icon="plusIcon" label="أضف كسارة" @click="openCreateCrusher" /> -->
                     </div>
 
                 </div>
@@ -510,39 +525,42 @@ onBeforeUnmount(() => {
                 <div v-if="showAdvancedFilters"
                     class="border-y border-y-primary-100 bg-primary-50 px-4 sm:px-6 py-3 flex flex-col gap-3">
                     <div class="flex flex-wrap xl:!flex-nowrap gap-3 items-center">
-                        <TextInput v-model="filterCrusherType" :items="crusherTypeItems" density="comfortable"
-                            variant="outlined" hide-details placeholder="عدد خطوط الإنتاج"
-                            class="w-full sm:w-40 bg-white" />
+                        <div class="flex flex-wrap gap-3 flex-1">
+                            <!-- Production Lines -->
+                            <TextInput v-model="filterProductionLines" density="comfortable" variant="outlined"
+                                hide-details placeholder="عدد خطوط الإنتاج" type="number"
+                                class="w-full sm:w-40 bg-white" @update:model-value="applyFilters" />
 
-                        <SelectInput v-model="filterCrusherType" :items="crusherTypeItems" density="comfortable"
-                            variant="outlined" hide-details placeholder="نوع الفاتورة"
-                            class="w-full sm:w-40 bg-white" />
+                            <!-- Crusher Type -->
+                            <SelectInput v-model="filterCrusherType" :items="crusherTypeItems" item-title="title"
+                                item-value="value" density="comfortable" variant="outlined" hide-details
+                                placeholder="نوع الكسارة" class="w-full sm:w-40 bg-white" :loading="loadingConstants"
+                                @update:model-value="applyFilters" />
 
-                        <!-- Crusher Type -->
-                        <SelectInput v-model="filterCrusherType" :items="crusherTypeItems" density="comfortable"
-                            variant="outlined" hide-details placeholder="نوع الكسارة" class="w-full sm:w-40 bg-white" />
-
-                        <!-- Production Range From-To -->
-                        <div class="flex items-center gap-2">
-                            <span class="text-sm text-gray-700  w-full">حد الإنتاج الحالي من</span>
-                            <div class="flex items-center gap-2 bg-white rounded-lg border border-gray-300  py-2.5">
-                                <input v-model="filterProductionFrom" type="number" placeholder="24"
-                                    class="w-12 text-center text-gray-700 outline-none border-none bg-transparent no-spinner" />
-                                <span class="text-gray-400">-</span>
-                                <input v-model="filterProductionTo" type="number" placeholder="12"
-                                    class="w-12 text-center text-gray-700 outline-none border-none bg-transparent no-spinner" />
+                            <!-- Current Production Range From-To -->
+                            <div class="flex items-center gap-2">
+                                <span class="text-sm text-gray-700 w-full whitespace-nowrap">الإنتاج الحالي من</span>
+                                <div
+                                    class="flex items-center gap-2 bg-white rounded-lg border border-gray-300 py-2.5 px-2">
+                                    <input v-model="filterCurrentProductionFrom" type="number" placeholder="من"
+                                        class="w-16 text-center text-gray-700 outline-none border-none bg-transparent no-spinner" />
+                                    <span class="text-gray-400">-</span>
+                                    <input v-model="filterCurrentProductionTo" type="number" placeholder="إلى"
+                                        class="w-16 text-center text-gray-700 outline-none border-none bg-transparent no-spinner" />
+                                </div>
                             </div>
-                        </div>
 
-                        <!-- Max Production Range From-To -->
-                        <div class="flex items-center gap-2 ">
-                            <span class="text-sm text-gray-700  w-full">حد الإنتاج الأقصى من</span>
-                            <div class="flex items-center gap-2 bg-white rounded-lg border border-gray-300 py-2.5">
-                                <input v-model="filterMaxProductionFrom" type="number" placeholder="24"
-                                    class="w-12 text-center text-gray-700 outline-none border-none bg-transparent no-spinner" />
-                                <span class="text-gray-400">-</span>
-                                <input v-model="filterMaxProductionTo" type="number" placeholder="12"
-                                    class="w-12 text-center text-gray-700 outline-none border-none bg-transparent no-spinner" />
+                            <!-- Max Production Range From-To -->
+                            <div class="flex items-center gap-2">
+                                <span class="text-sm text-gray-700 w-full whitespace-nowrap">الإنتاج الأقصى من</span>
+                                <div
+                                    class="flex items-center gap-2 bg-white rounded-lg border border-gray-300 py-2.5 px-2">
+                                    <input v-model="filterMaxProductionFrom" type="number" placeholder="من"
+                                        class="w-16 text-center text-gray-700 outline-none border-none bg-transparent no-spinner" />
+                                    <span class="text-gray-400">-</span>
+                                    <input v-model="filterMaxProductionTo" type="number" placeholder="إلى"
+                                        class="w-16 text-center text-gray-700 outline-none border-none bg-transparent no-spinner" />
+                                </div>
                             </div>
                         </div>
 
@@ -554,36 +572,28 @@ onBeforeUnmount(() => {
 
                             <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4" border="sm"
                                 custom-class="px-5 font-semibold text-sm sm:text-base !text-primary-800 !border-primary-200"
-                                prepend-icon="mdi-refresh" label="إعادة تعيين" />
+                                prepend-icon="mdi-refresh" label="إعادة تعيين" @click="resetFilters" />
                         </div>
                     </div>
                 </div>
 
                 <!-- Crushers Table -->
-                <DataTable :headers="tableHeaders" :items="tableItems" :loading="loading" show-checkbox show-actions
-                    @edit="handleEdit" @delete="handleDelete" @select="handleSelectCrusher"
+                <DataTable :headers="tableHeaders" :items="tableItems" :loading="loading" :show-view="false"
+                    show-checkbox show-actions @edit="handleEdit" @delete="confirmDelete" @select="handleSelectCrusher"
                     @selectAll="handleSelectAllCrushers">
-                    <template #item.status="{ item }">
-                        <v-switch :model-value="item.status" hide-details inset density="compact" class="small-switch" color="primary-600"
-                            @click="handleStatusChange(item)" />
+                    <template #item.status_value="{ item }">
+                        <v-switch :model-value="item.status" hide-details inset density="compact"
+                            @update:model-value="() => handleStatusChange(item)" class="small-switch"
+                            color="primary-600" />
                     </template>
-
                 </DataTable>
 
                 <!-- Infinite Scroll Trigger & Loading Indicator -->
                 <div ref="loadMoreTrigger" class="flex justify-center py-4">
                     <v-progress-circular v-if="loadingMore" indeterminate color="primary" size="32" />
-                    <span v-else-if="!hasMoreData && tableItems.length > 0" class="text-gray-500 text-sm">
-                        لا توجد المزيد من البيانات
-                    </span>
                 </div>
             </div>
         </div>
-
-        <!-- Delete Confirmation Dialog -->
-        <DeleteConfirmDialog v-model="showDeleteDialog" :loading="deleteLoading"
-            :item-name="itemToDelete?.business_name" title="حذف الكسارة" message="هل أنت متأكد من حذف الكسارة"
-            @confirm="confirmDelete" />
 
         <!-- Bulk Delete Confirmation Dialog -->
         <DeleteConfirmDialog v-model="showBulkDeleteDialog" :loading="deleteLoading" title="حذف الكسارات"
