@@ -566,18 +566,8 @@ onBeforeUnmount(() => {
         <GroupedDataTable :headers="tableHeaders" :items="tableItems" :sub-item-headers="computedSubItemHeaders" 
           :loading="isLoading" show-checkbox show-actions
           @edit="handleEdit" @delete="handleDelete" @view="handleView" @select="handleSelect"
-          @selectAll="handleSelectAll" @toggleSubItem="handleSubItemStatusChange">
-          <!-- Slot for status column -->
-          <template #item.status="{ item }">
-            <v-switch :model-value="item.status" hide-details inset density="compact" color="primary"
-              class="small-switch" @update:model-value="() => handleStatusChange(item)" />
-          </template>
-          <!-- Slot for is_active column (API may use this key) -->
-          <template #item.is_active="{ item }">
-            <v-switch :model-value="item.status ?? item.is_active" hide-details inset density="compact" color="primary"
-              class="small-switch" @update:model-value="() => handleStatusChange(item)" />
-          </template>
-        </GroupedDataTable>
+          @selectAll="handleSelectAll" @toggleStatus="handleStatusChange" @toggleSubItem="handleSubItemStatusChange" />
+
 
         <!-- Infinite scroll trigger -->
         <div ref="loadMoreTrigger" class="h-4"></div>

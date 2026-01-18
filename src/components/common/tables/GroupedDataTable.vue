@@ -49,6 +49,7 @@ const emit = defineEmits<{
   (e: 'view', item: TableItem | SubItem, isSubItem?: boolean): void
   (e: 'select', item: TableItem, selected: boolean): void
   (e: 'selectAll', selected: boolean): void
+  (e: 'toggleStatus', item: TableItem): void
   (e: 'toggleSubItem', item: SubItem): void
 }>()
 
@@ -104,6 +105,10 @@ const handleView = (item: TableItem | SubItem, isSubItem = false) => {
 
 const handleDelete = (item: TableItem | SubItem, isSubItem = false) => {
   emit('delete', item, isSubItem)
+}
+
+const handleToggleStatus = (item: TableItem) => {
+  emit('toggleStatus', item)
 }
 
 const handleToggleSubItem = (subItem: SubItem) => {
@@ -215,17 +220,17 @@ const eyeIcon = `<svg width="22" height="16" viewBox="0 0 22 16" fill="none" xml
                 <span class="text-sm font-medium text-gray-900">{{ item[header.key] }}</span>
               </template>
 
-              <!-- Status Switch -->
-              <template v-else-if="header.key === 'status'">
+              <!-- Status Switch (supports both 'status' and 'is_active' keys) -->
+              <template v-else-if="header.key === 'status' || header.key === 'is_active'">
                 <div class="flex">
                   <v-switch
-                    :model-value="isStatusActive(item[header.key])"
+                    :model-value="isStatusActive(item.status ?? item[header.key])"
                     hide-details
                     inset
                     density="compact"
                     color="primary"
-                    readonly
                     class="small-switch"
+                    @update:model-value="handleToggleStatus(item)"
                   />
                 </div>
               </template>
