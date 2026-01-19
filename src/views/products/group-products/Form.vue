@@ -879,8 +879,11 @@ const buildStep1Data = () => {
     // Only include id in edit mode (when item has a real backend id, not local generated)
     if (isEditMode.value && item.backendId) {
       formData.append(`sub_items[${index}][id]`, String(item.backendId));
+    } else {
+      formData.append(`sub_items[${index}][id]`,"");
     }
-    formData.append(`sub_items[${index}][name]`, item.name || "");
+    // Always send the name from the table item
+    formData.append(`sub_items[${index}][name]`, String(item.name || ''));
     formData.append(`sub_items[${index}][purchase_price]`, String(item.purchasePrice || 0));
     formData.append(`sub_items[${index}][sell_price]`, String(item.salePrice || 0));
   });
