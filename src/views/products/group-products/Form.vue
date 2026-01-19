@@ -235,6 +235,8 @@ interface Aspect {
 
 const aspects = ref<Aspect[]>([]);
 const selectedAspects = ref<Record<number, (string | number)[]>>({});
+// Store aspect_value_ids loaded from API (for edit mode)
+const savedAspectValueIds = ref<(string | number)[]>([]);
 
 // Fetch aspects from API
 const fetchAspects = async () => {
@@ -862,12 +864,17 @@ const buildStep1Data = () => {
   if (profitMargin.value) formData.append("profit_margin", profitMargin.value);
   
   // Collect all aspect_value_ids from selectedAspects
-  const allAspectValueIds: (string | number)[] = [];
+  let allAspectValueIds: (string | number)[] = [];
   Object.values(selectedAspects.value).forEach(values => {
     if (Array.isArray(values)) {
       values.forEach(val => allAspectValueIds.push(val));
     }
   });
+  
+  // In edit mode, if no new aspects selected, use the saved ones from API
+  if (allAspectValueIds.length === 0 && savedAspectValueIds.value.length > 0) {
+    allAspectValueIds = [...savedAspectValueIds.value];
+  }
   
   // Add aspect_value_ids with array notation
   allAspectValueIds.forEach((id, index) => {
@@ -931,11 +938,11 @@ const handleSaveAndReturn = async () => {
       const response = await api.post<CreateItemResponse>(endpoint, formData);
       
       if (response.status === 200) {
-        // Store the item_id and code if creating new
-        if (!productItemId.value && response.data.item_id) {
+        // Store the item_id and code if creating new (only when data is returned)
+        if (!productItemId.value && response.data?.item_id) {
           productItemId.value = response.data.item_id;
         }
-        if (response.data.code) {
+        if (response.data?.code) {
           productCode.value = response.data.code;
         }
         isStep1Completed.value = true;
@@ -987,11 +994,11 @@ const handleSaveAndContinue = async () => {
       const response = await api.post<CreateItemResponse>(endpoint, formData);
       
       if (response.status === 200) {
-        // Store the item_id and code if creating new
-        if (!productItemId.value && response.data.item_id) {
+        // Store the item_id and code if creating new (only when data is returned)
+        if (!productItemId.value && response.data?.item_id) {
           productItemId.value = response.data.item_id;
         }
-        if (response.data.code) {
+        if (response.data?.code) {
           productCode.value = response.data.code;
         }
         isStep1Completed.value = true;
@@ -1310,6 +1317,11 @@ const fetchProduct = async (id: number) => {
       discountType.value = data.discount_type ? Number(data.discount_type) : null;
       discountValue.value = data.discount_value;
       profitMargin.value = data.profit_margin;
+
+      // Load aspect_value_ids for edit mode
+      if (Array.isArray(data.aspect_value_ids)) {
+        savedAspectValueIds.value = data.aspect_value_ids.map((id: any) => String(id));
+      }
 
       // Relations
       originCountry.value = data.country_of_origin_id;
