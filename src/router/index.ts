@@ -15,8 +15,7 @@ import { projectsRoutes } from "./modules/projects.routes";
 import { authRoutes } from "./modules/auth.routes";
 import { errorRoutes } from "./modules/errors.routes";
 import { servicesRoutes } from "./modules/services.routes";
-import { crushersRoutes } from "./modules/crushers.routes";
-import { contractorsRoutes } from "./modules/contractors.routes";
+import { usersRoutes } from "./modules/users.routes";
 import { financeRoutes } from "./modules/finance.routes";
 
 // Auth check helper
@@ -35,8 +34,7 @@ const routes: RouteRecordRaw[] = [
   ...suppliersRoutes,
   ...customersRoutes,
   ...projectsRoutes,
-  ...crushersRoutes,
-  ...contractorsRoutes,
+  ...usersRoutes,
   ...errorRoutes,
   ...servicesRoutes,
   ...financeRoutes,

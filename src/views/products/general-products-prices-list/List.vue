@@ -1,16 +1,111 @@
-<script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { useApi } from '@/composables/useApi'
-import { useNotification } from '@/composables/useNotification'
-import { useI18n } from 'vue-i18n'
-import DatePickerInput from '@/components/common/forms/DatePickerInput.vue';
+<template>
+  <default-layout>
+    <div class="price-lists-page">
+      <PageHeader :icon="priceListsIcon" title-key="pages.GeneralProductsPriceLists.title"
+        description-key="pages.GeneralProductsPriceLists.description" />
 
-const { t } = useI18n()
+      <div
+        class="flex justify-end items-stretch rounded border border-gray-300 w-fit ms-auto mb-4 overflow-hidden bg-white text-sm">
+        <ButtonWithIcon variant="flat" height="40" rounded="0"
+          custom-class="font-semibold text-base border-gray-300 bg-primary-100 !text-primary-900"
+          :prepend-icon="importIcon" :label="t('common.import')" />
+        <ButtonWithIcon variant="flat" height="40" rounded="0"
+          custom-class="font-semibold text-base border-gray-300 bg-primary-50 !text-primary-900"
+          :prepend-icon="exportIcon" :label="t('common.export')" />
+      </div>
+
+      <div class="bg-gray-50 rounded-md -mx-6">
+        <div class="flex flex-wrap items-center justify-end gap-3 border-y border-y-slate-300 px-4 sm:!px-6 py-3">
+          <!-- Main header controls -->
+          <div class="flex flex-wrap gap-3">
+            <v-menu v-model="showHeadersMenu" :close-on-content-click="false">
+              <template v-slot:activator="{ props }">
+                <ButtonWithIcon v-bind="props" variant="outlined" rounded="4" color="gray-500" height="40"
+                  custom-class="font-semibold text-base border-gray-400" :prepend-icon="columnIcon"
+                  :label="t('common.columns')" append-icon="mdi-chevron-down" />
+              </template>
+              <v-list>
+                <v-list-item v-for="header in allHeaders" :key="header.key" @click="toggleHeader(header.key)">
+                  <template v-slot:prepend>
+                    <v-checkbox-btn :model-value="headerCheckStates[header.key]" :disabled="updatingHeaders"
+                      @click.stop="toggleHeader(header.key)"></v-checkbox-btn>
+                  </template>
+                  <v-list-item-title>{{ header.title }}</v-list-item-title>
+                </v-list-item>
+              </v-list>
+            </v-menu>
+
+            <ButtonWithIcon variant="flat" color="primary-500" height="40" rounded="4"
+              custom-class="px-7 font-semibold text-base text-white border !border-primary-200"
+              :prepend-icon="searchIcon" :label="t('common.advancedSearch')" @click="toggleAdvancedFilters" />
+          </div>
+        </div>
+
+        <!-- Advanced filters row -->
+        <div v-if="showAdvancedFilters"
+          class="border-y border-y-primary-100 bg-primary-50 px-4 sm:px-6 py-3 flex flex-col gap-3 sm:gap-2">
+          <div class="flex flex-wrap gap-3 flex-1">
+            <SelectInput v-model="filterStatus" :items="StatusList" item-title="title" item-value="value"
+              density="comfortable" variant="outlined" hide-details placeholder="الحالة" class="flex-1 bg-white"
+              @update:model-value="applyFilters" />
+            <TextInput v-model="filterListName" density="comfortable" variant="outlined" hide-details
+              placeholder="اسم القائمة" class="flex-1 bg-white" @keyup.enter="applyFilters" />
+            <DatePickerInput v-model="filterCreatedAt" density="comfortable" hide-details placeholder="تاريخ الانشاء"
+              class="flex-1 bg-white" @update:model-value="applyFilters" />
+            <div class="flex gap-2 items-center">
+              <ButtonWithIcon variant="flat" color="primary-500" rounded="4" height="40"
+                custom-class="px-5 font-semibold !text-white text-sm sm:text-base" :prepend-icon="searchIcon"
+                label="ابحث الآن" @click="applyFilters" />
+
+              <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4" border="sm"
+                custom-class="px-5 font-semibold text-sm sm:text-base !text-primary-800 !border-primary-200"
+                label="إعادة تعيين" prepend-icon="mdi-refresh" @click="resetFilters" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Price Lists Table -->
+        <DataTable :headers="tableHeaders" :items="tableItems" :loading="loading" show-actions @edit="handleEdit"
+          :show-view="false" :show-delete="false" :forceShowEdit="true">
+          <template #item.is_active="{ item }">
+            <v-switch :model-value="item.is_active" hide-details inset density="compact"
+              @update:model-value="() => handleStatusChange(item)" class="small-switch" color="primary-600" />
+          </template>
+        </DataTable>
+
+        <!-- Infinite Scroll Trigger & Loading Indicator -->
+        <div ref="loadMoreTrigger" class="flex justify-center py-4">
+          <v-progress-circular v-if="loadingMore" indeterminate color="primary" size="32" />
+        </div>
+      </div>
+    </div>
+    <!-- Status Change Confirmation Dialog -->
+    <StatusChangeDialog v-model="showStatusChangeDialog" :loading="statusChangeLoading"
+      :item-name="itemToChangeStatus?.name" :current-status="itemToChangeStatus?.is_active || false"
+      @confirm="confirmStatusChange" />
+  </default-layout>
+</template>
+
+<script setup lang="ts">
+import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
+import DatePickerInput from '@/components/common/forms/DatePickerInput.vue'
+import { useApi } from '@/composables/useApi'
 
 const router = useRouter()
+const { t } = useI18n()
 const api = useApi()
-const { success, error } = useNotification()
+
+// Loading states
+const loading = ref(false)
+const loadingMore = ref(false)
+
+// Pagination
+const perPage = ref(15)
+const nextCursor = ref<string | null>(null)
+const previousCursor = ref<string | null>(null)
+const hasMoreData = computed(() => nextCursor.value !== null)
 
 // TypeScript Interfaces
 interface PriceList {
@@ -26,10 +121,40 @@ interface PriceList {
   created_at: string
 }
 
+interface TableHeader {
+  key: string;
+  title: string;
+}
+
+interface Pagination {
+  next_cursor: string | null;
+  previous_cursor: string | null;
+  per_page: number;
+}
+
 interface PriceListsResponse {
-  success: boolean
-  message: string
-  data: PriceList[]
+  status: number;
+  code: number;
+  locale: string;
+  message: string;
+  data: PriceList[];
+  pagination: Pagination;
+  header_table: string;
+  headers: TableHeader[];
+  shownHeaders: TableHeader[];
+  actions: {
+    can_create: boolean;
+  };
+}
+
+interface PriceListFilters {
+  per_page?: number;
+  cursor?: string | null;
+  type: string;
+  is_building_material: boolean;
+  name?: string;
+  created_at?: string;
+  status?: number | null;
 }
 
 // Price Lists icon
@@ -40,16 +165,8 @@ const priceListsIcon = `<svg width="52" height="52" viewBox="0 0 52 52" fill="no
 </svg>
 `
 
-const editIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M8.33301 2.60175H4.83301C3.43288 2.60175 2.73281 2.60175 2.19803 2.87424C1.72763 3.11392 1.34517 3.49637 1.10549 3.96678C0.833008 4.50156 0.833008 5.20162 0.833008 6.60175V13.6018C0.833008 15.0019 0.833008 15.7019 1.10549 16.2367C1.34517 16.7071 1.72763 17.0896 2.19803 17.3293C2.73281 17.6018 3.43288 17.6018 4.83301 17.6018H11.833C13.2331 17.6018 13.9332 17.6018 14.468 17.3293C14.9384 17.0896 15.3208 16.7071 15.5605 16.2367C15.833 15.7019 15.833 15.0019 15.833 13.6018V10.1018M5.83299 12.6018H7.22844C7.63609 12.6018 7.83992 12.6018 8.03173 12.5557C8.20179 12.5149 8.36436 12.4475 8.51348 12.3562C8.68168 12.2531 8.8258 12.109 9.11406 11.8207L17.083 3.85175C17.7734 3.1614 17.7734 2.04211 17.083 1.35175C16.3927 0.661396 15.2734 0.661395 14.583 1.35175L6.61404 9.3207C6.32578 9.60896 6.18166 9.75308 6.07859 9.92128C5.9872 10.0704 5.91986 10.233 5.87904 10.403C5.83299 10.5948 5.83299 10.7987 5.83299 11.2063V12.6018Z" stroke="#175CD3" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>`
-
-const trash_1_icon = `<svg width="17" height="19" viewBox="0 0 17 19" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M11.5833 4.08333V3.41667C11.5833 2.48325 11.5833 2.01654 11.4017 1.66002C11.2419 1.34641 10.9869 1.09144 10.6733 0.931656C10.3168 0.75 9.85009 0.75 8.91667 0.75H7.58333C6.64991 0.75 6.1832 0.75 5.82668 0.931656C5.51308 1.09144 5.25811 1.34641 5.09832 1.66002C4.91667 2.01654 4.91667 2.48325 4.91667 3.41667V4.08333M0.75 4.08333H15.75M14.0833 4.08333V13.4167C14.0833 14.8168 14.0833 15.5169 13.8108 16.0516C13.5712 16.522 13.1887 16.9045 12.7183 17.1442C12.1835 17.4167 11.4835 17.4167 10.0833 17.4167H6.41667C5.01654 17.4167 4.31647 17.4167 3.78169 17.1442C3.31129 16.9045 2.92883 16.522 2.68915 16.0516C2.41667 15.5169 2.41667 14.8168 2.41667 13.4167V4.08333" stroke="#D92D20" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>`
-
-const trash_2_icon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M5.75 0.75H10.75M0.75 3.25H15.75M14.0833 3.25L13.4989 12.0161C13.4112 13.3313 13.3674 13.9889 13.0833 14.4875C12.8333 14.9265 12.456 15.2794 12.0014 15.4997C11.485 15.75 10.8259 15.75 9.50779 15.75H6.99221C5.67409 15.75 5.01503 15.75 4.49861 15.4997C4.04396 15.2794 3.66674 14.9265 3.41665 14.4875C3.13259 13.9889 3.08875 13.3313 3.00107 12.0161L2.41667 3.25M6.58333 7V11.1667M9.91667 7V11.1667" stroke="#D92D20" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+const searchIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M15.8333 15.8335L12.9167 12.9168M14.9999 7.91683C14.9999 11.8288 11.8286 15.0002 7.91659 15.0002C4.00457 15.0002 0.833252 11.8288 0.833252 7.91683C0.833252 4.00481 4.00457 0.833496 7.91659 0.833496C11.8286 0.833496 14.9999 4.00481 14.9999 7.91683Z" stroke="white" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`
 
 const columnIcon = `<svg width="16" height="17" viewBox="0 0 16 17" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -65,194 +182,246 @@ const importIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" 
 <path d="M16 11V12C16 13.4001 16 14.1002 15.7275 14.635C15.4878 15.1054 15.1054 15.4878 14.635 15.7275C14.1002 16 13.4001 16 12 16H5C3.59987 16 2.8998 16 2.36502 15.7275C1.89462 15.4878 1.51217 15.1054 1.27248 14.635C1 14.1002 1 13.4001 1 12V11M12.6667 6.83333L8.5 11M8.5 11L4.33333 6.83333M8.5 11V1" stroke="#194185" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`
 
-const plusIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M8 1V15M1 8H15" stroke="#1849A9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>`
-const searchIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M15.8333 15.8335L12.9167 12.9168M14.9999 7.91683C14.9999 11.8288 11.8286 15.0002 7.91659 15.0002C4.00457 15.0002 0.833252 11.8288 0.833252 7.91683C0.833252 4.00481 4.00457 0.833496 7.91659 0.833496C11.8286 0.833496 14.9999 4.00481 14.9999 7.91683Z" stroke="white" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>`
+// Data from API
+const tableItems = ref<PriceList[]>([])
+const allHeaders = ref<TableHeader[]>([])
+const shownHeaders = ref<TableHeader[]>([])
+const header_table = ref('')
 
-// Table headers
-const tableHeaders = [
-  { key: 'name', title: 'اسم القائمة', width: '200px' },
-  { key: 'createdAt', title: 'تاريخ الإنشاء', width: '160px' },
-  { key: 'status', title: 'الحالة', width: '120px' },
+// Computed table headers for DataTable component
+const tableHeaders = computed(() => shownHeaders.value)
+
+// State
+const showAdvancedFilters = ref(false)
+const filterListName = ref('')
+const filterCreatedAt = ref('')
+const filterStatus = ref<number | null>(null)
+
+// Status list
+const StatusList = [
+  { title: 'فعال', value: 1 },
+  { title: 'غير فعال', value: 0 }
 ]
 
-// Data
-const tableItems = ref<PriceList[]>([])
-const loading = ref(false)
-const deleteLoading = ref(false)
+// Status change confirmation
+const showStatusChangeDialog = ref(false)
+const statusChangeLoading = ref(false)
+const itemToChangeStatus = ref<PriceList | null>(null)
 
-// Selection state
-const selectedRows = ref<number[]>([])
-const hasSelected = computed(() => selectedRows.value.length > 0)
+// Headers dropdown
+const showHeadersMenu = ref(false)
+const updatingHeaders = ref(false)
 
-// Filters
-const showAdvancedFilters = ref(false)
-const filterStatus = ref<string | null>(null)
-const filterCreatedAt = ref('')
-const filterListName = ref('')
+// Computed checked headers for menu
+const headerCheckStates = computed(() => {
+  const states: Record<string, boolean> = {}
+  allHeaders.value.forEach(header => {
+    states[header.key] = shownHeaders.value.some(sh => sh.key === header.key)
+  })
+  return states
+})
 
+// Handlers
 const toggleAdvancedFilters = () => {
   showAdvancedFilters.value = !showAdvancedFilters.value
 }
 
-// API Functions
-const fetchPriceLists = async () => {
+const handleEdit = (item: any) => {
+  router.push({ name: 'GeneralProductPriceListEdit', params: { id: item.id } })
+}
+
+const handleStatusChange = (item: any) => {
+  itemToChangeStatus.value = { ...item }
+  showStatusChangeDialog.value = true
+}
+
+const confirmStatusChange = async () => {
+  if (!itemToChangeStatus.value) return
+
   try {
-    loading.value = true
-    const response = await api.get<PriceListsResponse>('/admin/price-lists')
-    tableItems.value = response.data
+    statusChangeLoading.value = true
+    const newStatus = !itemToChangeStatus.value.is_active
+
+    await api.patch(`/price-lists/${itemToChangeStatus.value.id}/change-status`, {
+      status: newStatus
+    })
+
+    toast.success(`تم ${newStatus ? 'تفعيل' : 'تعطيل'} قائمة الأسعار بنجاح`)
+
+    // Update local state
+    const index = tableItems.value.findIndex(t => t.id === itemToChangeStatus.value!.id)
+    if (index !== -1) {
+      tableItems.value[index].is_active = newStatus
+    }
+  } catch (err: any) {
+    console.error('Error changing price list status:', err)
+    toast.error(err?.response?.data?.message || 'فشل تغيير حالة قائمة الأسعار')
+  } finally {
+    statusChangeLoading.value = false
+    showStatusChangeDialog.value = false
+    itemToChangeStatus.value = null
+  }
+}
+
+// Fetch price lists from API
+const fetchPriceLists = async (append = false) => {
+  try {
+    if (append) {
+      loadingMore.value = true
+    } else {
+      loading.value = true
+    }
+
+    const filters: PriceListFilters = {
+      per_page: perPage.value,
+      type: 'items',
+      is_building_material: false,
+      cursor: append ? nextCursor.value : null,
+    }
+
+    if (filterListName.value) filters.name = filterListName.value
+    if (filterStatus.value !== null) filters.status = filterStatus.value
+    if (filterCreatedAt.value) filters.created_at = filterCreatedAt.value
+
+    const params = new URLSearchParams()
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== null && value !== undefined && value !== '') {
+        params.append(key, String(value))
+      }
+    })
+
+    const queryString = params.toString()
+    const url = queryString ? `/price-lists?${queryString}` : '/price-lists'
+
+    const response = await api.get<PriceListsResponse>(url)
+
+    // Convert is_active to boolean for v-switch compatibility
+    const normalizedData = response.data?.map(item => ({
+      ...item,
+      is_active: Boolean(item.is_active)
+    }))
+
+    if (append) {
+      tableItems.value = [...tableItems.value, ...normalizedData]
+    } else {
+      tableItems.value = normalizedData
+      allHeaders.value = response.headers.filter(h => h.key !== 'id' && h.key !== 'actions')
+      shownHeaders.value = response.shownHeaders.filter(h => h.key !== 'id' && h.key !== 'actions')
+      header_table.value = response.header_table
+    }
+
+    nextCursor.value = response.pagination.next_cursor
+    previousCursor.value = response.pagination.previous_cursor
+    perPage.value = response.pagination.per_page
   } catch (err: any) {
     console.error('Error fetching price lists:', err)
-    error(err?.response?.data?.message || 'فشل في جلب قوائم الأسعار')
+    toast.error(err?.response?.data?.message || 'فشل تحميل البيانات')
   } finally {
     loading.value = false
+    loadingMore.value = false
   }
 }
 
-const deletePriceList = async (priceListId: number) => {
+// Load more data (lazy loading)
+const loadMore = async () => {
+  if (!hasMoreData.value || loadingMore.value) return
+  await fetchPriceLists(true)
+}
+
+// Apply filters
+const applyFilters = () => {
+  fetchPriceLists()
+}
+
+// Reset filters
+const resetFilters = () => {
+  filterListName.value = ''
+  filterStatus.value = null
+  filterCreatedAt.value = ''
+  fetchPriceLists()
+}
+
+
+// Toggle header visibility
+const toggleHeader = async (headerKey: string) => {
+  const isCurrentlyShown = shownHeaders.value.some(h => h.key === headerKey)
+
+  if (isCurrentlyShown) {
+    shownHeaders.value = shownHeaders.value.filter(h => h.key !== headerKey)
+  } else {
+    const headerToAdd = allHeaders.value.find(h => h.key === headerKey)
+    if (headerToAdd) {
+      shownHeaders.value.push(headerToAdd)
+    }
+  }
+
+  await updateHeadersOnServer()
+}
+
+const updateHeadersOnServer = async () => {
   try {
-    deleteLoading.value = true
-    await api.delete(`/admin/price-lists/${priceListId}`)
-    success('تم حذف قائمة الأسعار بنجاح')
-    await fetchPriceLists()
+    updatingHeaders.value = true
+    const headerKeys = shownHeaders.value.map(h => h.key)
+
+    const formData = new FormData()
+    formData.append('table', header_table.value)
+    headerKeys.forEach((header, index) => {
+      formData.append(`header[${index}]`, header)
+    })
+
+    await api.post('/headers', formData)
   } catch (err: any) {
-    console.error('Error deleting price list:', err)
-    error(err?.response?.data?.message || 'فشل في حذف قائمة الأسعار')
+    console.error('Error updating headers:', err)
+    toast.error(err?.response?.data?.message || 'Failed to update headers')
   } finally {
-    deleteLoading.value = false
+    updatingHeaders.value = false
   }
 }
 
-// Handlers
-const handleEdit = (item: any) => {
-  router.push({ name: 'ProductBuildingMaterialPriceListEdit', params: { id: item.id } })
+
+
+
+// Infinite scroll with Intersection Observer
+const loadMoreTrigger = ref<HTMLElement | null>(null)
+const observer = ref<IntersectionObserver | null>(null)
+
+const setupInfiniteScroll = () => {
+  if (!loadMoreTrigger.value) return
+
+  observer.value = new IntersectionObserver(
+    (entries) => {
+      const entry = entries[0]
+      if (entry.isIntersecting && hasMoreData.value && !loadingMore.value && !loading.value) {
+        loadMore()
+      }
+    },
+    {
+      root: null,
+      rootMargin: '100px',
+      threshold: 0.1,
+    }
+  )
+
+  observer.value.observe(loadMoreTrigger.value)
 }
 
-const handleDelete = async (item: any) => {
-  if (confirm('هل أنت متأكد من حذف هذه القارمة؟')) {
-    await deletePriceList(item.id)
+const cleanupInfiniteScroll = () => {
+  if (observer.value && loadMoreTrigger.value) {
+    observer.value.unobserve(loadMoreTrigger.value)
+    observer.value.disconnect()
   }
 }
 
-const handleSelect = (item: any, selected: boolean) => {
-  if (selected) selectedRows.value.push(item.id)
-  else selectedRows.value = selectedRows.value.filter(id => id !== item.id)
-}
-
-const handleSelectAll = (checked: boolean) => {
-  selectedRows.value = checked ? tableItems.value.map(i => i.id) : []
-}
-
-// const openCreate = () => {
-//   router.push({ name: 'ProductPriceListCreate' })
-// }
-
-// Lifecycle
+// Load data on mount
 onMounted(() => {
   fetchPriceLists()
+  nextTick(() => {
+    setupInfiniteScroll()
+  })
 })
+
+onBeforeUnmount(() => {
+  cleanupInfiniteScroll()
+})
+
 </script>
-
-<template>
-  <default-layout>
-    <div class="price-lists-page">
-      <PageHeader :icon="priceListsIcon" title-key="pages.GeneralProductsPriceLists.title" description-key="pages.GeneralProductsPriceLists.description" />
-
-      <div
-        class="flex justify-end items-stretch rounded border border-gray-300 w-fit ms-auto mb-4 overflow-hidden bg-white text-sm">
-        <ButtonWithIcon variant="flat" height="40" rounded="0"
-          custom-class="font-semibold text-base border-gray-300 bg-primary-100 !text-primary-900"
-          :prepend-icon="importIcon" :label="t('common.import')" />
-        
-        <ButtonWithIcon variant="flat" height="40" rounded="0"
-          custom-class="font-semibold text-base border-gray-300 bg-primary-50 !text-primary-900"
-          :prepend-icon="exportIcon" :label="t('common.export')" />
-      </div>
-
-      <div class="bg-gray-50 rounded-md -mx-6">
-        <div :class="hasSelected ? 'justify-between' : 'justify-end'" class="flex flex-wrap items-center gap-3 border-y border-y-slate-300 px-4 sm:!px-6 py-3">
-          <!-- Actions when rows are selected -->
-          <div v-if="hasSelected" class="flex flex-wrap items-stretch rounded-lg overflow-hidden border border-gray-200 bg-white text-sm">
-            <ButtonWithIcon variant="flat" height="40" rounded="0"
-              custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-              :prepend-icon="trash_1_icon" color="white" label="حذف المحدد" />
-            <div class="w-px bg-gray-200"></div>
-            <ButtonWithIcon variant="flat" height="40" rounded="0"
-              custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-              :prepend-icon="trash_2_icon" color="white" label="حذف الجميع" />
-          </div>
-
-          <!-- Main header controls -->
-          <div class="flex flex-wrap gap-3">
-            <ButtonWithIcon variant="outlined" rounded="4" color="gray-500" height="40"
-              custom-class="font-semibold text-base border-gray-400"
-              :prepend-icon="columnIcon" :label="t('common.columns')" append-icon="mdi-chevron-down" />
-
-            <ButtonWithIcon variant="flat" color="primary-500" height="40" rounded="4"
-              custom-class="px-7 font-semibold text-base text-white border !border-primary-200"
-              :prepend-icon="searchIcon" :label="t('common.advancedSearch')" @click="toggleAdvancedFilters" />
-
-            <!-- <v-btn variant="flat" color="primary-100" height="40" rounded="4"
-              class="px-7 font-semibold text-base !text-primary-800 border !border-primary-200" @click="openCreate">
-              <template #prepend>
-                <span v-html="plusIcon"></span>
-              </template>
-
-              أضف قائمة
-            </v-btn> -->
-          </div>
-        </div>
-
-        <!-- Advanced filters row -->
-        <div v-if="showAdvancedFilters" class="border-y border-y-primary-100 bg-primary-50 px-4 sm:px-6 py-3 flex flex-col gap-3 sm:gap-2">
-          <div class="flex flex-wrap gap-3 flex-1">
-            <TextInput v-model="filterListName" density="comfortable" variant="outlined" hide-details placeholder="اسم القائمة" class="flex-1 bg-white" />
-            <SelectInput v-model="filterStatus" :items="['فعال', 'غير فعال']" density="comfortable" variant="outlined" hide-details placeholder="الحالة" class="flex-1 bg-white" />
-            <DatePickerInput v-model="filterCreatedAt" density="comfortable" hide-details placeholder="تاريخ الانشاء" class="flex-1 bg-white" />
-            <div class="flex gap-2 items-center">
-              <ButtonWithIcon variant="flat" color="primary-500" rounded="4" height="40"
-                custom-class="px-5 font-semibold !text-white text-sm sm:text-base"
-                :prepend-icon="searchIcon" label="ابحث الآن" />
-              
-              <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4" border="sm"
-                custom-class="px-5 font-semibold text-sm sm:text-base !text-primary-800 !border-primary-200"
-                prepend-icon="mdi-refresh" label="إعادة تعيين" />
-            </div>
-          </div>
-        </div>
-
-        <!-- Price Lists Table -->
-        <DataTable
-          :headers="tableHeaders"
-          :items="tableItems"
-          :loading="loading"
-          show-checkbox
-          show-actions
-          :show-view="false"
-          @edit="handleEdit"
-          @delete="handleDelete"
-          @select="handleSelect"
-          @selectAll="handleSelectAll"
-        >
-          <template #item.name="{ item }">
-            <span class="text-sm font-semibold text-gray-900">{{ item.name }}</span>
-          </template>
-
-          <template #item.createdAt="{ item }">
-            <span class="text-sm text-gray-600">{{ new Date(item.created_at).toLocaleDateString('ar-SA') }}</span>
-          </template>
-
-          <template #item.status="{ item }">
-            <v-switch :model-value="item.is_active" hide-details inset density="compact" class="small-switch" color="primary-600" disabled />
-          </template>
-        </DataTable>
-      </div>
-    </div>
-  </default-layout>
-</template>
-
-<style scoped></style>
-

@@ -39,8 +39,12 @@
       "description": "تمكنك من ادارة  المصانع"
     },
     "cities": {
+      "title": "المدن",
+      "description": "تمكنك من ادارة المدن"
+    },
+    "countries": {
       "title": "الدول",
-      "description": "تمكنك من ادارة  الدول والمدن"
+      "description": "تمكنك من ادارة  الدول"
     },
     "taxes": {
       "title": "الضرائب",
@@ -174,6 +178,11 @@
       "receiptVoucherTitle": "سندات القبض",
       "paymentVoucherTitle": "سندات الصرف",
       "description": "تمكنك من ادارة  السندات المالية "
+    },
+    "logistics":{
+      "title": "شركات اللوجستيات",
+      "description": "تمكنك من ادارة بيانات شركات اللوجستيات",
+      "sidebarTitle": "إدراة شركات النقل"
     }
   }
 }

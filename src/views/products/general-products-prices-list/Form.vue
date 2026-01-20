@@ -122,8 +122,16 @@ const priceListIcon = `<svg width="52" height="52" viewBox="0 0 52 52" fill="non
 </svg>
 `;
 
+const searchIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M15.8334 15.8333L12.9168 12.9166M15 7.91659C15 11.8286 11.8287 14.9999 7.91671 14.9999C4.00469 14.9999 0.833374 11.8286 0.833374 7.91659C0.833374 4.00457 4.00469 0.833252 7.91671 0.833252C11.8287 0.833252 15 4.00457 15 7.91659Z" stroke="#697586" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+`
 const saveIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M4.16536 0.833496H10.5608C10.9684 0.833496 11.1723 0.833496 11.3641 0.879546C11.5341 0.920374 11.6967 0.987715 11.8458 1.0791C12.014 1.18217 12.1582 1.32629 12.4464 1.61454L15.051 4.21911C15.3392 4.50737 15.4834 4.65149 15.5864 4.81969C15.6778 4.96881 15.7452 5.13138 15.786 5.30144C15.832 5.49326 15.832 5.69708 15.832 6.10473V12.5002M8.7487 6.66683H5.4987C5.03199 6.66683 4.79863 6.66683 4.62037 6.576C4.46357 6.49611 4.33609 6.36862 4.25619 6.21182C4.16536 6.03356 4.16536 5.80021 4.16536 5.3335V3.75016M9.58203 15.8335V12.1668C9.58203 11.7001 9.58203 11.4668 9.4912 11.2885C9.41131 11.1317 9.28383 11.0042 9.12702 10.9243C8.94876 10.8335 8.71541 10.8335 8.2487 10.8335H5.4987C5.03199 10.8335 4.79863 10.8335 4.62037 10.9243C4.46357 11.0042 4.33609 11.1317 4.25619 11.2885C4.16536 11.4668 4.16536 11.7001 4.16536 12.1668V15.8335M12.9154 6.80245V13.1668C12.9154 14.1002 12.9154 14.567 12.7337 14.9235C12.5739 15.2371 12.319 15.4921 12.0053 15.6518C11.6488 15.8335 11.1821 15.8335 10.2487 15.8335H3.4987C2.56528 15.8335 2.09857 15.8335 1.74205 15.6518C1.42844 15.4921 1.17348 15.2371 1.01369 14.9235C0.832031 14.567 0.832031 14.1003 0.832031 13.1668V6.41683C0.832031 5.48341 0.832031 5.0167 1.01369 4.66018C1.17348 4.34658 1.42844 4.09161 1.74205 3.93182C2.09857 3.75016 2.56528 3.75016 3.4987 3.75016H9.86308C10.0669 3.75016 10.1688 3.75016 10.2647 3.77319C10.3498 3.7936 10.431 3.82727 10.5056 3.87296C10.5897 3.9245 10.6618 3.99656 10.8059 4.14069L12.5248 5.85964C12.669 6.00376 12.741 6.07583 12.7926 6.15993C12.8383 6.23449 12.8719 6.31577 12.8923 6.4008C12.9154 6.49671 12.9154 6.59862 12.9154 6.80245Z" stroke="white" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`
+
+const plusIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M8 1V15M1 8H15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`
 
 const productName = ref("")
@@ -142,8 +150,8 @@ const rows = computed(() => {
   // Filter by name/code search
   if (productName.value.trim()) {
     const search = productName.value.trim().toLowerCase()
-    filtered = filtered.filter(row => 
-      row.name.toLowerCase().includes(search) || 
+    filtered = filtered.filter(row =>
+      row.name.toLowerCase().includes(search) ||
       row.code.toLowerCase().includes(search)
     )
   }
@@ -247,9 +255,9 @@ const handlePriceChange = (row: PriceListRow) => {
 }
 
 const tableHeaders = [
-  { key: "rowNumber", title: "#", width: "70px" },
   { key: "itemId", title: "المنتج" },
   { key: "salePrice", title: "سعر البيع", width: "420px" },
+  { key: "actions", title: "الإجراءات", width: "100px" },
 ]
 
 const bulkEditMode = ref<BulkEditMode>("percentage")
@@ -287,7 +295,6 @@ const applyBulkEdit = () => {
 
 // Category filter items
 const categoryItems = computed(() => [
-  { title: 'جميع التصنيفات', value: null },
   ...categories.value.map(cat => ({
     title: cat.name,
     value: cat.id
@@ -315,7 +322,7 @@ const handleSave = async () => {
 
     const summary = data.summary
     const messages = []
-    
+
     if (summary.added > 0) messages.push(`تم إضافة ${summary.added} عنصر`)
     if (summary.updated > 0) messages.push(`تم تحديث ${summary.updated} عنصر`)
     if (summary.removed > 0) messages.push(`تم حذف ${summary.removed} عنصر`)
@@ -400,37 +407,44 @@ onMounted(async () => {
                   </v-btn-toggle>
                 </div>
                 <ButtonWithIcon variant="flat" rounded="4" color="primary-500" border="sm" height="40"
-                  custom-class="px-7 !border-primary-200 text-white font-semibold text-base"
-                  label="تطبيق" @click="applyBulkEdit" />
+                  custom-class="px-7 !border-primary-200 text-white font-semibold text-base" label="تطبيق"
+                  @click="applyBulkEdit" />
               </div>
             </div>
           </div>
         </div>
 
-        <div class="border-y border-y-primary-100 bg-primary-50 px-4 sm:px-6 py-3">
+        <div class="flex gap-4 justify-between flex-wrap items-center border-y border-y-gray-200 py-2 px-4 sm:!px-6">
+          <div class="text-gray-900 text-lg font-bold">قائمة اسعار المنتجات العامة</div>
+
+          <div class="flex items-center gap-3">
+            <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4" border="sm"
+              custom-class="px-5 font-semibold text-sm sm:text-base !text-primary-800 !border-primary-200"
+              label="تحديث" prepend-icon="mdi-refresh"  />
+
+            <TextInput v-model="productName" placeholder="ابحث بالكود" :hide-details="true"
+              :input-props="{ class: 'bg-white min-w-60' }">
+              <template #prepend-inner>
+                <span v-html="searchIcon"></span>
+              </template>
+            </TextInput>
+          </div>
+        </div>
+        <div class="border-y border-y border-y-primary-100 bg-primary-50 px-4 sm:!px-6 py-3">
           <div class="flex flex-col md:flex-row gap-3 md:items-center justify-between">
             <div class="flex flex-wrap gap-3 flex-1">
-              <div class="min-w-[250px]">
-                <TextInput v-model="productName" placeholder="ابحث باسم المنتج أو الكود" :hide-details="true"
-                  :input-props="{ class: 'bg-white' }" prepend-inner-icon="mdi-magnify" />
-              </div>
-              
               <div class="min-w-[200px]">
-                <SelectInput v-model="selectedCategory" :items="categoryItems" placeholder="التصنيف" :hide-details="true"
-                  :input-props="{ class: 'bg-white' }" />
+                <SelectInput v-model="selectedCategory" :items="categoryItems" placeholder="جلب المنتجات عن طريق تصنيف محدد"
+                  :hide-details="true" :input-props="{ class: 'bg-white min-w-[200px] md:min-w-[300px]' }" />
               </div>
             </div>
 
-            <div class="text-sm font-semibold text-gray-700">
-              عدد المنتجات: {{ rows.length }} / {{ allRows.length }}
-            </div>
+            <ButtonWithIcon variant="flat" color="primary-500" rounded="4" height="40"
+              custom-class="px-5 font-semibold !text-white text-sm sm:text-base" :prepend-icon="plusIcon"
+              label="إضافة منتج"  />
           </div>
         </div>
         <EditableDataTable :headers="tableHeaders" :items="rows" :loading="loading" show-checkbox>
-          <template #item.rowNumber="{ rowIndex }">
-            <span class="text-sm text-gray-600">{{ rowIndex + 1 }}</span>
-          </template>
-
           <template #item.itemId="{ item }">
             <div class="flex items-center gap-3">
               <v-avatar v-if="(item as PriceListRow).image" size="40" rounded>
@@ -438,7 +452,8 @@ onMounted(async () => {
               </v-avatar>
               <div>
                 <div class="text-sm font-semibold text-gray-900">{{ (item as PriceListRow).name }}</div>
-                <div class="text-xs text-gray-500">{{ (item as PriceListRow).code }} • {{ (item as PriceListRow).category.name }}</div>
+                <div class="text-xs text-gray-500">{{ (item as PriceListRow).code }} • {{ (item as
+                  PriceListRow).category.name }}</div>
               </div>
             </div>
           </template>
@@ -446,13 +461,13 @@ onMounted(async () => {
           <template #item.salePrice="{ item }">
             <div class="flex items-center gap-2">
               <div class="w-[180px]">
-                <PriceInput v-model="(item as PriceListRow).priceMin" currency="الحد الأدنى" keep-currency-visible placeholder="0"
-                  :hide-details="true" :input-props="{ class: 'bg-white' }" 
+                <PriceInput v-model="(item as PriceListRow).priceMin" currency="الحد الأدنى" keep-currency-visible
+                  placeholder="0" :hide-details="true" :input-props="{ class: 'bg-white' }"
                   @update:model-value="handlePriceChange(item as PriceListRow)" />
               </div>
               <div class="w-[180px]">
-                <PriceInput v-model="(item as PriceListRow).priceMax" currency="الحد الأقصى" keep-currency-visible placeholder="0"
-                  :hide-details="true" :input-props="{ class: 'bg-white' }" 
+                <PriceInput v-model="(item as PriceListRow).priceMax" currency="الحد الأقصى" keep-currency-visible
+                  placeholder="0" :hide-details="true" :input-props="{ class: 'bg-white' }"
                   @update:model-value="handlePriceChange(item as PriceListRow)" />
               </div>
             </div>
@@ -461,13 +476,12 @@ onMounted(async () => {
 
         <div class="flex flex-col sm:flex-row gap-3 sm:justify-center mt-6">
           <ButtonWithIcon variant="flat" rounded="4" color="primary" height="44"
-            custom-class="font-semibold text-base sm:min-w-[200px]"
-            :prepend-icon="saveIcon"
-            label="حفظ" @click="handleSave" :loading="saving" :disabled="loading" />
-          
+            custom-class="font-semibold text-base sm:min-w-[200px]" :prepend-icon="saveIcon" label="حفظ"
+            @click="handleSave" :loading="saving" :disabled="loading" />
+
           <ButtonWithIcon variant="flat" rounded="4" color="primary-50" height="44"
-            custom-class="font-semibold text-base text-primary-700 sm:min-w-[200px]"
-            label="إغلاق" @click="handleClose" :disabled="saving">
+            custom-class="font-semibold text-base text-primary-700 sm:min-w-[200px]" label="إغلاق" @click="handleClose"
+            :disabled="saving">
             <template #prepend>
               <v-icon>mdi-close</v-icon>
             </template>

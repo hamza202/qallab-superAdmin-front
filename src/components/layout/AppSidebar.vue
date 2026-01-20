@@ -374,12 +374,16 @@
                                         :class="[isMenuItemActive('/contractors/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
                                         المقاولين</router-link>
                                 </li>
+                                <li class="relative">
+                                    <router-link to="/logistics/list"
+                                        :class="[isMenuItemActive('/logistics/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']"> {{ t('pages.logistics.sidebarTitle') }} </router-link>
+                                </li>
                             </ul>
                         </div>
                     </v-list-group>
 
                     <!-- اللوجستيات -->
-                    <v-list-group value="logistics" class="mt-1">
+                    <!-- <v-list-group value="logistics" class="mt-1">
                         <template #activator="{ props, isOpen }">
                             <v-list-item v-bind="props"
                                 :class="[{ '!mx-1 gap-5': !isSidebarExpanded }, isLogisticsActive ? 'bg-white !text-[#1570EF]' : '', '!ps-[11px]']"
@@ -416,7 +420,7 @@
                             </ul>
 
                         </div>
-                    </v-list-group>
+                    </v-list-group> -->
 
                     <!-- التقارير -->
                     <v-list-group value="reports" class="mt-1">
@@ -544,9 +548,15 @@
                             <h2 class="text-sm font-medium leading-5 my-2">الدول والعملات</h2>
                             <ul class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
                                 <li class="relative">
+                                    <router-link to="/settings/countries/list"
+                                        :class="[isMenuItemActive('/settings/countries/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        إدارة الدول
+                                    </router-link>
+                                </li>
+                                <li class="relative">
                                     <router-link to="/settings/cities/list"
                                         :class="[isMenuItemActive('/settings/cities/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
-                                        إدارة الدول
+                                        إدارة المدن
                                     </router-link>
                                 </li>
                                 <li class="relative">
@@ -640,7 +650,8 @@ import {
     reportsIcon,
     settingsIcon
 } from "@/components/icons/sidebarIcons";
-
+import { useI18n } from "vue-i18n";
+const { t } = useI18n()
 const route = useRoute();
 
 // Define routes for each dropdown group
@@ -650,10 +661,10 @@ const salesRoutes = ['/customers', '/sales'];
 const projectsRoutes = ['/projects'];
 const purchasesRoutes = ['/suppliers'];
 const financeRoutes = ['/finance'];
-const usersRoutes = ['/users', '/crushers', '/contractors'];
-const logisticsRoutes = ['/logistics'];
+const usersRoutes = ['/users', '/crushers', '/contractors','/logistics'];
+// const logisticsRoutes = ['/logistics'];
 const reportsRoutes = ['/reports'];
-const settingsRoutes = ['/products-categories', '/services-categories', '/products-categories/tree', '/units', '/factories', '/brands', '/geo-areas', '/geo-segments', '/tax-rules', '/taxes', '/cities', '/codes', '/account-types', '/test-group', '/tests', '/test-methodology', '/sample-types', '/settings'];
+const settingsRoutes = ['/products-categories', '/services-categories', '/products-categories/tree', '/units', '/factories', '/brands', '/geo-areas', '/geo-segments', '/tax-rules', '/taxes','/countries', '/cities', '/codes', '/account-types', '/test-group', '/tests', '/test-methodology', '/sample-types', '/settings'];
 
 // Helper function to check if route matches (including child routes like /form, /create, /edit/:id, /view/:id)
 const isRouteActive = (basePath) => {
@@ -767,7 +778,7 @@ const isProjectsActive = computed(() => isGroupActive(projectsRoutes));
 const isPurchasesActive = computed(() => isGroupActive(purchasesRoutes));
 const isFinanceActive = computed(() => isGroupActive(financeRoutes));
 const isUsersActive = computed(() => isGroupActive(usersRoutes));
-const isLogisticsActive = computed(() => isGroupActive(logisticsRoutes));
+// const isLogisticsActive = computed(() => isGroupActive(logisticsRoutes));
 const isReportsActive = computed(() => isGroupActive(reportsRoutes));
 const isSettingsActive = computed(() => isGroupActive(settingsRoutes));
 
@@ -783,7 +794,7 @@ const getActiveGroupName = () => {
     if (isPurchasesActive.value) return 'purchases';
     if (isFinanceActive.value) return 'finance';
     if (isUsersActive.value) return 'users';
-    if (isLogisticsActive.value) return 'logistics';
+    // if (isLogisticsActive.value) return 'logistics';
     if (isReportsActive.value) return 'reports';
     if (isSettingsActive.value) return 'settings';
     return null;

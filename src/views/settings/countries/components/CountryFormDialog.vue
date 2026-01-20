@@ -13,12 +13,14 @@ const availableLanguages = ref([
   { code: "ar", name: "AR", flag: "/img/sa.svg", dir: "rtl" as const },
 ]);
 
-interface CityForm {
+interface CountryForm {
   id?: number;
   nameAr: string;
   nameEn: string;
   code2: string;
-  countryId: number | string | null;
+  code3: string;
+  phoneCode: string;
+  isDefault: boolean;
   status: boolean;
 }
 
@@ -28,14 +30,16 @@ interface PayloadType {
     ar: string;
   };
   code2: string;
-  country_id: string | number | null;
+  code3: string;
+  phone_code: string;
+  is_default: boolean | string;
   is_active: boolean | string;
   _method?: string;
 }
 
 const props = defineProps<{
   modelValue: boolean;
-  cityId?: number | null;
+  countryId?: number | null;
 }>();
 
 const emit = defineEmits<{
@@ -51,54 +55,39 @@ const internalOpen = computed({
 const formRef = ref<any | null>(null);
 const isFormValid = ref(false);
 
-const form = reactive<CityForm>({
+const form = reactive<CountryForm>({
   nameAr: "",
   nameEn: "",
   code2: "",
-  countryId: null,
+  code3: "",
+  phoneCode: "",
+  isDefault: false,
   status: true,
 });
 
-const countryItems = ref<Array<{ title: string; value: string | number }>>([]);
-const loadingConstants = ref(false);
-const loadingCityData = ref(false);
+const loadingCountryData = ref(false);
 const saving = ref(false);
 
-
-const fetchCountriesList = async () => {
+const fetchCountryData = async (countryId: number) => {
   try {
-    loadingConstants.value = true;
-    const response = await api.get('/countries/list');
-    countryItems.value = response.data.map((country: any) => ({
-      title: country.name,
-      value: country.id,
-    }));
-  } catch (err: any) {
-    console.error('Error fetching countries:', err);
-    toast.error(err?.response?.data?.message || 'Failed to fetch countries');
-  } finally {
-    loadingConstants.value = false;
-  }
-};
+    loadingCountryData.value = true;
+    const response = await api.get(`/countries/${countryId}`);
+    const country = response.data;
 
-const fetchCityData = async (cityId: number) => {
-  try {
-    loadingCityData.value = true;
-    const response = await api.get(`/cities/${cityId}`);
-    const city = response.data;
-
-    form.id = city.id;
-    form.nameAr = city.name_translations?.ar || city.name;
-    form.nameEn = city.name_translations?.en || city.name;
-    form.code2 = city.code2 ?? "";
-    form.countryId = city.country_id ?? null;
-    form.status = Boolean(city.is_active);
+    form.id = country.id;
+    form.nameAr = country.name_translations?.ar || country.name;
+    form.nameEn = country.name_translations?.en || country.name;
+    form.code2 = country.code2 ?? "";
+    form.code3 = country.code3 ?? "";
+    form.phoneCode = country.phone_code ?? "";
+    form.isDefault = Boolean(country.is_default);
+    form.status = Boolean(country.is_active);
   } catch (err: any) {
-    console.error('Error fetching city details:', err);
-    toast.error(err?.response?.data?.message || 'Failed to fetch city details');
+    console.error('Error fetching country details:', err);
+    toast.error(err?.response?.data?.message || 'Failed to fetch country details');
     internalOpen.value = false;
   } finally {
-    loadingCityData.value = false;
+    loadingCountryData.value = false;
   }
 };
 
@@ -107,7 +96,9 @@ const resetForm = () => {
   form.nameAr = "";
   form.nameEn = "";
   form.code2 = "";
-  form.countryId = null;
+  form.code3 = "";
+  form.phoneCode = "";
+  form.isDefault = false;
   form.status = true;
 };
 
@@ -134,25 +125,28 @@ const handleSave = async () => {
         ar: form.nameAr,
       },
       code2: form.code2,
-      country_id: form.countryId,
+      code3: form.code3,
+      phone_code: form.phoneCode,
+      is_default: form.isDefault,
       is_active: form.status,
     };
 
     if (form.id) {
       payload['_method'] = 'PUT';
       payload.is_active = form.status ? '1' : '0';
-      await api.post(`/cities/${form.id}`, payload);
-      toast.success('تم تحديث المدينة بنجاح');
+      payload.is_default = form.isDefault ? '1' : '0';
+      await api.post(`/countries/${form.id}`, payload);
+      toast.success('تم تحديث الدولة بنجاح');
     } else {
-      await api.post('/cities', payload);
-      toast.success('تم إضافة المدينة بنجاح');
+      await api.post('/countries', payload);
+      toast.success('تم إضافة الدولة بنجاح');
     }
 
     emit('saved');
     closeDialog();
     resetForm();
   } catch (err: any) {
-    console.error('Error saving city:', err);
+    console.error('Error saving country:', err);
 
     // Handle validation errors
     if (err?.response?.status === 422 && err?.response?.data?.errors) {
@@ -162,7 +156,7 @@ const handleSave = async () => {
       });
       toast.error(err?.response?.data?.message || 'يرجى تصحيح الأخطاء في النموذج');
     } else {
-      toast.error(err?.response?.data?.message || 'Failed to save city');
+      toast.error(err?.response?.data?.message || 'Failed to save country');
     }
   } finally {
     saving.value = false;
@@ -174,32 +168,28 @@ watch(
   (open) => {
     if (!open) return;
 
-    if (props.cityId) {
-      fetchCityData(props.cityId);
+    if (props.countryId) {
+      fetchCountryData(props.countryId);
     } else {
       resetForm();
     }
   }
 );
-
-onMounted(() => {
-  fetchCountriesList();
-});
 </script>
 
 <template>
-  <AppDialog v-model="internalOpen" title="إضافة مدينة" :max-width="520">
+  <AppDialog v-model="internalOpen" title="إضافة دولة" :max-width="640">
     <template #title>
       <div class="text-base font-bold text-gray-900 flex items-center gap-2">
         <span class="bg-gray-50 border border-gray-100 rounded px-1 py-0.5 text-gray-600">
-          <v-icon size="18">mdi-city-variant-outline</v-icon>
+          <v-icon size="18">mdi-earth</v-icon>
         </span>
-        إضافة مدينة
+        إضافة دولة
       </div>
     </template>
 
     <v-form ref="formRef" v-model="isFormValid" @submit.prevent>
-      <div v-if="loadingCityData" class="flex justify-center items-center py-12">
+      <div v-if="loadingCountryData" class="flex justify-center items-center py-12">
         <v-progress-circular indeterminate color="primary" size="48" />
       </div>
 
@@ -221,13 +211,15 @@ onMounted(() => {
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-x-3 gap-y-5 mb-4">
 
-          <SelectInput v-model="form.countryId" label="الدولة" placeholder="اختر الدولة" :items="countryItems"
-            :rules="[required()]" :hide-details="false" clearable :loading="loadingConstants"
-            :error-messages="formErrors['country_id']" @update:model-value="delete formErrors['country_id']" />
-
           <TextInput v-model="form.code2" label="الرمز 2" placeholder="ادخل الرمز" :rules="[required(), exactLength(2)]"
             :hide-details="false" :error-messages="formErrors['code2']" @input="delete formErrors['code2']" />
 
+          <TextInput v-model="form.code3" label="الرمز 3" placeholder="ادخل الرمز" :rules="[required(), exactLength(3)]"
+            :hide-details="false" :error-messages="formErrors['code3']" @input="delete formErrors['code3']" />
+
+          <TextInput v-model="form.phoneCode" label="كود الهاتف" placeholder="ادخل كود الهاتف"
+            :rules="[required(), numeric()]" :hide-details="false" :error-messages="formErrors['phone_code']"
+            @input="delete formErrors['phone_code']" />
           <div>
             <span class="text-sm font-semibold text-gray-700 block mb-1">الحالة</span>
             <div class="flex items-center gap-3">
@@ -243,6 +235,28 @@ onMounted(() => {
                   <template #label>
                     <span :class="!form.status ? 'text-primary font-semibold' : 'text-gray-600'">
                       غير فعال
+                    </span>
+                  </template>
+                </v-radio>
+              </v-radio-group>
+            </div>
+          </div>
+
+          <div>
+            <span class="text-sm font-semibold text-gray-700 block mb-1">افتراضي</span>
+            <div class="flex items-center gap-3">
+              <v-radio-group v-model="form.isDefault" inline hide-details>
+                <v-radio :value="true" color="primary">
+                  <template #label>
+                    <span :class="form.isDefault ? 'text-primary font-semibold' : 'text-gray-600'">
+                      نعم
+                    </span>
+                  </template>
+                </v-radio>
+                <v-radio :value="false" color="primary">
+                  <template #label>
+                    <span :class="!form.isDefault ? 'text-primary font-semibold' : 'text-gray-600'">
+                      لا
                     </span>
                   </template>
                 </v-radio>
