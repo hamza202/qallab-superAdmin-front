@@ -4,19 +4,50 @@
 // - Components from 'src/components/common/forms' and 'src/layouts'
 // - Validators (required, minLength, etc.) from '@/utils/validators'
 
-import { useNotification } from "@/composables/useNotification";
+import { toast } from "vue3-toastify";
+import { useApi } from "@/composables/useApi";
+import { useRoute, useRouter } from "vue-router";
+import { onMounted, watch } from "vue";
 import TestFormDialog from "@/views/products/simple-products/components/TestFormDialog.vue";
+import {
+  gridIcon,
+  langIcon,
+  returnIcon,
+  saveIcon,
+  arrowLeftIcon,
+  plusIcon,
+  editIcon,
+  deleteIcon,
+  checkIcon
+} from "@/components/icons/productIcons";
+
+// Router & API
+const route = useRoute();
+const router = useRouter();
+const api = useApi();
+
+// Edit mode detection
+const isEditMode = computed(() => !!route.params.id);
+const itemId = ref<number | null>(null);
+const productItemId = ref<number | null>(null);
+
+// Step completion state - controls tab access
+const isStep1Completed = ref(false);
+
+// Loading states
+const loading = ref(false);
+const savingLoading = ref(false);
 
 // Form ref
 const formRef = ref<any>(null);
 const isFormValid = ref(false);
 
 // Form data
-const productCode = ref("#eda23422");
+const productCode = ref("");
 const arabicName = ref("");
 const englishName = ref("");
-const category = ref(null);
-const unit = ref(null);
+const category = ref<number | null>(null);
+const unit = ref<number | null>(null);
 const isMinUnit = ref(false);
 const arabicDescription = ref("");
 const englishDescription = ref("");
@@ -25,30 +56,16 @@ const purchasePrice = ref("");
 const salePrice = ref("");
 const maxSalePrice = ref("");
 const minSalePrice = ref("");
+const wholesalePrice = ref("");
 const halfWholesalePrice = ref("");
-const discountType = ref(null);
-const discountValue = ref("506.64");
+const discountType = ref<number | null>(null);
+const discountValue = ref("");
+const profitMargin = ref("");
 
-// Sample items for selects
-const categoryItems = [
-  { title: "اختر التصنيف", value: "" },
-  { title: "إلكترونيات", value: "electronics" },
-  { title: "ملابس", value: "clothing" },
-  { title: "طعام", value: "food" },
-];
-
-const unitItems = [
-  { title: "اختر الوحدة", value: "" },
-  { title: "قطعة", value: "piece" },
-  { title: "كيلو", value: "kg" },
-  { title: "لتر", value: "liter" },
-];
-
-const discountTypeItems = [
-  { title: "اختر نوع الخصم", value: "" },
-  { title: "نسبة مئوية", value: "percentage" },
-  { title: "قيمة ثابتة", value: "fixed" },
-];
+// Sample items for selects - will be fetched from API
+const categoryItems = ref<Array<{ title: string; value: string | number }>>([]);
+const unitItems = ref<Array<{ title: string; value: string | number }>>([]);
+const discountTypeItems = ref<Array<{ title: string; value: string | number }>>([]);
 
 // Available languages (will be fetched from API in the future)
 const availableLanguages = ref([
@@ -56,102 +73,108 @@ const availableLanguages = ref([
   { code: "ar", name: "AR", flag: "/img/sa.svg", dir: "rtl" as const },
 ]);
 
+// Tax interface
+interface TaxItem {
+  id: number;
+  tax_name: string;
+  value_rate: string;
+  minimum: string;
+}
+
+// Tax table row interface
+interface TaxTableRow {
+  id: number;
+  taxId: number;
+  taxName: string;
+  percentage: string;
+  minValue: string;
+  priority: string | number;
+  priorityLabel: string;
+}
+
 // Tax data
-const taxType = ref(null);
-const taxPercentage = ref("10%");
-const taxMinValue = ref(null);
-const taxPriority = ref(null);
+const taxType = ref<number | null>(null);
+const taxPercentage = ref("");
+const taxMinValue = ref("");
+const taxPriority = ref<string | number | null>(null);
 
-const taxTypeItems = [
-  { title: "اختر النوع", value: "" },
-  { title: "ضريبة القيمة المضافة", value: "vat" },
-  { title: "ضريبة المبيعات", value: "sales" },
-  { title: "ضريبة الدخل", value: "income" },
-];
+// Editing state for tax
+const isEditingTax = ref(false);
+const editingTaxIndex = ref<number | null>(null);
 
-const taxMinValueItems = [
-  { title: "اختر القيمة", value: "" },
-  { title: "100", value: "100" },
-  { title: "500", value: "500" },
-  { title: "1000", value: "1000" },
-];
+// Tax items from API
+const taxTypeItems = ref<Array<{ title: string; value: number; value_rate: string; minimum: string }>>([]);
 
-const taxPriorityItems = [
-  { title: "اختر الأولوية", value: "" },
-  { title: "عالية", value: "high" },
-  { title: "متوسطة", value: "medium" },
-  { title: "منخفضة", value: "low" },
-];
+// Tax priority items from API
+const taxPriorityItems = ref<Array<{ title: string; value: string | number }>>([]);
+
+// Dynamic tax table items
+const taxTableItems = ref<TaxTableRow[]>([]);
+let taxRowIdCounter = 1;
 
 // Supply and Internal Relations Data
-const originCountry = ref(null);
-const manufacturer = ref(null);
-const brand = ref(null);
-const relatedProducts = ref(null);
-const attachedProducts = ref(null);
-const alternativeProducts = ref(null);
-const bestSuppliers = ref(null);
+const originCountry = ref<number | null>(null);
+const manufacturer = ref<number | null>(null);
+const brand = ref<number | null>(null);
+const relatedProducts = ref<number[]>([]);
+const attachedProducts = ref<number[]>([]);
+const alternativeProducts = ref<number[]>([]);
+const bestSuppliers = ref<number[]>([]);
 
 // Advanced Product Attributes
 const isReturnable = ref(false);
 const isRentable = ref(false);
 const sellNegative = ref(false);
 const isManufacturingProduct = ref(false);
-const isHostable = ref(false);
-const isNegotiable = ref(false);
-const isAvailableForSale = ref(false);
 const isAvailableForPurchase = ref(false);
-const isAvailableForProjects = ref(false);
+const isAvailableForRent = ref(false);
+const isAvailableForReturn = ref(false);
+const isAvailableForSelling = ref(false);
+const isAvailableForBuying = ref(false);
+const isAvailableForManufacturing = ref(false);
+const isAvailableForRefund = ref(false);
+const isAvailableForOffset = ref(false);
 
 // Sample items for new selects
-const countryItems = [
-  { title: "اختر البلد", value: "" },
-  { title: "السعودية", value: "sa" },
-  { title: "الإمارات", value: "ae" },
-  { title: "مصر", value: "eg" },
-];
+// API Response interfaces for step 3
+interface BrandItem {
+  id: number;
+  name: string;
+}
 
-const manufacturerItems = [
-  { title: "اختر المصنع", value: "" },
-  { title: "مصنع 1", value: "factory1" },
-  { title: "مصنع 2", value: "factory2" },
-];
+interface ManufacturerItem {
+  id: number;
+  name: string;
+}
 
-const brandItems = [
-  { title: "ادخل العلامة التجارية", value: "" },
-  { title: "علامة 1", value: "brand1" },
-  { title: "علامة 2", value: "brand2" },
-];
+interface CountryItem {
+  id: number;
+  name: string;
+}
 
-const productItems = [
-  { title: "اختر المنتج", value: "" },
-  { title: "منتج 1", value: "product1" },
-  { title: "منتج 2", value: "product2" },
-];
+interface ItemListItem {
+  id: number;
+  name: string;
+  code: string;
+}
 
-const supplierItems = [
-  { title: "اختر المورد", value: "" },
-  { title: "مورد 1", value: "supplier1" },
-  { title: "مورد 2", value: "supplier2" },
-];
+interface SupplierItem {
+  id: number;
+  full_name: string;
+}
+
+// Dynamic dropdown items from API
+const countryItems = ref<Array<{ title: string; value: number }>>([]);
+const manufacturerItems = ref<Array<{ title: string; value: number }>>([]);
+const brandItems = ref<Array<{ title: string; value: number }>>([]);
+const productItems = ref<Array<{ title: string; value: number }>>([]);
+const supplierItems = ref<Array<{ title: string; value: number }>>([])
 
 // Product Variants Data
-const selectedSizes = ref<(string | number)[]>([]);
-const selectedColors = ref<(string | number)[]>([]);
 const subProductsGenerated = ref(false);
 const editingRowId = ref<number | null>(null);
 
-const sizeItems = [
-  { title: "صغير", value: "small" },
-  { title: "وسط", value: "medium" },
-  { title: "كبير", value: "large" },
-];
-
-const colorItems = [
-  { title: "احمر", value: "red" },
-  { title: "ابيض", value: "white" },
-  { title: "اصفر", value: "yellow" },
-];
+// Generate sub products - Logic moved to dynamic generation above
 
 // Computed to check if category is selected
 const isCategorySelected = computed(() => {
@@ -160,46 +183,9 @@ const isCategorySelected = computed(() => {
 
 // Get category title
 const getCategoryTitle = computed(() => {
-  const selectedCategory = categoryItems.find((item) => item.value === category.value);
+  const selectedCategory = categoryItems.value.find((item) => item.value === category.value);
   return selectedCategory?.title || "منتج";
 });
-
-// Get item title by value
-const getColorTitle = (value: string | number) => {
-  const item = colorItems.find((i) => i.value === value);
-  return item?.title || String(value);
-};
-
-const getSizeTitle = (value: string | number) => {
-  const item = sizeItems.find((i) => i.value === value);
-  return item?.title || String(value);
-};
-
-// Generate sub products
-const generateSubProducts = () => {
-  if (selectedColors.value.length === 0 || selectedSizes.value.length === 0) {
-    return;
-  }
-
-  const products: any[] = [];
-  let id = 1;
-
-  selectedColors.value.forEach((color) => {
-    selectedSizes.value.forEach((size) => {
-      products.push({
-        id: id++,
-        name: `${getCategoryTitle.value} ${getColorTitle(color)} _ ${getSizeTitle(size)}`,
-        sku: "BR-S-BAG-50KG",
-        salePrice: "",
-        purchasePrice: "",
-        isEditing: false,
-      });
-    });
-  });
-
-  subProductsTableItems.value = products;
-  subProductsGenerated.value = true;
-};
 
 // Start editing a row
 const startEditingRow = (item: any) => {
@@ -232,48 +218,221 @@ const handleAddBrand = () => {
   console.log("Add new brand");
 };
 
-// Tax table data
-const taxTableHeaders = [
-  { key: "name", title: "الضريبة", width: "370px" },
-  { key: "percentage", title: "النسبة", width: "176px" },
-  { key: "minValue", title: "أقل قيمة", width: "176px" },
-  { key: "priority", title: "الأولوية", width: "176px" },
-];
+// === Aspects & Dynamic Sub-products ===
 
-const taxTableItems = ref([
-  {
-    id: 1,
-    name: "ضريبة القيمة المضافة",
-    percentage: "15%",
-    minValue: "150",
-    priority: "عالية",
-  },
-  {
-    id: 2,
-    name: "ضريبة تأمين",
-    percentage: "15%",
-    minValue: "150",
-    priority: "منخفضة",
-  },
-  {
-    id: 3,
-    name: "ضريبة تأمين",
-    percentage: "15%",
-    minValue: "150",
-    priority: "متوسطة",
-  },
-]);
+interface AspectValue {
+  id: number;
+  name: string;
+}
 
-const handleEditTax = (item: any) => {
-  console.log("Edit tax:", item);
+interface Aspect {
+  id: number;
+  name: string;
+  value_type: number;
+  value_type_label: string;
+  values: AspectValue[];
+}
+
+const aspects = ref<Aspect[]>([]);
+const selectedAspects = ref<Record<number, (string | number)[]>>({});
+// Store aspect_value_ids loaded from API (for edit mode)
+const savedAspectValueIds = ref<(string | number)[]>([]);
+
+// Fetch aspects from API
+const fetchAspects = async () => {
+  if (!category.value) {
+    aspects.value = [];
+    selectedAspects.value = {};
+    return;
+  }
+  try {
+    const response = await api.get<{ data: Aspect[] }>(`/aspects/list?category_id=${category.value}`);
+    const data = response.data;
+    
+    // Initialize selectedAspects for each aspect before updating aspects ref
+    // to ensure v-for loop finds the initialized arrays
+    // Create a new object for selectedAspects.value to ensure reactivity for new keys
+    const newSelectedAspects: Record<number, (string | number)[]> = {};
+    data.forEach(aspect => {
+      newSelectedAspects[aspect.id] = selectedAspects.value[aspect.id] || [];
+    });
+    selectedAspects.value = newSelectedAspects;
+    
+    aspects.value = data;
+  } catch (err: any) {
+    console.error('Error fetching aspects:', err);
+  }
 };
 
+// Get aspect value title by id (helper for generating names)
+const getAspectValueTitle = (aspectId: number, valueId: string | number) => {
+  const aspect = aspects.value.find(a => a.id === aspectId);
+  if (!aspect) return String(valueId);
+  const val = aspect.values.find(v => v.id === valueId);
+  return val ? val.name : String(valueId);
+};
+
+// Generate sub products dynamically based on selected aspects - calls API
+const generateSubProducts = async () => {
+  // Collect all aspect_value_ids from selectedAspects
+  const allAspectValueIds: (string | number)[] = [];
+  Object.values(selectedAspects.value).forEach(values => {
+    if (Array.isArray(values)) {
+      values.forEach(val => allAspectValueIds.push(val));
+    }
+  });
+
+  if (allAspectValueIds.length === 0) {
+    toast.error('يرجى اختيار قيم المتغيرات أولاً');
+    return;
+  }
+
+  try {
+    // Build FormData for API request
+    const formData = new FormData();
+    allAspectValueIds.forEach((id, index) => {
+      formData.append(`aspect_value_ids[${index}]`, String(id));
+    });
+
+    // Call API to get sub-item names
+    const response = await api.post<{ data: { sub_items_name: string[] } }>('/aspects/generate-subitem-names', formData);
+    
+    const subItemNames = response.data.sub_items_name || [];
+    
+    if (subItemNames.length === 0) {
+      toast.warning('لم يتم إرجاع أسماء منتجات فرعية');
+      return;
+    }
+
+    // Generate sub products with API names
+    const products: any[] = [];
+    subItemNames.forEach((name, index) => {
+      products.push({
+        id: index + 1,
+        name: name,
+        sku: `BR-${index + 1}`,
+        salePrice: "",
+        purchasePrice: "",
+        isEditing: false,
+      });
+    });
+
+    subProductsTableItems.value = products;
+    subProductsGenerated.value = true;
+    toast.success('تم إنشاء المنتجات الفرعية بنجاح');
+  } catch (err: any) {
+    console.error('Error generating sub products:', err);
+    toast.error(err?.response?.data?.message || 'فشل في إنشاء المنتجات الفرعية');
+  }
+};
+
+// Helper for Cartesian Product
+function cartesianProduct(arrays: any[][]): any[][] {
+  return arrays.reduce((acc, curr) => {
+    return acc.flatMap(x => curr.map(y => [...x, y]));
+  }, [[]]);
+}
+const taxTableHeaders = [
+  { key: "taxName", title: "الضريبة", width: "370px" },
+  { key: "percentage", title: "النسبة", width: "176px" },
+  { key: "minValue", title: "أقل قيمة", width: "176px" },
+  { key: "priorityLabel", title: "الأولوية", width: "176px" },
+];
+
+// Handle add/update tax to table
+const handleAddTax = () => {
+  if (!taxType.value || !taxPriority.value) {
+    toast.error('يرجى اختيار نوع الضريبة والأولوية');
+    return;
+  }
+
+  const selectedTax = taxTypeItems.value.find(t => t.value === taxType.value);
+  const selectedPriority = taxPriorityItems.value.find(p => p.value === taxPriority.value);
+
+  if (!selectedTax || !selectedPriority) return;
+
+  if (isEditingTax.value && editingTaxIndex.value !== null) {
+    // Update existing row
+    const index = taxTableItems.value.findIndex(t => t.id === editingTaxIndex.value);
+    if (index !== -1) {
+      taxTableItems.value[index] = {
+        id: editingTaxIndex.value,
+        taxId: selectedTax.value,
+        taxName: selectedTax.title,
+        percentage: taxPercentage.value,
+        minValue: taxMinValue.value,
+        priority: taxPriority.value,
+        priorityLabel: selectedPriority.title,
+      };
+    }
+    // Reset editing state
+    isEditingTax.value = false;
+    editingTaxIndex.value = null;
+  } else {
+    // Add new row
+    taxTableItems.value.push({
+      id: taxRowIdCounter++,
+      taxId: selectedTax.value,
+      taxName: selectedTax.title,
+      percentage: taxPercentage.value,
+      minValue: taxMinValue.value,
+      priority: taxPriority.value,
+      priorityLabel: selectedPriority.title,
+    });
+  }
+
+  // Reset form
+  taxType.value = null;
+  taxPercentage.value = '';
+  taxMinValue.value = '';
+  taxPriority.value = null;
+};
+
+// Handle edit tax from table
+const handleEditTax = (item: any) => {
+  taxType.value = item.taxId;
+  taxPercentage.value = item.percentage;
+  taxMinValue.value = item.minValue;
+  taxPriority.value = item.priority;
+  isEditingTax.value = true;
+  editingTaxIndex.value = item.id;
+};
+
+// Handle delete tax from table
 const handleDeleteTax = (item: any) => {
   taxTableItems.value = taxTableItems.value.filter((t) => t.id !== item.id);
+  // Reset editing if deleting the item being edited
+  if (editingTaxIndex.value === item.id) {
+    isEditingTax.value = false;
+    editingTaxIndex.value = null;
+    taxType.value = null;
+    taxPercentage.value = '';
+    taxMinValue.value = '';
+    taxPriority.value = null;
+  }
+};
+
+// Cancel editing tax
+const handleCancelTaxEdit = () => {
+  isEditingTax.value = false;
+  editingTaxIndex.value = null;
+  taxType.value = null;
+  taxPercentage.value = '';
+  taxMinValue.value = '';
+  taxPriority.value = null;
 };
 
 // Tests data
-const testsList = ref([
+interface TestItem {
+  id?: number;
+  testName: string | null;
+  testsCount: number | string;
+  samplesCount: number | string;
+  sampleQuantity: number | string;
+  status: boolean;
+}
+
+const testsList = ref<TestItem[]>([
   {
     id: 1,
     testName: "اختبار 1",
@@ -300,7 +459,7 @@ const testsList = ref([
   },
 ]);
 
-const testForm = reactive({
+const testForm = reactive<TestItem>({
   testName: null,
   testsCount: "",
   samplesCount: "",
@@ -309,7 +468,7 @@ const testForm = reactive({
 });
 
 const showTestDialog = ref(false);
-const editingTest = ref<any>(null);
+const editingTest = ref<TestItem | null>(null);
 
 const testItems = [
   { title: "اختر", value: null },
@@ -423,14 +582,11 @@ const tabs = [
 // Tab helpers
 const isTabActive = (tabValue: number) => activeTab.value === tabValue;
 
-// Notification
-const { notification, success } = useNotification();
-
 // Copy product code function
 const copyProductCode = async () => {
   try {
     await navigator.clipboard.writeText(productCode.value);
-    success("تم نسخ كود المنتج بنجاح");
+    toast.success("تم نسخ كود المنتج بنجاح");
   } catch (err) {
     console.error("Failed to copy:", err);
     // Fallback for older browsers
@@ -440,7 +596,7 @@ const copyProductCode = async () => {
     textArea.select();
     document.execCommand("copy");
     document.body.removeChild(textArea);
-    success("تم نسخ كود المنتج بنجاح");
+    toast.success("تم نسخ كود المنتج بنجاح");
   }
 };
 
@@ -461,69 +617,829 @@ const handleAddTaxType = () => {
   console.log("Add new tax type");
 };
 
-const handleAddTax = () => {
-  console.log("Add tax");
+// === API Functions ===
+interface CategoryItem {
+  id: number;
+  name: string;
+}
+
+interface UnitItem {
+  id: number;
+  name: string;
+}
+
+interface DiscountType {
+  key: number;
+  label: string;
+}
+
+interface ConstantsResponse {
+  status: number;
+  data: {
+    discount_types: DiscountType[];
+  };
+}
+
+interface CreateItemResponse {
+  status: number;
+  code: number;
+  locale: string;
+  message: string;
+  data: {
+    item_id: number;
+    code: string;
+  };
+}
+
+// Helper function to display API errors
+const displayApiErrors = (err: any) => {
+  const errors = err?.response?.data?.errors;
+  if (errors && typeof errors === 'object') {
+    // Display each field error
+    Object.values(errors).forEach((fieldErrors: any) => {
+      if (Array.isArray(fieldErrors)) {
+        fieldErrors.forEach((message: string) => {
+          toast.error(message);
+        });
+      }
+    });
+  } else {
+    // Fallback to general message
+    toast.error(err?.response?.data?.message || 'حدث خطأ أثناء الحفظ');
+  }
+};
+
+// Fetch categories from API
+const fetchCategories = async () => {
+  try {
+    const response = await api.get<{ data: CategoryItem[] }>('/categories/list');
+    categoryItems.value = response.data.map((item: CategoryItem) => ({
+      title: item.name,
+      value: item.id,
+    }));
+  } catch (err: any) {
+    console.error('Error fetching categories:', err);
+  }
+};
+
+// Fetch units from API
+const fetchUnits = async () => {
+  try {
+    const response = await api.get<{ data: UnitItem[] }>('/units/list');
+    unitItems.value = response.data.map((item: UnitItem) => ({
+      title: item.name,
+      value: item.id,
+    }));
+  } catch (err: any) {
+    console.error('Error fetching units:', err);
+  }
+};
+
+// Fetch constants (discount types) from API
+const fetchConstants = async () => {
+  try {
+    const response = await api.get<ConstantsResponse>('/items/constants');
+    discountTypeItems.value = response.data.discount_types.map((item: DiscountType) => ({
+      title: item.label,
+      value: item.key,
+    }));
+  } catch (err: any) {
+    console.error('Error fetching constants:', err);
+  }
+};
+
+// Fetch taxes from API
+const fetchTaxes = async () => {
+  try {
+    const response = await api.get<{ data: TaxItem[] }>('/taxes/list');
+    taxTypeItems.value = response.data.map((item: TaxItem) => ({
+      title: item.tax_name,
+      value: item.id,
+      value_rate: item.value_rate,
+      minimum: item.minimum,
+    }));
+  } catch (err: any) {
+    console.error('Error fetching taxes:', err);
+  }
+};
+
+// Fetch tax constants (priorities) from API
+interface TaxConstantsResponse {
+  data: {
+    priorities: Array<{ key: number; label: string }>;
+    calculation_methods: Array<{ key: string; label: string }>;
+  };
+}
+
+const fetchTaxConstants = async () => {
+  try {
+    const response = await api.get<TaxConstantsResponse>('/taxes/constants');
+    taxPriorityItems.value = response.data.priorities.map((item) => ({
+      title: item.label,
+      value: item.key,
+    }));
+  } catch (err: any) {
+    console.error('Error fetching tax constants:', err);
+  }
+};
+
+// Handle tax selection change
+const handleTaxChange = (taxId: string | number | number[] | string[] | null) => {
+  // If it's an array, take the first element
+  const id = Array.isArray(taxId) ? taxId[0] : taxId;
+  
+  if (id) {
+    const selectedTax = taxTypeItems.value.find(tax => tax.value === Number(id));
+    if (selectedTax) {
+      taxPercentage.value = selectedTax.value_rate + '%';
+      taxMinValue.value = selectedTax.minimum;
+    }
+  } else {
+    taxPercentage.value = '';
+    taxMinValue.value = '';
+  }
+};
+
+// Fetch brands from API
+const fetchBrands = async () => {
+  try {
+    const response = await api.get<{ data: BrandItem[] }>('/brands/list');
+    brandItems.value = response.data.map((item: BrandItem) => ({
+      title: item.name,
+      value: item.id,
+    }));
+  } catch (err: any) {
+    console.error('Error fetching brands:', err);
+  }
+};
+
+// Fetch manufacturers from API
+const fetchManufacturers = async () => {
+  try {
+    const response = await api.get<{ data: ManufacturerItem[] }>('/manufacturers/list');
+    manufacturerItems.value = response.data.map((item: ManufacturerItem) => ({
+      title: item.name,
+      value: item.id,
+    }));
+  } catch (err: any) {
+    console.error('Error fetching manufacturers:', err);
+  }
+};
+
+// Fetch countries from API
+const fetchCountries = async () => {
+  try {
+    const response = await api.get<{ data: CountryItem[] }>('/countries/list');
+    countryItems.value = response.data.map((item: CountryItem) => ({
+      title: item.name,
+      value: item.id,
+    }));
+  } catch (err: any) {
+    console.error('Error fetching countries:', err);
+  }
+};
+
+// Fetch items (for related, attached, alternative products) from API
+const fetchItemsList = async () => {
+  try {
+    const ignoreId = productItemId.value || '';
+    const response = await api.get<{ data: ItemListItem[] }>(`/items/list?ignore_id=${ignoreId}`);
+    productItems.value = response.data.map((item: ItemListItem) => ({
+      title: `${item.name} (${item.code})`,
+      value: item.id,
+    }));
+  } catch (err: any) {
+    console.error('Error fetching items list:', err);
+  }
+};
+
+// Fetch suppliers from API
+const fetchSuppliers = async () => {
+  try {
+    const response = await api.get<{ data: SupplierItem[] }>('/suppliers/list');
+    supplierItems.value = response.data.map((item: SupplierItem) => ({
+      title: item.full_name || `Supplier ${item.id}`,
+      value: item.id,
+    }));
+  } catch (err: any) {
+    console.error('Error fetching suppliers:', err);
+  }
+};
+
+// Build step 1 form data using FormData for proper array notation
+const buildStep1Data = () => {
+  const formData = new FormData();
+  
+  // Add _method: PUT if we're updating (productItemId exists)
+  if (productItemId.value) {
+    formData.append("_method", "PUT");
+  }
+  
+  // Name fields with array notation
+  formData.append("name[ar]", arabicName.value);
+  formData.append("name[en]", englishName.value);
+  
+  // Description fields with array notation
+  formData.append("description[ar]", arabicDescription.value);
+  formData.append("description[en]", englishDescription.value);
+  
+  // Category and Unit
+  if (category.value) formData.append("category_id", String(category.value));
+  if (unit.value) formData.append("unit_id", String(unit.value));
+  formData.append("is_minimum_unit", isMinUnit.value ? "true" : "false");
+  
+  // Prices
+  if (purchasePrice.value) formData.append("purchase_price", purchasePrice.value);
+  if (salePrice.value) formData.append("sell_price", salePrice.value);
+  if (minSalePrice.value) formData.append("min_sell_price", minSalePrice.value);
+  if (maxSalePrice.value) formData.append("max_sell_price", maxSalePrice.value);
+  if (wholesalePrice.value) formData.append("wholesale_price", wholesalePrice.value);
+  if (halfWholesalePrice.value) formData.append("half_wholesale_price", halfWholesalePrice.value);
+  
+  // Discount
+  if (discountType.value) formData.append("discount_type", String(discountType.value));
+  if (discountValue.value) formData.append("discount_value", discountValue.value);
+  
+  // Profit margin
+  if (profitMargin.value) formData.append("profit_margin", profitMargin.value);
+  
+  // Collect all aspect_value_ids from selectedAspects
+  let allAspectValueIds: (string | number)[] = [];
+  Object.values(selectedAspects.value).forEach(values => {
+    if (Array.isArray(values)) {
+      values.forEach(val => allAspectValueIds.push(val));
+    }
+  });
+  
+  // In edit mode, if no new aspects selected, use the saved ones from API
+  if (allAspectValueIds.length === 0 && savedAspectValueIds.value.length > 0) {
+    allAspectValueIds = [...savedAspectValueIds.value];
+  }
+  
+  // Add aspect_value_ids with array notation
+  allAspectValueIds.forEach((id, index) => {
+    formData.append(`aspect_value_ids[${index}]`, String(id));
+  });
+  
+  // Add sub_items from subProductsTableItems
+  subProductsTableItems.value.forEach((item, index) => {
+    // Only include id in edit mode (when item has a real backend id, not local generated)
+    if (isEditMode.value && item.backendId) {
+      formData.append(`sub_items[${index}][id]`, String(item.backendId));
+    } else {
+      formData.append(`sub_items[${index}][id]`,"");
+    }
+    // Always send the name from the table item
+    formData.append(`sub_items[${index}][name]`, String(item.name || ''));
+    formData.append(`sub_items[${index}][purchase_price]`, String(item.purchasePrice || 0));
+    formData.append(`sub_items[${index}][sell_price]`, String(item.salePrice || 0));
+  });
+  
+  // Step
+  formData.append("step", "1");
+  
+  return formData;
+};
+
+// Reset form fields
+const resetFormFields = () => {
+  arabicName.value = "";
+  englishName.value = "";
+  category.value = null;
+  unit.value = null;
+  isMinUnit.value = false;
+  arabicDescription.value = "";
+  englishDescription.value = "";
+  purchasePrice.value = "";
+  salePrice.value = "";
+  minSalePrice.value = "";
+  maxSalePrice.value = "";
+  wholesalePrice.value = "";
+  halfWholesalePrice.value = "";
+  discountType.value = null;
+  discountValue.value = "";
+  profitMargin.value = "";
+  productCode.value = "";
+  productItemId.value = null;
+  isStep1Completed.value = false;
+  activeTab.value = 0;
+  formRef.value?.reset();
 };
 
 const handleSaveAndReturn = async () => {
   const { valid } = await formRef.value?.validate();
   if (valid) {
-    console.log("Form is valid! Save and return to home");
-  } else {
-    console.log("Form has errors");
+    try {
+      savingLoading.value = true;
+      const formData = buildStep1Data();
+      
+      // Use different endpoint for create vs update - GROUPED-ITEMS
+      const endpoint = productItemId.value ? `/grouped-items/${productItemId.value}` : '/grouped-items';
+      const response = await api.post<CreateItemResponse>(endpoint, formData);
+      
+      if (response.status === 200) {
+        // Store the item_id and code if creating new (only when data is returned)
+        if (!productItemId.value && response.data?.item_id) {
+          productItemId.value = response.data.item_id;
+        }
+        if (response.data?.code) {
+          productCode.value = response.data.code;
+        }
+        isStep1Completed.value = true;
+        toast.success(productItemId.value ? "تم التعديل بنجاح" : "تم الإنشاء بنجاح");
+        router.push({ name: 'GroupProductsList' });
+      }
+    } catch (err: any) {
+      console.error('Error saving product:', err);
+      displayApiErrors(err);
+    } finally {
+      savingLoading.value = false;
+    }
   }
 };
 
 const handleSaveAndCreate = async () => {
   const { valid } = await formRef.value?.validate();
   if (valid) {
-    console.log("Form is valid! Save and create new");
-    formRef.value?.reset();
-  } else {
-    console.log("Form has errors");
+    try {
+      savingLoading.value = true;
+      const formData = buildStep1Data();
+      
+      // Use different endpoint for create vs update - GROUPED-ITEMS
+      const endpoint = productItemId.value ? `/grouped-items/${productItemId.value}` : '/grouped-items';
+      const response = await api.post<CreateItemResponse>(endpoint, formData);
+      
+      if (response.status === 200) {
+        toast.success(productItemId.value ? "تم التعديل بنجاح" : "تم الإنشاء بنجاح");
+        resetFormFields();
+      }
+    } catch (err: any) {
+      console.error('Error saving product:', err);
+      displayApiErrors(err);
+    } finally {
+      savingLoading.value = false;
+    }
   }
 };
 
 const handleSaveAndContinue = async () => {
   const { valid } = await formRef.value?.validate();
   if (valid) {
-    console.log("Form is valid! Save and continue");
-  } else {
-    console.log("Form has errors");
+    try {
+      savingLoading.value = true;
+      const formData = buildStep1Data();
+      
+      // Use different endpoint for create vs update - GROUPED-ITEMS
+      const endpoint = productItemId.value ? `/grouped-items/${productItemId.value}` : '/grouped-items';
+      const response = await api.post<CreateItemResponse>(endpoint, formData);
+      
+      if (response.status === 200) {
+        // Store the item_id and code if creating new (only when data is returned)
+        if (!productItemId.value && response.data?.item_id) {
+          productItemId.value = response.data.item_id;
+        }
+        if (response.data?.code) {
+          productCode.value = response.data.code;
+        }
+        isStep1Completed.value = true;
+        toast.success(productItemId.value ? "تم التعديل بنجاح" : "تم الحفظ بنجاح");
+        // Move to next tab (Tax data)
+        activeTab.value = 1;
+      }
+    } catch (err: any) {
+      console.error('Error saving product:', err);
+      displayApiErrors(err);
+    } finally {
+      savingLoading.value = false;
+    }
   }
 };
 
-// Icons
-const gridIcon = `<svg width="52" height="52" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M15.1668 20.5836L4.3335 26.0002L25.225 36.446C25.5092 36.5881 25.6513 36.6591 25.8004 36.6871C25.9324 36.7119 26.0679 36.7119 26.1999 36.6871C26.349 36.6591 26.4911 36.5881 26.7753 36.446L47.6668 26.0002L36.8335 20.5836M15.1668 31.4169L4.3335 36.8336L25.225 47.2793C25.5092 47.4214 25.6513 47.4925 25.8004 47.5204C25.9324 47.5452 26.0679 47.5452 26.1999 47.5204C26.349 47.4925 26.4911 47.4214 26.7753 47.2793L47.6668 36.8336L36.8335 31.4169M4.3335 15.1669L25.225 4.72114C25.5092 4.57903 25.6513 4.50797 25.8004 4.48C25.9324 4.45523 26.0679 4.45523 26.1999 4.48C26.349 4.50797 26.4911 4.57903 26.7753 4.72114L47.6668 15.1669L26.7753 25.6126C26.4911 25.7547 26.349 25.8258 26.1999 25.8538C26.0679 25.8785 25.9324 25.8785 25.8004 25.8538C25.6513 25.8258 25.5092 25.7547 25.225 25.6126L4.3335 15.1669Z" stroke="#1570EF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>`;
-const langIcon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-<g clip-path="url(#clip0_12786_6371)">
-<path d="M1.66669 9.99999H18.3334M1.66669 9.99999C1.66669 14.6024 5.39765 18.3333 10 18.3333M1.66669 9.99999C1.66669 5.39762 5.39765 1.66666 10 1.66666M18.3334 9.99999C18.3334 14.6024 14.6024 18.3333 10 18.3333M18.3334 9.99999C18.3334 5.39762 14.6024 1.66666 10 1.66666M10 1.66666C12.0844 3.94862 13.269 6.91002 13.3334 9.99999C13.269 13.09 12.0844 16.0514 10 18.3333M10 1.66666C7.91562 3.94862 6.73106 6.91002 6.66669 9.99999C6.73106 13.09 7.91562 16.0514 10 18.3333" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-</g>
-<defs>
-<clipPath id="clip0_12786_6371">
-<rect width="20" height="20" fill="white"/>
-</clipPath>
-</defs>
-</svg>
-`;
+// Build step 2 form data for taxes
+const buildStep2Data = () => {
+  const formData = new FormData();
+  
+  // Add _method: PUT since we're updating
+  formData.append("_method", "PUT");
+  
+  // Add taxes array in the format: taxes[0][tax_id], taxes[0][percentage], etc.
+  taxTableItems.value.forEach((tax, index) => {
+    formData.append(`taxes[${index}][id]`, String(tax.id));
+    formData.append(`taxes[${index}][tax_id]`, String(tax.taxId));
+    formData.append(`taxes[${index}][percentage]`, tax.percentage.replace('%', ''));
+    formData.append(`taxes[${index}][minimum]`, tax.minValue);
+    formData.append(`taxes[${index}][priority]`, String(tax.priority));
+  });
+  
+  // Step
+  formData.append("step", "2");
+  
+  return formData;
+};
 
-const returnIcon = `<svg width="17" height="13" viewBox="0 0 17 13" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M0.833332 4.16671H12.0833C14.1544 4.16671 15.8333 5.84564 15.8333 7.91671C15.8333 9.98778 14.1544 11.6667 12.0833 11.6667H8.33333M0.833332 4.16671L4.16667 0.833374M0.833332 4.16671L4.16667 7.50004" stroke="white" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
+// Step 2 Save Handlers
+const handleStep2SaveAndReturn = async () => {
+  if (!productItemId.value) {
+    toast.error('يرجى إتمام الخطوة الأولى أولاً');
+    return;
+  }
+  
+  try {
+    savingLoading.value = true;
+    const formData = buildStep2Data();
+    const endpoint = `/grouped-items/${productItemId.value}`;
+    const response = await api.post<CreateItemResponse>(endpoint, formData);
+    
+    if (response.status === 200) {
+      toast.success("تم حفظ بيانات الضرائب بنجاح");
+      router.push({ name: 'GroupProductsList' });
+    }
+  } catch (err: any) {
+    console.error('Error saving tax data:', err);
+    displayApiErrors(err);
+  } finally {
+    savingLoading.value = false;
+  }
+};
+
+const handleStep2SaveAndCreate = async () => {
+  if (!productItemId.value) {
+    toast.error('يرجى إتمام الخطوة الأولى أولاً');
+    return;
+  }
+  
+  try {
+    savingLoading.value = true;
+    const formData = buildStep2Data();
+    const endpoint = `/grouped-items/${productItemId.value}`;
+    const response = await api.post<CreateItemResponse>(endpoint, formData);
+    
+    if (response.status === 200) {
+      toast.success("تم حفظ بيانات الضرائب بنجاح");
+      resetFormFields();
+    }
+  } catch (err: any) {
+    console.error('Error saving tax data:', err);
+    displayApiErrors(err);
+  } finally {
+    savingLoading.value = false;
+  }
+};
+
+const handleStep2SaveAndContinue = async () => {
+  if (!productItemId.value) {
+    toast.error('يرجى إتمام الخطوة الأولى أولاً');
+    return;
+  }
+  
+  try {
+    savingLoading.value = true;
+    const formData = buildStep2Data();
+    const endpoint = `/grouped-items/${productItemId.value}`;
+    const response = await api.post<CreateItemResponse>(endpoint, formData);
+    
+    if (response.status === 200) {
+      toast.success("تم حفظ بيانات الضرائب بنجاح");
+      // Fetch items list for step 3 dropdowns
+      await fetchItemsList();
+      // Move to next tab (Additional data)
+      activeTab.value = 2;
+    }
+  } catch (err: any) {
+    console.error('Error saving tax data:', err);
+    displayApiErrors(err);
+  } finally {
+    savingLoading.value = false;
+  }
+};
+
+// Build step 3 form data for additional data
+const buildStep3Data = () => {
+  const formData = new FormData();
+  
+  // Add _method: PUT since we're updating
+  formData.append("_method", "PUT");
+  
+  // Brand, Manufacturer, Country of Origin
+  if (brand.value) formData.append("brand_id", String(brand.value));
+  if (manufacturer.value) formData.append("manufacturer_id", String(manufacturer.value));
+  if (originCountry.value) formData.append("country_of_origin_id", String(originCountry.value));
+  
+  // Product availability flags
+  formData.append("is_manufacturable", isManufacturingProduct.value ? "true" : "false");
+  formData.append("allow_negative_sales", sellNegative.value ? "true" : "false");
+  formData.append("is_rentable", isAvailableForRent.value ? "true" : "false");
+  formData.append("is_returnable", isAvailableForReturn.value ? "true" : "false");
+  formData.append("is_barter_sale", isAvailableForRefund.value ? "true" : "false");
+  formData.append("is_settlement_by_netting", isAvailableForOffset.value ? "true" : "false");
+  formData.append("is_available_for_projects", isAvailableForPurchase.value ? "true" : "false");
+  formData.append("is_available_for_sale", isAvailableForSelling.value ? "true" : "false");
+  formData.append("is_available_for_purchase", isAvailableForBuying.value ? "true" : "false");
+  
+  // Alternative items (array)
+  alternativeProducts.value.forEach((itemId, index) => {
+    formData.append(`alternative_items[${index}]`, String(itemId));
+  });
+  
+  // Attached items (array)
+  attachedProducts.value.forEach((itemId, index) => {
+    formData.append(`attached_items[${index}]`, String(itemId));
+  });
+  
+  // Linked items / Related products (array)
+  relatedProducts.value.forEach((itemId, index) => {
+    formData.append(`linked_items[${index}]`, String(itemId));
+  });
+  
+  // Best suppliers (array)
+  bestSuppliers.value.forEach((supplierId, index) => {
+    formData.append(`best_suppliers[${index}]`, String(supplierId));
+  });
+  
+  // Step
+  formData.append("step", "3");
+  
+  return formData;
+};
+
+// Step 3 Save Handlers
+const handleStep3SaveAndReturn = async () => {
+  if (!productItemId.value) {
+    toast.error('يرجى إتمام الخطوة الأولى أولاً');
+    return;
+  }
+  
+  try {
+    savingLoading.value = true;
+    const formData = buildStep3Data();
+    const endpoint = `/grouped-items/${productItemId.value}`;
+    const response = await api.post<CreateItemResponse>(endpoint, formData);
+    
+    if (response.status === 200) {
+      toast.success("تم حفظ البيانات الإضافية بنجاح");
+      router.push({ name: 'GroupProductsList' });
+    }
+  } catch (err: any) {
+    console.error('Error saving additional data:', err);
+    displayApiErrors(err);
+  } finally {
+    savingLoading.value = false;
+  }
+};
+
+const handleStep3SaveAndCreate = async () => {
+  if (!productItemId.value) {
+    toast.error('يرجى إتمام الخطوة الأولى أولاً');
+    return;
+  }
+  
+  try {
+    savingLoading.value = true;
+    const formData = buildStep3Data();
+    const endpoint = `/grouped-items/${productItemId.value}`;
+    const response = await api.post<CreateItemResponse>(endpoint, formData);
+    
+    if (response.status === 200) {
+      toast.success("تم حفظ البيانات الإضافية بنجاح");
+      resetFormFields();
+    }
+  } catch (err: any) {
+    console.error('Error saving additional data:', err);
+    displayApiErrors(err);
+  } finally {
+    savingLoading.value = false;
+  }
+};
+
+const handleStep3SaveAndContinue = async () => {
+  if (!productItemId.value) {
+    toast.error('يرجى إتمام الخطوة الأولى أولاً');
+    return;
+  }
+  
+  try {
+    savingLoading.value = true;
+    const formData = buildStep3Data();
+    const endpoint = `/grouped-items/${productItemId.value}`;
+    const response = await api.post<CreateItemResponse>(endpoint, formData);
+    
+    if (response.status === 200) {
+      toast.success("تم حفظ البيانات الإضافية بنجاح");
+      // Move to next tab (Tests list)
+      activeTab.value = 3;
+      // Fetch items list for step 3 dropdowns with ignore_id
+      fetchItemsList();
+    }
+  } catch (err: any) {
+    console.error('Error saving additional data:', err);
+    displayApiErrors(err);
+  } finally {
+    savingLoading.value = false;
+  }
+};
+
+// Check if tab is accessible
+const isTabAccessible = (tabValue: number) => {
+  // Tab 0 is always accessible
+  if (tabValue === 0) return true;
+  // Other tabs are accessible only in edit mode or after step 1 completion
+  return isEditMode.value || isStep1Completed.value;
+};
+
+// Handle tab click
+const handleTabClick = (tabValue: number) => {
+  if (isTabAccessible(tabValue)) {
+    activeTab.value = tabValue;
+  }
+};
+
+// Fetch single product data for edit mode
+const fetchProduct = async (id: number) => {
+  try {
+    const response = await api.get<any>(`/grouped-items/${id}`);
+    const data = response.data;
+
+    if (data) {
+      productItemId.value = data.id;
+      productCode.value = data.code;
+
+      // Names
+      if (data.name_translations) {
+        arabicName.value = data.name_translations.ar || '';
+        englishName.value = data.name_translations.en || '';
+      }
+
+      // Descriptions
+      if (data.description_translations) {
+        arabicDescription.value = data.description_translations.ar || '';
+        englishDescription.value = data.description_translations.en || '';
+      }
+
+      // Category & Unit
+      category.value = data.category_id;
+      unit.value = data.unit_id;
+      isMinUnit.value = data.is_minimum_unit;
+
+      // Prices
+      purchasePrice.value = data.purchase_price;
+      salePrice.value = data.sell_price;
+      minSalePrice.value = data.min_sell_price;
+      maxSalePrice.value = data.max_sell_price;
+      wholesalePrice.value = data.wholesale_price;
+      halfWholesalePrice.value = data.semi_wholesale_price;
+
+      // Taxes (Map API taxes to table items)
+      if (Array.isArray(data.taxes)) {
+        taxTableItems.value = data.taxes.map((tax: any) => {
+          // Find priority label from loaded constants
+          const priorityItem = taxPriorityItems.value.find(p => p.value == tax.priority);
+          const priorityLabel = priorityItem ? priorityItem.title : String(tax.priority);
+          
+          return {
+            id: tax.id,
+            taxId: tax.tax_id,
+            taxName: tax.tax_name,
+            percentage: tax.percentage ? `${parseFloat(tax.percentage)}%` : '0%',
+            minValue: tax.minimum,
+            priority: tax.priority,
+            priorityLabel: priorityLabel
+          };
+        });
+
+        // Update ID counter to prevent collisions with new local rows
+        if (taxTableItems.value.length > 0) {
+          const maxId = Math.max(...taxTableItems.value.map(t => t.id));
+          taxRowIdCounter = maxId + 1;
+        }
+      }
+
+      // Discount & Profit
+      discountType.value = data.discount_type ? Number(data.discount_type) : null;
+      discountValue.value = data.discount_value;
+      profitMargin.value = data.profit_margin;
+
+      // Load aspect_value_ids for edit mode
+      if (Array.isArray(data.aspect_value_ids)) {
+        savedAspectValueIds.value = data.aspect_value_ids.map((id: any) => String(id));
+      }
+
+      // Relations
+      originCountry.value = data.country_of_origin_id;
+      manufacturer.value = data.manufacturer_id;
+      brand.value = data.brand_id;
+
+      // Arrays (Map string IDs to numbers)
+      if (Array.isArray(data.alternative_items)) {
+        alternativeProducts.value = data.alternative_items.map((i: any) => Number(i));
+      }
+      if (Array.isArray(data.attached_items)) {
+        attachedProducts.value = data.attached_items.map((i: any) => Number(i));
+      }
+      if (Array.isArray(data.linked_items)) {
+        relatedProducts.value = data.linked_items.map((i: any) => Number(i));
+      }
+      if (Array.isArray(data.best_suppliers)) {
+        bestSuppliers.value = data.best_suppliers.map((i: any) => Number(i));
+      }
+
+      // Boolean Flags - Mapping based on buildStep3Data logic
+      sellNegative.value = data.allow_negative_sales;
+      isManufacturingProduct.value = data.is_manufacturable;
+      isAvailableForRent.value = data.is_rentable;
+      isAvailableForReturn.value = data.is_returnable;
+      
+      // Mappings inferred from formData construction:
+      isAvailableForRefund.value = data.is_barter_sale; // formData: is_barter_sale maps to isAvailableForRefund
+      isAvailableForOffset.value = data.is_settlement_by_netting; // formData: is_settlement_by_netting maps to isAvailableForOffset
+      isAvailableForPurchase.value = data.is_available_for_projects; // formData: is_available_for_projects maps to isAvailableForPurchase
+      isAvailableForSelling.value = data.is_available_for_sale;
+      isAvailableForBuying.value = data.is_available_for_purchase;
+
+      // Load sub_items for edit mode
+      if (Array.isArray(data.sub_items) && data.sub_items.length > 0) {
+        subProductsTableItems.value = data.sub_items.map((item: any, index: number) => ({
+          id: index + 1, // Local ID for v-for key
+          backendId: item.id, // Backend ID for API updates
+          name: item.name || '',
+          sku: item.code || '',
+          salePrice: item.sell_price || '',
+          purchasePrice: item.purchase_price || '',
+          isEditing: false,
+        }));
+      }
+
+      isStep1Completed.value = true;
+    }
+  } catch (err: any) {
+    console.error('Error fetching product:', err);
+    toast.error('فشل في جلب بيانات المنتج');
+  }
+};
+
+// Lifecycle hook - fetch data on mount
+onMounted(async () => {
+  loading.value = true;
+  try {
+    await Promise.all([
+      // Step 1 APIs
+      fetchCategories(),
+      fetchUnits(),
+      fetchConstants(),
+      // Step 2 APIs
+      fetchTaxes(),
+      fetchTaxConstants(),
+      // Step 3 APIs
+      fetchBrands(),
+      fetchManufacturers(),
+      fetchCountries(),
+      fetchSuppliers(),
+      // fetchAspects(), // Removed from here to be called by watch on category selection
+    ]);
+    
+    // If in edit mode, set step 1 as completed and load item data
+    if (isEditMode.value) {
+      itemId.value = Number(route.params.id);
+      productItemId.value = Number(route.params.id);
+      // Fetch items list with ignore_id for edit mode
+      await fetchItemsList();
+      // Fetch item data for editing
+      await fetchProduct(Number(route.params.id));
+    }
+  } catch (err) {
+    console.error('Error loading form data:', err);
+  } finally {
+    loading.value = false;
+  }
+});
+
+// Watch for tab changes to fetch data when needed
+watch(activeTab, async (newTab) => {
+  // When moving to tab 2 (Additional data), fetch items list if not already loaded
+  if (newTab === 2 && productItems.value.length === 0 && productItemId.value) {
+    await fetchItemsList();
+  }
+});
+
+// Watch for category change to fetch aspects
+watch(category, (newVal) => {
+  if (newVal) {
+    fetchAspects();
+  } else {
+    aspects.value = [];
+    selectedAspects.value = {};
+  }
+});
+
+// Additional icons for sub-products table (matching DataTable.vue icons)
+const trashIcon = `<svg width="17" height="19" viewBox="0 0 17 19" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M11.6666 4.16668V3.50001C11.6666 2.56659 11.6666 2.09988 11.4849 1.74336C11.3251 1.42976 11.0702 1.17479 10.7566 1.015C10.4 0.833344 9.93334 0.833344 8.99992 0.833344H7.66658C6.73316 0.833344 6.26645 0.833344 5.90993 1.015C5.59633 1.17479 5.34136 1.42976 5.18157 1.74336C4.99992 2.09988 4.99992 2.56659 4.99992 3.50001V4.16668M6.66659 8.75001V12.9167M9.99992 8.75001V12.9167M0.833252 4.16668H15.8333M14.1666 4.16668V13.5C14.1666 14.9001 14.1666 15.6002 13.8941 16.135C13.6544 16.6054 13.272 16.9878 12.8016 17.2275C12.2668 17.5 11.5667 17.5 10.1666 17.5H6.49992C5.09979 17.5 4.39972 17.5 3.86494 17.2275C3.39454 16.9878 3.01209 16.6054 2.7724 16.135C2.49992 15.6002 2.49992 14.9001 2.49992 13.5V4.16668" stroke="#D92D20" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`;
 
-const saveIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M4.08333 0.750122H10.4788C10.8864 0.750122 11.0902 0.750122 11.2821 0.796172C11.4521 0.837 11.6147 0.904341 11.7638 0.995722C11.932 1.09879 12.0761 1.24292 12.3644 1.53117L14.969 4.13574C15.2572 4.42399 15.4013 4.56812 15.5044 4.73631C15.5958 4.88543 15.6631 5.04801 15.7039 5.21807C15.75 5.40988 15.75 5.61371 15.75 6.02136V12.4168M8.66667 6.58346H5.41667C4.94996 6.58346 4.7166 6.58346 4.53834 6.49263C4.38154 6.41273 4.25406 6.28525 4.17416 6.12845C4.08333 5.95019 4.08333 5.71683 4.08333 5.25012V3.66679M9.5 15.7501V12.0835C9.5 11.6167 9.5 11.3834 9.40917 11.2051C9.32928 11.0483 9.20179 10.9208 9.04499 10.8409C8.86673 10.7501 8.63338 10.7501 8.16667 10.7501H5.41667C4.94996 10.7501 4.7166 10.7501 4.53834 10.8409C4.38154 10.9208 4.25406 11.0483 4.17416 11.2051C4.08333 11.3834 4.08333 11.6167 4.08333 12.0835V15.7501M12.8333 6.71907V13.0835C12.8333 14.0169 12.8333 14.4836 12.6517 14.8401C12.4919 15.1537 12.2369 15.4087 11.9233 15.5685C11.5668 15.7501 11.1001 15.7501 10.1667 15.7501H3.41667C2.48325 15.7501 2.01654 15.7501 1.66002 15.5685C1.34641 15.4087 1.09144 15.1537 0.931656 14.8401C0.75 14.4836 0.75 14.0169 0.75 13.0835V6.33346C0.75 5.40003 0.75 4.93332 0.931656 4.5768C1.09144 4.2632 1.34641 4.00823 1.66002 3.84844C2.01654 3.66679 2.48325 3.66679 3.41667 3.66679H9.78105C9.98487 3.66679 10.0868 3.66679 10.1827 3.68981C10.2677 3.71023 10.349 3.7439 10.4236 3.78959C10.5077 3.84112 10.5797 3.91319 10.7239 4.05731L12.4428 5.77626C12.5869 5.92039 12.659 5.99245 12.7105 6.07655C12.7562 6.15111 12.7899 6.2324 12.8103 6.31743C12.8333 6.41333 12.8333 6.51525 12.8333 6.71907Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+const pencilIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M1.14662 14.1201C1.18491 13.7755 1.20405 13.6032 1.25618 13.4422C1.30243 13.2993 1.36778 13.1633 1.45045 13.038C1.54363 12.8967 1.66621 12.7741 1.91136 12.5289L12.9166 1.5237C13.8371 0.603225 15.3295 0.603226 16.2499 1.5237C17.1704 2.44417 17.1704 3.93656 16.2499 4.85703L5.24469 15.8623C4.99954 16.1074 4.87696 16.23 4.73566 16.3232C4.61029 16.4058 4.47433 16.4712 4.33146 16.5174C4.17042 16.5696 3.99813 16.5887 3.65356 16.627L0.833252 16.9404L1.14662 14.1201Z" stroke="#1570EF" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`;
 
-const arrowLeftIcon = `<svg width="15" height="12" viewBox="0 0 15 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M14.1667 5.83337H0.833344M0.833344 5.83337L5.83334 10.8334M0.833344 5.83337L5.83334 0.833374" stroke="#175CD3" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>`;
-
-const plusIcon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M10 4.16667V15.8333M4.16667 10H15.8333" stroke="white" stroke-width="1.67" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>`;
+// Icons moved to @/components/icons/productIcons.ts
 </script>
 
 <template>
@@ -545,12 +1461,15 @@ const plusIcon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xm
           <button
             v-for="tab in tabs"
             :key="tab.value"
-            @click="activeTab = tab.value"
+            @click="handleTabClick(tab.value)"
+            :disabled="!isTabAccessible(tab.value)"
             :class="[
               'flex items-center gap-2 px-3.5 py-2.5 rounded-md transition-all',
               isTabActive(tab.value)
                 ? 'bg-primary-500 text-white'
-                : 'text-gray-400 hover:bg-gray-50',
+                : isTabAccessible(tab.value)
+                  ? 'text-gray-400 hover:bg-gray-50 cursor-pointer'
+                  : 'text-gray-300 cursor-not-allowed opacity-50',
             ]"
           >
             <span v-html="tab.icon" class="w-6 h-6"></span>
@@ -560,7 +1479,8 @@ const plusIcon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xm
           </button>
         </div>
 
-        <div class="flex items-center lg:gap-3 gap-2">
+        <!-- Product Code Badge - Only show in edit mode or after step 1 completion -->
+        <div v-if="isEditMode || isStep1Completed" class="flex items-center lg:gap-3 gap-2">
           <!-- Label -->
           <span class="text-sm font-semibold text-gray-700">كود المنتج</span>
           <!-- Product Code Badge -->
@@ -672,7 +1592,7 @@ const plusIcon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xm
                         />
                       </div>
                       <PriceInput
-                        v-model="halfWholesalePrice"
+                        v-model="profitMargin"
                         label="هامش الربح"
                         placeholder="هامش الربح"
                         :rules="[numeric(), positive()]"
@@ -689,18 +1609,8 @@ const plusIcon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xm
                         />
                       </div>
                       <div>
-                        <div
-                          class="mb-[7px] text-sm font-semibold text-gray-700"
-                        >
-                          قيمة الخصم
-                        </div>
-                        <div
-                          class="bg-gray-200 border border-gray-300 rounded-lg px-3 py-2 min-h-[44px] font-semibold text-primary-900 flex items-center justify-end"
-                        >
-                          <p class="text-base dir-ltr font-semibold">
-                            {{ discountValue }} $
-                          </p>
-                        </div>
+                        <TextInput v-model="discountValue" label="قيمة الخصم" placeholder="ادخل قيمة الخصم"
+                          :rules="[numeric(), positive()]" :hide-details="false" />
                       </div>
                     </div>
                   </div>
@@ -875,27 +1785,24 @@ const plusIcon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xm
               </div>
             </div>
 
-            <!-- Product Variants Section - Only show when category is selected -->
+            <!-- Product Variants Section - Only show when category is selected AND not in edit mode -->
             <template v-if="isCategorySelected">
-              <div class="bg-primary-50 rounded-lg p-6 mb-6">
+              <!-- Show variant selection only in create mode -->
+              <div v-if="!isEditMode && !isStep1Completed" class="bg-primary-50 rounded-lg p-6 mb-6">
                 <h3 class="text-lg font-bold text-primary-800 text-right mb-6">
                   متغيرات المنتج
                 </h3>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-5 items-end">
-                  <div class="w-full">
+                  <div 
+                    v-for="aspect in aspects" 
+                    :key="aspect.id"
+                    class="w-full"
+                  >
                     <MultipleSelectInput
-                      v-model="selectedSizes"
-                      label="المقاس"
-                      :items="sizeItems"
-                      placeholder="اختر المقاس"
-                    />
-                  </div>
-                  <div class="w-full">
-                    <MultipleSelectInput
-                      v-model="selectedColors"
-                      label="اللون"
-                      :items="colorItems"
-                      placeholder="اختر اللون"
+                      v-model="selectedAspects[aspect.id]"
+                      :label="aspect.name"
+                      :items="aspect.values.map(v => ({ title: v.name, value: v.id }))"
+                      :placeholder="'اختر ' + aspect.name"
                     />
                   </div>
                   <div class="w-full">
@@ -906,8 +1813,8 @@ const plusIcon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xm
                 </div>
               </div>
 
-              <!-- Sub Products Table Section - Only show after generate -->
-              <div v-if="subProductsGenerated" class="mb-6">
+              <!-- Sub Products Table Section - Show after generate OR in edit mode when items exist -->
+              <div v-if="subProductsGenerated || subProductsTableItems.length > 0" class="mb-6">
                 <div class="rounded-lg overflow-hidden border border-gray-200">
                   <!-- Table Header -->
                   <div class="bg-primary-50 px-4 py-3">
@@ -968,17 +1875,17 @@ const plusIcon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xm
                         <td class="px-6 py-4 text-center">
                           <div class="flex items-center justify-center gap-1">
                             <template v-if="editingRowId === item.id">
-                              <ButtonWithIcon variant="flat" color="primary-500" height="40"
-                                custom-class="font-semibold text-xs" :prepend-icon="checkIcon"
-                                label="تعديل" @click="saveEditingRow" />
+                              <v-btn icon color="primary" size="small" class="!px-4 !w-auto" @click="saveEditingRow">
+                                تعديل
+                              </v-btn>
                             </template>
                             <template v-else>
-                              <ButtonWithIcon variant="flat" color="primary-500" height="40"
-                                custom-class="font-semibold text-xs" :prepend-icon="editIcon"
-                                label="" @click="startEditingRow(item)" />
-                              <ButtonWithIcon variant="flat" color="primary-500" height="40"
-                                custom-class="font-semibold text-xs" :prepend-icon="deleteIcon"
-                                label="" @click="deleteSubProductRow(item)" />
+                              <v-btn icon variant="text" color="primary" size="small" @click="startEditingRow(item)">
+                                <span v-html="pencilIcon"></span>
+                              </v-btn>
+                              <v-btn icon variant="text" color="error" size="small" @click="deleteSubProductRow(item)">
+                                <span v-html="trashIcon"></span>
+                              </v-btn>
                             </template>
                           </div>
                         </td>
@@ -1009,55 +1916,44 @@ const plusIcon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xm
         <v-tabs-window-item :value="1">
           <div class="mx-auto">
             <div class="-mx-6">
-              <h3
-                class="text-lg font-bold text-gray-900 bg-gray-25 border-t-gray-300 border-t px-6 py-3"
-              >
+              <h3 class="text-lg font-bold text-gray-900 bg-gray-25 border-t-gray-300 border-t px-6 py-3">
                 الضرائب المطبقة على المنتج
               </h3>
               <!-- Tax Fields Row -->
               <div
-                class="grid grid-cols-1 lg:grid-cols-5 md:grid-cols-3 gap-4 items-end px-6 bg-primary-50 py-3 border-t border-t-gray-300"
-              >
-                <SelectWithIconInput
-                  v-model="taxType"
-                  placeholder="اختر النوع"
-                  :items="taxTypeItems"
-                  :hide-details="true"
-                  show-add-button
-                  @add-click="handleAddTaxType"
-                />
-                <TextInput
-                  v-model="taxPercentage"
-                  placeholder="النسبة"
-                  :hide-details="true"
-                  disabled
-                />
-                <SelectInput
-                  v-model="taxMinValue"
-                  placeholder="اختر القيمة"
-                  :items="taxMinValueItems"
-                  :hide-details="true"
-                />
-                <SelectInput
-                  v-model="taxPriority"
-                  placeholder="اختر الأولوية"
-                  :items="taxPriorityItems"
-                  :hide-details="true"
-                />
+                class="grid grid-cols-1 lg:grid-cols-6 md:grid-cols-3 gap-4 items-center px-6 bg-primary-50 py-3 border-t border-t-gray-300">
+                <SelectWithIconInput v-model="taxType" placeholder="اختر النوع" :items="taxTypeItems"
+                  :hide-details="false" show-add-button @add-click="handleAddTaxType" @update:model-value="handleTaxChange" />
+                <TextInput v-model="taxPercentage" placeholder="النسبة" :hide-details="false" disabled />
+                <TextInput v-model="taxMinValue" placeholder="الحد الأدنى للضريبة" :hide-details="false" disabled />
+                <SelectInput v-model="taxPriority" placeholder="اختر الأولوية" :items="taxPriorityItems"
+                  :hide-details="false" />
                 <ButtonWithIcon variant="flat" color="primary-500" border="sm" rounded="4" height="44"
                   custom-class="font-semibold !text-white text-sm !border-primary-200" :prepend-icon="plusIcon"
-                  label="اضافة ضريبة" @click="handleAddTax" />
+                  :label="isEditingTax ? 'تعديل ضريبة' : 'أضف ضريبة'" @click="handleAddTax" />
+                <ButtonWithIcon v-if="isEditingTax" variant="flat" color="gray-200" border="sm" rounded="4" height="44"
+                  custom-class="font-semibold text-gray-700 text-sm"
+                  label="إلغاء" @click="handleCancelTaxEdit" />
               </div>
 
               <!-- Tax Table -->
-              <DataTable
-                :headers="taxTableHeaders"
-                :items="taxTableItems"
-                show-checkbox
-                show-actions
-                @edit="handleEditTax"
-                @delete="handleDeleteTax"
-              />
+              <DataTable :headers="taxTableHeaders" :items="taxTableItems" show-checkbox show-actions
+                force-show-edit force-show-delete @edit="handleEditTax" @delete="handleDeleteTax" />
+            </div>
+            
+            <!-- Action Buttons for Step 2 -->
+            <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col px-6">
+              <ButtonWithIcon variant="flat" color="primary" height="48" rounded="4"
+                custom-class="font-semibold text-base px-6 md:!px-10" :prepend-icon="returnIcon"
+                label="حفظ والعودة للرئيسية" @click="handleStep2SaveAndReturn" />
+
+              <ButtonWithIcon variant="flat" color="primary-50" height="48" rounded="4"
+                custom-class="font-semibold text-base text-primary-700 px-6 md:!px-10" :prepend-icon="saveIcon"
+                label="حفظ وإنشاء جديد" @click="handleStep2SaveAndCreate" />
+
+              <ButtonWithIcon variant="flat" color="primary-50" height="48" rounded="4"
+                custom-class="font-semibold text-base text-primary-700 px-6 md:!px-10" :prepend-icon="arrowLeftIcon"
+                label="حفظ والمتابعة" @click="handleStep2SaveAndContinue" />
             </div>
           </div>
         </v-tabs-window-item>
@@ -1072,69 +1968,28 @@ const plusIcon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xm
 
             <!-- Row 1: Country, Manufacturer, Brand -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-10 mb-6">
-              <SelectWithIconInput
-                v-model="originCountry"
-                label="بلد المنشأ"
-                placeholder="اختر البلد"
-                :items="countryItems"
-                :hide-details="true"
-                show-add-button
-                @add-click="handleAddCountry"
-              />
-              <SelectWithIconInput
-                v-model="manufacturer"
-                label="المصنع"
-                placeholder="اختر المصنع"
-                :items="manufacturerItems"
-                :hide-details="true"
-                show-add-button
-                @add-click="handleAddManufacturer"
-              />
-              <SelectWithIconInput
-                v-model="brand"
-                label="العلامة التجارية"
-                placeholder="ادخل العلامة التجارية"
-                :items="brandItems"
-                :hide-details="true"
-                show-add-button
-                @add-click="handleAddBrand"
-              />
+              <SelectWithIconInput v-model="originCountry" label="بلد المنشأ" placeholder="اختر البلد"
+                :items="countryItems" :hide-details="false" show-add-button @add-click="handleAddCountry" />
+              <SelectWithIconInput v-model="manufacturer" label="المصنع" placeholder="اختر المصنع"
+                :items="manufacturerItems" :hide-details="false" show-add-button @add-click="handleAddManufacturer" />
+              <SelectWithIconInput v-model="brand" label="العلامة التجارية" placeholder="ادخل العلامة التجارية"
+                :items="brandItems" :hide-details="false" show-add-button @add-click="handleAddBrand" />
             </div>
 
             <!-- Row 2: Related, Attached, Alternative Products -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-10 mb-6">
-              <SelectInput
-                v-model="relatedProducts"
-                label="المنتجات المرتبطة"
-                placeholder="اختر المنتج"
-                :items="productItems"
-                :hide-details="true"
-              />
-              <SelectInput
-                v-model="attachedProducts"
-                label="المنتجات الملحقة"
-                placeholder="اختر المنتج"
-                :items="productItems"
-                :hide-details="true"
-              />
-              <SelectInput
-                v-model="alternativeProducts"
-                label="المنتجات البديلة"
-                placeholder="اختر المنتج"
-                :items="productItems"
-                :hide-details="true"
-              />
+              <MultipleSelectInput v-model="relatedProducts" label="المنتجات المرتبطة" placeholder="اختر المنتج"
+                :items="productItems" :hide-details="false" />
+              <MultipleSelectInput v-model="attachedProducts" label="المنتجات الملحقة" placeholder="اختر المنتج"
+                :items="productItems" :hide-details="false" />
+              <MultipleSelectInput v-model="alternativeProducts" label="المنتجات البديلة" placeholder="اختر المنتج"
+                :items="productItems" :hide-details="false" />
             </div>
 
             <!-- Row 3: Best Suppliers -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
-              <SelectInput
-                v-model="bestSuppliers"
-                label="افضل الموردين"
-                placeholder="اختر المورد"
-                :items="supplierItems"
-                :hide-details="true"
-              />
+              <MultipleSelectInput v-model="bestSuppliers" label="افضل الموردين" placeholder="اختر المورد"
+                :items="supplierItems" :hide-details="false" />
             </div>
           </div>
 
@@ -1144,62 +1999,31 @@ const plusIcon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xm
               سمات/خصائص المنتج المتقدمة
             </h2>
 
-            <div class="flex flex-wrap gap-5">
-              <CheckboxInput
-                v-model="isAvailableForProjects"
-                label="متاح للمشاريع"
-                color="primary"
-              />
-              <CheckboxInput
-                v-model="isAvailableForPurchase"
-                label="متاح للشراء"
-                color="primary"
-              />
-              <CheckboxInput
-                v-model="isAvailableForSale"
-                label="متاح للبيع"
-                color="primary"
-              />
-              <CheckboxInput
-                v-model="isNegotiable"
-                label="قابل للمقاصة"
-                color="primary"
-              />
-              <CheckboxInput
-                v-model="isHostable"
-                label="قابل للمقايضة"
-                color="primary"
-              />
-              <CheckboxInput
-                v-model="isReturnable"
-                label="قابل للارجاع"
-                color="primary"
-              />
-              <CheckboxInput
-                v-model="isRentable"
-                label="قابل للايجار"
-                color="primary"
-              />
-              <CheckboxInput
-                v-model="sellNegative"
-                label="البيع بالسالب"
-                color="primary"
-              />
-              <CheckboxInput
-                v-model="isManufacturingProduct"
-                label="منتج تصنيع"
-                color="primary"
-              />
+            <div class="flex flex-wrap gap-8">
+              <CheckboxInput v-model="isManufacturingProduct" label="منتج تصنيع" color="primary" />
+              <CheckboxInput v-model="sellNegative" label="البيع بالسالب" color="primary" />
+              <CheckboxInput v-model="isAvailableForRent" label="قابل للإيجار" color="primary" />
+              <CheckboxInput v-model="isAvailableForReturn" label="قابل للمقايضة" color="primary" />
+              <CheckboxInput v-model="isAvailableForRefund" label="قابل للارجاع" color="primary" />
+              <CheckboxInput v-model="isAvailableForOffset" label="قابل للمقاصة" color="primary" />
+              <CheckboxInput v-model="isAvailableForSelling" label="متاح للبيع" color="primary" />
+              <CheckboxInput v-model="isAvailableForBuying" label="متاح للشراء" color="primary" />
+              <CheckboxInput v-model="isAvailableForPurchase" label="متاح للمشاريع" color="primary" />
             </div>
           </div>
-
-          <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col">
-            <ButtonWithIcon variant="flat" color="primary-50" height="48" rounded="4"
-              custom-class="font-semibold text-base text-primary-700 px-6 min-w-56"
-              label="حفظ" @click="handleSaveAndContinue" />
-
+          <!-- Action Buttons for Step 3 -->
+          <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col px-6">
             <ButtonWithIcon variant="flat" color="primary" height="48" rounded="4"
-              custom-class="min-w-56" label="حفظ / انشاء جديد" @click="handleSaveAndCreate" />
+              custom-class="font-semibold text-base px-6 md:!px-10" :prepend-icon="returnIcon"
+              label="حفظ والعودة للرئيسية" @click="handleStep3SaveAndReturn" />
+
+            <ButtonWithIcon variant="flat" color="primary-50" height="48" rounded="4"
+              custom-class="font-semibold text-base text-primary-700 px-6 md:!px-10" :prepend-icon="saveIcon"
+              label="حفظ وإنشاء جديد" @click="handleStep3SaveAndCreate" />
+
+            <ButtonWithIcon variant="flat" color="primary-50" height="48" rounded="4"
+              custom-class="font-semibold text-base text-primary-700 px-6 md:!px-10" :prepend-icon="arrowLeftIcon"
+              label="حفظ والمتابعة" @click="handleStep3SaveAndContinue" />
           </div>
         </v-tabs-window-item>
 
@@ -1287,27 +2111,6 @@ const plusIcon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xm
         </v-tabs-window-item>
       </v-tabs-window>
     </div>
-
-    <!-- Notification Snackbar -->
-    <v-snackbar
-      v-model="notification.show"
-      :timeout="notification.timeout"
-      :color="
-        notification.type === 'success'
-          ? 'success'
-          : notification.type === 'error'
-          ? 'error'
-          : notification.type === 'warning'
-          ? 'warning'
-          : 'info'
-      "
-      location="top end"
-    >
-      {{ notification.message }}
-      <template #actions>
-        <ButtonWithIcon variant="text" label="إغلاق" @click="notification.show = false" />
-      </template>
-    </v-snackbar>
   </default-layout>
 </template>
 
