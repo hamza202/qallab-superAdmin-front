@@ -174,9 +174,7 @@ html[dir="ltr"] .language-tabs-wrapper {
   }
 }
 
-// ===================================
-// HIDE THE SPINNERS FOR NUMBER INPUT
-// ===================================
+
 .no-spinner::-webkit-inner-spin-button,
 .no-spinner::-webkit-outer-spin-button {
   -webkit-appearance: none;
@@ -187,14 +185,12 @@ html[dir="ltr"] .language-tabs-wrapper {
   -moz-appearance: textfield;
 }
 
-// custom tooltip
 .v-tooltip>.v-overlay__content.custom-tooltip {
   @apply bg-white text-gray-500 rounded-md shadow-lg;
 }
 
 .no-scroll-style {}
 
-// checkbox
 .white-checkbox .v-selection-control__input .mdi-checkbox-blank-outline::before,
 .white-checkbox .v-selection-control__input .mdi-checkbox-marked::before {
   background-color: white !important;

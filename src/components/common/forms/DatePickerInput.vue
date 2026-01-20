@@ -88,7 +88,7 @@ const formattedDate = computed(() => {
             <template #activator="{ props: menuProps }">
                 <v-text-field v-model="formattedDate" :placeholder="placeholder" variant="outlined" :color="color"
                     :density="density" :disabled="disabled" :readonly="true" :error-messages="errorMessages"  :rules="rules" :dir="dir"
-                    :clearable="clearable" :hide-details="hideDetails" :hint="hint" :persistent-hint="persistentHint"
+                    :clearable="clearable" :hide-details="false" :hint="hint" :persistent-hint="persistentHint"
                     v-bind="menuProps">
                     <template #prepend-inner>
                         <slot name="prepend-inner">
