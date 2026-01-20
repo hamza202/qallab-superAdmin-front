@@ -156,6 +156,21 @@ export const settingsRoutes: RouteRecordRaw[] = [
     ],
   },
   {
+    path: "/settings/countries",
+    name: "Countries",
+    redirect: "/settings/Countries/list",
+    children: [
+      {
+        path: "list",
+        name: "CountriesList",
+        component: () => import("@/views/settings/countries/List.vue"),
+        meta: {
+          title: "pages.countries.title",
+        },
+      },
+    ],
+  },
+  {
     path: "/settings/taxes",
     name: "Taxes",
     redirect: "/settings/taxes/list",
