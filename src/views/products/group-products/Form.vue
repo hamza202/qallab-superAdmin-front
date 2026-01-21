@@ -56,6 +56,8 @@ const purchasePrice = ref("");
 const salePrice = ref("");
 const maxSalePrice = ref("");
 const minSalePrice = ref("");
+const materialType = ref<number | null>(null);
+const minQuantity = ref("");
 const wholesalePrice = ref("");
 const halfWholesalePrice = ref("");
 const discountType = ref<number | null>(null);
@@ -169,6 +171,7 @@ const manufacturerItems = ref<Array<{ title: string; value: number }>>([]);
 const brandItems = ref<Array<{ title: string; value: number }>>([]);
 const productItems = ref<Array<{ title: string; value: number }>>([]);
 const supplierItems = ref<Array<{ title: string; value: number }>>([])
+const MaterialTypeItems = ref<Array<{ title: string; value: string | number }>>([]);
 
 // Product Variants Data
 const subProductsGenerated = ref(false);
@@ -426,9 +429,9 @@ const handleCancelTaxEdit = () => {
 interface TestItem {
   id?: number;
   testName: string | null;
-  testsCount: number | string;
-  samplesCount: number | string;
-  sampleQuantity: number | string;
+  testsCount: number | string | null;
+  samplesCount: number | string | null;
+  sampleQuantity: number | string | null;
   status: boolean;
 }
 
@@ -512,7 +515,7 @@ const handleEditTest = (item: any) => {
 
 const handleSaveTest = (payload: any) => {
   if (editingTest.value && editingTest.value.id) {
-    const index = testsList.value.findIndex((t) => t.id === editingTest.value.id);
+    const index = testsList.value.findIndex((t) => t.id === editingTest?.value?.id);
     if (index !== -1) {
       testsList.value[index] = {
         ...testsList.value[index],
@@ -633,10 +636,16 @@ interface DiscountType {
   label: string;
 }
 
+interface MaterialType {
+  key: number;
+  label: string;
+}
+
 interface ConstantsResponse {
   status: number;
   data: {
     discount_types: DiscountType[];
+    material_types: MaterialType[];
   };
 }
 
@@ -703,6 +712,12 @@ const fetchConstants = async () => {
       title: item.label,
       value: item.key,
     }));
+
+    MaterialTypeItems.value = response.data.material_types.map((item: MaterialType) => ({
+      title: item.label,
+      value: item.key,
+    }));
+
   } catch (err: any) {
     console.error('Error fetching constants:', err);
   }
@@ -847,7 +862,9 @@ const buildStep1Data = () => {
   if (category.value) formData.append("category_id", String(category.value));
   if (unit.value) formData.append("unit_id", String(unit.value));
   formData.append("is_minimum_unit", isMinUnit.value ? "true" : "false");
-  
+  if (materialType.value) formData.append("material_type", String(materialType.value));
+  if (minQuantity.value) formData.append("min_quantity", String(minQuantity.value));
+
   // Prices
   if (purchasePrice.value) formData.append("purchase_price", purchasePrice.value);
   if (salePrice.value) formData.append("sell_price", salePrice.value);
@@ -917,6 +934,9 @@ const resetFormFields = () => {
   wholesalePrice.value = "";
   halfWholesalePrice.value = "";
   discountType.value = null;
+  materialType.value = null;
+  minQuantity.value = "";
+
   discountValue.value = "";
   profitMargin.value = "";
   productCode.value = "";
@@ -1316,6 +1336,8 @@ const fetchProduct = async (id: number) => {
       // Discount & Profit
       discountType.value = data.discount_type ? Number(data.discount_type) : null;
       discountValue.value = data.discount_value;
+      minQuantity.value = data.min_quantity;
+      materialType.value = data.material_types;
       profitMargin.value = data.profit_margin;
 
       // Load aspect_value_ids for edit mode
@@ -1719,6 +1741,17 @@ const pencilIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" 
                           classes="mt-2"
                         />
                       </div>
+
+                      <div>
+                        <SelectWithIconInput :rules="[required()]" clearable v-model="materialType" label="نوع المادة"
+                          placeholder="اختر نوع المادة" :items="MaterialTypeItems" :hide-details="false"/>
+                      </div>
+
+                      <div>
+                        <TextInput :rules="[required()]" v-model="minQuantity" label="حد أدنى للكمية"
+                          placeholder="أدخل الحد الأدنى" :hide-details="false" />
+                      </div>
+
                     </div>
 
                     <!-- Description with Language Tabs -->

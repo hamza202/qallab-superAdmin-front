@@ -65,6 +65,7 @@ export default defineConfig(({ mode }) => {
           'src/components/common',
           'src/components/common/forms',
           'src/components/common/tables',
+          'src/components/buttons',
           'src/layouts',
         ],
         dts: 'src/components.d.ts',
