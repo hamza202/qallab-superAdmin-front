@@ -66,7 +66,7 @@ interface PriceListData {
   is_active: boolean
   is_assigned: boolean
   user_id: number
-  item_price_lists: Array<{
+  price_list_items: Array<{
     id: number
     item_id: number
     price_list_id: number
@@ -86,9 +86,10 @@ interface PriceListData {
         }
       }
       code: string
-      category: ItemCategory
       unit: ItemUnit
-    }
+    },
+    category: ItemCategory
+
   }>
 }
 
@@ -133,6 +134,10 @@ const saveIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xm
 const plusIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M8 1V15M1 8H15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`
+const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M12.3333 5.00033V4.33366C12.3333 3.40024 12.3333 2.93353 12.1517 2.57701C11.9919 2.2634 11.7369 2.00844 11.4233 1.84865C11.0668 1.66699 10.6001 1.66699 9.66667 1.66699H8.33333C7.39991 1.66699 6.9332 1.66699 6.57668 1.84865C6.26308 2.00844 6.00811 2.2634 5.84832 2.57701C5.66667 2.93353 5.66667 3.40024 5.66667 4.33366V5.00033M7.33333 9.58366V13.7503M10.6667 9.58366V13.7503M1.5 5.00033H16.5M14.8333 5.00033V14.3337C14.8333 15.7338 14.8333 16.4339 14.5608 16.9686C14.3212 17.439 13.9387 17.8215 13.4683 18.0612C12.9335 18.3337 12.2335 18.3337 10.8333 18.3337H7.16667C5.76654 18.3337 5.06647 18.3337 4.53169 18.0612C4.06129 17.8215 3.67883 17.439 3.43915 16.9686C3.16667 16.4339 3.16667 15.7338 3.16667 14.3337V5.00033" stroke="#B42318" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`;
+
 
 const productName = ref("")
 const allRows = ref<PriceListRow[]>([])
@@ -162,7 +167,7 @@ const rows = computed(() => {
 // API Functions
 const fetchCategories = async () => {
   try {
-    const response = await api.get<ApiResponse<ItemCategory[]>>('/admin/settings/categories/list')
+    const response = await api.get<ApiResponse<ItemCategory[]>>('/categories/list')
     categories.value = response.data
   } catch (err: any) {
     console.error('Error fetching categories:', err)
@@ -174,24 +179,19 @@ const fetchPriceListItems = async (priceListId: number) => {
   try {
     loading.value = true
     const response = await api.get<ApiResponse<PriceListData>>(
-      `/admin/price-lists/${priceListId}`,
+      `/price-lists/${priceListId}`,
       { params: { is_building_material: 0 } }
     )
     const priceListData = response.data
 
-    // Store supplier ID for sync operation
-    if (priceListData.item_price_lists && priceListData.item_price_lists.length > 0) {
-      supplierId.value = priceListData.user_id
-    }
-
-    if (priceListData.item_price_lists && priceListData.item_price_lists.length > 0) {
-      allRows.value = priceListData.item_price_lists.map((itemPrice) => ({
+    if (priceListData.price_list_items && priceListData.price_list_items.length > 0) {
+      allRows.value = priceListData.price_list_items.map((itemPrice) => ({
         id: itemPrice.id,
         itemId: itemPrice.item_id,
         name: itemPrice.item.translations?.name?.ar || itemPrice.item.name,
         code: itemPrice.item.code,
         image: null,
-        category: itemPrice.item.category,
+        category: itemPrice.category,
         unit: itemPrice.item.unit,
         priceMin: itemPrice.price_min,
         priceMax: itemPrice.price_max,
@@ -203,7 +203,7 @@ const fetchPriceListItems = async (priceListId: number) => {
           name: itemPrice.item.name,
           code: itemPrice.item.code,
           image: null,
-          category: itemPrice.item.category,
+          category: itemPrice.category,
           unit: itemPrice.item.unit,
           is_active: itemPrice.is_active,
           is_available: true,
@@ -246,7 +246,7 @@ const bulkSyncItems = async (supplierId: number, items: PriceListRow[]) => {
     })
   }
 
-  return await api.put(`/admin/suppliers/${supplierId}/price-list/items/sync`, payload)
+  return await api.put(`/suppliers/${supplierId}/price-list/items/sync`, payload)
 }
 
 // Track price changes
@@ -255,8 +255,9 @@ const handlePriceChange = (row: PriceListRow) => {
 }
 
 const tableHeaders = [
-  { key: "itemId", title: "المنتج" },
-  { key: "salePrice", title: "سعر البيع", width: "420px" },
+  { key: "itemId", title: "المنتج", width: "420px" },
+  { key: "maxPrice", title: "أعلى سعر", width: "150px" },
+  { key: "minPrice", title: "أدنى سعر", width: "150px" },
   { key: "actions", title: "الإجراءات", width: "100px" },
 ]
 
@@ -419,8 +420,8 @@ onMounted(async () => {
 
           <div class="flex items-center gap-3">
             <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4" border="sm"
-              custom-class="px-5 font-semibold text-sm sm:text-base !text-primary-800 !border-primary-200"
-              label="تحديث" prepend-icon="mdi-refresh"  />
+              custom-class="px-5 font-semibold text-sm sm:text-base !text-primary-800 !border-primary-200" label="تحديث"
+              prepend-icon="mdi-refresh" />
 
             <TextInput v-model="productName" placeholder="ابحث بالكود" :hide-details="true"
               :input-props="{ class: 'bg-white min-w-60' }">
@@ -434,17 +435,18 @@ onMounted(async () => {
           <div class="flex flex-col md:flex-row gap-3 md:items-center justify-between">
             <div class="flex flex-wrap gap-3 flex-1">
               <div class="min-w-[200px]">
-                <SelectInput v-model="selectedCategory" :items="categoryItems" placeholder="جلب المنتجات عن طريق تصنيف محدد"
-                  :hide-details="true" :input-props="{ class: 'bg-white min-w-[200px] md:min-w-[300px]' }" />
+                <SelectInput v-model="selectedCategory" :items="categoryItems"
+                  placeholder="جلب المنتجات عن طريق تصنيف محدد" :hide-details="true"
+                  :input-props="{ class: 'bg-white min-w-[200px] md:min-w-[300px]' }" />
               </div>
             </div>
 
             <ButtonWithIcon variant="flat" color="primary-500" rounded="4" height="40"
               custom-class="px-5 font-semibold !text-white text-sm sm:text-base" :prepend-icon="plusIcon"
-              label="إضافة منتج"  />
+              label="إضافة منتج" />
           </div>
         </div>
-        <EditableDataTable :headers="tableHeaders" :items="rows" :loading="loading" show-checkbox>
+        <EditableDataTable :headers="tableHeaders" :items="rows" :loading="loading" show-checkbox :show-actions="false">
           <template #item.itemId="{ item }">
             <div class="flex items-center gap-3">
               <v-avatar v-if="(item as PriceListRow).image" size="40" rounded>
@@ -452,25 +454,27 @@ onMounted(async () => {
               </v-avatar>
               <div>
                 <div class="text-sm font-semibold text-gray-900">{{ (item as PriceListRow).name }}</div>
-                <div class="text-xs text-gray-500">{{ (item as PriceListRow).code }} • {{ (item as
-                  PriceListRow).category.name }}</div>
               </div>
             </div>
           </template>
 
-          <template #item.salePrice="{ item }">
-            <div class="flex items-center gap-2">
-              <div class="w-[180px]">
-                <PriceInput v-model="(item as PriceListRow).priceMin" currency="الحد الأدنى" keep-currency-visible
-                  placeholder="0" :hide-details="true" :input-props="{ class: 'bg-white' }"
-                  @update:model-value="handlePriceChange(item as PriceListRow)" />
-              </div>
-              <div class="w-[180px]">
-                <PriceInput v-model="(item as PriceListRow).priceMax" currency="الحد الأقصى" keep-currency-visible
-                  placeholder="0" :hide-details="true" :input-props="{ class: 'bg-white' }"
-                  @update:model-value="handlePriceChange(item as PriceListRow)" />
-              </div>
+          <template #item.maxPrice="{ item }">
+            <div class="w-[150px]">
+              <PriceInput v-model="(item as PriceListRow).priceMax" placeholder="0" :hide-details="true" showRialIcon
+                :input-props="{ class: 'bg-white !text-center' }"
+                @update:model-value="handlePriceChange(item as PriceListRow)" />
             </div>
+          </template>
+          <template #item.minPrice="{ item }">
+            <div class="w-[150px]">
+              <PriceInput v-model="(item as PriceListRow).priceMin" placeholder="0" :hide-details="true" showRialIcon
+                :input-props="{ class: 'bg-white !text-center' }"
+                @update:model-value="handlePriceChange(item as PriceListRow)" />
+            </div>
+          </template>
+
+          <template #item.actions="{ item }">
+            <ButtonWithIcon :icon="trashIcon" icon-only size="small" variant="text" color="error" @click="" />
           </template>
         </EditableDataTable>
 

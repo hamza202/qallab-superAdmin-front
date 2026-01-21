@@ -53,6 +53,8 @@ const purchasePrice = ref("");
 const salePrice = ref("");
 const maxSalePrice = ref("");
 const minSalePrice = ref("");
+const materialType = ref<number | null>(null);
+const minQuantity = ref("");
 const wholesalePrice = ref("");
 const halfWholesalePrice = ref("");
 const discountType = ref<number | null>(null);
@@ -63,6 +65,7 @@ const profitMargin = ref("");
 const categoryItems = ref<Array<{ title: string; value: string | number }>>([]);
 const unitItems = ref<Array<{ title: string; value: string | number }>>([]);
 const discountTypeItems = ref<Array<{ title: string; value: string | number }>>([]);
+const MaterialTypeItems = ref<Array<{ title: string; value: string | number }>>([]);
 
 // Available languages (will be fetched from API in the future)
 const availableLanguages = ref([
@@ -165,7 +168,7 @@ const countryItems = ref<Array<{ title: string; value: number }>>([]);
 const manufacturerItems = ref<Array<{ title: string; value: number }>>([]);
 const brandItems = ref<Array<{ title: string; value: number }>>([]);
 const productItems = ref<Array<{ title: string; value: number }>>([]);
-const supplierItems = ref<Array<{ title: string; value: number }>>([]); 
+const supplierItems = ref<Array<{ title: string; value: number }>>([]);
 
 // Handlers for new section
 const handleAddCountry = () => {
@@ -488,10 +491,16 @@ interface DiscountType {
   label: string;
 }
 
+interface MaterialType {
+  key: number;
+  label: string;
+}
+
 interface ConstantsResponse {
   status: number;
   data: {
     discount_types: DiscountType[];
+    material_types: MaterialType[];
   };
 }
 
@@ -537,6 +546,11 @@ const fetchConstants = async () => {
   try {
     const response = await api.get<ConstantsResponse>('/items/constants');
     discountTypeItems.value = response.data.discount_types.map((item: DiscountType) => ({
+      title: item.label,
+      value: item.key,
+    }));
+
+    MaterialTypeItems.value = response.data.material_types.map((item: MaterialType) => ({
       title: item.label,
       value: item.key,
     }));
@@ -663,25 +677,28 @@ const fetchSuppliers = async () => {
 // Build step 1 form data using FormData for proper array notation
 const buildStep1Data = () => {
   const formData = new FormData();
-  
+
   // Add _method: PUT if we're updating (productItemId exists)
   if (productItemId.value) {
     formData.append("_method", "PUT");
   }
-  
+
   // Name fields with array notation
   formData.append("name[ar]", arabicName.value);
   formData.append("name[en]", englishName.value);
-  
+
   // Description fields with array notation
   formData.append("description[ar]", arabicDescription.value);
   formData.append("description[en]", englishDescription.value);
-  
+
   // Category and Unit
   if (category.value) formData.append("category_id", String(category.value));
   if (unit.value) formData.append("unit_id", String(unit.value));
   formData.append("is_minimum_unit", isMinUnit.value ? "true" : "false");
-  
+
+  if (materialType.value) formData.append("material_type", String(materialType.value));
+  if (minQuantity.value) formData.append("min_quantity", String(minQuantity.value));
+
   // Prices
   if (purchasePrice.value) formData.append("purchase_price", purchasePrice.value);
   if (salePrice.value) formData.append("sell_price", salePrice.value);
@@ -689,17 +706,17 @@ const buildStep1Data = () => {
   if (maxSalePrice.value) formData.append("max_sell_price", maxSalePrice.value);
   if (wholesalePrice.value) formData.append("wholesale_price", wholesalePrice.value);
   if (halfWholesalePrice.value) formData.append("half_wholesale_price", halfWholesalePrice.value);
-  
+
   // Discount
   if (discountType.value) formData.append("discount_type", String(discountType.value));
   if (discountValue.value) formData.append("discount_value", discountValue.value);
-  
+
   // Profit margin
   if (profitMargin.value) formData.append("profit_margin", profitMargin.value);
-  
+
   // Step
   formData.append("step", "1");
-  
+
   return formData;
 };
 
@@ -720,6 +737,8 @@ const resetFormFields = () => {
   halfWholesalePrice.value = "";
   discountType.value = null;
   discountValue.value = "";
+  minQuantity.value = "";
+  materialType.value = null;
   profitMargin.value = "";
   productCode.value = "";
   productItemId.value = null;
@@ -734,11 +753,11 @@ const handleSaveAndReturn = async () => {
     try {
       savingLoading.value = true;
       const formData = buildStep1Data();
-      
+
       // Use different endpoint for create vs update
       const endpoint = productItemId.value ? `/items/${productItemId.value}` : '/items';
       const response = await api.post<CreateItemResponse>(endpoint, formData);
-      
+
       if (response.status === 200) {
         // Store the item_id and code if creating new
         if (!productItemId.value && response.data.item_id) {
@@ -766,11 +785,11 @@ const handleSaveAndCreate = async () => {
     try {
       savingLoading.value = true;
       const formData = buildStep1Data();
-      
+
       // Use different endpoint for create vs update
       const endpoint = productItemId.value ? `/items/${productItemId.value}` : '/items';
       const response = await api.post<CreateItemResponse>(endpoint, formData);
-      
+
       if (response.status === 200) {
         toast.success(productItemId.value ? "تم التعديل بنجاح" : "تم الإنشاء بنجاح");
         resetFormFields();
@@ -790,11 +809,11 @@ const handleSaveAndContinue = async () => {
     try {
       savingLoading.value = true;
       const formData = buildStep1Data();
-      
+
       // Use different endpoint for create vs update
       const endpoint = productItemId.value ? `/items/${productItemId.value}` : '/items';
       const response = await api.post<CreateItemResponse>(endpoint, formData);
-      
+
       if (response.status === 200) {
         // Store the item_id and code if creating new
         if (!productItemId.value && response.data.item_id) {
@@ -820,10 +839,10 @@ const handleSaveAndContinue = async () => {
 // Build step 2 form data for taxes
 const buildStep2Data = () => {
   const formData = new FormData();
-  
+
   // Add _method: PUT since we're updating
   formData.append("_method", "PUT");
-  
+
   // Add taxes array in the format: taxes[0][tax_id], taxes[0][percentage], etc.
   taxTableItems.value.forEach((tax, index) => {
     formData.append(`taxes[${index}][id]`, String(tax.id));
@@ -832,10 +851,10 @@ const buildStep2Data = () => {
     formData.append(`taxes[${index}][minimum]`, tax.minValue);
     formData.append(`taxes[${index}][priority]`, String(tax.priority));
   });
-  
+
   // Step
   formData.append("step", "2");
-  
+
   return formData;
 };
 
@@ -845,13 +864,13 @@ const handleStep2SaveAndReturn = async () => {
     toast.error('يرجى إتمام الخطوة الأولى أولاً');
     return;
   }
-  
+
   try {
     savingLoading.value = true;
     const formData = buildStep2Data();
     const endpoint = `/items/${productItemId.value}`;
     const response = await api.post<CreateItemResponse>(endpoint, formData);
-    
+
     if (response.status === 200) {
       toast.success("تم حفظ بيانات الضرائب بنجاح");
       router.push({ name: 'SimpleProductsList' });
@@ -869,13 +888,13 @@ const handleStep2SaveAndCreate = async () => {
     toast.error('يرجى إتمام الخطوة الأولى أولاً');
     return;
   }
-  
+
   try {
     savingLoading.value = true;
     const formData = buildStep2Data();
     const endpoint = `/items/${productItemId.value}`;
     const response = await api.post<CreateItemResponse>(endpoint, formData);
-    
+
     if (response.status === 200) {
       toast.success("تم حفظ بيانات الضرائب بنجاح");
       resetFormFields();
@@ -893,13 +912,13 @@ const handleStep2SaveAndContinue = async () => {
     toast.error('يرجى إتمام الخطوة الأولى أولاً');
     return;
   }
-  
+
   try {
     savingLoading.value = true;
     const formData = buildStep2Data();
     const endpoint = `/items/${productItemId.value}`;
     const response = await api.post<CreateItemResponse>(endpoint, formData);
-    
+
     if (response.status === 200) {
       toast.success("تم حفظ بيانات الضرائب بنجاح");
       // Fetch items list for step 3 dropdowns
@@ -918,15 +937,15 @@ const handleStep2SaveAndContinue = async () => {
 // Build step 3 form data for additional data
 const buildStep3Data = () => {
   const formData = new FormData();
-  
+
   // Add _method: PUT since we're updating
   formData.append("_method", "PUT");
-  
+
   // Brand, Manufacturer, Country of Origin
   if (brand.value) formData.append("brand_id", String(brand.value));
   if (manufacturer.value) formData.append("manufacturer_id", String(manufacturer.value));
   if (originCountry.value) formData.append("country_of_origin_id", String(originCountry.value));
-  
+
   // Product availability flags
   formData.append("is_manufacturable", isManufacturingProduct.value ? "true" : "false");
   formData.append("allow_negative_sales", sellNegative.value ? "true" : "false");
@@ -937,30 +956,30 @@ const buildStep3Data = () => {
   formData.append("is_available_for_projects", isAvailableForPurchase.value ? "true" : "false");
   formData.append("is_available_for_sale", isAvailableForSelling.value ? "true" : "false");
   formData.append("is_available_for_purchase", isAvailableForBuying.value ? "true" : "false");
-  
+
   // Alternative items (array)
   alternativeProducts.value.forEach((itemId, index) => {
     formData.append(`alternative_items[${index}]`, String(itemId));
   });
-  
+
   // Attached items (array)
   attachedProducts.value.forEach((itemId, index) => {
     formData.append(`attached_items[${index}]`, String(itemId));
   });
-  
+
   // Linked items / Related products (array)
   relatedProducts.value.forEach((itemId, index) => {
     formData.append(`linked_items[${index}]`, String(itemId));
   });
-  
+
   // Best suppliers (array)
   bestSuppliers.value.forEach((supplierId, index) => {
     formData.append(`best_suppliers[${index}]`, String(supplierId));
   });
-  
+
   // Step
   formData.append("step", "3");
-  
+
   return formData;
 };
 
@@ -970,13 +989,13 @@ const handleStep3SaveAndReturn = async () => {
     toast.error('يرجى إتمام الخطوة الأولى أولاً');
     return;
   }
-  
+
   try {
     savingLoading.value = true;
     const formData = buildStep3Data();
     const endpoint = `/items/${productItemId.value}`;
     const response = await api.post<CreateItemResponse>(endpoint, formData);
-    
+
     if (response.status === 200) {
       toast.success("تم حفظ البيانات الإضافية بنجاح");
       router.push({ name: 'SimpleProductsList' });
@@ -994,13 +1013,13 @@ const handleStep3SaveAndCreate = async () => {
     toast.error('يرجى إتمام الخطوة الأولى أولاً');
     return;
   }
-  
+
   try {
     savingLoading.value = true;
     const formData = buildStep3Data();
     const endpoint = `/items/${productItemId.value}`;
     const response = await api.post<CreateItemResponse>(endpoint, formData);
-    
+
     if (response.status === 200) {
       toast.success("تم حفظ البيانات الإضافية بنجاح");
       resetFormFields();
@@ -1018,13 +1037,13 @@ const handleStep3SaveAndContinue = async () => {
     toast.error('يرجى إتمام الخطوة الأولى أولاً');
     return;
   }
-  
+
   try {
     savingLoading.value = true;
     const formData = buildStep3Data();
     const endpoint = `/items/${productItemId.value}`;
     const response = await api.post<CreateItemResponse>(endpoint, formData);
-    
+
     if (response.status === 200) {
       toast.success("تم حفظ البيانات الإضافية بنجاح");
       // Move to next tab (Tests list)
@@ -1096,7 +1115,7 @@ const fetchProduct = async (id: number) => {
           // Find priority label from loaded constants
           const priorityItem = taxPriorityItems.value.find(p => p.value == tax.priority);
           const priorityLabel = priorityItem ? priorityItem.title : String(tax.priority);
-          
+
           return {
             id: tax.id,
             taxId: tax.tax_id,
@@ -1118,6 +1137,8 @@ const fetchProduct = async (id: number) => {
       // Discount & Profit
       discountType.value = data.discount_type ? Number(data.discount_type) : null;
       discountValue.value = data.discount_value;
+      minQuantity.value = data.min_quantity;
+      materialType.value = data.material_types;
       profitMargin.value = data.profit_margin;
 
       // Relations
@@ -1144,7 +1165,7 @@ const fetchProduct = async (id: number) => {
       isManufacturingProduct.value = data.is_manufacturable;
       isAvailableForRent.value = data.is_rentable;
       isAvailableForReturn.value = data.is_returnable;
-      
+
       // Mappings inferred from formData construction:
       isAvailableForRefund.value = data.is_barter_sale; // formData: is_barter_sale maps to isAvailableForRefund
       isAvailableForOffset.value = data.is_settlement_by_netting; // formData: is_settlement_by_netting maps to isAvailableForOffset
@@ -1178,7 +1199,7 @@ onMounted(async () => {
       fetchCountries(),
       fetchSuppliers(),
     ]);
-    
+
     // If in edit mode, set step 1 as completed and load item data
     if (isEditMode.value) {
       itemId.value = Number(route.params.id);
@@ -1220,14 +1241,15 @@ watch(activeTab, async (newTab) => {
         class="flex lg:items-center lg:justify-between py-4 border-y border-gray-200 flex-col lg:flex-row gap-3 mb-4">
         <!-- Tabs -->
         <div class="flex gap-2 overflow-y-auto">
-          <button v-for="tab in tabs" :key="tab.value" @click="handleTabClick(tab.value)" :disabled="!isTabAccessible(tab.value)" :class="[
-            'flex items-center gap-2 px-3.5 py-2.5 rounded-md transition-all',
-            isTabActive(tab.value)
-              ? 'bg-primary-500 text-white'
-              : isTabAccessible(tab.value)
-                ? 'text-gray-400 hover:bg-gray-50 cursor-pointer'
-                : 'text-gray-300 cursor-not-allowed opacity-50',
-          ]">
+          <button v-for="tab in tabs" :key="tab.value" @click="handleTabClick(tab.value)"
+            :disabled="!isTabAccessible(tab.value)" :class="[
+              'flex items-center gap-2 px-3.5 py-2.5 rounded-md transition-all',
+              isTabActive(tab.value)
+                ? 'bg-primary-500 text-white'
+                : isTabAccessible(tab.value)
+                  ? 'text-gray-400 hover:bg-gray-50 cursor-pointer'
+                  : 'text-gray-300 cursor-not-allowed opacity-50',
+            ]">
             <span v-html="tab.icon" class="w-6 h-6"></span>
             <span class="text-base font-semibold whitespace-nowrap">{{
               tab.title
@@ -1341,8 +1363,8 @@ watch(activeTab, async (newTab) => {
                       </div>
                       <div class="flex items-center gap-4">
                         <ButtonWithIcon variant="flat" color="primary-700" height="40"
-                          custom-class="font-semibold text-base" :prepend-icon="langIcon"
-                          label="أضف لغة جديدة" @click="handleAddLanguage" />
+                          custom-class="font-semibold text-base" :prepend-icon="langIcon" label="أضف لغة جديدة"
+                          @click="handleAddLanguage" />
                       </div>
                     </div>
 
@@ -1366,7 +1388,7 @@ watch(activeTab, async (newTab) => {
                     </LanguageTabs>
 
                     <!-- Category and Unit -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-[20px]">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-[25px]">
                       <SelectWithIconInput v-model="category" label="التصنيف" placeholder="اختر التصنيف"
                         :items="categoryItems" :rules="[required()]" :hide-details="false" show-add-button
                         @add-click="handleAddCategory" />
@@ -1375,17 +1397,26 @@ watch(activeTab, async (newTab) => {
                           :rules="[required()]" :hide-details="false" show-add-button @add-click="handleAddUnit" />
                         <CheckboxInput v-model="isMinUnit" label="اقل وحدة" color="primary" classes="mt-2" />
                       </div>
+                      <div>
+                        <SelectWithIconInput :rules="[required()]" clearable v-model="materialType" label="نوع المادة"
+                          placeholder="اختر نوع المادة" :items="MaterialTypeItems" :hide-details="false"/>
+                      </div>
+
+                      <div>
+                        <TextInput :rules="[required()]" v-model="minQuantity" label="حد أدنى للكمية"
+                          placeholder="أدخل الحد الأدنى" :hide-details="false" />
+                      </div>
                     </div>
 
                     <!-- Description with Language Tabs -->
                     <LanguageTabs :languages="availableLanguages" label="الوصف" class="mb-[20px]">
                       <template #en>
-                        <RichTextEditor :rules="[required()]" v-model="englishDescription" placeholder="Enter description in English"
-                          min-height="120px" :hide-details="false" />
+                        <RichTextEditor :rules="[required()]" v-model="englishDescription"
+                          placeholder="Enter description in English" min-height="120px" :hide-details="false" />
                       </template>
                       <template #ar>
-                        <RichTextEditor :rules="[required()]" v-model="arabicDescription" placeholder="ادخل الوصف بالعربية" min-height="120px"
-                          :hide-details="false" />
+                        <RichTextEditor :rules="[required()]" v-model="arabicDescription"
+                          placeholder="ادخل الوصف بالعربية" min-height="120px" :hide-details="false" />
                       </template>
                     </LanguageTabs>
 
@@ -1426,7 +1457,8 @@ watch(activeTab, async (newTab) => {
               <div
                 class="grid grid-cols-1 lg:grid-cols-6 md:grid-cols-3 gap-4 items-center px-6 bg-primary-50 py-3 border-t border-t-gray-300">
                 <SelectWithIconInput v-model="taxType" placeholder="اختر النوع" :items="taxTypeItems"
-                  :hide-details="false" show-add-button @add-click="handleAddTaxType" @update:model-value="handleTaxChange" />
+                  :hide-details="false" show-add-button @add-click="handleAddTaxType"
+                  @update:model-value="handleTaxChange" />
                 <TextInput v-model="taxPercentage" placeholder="النسبة" :hide-details="false" disabled />
                 <TextInput v-model="taxMinValue" placeholder="الحد الأدنى للضريبة" :hide-details="false" disabled />
                 <SelectInput v-model="taxPriority" placeholder="اختر الأولوية" :items="taxPriorityItems"
@@ -1435,15 +1467,14 @@ watch(activeTab, async (newTab) => {
                   custom-class="font-semibold !text-white text-sm !border-primary-200" :prepend-icon="plusIcon"
                   :label="isEditingTax ? 'تعديل ضريبة' : 'أضف ضريبة'" @click="handleAddTax" />
                 <ButtonWithIcon v-if="isEditingTax" variant="flat" color="gray-200" border="sm" rounded="4" height="44"
-                  custom-class="font-semibold text-gray-700 text-sm"
-                  label="إلغاء" @click="handleCancelTaxEdit" />
+                  custom-class="font-semibold text-gray-700 text-sm" label="إلغاء" @click="handleCancelTaxEdit" />
               </div>
 
               <!-- Tax Table -->
-              <DataTable :headers="taxTableHeaders" :items="taxTableItems" show-checkbox show-actions
-                force-show-edit force-show-delete @edit="handleEditTax" @delete="handleDeleteTax" />
+              <DataTable :headers="taxTableHeaders" :items="taxTableItems" show-checkbox show-actions force-show-edit
+                force-show-delete @edit="handleEditTax" @delete="handleDeleteTax" />
             </div>
-            
+
             <!-- Action Buttons for Step 2 -->
             <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col px-6">
               <ButtonWithIcon variant="flat" color="primary" height="48" rounded="4"
@@ -1540,7 +1571,8 @@ watch(activeTab, async (newTab) => {
               <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                 <div>
                   <label class="block text-sm font-semibold text-gray-700 mb-2">الاختبار</label>
-                  <SelectInput v-model="testForm.testName" placeholder="اختر" :items="testItems" :hide-details="false" />
+                  <SelectInput v-model="testForm.testName" placeholder="اختر" :items="testItems"
+                    :hide-details="false" />
                 </div>
                 <div>
                   <label class="block text-sm font-semibold text-gray-700 mb-2">عدد الاختبارات</label>
@@ -1580,8 +1612,8 @@ watch(activeTab, async (newTab) => {
                   </div>
                 </div>
                 <ButtonWithIcon variant="flat" color="primary" rounded="4" height="48"
-                  custom-class="font-semibold text-base w-full md:col-span-2" :prepend-icon="plusIcon"
-                  label="أضف جديد" @click="handleAddTest" />
+                  custom-class="font-semibold text-base w-full md:col-span-2" :prepend-icon="plusIcon" label="أضف جديد"
+                  @click="handleAddTest" />
 
               </div>
 
@@ -1596,12 +1628,12 @@ watch(activeTab, async (newTab) => {
 
             <!-- Action Buttons -->
             <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col">
-              <ButtonWithIcon variant="flat" color="primary" rounded="4" height="48"
-                custom-class="min-w-56" :prepend-icon="saveIcon" label="حفظ" @click="handleSaveAndCreate" />
+              <ButtonWithIcon variant="flat" color="primary" rounded="4" height="48" custom-class="min-w-56"
+                :prepend-icon="saveIcon" label="حفظ" @click="handleSaveAndCreate" />
 
               <ButtonWithIcon variant="flat" color="primary-50" rounded="4" height="48"
-                custom-class="font-semibold text-base text-primary-700 px-6 min-w-56"
-                label="إغلاق" @click="handleSaveAndContinue">
+                custom-class="font-semibold text-base text-primary-700 px-6 min-w-56" label="إغلاق"
+                @click="handleSaveAndContinue">
                 <template #prepend>
                   <v-icon>mdi-close</v-icon>
                 </template>
