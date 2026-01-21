@@ -41,7 +41,7 @@ const internalValue = computed({
         :density="density" 
         :disabled="disabled"
         :readonly="readonly" 
-        :hide-details="hideDetails" 
+        :hide-details="false" 
         v-bind="inputProps" 
         :class="classes" 
     />

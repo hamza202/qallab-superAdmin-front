@@ -81,7 +81,7 @@ const rialIcon = `<svg width="13" height="15" viewBox="0 0 13 15" fill="none" xm
 
         <v-text-field v-model="internalValue" type="number" :placeholder="placeholder" variant="outlined" :color="color"
             :density="density" :disabled="disabled" :readonly="readonly" :clearable="clearable" :rules="rules"
-            :hide-details="hideDetails" :hint="hint" :persistent-hint="persistentHint"
+            :hide-details="false" :hint="hint" :persistent-hint="persistentHint"
             :prefix="!keepCurrencyVisible && showCurrencyOnLeft ? currency : undefined"
             :suffix="!keepCurrencyVisible && !showCurrencyOnLeft ? currency : undefined" v-bind="inputProps"
             class="price-input">
