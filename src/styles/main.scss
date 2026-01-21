@@ -209,3 +209,15 @@ html[dir="rtl"] .small-switch {
   @apply bg-gray-100 !important;
   opacity: 1 !important;
 }
+
+.v-switch--inset .v-switch__thumb {
+  @apply scale-100 !important;
+}
+
+html[dir="rtl"] .v-switch {
+
+  .v-switch__track,
+  .v-selection-control__wrapper {
+    transform: scaleX(-1);
+  }
+}

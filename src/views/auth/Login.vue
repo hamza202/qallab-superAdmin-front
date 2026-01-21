@@ -53,7 +53,7 @@ const handleForgotPassword = () => {
 
 // Handle create account
 const handleCreateAccount = () => {
-  router.push('/register');
+  window.open('https://dev-site.qallab.sa/register', '_blank');
 };
 </script>
 

@@ -35,6 +35,16 @@
       "message": "Are you sure you want to delete",
       "confirm": "Delete",
       "cancel": "Cancel"
+    },
+    "dashboard": {
+      "welcomeText": "Welcome to",
+      "qallab": "Qallab"
+    },
+    "errors": {
+      "pageNotFound": "Page not found",
+      "pageNotFoundDescription": "Sorry, the page you are looking for doesn't exist or has been moved. Here are some helpful links:",
+      "goBack": "Go back",
+      "takeMeHome": "Take me home"
     }
   }
 }

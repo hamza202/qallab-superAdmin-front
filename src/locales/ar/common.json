@@ -37,6 +37,16 @@
       "message": "هل تريد بالتأكيد الحذف",
       "confirm": "حذف",
       "cancel": "إلغاء"
+    },
+    "dashboard": {
+      "welcomeText": "أهلاً وسهلاً بك في",
+      "qallab": "قلاب"
+    },
+    "errors": {
+      "pageNotFound": "الصفحة غير موجودة",
+      "pageNotFoundDescription": "عذراً، الصفحة التي تبحث عنها غير موجودة أو تم نقلها. إليك بعض الروابط المفيدة:",
+      "goBack": "العودة",
+      "takeMeHome": "الصفحة الرئيسية"
     }
   }
 }
