@@ -92,8 +92,19 @@ export const useAuthStore = defineStore('auth', () => {
 
   const logout = async () => {
     isLoading.value = true
+    const currentToken = token.value || localStorage.getItem(AUTH_TOKEN_KEY)
+    
+    if (!currentToken) {
+      console.warn('No token found for logout')
+      clearAuthData()
+      isLoading.value = false
+      return
+    }
+    
     try {
-      await authService.logout()
+      await authService.logout(currentToken)
+    } catch (error) {
+      console.error('Logout error:', error)
     } finally {
       clearAuthData()
       isLoading.value = false

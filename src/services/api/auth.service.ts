@@ -60,9 +60,22 @@ const authService = {
     return response.data
   },
 
-  async logout(): Promise<void> {
+  async logout(token: string | null): Promise<void> {
     try {
-      await api.post('/auth/logout')
+      if (!token) {
+        console.warn('No token provided for logout')
+        return
+      }
+      
+      await axios.request({
+        method: 'GET',
+        url: `${AUTH_BASE_URL}/auth/logout`,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      })
     } catch (error) {
       // Even if logout API fails, we should clear local data
       console.error('Logout API error:', error)

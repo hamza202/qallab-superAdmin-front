@@ -2,6 +2,8 @@
   "app": {
     "name": "Qallab",
     "title": "superAdmin Portal",
-    "welcome": "Welcome"
+    "welcome": "Welcome",
+    "viewProfile": "View profile",
+    "logOut": "Log out"
   }
 }
