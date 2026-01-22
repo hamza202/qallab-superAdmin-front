@@ -12,7 +12,7 @@
         <ButtonWithIcon variant="flat" height="40" rounded="0"
           custom-class="font-semibold text-base border-gray-300 bg-primary-50 !text-primary-900"
           :prepend-icon="exportIcon" :label="t('common.export')" />
-          <span>test</span>
+          <span>test dev</span>
       </div>
 
       <div class="bg-gray-50 rounded-md -mx-6">
