@@ -17,6 +17,12 @@ api.interceptors.request.use(
     const authStore = useAuthStore();
     if (authStore.token) {
       config.headers.Authorization = `Bearer ${authStore.token}`;
+
+      // Add org-id header (organization.id)
+      const orgId = authStore.orgId;
+      if (orgId) {
+        config.headers['org-id'] = orgId;
+      }
     }
     return config;
   },

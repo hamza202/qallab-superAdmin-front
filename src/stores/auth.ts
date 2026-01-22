@@ -8,6 +8,7 @@ const AUTH_USER_KEY = 'auth_user'
 const AUTH_ORGANIZATION_KEY = 'auth_organization'
 const AUTH_ORGANIZATIONS_KEY = 'auth_organizations'
 const AUTH_USER_TYPE_KEY = 'auth_user_type'
+const AUTH_ORG_ID_KEY = 'auth_org_id'
 
 export const useAuthStore = defineStore('auth', () => {
   // State
@@ -16,6 +17,7 @@ export const useAuthStore = defineStore('auth', () => {
   const organization = ref<Organization | null>(JSON.parse(localStorage.getItem(AUTH_ORGANIZATION_KEY) || 'null'))
   const organizations = ref<Organization[]>(JSON.parse(localStorage.getItem(AUTH_ORGANIZATIONS_KEY) || '[]'))
   const userType = ref<string | null>(localStorage.getItem(AUTH_USER_TYPE_KEY))
+  const orgId = ref<number | null>(JSON.parse(localStorage.getItem(AUTH_ORG_ID_KEY) || 'null'))
   const isLoading = ref(false)
   const error = ref<string | null>(null)
 
@@ -35,13 +37,20 @@ export const useAuthStore = defineStore('auth', () => {
     organization.value = authUser.organization
     organizations.value = authUser.organizations
     userType.value = authUser.organization?.type || null
-    
+
+    // Use organization.id as org-id
+    const organizationId = authUser.organization?.id || null
+    orgId.value = organizationId
+
     localStorage.setItem(AUTH_TOKEN_KEY, authToken)
     localStorage.setItem(AUTH_USER_KEY, JSON.stringify(authUser))
     localStorage.setItem(AUTH_ORGANIZATION_KEY, JSON.stringify(authUser.organization))
     localStorage.setItem(AUTH_ORGANIZATIONS_KEY, JSON.stringify(authUser.organizations))
     if (authUser.organization?.type) {
       localStorage.setItem(AUTH_USER_TYPE_KEY, authUser.organization.type)
+    }
+    if (organizationId) {
+      localStorage.setItem(AUTH_ORG_ID_KEY, JSON.stringify(organizationId))
     }
   }
 
@@ -51,12 +60,14 @@ export const useAuthStore = defineStore('auth', () => {
     organization.value = null
     organizations.value = []
     userType.value = null
-    
+    orgId.value = null
+
     localStorage.removeItem(AUTH_TOKEN_KEY)
     localStorage.removeItem(AUTH_USER_KEY)
     localStorage.removeItem(AUTH_ORGANIZATION_KEY)
     localStorage.removeItem(AUTH_ORGANIZATIONS_KEY)
     localStorage.removeItem(AUTH_USER_TYPE_KEY)
+    localStorage.removeItem(AUTH_ORG_ID_KEY)
   }
 
   const login = async (email: string, password: string): Promise<boolean> => {
@@ -66,12 +77,12 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       const credentials = authService.getDefaultCredentials(email, password)
       const response = await authService.login(credentials)
-      
+
       if (response.status === 200 && response.data) {
         setAuthData(response.data.token, response.data.user)
         return true
       }
-      
+
       error.value = response.message || 'فشل تسجيل الدخول'
       return false
     } catch (err) {
@@ -93,14 +104,14 @@ export const useAuthStore = defineStore('auth', () => {
   const logout = async () => {
     isLoading.value = true
     const currentToken = token.value || localStorage.getItem(AUTH_TOKEN_KEY)
-    
+
     if (!currentToken) {
       console.warn('No token found for logout')
       clearAuthData()
       isLoading.value = false
       return
     }
-    
+
     try {
       await authService.logout(currentToken)
     } catch (error) {
@@ -117,16 +128,18 @@ export const useAuthStore = defineStore('auth', () => {
     const storedOrganization = localStorage.getItem(AUTH_ORGANIZATION_KEY)
     const storedOrganizations = localStorage.getItem(AUTH_ORGANIZATIONS_KEY)
     const storedUserType = localStorage.getItem(AUTH_USER_TYPE_KEY)
-    
+    const storedOrgId = localStorage.getItem(AUTH_ORG_ID_KEY)
+
     if (storedToken && storedUser) {
       token.value = storedToken
       user.value = JSON.parse(storedUser)
       organization.value = storedOrganization ? JSON.parse(storedOrganization) : null
       organizations.value = storedOrganizations ? JSON.parse(storedOrganizations) : []
       userType.value = storedUserType
+      orgId.value = storedOrgId ? JSON.parse(storedOrgId) : null
       return true
     }
-    
+
     clearAuthData()
     return false
   }
@@ -138,6 +151,7 @@ export const useAuthStore = defineStore('auth', () => {
     organization,
     organizations,
     userType,
+    orgId,
     isLoading,
     error,
     // Getters
