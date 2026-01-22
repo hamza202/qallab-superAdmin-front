@@ -89,7 +89,7 @@ const plusCircleIcon = `<svg width="22" height="22" viewBox="0 0 20 20" fill="no
         <v-select v-model="internalValue" :items="items" :item-title="itemTitle" :item-value="itemValue"
             :placeholder="placeholder" variant="outlined" :color="color" :density="density" :disabled="disabled"
             :readonly="readonly" :clearable="clearable" :multiple="multiple" :chips="chips" :rules="rules"
-            :error-messages="errorMessages" :hide-details="hideDetails" :hint="hint" :persistent-hint="persistentHint"
+            :error-messages="errorMessages" :hide-details="false" :hint="hint" :persistent-hint="persistentHint"
             v-bind="inputProps">
             <template v-if="showAddButton" #prepend-inner>
                 <button type="button" class="add-button" @click.stop.prevent="handleAddClick">

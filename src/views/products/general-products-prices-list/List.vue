@@ -151,7 +151,7 @@ interface PriceListFilters {
   per_page?: number;
   cursor?: string | null;
   type: string;
-  is_building_material: boolean;
+  material_type: number;
   name?: string;
   created_at?: string;
   status?: number | null;
@@ -274,8 +274,8 @@ const fetchPriceLists = async (append = false) => {
 
     const filters: PriceListFilters = {
       per_page: perPage.value,
-      type: 'items',
-      is_building_material: false,
+      type: 'product',
+      material_type: 0,
       cursor: append ? nextCursor.value : null,
     }
 

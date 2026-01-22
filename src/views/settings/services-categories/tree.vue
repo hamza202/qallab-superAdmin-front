@@ -620,7 +620,7 @@ const handleAddSubcategory = () => {
   // Switch to add mode for subcategory
   isEditing.value = false;
   isSubcategoryMode.value = true;
-  selectedCategory.value = null;
+  selectedCategory.value = { ...selectedCategory.value };
 
   // Reset form but keep parent category
   categoryNameAr.value = "";
@@ -864,6 +864,7 @@ const confirmDelete = async () => {
 
     // Refresh categories list
     await fetchCategoriesTree();
+    fetchCategoriesList()
 
     // Reset form and state
     resetForm();
@@ -1038,7 +1039,7 @@ const editIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xm
 
                 <SelectWithIconInput show-add-button clearable v-model="parentCategory" label="التصنيف الرئيسي"
                   placeholder="اختر التصنيف الرئيسي" :items="CategoryDropdownItems" :hide-details="false"
-                  :disabled="isSubcategoryMode" />
+                  :disabled="isSubcategoryMode" v-if="isSubcategoryMode" />
 
                 <SelectWithIconInput show-add-button clearable v-model="unit" label="الوحدة" placeholder="اختر الوحدة"
                   :items="unitItems" :hide-details="false" />
@@ -1104,7 +1105,7 @@ const editIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xm
               <div class="grid grid-cols-1 xl:grid-cols-2 gap-4 mb-6">
                 <div class="w-full lg:w-auto lg:flex-1 min-w-[250px]">
                   <SelectWithIconInput v-model="newTaxRule.tax_id" label="الضريبة" placeholder="اختر الضريبة"
-                    :items="taxNameItems" show-add-button :hide-details="false"
+                    :items="taxNameItems" show-add-button :hide-details="false" clearable
                     :error-messages="formErrors['taxes']" @update:model-value="delete formErrors['taxes']" />
                 </div>
 
@@ -1123,7 +1124,7 @@ const editIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xm
                     :items="priorityItems" :hide-details="false" />
                 </div>
               </div>
-
+              <p v-if="formErrors['taxes'] && newTaxRule.tax_id" class="text-xs text-error-500"> يجب إدخال قيم الضريبة المدخلة على الجدول أدناه </p>
               <div
                 class="mt-4 bg-white !rounded-xl shadow-[0px_1px_2px_0px_rgba(16,24,40,0.06)] shadow-[0px_1px_3px_0px_rgba(16,24,40,0.10)] outline outline-1 outline-offset-[-1px] outline-slate-200 overflow-hidden">
                 <h3 class="text-base sm:text-lg font-bold text-gray-900 px-6 py-5">

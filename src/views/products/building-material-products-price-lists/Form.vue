@@ -2,12 +2,16 @@
 import { ref, computed, onMounted } from "vue"
 import { useRoute, useRouter } from 'vue-router'
 import { useApi } from '@/composables/useApi'
-import { useNotification } from '@/composables/useNotification'
+
+interface TableItem {
+  id: string | number
+  [key: string]: any
+}
 
 interface ItemCategory {
   id: number
   name: string
-  is_building_material: boolean
+  material_type: boolean
   sup_category?: any[]
 }
 
@@ -30,25 +34,23 @@ interface PriceListItem {
   item_id: number
   name: string
   code: string
-  image: string | null
+  // image: string | null
   category: ItemCategory
-  unit: ItemUnit
   is_active: boolean
   is_available: boolean
   prices: ItemPrices
 }
 
-interface PriceListRow {
+interface PriceListRow extends TableItem {
   id: number
   itemId: number
   name: string
   code: string
-  image: string | null
+  // image: string | null
   category: ItemCategory
-  unit: ItemUnit
-  salePriceTon: string | null
-  salePriceM3: string | null
-  salePriceRd: string | null
+  priceM3: string | null
+  priceTon: string | null
+  priceRd: string | null
   isActive: boolean
   isAvailable: boolean
   originalData?: PriceListItem
@@ -67,7 +69,7 @@ interface PriceListData {
   is_active: boolean
   is_assigned: boolean
   user_id: number
-  item_price_lists: Array<{
+  price_list_items: Array<{
     id: number
     item_id: number
     price_list_id: number
@@ -87,9 +89,9 @@ interface PriceListData {
         }
       }
       code: string
-      category: ItemCategory
-      unit: ItemUnit
-    }
+    },
+    category: ItemCategory
+
   }>
 }
 
@@ -105,16 +107,13 @@ interface ApiResponse<T> {
 const route = useRoute()
 const router = useRouter()
 const api = useApi()
-const { success, error } = useNotification()
-
-const priceListId = computed(() => route.params.id ? Number(route.params.id) : null)
-const supplierId = ref<number | null>(null)
 const loading = ref(false)
 const saving = ref(false)
 
 // Categories for filtering
 const categories = ref<ItemCategory[]>([])
 const selectedCategory = ref<number | null>(null)
+const priceListId = computed(() => route.params.id ? Number(route.params.id) : '')
 
 const priceListIcon = `<svg width="52" height="52" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path fill-rule="evenodd" clip-rule="evenodd" d="M32.8485 26H36.4822C37.6244 26 38.6097 25.9999 39.4213 26.0662C40.2778 26.1362 41.1298 26.2907 41.9496 26.7085C43.1727 27.3316 44.1671 28.326 44.7902 29.5491C45.208 30.3689 45.3625 31.2209 45.4325 32.0774C45.4988 32.889 45.4987 33.8743 45.4987 35.0164V36.4836C45.4987 37.6257 45.4988 38.611 45.4325 39.4226C45.3625 40.2791 45.208 41.1311 44.7902 41.9509C44.1671 43.174 43.1727 44.1684 41.9496 44.7915C41.1298 45.2093 40.2778 45.3638 39.4213 45.4338C38.6097 45.5001 37.6243 45.5 36.4822 45.5H32.8486C31.7064 45.5 30.7211 45.5001 29.9095 45.4338C29.0529 45.3638 28.2009 45.2093 27.3811 44.7915C26.158 44.1684 25.1637 43.174 24.5405 41.9509C24.1228 41.1311 23.9683 40.2791 23.8983 39.4226C23.832 38.611 23.832 37.6257 23.832 36.4835V35.0165C23.832 33.8743 23.832 32.889 23.8983 32.0774C23.9683 31.2209 24.1228 30.3689 24.5405 29.5491C25.1637 28.326 26.158 27.3316 27.3811 26.7085C28.2009 26.2907 29.0529 26.1362 29.9095 26.0662C30.721 25.9999 31.7064 26 32.8485 26ZM30.2623 30.3852C29.6737 30.4333 29.4555 30.5149 29.3484 30.5695C28.9407 30.7772 28.6092 31.1087 28.4015 31.5164C28.3469 31.6235 28.2653 31.8417 28.2172 32.4303C28.1671 33.0442 28.1654 33.8508 28.1654 35.1V36.4C28.1654 37.6492 28.1671 38.4558 28.2172 39.0697C28.2653 39.6583 28.3469 39.8765 28.4015 39.9836C28.6092 40.3913 28.9407 40.7228 29.3484 40.9305C29.4555 40.9851 29.6737 41.0667 30.2623 41.1148C30.8762 41.165 31.6828 41.1667 32.932 41.1667H36.3987C37.6479 41.1667 38.4545 41.165 39.0684 41.1148C39.657 41.0667 39.8752 40.9851 39.9823 40.9305C40.39 40.7228 40.7215 40.3913 40.9292 39.9836C40.9838 39.8765 41.0654 39.6583 41.1135 39.0697C41.1637 38.4558 41.1654 37.6492 41.1654 36.4V35.1C41.1654 33.8508 41.1637 33.0442 41.1135 32.4303C41.0654 31.8417 40.9838 31.6235 40.9292 31.5164C40.7215 31.1087 40.39 30.7772 39.9823 30.5695C39.8752 30.5149 39.657 30.4333 39.0684 30.3852C38.4545 30.335 37.6479 30.3333 36.3987 30.3333H32.932C31.6828 30.3333 30.8762 30.335 30.2623 30.3852Z" fill="#1570EF"/>
@@ -123,12 +122,26 @@ const priceListIcon = `<svg width="52" height="52" viewBox="0 0 52 52" fill="non
 </svg>
 `;
 
+const searchIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M15.8334 15.8333L12.9168 12.9166M15 7.91659C15 11.8286 11.8287 14.9999 7.91671 14.9999C4.00469 14.9999 0.833374 11.8286 0.833374 7.91659C0.833374 4.00457 4.00469 0.833252 7.91671 0.833252C11.8287 0.833252 15 4.00457 15 7.91659Z" stroke="#697586" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+`
 const saveIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M4.16536 0.833496H10.5608C10.9684 0.833496 11.1723 0.833496 11.3641 0.879546C11.5341 0.920374 11.6967 0.987715 11.8458 1.0791C12.014 1.18217 12.1582 1.32629 12.4464 1.61454L15.051 4.21911C15.3392 4.50737 15.4834 4.65149 15.5864 4.81969C15.6778 4.96881 15.7452 5.13138 15.786 5.30144C15.832 5.49326 15.832 5.69708 15.832 6.10473V12.5002M8.7487 6.66683H5.4987C5.03199 6.66683 4.79863 6.66683 4.62037 6.576C4.46357 6.49611 4.33609 6.36862 4.25619 6.21182C4.16536 6.03356 4.16536 5.80021 4.16536 5.3335V3.75016M9.58203 15.8335V12.1668C9.58203 11.7001 9.58203 11.4668 9.4912 11.2885C9.41131 11.1317 9.28383 11.0042 9.12702 10.9243C8.94876 10.8335 8.71541 10.8335 8.2487 10.8335H5.4987C5.03199 10.8335 4.79863 10.8335 4.62037 10.9243C4.46357 11.0042 4.33609 11.1317 4.25619 11.2885C4.16536 11.4668 4.16536 11.7001 4.16536 12.1668V15.8335M12.9154 6.80245V13.1668C12.9154 14.1002 12.9154 14.567 12.7337 14.9235C12.5739 15.2371 12.319 15.4921 12.0053 15.6518C11.6488 15.8335 11.1821 15.8335 10.2487 15.8335H3.4987C2.56528 15.8335 2.09857 15.8335 1.74205 15.6518C1.42844 15.4921 1.17348 15.2371 1.01369 14.9235C0.832031 14.567 0.832031 14.1003 0.832031 13.1668V6.41683C0.832031 5.48341 0.832031 5.0167 1.01369 4.66018C1.17348 4.34658 1.42844 4.09161 1.74205 3.93182C2.09857 3.75016 2.56528 3.75016 3.4987 3.75016H9.86308C10.0669 3.75016 10.1688 3.75016 10.2647 3.77319C10.3498 3.7936 10.431 3.82727 10.5056 3.87296C10.5897 3.9245 10.6618 3.99656 10.8059 4.14069L12.5248 5.85964C12.669 6.00376 12.741 6.07583 12.7926 6.15993C12.8383 6.23449 12.8719 6.31577 12.8923 6.4008C12.9154 6.49671 12.9154 6.59862 12.9154 6.80245Z" stroke="white" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`
+
+const plusIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M8 1V15M1 8H15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`
+const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M12.3333 5.00033V4.33366C12.3333 3.40024 12.3333 2.93353 12.1517 2.57701C11.9919 2.2634 11.7369 2.00844 11.4233 1.84865C11.0668 1.66699 10.6001 1.66699 9.66667 1.66699H8.33333C7.39991 1.66699 6.9332 1.66699 6.57668 1.84865C6.26308 2.00844 6.00811 2.2634 5.84832 2.57701C5.66667 2.93353 5.66667 3.40024 5.66667 4.33366V5.00033M7.33333 9.58366V13.7503M10.6667 9.58366V13.7503M1.5 5.00033H16.5M14.8333 5.00033V14.3337C14.8333 15.7338 14.8333 16.4339 14.5608 16.9686C14.3212 17.439 13.9387 17.8215 13.4683 18.0612C12.9335 18.3337 12.2335 18.3337 10.8333 18.3337H7.16667C5.76654 18.3337 5.06647 18.3337 4.53169 18.0612C4.06129 17.8215 3.67883 17.439 3.43915 16.9686C3.16667 16.4339 3.16667 15.7338 3.16667 14.3337V5.00033" stroke="#B42318" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`;
+
+
 const productName = ref("")
 const allRows = ref<PriceListRow[]>([])
 const modifiedItemIds = ref<Set<number>>(new Set())
+const selectedRows = ref<number[]>([])
 
 // Filtered rows based on search and category
 const rows = computed(() => {
@@ -142,8 +155,8 @@ const rows = computed(() => {
   // Filter by name/code search
   if (productName.value.trim()) {
     const search = productName.value.trim().toLowerCase()
-    filtered = filtered.filter(row => 
-      row.name.toLowerCase().includes(search) || 
+    filtered = filtered.filter(row =>
+      row.name.toLowerCase().includes(search) ||
       row.code.toLowerCase().includes(search)
     )
   }
@@ -154,11 +167,11 @@ const rows = computed(() => {
 // API Functions
 const fetchCategories = async () => {
   try {
-    const response = await api.get<ApiResponse<ItemCategory[]>>('/settings/categories/list')
+    const response = await api.get<ApiResponse<ItemCategory[]>>('/categories/list')
     categories.value = response.data
   } catch (err: any) {
     console.error('Error fetching categories:', err)
-    error(err?.response?.data?.message || 'فشل في جلب التصنيفات')
+    toast.error(err?.response?.data?.message || 'فشل في جلب التصنيفات')
   }
 }
 
@@ -167,38 +180,30 @@ const fetchPriceListItems = async (priceListId: number) => {
     loading.value = true
     const response = await api.get<ApiResponse<PriceListData>>(
       `/price-lists/${priceListId}`,
-      { params: { is_building_material: 1 } }
+      { params: { material_type: 1 } }
     )
     const priceListData = response.data
 
-    // Store supplier ID for sync operation
-    if (priceListData.item_price_lists && priceListData.item_price_lists.length > 0) {
-      // Get supplier ID from the first item or from the price list data
-      supplierId.value = priceListData.user_id
-    }
-
-    if (priceListData.item_price_lists && priceListData.item_price_lists.length > 0) {
-      allRows.value = priceListData.item_price_lists.map((itemPrice) => ({
+    if (priceListData.price_list_items && priceListData.price_list_items.length > 0) {
+      allRows.value = priceListData.price_list_items.map((itemPrice) => ({
         id: itemPrice.id,
-        itemId: itemPrice.item_id,
-        name: itemPrice.item.translations?.name?.ar || itemPrice.item.name,
+        itemId: itemPrice.item.id,
+        name: itemPrice.item.name,
         code: itemPrice.item.code,
-        image: null,
-        category: itemPrice.item.category,
-        unit: itemPrice.item.unit,
-        salePriceTon: itemPrice.price_ton,
-        salePriceM3: itemPrice.price_m3,
-        salePriceRd: itemPrice.price_rd,
+        // image: null,
+        category: itemPrice.category,
+        priceM3: itemPrice.price_m3,
+        priceTon: itemPrice.price_ton,
+        priceRd: itemPrice.price_rd,
         isActive: itemPrice.is_active,
         isAvailable: true,
         originalData: {
           id: itemPrice.id,
-          item_id: itemPrice.item_id,
+          item_id: itemPrice.item.id,
           name: itemPrice.item.name,
           code: itemPrice.item.code,
-          image: null,
-          category: itemPrice.item.category,
-          unit: itemPrice.item.unit,
+          // image: null,
+          category: itemPrice.category,
           is_active: itemPrice.is_active,
           is_available: true,
           prices: {
@@ -214,56 +219,35 @@ const fetchPriceListItems = async (priceListId: number) => {
     }
   } catch (err: any) {
     console.error('Error fetching price list items:', err)
-    error(err?.response?.data?.message || 'فشل في جلب عناصر قائمة الأسعار')
+    toast.error(err?.response?.data?.message || 'فشل في جلب عناصر قائمة الأسعار')
   } finally {
     loading.value = false
   }
 }
 
-const bulkSyncItems = async (supplierId: number, items: PriceListRow[]) => {
-  const payload = {
-    items: items.map(row => {
-      const item: any = {
-        item_id: row.itemId,
-        is_active: row.isActive
-      }
-
-      // For building materials, send price_m3, price_ton, price_rd
-      if (row.salePriceM3 !== null && row.salePriceM3 !== '') {
-        item.price_m3 = parseFloat(row.salePriceM3)
-      }
-      if (row.salePriceTon !== null && row.salePriceTon !== '') {
-        item.price_ton = parseFloat(row.salePriceTon)
-      }
-      if (row.salePriceRd !== null && row.salePriceRd !== '') {
-        item.price_rd = parseFloat(row.salePriceRd)
-      }
-
-      return item
-    })
-  }
-
-  return await api.put(`/suppliers/${supplierId}/price-list/items/sync`, payload)
-}
-
-// Track price changes
-const handlePriceChange = (row: PriceListRow) => {
-  modifiedItemIds.value.add(row.itemId)
-}
 
 const tableHeaders = [
-  { key: "rowNumber", title: "#", width: "70px" },
-  { key: "itemId", title: "المنتج" },
+  { key: "rowNumber", title: "#", width: "30px" },
+  { key: "itemId", title: "المنتج", width: "420px" },
   { key: "salePrice", title: "سعر البيع", width: "420px" },
+  // { key: "actions", title: "الإجراءات", width: "100px" },
 ]
 
 const bulkEditMode = ref<BulkEditMode>("percentage")
-const bulkEditDirection = ref<BulkEditDirection>("increase")
 const bulkEditAmount = ref<number | null>(10)
 
-const applyBulkEdit = () => {
+const applyBulkEdit = (direction: BulkEditDirection) => {
+  // Check if any rows are selected
+  if (selectedRows.value.length === 0) {
+    toast.error('الرجاء تحديد منتجات لتطبيق التعديل')
+    return
+  }
+
   const amount = Math.abs(Number(bulkEditAmount.value))
-  if (!Number.isFinite(amount) || amount === 0) return
+  if (!Number.isFinite(amount) || amount === 0) {
+    toast.error('الرجاء إدخال قيمة صحيحة')
+    return
+  }
 
   const applyToValue = (value: string | null) => {
     const base = parseFloat(value || '0')
@@ -272,9 +256,9 @@ const applyBulkEdit = () => {
     let next = base
     if (bulkEditMode.value === "percentage") {
       const factor = amount / 100
-      next = bulkEditDirection.value === "increase" ? base * (1 + factor) : base * (1 - factor)
+      next = direction === "increase" ? base * (1 + factor) : base * (1 - factor)
     } else {
-      next = bulkEditDirection.value === "increase" ? base + amount : base - amount
+      next = direction === "increase" ? base + amount : base - amount
     }
 
     if (!Number.isFinite(next)) return value || '0'
@@ -282,80 +266,116 @@ const applyBulkEdit = () => {
     return next.toString()
   }
 
-  // Apply to filtered rows only
-  rows.value.forEach((r) => {
-    r.salePriceTon = applyToValue(r.salePriceTon)
-    r.salePriceM3 = applyToValue(r.salePriceM3)
-    r.salePriceRd = applyToValue(r.salePriceRd)
-    modifiedItemIds.value.add(r.itemId)
+  // Apply to selected rows only
+  allRows.value.forEach((r) => {
+    if (selectedRows.value.includes(r.id)) {
+      r.priceTon = applyToValue(r.priceTon)
+      r.priceM3 = applyToValue(r.priceM3)
+      r.priceRd = applyToValue(r.priceRd)
+      modifiedItemIds.value.add(r.itemId)
+    }
   })
+
+  toast.success(`تم تطبيق التعديل على ${selectedRows.value.length} منتج`)
 }
 
 // Category filter items
 const categoryItems = computed(() => [
-  { title: 'جميع التصنيفات', value: null },
   ...categories.value.map(cat => ({
     title: cat.name,
     value: cat.id
   }))
 ])
 
+const handleSelectRow = (item: TableItem, selected: boolean) => {
+  if (selected) {
+    if (!selectedRows.value.includes(Number(item.id))) {
+      selectedRows.value.push(Number(item.id))
+    }
+  } else {
+    const index = selectedRows.value.indexOf(Number(item.id))
+    if (index > -1) {
+      selectedRows.value.splice(index, 1)
+    }
+  }
+}
+
+const handleSelectAll = (selected: boolean) => {
+  if (selected) {
+    selectedRows.value = rows.value.map(r => r.id)
+  } else {
+    selectedRows.value = []
+  }
+}
+
+const bulkSyncItems = async (items: PriceListRow[]) => {
+  const payload = {
+    material_type : 1,
+    items: items.map(row => {
+      console.log(row);
+
+      const item: any = {
+        item_id: row.itemId,
+        is_active: row.isActive
+      }
+
+      // For building material products, send price_m3, price_ton, and price_rd
+      if (row.priceTon !== null && row.priceTon !== '') {
+        item.price_ton = parseFloat(row.priceTon)
+      }
+      if (row.priceM3 !== null && row.priceM3 !== '') {
+        item.price_m3 = parseFloat(row.priceM3)
+      }
+      if (row.priceRd !== null && row.priceRd !== '') {
+        item.price_rd = parseFloat(row.priceRd)
+      }
+
+      return item
+    })
+  }
+  console.log(payload);
+
+  return await api.put(`/price-lists/${priceListId.value}/items`, payload)
+}
+
 const handleSave = async () => {
   try {
     saving.value = true
-
-    if (!supplierId.value) {
-      error('معرف المورد غير موجود')
-      return
-    }
-
-    // Check if any modifications were made
-    if (modifiedItemIds.value.size === 0) {
-      error('لم يتم تعديل أي عنصر')
-      return
-    }
-
     // Send ALL items (API will determine what to add/update/remove)
-    const response = await bulkSyncItems(supplierId.value, allRows.value)
+    const response = await bulkSyncItems(allRows.value)
     const data = response.data
-
-    const summary = data.summary
-    const messages = []
-    
-    if (summary.added > 0) messages.push(`تم إضافة ${summary.added} عنصر`)
-    if (summary.updated > 0) messages.push(`تم تحديث ${summary.updated} عنصر`)
-    if (summary.removed > 0) messages.push(`تم حذف ${summary.removed} عنصر`)
-    if (summary.errors > 0) messages.push(`فشل ${summary.errors} عنصر`)
-
-    if (summary.errors > 0 && data.errors.length > 0) {
-      const errorMessages = data.errors.map((e: any) => e.error || e.message).join(', ')
-      error(`${messages.join(', ')}. الأخطاء: ${errorMessages}`)
-    } else {
-      success(messages.join(', ') || 'تم حفظ التغييرات بنجاح')
-    }
+    toast.success(data.message || 'تم حفظ القائمة بنجاح')
 
     // Refresh data
-    modifiedItemIds.value.clear()
-    await fetchPriceListItems(supplierId.value)
+    if (priceListId.value)
+      await fetchPriceListItems(priceListId.value)
   } catch (err: any) {
     console.error('Error saving price list:', err)
-    error(err?.response?.data?.message || 'فشل في حفظ قائمة الأسعار')
+    toast.error(err?.response?.data?.message || 'فشل في حفظ قائمة الأسعار')
   } finally {
     saving.value = false
   }
 }
 
 const handleClose = () => {
-  router.push({ name: 'ProductPriceListsList' })
+  router.push({ name: 'ProductsBuildingMaterialPriceList' })
+}
+
+const refreshData = () => {
+  selectedCategory.value = null
+  handleSelectAll(false)
+  if (priceListId.value)
+    fetchPriceListItems(priceListId.value)
 }
 
 // Lifecycle
 onMounted(async () => {
-  await fetchCategories()
+  fetchCategories()
   if (priceListId.value) {
     await fetchPriceListItems(priceListId.value)
   }
 })
+
 </script>
 
 <template>
@@ -382,69 +402,73 @@ onMounted(async () => {
                   <PriceInput v-model="bulkEditAmount" :hide-details="true" :input-props="{ class: 'bg-white' }"
                     :currency="bulkEditMode === 'percentage' ? '%' : ''" placeholder="10" />
                 </div>
-                <div class="p-1 bg-gray-50 border border-gray-100 rounded-lg">
-
-                  <v-btn-toggle v-model="bulkEditDirection" mandatory density="comfortable" color="primary"
-                    class="gap-2">
-                    <v-btn value="increase" variant="flat" class="px-4">
-                      <template #prepend>
-                        <span class="w-5 h-4 rounded-full bg-white flex items-center justify-center">
-                          <v-icon icon="mdi-plus" size="13" />
-                        </span>
-                      </template>
-                      <span class="font-semibold">زيادة</span>
-                    </v-btn>
-                    <v-btn value="decrease" variant="flat" class="px-4">
-                      <template #prepend>
-                        <span class="w-5 h-4 rounded-full bg-white flex items-center justify-center">
-                          <v-icon icon="mdi-minus" size="13" />
-                        </span>
-                      </template>
-
-                      <span class="font-semibold">نقصان</span>
-                    </v-btn>
-                  </v-btn-toggle>
+                <div class="flex items-center gap-2 p-1 bg-gray-50 border border-gray-100 rounded-lg">
+                  <v-btn variant="flat" color="primary-500" class="px-4" height="40" @click="applyBulkEdit('increase')">
+                    <template #prepend>
+                      <span class="w-5 h-4 rounded-full bg-white flex items-center justify-center">
+                        <v-icon icon="mdi-plus" size="13" />
+                      </span>
+                    </template>
+                    <span class="font-semibold text-white">زيادة</span>
+                  </v-btn>
+                  <v-btn variant="flat" color="primary-500" class="px-4" height="40" @click="applyBulkEdit('decrease')">
+                    <template #prepend>
+                      <span class="w-5 h-4 rounded-full bg-white flex items-center justify-center">
+                        <v-icon icon="mdi-minus" size="13" />
+                      </span>
+                    </template>
+                    <span class="font-semibold text-white">نقصان</span>
+                  </v-btn>
                 </div>
-                <ButtonWithIcon variant="flat" rounded="4" color="primary-500" border="sm" height="40"
-                  custom-class="px-7 !border-primary-200 text-white font-semibold text-base"
-                  label="تطبيق" @click="applyBulkEdit" />
               </div>
             </div>
           </div>
         </div>
 
-        <div class="border-y border-y-primary-100 bg-primary-50 px-4 sm:px-6 py-3">
+        <div class="flex gap-4 justify-between flex-wrap items-center border-y border-y-gray-200 py-2 px-4 sm:!px-6">
+          <div class="text-gray-900 text-lg font-bold">قائمة اسعار منتجات مواد البناء</div>
+
+          <div class="flex items-center gap-3">
+            <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4" border="sm" @click="refreshData"
+              custom-class="px-5 font-semibold text-sm sm:text-base !text-primary-800 !border-primary-200" label="تحديث"
+              prepend-icon="mdi-refresh" />
+
+            <TextInput v-model="productName" placeholder="ابحث بالكود" :hide-details="true"
+              :input-props="{ class: 'bg-white min-w-60' }">
+              <template #prepend-inner>
+                <span v-html="searchIcon"></span>
+              </template>
+            </TextInput>
+          </div>
+        </div>
+        <div class="border-y border-y border-y-primary-100 bg-primary-50 px-4 sm:!px-6 py-3">
           <div class="flex flex-col md:flex-row gap-3 md:items-center justify-between">
             <div class="flex flex-wrap gap-3 flex-1">
-              <div class="min-w-[250px]">
-                <TextInput v-model="productName" placeholder="ابحث باسم المنتج أو الكود" :hide-details="true"
-                  :input-props="{ class: 'bg-white' }" prepend-inner-icon="mdi-magnify" />
-              </div>
-              
               <div class="min-w-[200px]">
-                <SelectInput v-model="selectedCategory" :items="categoryItems" placeholder="التصنيف" :hide-details="true"
-                  :input-props="{ class: 'bg-white' }" />
+                <SelectInput v-model="selectedCategory" :items="categoryItems" clearable
+                  placeholder="جلب المنتجات عن طريق تصنيف محدد" :hide-details="true"
+                  :input-props="{ class: 'bg-white min-w-[200px] md:min-w-[300px]' }" />
               </div>
             </div>
 
-            <div class="text-sm font-semibold text-gray-700">
-              عدد المنتجات: {{ rows.length }} / {{ allRows.length }}
-            </div>
+            <!-- <ButtonWithIcon variant="flat" color="primary-500" rounded="4" height="40"
+              custom-class="px-5 font-semibold !text-white text-sm sm:text-base" :prepend-icon="plusIcon"
+              label="إضافة منتج" /> -->
           </div>
         </div>
-        <EditableDataTable :headers="tableHeaders" :items="rows" :loading="loading" show-checkbox>
+        <EditableDataTable :headers="tableHeaders" :items="rows" :loading="loading" show-checkbox :show-actions="false"
+          @select="handleSelectRow" @select-all="handleSelectAll">
           <template #item.rowNumber="{ rowIndex }">
             <span class="text-sm text-gray-600">{{ rowIndex + 1 }}</span>
           </template>
 
           <template #item.itemId="{ item }">
             <div class="flex items-center gap-3">
-              <v-avatar v-if="(item as PriceListRow).image" size="40" rounded>
+              <!-- <v-avatar v-if="(item as PriceListRow).image" size="40" rounded>
                 <v-img :src="(item as PriceListRow).image || undefined" :alt="(item as PriceListRow).name" />
-              </v-avatar>
+              </v-avatar> -->
               <div>
                 <div class="text-sm font-semibold text-gray-900">{{ (item as PriceListRow).name }}</div>
-                <div class="text-xs text-gray-500">{{ (item as PriceListRow).code }} • {{ (item as PriceListRow).category.name }}</div>
               </div>
             </div>
           </template>
@@ -452,33 +476,33 @@ onMounted(async () => {
           <template #item.salePrice="{ item }">
             <div class="flex items-center gap-2">
               <div class="w-[130px]">
-                <PriceInput v-model="(item as PriceListRow).salePriceTon" currency="طن" keep-currency-visible placeholder="0"
-                  :hide-details="true" :input-props="{ class: 'bg-white' }" 
-                  @update:model-value="handlePriceChange(item as PriceListRow)" />
+                <PriceInput v-model="(item as PriceListRow).priceTon" currency="طن" keep-currency-visible
+                  placeholder="0" :hide-details="true" :input-props="{ class: 'bg-white' }" />
               </div>
               <div class="w-[130px]">
-                <PriceInput v-model="(item as PriceListRow).salePriceM3" currency="م^3" keep-currency-visible placeholder="0"
-                  :hide-details="true" :input-props="{ class: 'bg-white' }" 
-                  @update:model-value="handlePriceChange(item as PriceListRow)" />
+                <PriceInput v-model="(item as PriceListRow).priceM3" currency="م^3" keep-currency-visible
+                  placeholder="0" :hide-details="true" :input-props="{ class: 'bg-white' }" />
               </div>
               <div class="w-[130px]">
-                <PriceInput v-model="(item as PriceListRow).salePriceRd" currency="رد" keep-currency-visible placeholder="0"
-                  :hide-details="true" :input-props="{ class: 'bg-white' }" 
-                  @update:model-value="handlePriceChange(item as PriceListRow)" />
+                <PriceInput v-model="(item as PriceListRow).priceRd" currency="رد" keep-currency-visible placeholder="0"
+                  :hide-details="true" :input-props="{ class: 'bg-white' }" />
               </div>
             </div>
           </template>
+
+          <!-- <template #item.actions="{ item }">
+            <ButtonWithIcon :icon="trashIcon" icon-only size="small" variant="text" color="error" @click="" />
+          </template> -->
         </EditableDataTable>
 
         <div class="flex flex-col sm:flex-row gap-3 sm:justify-center mt-6">
           <ButtonWithIcon variant="flat" rounded="4" color="primary" height="44"
-            custom-class="font-semibold text-base sm:min-w-[200px]"
-            :prepend-icon="saveIcon"
-            label="حفظ" @click="handleSave" :loading="saving" :disabled="loading" />
-          
+            custom-class="font-semibold text-base sm:min-w-[200px]" :prepend-icon="saveIcon" label="حفظ"
+            @click="handleSave" :loading="saving" :disabled="loading" />
+
           <ButtonWithIcon variant="flat" rounded="4" color="primary-50" height="44"
-            custom-class="font-semibold text-base text-primary-700 sm:min-w-[200px]"
-            label="إغلاق" @click="handleClose" :disabled="saving">
+            custom-class="font-semibold text-base text-primary-700 sm:min-w-[200px]" label="إغلاق" @click="handleClose"
+            :disabled="saving">
             <template #prepend>
               <v-icon>mdi-close</v-icon>
             </template>

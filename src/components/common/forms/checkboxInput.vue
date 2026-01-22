@@ -19,7 +19,7 @@ interface CheckboxInputProps {
 const props = withDefaults(defineProps<CheckboxInputProps>(), {
     color: "primary",
     density: "compact" as Density,
-    hideDetails: true,
+    hideDetails: false,
     inputProps: () => ({}),
 });
 
@@ -41,7 +41,7 @@ const internalValue = computed({
         :density="density" 
         :disabled="disabled"
         :readonly="readonly" 
-        :hide-details="false" 
+        :hide-details="hideDetails" 
         v-bind="inputProps" 
         :class="classes" 
     />
