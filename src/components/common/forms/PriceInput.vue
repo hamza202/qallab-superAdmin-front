@@ -34,6 +34,7 @@ interface PriceInputProps {
     showCurrencyOnLeft?: boolean;
     showRialIcon?: boolean;
     keepCurrencyVisible?: boolean;
+    allowNegative?: boolean;
 }
 
 const props = withDefaults(defineProps<PriceInputProps>(), {
@@ -48,6 +49,7 @@ const props = withDefaults(defineProps<PriceInputProps>(), {
     showRialIcon: false,
     keepCurrencyVisible: false,
     placeholder: "ادخل السعر",
+    allowNegative: false,
 });
 
 const emit = defineEmits<{
@@ -58,6 +60,16 @@ const internalValue = computed({
     get: () => props.modelValue,
     set: (val) => emit("update:modelValue", val),
 });
+
+const handleKeydown = (e: KeyboardEvent) => {
+    if (!props.allowNegative && e.key === '-') {
+        e.preventDefault();
+    }
+};
+
+const handleWheel = (e: WheelEvent) => {
+    e.preventDefault();
+};
 
 const rialIcon = `<svg width="13" height="15" viewBox="0 0 13 15" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g clip-path="url(#clip0_2962_362153)">
@@ -84,7 +96,7 @@ const rialIcon = `<svg width="13" height="15" viewBox="0 0 13 15" fill="none" xm
             :hide-details="false" :hint="hint" :persistent-hint="persistentHint"
             :prefix="!keepCurrencyVisible && showCurrencyOnLeft ? currency : undefined"
             :suffix="!keepCurrencyVisible && !showCurrencyOnLeft ? currency : undefined" v-bind="inputProps"
-            class="price-input">
+            class="price-input" @keydown="handleKeydown" @wheel="handleWheel">
             <template #prepend-inner>
                 <span v-if="keepCurrencyVisible && currency && showCurrencyOnLeft" class="text-xs text-gray-500">{{
                     currency }}</span>

@@ -16,9 +16,6 @@ import {
   saveIcon,
   arrowLeftIcon,
   plusIcon,
-  editIcon,
-  deleteIcon,
-  checkIcon
 } from "@/components/icons/productIcons";
 
 // Router & API
@@ -1337,7 +1334,24 @@ const fetchProduct = async (id: number) => {
       discountType.value = data.discount_type ? Number(data.discount_type) : null;
       discountValue.value = data.discount_value;
       minQuantity.value = data.min_quantity;
-      materialType.value = data.material_types;
+      // Material Type
+      if (data.material_types) {
+        if (typeof data.material_types === 'object' && 'key' in data.material_types) {
+            materialType.value = data.material_types.key;
+        } else if (typeof data.material_types === 'object' && 'id' in data.material_types) {
+            materialType.value = data.material_types.id;
+        } else {
+            materialType.value = data.material_types;
+        }
+      } else if (data.material_type) {
+         if (typeof data.material_type === 'object' && 'key' in data.material_type) {
+            materialType.value = data.material_type.key;
+        } else if (typeof data.material_type === 'object' && 'id' in data.material_type) {
+            materialType.value = data.material_type.id;
+        } else {
+            materialType.value = data.material_type;
+        }
+      }
       profitMargin.value = data.profit_margin;
 
       // Load aspect_value_ids for edit mode
@@ -1631,7 +1645,7 @@ const pencilIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" 
                         />
                       </div>
                       <div>
-                        <TextInput v-model="discountValue" label="قيمة الخصم" placeholder="ادخل قيمة الخصم"
+                        <PriceInput v-model="discountValue" label="قيمة الخصم" placeholder="ادخل قيمة الخصم"
                           :rules="[numeric(), positive()]" :hide-details="false" />
                       </div>
                     </div>
@@ -1748,7 +1762,7 @@ const pencilIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" 
                       </div>
 
                       <div>
-                        <TextInput :rules="[required()]" v-model="minQuantity" label="حد أدنى للكمية"
+                        <PriceInput :rules="[required()]" v-model="minQuantity" label="حد أدنى للكمية"
                           placeholder="أدخل الحد الأدنى" :hide-details="false" />
                       </div>
 

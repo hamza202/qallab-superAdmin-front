@@ -1138,7 +1138,24 @@ const fetchProduct = async (id: number) => {
       discountType.value = data.discount_type ? Number(data.discount_type) : null;
       discountValue.value = data.discount_value;
       minQuantity.value = data.min_quantity;
-      materialType.value = data.material_types;
+      // Material Type
+      if (data.material_types) {
+        if (typeof data.material_types === 'object' && 'key' in data.material_types) {
+            materialType.value = data.material_types.key;
+        } else if (typeof data.material_types === 'object' && 'id' in data.material_types) {
+            materialType.value = data.material_types.id;
+        } else {
+            materialType.value = data.material_types;
+        }
+      } else if (data.material_type) {
+         if (typeof data.material_type === 'object' && 'key' in data.material_type) {
+            materialType.value = data.material_type.key;
+        } else if (typeof data.material_type === 'object' && 'id' in data.material_type) {
+            materialType.value = data.material_type.id;
+        } else {
+            materialType.value = data.material_type;
+        }
+      }
       profitMargin.value = data.profit_margin;
 
       // Relations
@@ -1332,11 +1349,11 @@ watch(activeTab, async (newTab) => {
                           :items="discountTypeItems" />
                       </div>
                       <div>
-                        <TextInput v-model="discountValue" label="قيمة الخصم" placeholder="ادخل قيمة الخصم"
+                        <PriceInput v-model="discountValue" label="قيمة الخصم" placeholder="ادخل قيمة الخصم"
                           :rules="[numeric(), positive()]" :hide-details="false" />
                       </div>
                       <div>
-                        <TextInput v-model="profitMargin" label="هامش الربح" placeholder="ادخل هامش الربح"
+                        <PriceInput v-model="profitMargin" label="هامش الربح" placeholder="ادخل هامش الربح"
                           :rules="[numeric(), positive()]" :hide-details="false" />
                       </div>
                     </div>
@@ -1403,7 +1420,7 @@ watch(activeTab, async (newTab) => {
                       </div>
 
                       <div>
-                        <TextInput :rules="[required()]" v-model="minQuantity" label="حد أدنى للكمية"
+                        <PriceInput :rules="[required()]" v-model="minQuantity" label="حد أدنى للكمية"
                           placeholder="أدخل الحد الأدنى" :hide-details="false" />
                       </div>
                     </div>
