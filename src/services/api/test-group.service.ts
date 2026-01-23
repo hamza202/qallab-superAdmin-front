@@ -72,6 +72,10 @@ const testGroupService = {
     return await get<TestGroupListResponse>('/test-groups/list', { params })
   },
 
+  async getAll(params?: TestGroupListParams): Promise<TestGroupListResponse> {
+    return await get<TestGroupListResponse>('/test-groups', { params })
+  },
+
   async getById(id: number): Promise<{ data: TestGroup }> {
     return await get<{ data: TestGroup }>(`/test-groups/${id}`)
   },

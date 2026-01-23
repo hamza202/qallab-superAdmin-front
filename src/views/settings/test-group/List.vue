@@ -83,7 +83,7 @@ const fetchData = async (cursor?: string | null, append = false) => {
     if (filterName.value) params.name = filterName.value;
     if (filterStatus.value !== null) params.status = String(filterStatus.value);
 
-    const response = await testGroupService.getList(params);
+    const response = await testGroupService.getAll(params);
 
     if (append) {
       tableItems.value = [...tableItems.value, ...response.data];
