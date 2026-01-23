@@ -621,7 +621,7 @@ const handleAddSubcategory = () => {
   // Switch to add mode for subcategory
   isEditing.value = false;
   isSubcategoryMode.value = true;
-  selectedCategory.value = null;
+  selectedCategory.value =  { ...selectedCategory.value };
 
   // Reset form but keep parent category
   categoryNameAr.value = "";
@@ -763,14 +763,13 @@ const handleSave = async () => {
         } else {
           await api.post('/categories', payload);
         }
-
         toast.success(isSubcategoryMode.value ? 'تم إضافة التصنيف الفرعي بنجاح' : 'تم إضافة التصنيف بنجاح');
       }
     }
 
     // Refresh categories list
     await fetchCategoriesTree();
-
+    fetchCategoriesList()
     // Reset form and state
     resetForm();
     selectedCategory.value = null;
@@ -1124,7 +1123,7 @@ const editIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xm
                     :items="priorityItems" :hide-details="false" />
                 </div>
               </div>
-
+              <p v-if="formErrors['taxes'] && newTaxRule.tax_id" class="text-xs text-error-500"> يجب إدخال قيم الضريبة المدخلة على الجدول أدناه </p>
               <div
                 class="mt-4 bg-white !rounded-xl shadow-[0px_1px_2px_0px_rgba(16,24,40,0.06)] shadow-[0px_1px_3px_0px_rgba(16,24,40,0.10)] outline outline-1 outline-offset-[-1px] outline-slate-200 overflow-hidden">
                 <h3 class="text-base sm:text-lg font-bold text-gray-900 px-6 py-5">

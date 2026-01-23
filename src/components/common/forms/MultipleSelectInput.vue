@@ -72,7 +72,7 @@ const getItemTitle = (value: string | number): string => {
             :density="density"
             :disabled="disabled"
             :readonly="readonly"
-            :hide-details="hideDetails"
+            :hide-details="false"
             :hint="hint"
             :persistent-hint="persistentHint"
             multiple
