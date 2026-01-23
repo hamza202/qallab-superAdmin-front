@@ -65,8 +65,6 @@ const commercialRegister = ref("");
 const taxRegister = ref("");
 const entityType = ref<string | null>(null);
 const isActive = ref(true);
-const crIssueDate = ref("");
-const crExpiryDate = ref("");
 const languageId = ref<number | null>(null);
 const phone = ref("");
 const email = ref("");
@@ -185,8 +183,6 @@ const handleSave = async () => {
       if (taxRegister.value) payload.tax_register = String(taxRegister.value);
       if (entityType.value) payload.entity_type = entityType.value;
       payload.is_active = isActive.value;
-      if (crIssueDate.value) payload.cr_issue_date = crIssueDate.value;
-      if (crExpiryDate.value) payload.cr_expiry_date = crExpiryDate.value;
       if (languageId.value) payload.language_id = languageId.value;
       if (phone.value) payload.phone = phone.value;
       if (email.value) payload.email = email.value;
@@ -352,8 +348,6 @@ const handleBasicInfoUpdate = (data: any) => {
   if (data.taxRegister !== undefined) taxRegister.value = data.taxRegister;
   if (data.entityType !== undefined) entityType.value = data.entityType;
   if (data.isActive !== undefined) isActive.value = data.isActive;
-  if (data.crIssueDate !== undefined) crIssueDate.value = data.crIssueDate;
-  if (data.crExpiryDate !== undefined) crExpiryDate.value = data.crExpiryDate;
   if (data.languageId !== undefined) languageId.value = data.languageId;
   if (data.phone !== undefined) phone.value = data.phone;
   if (data.email !== undefined) email.value = data.email;
@@ -498,8 +492,6 @@ const fetchContractorData = async () => {
     taxRegister.value = data.tax_register || "";
     entityType.value = data.entity_type;
     isActive.value = data.is_active;
-    crIssueDate.value = data.cr_issue_date || "";
-    crExpiryDate.value = data.cr_expiry_date || "";
     languageId.value = data.language_id;
     phone.value = data.phone || "";
     email.value = data.email || "";
@@ -580,7 +572,7 @@ onMounted(async () => {
         <v-tabs-window-item :value="0">
           <BasicInfoTab :fullNameTranslations="fullNameTranslations" :tradeNameTranslations="tradeNameTranslations"
             :commercialRegister="commercialRegister" :taxRegister="taxRegister" :entityType="entityType"
-            :isActive="isActive" :crIssueDate="crIssueDate" :crExpiryDate="crExpiryDate" :languageId="languageId"
+            :isActive="isActive" :languageId="languageId"
             :phone="phone" :email="email" :mobile="mobile" :countryId="countryId" :cityId="cityId"
             :neighborhood="neighborhood" :streetName="streetName" :buildingNumber="buildingNumber"
             :postalCode="postalCode" :address1="address1" :entityTypeItems="entityTypeItems"
