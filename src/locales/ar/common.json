@@ -28,6 +28,7 @@
     "addNew": "أضف جديد",
     "active": "فعال",
     "inactive": "غير فعال",
+    "createdAt": "تاريخ الإنشاء",
     "name": "الاسم",
     "reset": "إعادة تعيين",
     "confirmStatusChange": "تأكيد تغيير الحالة",

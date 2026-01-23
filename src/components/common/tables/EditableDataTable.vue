@@ -128,7 +128,7 @@ const cancelDelete = () => {
             {{ header.title }}
           </th>
 
-          <th v-if="showActions" class="!text-start w-[100px] !bg-gray-50"></th>
+          <th v-if="showActions && showDelete" class="!text-start w-[100px] !bg-gray-50"></th>
         </tr>
 
         <tr v-else class="bg-gray-50">
@@ -148,7 +148,7 @@ const cancelDelete = () => {
             </th>
           </template>
 
-          <th v-if="showActions" class="!text-start w-[100px] !bg-gray-50"></th>
+          <th v-if="showActions && showDelete" class="!text-start w-[100px] !bg-gray-50"></th>
         </tr>
 
         <tr v-if="hasGroupedHeaders" class="bg-gray-50">
@@ -163,7 +163,7 @@ const cancelDelete = () => {
             </template>
             <th v-else class="!bg-gray-50" :style="header.width ? { width: header.width } : {}"></th>
           </template>
-          <th v-if="showActions" class="!bg-gray-50"></th>
+          <th v-if="showActions && showDelete" class="!bg-gray-50"></th>
         </tr>
       </thead>
 
@@ -181,10 +181,10 @@ const cancelDelete = () => {
             </slot>
           </td>
 
-          <td v-if="showActions" class="!py-4 !bg-white">
+          <td v-if="showActions && showDelete" class="!py-4 !bg-white">
             <slot name="actions" :item="item" :row-index="rowIndex">
               <div class="flex items-center gap-1">
-                <v-btn v-if="showDelete" icon variant="text" size="small" color="error" @click="handleDelete(item)">
+                <v-btn icon variant="text" size="small" color="error" @click="handleDelete(item)">
                   <v-icon>mdi-trash-can-outline</v-icon>
                 </v-btn>
               </div>
@@ -193,7 +193,7 @@ const cancelDelete = () => {
         </tr>
 
         <tr v-if="items.length === 0">
-          <td :colspan="flatHeaders.length + (showActions ? 1 : 0) + (showCheckbox ? 1 : 0)"
+          <td :colspan="flatHeaders.length + (showActions && showDelete ? 1 : 0) + (showCheckbox ? 1 : 0)"
             class="text-center py-8 text-gray-500">
             {{ emptyText }}
           </td>
