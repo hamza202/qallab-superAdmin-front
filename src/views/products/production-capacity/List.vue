@@ -288,9 +288,10 @@ const confirmStatusChange = async () => {
     const newStatus = !itemToChangeStatus.value.is_active
 
     await api.patch(`/production-capacities/${itemToChangeStatus.value.id}/change-status`, { is_active: newStatus })
-    success(`تم ${newStatus ? 'تفعيل' : 'تعطيل'} الطاقة الإنتاجية بنجاح`)
+    success(`تم ${newStatus ? 'تفعيل' : 'تعطيل'} القدرة الإنتاجية بنجاح`)
+    toast.success(`تم ${newStatus ? 'تفعيل' : 'تعطيل'} القدرة الإنتاجية بنجاح`)
 
-    // Update local state
+    // Update local state     
     const index = tableItems.value.findIndex(t => t.id === itemToChangeStatus.value!.id)
     if (index !== -1) {
       tableItems.value[index].is_active = newStatus

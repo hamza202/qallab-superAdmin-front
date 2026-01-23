@@ -310,6 +310,7 @@ const handleSave = async () => {
     // Send ALL items with their capacity data
     await saveItems(productionCapacityId.value, allRows.value)
     success('تم حفظ التغييرات بنجاح')
+    toast.success('تم حفظ التغييرات بنجاح')
 
     // Refresh data
     modifiedItemIds.value.clear()
@@ -323,7 +324,7 @@ const handleSave = async () => {
 }
 
 const handleClose = () => {
-  router.push({ name: 'ProductionCapacityList' })
+  router.push({ name: 'ProductProductionCapacityList' })
 }
 
 const handleSelectRow = (item: TableItem, selected: boolean) => {
