@@ -1,12 +1,107 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, nextTick, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import DatePickerInput from '@/components/common/forms/DatePickerInput.vue';
+import { useApi } from '@/composables/useApi'
+import { useNotification } from '@/composables/useNotification'
+import { useTableColumns } from '@/composables/useTableColumns'
+import DatePickerInput from '@/components/common/forms/DatePickerInput.vue'
 
 const { t } = useI18n()
-
 const router = useRouter()
+const api = useApi()
+const { success, error: showError } = useNotification()
+
+// === TypeScript Interfaces ===
+interface ProductionCapacity {
+  id: number
+  name: string
+  supplier: string
+  is_active: boolean
+  created_at: string
+  actions?: {
+    can_update: boolean
+    can_delete: boolean
+    can_change_status: boolean
+  }
+}
+
+interface TableHeader {
+  key: string
+  title: string
+  width?: string
+  sortable?: boolean
+}
+
+interface Pagination {
+  next_cursor: string | null
+  previous_cursor: string | null
+  per_page: number
+}
+
+interface ApiResponse {
+  status: number
+  code: number
+  locale: string
+  message: string
+  data: ProductionCapacity[]
+  pagination: Pagination
+  header_table: string
+  headers: Record<string, { label: string; sortable: boolean }>
+  shownHeaders: Record<string, { label: string; sortable: boolean }>
+  actions?: { can_create: boolean }
+}
+
+// Table columns composable
+const {
+  allHeaders,
+  visibleHeaders,
+  updatingHeaders,
+  showHeadersMenu,
+  headerCheckStates,
+  initHeaders,
+  toggleHeader,
+} = useTableColumns('admin_production_capacities')
+
+// === State ===
+const tableItems = ref<ProductionCapacity[]>([])
+const isLoading = ref(false)
+const loadingMore = ref(false)
+const errorMessage = ref<string | null>(null)
+const canCreate = ref(true)
+
+// Pagination
+const nextCursor = ref<string | null>(null)
+const perPage = ref(15)
+const hasMoreData = computed(() => nextCursor.value !== null)
+
+// Selection state
+const selectedRows = ref<number[]>([])
+const hasSelected = computed(() => selectedRows.value.length > 0)
+
+// Status change dialog
+const showStatusChangeDialog = ref(false)
+const statusChangeLoading = ref(false)
+const itemToChangeStatus = ref<ProductionCapacity | null>(null)
+
+// Delete dialog
+const showDeleteDialog = ref(false)
+const deleteLoading = ref(false)
+const itemToDelete = ref<ProductionCapacity | null>(null)
+
+// Filters
+const showAdvancedFilters = ref(false)
+const filterStatus = ref<string | null>(null)
+const statusOptions = [
+  { title: 'فعال', value: 'فعال' },
+  { title: 'غير فعال', value: 'غير فعال' }
+]
+const filterCreatedAt = ref('')
+const filterName = ref('')
+
+// Infinite scroll
+const loadMoreTrigger = ref<HTMLElement | null>(null)
+const observer = ref<IntersectionObserver | null>(null)
 
 // Production Capacity icon
 const productionCapacityIcon = `<svg width="52" height="52" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -48,41 +143,166 @@ const plusIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
 <path d="M8 1V15M1 8H15" stroke="#1849A9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`
 
-// Table headers
-const tableHeaders = [
-  { key: 'name', title: 'الاسم', width: '200px' },
-  { key: 'createdAt', title: 'تاريخ الانشاء', width: '160px' },
-  { key: 'status', title: 'الحالة', width: '120px' },
+// Default headers (fallback)
+const defaultTableHeaders: TableHeader[] = [
+  { key: 'name', title: 'الاسم', width: '180px' },
+  { key: 'supplier', title: 'المورد', width: '150px' },
+  { key: 'created_at', title: 'تاريخ الانشاء', width: '160px' },
+  { key: 'is_active', title: 'الحالة', width: '100px' },
 ]
 
-// Sample data
-const tableItems = ref([
-  { id: 1, name: 'الطاقة الإنتاجية 1', createdAt: '12/07/2025', status: true },
-  { id: 2, name: 'الطاقة الإنتاجية 2', createdAt: '13/07/2025', status: false },
-  { id: 3, name: 'الطاقة الإنتاجية 3', createdAt: '14/07/2025', status: true },
-])
+// === Computed ===
+const tableHeaders = computed(() => {
+  if (visibleHeaders.value.length > 0) {
+    return visibleHeaders.value.map(header => ({
+      key: header.key,
+      title: header.title,
+      width: '140px',
+    }))
+  }
+  return defaultTableHeaders
+})
 
-// Selection state
-const selectedRows = ref<number[]>([])
-const hasSelected = computed(() => selectedRows.value.length > 0)
-
-// Filters
-const showAdvancedFilters = ref(false)
-const filterStatus = ref<string | null>(null)
-const filterCreatedAt = ref('')
-const filterName = ref('')
-
-const toggleAdvancedFilters = () => {
-  showAdvancedFilters.value = !showAdvancedFilters.value
+// === Helper Functions ===
+// Convert headers object to array format
+const convertHeadersToArray = (headersObj: Record<string, { label: string; sortable: boolean }>): TableHeader[] => {
+  return Object.keys(headersObj)
+    .filter(key => key !== 'id' && key !== 'actions')
+    .map(key => ({
+      key,
+      title: headersObj[key].label,
+      sortable: headersObj[key].sortable,
+    }))
 }
 
-// Handlers
+// === API Functions ===
+const fetchData = async (cursor?: string | null, append = false) => {
+  try {
+    if (append) {
+      loadingMore.value = true
+    } else {
+      isLoading.value = true
+    }
+    errorMessage.value = null
+
+    const params = new URLSearchParams()
+    params.append('per_page', String(perPage.value))
+    if (cursor) params.append('cursor', cursor)
+    if (filterCreatedAt.value) params.append('created_at', filterCreatedAt.value)
+    if (filterName.value) params.append('name', filterName.value)
+    if (filterStatus.value) {
+      params.append('status', filterStatus.value === 'فعال' ? '1' : '0')
+    }
+
+    const response = await api.get<ApiResponse>(`/production-capacities?${params}`)
+
+    if (append) {
+      tableItems.value = [...tableItems.value, ...response.data]
+    } else {
+      tableItems.value = response.data
+
+      // Initialize headers if available from API
+      if (response.headers && response.shownHeaders) {
+        const headersArray = convertHeadersToArray(response.headers)
+        const shownHeadersArray = convertHeadersToArray(response.shownHeaders)
+        initHeaders(headersArray, shownHeadersArray)
+      }
+
+      // Set create permission
+      if (response.actions) {
+        canCreate.value = response.actions.can_create
+      }
+    }
+
+    nextCursor.value = response.pagination.next_cursor
+  } catch (err: any) {
+    errorMessage.value = err?.response?.data?.message || 'حدث خطأ أثناء جلب البيانات'
+    showError(errorMessage.value || 'حدث خطأ')
+    console.error('Error fetching production capacities:', err)
+  } finally {
+    isLoading.value = false
+    loadingMore.value = false
+  }
+}
+
+// === Handlers ===
 const handleEdit = (item: any) => {
-  router.push({ name: 'ProductsProductionCapacityEdit' , params: { id: item.id } })
+  router.push({ name: 'ProductsProductionCapacityEdit', params: { id: item.id } })
 }
+
+// Unified Delete Logic
+const deleteMode = ref<'single' | 'bulk'>('single')
 
 const handleDelete = (item: any) => {
-  tableItems.value = tableItems.value.filter(t => t.id !== item.id)
+  deleteMode.value = 'single'
+  itemToDelete.value = item
+  showDeleteDialog.value = true
+}
+
+const handleBulkDelete = () => {
+  if (selectedRows.value.length === 0) return
+  deleteMode.value = 'bulk'
+  itemToDelete.value = null
+  showDeleteDialog.value = true
+}
+
+const confirmDelete = async () => {
+  try {
+    deleteLoading.value = true
+    
+    if (deleteMode.value === 'single') {
+      if (!itemToDelete.value) return
+      await api.delete(`/production-capacities/${itemToDelete.value.id}`)
+      tableItems.value = tableItems.value.filter(t => t.id !== itemToDelete.value!.id)
+      success('تم حذف الطاقة الإنتاجية بنجاح')
+    } else {
+      // Bulk delete
+      if (selectedRows.value.length === 0) return
+      await Promise.all(selectedRows.value.map(id => api.delete(`/production-capacities/${id}`)))
+      tableItems.value = tableItems.value.filter(t => !selectedRows.value.includes(t.id))
+      selectedRows.value = []
+      success('تم حذف الطاقات الإنتاجية المحددة بنجاح')
+    }
+  } catch (err: any) {
+    showError(err?.response?.data?.message || 'حدث خطأ أثناء الحذف')
+    console.error('Error deleting production capacities:', err)
+  } finally {
+    deleteLoading.value = false
+    showDeleteDialog.value = false
+    itemToDelete.value = null
+  }
+}
+
+// Handle status change - open confirmation dialog
+const handleStatusChange = (item: any) => {
+  itemToChangeStatus.value = { ...item }
+  showStatusChangeDialog.value = true
+}
+
+// Confirm status change after dialog
+const confirmStatusChange = async () => {
+  if (!itemToChangeStatus.value) return
+
+  try {
+    statusChangeLoading.value = true
+    const newStatus = !itemToChangeStatus.value.is_active
+
+    await api.patch(`/production-capacities/${itemToChangeStatus.value.id}/change-status`, { is_active: newStatus })
+    success(`تم ${newStatus ? 'تفعيل' : 'تعطيل'} الطاقة الإنتاجية بنجاح`)
+
+    // Update local state
+    const index = tableItems.value.findIndex(t => t.id === itemToChangeStatus.value!.id)
+    if (index !== -1) {
+      tableItems.value[index].is_active = newStatus
+    }
+  } catch (err: any) {
+    showError(err?.response?.data?.message || 'حدث خطأ أثناء تغيير الحالة')
+    console.error('Error changing status:', err)
+  } finally {
+    statusChangeLoading.value = false
+    showStatusChangeDialog.value = false
+    itemToChangeStatus.value = null
+  }
 }
 
 const handleSelect = (item: any, selected: boolean) => {
@@ -94,9 +314,60 @@ const handleSelectAll = (checked: boolean) => {
   selectedRows.value = checked ? tableItems.value.map(i => i.id) : []
 }
 
-// const openCreate = () => {
-//   router.push({ name: 'ProductsProductionCapacityEdit' })
-// }
+const toggleAdvancedFilters = () => {
+  showAdvancedFilters.value = !showAdvancedFilters.value
+}
+
+const handleSearch = () => {
+  fetchData()
+}
+
+const resetFilters = () => {
+  filterStatus.value = null
+  filterCreatedAt.value = ''
+  filterName.value = ''
+  fetchData()
+}
+
+// === Infinite Scroll ===
+const setupInfiniteScroll = () => {
+  if (!loadMoreTrigger.value) return
+
+  observer.value = new IntersectionObserver(
+    (entries) => {
+      const entry = entries[0]
+      if (entry.isIntersecting && hasMoreData.value && !loadingMore.value && !isLoading.value) {
+        fetchData(nextCursor.value, true)
+      }
+    },
+    {
+      root: null,
+      rootMargin: '100px',
+      threshold: 0.1,
+    }
+  )
+
+  observer.value.observe(loadMoreTrigger.value)
+}
+
+const cleanupInfiniteScroll = () => {
+  if (observer.value && loadMoreTrigger.value) {
+    observer.value.unobserve(loadMoreTrigger.value)
+    observer.value.disconnect()
+  }
+}
+
+// === Lifecycle ===
+onMounted(() => {
+  fetchData()
+  nextTick(() => {
+    setupInfiniteScroll()
+  })
+})
+
+onBeforeUnmount(() => {
+  cleanupInfiniteScroll()
+})
 </script>
 
 <template>
@@ -124,17 +395,31 @@ const handleSelectAll = (checked: boolean) => {
             class="flex flex-wrap items-stretch rounded-lg overflow-hidden border border-gray-200 bg-white text-sm">
             <ButtonWithIcon variant="flat" height="40" rounded="0"
               custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-              :prepend-icon="trash_1_icon" color="white" label="حذف" />
+              :prepend-icon="trash_1_icon" color="white" label="حذف المحدد" @click="handleBulkDelete" />
             <div class="w-px bg-gray-200"></div>
             <ButtonWithIcon variant="flat" height="40" rounded="0"
               custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-              :prepend-icon="trash_2_icon" color="white" label="حذف الجميع" />
+              :prepend-icon="trash_2_icon" color="white" label="حذف الجميع" @click="handleBulkDelete" />
           </div>
-                    <!-- Main header controls -->
+          <!-- Main header controls -->
           <div class="flex flex-wrap gap-3">
-            <ButtonWithIcon variant="outlined" rounded="4" color="gray-500" height="40"
-              custom-class="font-semibold text-base border-gray-400"
-              :prepend-icon="columnIcon" :label="t('common.columns')" append-icon="mdi-chevron-down" />
+            <!-- Column Management -->
+            <v-menu v-model="showHeadersMenu" :close-on-content-click="false">
+              <template v-slot:activator="{ props }">
+                <ButtonWithIcon v-bind="props" variant="outlined" rounded="4" color="gray-500" height="40"
+                  custom-class="font-semibold text-base border-gray-400"
+                  :prepend-icon="columnIcon" :label="t('common.columns')" append-icon="mdi-chevron-down" />
+              </template>
+              <v-list>
+                <v-list-item v-for="header in allHeaders" :key="header.key" @click="toggleHeader(header.key)">
+                  <template v-slot:prepend>
+                    <v-checkbox-btn :model-value="headerCheckStates[header.key]" :disabled="updatingHeaders"
+                      @click.stop="toggleHeader(header.key)"></v-checkbox-btn>
+                  </template>
+                  <v-list-item-title>{{ header.title }}</v-list-item-title>
+                </v-list-item>
+              </v-list>
+            </v-menu>
 
             <ButtonWithIcon variant="flat" color="primary-500" height="40" rounded="4"
               custom-class="px-7 font-semibold text-base text-white border !border-primary-200"
@@ -154,31 +439,60 @@ const handleSelectAll = (checked: boolean) => {
         <!-- Advanced filters row -->
         <div v-if="showAdvancedFilters"
           class="border-y border-y-primary-100 bg-primary-50 px-4 sm:px-6 py-3 flex flex-col gap-3 sm:gap-2">
-          <div class="flex flex-wrap gap-3 flex-1 order-1 sm:order-2 justify-end sm:justify-start">
-            <SelectInput v-model="filterStatus" :items="['فعال', 'غير فعال']" density="comfortable" variant="outlined"
-              hide-details placeholder="الحالة" class="flex-1 bg-white" />
+          <div class="flex flex-wrap lg:!flex-nowrap gap-3 flex-1 order-1 sm:order-2 justify-end sm:justify-start">
+            <v-select v-model="filterStatus" :items="statusOptions" item-title="title" item-value="value"
+              density="comfortable" variant="outlined" hide-details :placeholder="t('common.status')"
+              class="w-full sm:w-40 bg-white" clearable />
             <DatePickerInput v-model="filterCreatedAt" density="comfortable" hide-details
-              placeholder="تاريخ الانشاء" class="flex-1 bg-white" />
-            <TextInput v-model="filterName" density="comfortable" variant="outlined" hide-details placeholder="الاسم"
-              class="flex-1 bg-white" />
+              :placeholder="t('common.createdAt')" class="w-full sm:w-40 bg-white" />
+            <v-text-field v-model="filterName" density="comfortable" variant="outlined" hide-details
+              :placeholder="t('common.name')" class="w-full sm:w-40 bg-white" />
             <div class="flex gap-2 items-center">
               <ButtonWithIcon variant="flat" color="primary-500" rounded="4" height="40"
                 custom-class="px-5 font-semibold !text-white text-sm sm:text-base"
-                :prepend-icon="searchIcon" label="ابحث الآن" />
-              
+                :prepend-icon="searchIcon" label="ابحث الآن" @click="handleSearch" />
               <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4" border="sm"
                 custom-class="px-5 font-semibold text-sm sm:text-base !text-primary-800 !border-primary-200"
-                prepend-icon="mdi-refresh" label="إعادة تعيين" />
+                prepend-icon="mdi-refresh" label="إعادة تعيين" @click="resetFilters" />
             </div>
-
           </div>
         </div>
 
+        <!-- Error State -->
+        <v-alert v-if="errorMessage" type="error" variant="tonal" class="mx-6 my-4" closable>
+          {{ errorMessage }}
+        </v-alert>
+
         <!-- Production Capacity Table -->
-        <DataTable :show-view="false"  :headers="tableHeaders" :items="tableItems" show-checkbox show-actions @edit="handleEdit"
-          @delete="handleDelete" @select="handleSelect" @selectAll="handleSelectAll" />
+        <DataTable :show-view="false" :headers="tableHeaders" :items="tableItems" :loading="isLoading" show-checkbox show-actions
+          @edit="handleEdit" @delete="handleDelete" @select="handleSelect" @selectAll="handleSelectAll">
+          <template #item.is_active="{ item }">
+            <v-switch :model-value="item.is_active" hide-details inset density="compact" color="primary"
+              class="small-switch" @update:model-value="() => handleStatusChange(item)" />
+          </template>
+        </DataTable>
+
+        <!-- Infinite scroll trigger -->
+        <div ref="loadMoreTrigger" class="h-4"></div>
+
+        <!-- Loading more indicator -->
+        <div v-if="loadingMore" class="flex justify-center items-center py-4">
+          <v-progress-circular indeterminate color="primary" size="32" />
+          <span class="mr-2 text-gray-600">جاري تحميل المزيد...</span>
+        </div>
       </div>
     </div>
+
+    <!-- Unified Delete Confirmation Dialog -->
+    <DeleteConfirmDialog v-model="showDeleteDialog" :loading="deleteLoading" 
+      :title="deleteMode === 'single' ? 'حذف الطاقة الإنتاجية' : 'حذف الطاقات الإنتاجية'"
+      :message="deleteMode === 'single' ? `هل أنت متأكد من حذف ${itemToDelete?.name}؟` : `هل أنت متأكد من حذف ${selectedRows.length} طاقة إنتاجية؟`" 
+      @confirm="confirmDelete" />
+
+    <!-- Status Change Confirmation Dialog -->
+    <StatusChangeDialog v-model="showStatusChangeDialog" :loading="statusChangeLoading"
+      :item-name="itemToChangeStatus?.name" :current-status="itemToChangeStatus?.is_active"
+      @confirm="confirmStatusChange" />
   </default-layout>
 </template>
 
