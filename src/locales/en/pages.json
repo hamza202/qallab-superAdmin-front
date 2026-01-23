@@ -7,6 +7,10 @@
       "create": "Add Simple Product",
       "edit": "Edit Simple Product"
     },
+    "profile": {
+      "title": "Profile Settings",
+      "description": "Allows you to manage profile settings"
+    },
     "groupProducts": {
       "title": "Group Products",
       "description": "Allows you to manage added group products and add new group products",
