@@ -90,6 +90,7 @@ interface TaxTableRow {
   minValue: string;
   priority: string | number;
   priorityLabel: string;
+  backendId?: number; // ID from backend, only exists for saved taxes
 }
 
 // Tax data
@@ -845,7 +846,10 @@ const buildStep2Data = () => {
 
   // Add taxes array in the format: taxes[0][tax_id], taxes[0][percentage], etc.
   taxTableItems.value.forEach((tax, index) => {
-    formData.append(`taxes[${index}][id]`, String(tax.id));
+    // Only send ID if it's from backend (saved tax)
+    if (tax.backendId) {
+      formData.append(`taxes[${index}][id]`, String(tax.backendId));
+    }
     formData.append(`taxes[${index}][tax_id]`, String(tax.taxId));
     formData.append(`taxes[${index}][percentage]`, tax.percentage.replace('%', ''));
     formData.append(`taxes[${index}][minimum]`, tax.minValue);
@@ -1117,7 +1121,8 @@ const fetchProduct = async (id: number) => {
           const priorityLabel = priorityItem ? priorityItem.title : String(tax.priority);
 
           return {
-            id: tax.id,
+            id: tax.id, // Local ID for table
+            backendId: tax.id, // Backend ID for API requests
             taxId: tax.tax_id,
             taxName: tax.tax_name,
             percentage: tax.percentage ? `${parseFloat(tax.percentage)}%` : '0%',
