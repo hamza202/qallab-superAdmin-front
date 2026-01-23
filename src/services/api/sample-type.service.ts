@@ -1,4 +1,4 @@
-import api from './index'
+import { useApi } from '@/composables/useApi'
 
 export interface SampleType {
     id: number
@@ -78,14 +78,15 @@ export interface SampleTypeShowResponse {
     data: SampleType
 }
 
+const { get, delete: destroy, patch, upload } = useApi()
+
 const sampleTypeService = {
     /**
      * Get paginated list of sample types (Index)
      * GET /sample-types
      */
     async getIndex(params?: SampleTypeListParams): Promise<SampleTypeListResponse> {
-        const response = await api.get<SampleTypeListResponse>('/sample-types', { params })
-        return response.data
+        return await get<SampleTypeListResponse>('/sample-types', { params })
     },
 
     /**
@@ -93,8 +94,7 @@ const sampleTypeService = {
      * GET /sample-types/list
      */
     async getList(params?: SampleTypeListParams): Promise<SampleTypeListResponse> {
-        const response = await api.get<SampleTypeListResponse>('/sample-types/list', { params })
-        return response.data
+        return await get<SampleTypeListResponse>('/sample-types/list', { params })
     },
 
     /**
@@ -102,8 +102,7 @@ const sampleTypeService = {
      * GET /sample-types/{id}
      */
     async getById(id: number): Promise<SampleTypeShowResponse> {
-        const response = await api.get<SampleTypeShowResponse>(`/sample-types/${id}`)
-        return response.data
+        return await get<SampleTypeShowResponse>(`/sample-types/${id}`)
     },
 
     /**
@@ -111,12 +110,7 @@ const sampleTypeService = {
      * POST /sample-types
      */
     async create(data: FormData): Promise<SampleTypeShowResponse> {
-        const response = await api.post<SampleTypeShowResponse>('/sample-types', data, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-            },
-        })
-        return response.data
+        return await upload<SampleTypeShowResponse>('/sample-types', data)
     },
 
     /**
@@ -126,12 +120,7 @@ const sampleTypeService = {
     async update(id: number, data: FormData): Promise<SampleTypeShowResponse> {
         // إضافة _method: PUT للتعديل عبر POST
         data.append('_method', 'PUT')
-        const response = await api.post<SampleTypeShowResponse>(`/sample-types/${id}`, data, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-            },
-        })
-        return response.data
+        return await upload<SampleTypeShowResponse>(`/sample-types/${id}`, data)
     },
 
     /**
@@ -139,7 +128,7 @@ const sampleTypeService = {
      * DELETE /sample-types/{id}
      */
     async delete(id: number): Promise<void> {
-        await api.delete(`/sample-types/${id}`)
+        await destroy(`/sample-types/${id}`)
     },
 
     /**
@@ -147,8 +136,7 @@ const sampleTypeService = {
      * PATCH /sample-types/{id}/change-status
      */
     async changeStatus(id: number, status: boolean): Promise<SampleTypeShowResponse> {
-        const response = await api.patch<SampleTypeShowResponse>(`/sample-types/${id}/change-status`, { status })
-        return response.data
+        return await patch<SampleTypeShowResponse>(`/sample-types/${id}/change-status`, { status })
     },
 }
 

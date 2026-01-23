@@ -1,4 +1,4 @@
-import api from './index'
+import { useApi } from '@/composables/useApi'
 
 export interface TestGroup {
   id: number
@@ -65,36 +65,33 @@ export interface TestGroupListResponse {
   }
 }
 
+const { get, post, delete: destroy, patch } = useApi()
+
 const testGroupService = {
   async getList(params?: TestGroupListParams): Promise<TestGroupListResponse> {
-    const response = await api.get<TestGroupListResponse>('/test-groups/list', { params })
-    return response.data
+    return await get<TestGroupListResponse>('/test-groups/list', { params })
   },
 
   async getById(id: number): Promise<{ data: TestGroup }> {
-    const response = await api.get<{ data: TestGroup }>(`/test-groups/${id}`)
-    return response.data
+    return await get<{ data: TestGroup }>(`/test-groups/${id}`)
   },
 
   async create(data: FormData | Partial<TestGroup>): Promise<{ data: TestGroup }> {
-    const response = await api.post<{ data: TestGroup }>('/test-groups', data)
-    return response.data
+    return await post<{ data: TestGroup }>('/test-groups', data)
   },
 
   async update(id: number, data: FormData): Promise<{ data: TestGroup }> {
     // إضافة _method: PUT للتعديل عبر POST
     data.append('_method', 'PUT')
-    const response = await api.post<{ data: TestGroup }>(`/test-groups/${id}`, data)
-    return response.data
+    return await post<{ data: TestGroup }>(`/test-groups/${id}`, data)
   },
 
   async delete(id: number): Promise<void> {
-    await api.delete(`/test-groups/${id}`)
+    await destroy(`/test-groups/${id}`)
   },
 
   async changeStatus(id: number, status: boolean): Promise<{ data: TestGroup }> {
-    const response = await api.patch<{ data: TestGroup }>(`/test-groups/${id}/change-status`, { status })
-    return response.data
+    return await patch<{ data: TestGroup }>(`/test-groups/${id}/change-status`, { status })
   },
 }
 

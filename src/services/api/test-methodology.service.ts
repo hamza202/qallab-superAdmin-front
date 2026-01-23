@@ -1,4 +1,4 @@
-import api from './index'
+import { useApi } from '@/composables/useApi'
 
 export interface TestMethodology {
   id: number
@@ -49,35 +49,32 @@ export interface TestMethodologyListResponse {
   header_table?: string
 }
 
+const { get, post, delete: destroy, patch } = useApi()
+
 const testMethodologyService = {
   async getList(params?: TestMethodologyListParams): Promise<TestMethodologyListResponse> {
-    const response = await api.get<TestMethodologyListResponse>('/test-methodologies', { params })
-    return response.data
+    return await get<TestMethodologyListResponse>('/test-methodologies', { params })
   },
 
   async getById(id: number): Promise<{ data: TestMethodology }> {
-    const response = await api.get<{ data: TestMethodology }>(`/test-methodologies/${id}`)
-    return response.data
+    return await get<{ data: TestMethodology }>(`/test-methodologies/${id}`)
   },
 
   async create(data: Partial<TestMethodology>): Promise<{ data: TestMethodology }> {
-    const response = await api.post<{ data: TestMethodology }>('/test-methodologies', data)
-    return response.data
+    return await post<{ data: TestMethodology }>('/test-methodologies', data)
   },
 
   async update(id: number, data: FormData): Promise<{ data: TestMethodology }> {
     data.append('_method', 'PUT')
-    const response = await api.post<{ data: TestMethodology }>(`/test-methodologies/${id}`, data)
-    return response.data
+    return await post<{ data: TestMethodology }>(`/test-methodologies/${id}`, data)
   },
 
   async delete(id: number): Promise<void> {
-    await api.delete(`/test-methodologies/${id}`)
+    await destroy(`/test-methodologies/${id}`)
   },
 
   async changeStatus(id: number, status: boolean): Promise<{ data: TestMethodology }> {
-    const response = await api.patch<{ data: TestMethodology }>(`/test-methodologies/${id}/change-status`, { status })
-    return response.data
+    return await patch<{ data: TestMethodology }>(`/test-methodologies/${id}/change-status`, { status })
   },
 }
 
