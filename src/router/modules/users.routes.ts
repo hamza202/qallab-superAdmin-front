@@ -97,7 +97,7 @@ export const usersRoutes: RouteRecordRaw[] = [
       {
         path: "list",
         name: "UsersList",
-        component: () => import("@/views/users/users/List.vue"),
+        component: () => import("@/views/users/role-and-permissions/users/List.vue"),
         meta: {
           title: "pages.users.title",
         },
@@ -105,7 +105,7 @@ export const usersRoutes: RouteRecordRaw[] = [
       {
         path: "create",
         name: "UsersCreate",
-        component: () => import("@/views/users/users/Form.vue"),
+        component: () => import("@/views/users/role-and-permissions/users/Form.vue"),
         meta: {
           title: "pages.users.create",
         },
@@ -113,7 +113,7 @@ export const usersRoutes: RouteRecordRaw[] = [
       {
         path: "edit/:id",
         name: "UsersEdit",
-        component: () => import("@/views/users/users/Form.vue"),
+        component: () => import("@/views/users/role-and-permissions/users/Form.vue"),
         meta: {
           title: "pages.users.edit",
         },
@@ -128,7 +128,7 @@ export const usersRoutes: RouteRecordRaw[] = [
       {
         path: "list",
         name: "RolesList",
-        component: () => import("@/views/users/roles/List.vue"),
+        component: () => import("@/views/users/role-and-permissions/roles/List.vue"),
         meta: {
           title: "pages.roles.title",
         },
@@ -136,7 +136,7 @@ export const usersRoutes: RouteRecordRaw[] = [
       {
         path: "create",
         name: "RolesCreate",
-        component: () => import("@/views/users/roles/Form.vue"),
+        component: () => import("@/views/users/role-and-permissions/roles/Form.vue"),
         meta: {
           title: "pages.roles.create",
         },
@@ -144,7 +144,7 @@ export const usersRoutes: RouteRecordRaw[] = [
       {
         path: "edit/:id",
         name: "RolesEdit",
-        component: () => import("@/views/users/roles/Form.vue"),
+        component: () => import("@/views/users/role-and-permissions/roles/Form.vue"),
         meta: {
           title: "pages.roles.edit",
         },

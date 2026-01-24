@@ -37,11 +37,11 @@
                 <div
                     class="flex lg:items-center lg:justify-between py-4 border-b border-gray-200 flex-col lg:flex-row gap-3 px-6">
                     <div class="flex gap-2 overflow-y-auto">
-                        <ButtonWithIcon to="/users" variant="flat" size="large" label="المستخدمين" color="primary-500"
-                            :rounded="'md'" :prepend-icon="usersIcon_1" custom-class="text-white">
+                        <ButtonWithIcon to="/users/list" variant="flat" size="large" label="المستخدمين" color="white"
+                            :rounded="'md'" :prepend-icon="usersIcon_1" custom-class="!text-gray-400">
                         </ButtonWithIcon>
-                        <ButtonWithIcon to="/roles" variant="flat" size="large" label="الأدوار" color="white"
-                            :rounded="'md'" :prepend-icon="checksIcon" custom-class="!text-gray-400">
+                        <ButtonWithIcon to="/roles/list" variant="flat" size="large" label="الأدوار" color="primary-500"
+                            :rounded="'md'" :prepend-icon="checksIcon" custom-class="text-white">
                         </ButtonWithIcon>
                     </div>
                 </div>

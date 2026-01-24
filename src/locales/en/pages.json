@@ -94,6 +94,20 @@
     "sampleTypes": {
       "title": "Sample Types",
       "description": "Allows you to manage sample types"
+    },
+    "users": {
+      "title": "Users",
+      "description": "Manage system users",
+      "list": "Users List",
+      "create": "Add User",
+      "edit": "Edit User"
+    },
+    "roles": {
+      "title": "Roles & Permissions",
+      "description": "Manage user roles and permissions",
+      "list": "Roles List",
+      "create": "Add Role",
+      "edit": "Edit Role"
     }
   }
 }
