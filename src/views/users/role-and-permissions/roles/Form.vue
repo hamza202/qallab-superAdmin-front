@@ -64,29 +64,36 @@
                     </div>
 
                     <!-- Permissions Groups -->
-                    <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
                         <div v-for="(group, groupKey) in permissionGroups" :key="groupKey"
-                            class="bg-[#F8FAFC] rounded-2xl border border-gray-100 overflow-hidden">
+                            class="rounded-2xl border overflow-hidden transition-all"
+                            :class="expandedGroups.includes(groupKey) 
+                                ? 'bg-[#F8FAFC] border-gray-100' 
+                                : 'bg-white border-gray-200'">
                             
                             <!-- Group Header (Collapsible) -->
                             <div 
                                 @click="toggleGroup(groupKey)"
-                                class="flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-gray-100 transition-colors"
+                                class="flex items-center justify-between px-4 py-3 cursor-pointer transition-colors"
+                                :class="expandedGroups.includes(groupKey) 
+                                    ? 'bg-[#F8FAFC]' 
+                                    : 'bg-white hover:bg-gray-50'"
                             >
                                 <h3 class="text-base font-bold text-gray-700">{{ group.group }}</h3>
                                 <v-icon 
                                     :icon="expandedGroups.includes(groupKey) ? 'mdi-minus-circle-outline' : 'mdi-plus-circle-outline'"
-                                    :color="expandedGroups.includes(groupKey) ? 'primary' : 'grey'"
+                                    color="primary"
                                     size="24"
                                 />
                             </div>
 
                             <!-- Group Content (Expanded) -->
                             <v-expand-transition>
-                                <div v-show="expandedGroups.includes(groupKey)" class="px-4 pb-4">
+                                <div v-show="expandedGroups.includes(groupKey)" 
+                                    class="px-4 pb-4 bg-[#F8FAFC]">
                                     <!-- Select All Checkbox -->
-                                    <div class="flex items-center justify-end mb-3 border-b border-gray-100 pb-2">
-                                        <label class="flex items-center gap-2 cursor-pointer">
+                                    <div class="flex items-center mb-3 border-b border-gray-100 pb-2 pt-2">
+                                        <label class="flex items-center gap-2 cursor-pointer flex-row-reverse">
                                             <span class="text-sm font-medium text-primary-600">جميع الصلاحيات</span>
                                             <v-checkbox
                                                 :model-value="isGroupAllSelected(groupKey)"
@@ -100,11 +107,11 @@
                                     </div>
 
                                     <!-- Permissions Grid -->
-                                    <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+                                    <div class="grid grid-cols-2 gap-2">
                                         <label 
                                             v-for="permission in group.permissions" 
                                             :key="permission.id"
-                                            class="flex items-center gap-2 cursor-pointer py-1"
+                                            class="flex items-center gap-2 cursor-pointer py-1 flex-row-reverse"
                                         >
                                             <span class="text-sm text-gray-600 flex-1">{{ permission.display_name }}</span>
                                             <v-checkbox
@@ -365,8 +372,8 @@ const checksIcon = `<svg width="48" height="48" viewBox="0 0 48 48" fill="none" 
 <path d="M32 15V9.6C32 7.33983 32 6.20976 31.564 5.34731C31.1805 4.59159 30.5607 3.97188 29.805 3.5884C28.9425 3.15265 27.8125 3.15265 25.5523 3.15265H10.8C8.53983 3.15265 7.40976 3.15265 6.54731 3.5884C5.79159 3.97188 5.17188 4.59159 4.7884 5.34731C4.35265 6.20976 4.35265 7.33983 4.35265 9.6V25.2C4.35265 27.4602 4.35265 28.5902 4.7884 29.4527C5.17188 30.2084 5.79159 30.8281 6.54731 31.2116C7.40976 31.6474 8.53983 31.6474 10.8 31.6474H15M23.5 30L27.5 34L37 24.5M22.4 44.5H38.8C41.0602 44.5 42.1902 44.5 43.0527 44.0642C43.8084 43.6807 44.4281 43.061 44.8116 42.3053C45.2474 41.4428 45.2474 40.3128 45.2474 38.0526V22.6C45.2474 20.3398 45.2474 19.2098 44.8116 18.3473C44.4281 17.5916 43.8084 16.9719 43.0527 16.5884C42.1902 16.1527 41.0602 16.1527 38.8 16.1527H22.4C20.1398 16.1527 19.0098 16.1527 18.1473 16.5884C17.3916 16.9719 16.7719 17.5916 16.3884 18.3473C15.9527 19.2098 15.9527 20.3398 15.9527 22.6V38.0526C15.9527 40.3128 15.9527 41.4428 16.3884 42.3053C16.7719 43.061 17.3916 43.6807 18.1473 44.0642C19.0098 44.5 20.1398 44.5 22.4 44.5Z" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`
 
-const clipboardIcon = `<svg width="20" height="22" viewBox="0 0 20 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M6 5H4.2C3.0799 5 2.51984 5 2.09202 5.21799C1.71569 5.40973 1.40973 5.71569 1.21799 6.09202C1 6.51984 1 7.0799 1 8.2V17.8C1 18.9201 1 19.4802 1.21799 19.908C1.40973 20.2843 1.71569 20.5903 2.09202 20.782C2.51984 21 3.0799 21 4.2 21H15.8C16.9201 21 17.4802 21 17.908 20.782C18.2843 20.5903 18.5903 20.2843 18.782 19.908C19 19.4802 19 18.9201 19 17.8V8.2C19 7.0799 19 6.51984 18.782 6.09202C18.5903 5.71569 18.2843 5.40973 17.908 5.21799C17.4802 5 16.9201 5 15.8 5H14M6 5V3C6 1.89543 6.89543 1 8 1H12C13.1046 1 14 1.89543 14 3V5M6 5H14M10 11V17M7 14H13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+const clipboardIcon = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M20 12.5V6.8C20 5.11984 20 4.27976 19.673 3.63803C19.3854 3.07354 18.9265 2.6146 18.362 2.32698C17.7202 2 16.8802 2 15.2 2H8.8C7.11984 2 6.27976 2 5.63803 2.32698C5.07354 2.6146 4.6146 3.07354 4.32698 3.63803C4 4.27976 4 5.11984 4 6.8V17.2C4 18.8802 4 19.7202 4.32698 20.362C4.6146 20.9265 5.07354 21.3854 5.63803 21.673C6.27976 22 7.11984 22 8.8 22H12M14 11H8M10 15H8M16 7H8M14.5 19L16.5 21L21 16.5" stroke="#1570EF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`
 
 const shieldIcon = `<svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -378,7 +385,7 @@ const closeIcon = `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" x
 </svg>`
 
 const saveIcon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M6 13L10 17L18 9M2 10L6 14L14 6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M7.5 9.16667L10 11.6667L18.3333 3.33333M13.3333 2.5H6.5C5.09987 2.5 4.3998 2.5 3.86502 2.77248C3.39462 3.01217 3.01217 3.39462 2.77248 3.86502C2.5 4.3998 2.5 5.09987 2.5 6.5V13.5C2.5 14.9001 2.5 15.6002 2.77248 16.135C3.01217 16.6054 3.39462 16.9878 3.86502 17.2275C4.3998 17.5 5.09987 17.5 6.5 17.5H13.5C14.9001 17.5 15.6002 17.5 16.135 17.2275C16.6054 16.9878 16.9878 16.6054 17.2275 16.135C17.5 15.6002 17.5 14.9001 17.5 13.5V10" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`
 </script>
 
