@@ -45,7 +45,6 @@
                         <span v-html="clipboardIcon" class="text-primary-500"></span>
                         <h2 class="text-lg font-bold text-primary-600">البيانات الأساسية</h2>
                     </div>
-
                     <!-- Form Fields -->
                     <div class="space-y-6">
                         <!-- Row 1: Name, Phone, Email -->
@@ -58,14 +57,11 @@
 
                             <!-- Phone -->
                             <div>
-                                <label class="qallab-label">الهاتف</label>
-                                <div class="flex gap-2">
-                                    <TextInput v-model="form.phone" placeholder="+966 (555) 000-0000" 
-                                        class="flex-1" :rules="[required()]" />
-                                    <v-select v-model="form.country_code" :items="countryCodes" item-title="title"
-                                        item-value="value" variant="outlined" density="comfortable" hide-details
-                                        class="w-24" />
-                                </div>
+                                <SaudiPhoneInput
+                                    v-model="form.phone"
+                                    label="الهاتف"
+                                    :rules="[required()]"
+                                />
                             </div>
 
                             <!-- Email -->
@@ -78,33 +74,32 @@
 
                         <!-- Row 2: Password, Confirm Password, Roles -->
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <!-- Password -->
-                            <div>
+                            <!-- Password (only for create) -->
+                            <div v-if="!isEditing">
                                 <label class="qallab-label">كلمة المرور</label>
                                 <TextInput v-model="form.password" type="password" placeholder="كلمة المرور"
-                                    :rules="isEditing ? [] : [required(), minLength(8)]" />
+                                    :rules="[required(), strongPassword()]" />
                             </div>
 
-                            <!-- Confirm Password -->
-                            <div>
+                            <!-- Confirm Password (only for create) -->
+                            <div v-if="!isEditing">
                                 <label class="qallab-label">تأكيد كلمة المرور</label>
                                 <TextInput v-model="form.password_confirmation" type="password"
                                     placeholder="تأكيد كلمة المرور"
-                                    :rules="isEditing ? [] : [required(), confirmPassword(form.password)]" />
+                                    :rules="[required(), confirmPassword(form.password)]" />
                             </div>
 
                             <!-- Roles -->
                             <div>
-                                <label class="qallab-label">الأدوار</label>
-                                <v-select v-model="form.roles" :items="rolesOptions" item-title="title"
-                                    item-value="value" variant="outlined" density="comfortable" hide-details multiple
-                                    chips closable-chips placeholder="اختر الأدوار" :rules="[required()]">
-                                    <template #chip="{ item, props }">
-                                        <v-chip v-bind="props" closable color="primary" variant="flat" size="small">
-                                            {{ item.title }}
-                                        </v-chip>
-                                    </template>
-                                </v-select>
+                                <MultipleSelectInput
+                                    v-model="form.roles"
+                                    label="الأدوار"
+                                    :items="rolesOptions"
+                                    placeholder="اختر الأدوار"
+                                    :input-props="{
+                                        rules: [required()]
+                                    }"
+                                />
                             </div>
                         </div>
 
@@ -122,14 +117,27 @@
 
                     <!-- Action Buttons -->
                     <div class="flex items-center justify-center gap-4 mt-10">
-                        <v-btn type="submit" color="primary" size="large" class="px-10" :loading="loading">
-                            <span v-html="userPlusSmallIcon" class="me-2"></span>
-                            {{ isEditing ? 'حفظ التعديلات' : 'أضف مستخدم جديد' }}
-                        </v-btn>
-                        <v-btn variant="outlined" color="gray-300" size="large" class="px-10" @click="handleCancel">
-                            <span v-html="closeIcon" class="me-2"></span>
-                            الغاء
-                        </v-btn>
+                        <ButtonWithIcon
+                            variant="flat"
+                            rounded="4"
+                            color="primary"
+                            height="44"
+                            custom-class="font-semibold text-base px-10 text-white"
+                            :prepend-icon="userPlusSmallIcon"
+                            :label="isEditing ? 'حفظ التعديلات' : 'أضف مستخدم جديد'"
+                            :loading="loading"
+                            @click="handleSubmit"
+                        />
+                        <ButtonWithIcon
+                            variant="flat"
+                            rounded="4"
+                            color="primary-50"
+                            height="44"
+                            custom-class="font-semibold text-base text-primary-700 px-10"
+                            :prepend-icon="closeIcon"
+                            label="الغاء"
+                            @click="handleCancel"
+                        />
                     </div>
                 </v-form>
             </div>
@@ -142,7 +150,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useApi } from '@/composables/useApi'
 import { useNotification } from '@/composables/useNotification'
-import { required, email, minLength, confirmPassword } from '@/utils/validators'
+import { required, email, confirmPassword, strongPassword } from '@/utils/validators'
 
 // Composables
 const api = useApi()
@@ -170,11 +178,7 @@ const form = ref({
 })
 
 // Options
-const countryCodes = ref([
-    { title: 'KSA', value: 'KSA' },
-    { title: 'UAE', value: 'UAE' },
-    { title: 'EGY', value: 'EGY' }
-])
+
 
 interface RoleOption {
     id: number
@@ -212,11 +216,11 @@ const fetchUser = async () => {
         form.value = {
             name: user.name || '',
             email: user.email || '',
-            phone: user.phone || '',
-            country_code: user.country_code || 'KSA',
+            phone: user.mobile || '', // API uses 'mobile' field
+            country_code: 'KSA',
             password: '',
             password_confirmation: '',
-            roles: user.roles?.map((r: any) => r.id) || [],
+            roles: user.roles || [], // roles comes as array of IDs directly
             is_active: user.is_active ?? true
         }
     } catch (err: any) {
@@ -234,26 +238,40 @@ const handleSubmit = async () => {
     try {
         loading.value = true
 
-        const payload: any = {
-            name: form.value.name,
-            email: form.value.email,
-            phone: form.value.phone,
-            country_code: form.value.country_code,
-            roles: form.value.roles,
-            is_active: form.value.is_active ? 1 : 0
+        // Build FormData for multipart/form-data request
+        const formData = new FormData()
+        
+        // Add _method for PUT request when editing
+        if (isEditing.value) {
+            formData.append('_method', 'PUT')
         }
-
-        // Only include password if it's provided
-        if (form.value.password) {
-            payload.password = form.value.password
-            payload.password_confirmation = form.value.password_confirmation
+        
+        formData.append('name', form.value.name)
+        formData.append('email', form.value.email)
+        formData.append('mobile', form.value.phone) // API expects 'mobile'
+        
+        // Only include password for new users (not editing)
+        if (!isEditing.value && form.value.password) {
+            formData.append('password', form.value.password)
+            formData.append('password_confirmation', form.value.password_confirmation)
         }
+        
+        formData.append('is_active', form.value.is_active ? 'true' : 'false')
+        
+        // Append roles as roles[0], roles[1], etc.
+        form.value.roles.forEach((roleId, index) => {
+            // Get the role name from rolesOptions
+            const role = rolesOptions.value.find(r => r.value === roleId)
+            if (role) {
+                formData.append(`roles[${index}]`, role.title)
+            }
+        })
 
         if (isEditing.value) {
-            await api.put(`/users/${userId.value}`, payload)
+            await api.post(`/users/${userId.value}`, formData)
             success('تم تحديث المستخدم بنجاح')
         } else {
-            await api.post('/users', payload)
+            await api.post('/users', formData)
             success('تم إضافة المستخدم بنجاح')
         }
 
@@ -282,7 +300,7 @@ const homeIcon = `<svg width="17" height="18" viewBox="0 0 17 18" fill="none" xm
 </svg>`
 
 const userPlusIcon = `<svg width="48" height="43" viewBox="0 0 48 43" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M23.6667 29.0833H13.9167C10.8929 29.0833 9.38108 29.0833 8.15086 29.4565C5.38099 30.2968 3.21342 32.4643 2.37319 35.2342C2 36.4644 2 37.9763 2 41M38.8333 41V28M32.3333 34.5H45.3333M29.0833 11.75C29.0833 17.1348 24.7181 21.5 19.3333 21.5C13.9486 21.5 9.58333 17.1348 9.58333 11.75C9.58333 6.36522 13.9486 2 19.3333 2C24.7181 2 29.0833 6.36522 29.0833 11.75Z" stroke="#1570EF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M23.6667 29.0833H13.9167C10.8929 29.0833 9.38108 29.0833 8.15086 29.4565C5.38099 30.2968 3.21342 32.4643 2.37319 35.2342C2 36.4644 2 37.9763 2 41M38.8333 41V28M32.3333 34.5H45.3333M29.0833 11.75C29.0833 17.1348 24.7181 21.5 19.3333 21.5C13.9486 21.5 9.58333 17.1348 9.58333 11.75C9.58333 6.36522 13.9486 2 19.3333 2C24.7181 2 29.0833 6.36522 29.0833 11.75Z" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
 `
 
@@ -294,9 +312,8 @@ const closeIcon = `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" x
 <path d="M13 1L1 13M1 1L13 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`
 
-const userPlusSmallIcon = `<svg width="20" height="18" viewBox="0 0 20 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M16 17V15C16 13.1362 14.7252 11.5701 13 11.126M11 1.29076C12.4659 1.88415 13.5 3.32131 13.5 5C13.5 6.67869 12.4659 8.11585 11 8.70924M12.5 17C12.5 15.1362 12.5 14.2044 12.1955 13.4693C11.7895 12.4892 11.0108 11.7105 10.0307 11.3045C9.29565 11 8.36377 11 6.5 11H5C3.13623 11 2.20435 11 1.46927 11.3045C0.489151 11.7105 -0.289536 12.4892 -0.695521 13.4693C-1 14.2044 -1 15.1362 -1 17M9 5C9 7.20914 7.20914 9 5 9C2.79086 9 1 7.20914 1 5C1 2.79086 2.79086 1 5 1C7.20914 1 9 2.79086 9 5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-<path d="M16 5V11M19 8H13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+const userPlusSmallIcon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M9.9974 12.9167H6.2474C5.08443 12.9167 4.50294 12.9167 4.02978 13.0602C2.96444 13.3834 2.13076 14.217 1.8076 15.2824C1.66406 15.7555 1.66406 16.337 1.66406 17.5M15.8307 17.5V12.5M13.3307 15H18.3307M12.0807 6.25C12.0807 8.32107 10.4018 10 8.33073 10C6.25966 10 4.58073 8.32107 4.58073 6.25C4.58073 4.17893 6.25966 2.5 8.33073 2.5C10.4018 2.5 12.0807 4.17893 12.0807 6.25Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`
 </script>
 

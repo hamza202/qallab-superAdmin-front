@@ -30,6 +30,7 @@ declare module 'vue' {
     RichTextEditor: typeof import('./components/common/forms/RichTextEditor.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    SaudiPhoneInput: typeof import('./components/common/forms/SaudiPhoneInput.vue')['default']
     SelectInput: typeof import('./components/common/forms/selectInput.vue')['default']
     SelectWithIconInput: typeof import('./components/common/forms/SelectWithIconInput.vue')['default']
     StatusChangeDialog: typeof import('./components/common/StatusChangeDialog.vue')['default']

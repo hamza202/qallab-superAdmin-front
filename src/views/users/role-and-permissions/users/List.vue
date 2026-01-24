@@ -272,7 +272,7 @@
                     <!-- Users Grid -->
                     <div v-else-if="users.length > 0" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                         <UserCard v-for="(user, index) in users" :key="user.id" :user="user" :index="index"
-                            :status-loading="statusLoadingId === user.id" @edit="handleEditUser"
+                            :status-loading="statusLoadingId === user.id" edit-route-name="UsersEdit"
                             @status-change="handleStatusChange" />
                     </div>
 
@@ -434,9 +434,7 @@ const handleAddUser = () => {
     router.push({ name: 'UsersCreate' })
 }
 
-const handleEditUser = (user: User) => {
-    router.push({ name: 'UserEdit', params: { id: user.id } })
-}
+
 
 const resetFilters = () => {
     nameFilter.value = ''
