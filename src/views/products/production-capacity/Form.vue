@@ -334,7 +334,7 @@ onMounted(async () => {
             <div class="flex items-center gap-3">
               <div>
                 <div class="text-sm font-semibold text-gray-900">{{ (item as ProductionCapacityRow).name }}</div>
-                <div class="text-xs text-gray-500">{{ (item as ProductionCapacityRow).category.name }} • {{ (item as ProductionCapacityRow).unit }}</div>
+                <div class="text-xs text-gray-500">{{ (item as ProductionCapacityRow).category.name }}</div>
               </div>
             </div>
           </template>
