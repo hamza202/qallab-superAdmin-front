@@ -72,18 +72,9 @@ interface ApiResponse<T> {
   data: T
 }
 
-type ProductionCapacityNumericField = 
-  | "tonPerHourMin"
-  | "tonPerHourMax"
-  | "tonPerDayMin"
-  | "tonPerDayMax"
-  | "tonPerWeekMin"
-  | "tonPerWeekMax"
-  | "tonPerMonthMin"
-  | "tonPerMonthMax"
 
-type BulkEditMode = "percentage" | "value"
-type BulkEditDirection = "increase" | "decrease"
+
+
 
 const route = useRoute()
 const router = useRouter()
@@ -235,62 +226,9 @@ const tableHeaders = [
   },
 ];
 
-const bulkEditMode = ref<BulkEditMode>("percentage");
-const bulkEditAmount = ref<number | null>(10);
 
-const applyBulkEdit = (direction: BulkEditDirection) => {
-  // Check if any rows are selected
-  if (selectedRows.value.length === 0) {
-    error('الرجاء تحديد منتجات لتطبيق التعديل')
-    return
-  }
 
-  const amount = Math.abs(Number(bulkEditAmount.value))
-  if (!Number.isFinite(amount) || amount === 0) {
-    error('الرجاء إدخال قيمة صحيحة')
-    return
-  }
 
-  const applyToValue = (value: string | null) => {
-    const base = parseFloat(value || '0')
-    if (!Number.isFinite(base)) return '0'
-
-    let next = base
-    if (bulkEditMode.value === "percentage") {
-      const factor = amount / 100
-      next = direction === "increase" ? base * (1 + factor) : base * (1 - factor)
-    } else {
-      next = direction === "increase" ? base + amount : base - amount
-    }
-
-    if (!Number.isFinite(next)) return value || '0'
-    next = Math.max(0, Math.round(next * 100) / 100)
-    return next.toString()
-  }
-
-  const fields: ProductionCapacityNumericField[] = [
-    "tonPerHourMin",
-    "tonPerHourMax",
-    "tonPerDayMin",
-    "tonPerDayMax",
-    "tonPerWeekMin",
-    "tonPerWeekMax",
-    "tonPerMonthMin",
-    "tonPerMonthMax",
-  ]
-
-  // Apply to selected rows only
-  allRows.value.forEach((r) => {
-    if (selectedRows.value.includes(r.id)) {
-      fields.forEach((f) => {
-        r[f] = applyToValue(r[f])
-      })
-      modifiedItemIds.value.add(r.itemId)
-    }
-  })
-
-  success(`تم تطبيق التعديل على ${selectedRows.value.length} منتج`)
-}
 
 const handleSave = async () => {
   try {
@@ -310,7 +248,7 @@ const handleSave = async () => {
     // Send ALL items with their capacity data
     await saveItems(productionCapacityId.value, allRows.value)
     success('تم حفظ التغييرات بنجاح')
-    toast.success('تم حفظ التغييرات بنجاح')
+
 
     // Refresh data
     modifiedItemIds.value.clear()
@@ -370,49 +308,7 @@ onMounted(async () => {
     <div class="production-capacity-page">
       <PageHeader :icon="productionCapacityIcon" title-key="pages.productionCapacityList.title"
         description-key="pages.productionCapacityList.description" />
-
       <div class="-mx-6">
-        <div class="pb-2">
-          <div class="px-4 py-3">
-            <div class="flex flex-col md:flex-row gap-5 md:items-center">
-              <div class="text-lg font-bold text-gray-900">تعديل الكل</div>
-
-              <div class="flex flex-wrap items-center gap-3">
-                <div class="p-1 bg-gray-50 border border-gray-100 rounded-lg">
-                  <v-btn-toggle v-model="bulkEditMode" mandatory density="comfortable" color="primary" class="gap-2">
-                    <v-btn value="percentage" variant="flat" class="px-6">نسبة</v-btn>
-                    <v-btn value="value" variant="flat" class="px-6">قيمة</v-btn>
-                  </v-btn-toggle>
-                </div>
-
-                <div class="w-[120px]">
-                  <PriceInput v-model="bulkEditAmount" :hide-details="true" :input-props="{ class: 'bg-white' }"
-                    :currency="bulkEditMode === 'percentage' ? '%' : ''" placeholder="10" />
-                </div>
-
-                <div class="flex items-center gap-2 p-1 bg-gray-50 border border-gray-100 rounded-lg">
-                  <v-btn variant="flat" color="primary-500" class="px-4" height="40" @click="applyBulkEdit('increase')">
-                    <template #prepend>
-                      <span class="w-5 h-4 rounded-full bg-white flex items-center justify-center">
-                        <v-icon icon="mdi-plus" size="13" />
-                      </span>
-                    </template>
-                    <span class="font-semibold text-white">زيادة</span>
-                  </v-btn>
-                  <v-btn variant="flat" color="primary-500" class="px-4" height="40" @click="applyBulkEdit('decrease')">
-                    <template #prepend>
-                      <span class="w-5 h-4 rounded-full bg-white flex items-center justify-center">
-                        <v-icon icon="mdi-minus" size="13" />
-                      </span>
-                    </template>
-                    <span class="font-semibold text-white">نقصان</span>
-                  </v-btn>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
         <div class="border-y border-y-primary-100 bg-primary-50 px-4 sm:px-6 py-3">
           <div class="flex flex-col md:flex-row gap-3 md:items-center justify-between">
             <div class="flex flex-wrap gap-3 flex-1">
