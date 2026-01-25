@@ -356,10 +356,7 @@ const fetchRoles = async () => {
         
         const response = await api.get<ApiResponse>(url)
         
-        roles.value = response.data.map((role, index) => ({
-            ...role,
-            id: index + 1 // Use index as id if not provided
-        }))
+        roles.value = response.data
         canCreate.value = response.actions?.can_create ?? false
     } catch (err: any) {
         console.error('Error fetching roles:', err)

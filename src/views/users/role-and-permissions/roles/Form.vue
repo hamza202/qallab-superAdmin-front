@@ -115,8 +115,8 @@
                                         >
                                             <span class="text-sm text-gray-600 flex-1">{{ permission.display_name }}</span>
                                             <v-checkbox
-                                                :model-value="form.permissions.includes(permission.name)"
-                                                @update:model-value="togglePermission(permission.name, $event)"
+                                                :model-value="form.permissions.includes(permission.id)"
+                                                @update:model-value="togglePermission(permission.id, $event)"
                                                 hide-details
                                                 density="compact"
                                                 color="primary"
@@ -193,7 +193,7 @@ interface RoleApiResponse {
     data: {
         id: number
         name: string
-        permissions: string[]
+        permissions: number[] // API returns permission IDs
     }
 }
 
@@ -208,7 +208,7 @@ const roleId = computed(() => route.params.id as string)
 // Form Data
 const form = ref({
     name: '',
-    permissions: [] as string[]
+    permissions: [] as number[] // Store permission IDs
 })
 
 // Permissions Data
@@ -219,13 +219,13 @@ const expandedGroups = ref<string[]>([])
 const isGroupAllSelected = (groupKey: string) => {
     const group = permissionGroups.value[groupKey]
     if (!group) return false
-    return group.permissions.every(p => form.value.permissions.includes(p.name))
+    return group.permissions.every(p => form.value.permissions.includes(p.id))
 }
 
 const isGroupPartiallySelected = (groupKey: string) => {
     const group = permissionGroups.value[groupKey]
     if (!group) return false
-    const selectedCount = group.permissions.filter(p => form.value.permissions.includes(p.name)).length
+    const selectedCount = group.permissions.filter(p => form.value.permissions.includes(p.id)).length
     return selectedCount > 0 && selectedCount < group.permissions.length
 }
 
@@ -246,14 +246,14 @@ const toggleGroupAll = (groupKey: string, selected: boolean | null) => {
     if (selected) {
         // Add all permissions from this group
         group.permissions.forEach(p => {
-            if (!form.value.permissions.includes(p.name)) {
-                form.value.permissions.push(p.name)
+            if (!form.value.permissions.includes(p.id)) {
+                form.value.permissions.push(p.id)
             }
         })
     } else {
         // Remove all permissions from this group
         group.permissions.forEach(p => {
-            const index = form.value.permissions.indexOf(p.name)
+            const index = form.value.permissions.indexOf(p.id)
             if (index > -1) {
                 form.value.permissions.splice(index, 1)
             }
@@ -261,13 +261,13 @@ const toggleGroupAll = (groupKey: string, selected: boolean | null) => {
     }
 }
 
-const togglePermission = (permissionName: string, selected: boolean | null) => {
+const togglePermission = (permissionId: number, selected: boolean | null) => {
     if (selected) {
-        if (!form.value.permissions.includes(permissionName)) {
-            form.value.permissions.push(permissionName)
+        if (!form.value.permissions.includes(permissionId)) {
+            form.value.permissions.push(permissionId)
         }
     } else {
-        const index = form.value.permissions.indexOf(permissionName)
+        const index = form.value.permissions.indexOf(permissionId)
         if (index > -1) {
             form.value.permissions.splice(index, 1)
         }
@@ -331,10 +331,18 @@ const handleSubmit = async () => {
         
         formData.append('name', form.value.name)
         
-        // Append permissions as permissions[0], permissions[1], etc.
-        form.value.permissions.forEach((permissionName, index) => {
-            formData.append(`permissions[${index}]`, permissionName)
-        })
+        // Convert permission IDs to permission names for API
+        // Find permission name by ID from permissionGroups
+        let permissionIndex = 0
+        for (const groupKey in permissionGroups.value) {
+            const group = permissionGroups.value[groupKey]
+            for (const permission of group.permissions) {
+                if (form.value.permissions.includes(permission.id)) {
+                    formData.append(`permissions[${permissionIndex}]`, permission.name)
+                    permissionIndex++
+                }
+            }
+        }
 
         if (isEditing.value) {
             await api.post(`/roles/${roleId.value}`, formData)
