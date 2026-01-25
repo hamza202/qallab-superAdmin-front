@@ -33,6 +33,7 @@ declare module 'vue' {
     SelectInput: typeof import('./components/common/forms/selectInput.vue')['default']
     SelectWithIconInput: typeof import('./components/common/forms/SelectWithIconInput.vue')['default']
     StatusChangeDialog: typeof import('./components/common/StatusChangeDialog.vue')['default']
+    TelInput: typeof import('./components/common/forms/TelInput.vue')['default']
     TextareaInput: typeof import('./components/common/forms/TextareaInput.vue')['default']
     TextInput: typeof import('./components/common/forms/textInput.vue')['default']
   }

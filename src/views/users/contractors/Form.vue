@@ -61,6 +61,7 @@ const handleTabChange = (newTab: number, event?: Event) => {
 
 const fullNameTranslations = ref({ ar: "", en: "" });
 const tradeNameTranslations = ref({ ar: "", en: "" });
+const ownerName = ref("");
 const commercialRegister = ref("");
 const taxRegister = ref("");
 const entityType = ref<string | null>(null);
@@ -179,6 +180,7 @@ const handleSave = async () => {
         ar: tradeNameTranslations.value.ar,
         en: tradeNameTranslations.value.en
       };
+      payload.owner_name = ownerName.value;
       if (commercialRegister.value) payload.commercial_register = String(commercialRegister.value);
       if (taxRegister.value) payload.tax_register = String(taxRegister.value);
       if (entityType.value) payload.entity_type = entityType.value;
@@ -296,13 +298,13 @@ const handleSave = async () => {
       formData.append('_method', 'PUT');
       response = await api.post(`/contractors/${route.params.id}`, formData);
 
-        // Show success message based on step
-        const stepMessages = [
-            'تم حفظ البيانات الأساسية بنجاح',
-            'تم حفظ البيانات المالية بنجاح',
-            'تم حفظ البيانات التجارية بنجاح',
-            'تم حفظ المعلومات التشغيلية بنجاح'
-        ];
+      // Show success message based on step
+      const stepMessages = [
+        'تم حفظ البيانات الأساسية بنجاح',
+        'تم حفظ البيانات المالية بنجاح',
+        'تم حفظ البيانات التجارية بنجاح',
+        'تم حفظ المعلومات التشغيلية بنجاح'
+      ];
 
       // Clear validation errors on successful save
       hasValidationErrors.value = false;
@@ -344,6 +346,7 @@ const handleCancel = () => {
 const handleBasicInfoUpdate = (data: any) => {
   if (data.fullNameTranslations !== undefined) fullNameTranslations.value = data.fullNameTranslations;
   if (data.tradeNameTranslations !== undefined) tradeNameTranslations.value = data.tradeNameTranslations;
+  if (data.ownerName !== undefined) ownerName.value = data.ownerName;
   if (data.commercialRegister !== undefined) commercialRegister.value = data.commercialRegister;
   if (data.taxRegister !== undefined) taxRegister.value = data.taxRegister;
   if (data.entityType !== undefined) entityType.value = data.entityType;
@@ -488,6 +491,7 @@ const fetchContractorData = async () => {
     contractorId.value = data.id;
     fullNameTranslations.value = data.full_name_translations || { ar: "", en: "" };
     tradeNameTranslations.value = data.trade_name_translations || { ar: "", en: "" };
+    ownerName.value = data.owner_name || '';
     commercialRegister.value = data.commercial_register || "";
     taxRegister.value = data.tax_register || "";
     entityType.value = data.entity_type;
@@ -571,13 +575,13 @@ onMounted(async () => {
       <v-tabs-window v-model="activeTab">
         <v-tabs-window-item :value="0">
           <BasicInfoTab :fullNameTranslations="fullNameTranslations" :tradeNameTranslations="tradeNameTranslations"
-            :commercialRegister="commercialRegister" :taxRegister="taxRegister" :entityType="entityType"
-            :isActive="isActive" :languageId="languageId"
-            :phone="phone" :email="email" :mobile="mobile" :countryId="countryId" :cityId="cityId"
-            :neighborhood="neighborhood" :streetName="streetName" :buildingNumber="buildingNumber"
-            :postalCode="postalCode" :address1="address1" :entityTypeItems="entityTypeItems"
-            :languageItems="languageItems" :countryItems="countryItems" :cityItems="cityItems" :formErrors="formErrors"
-            @update:formData="handleBasicInfoUpdate" @clear:error="clearError" />
+            :ownerName="ownerName" :commercialRegister="commercialRegister" :taxRegister="taxRegister"
+            :entityType="entityType" :isActive="isActive" :languageId="languageId" :phone="phone" :email="email"
+            :mobile="mobile" :countryId="countryId" :cityId="cityId" :neighborhood="neighborhood"
+            :streetName="streetName" :buildingNumber="buildingNumber" :postalCode="postalCode" :address1="address1"
+            :entityTypeItems="entityTypeItems" :languageItems="languageItems" :countryItems="countryItems"
+            :cityItems="cityItems" :formErrors="formErrors" @update:formData="handleBasicInfoUpdate"
+            @clear:error="clearError" />
         </v-tabs-window-item>
 
         <v-tabs-window-item :value="1">

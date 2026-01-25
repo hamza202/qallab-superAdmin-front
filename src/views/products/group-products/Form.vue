@@ -249,7 +249,7 @@ const fetchAspects = async () => {
   try {
     const response = await api.get<{ data: Aspect[] }>(`/aspects/list?category_id=${category.value}`);
     const data = response.data;
-    
+
     // Initialize selectedAspects for each aspect before updating aspects ref
     // to ensure v-for loop finds the initialized arrays
     // Create a new object for selectedAspects.value to ensure reactivity for new keys
@@ -258,7 +258,7 @@ const fetchAspects = async () => {
       newSelectedAspects[aspect.id] = selectedAspects.value[aspect.id] || [];
     });
     selectedAspects.value = newSelectedAspects;
-    
+
     aspects.value = data;
   } catch (err: any) {
     console.error('Error fetching aspects:', err);
@@ -297,9 +297,9 @@ const generateSubProducts = async () => {
 
     // Call API to get sub-item names
     const response = await api.post<{ data: { sub_items_name: string[] } }>('/aspects/generate-subitem-names', formData);
-    
+
     const subItemNames = response.data.sub_items_name || [];
-    
+
     if (subItemNames.length === 0) {
       toast.warning('لم يتم إرجاع أسماء منتجات فرعية');
       return;
@@ -760,7 +760,7 @@ const fetchTaxConstants = async () => {
 const handleTaxChange = (taxId: string | number | number[] | string[] | null) => {
   // If it's an array, take the first element
   const id = Array.isArray(taxId) ? taxId[0] : taxId;
-  
+
   if (id) {
     const selectedTax = taxTypeItems.value.find(tax => tax.value === Number(id));
     if (selectedTax) {
@@ -842,20 +842,20 @@ const fetchSuppliers = async () => {
 // Build step 1 form data using FormData for proper array notation
 const buildStep1Data = () => {
   const formData = new FormData();
-  
+
   // Add _method: PUT if we're updating (productItemId exists)
   if (productItemId.value) {
     formData.append("_method", "PUT");
   }
-  
+
   // Name fields with array notation
   formData.append("name[ar]", arabicName.value);
   formData.append("name[en]", englishName.value);
-  
+
   // Description fields with array notation
   formData.append("description[ar]", arabicDescription.value);
   formData.append("description[en]", englishDescription.value);
-  
+
   // Category and Unit
   if (category.value) formData.append("category_id", String(category.value));
   if (unit.value) formData.append("unit_id", String(unit.value));
@@ -870,14 +870,14 @@ const buildStep1Data = () => {
   if (maxSalePrice.value) formData.append("max_sell_price", maxSalePrice.value);
   if (wholesalePrice.value) formData.append("wholesale_price", wholesalePrice.value);
   if (halfWholesalePrice.value) formData.append("half_wholesale_price", halfWholesalePrice.value);
-  
+
   // Discount
   if (discountType.value) formData.append("discount_type", String(discountType.value));
   if (discountValue.value) formData.append("discount_value", discountValue.value);
-  
+
   // Profit margin
   if (profitMargin.value) formData.append("profit_margin", profitMargin.value);
-  
+
   // Collect all aspect_value_ids from selectedAspects
   let allAspectValueIds: (string | number)[] = [];
   Object.values(selectedAspects.value).forEach(values => {
@@ -885,34 +885,34 @@ const buildStep1Data = () => {
       values.forEach(val => allAspectValueIds.push(val));
     }
   });
-  
+
   // In edit mode, if no new aspects selected, use the saved ones from API
   if (allAspectValueIds.length === 0 && savedAspectValueIds.value.length > 0) {
     allAspectValueIds = [...savedAspectValueIds.value];
   }
-  
+
   // Add aspect_value_ids with array notation
   allAspectValueIds.forEach((id, index) => {
     formData.append(`aspect_value_ids[${index}]`, String(id));
   });
-  
+
   // Add sub_items from subProductsTableItems
   subProductsTableItems.value.forEach((item, index) => {
     // Only include id in edit mode (when item has a real backend id, not local generated)
     if (isEditMode.value && item.backendId) {
       formData.append(`sub_items[${index}][id]`, String(item.backendId));
     } else {
-      formData.append(`sub_items[${index}][id]`,"");
+      formData.append(`sub_items[${index}][id]`, "");
     }
     // Always send the name from the table item
     formData.append(`sub_items[${index}][name]`, String(item.name || ''));
     formData.append(`sub_items[${index}][purchase_price]`, String(item.purchasePrice || 0));
     formData.append(`sub_items[${index}][sell_price]`, String(item.salePrice || 0));
   });
-  
+
   // Step
   formData.append("step", "1");
-  
+
   return formData;
 };
 
@@ -950,11 +950,11 @@ const handleSaveAndReturn = async () => {
     try {
       savingLoading.value = true;
       const formData = buildStep1Data();
-      
+
       // Use different endpoint for create vs update - GROUPED-ITEMS
       const endpoint = productItemId.value ? `/grouped-items/${productItemId.value}` : '/grouped-items';
       const response = await api.post<CreateItemResponse>(endpoint, formData);
-      
+
       if (response.status === 200) {
         // Store the item_id and code if creating new (only when data is returned)
         if (!productItemId.value && response.data?.item_id) {
@@ -982,11 +982,11 @@ const handleSaveAndCreate = async () => {
     try {
       savingLoading.value = true;
       const formData = buildStep1Data();
-      
+
       // Use different endpoint for create vs update - GROUPED-ITEMS
       const endpoint = productItemId.value ? `/grouped-items/${productItemId.value}` : '/grouped-items';
       const response = await api.post<CreateItemResponse>(endpoint, formData);
-      
+
       if (response.status === 200) {
         toast.success(productItemId.value ? "تم التعديل بنجاح" : "تم الإنشاء بنجاح");
         resetFormFields();
@@ -1006,11 +1006,11 @@ const handleSaveAndContinue = async () => {
     try {
       savingLoading.value = true;
       const formData = buildStep1Data();
-      
+
       // Use different endpoint for create vs update - GROUPED-ITEMS
       const endpoint = productItemId.value ? `/grouped-items/${productItemId.value}` : '/grouped-items';
       const response = await api.post<CreateItemResponse>(endpoint, formData);
-      
+
       if (response.status === 200) {
         // Store the item_id and code if creating new (only when data is returned)
         if (!productItemId.value && response.data?.item_id) {
@@ -1036,10 +1036,10 @@ const handleSaveAndContinue = async () => {
 // Build step 2 form data for taxes
 const buildStep2Data = () => {
   const formData = new FormData();
-  
+
   // Add _method: PUT since we're updating
   formData.append("_method", "PUT");
-  
+
   // Add taxes array in the format: taxes[0][tax_id], taxes[0][percentage], etc.
   taxTableItems.value.forEach((tax, index) => {
     // Only send ID if it's from backend (saved tax)
@@ -1051,10 +1051,10 @@ const buildStep2Data = () => {
     formData.append(`taxes[${index}][minimum]`, tax.minValue);
     formData.append(`taxes[${index}][priority]`, String(tax.priority));
   });
-  
+
   // Step
   formData.append("step", "2");
-  
+
   return formData;
 };
 
@@ -1064,13 +1064,13 @@ const handleStep2SaveAndReturn = async () => {
     toast.error('يرجى إتمام الخطوة الأولى أولاً');
     return;
   }
-  
+
   try {
     savingLoading.value = true;
     const formData = buildStep2Data();
     const endpoint = `/grouped-items/${productItemId.value}`;
     const response = await api.post<CreateItemResponse>(endpoint, formData);
-    
+
     if (response.status === 200) {
       toast.success("تم حفظ بيانات الضرائب بنجاح");
       router.push({ name: 'GroupProductsList' });
@@ -1088,13 +1088,13 @@ const handleStep2SaveAndCreate = async () => {
     toast.error('يرجى إتمام الخطوة الأولى أولاً');
     return;
   }
-  
+
   try {
     savingLoading.value = true;
     const formData = buildStep2Data();
     const endpoint = `/grouped-items/${productItemId.value}`;
     const response = await api.post<CreateItemResponse>(endpoint, formData);
-    
+
     if (response.status === 200) {
       toast.success("تم حفظ بيانات الضرائب بنجاح");
       resetFormFields();
@@ -1112,13 +1112,13 @@ const handleStep2SaveAndContinue = async () => {
     toast.error('يرجى إتمام الخطوة الأولى أولاً');
     return;
   }
-  
+
   try {
     savingLoading.value = true;
     const formData = buildStep2Data();
     const endpoint = `/grouped-items/${productItemId.value}`;
     const response = await api.post<CreateItemResponse>(endpoint, formData);
-    
+
     if (response.status === 200) {
       toast.success("تم حفظ بيانات الضرائب بنجاح");
       // Fetch items list for step 3 dropdowns
@@ -1137,15 +1137,15 @@ const handleStep2SaveAndContinue = async () => {
 // Build step 3 form data for additional data
 const buildStep3Data = () => {
   const formData = new FormData();
-  
+
   // Add _method: PUT since we're updating
   formData.append("_method", "PUT");
-  
+
   // Brand, Manufacturer, Country of Origin
   if (brand.value) formData.append("brand_id", String(brand.value));
   if (manufacturer.value) formData.append("manufacturer_id", String(manufacturer.value));
   if (originCountry.value) formData.append("country_of_origin_id", String(originCountry.value));
-  
+
   // Product availability flags
   formData.append("is_manufacturable", isManufacturingProduct.value ? "true" : "false");
   formData.append("allow_negative_sales", sellNegative.value ? "true" : "false");
@@ -1156,30 +1156,30 @@ const buildStep3Data = () => {
   formData.append("is_available_for_projects", isAvailableForPurchase.value ? "true" : "false");
   formData.append("is_available_for_sale", isAvailableForSelling.value ? "true" : "false");
   formData.append("is_available_for_purchase", isAvailableForBuying.value ? "true" : "false");
-  
+
   // Alternative items (array)
   alternativeProducts.value.forEach((itemId, index) => {
     formData.append(`alternative_items[${index}]`, String(itemId));
   });
-  
+
   // Attached items (array)
   attachedProducts.value.forEach((itemId, index) => {
     formData.append(`attached_items[${index}]`, String(itemId));
   });
-  
+
   // Linked items / Related products (array)
   relatedProducts.value.forEach((itemId, index) => {
     formData.append(`linked_items[${index}]`, String(itemId));
   });
-  
+
   // Best suppliers (array)
   bestSuppliers.value.forEach((supplierId, index) => {
     formData.append(`best_suppliers[${index}]`, String(supplierId));
   });
-  
+
   // Step
   formData.append("step", "3");
-  
+
   return formData;
 };
 
@@ -1189,13 +1189,13 @@ const handleStep3SaveAndReturn = async () => {
     toast.error('يرجى إتمام الخطوة الأولى أولاً');
     return;
   }
-  
+
   try {
     savingLoading.value = true;
     const formData = buildStep3Data();
     const endpoint = `/grouped-items/${productItemId.value}`;
     const response = await api.post<CreateItemResponse>(endpoint, formData);
-    
+
     if (response.status === 200) {
       toast.success("تم حفظ البيانات الإضافية بنجاح");
       router.push({ name: 'GroupProductsList' });
@@ -1213,13 +1213,13 @@ const handleStep3SaveAndCreate = async () => {
     toast.error('يرجى إتمام الخطوة الأولى أولاً');
     return;
   }
-  
+
   try {
     savingLoading.value = true;
     const formData = buildStep3Data();
     const endpoint = `/grouped-items/${productItemId.value}`;
     const response = await api.post<CreateItemResponse>(endpoint, formData);
-    
+
     if (response.status === 200) {
       toast.success("تم حفظ البيانات الإضافية بنجاح");
       resetFormFields();
@@ -1237,13 +1237,13 @@ const handleStep3SaveAndContinue = async () => {
     toast.error('يرجى إتمام الخطوة الأولى أولاً');
     return;
   }
-  
+
   try {
     savingLoading.value = true;
     const formData = buildStep3Data();
     const endpoint = `/grouped-items/${productItemId.value}`;
     const response = await api.post<CreateItemResponse>(endpoint, formData);
-    
+
     if (response.status === 200) {
       toast.success("تم حفظ البيانات الإضافية بنجاح");
       // Move to next tab (Tests list)
@@ -1315,7 +1315,7 @@ const fetchProduct = async (id: number) => {
           // Find priority label from loaded constants
           const priorityItem = taxPriorityItems.value.find(p => p.value == tax.priority);
           const priorityLabel = priorityItem ? priorityItem.title : String(tax.priority);
-          
+
           return {
             id: tax.id, // Local ID for table
             backendId: tax.id, // Backend ID for API requests
@@ -1342,19 +1342,19 @@ const fetchProduct = async (id: number) => {
       // Material Type
       if (data.material_types) {
         if (typeof data.material_types === 'object' && 'key' in data.material_types) {
-            materialType.value = data.material_types.key;
+          materialType.value = data.material_types.key;
         } else if (typeof data.material_types === 'object' && 'id' in data.material_types) {
-            materialType.value = data.material_types.id;
+          materialType.value = data.material_types.id;
         } else {
-            materialType.value = data.material_types;
+          materialType.value = data.material_types;
         }
       } else if (data.material_type) {
-         if (typeof data.material_type === 'object' && 'key' in data.material_type) {
-            materialType.value = data.material_type.key;
+        if (typeof data.material_type === 'object' && 'key' in data.material_type) {
+          materialType.value = data.material_type.key;
         } else if (typeof data.material_type === 'object' && 'id' in data.material_type) {
-            materialType.value = data.material_type.id;
+          materialType.value = data.material_type.id;
         } else {
-            materialType.value = data.material_type;
+          materialType.value = data.material_type;
         }
       }
       profitMargin.value = data.profit_margin;
@@ -1388,7 +1388,7 @@ const fetchProduct = async (id: number) => {
       isManufacturingProduct.value = data.is_manufacturable;
       isAvailableForRent.value = data.is_rentable;
       isAvailableForReturn.value = data.is_returnable;
-      
+
       // Mappings inferred from formData construction:
       isAvailableForRefund.value = data.is_barter_sale; // formData: is_barter_sale maps to isAvailableForRefund
       isAvailableForOffset.value = data.is_settlement_by_netting; // formData: is_settlement_by_netting maps to isAvailableForOffset
@@ -1436,7 +1436,7 @@ onMounted(async () => {
       fetchSuppliers(),
       // fetchAspects(), // Removed from here to be called by watch on category selection
     ]);
-    
+
     // If in edit mode, set step 1 as completed and load item data
     if (isEditMode.value) {
       itemId.value = Number(route.params.id);
@@ -1487,32 +1487,23 @@ const pencilIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" 
   <default-layout>
     <div class="form-validation-page">
       <!-- Header -->
-      <PageHeader
-        :icon="gridIcon"
-        title-key="pages.groupProducts.title"
-        description-key="pages.groupProducts.description"
-      />
+      <PageHeader :icon="gridIcon" title-key="pages.groupProducts.title"
+        description-key="pages.groupProducts.description" />
 
       <!-- Tabs -->
       <div
-        class="flex lg:items-center lg:justify-between py-4 border-y border-gray-200 flex-col lg:flex-row gap-3 mb-4"
-      >
+        class="flex xl:items-center xl:justify-between py-4 border-y border-gray-200 flex-col xl:flex-row gap-3 mb-4">
         <!-- Tabs -->
         <div class="flex gap-2 overflow-y-auto">
-          <button
-            v-for="tab in tabs"
-            :key="tab.value"
-            @click="handleTabClick(tab.value)"
-            :disabled="!isTabAccessible(tab.value)"
-            :class="[
+          <button v-for="tab in tabs" :key="tab.value" @click="handleTabClick(tab.value)"
+            :disabled="!isTabAccessible(tab.value)" :class="[
               'flex items-center gap-2 px-3.5 py-2.5 rounded-md transition-all',
               isTabActive(tab.value)
                 ? 'bg-primary-500 text-white'
                 : isTabAccessible(tab.value)
                   ? 'text-gray-400 hover:bg-gray-50 cursor-pointer'
                   : 'text-gray-300 cursor-not-allowed opacity-50',
-            ]"
-          >
+            ]">
             <span v-html="tab.icon" class="w-6 h-6"></span>
             <span class="text-base font-semibold whitespace-nowrap">{{
               tab.title
@@ -1525,27 +1516,12 @@ const pencilIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" 
           <!-- Label -->
           <span class="text-sm font-semibold text-gray-700">كود المنتج</span>
           <!-- Product Code Badge -->
-          <div
-            class="flex items-center gap-2 px-2.5 py-1.5 bg-primary-100 border border-primary-300 rounded shadow-xs"
-          >
-            <button
-              @click="copyProductCode"
-              class="cursor-pointer hover:opacity-80 transition-opacity"
-            >
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 20 20"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
+          <div class="flex items-center gap-2 px-2.5 py-1.5 bg-primary-100 border border-primary-300 rounded shadow-xs">
+            <button @click="copyProductCode" class="cursor-pointer hover:opacity-80 transition-opacity">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path
                   d="M11.6667 1.89111V5.33323C11.6667 5.79994 11.6667 6.0333 11.7575 6.21156C11.8374 6.36836 11.9649 6.49584 12.1217 6.57574C12.3 6.66656 12.5333 6.66656 13 6.66656H16.4422M11.6667 14.1665H6.66671M13.3334 10.8332H6.66671M16.6667 8.32336V14.3332C16.6667 15.7333 16.6667 16.4334 16.3942 16.9681C16.1545 17.4386 15.7721 17.821 15.3017 18.0607C14.7669 18.3332 14.0668 18.3332 12.6667 18.3332H7.33337C5.93324 18.3332 5.23318 18.3332 4.6984 18.0607C4.22799 17.821 3.84554 17.4386 3.60586 16.9681C3.33337 16.4334 3.33337 15.7333 3.33337 14.3332V5.6665C3.33337 4.26637 3.33337 3.56631 3.60586 3.03153C3.84554 2.56112 4.22799 2.17867 4.6984 1.93899C5.23318 1.6665 5.93324 1.6665 7.33337 1.6665H10.0099C10.6213 1.6665 10.9271 1.6665 11.2148 1.73558C11.4699 1.79682 11.7137 1.89783 11.9374 2.0349C12.1897 2.18951 12.4059 2.4057 12.8383 2.83808L15.4951 5.49493C15.9275 5.92731 16.1437 6.1435 16.2983 6.39579C16.4354 6.61947 16.5364 6.86333 16.5976 7.11842C16.6667 7.40614 16.6667 7.71188 16.6667 8.32336Z"
-                  stroke="#1849A9"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
+                  stroke="#1849A9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
               </svg>
             </button>
             <span class="font-bold text-primary-800 dir-ltr">{{
@@ -1561,32 +1537,18 @@ const pencilIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" 
           <v-form ref="formRef" v-model="isFormValid" @submit.prevent>
             <div class="">
               <!-- Two Column Layout -->
-              <div
-                class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-3 bg-gray-50 rounded-lg p-3"
-              >
+              <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 mb-3 bg-gray-50 rounded-lg p-3">
                 <!-- Right Column: Prices Section -->
-                <div class="lg:col-span-4 order-2 lg:order-1">
+                <div class="xl:col-span-4 order-2 lg:order-1">
                   <div class="bg-gray-100 rounded-lg p-6">
                     <!-- Prices Header -->
                     <div class="flex items-center gap-3 mb-6">
-                      <div
-                        class="w-[38px] h-[38px] bg-primary-500 rounded flex items-center justify-center"
-                      >
-                        <svg
-                          width="20"
-                          height="20"
-                          viewBox="0 0 20 20"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
+                      <div class="w-[38px] h-[38px] bg-primary-500 rounded flex items-center justify-center">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                           <g clip-path="url(#clip0_852_47730)">
                             <path
                               d="M11.2749 6.95972C10.7979 7.29979 10.2141 7.49984 9.58366 7.49984C7.97283 7.49984 6.66699 6.194 6.66699 4.58317C6.66699 2.97234 7.97283 1.6665 9.58366 1.6665C10.6278 1.6665 11.5438 2.21518 12.0591 3.03996M5.00033 16.7391H7.17557C7.45918 16.7391 7.74106 16.7729 8.016 16.8404L10.3144 17.3989C10.8131 17.5204 11.3326 17.5322 11.8366 17.4343L14.3778 16.9399C15.0491 16.8092 15.6666 16.4877 16.1506 16.0169L17.9486 14.2679C18.462 13.7693 18.462 12.9602 17.9486 12.4607C17.4863 12.011 16.7543 11.9604 16.2313 12.3418L14.1358 13.8705C13.8357 14.0899 13.4706 14.208 13.095 14.208H11.0716L12.3595 14.208C13.0855 14.208 13.6735 13.6359 13.6735 12.9298V12.6741C13.6735 12.0878 13.2633 11.5765 12.6787 11.4347L10.6908 10.9513C10.3673 10.8728 10.036 10.8332 9.70294 10.8332C8.89893 10.8332 7.44357 11.4988 7.44357 11.4988L5.00033 12.5206M16.667 5.4165C16.667 7.02733 15.3612 8.33317 13.7503 8.33317C12.1395 8.33317 10.8337 7.02733 10.8337 5.4165C10.8337 3.80567 12.1395 2.49984 13.7503 2.49984C15.3612 2.49984 16.667 3.80567 16.667 5.4165ZM1.66699 12.1665L1.66699 16.9998C1.66699 17.4665 1.66699 17.6999 1.75782 17.8782C1.83771 18.035 1.9652 18.1624 2.122 18.2423C2.30026 18.3332 2.53361 18.3332 3.00033 18.3332H3.66699C4.1337 18.3332 4.36706 18.3332 4.54532 18.2423C4.70212 18.1624 4.8296 18.035 4.9095 17.8782C5.00033 17.6999 5.00033 17.4665 5.00033 16.9998V12.1665C5.00033 11.6998 5.00033 11.4664 4.9095 11.2882C4.8296 11.1314 4.70212 11.0039 4.54532 10.924C4.36706 10.8332 4.1337 10.8332 3.66699 10.8332L3.00033 10.8332C2.53362 10.8332 2.30026 10.8332 2.122 10.924C1.9652 11.0039 1.83771 11.1314 1.75782 11.2882C1.66699 11.4664 1.66699 11.6998 1.66699 12.1665Z"
-                              stroke="white"
-                              stroke-width="1.5"
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                            />
+                              stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                           </g>
                           <defs>
                             <clipPath id="clip0_852_47730">
@@ -1602,52 +1564,23 @@ const pencilIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" 
 
                     <!-- Price Fields -->
                     <div class="flex flex-col gap-[20px]">
-                      <PriceInput
-                        v-model="purchasePrice"
-                        label="سعر الشراء"
-                        placeholder="ادخل السعر"
-                        :rules="[required(), numeric(), positive()]"
-                        :hide-details="false"
-                      />
-                      <PriceInput
-                        v-model="salePrice"
-                        label="سعر البيع"
-                        placeholder="ادخل السعر"
-                        :rules="[required(), numeric(), positive()]"
-                        :hide-details="false"
-                      />
+                      <PriceInput v-model="purchasePrice" label="سعر الشراء" placeholder="ادخل السعر"
+                        :rules="[required(), numeric(), positive()]" :hide-details="false" />
+                      <PriceInput v-model="salePrice" label="سعر البيع" placeholder="ادخل السعر"
+                        :rules="[required(), numeric(), positive()]" :hide-details="false" />
                       <div class="grid grid-cols-2 gap-[14px]">
-                        <PriceInput
-                          v-model="minSalePrice"
-                          label="أقل سعر بيع"
-                          placeholder="ادخل السعر"
-                          :rules="[numeric(), positive()]"
-                          :hide-details="false"
-                        />
-                        <PriceInput
-                          v-model="maxSalePrice"
-                          label="أعلى سعر بيع"
-                          placeholder="ادخل السعر"
-                          :rules="[numeric(), positive()]"
-                          :hide-details="true"
-                        />
+                        <PriceInput v-model="minSalePrice" label="أقل سعر بيع" placeholder="ادخل السعر"
+                          :rules="[numeric(), positive()]" :hide-details="false" />
+                        <PriceInput v-model="maxSalePrice" label="أعلى سعر بيع" placeholder="ادخل السعر"
+                          :rules="[numeric(), positive()]" :hide-details="true" />
                       </div>
-                      <PriceInput
-                        v-model="profitMargin"
-                        label="هامش الربح"
-                        placeholder="هامش الربح"
-                        :rules="[numeric(), positive()]"
-                        :hide-details="true"
-                      />
+                      <PriceInput v-model="profitMargin" label="هامش الربح" placeholder="هامش الربح"
+                        :rules="[numeric(), positive()]" :hide-details="true" />
 
                       <!-- Discount Section -->
                       <div>
-                        <SelectInput
-                          v-model="discountType"
-                          label="نوع الخصم"
-                          placeholder="اختر نوع الخصم"
-                          :items="discountTypeItems"
-                        />
+                        <SelectInput v-model="discountType" label="نوع الخصم" placeholder="اختر نوع الخصم"
+                          :items="discountTypeItems" />
                       </div>
                       <div>
                         <PriceInput v-model="discountValue" label="قيمة الخصم" placeholder="ادخل قيمة الخصم"
@@ -1658,30 +1591,17 @@ const pencilIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" 
                 </div>
 
                 <!-- Left Column: Product Info Section -->
-                <div class="lg:col-span-8 order-1 lg:order-2">
+                <div class="xl:col-span-8 order-1 lg:order-2">
                   <div class="p-6">
                     <!-- Product Info Header -->
-                    <div
-                      class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6"
-                    >
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                       <div class="flex items-center gap-3">
-                        <div
-                          class="w-[38px] h-[38px] bg-primary-500 rounded flex items-center justify-center"
-                        >
-                          <svg
-                            width="20"
-                            height="20"
-                            viewBox="0 0 20 20"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
-                          >
+                        <div class="w-[38px] h-[38px] bg-primary-500 rounded flex items-center justify-center">
+                          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"
+                            xmlns="http://www.w3.org/2000/svg">
                             <path
                               d="M11.6663 9.1665H6.66634M8.33301 12.4998H6.66634M13.333 5.83317H6.66634M16.6663 5.6665V14.3332C16.6663 15.7333 16.6663 16.4334 16.3939 16.9681C16.1542 17.4386 15.7717 17.821 15.3013 18.0607C14.7665 18.3332 14.0665 18.3332 12.6663 18.3332H7.33301C5.93288 18.3332 5.23281 18.3332 4.69803 18.0607C4.22763 17.821 3.84517 17.4386 3.60549 16.9681C3.33301 16.4334 3.33301 15.7333 3.33301 14.3332V5.6665C3.33301 4.26637 3.33301 3.56631 3.60549 3.03153C3.84517 2.56112 4.22763 2.17867 4.69803 1.93899C5.23281 1.6665 5.93288 1.6665 7.33301 1.6665H12.6663C14.0665 1.6665 14.7665 1.6665 15.3013 1.93899C15.7717 2.17867 16.1542 2.56112 16.3939 3.03153C16.6663 3.56631 16.6663 4.26637 16.6663 5.6665Z"
-                              stroke="white"
-                              stroke-width="1.5"
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                            />
+                              stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                           </svg>
                         </div>
                         <h2 class="text-lg font-bold text-primary-900">
@@ -1690,146 +1610,81 @@ const pencilIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" 
                       </div>
                       <div class="flex items-center gap-4">
                         <ButtonWithIcon variant="flat" color="primary-700" height="40"
-                          custom-class="font-semibold text-base" :prepend-icon="langIcon"
-                          label="أضف لغة جديدة" @click="handleAddLanguage" />
+                          custom-class="font-semibold text-base" :prepend-icon="langIcon" label="أضف لغة جديدة"
+                          @click="handleAddLanguage" />
                       </div>
                     </div>
 
                     <!-- Name Fields with Language Tabs -->
-                    <LanguageTabs
-                      :languages="availableLanguages"
-                      label="الإسم"
-                      class="mb-[20px]"
-                    >
+                    <LanguageTabs :languages="availableLanguages" label="الإسم" class="mb-[20px]">
                       <template #en>
-                        <TextInput
-                          v-model="englishName"
-                          placeholder="Enter name in English"
-                          :rules="[
-                            required('englishNameRequired'),
-                            minLength(2),
-                            maxLength(100),
-                          ]"
-                          :hide-details="false"
-                        />
+                        <TextInput v-model="englishName" placeholder="Enter name in English" :rules="[
+                          required('englishNameRequired'),
+                          minLength(2),
+                          maxLength(100),
+                        ]" :hide-details="false" />
                       </template>
                       <template #ar>
-                        <TextInput
-                          v-model="arabicName"
-                          placeholder="ادخل الاسم بالعربية"
-                          :rules="[
-                            required('arabicNameRequired'),
-                            minLength(2),
-                            maxLength(100),
-                            arabicOnly(),
-                          ]"
-                          :hide-details="true"
-                        />
+                        <TextInput v-model="arabicName" placeholder="ادخل الاسم بالعربية" :rules="[
+                          required('arabicNameRequired'),
+                          minLength(2),
+                          maxLength(100),
+                          arabicOnly(),
+                        ]" :hide-details="true" />
                       </template>
                     </LanguageTabs>
 
                     <!-- Category and Unit -->
-                    <div
-                      class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-[20px]"
-                    >
-                      <SelectWithIconInput
-                        v-model="category"
-                        label="التصنيف"
-                        placeholder="اختر التصنيف"
-                        :items="categoryItems"
-                        :rules="[required()]"
-                        :hide-details="false"
-                        show-add-button
-                        @add-click="handleAddCategory"
-                      />
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-[20px]">
+                      <SelectWithIconInput v-model="category" label="التصنيف" placeholder="اختر التصنيف"
+                        :items="categoryItems" :rules="[required()]" :hide-details="false" show-add-button
+                        @add-click="handleAddCategory" />
                       <div class="flex flex-col">
-                        <SelectWithIconInput
-                          v-model="unit"
-                          label="الوحدة"
-                          placeholder="اختر الوحدة"
-                          :items="unitItems"
-                          :rules="[required()]"
-                          :hide-details="false"
-                          show-add-button
-                          @add-click="handleAddUnit"
-                        />
-                        <CheckboxInput
-                          v-model="isMinUnit"
-                          label="اقل وحدة"
-                          color="primary"
-                          classes="mt-2"
-                        />
+                        <SelectWithIconInput v-model="unit" label="الوحدة" placeholder="اختر الوحدة" :items="unitItems"
+                          :rules="[required()]" :hide-details="false" show-add-button @add-click="handleAddUnit" />
+                        <CheckboxInput v-model="isMinUnit" label="اقل وحدة" color="primary" classes="mt-2" />
                       </div>
 
                       <div>
                         <SelectWithIconInput :rules="[required()]" clearable v-model="materialType" label="نوع المادة"
-                          placeholder="اختر نوع المادة" :items="MaterialTypeItems" :hide-details="false"/>
+                          placeholder="اختر نوع المادة" :items="MaterialTypeItems" :hide-details="false" />
                       </div>
 
                       <div>
-                        <PriceInput :rules="[required()]" v-model="minQuantity" label="حد أدنى للكمية"
+                        <TextInput type="number" :rules="[required()]" v-model="minQuantity" label="حد أدنى للكمية"
                           placeholder="أدخل الحد الأدنى" :hide-details="false" />
                       </div>
 
                     </div>
 
                     <!-- Description with Language Tabs -->
-                    <LanguageTabs
-                      :languages="availableLanguages"
-                      label="الوصف"
-                      class="mb-[20px]"
-                    >
+                    <LanguageTabs :languages="availableLanguages" label="الوصف" class="mb-[20px]">
                       <template #en>
-                        <RichTextEditor
-                          v-model="englishDescription"
-                          placeholder="Enter description in English"
-                          min-height="120px"
-                          :hide-details="false"
-                        />
+                        <RichTextEditor v-model="englishDescription" placeholder="Enter description in English"
+                          min-height="120px" :hide-details="false" />
                       </template>
                       <template #ar>
-                        <RichTextEditor
-                          v-model="arabicDescription"
-                          placeholder="ادخل الوصف بالعربية"
-                          min-height="120px"
-                          :hide-details="false"
-                        />
+                        <RichTextEditor v-model="arabicDescription" placeholder="ادخل الوصف بالعربية" min-height="120px"
+                          :hide-details="false" />
                       </template>
                     </LanguageTabs>
 
                     <!-- Product Image Section -->
                     <div>
-                      <FileUploadInput
-                        v-model="productImages"
-                        label="صورة المنتج"
-                        hint="PNG, JPG or GIF (max. 400x400px)"
-                        :max-files="4"
-                        layout="horizontal"
-                      />
+                      <FileUploadInput v-model="productImages" label="صورة المنتج"
+                        hint="PNG, JPG or GIF (max. 400x400px)" :max-files="4" layout="horizontal" />
                     </div>
                   </div>
                 </div>
               </div>
 
               <!-- Warning Message - Only show when category is NOT selected -->
-              <div
-                v-if="!isCategorySelected"
-                class="bg-warning-50 border border-warning-200 rounded-lg p-4 mb-6 flex items-center gap-3"
-              >
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
+              <div v-if="!isCategorySelected"
+                class="bg-warning-50 border border-warning-200 rounded-lg p-4 mb-6 flex items-center gap-3">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path
                     d="M12 8V12M12 16H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
-                    stroke="#DC6803"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
+                    stroke="#DC6803" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                 </svg>
                 <p class="text-sm font-bold text-warning-600">
                   يجب عليك اختيار التصنيف لاضافة مجموعة منتجات
@@ -1845,22 +1700,15 @@ const pencilIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" 
                   متغيرات المنتج
                 </h3>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-5 items-end">
-                  <div 
-                    v-for="aspect in aspects" 
-                    :key="aspect.id"
-                    class="w-full"
-                  >
-                    <MultipleSelectInput
-                      v-model="selectedAspects[aspect.id]"
-                      :label="aspect.name"
+                  <div v-for="aspect in aspects" :key="aspect.id" class="w-full">
+                    <MultipleSelectInput v-model="selectedAspects[aspect.id]" :label="aspect.name"
                       :items="aspect.values.map(v => ({ title: v.name, value: v.id }))"
-                      :placeholder="'اختر ' + aspect.name"
-                    />
+                      :placeholder="'اختر ' + aspect.name" />
                   </div>
                   <div class="w-full">
                     <ButtonWithIcon variant="flat" color="primary" height="44"
-                      custom-class="font-semibold text-sm w-full" :append-icon="plusIcon"
-                      label="انشاء منتجات فرعية" @click="generateSubProducts" />
+                      custom-class="font-semibold text-sm w-full" :append-icon="plusIcon" label="انشاء منتجات فرعية"
+                      @click="generateSubProducts" />
                   </div>
                 </div>
               </div>
@@ -1874,7 +1722,7 @@ const pencilIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" 
                       المنتجات الفرعية
                     </h3>
                   </div>
-                  
+
                   <!-- Table -->
                   <table class="w-full">
                     <thead class="bg-gray-50 border-b border-gray-200">
@@ -1887,21 +1735,15 @@ const pencilIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" 
                       </tr>
                     </thead>
                     <tbody>
-                      <tr 
-                        v-for="item in subProductsTableItems" 
-                        :key="item.id"
-                        class="border-b border-gray-200 hover:bg-gray-50"
-                      >
+                      <tr v-for="item in subProductsTableItems" :key="item.id"
+                        class="border-b border-gray-200 hover:bg-gray-50">
                         <td class="px-6 py-4 text-right text-sm font-medium text-gray-600">{{ item.name }}</td>
                         <td class="px-6 py-4 text-center text-sm font-medium text-gray-600">{{ item.sku }}</td>
                         <td class="px-2 py-4 text-center">
                           <template v-if="editingRowId === item.id">
-                            <input
-                              v-model="item.salePrice"
-                              type="number"
+                            <input v-model="item.salePrice" type="number"
                               class="w-[110px] px-3 py-2 text-center text-sm border-2 border-solid bg-white border-primary-400 rounded-lg focus:outline-none focus:border-primary-500"
-                              placeholder="0"
-                            />
+                              placeholder="0" />
                           </template>
                           <template v-else>
                             <span class="text-sm font-medium text-gray-600">
@@ -1911,12 +1753,9 @@ const pencilIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" 
                         </td>
                         <td class="px-2 py-4 text-center">
                           <template v-if="editingRowId === item.id">
-                            <input
-                              v-model="item.purchasePrice"
-                              type="number"
+                            <input v-model="item.purchasePrice" type="number"
                               class="w-[110px] px-3 py-2 text-center text-sm border-2 border-solid bg-white border-primary-400 rounded-lg focus:outline-none focus:border-primary-500"
-                              placeholder="0"
-                            />
+                              placeholder="0" />
                           </template>
                           <template v-else>
                             <span class="text-sm font-medium text-gray-600">
@@ -1973,9 +1812,10 @@ const pencilIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" 
               </h3>
               <!-- Tax Fields Row -->
               <div
-                class="grid grid-cols-1 lg:grid-cols-6 md:grid-cols-3 gap-4 items-center px-6 bg-primary-50 py-3 border-t border-t-gray-300">
+                class="grid grid-cols-1 xl:grid-cols-6 md:grid-cols-3 gap-4 items-center px-6 bg-primary-50 py-3 border-t border-t-gray-300">
                 <SelectWithIconInput v-model="taxType" placeholder="اختر النوع" :items="taxTypeItems"
-                  :hide-details="false" show-add-button @add-click="handleAddTaxType" @update:model-value="handleTaxChange" />
+                  :hide-details="false" show-add-button @add-click="handleAddTaxType"
+                  @update:model-value="handleTaxChange" />
                 <TextInput v-model="taxPercentage" placeholder="النسبة" :hide-details="false" disabled />
                 <TextInput v-model="taxMinValue" placeholder="الحد الأدنى للضريبة" :hide-details="false" disabled />
                 <SelectInput v-model="taxPriority" placeholder="اختر الأولوية" :items="taxPriorityItems"
@@ -1984,15 +1824,14 @@ const pencilIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" 
                   custom-class="font-semibold !text-white text-sm !border-primary-200" :prepend-icon="plusIcon"
                   :label="isEditingTax ? 'تعديل ضريبة' : 'أضف ضريبة'" @click="handleAddTax" />
                 <ButtonWithIcon v-if="isEditingTax" variant="flat" color="gray-200" border="sm" rounded="4" height="44"
-                  custom-class="font-semibold text-gray-700 text-sm"
-                  label="إلغاء" @click="handleCancelTaxEdit" />
+                  custom-class="font-semibold text-gray-700 text-sm" label="إلغاء" @click="handleCancelTaxEdit" />
               </div>
 
               <!-- Tax Table -->
-              <DataTable :headers="taxTableHeaders" :items="taxTableItems" show-checkbox show-actions
-                force-show-edit force-show-delete @edit="handleEditTax" @delete="handleDeleteTax" />
+              <DataTable :headers="taxTableHeaders" :items="taxTableItems" show-checkbox show-actions force-show-edit
+                force-show-delete @edit="handleEditTax" @delete="handleDeleteTax" />
             </div>
-            
+
             <!-- Action Buttons for Step 2 -->
             <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col px-6">
               <ButtonWithIcon variant="flat" color="primary" height="48" rounded="4"
@@ -2085,27 +1924,26 @@ const pencilIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" 
             <!-- Form Section (Separate from table) -->
             <div class="bg-white rounded-lg p-6 mb-6">
               <h3 class="text-lg font-bold text-gray-900 mb-4">قائمة الاختبارات</h3>
-              
+
               <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                 <div>
                   <label class="block text-sm font-semibold text-gray-700 mb-2">الاختبار</label>
-                  <SelectInput v-model="testForm.testName" placeholder="اختر" :items="testItems"
-                    :hide-details="true" />
+                  <SelectInput v-model="testForm.testName" placeholder="اختر" :items="testItems" :hide-details="true" />
                 </div>
                 <div>
                   <label class="block text-sm font-semibold text-gray-700 mb-2">عدد الاختبارات</label>
-                  <TextInput v-model="testForm.testsCount" placeholder="عدد الاختبارات" :hide-details="true" 
+                  <TextInput v-model="testForm.testsCount" placeholder="عدد الاختبارات" :hide-details="true"
                     type="number" />
                 </div>
                 <div>
                   <label class="block text-sm font-semibold text-gray-700 mb-2">عدد العينات</label>
-                  <TextInput v-model="testForm.samplesCount" placeholder="عدد العينات" :hide-details="true" 
+                  <TextInput v-model="testForm.samplesCount" placeholder="عدد العينات" :hide-details="true"
                     type="number" />
                 </div>
 
                 <div>
                   <label class="block text-sm font-semibold text-gray-700 mb-2">كمية العينات</label>
-                  <TextInput v-model="testForm.sampleQuantity" placeholder="كمية العينات" :hide-details="true" 
+                  <TextInput v-model="testForm.sampleQuantity" placeholder="كمية العينات" :hide-details="true"
                     type="number" />
                 </div>
                 <div>
@@ -2130,31 +1968,31 @@ const pencilIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" 
                   </div>
                 </div>
                 <ButtonWithIcon variant="flat" color="primary" rounded="4" height="48" prepend-icon="mdi-plus"
-                  custom-class="font-semibold text-base w-full md:col-span-2"
-                  label="أضف جديد" @click="handleAddTest" />
+                  custom-class="font-semibold text-base w-full md:col-span-2" label="أضف جديد" @click="handleAddTest" />
               </div>
 
             </div>
 
             <!-- Tests Table -->
             <div class="-mx-6">
-              <DataTable :headers="testsTableHeaders" :items="testsList" show-actions
-                @edit="handleEditTest" @delete="handleDeleteTest">
+              <DataTable :headers="testsTableHeaders" :items="testsList" show-actions @edit="handleEditTest"
+                @delete="handleDeleteTest">
               </DataTable>
             </div>
 
             <!-- Action Buttons -->
             <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col">
-              <ButtonWithIcon variant="flat" color="primary" rounded="4" height="48"
-                custom-class="min-w-56" :prepend-icon="saveIcon" label="حفظ" @click="handleSaveAndCreate" />
-              
-              <ButtonWithIcon variant="flat" color="primary-50" rounded="4" height="48"
-                custom-class="font-semibold text-base text-primary-700 px-6 min-w-56"
-                label="إغلاق" @click="handleSaveAndContinue">
-                <template #prepend>
-                  <v-icon>mdi-close</v-icon>
-                </template>
-              </ButtonWithIcon>
+              <ButtonWithIcon variant="flat" color="primary" height="48" rounded="4"
+                custom-class="font-semibold text-base px-6 md:!px-10" :prepend-icon="returnIcon"
+                label="حفظ والعودة للرئيسية" @click="handleSaveAndReturn" />
+
+              <ButtonWithIcon variant="flat" color="primary-50" height="48" rounded="4"
+                custom-class="font-semibold text-base text-primary-700 px-6 md:!px-10" :prepend-icon="saveIcon"
+                label="حفظ وإنشاء جديد" @click="handleSaveAndCreate" />
+
+              <ButtonWithIcon variant="flat" color="primary-50" rounded="4" height="48" prepend-icon="mdi-close"
+                custom-class="font-semibold text-base text-primary-700 px-6 min-w-56" label="إغلاق"
+                @click="handleSaveAndContinue" />
             </div>
           </div>
 

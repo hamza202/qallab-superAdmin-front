@@ -183,7 +183,7 @@ const eyeIcon = `<svg width="22" height="16" viewBox="0 0 22 16" fill="none" xml
           <!-- Main Row -->
           <tr class="border-b border-gray-200 bg-white main-row">
             <!-- Checkbox Column -->
-            <td v-if="showCheckbox" class="!text-start !py-4 !bg-white">
+            <td v-if="showCheckbox" class="!text-start !py-4 !bg-white min-w-[60px]">
               <v-checkbox
                 :model-value="isSelected(item.id)"
                 hide-details

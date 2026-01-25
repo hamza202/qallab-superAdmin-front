@@ -152,7 +152,7 @@ onMounted(() => {
 
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div class="md:col-span-2">
-              <LanguageTabs :languages="availableLanguages" label="الإسم بالعربية">
+              <LanguageTabs :languages="availableLanguages" label="الإسم">
                 <template #en>
                   <TextInput
                     v-model="form.nameEn"

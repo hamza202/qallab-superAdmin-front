@@ -435,7 +435,7 @@ const handleClose = () => {
 watch(country, (newCountryId) => {
   if (newCountryId) {
     fetchCities(newCountryId);
-  }else{
+  } else {
     city.value = null; // Reset city when country changes
   }
 });
@@ -543,7 +543,7 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
               <h2 class="text-lg font-bold text-primary-900 mb-4">{{ pageTitle }} - بيانات المورد</h2>
 
               <!-- Row 1: Business Name, First Name, Last Name with Language Tabs -->
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+              <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3  gap-4 mb-4">
                 <LanguageTabs :languages="availableLanguages" label="الاسم التجاري">
                   <template #en>
                     <TextInput v-model="businessNameEn" placeholder="Enter business name in English"
@@ -582,10 +582,7 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
                       @input="delete formErrors['last_name.ar']" />
                   </template>
                 </LanguageTabs>
-              </div>
 
-              <!-- Row 2: Supplier Code, Currency -->
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                 <div v-if="isEditing">
                   <div class="mb-[7px] text-sm font-semibold text-gray-700">كود المورد</div>
                   <div class="bg-gray-200 text-primary-900 rounded-lg px-4 py-2.5 font-bold text-end">
@@ -596,31 +593,14 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
                   :items="currencyItems" :rules="[required()]" :hide-details="false"
                   :error-messages="formErrors['default_currency_id']"
                   @update:model-value="delete formErrors['default_currency_id']" />
-              </div>
+                <TelInput v-model="phone" label="الجوال" :rules="[required(), saudiPhone()]"
+                  :error-messages="formErrors['mobile']" @input="delete formErrors['mobile']" />
+                <TelInput v-model="phone" label="الهاتف" :rules="[saudiPhone()]" :error-messages="formErrors['phone']"
+                  @input="delete formErrors['phone']" />
 
-              <!-- Row 3: Mobile, Phone, Email -->
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                <TextInput v-model="mobile" label="الجوال" placeholder="+966 (555) 000-0000"
-                  :rules="[required(), saudiPhone()]" :hide-details="false" dir="ltr"
-                  :error-messages="formErrors['mobile']" @input="delete formErrors['mobile']">
-                  <template #prepend-inner>
-                    <span class="text-gray-900 font-semibold me-2 block text-sm">KSA</span>
-                  </template>
-                </TextInput>
-                <TextInput v-model="phone" dir="ltr" label="الهاتف" placeholder="+966 (555) 000-0000"
-                  :rules="[saudiPhone()]" :hide-details="false" :error-messages="formErrors['phone']"
-                  @input="delete formErrors['phone']">
-                  <template #prepend-inner>
-                    <span class="text-gray-900 font-semibold me-2 block text-sm">KSA</span>
-                  </template>
-                </TextInput>
                 <TextInput v-model="email" dir="ltr" label="البريد الالكتروني" placeholder="example@gmail.com"
                   :rules="[required()]" :hide-details="false" :error-messages="formErrors['email']"
                   @input="delete formErrors['email']" />
-              </div>
-
-              <!-- Row 4: Business Number, Tax Number -->
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                 <TextInput v-model="businessNumber" label="رقم السجل التجاري" placeholder="ادخل الرقم"
                   :hide-details="false">
                   <template #append-inner>
@@ -743,22 +723,23 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
                     <tr v-for="(contact, index) in contacts" :key="index" class="border-b border-gray-200">
                       <td class="py-3 px-4">
                         <TextInput v-model="contact.first_name" placeholder="الاسم الاول" :hide-details="true"
-                          density="compact" />
+                          density="compact" :input-props="{ class: 'min-w-[150px]' }" />
                       </td>
                       <td class="py-3 px-4">
                         <TextInput v-model="contact.last_name" placeholder="الاسم الاخر" :hide-details="true"
-                          density="compact" />
+                          density="compact" :input-props="{ class: 'min-w-[150px]' }" />
                       </td>
                       <td class="py-3 px-4">
                         <TextInput v-model="contact.email" placeholder="example@gmail.com" :hide-details="true"
-                          density="compact" />
+                          density="compact" :input-props="{ class: 'min-w-[150px]' }" />
                       </td>
                       <td class="py-3 px-4">
-                        <TextInput v-model="contact.telephone" placeholder="+966" :hide-details="true"
-                          density="compact" />
+                        <TelInput v-model="contact.telephone" :hide-details="true" density="compact"
+                          :input-props="{ class: 'min-w-[200px]' }" />
                       </td>
                       <td class="py-3 px-4">
-                        <TextInput v-model="contact.mobile" placeholder="+966" :hide-details="true" density="compact" />
+                        <TelInput :input-props="{ class: 'min-w-[200px]' }" v-model="contact.mobile" :hide-details="true"
+                          density="compact" />
                       </td>
                       <td class="py-3 px-4">
                         <ButtonWithIcon :icon="trashIcon" icon-only size="small" variant="text" color="error"
@@ -852,8 +833,9 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
         <ButtonWithIcon variant="flat" color="primary" rounded="4" height="48" custom-class="min-w-56"
           :prepend-icon="saveIcon" label="حفظ" @click="handleSave" :loading="saving" />
 
-        <ButtonWithIcon prepend-icon="mdi-close" variant="flat" color="primary-50" rounded="4" :disabled="saving" height="48"
-          custom-class="font-semibold text-base text-primary-700 px-6 min-w-56" label="إغلاق" @click="handleClose" />
+        <ButtonWithIcon prepend-icon="mdi-close" variant="flat" color="primary-50" rounded="4" :disabled="saving"
+          height="48" custom-class="font-semibold text-base text-primary-700 px-6 min-w-56" label="إغلاق"
+          @click="handleClose" />
       </div>
     </div>
 

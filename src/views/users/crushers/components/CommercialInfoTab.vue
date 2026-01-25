@@ -111,42 +111,41 @@ const datepickerInput = `<svg width="17" height="19" viewBox="0 0 17 19" fill="n
 
     <!-- License Information -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-      <TextInput v-model="formData.licenseNumber" @input="emitUpdate" label="رقم الرخصة"
-        placeholder="رقم الرخصة" />
+      <TextInput v-model="formData.licenseNumber" @input="emitUpdate" label="رقم الرخصة" placeholder="رقم الرخصة" />
       <DatePickerInput v-model="formData.licenseIssueDate" @input="emitUpdate" label="تاريخ إصدار الرخصة"
         placeholder="اختر التاريخ">
-              <template #append-inner>
-                <v-tooltip location="top" content-class="custom-tooltip">
-                  <template #activator="{ props: tooltipProps }">
-                    <ButtonWithIcon variant="text" size="small" density="compact"
-                custom-class="!min-w-0 p-0" :prepend-icon="infoIcon" v-bind="tooltipProps" />
-                  </template>
-                  <div>
-                    تاريخ إصدار رخصة الكسارة الرسمي
-                  </div>
-                </v-tooltip>
-              </template>
-              <template #prepend-inner>
-                <span v-html="datepickerInput"></span>
-              </template>
-        </DatePickerInput>
+        <template #append-inner>
+          <v-tooltip location="top" content-class="custom-tooltip">
+            <template #activator="{ props: tooltipProps }">
+              <ButtonWithIcon variant="text" size="small" density="compact" custom-class="!min-w-0 p-0"
+                :prepend-icon="infoIcon" v-bind="tooltipProps" />
+            </template>
+            <div>
+              تاريخ إصدار رخصة الكسارة الرسمي
+            </div>
+          </v-tooltip>
+        </template>
+        <template #prepend-inner>
+          <span v-html="datepickerInput"></span>
+        </template>
+      </DatePickerInput>
       <DatePickerInput v-model="formData.licenseExpiryDate" @input="emitUpdate" label="تاريخ انتهاء الرخصة"
         placeholder="اختر التاريخ">
-              <template #append-inner>
-                <v-tooltip location="top" content-class="custom-tooltip">
-                  <template #activator="{ props: tooltipProps }">
-                    <ButtonWithIcon variant="text" size="small" density="compact"
-                custom-class="!min-w-0 p-0" :prepend-icon="infoIcon" v-bind="tooltipProps" />
-                  </template>
-                  <div>
-                    تاريخ انتهاء صلاحية رخصة الكسارة
-                  </div>
-                </v-tooltip>
-              </template>
-              <template #prepend-inner>
-                <span v-html="datepickerInput"></span>
-              </template>
-        </DatePickerInput>
+        <template #append-inner>
+          <v-tooltip location="top" content-class="custom-tooltip">
+            <template #activator="{ props: tooltipProps }">
+              <ButtonWithIcon variant="text" size="small" density="compact" custom-class="!min-w-0 p-0"
+                :prepend-icon="infoIcon" v-bind="tooltipProps" />
+            </template>
+            <div>
+              تاريخ انتهاء صلاحية رخصة الكسارة
+            </div>
+          </v-tooltip>
+        </template>
+        <template #prepend-inner>
+          <span v-html="datepickerInput"></span>
+        </template>
+      </DatePickerInput>
       <div class="relative">
         <label class="text-sm font-medium text-gray-700 mb-2 block">الموقع الجغرافي</label>
         <div @click="openMapDialog"
@@ -169,17 +168,16 @@ const datepickerInput = `<svg width="17" height="19" viewBox="0 0 17 19" fill="n
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
       <TextInput v-model="formData.managerName" @input="emitUpdate" label="اسم المدير / المسؤول"
         placeholder="اسم المدير / المسؤول" />
-      <TextInput v-model="formData.managerId" @input="emitUpdate" label="رقم الهوية / الإقامة" placeholder="845987565" />
-      <TextInput v-model="formData.managerPhone" @input="() => handleInputUpdate('manager_phone')" label="الهاتف" placeholder="+966 (555) 000-0000"
-        dir="ltr" :hide-details="false" :rules="[required(), saudiPhone()]" :error-messages="props.formErrors?.['manager_phone']">
-        <template #prepend-inner>
-          <span class="text-gray-900 font-semibold me-2 block text-sm">KSA</span>
-        </template>
-      </TextInput>
-      <TextInput v-model="formData.managerEmail" :hide-details="false" @input="() => handleInputUpdate('manager_email')" label="البريد الإلكتروني"
-        placeholder="info@buildtrans.sa" dir="ltr" :rules="[required(), email()]" 
+      <TextInput v-model="formData.managerId" @input="emitUpdate" label="رقم الهوية / الإقامة"
+        placeholder="845987565" />
+
+      <TelInput v-model="formData.managerPhone" label="الهاتف" :rules="[required(), saudiPhone()]"
+        :error-messages="props.formErrors?.['manager_phone']" @input="() => handleInputUpdate('manager_phone')" />
+
+      <TextInput v-model="formData.managerEmail" :hide-details="false" @input="() => handleInputUpdate('manager_email')"
+        label="البريد الإلكتروني" placeholder="info@buildtrans.sa" dir="ltr" :rules="[required(), email()]"
         :error-messages="props.formErrors?.['manager_email']" />
-    </div> 
+    </div>
 
     <!-- Map Dialog -->
     <MapDialog v-model="showMapDialog" :latitude="formData.latitude" :longitude="formData.longitude"

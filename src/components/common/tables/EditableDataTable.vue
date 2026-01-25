@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref, computed, watch } from 'vue';
 interface TableHeader {
   key: string;
   title: string;
@@ -43,6 +44,14 @@ const emit = defineEmits<{
 
 const selectedItems = ref<(string | number)[]>([]);
 const selectAll = ref(false);
+
+// Watch for items changes to reset selection
+watch(() => props.items, (newItems, oldItems) => {
+  if (newItems !== oldItems) {
+    selectedItems.value = [];
+    selectAll.value = false;
+  }
+}, { deep: false });
 
 const hasGroupedHeaders = computed(() =>
   props.headers.some((h) => !!h.children?.length)
