@@ -67,7 +67,7 @@ const closeDialog = () => {
 
       <v-card-actions
         v-if="!props.hideActions"
-        class="px-6 pb-5 pt-2 flex flex-col sm:flex-row gap-3 justify-end"
+        class="px-6 pb-5 pt-2 flex flex-col sm:flex-row gap-3 sm:justify-end items-stretch"
       >
         <slot name="actions">
           <v-btn

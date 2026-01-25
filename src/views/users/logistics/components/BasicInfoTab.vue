@@ -139,20 +139,12 @@ const markIcon = `<svg width="18" height="22" viewBox="0 0 18 22" fill="none" xm
         placeholder="216623263" :error-messages="props.formErrors?.['taxno']" @update:model-value="clearError('taxno')"
         type="text" />
 
-      <TextInput v-model="formData.mobile" :hide-details="false" label="الهاتف المحمول"
-        placeholder="+966 (555) 000-0000" :rules="[required(), saudiPhone()]" dir="ltr"
-        :error-messages="props.formErrors?.['mobile']" @input="() => handleInputUpdate('mobile')">
-        <template #prepend-inner>
-          <span class="text-gray-900 font-semibold me-2 block text-sm">KSA</span>
-        </template>
-      </TextInput>
-      <TextInput v-model="formData.phone" :hide-details="false" label="الهاتف" placeholder="+966 (555) 000-0000"
-        :rules="[saudiPhone()]" dir="ltr" :error-messages="props.formErrors?.['phone']"
-        @input="() => handleInputUpdate('phone')">
-        <template #prepend-inner>
-          <span class="text-gray-900 font-semibold me-2 block text-sm">KSA</span>
-        </template>
-      </TextInput>
+            <TelInput v-model="formData.mobile" label="الهاتف المحمول" :rules="[required(), saudiPhone()]"
+        :error-messages="props.formErrors?.['mobile']" @input="() => handleInputUpdate('mobile')" />
+
+      <TelInput v-model="formData.phone" label="الهاتف" :rules="[required(), saudiPhone()]"
+        :error-messages="props.formErrors?.['phone']" @input="() => handleInputUpdate('phone')" />
+
       <TextInput v-model="formData.email" @input="() => handleInputUpdate('email')" label="البريد الإلكتروني"
         placeholder="info@buildtrans.sa" :rules="[required()]" dir="ltr" type="email"
         :error-messages="props.formErrors?.['email']" :hide-details="false" />

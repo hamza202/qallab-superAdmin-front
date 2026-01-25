@@ -1146,19 +1146,19 @@ const fetchProduct = async (id: number) => {
       // Material Type
       if (data.material_types) {
         if (typeof data.material_types === 'object' && 'key' in data.material_types) {
-            materialType.value = data.material_types.key;
+          materialType.value = data.material_types.key;
         } else if (typeof data.material_types === 'object' && 'id' in data.material_types) {
-            materialType.value = data.material_types.id;
+          materialType.value = data.material_types.id;
         } else {
-            materialType.value = data.material_types;
+          materialType.value = data.material_types;
         }
       } else if (data.material_type) {
-         if (typeof data.material_type === 'object' && 'key' in data.material_type) {
-            materialType.value = data.material_type.key;
+        if (typeof data.material_type === 'object' && 'key' in data.material_type) {
+          materialType.value = data.material_type.key;
         } else if (typeof data.material_type === 'object' && 'id' in data.material_type) {
-            materialType.value = data.material_type.id;
+          materialType.value = data.material_type.id;
         } else {
-            materialType.value = data.material_type;
+          materialType.value = data.material_type;
         }
       }
       profitMargin.value = data.profit_margin;
@@ -1260,7 +1260,7 @@ watch(activeTab, async (newTab) => {
 
       <!-- Tabs -->
       <div
-        class="flex lg:items-center lg:justify-between py-4 border-y border-gray-200 flex-col lg:flex-row gap-3 mb-4">
+        class="flex xl:items-center xl:justify-between py-4 border-y border-gray-200 flex-col xl:flex-row gap-3 mb-4">
         <!-- Tabs -->
         <div class="flex gap-2 overflow-y-auto">
           <button v-for="tab in tabs" :key="tab.value" @click="handleTabClick(tab.value)"
@@ -1305,9 +1305,9 @@ watch(activeTab, async (newTab) => {
           <v-form ref="formRef" v-model="isFormValid" @submit.prevent>
             <div class="">
               <!-- Two Column Layout -->
-              <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-3 bg-gray-50 rounded-lg p-3">
+              <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 mb-3 bg-gray-50 rounded-lg p-3">
                 <!-- Right Column: Prices Section -->
-                <div class="lg:col-span-4 order-2 lg:order-1">
+                <div class="xl:col-span-4 order-2 lg:order-1">
                   <div class="bg-gray-100 rounded-lg p-6">
                     <!-- Prices Header -->
                     <div class="flex items-center gap-3 mb-6">
@@ -1366,7 +1366,7 @@ watch(activeTab, async (newTab) => {
                 </div>
 
                 <!-- Left Column: Product Info Section -->
-                <div class="lg:col-span-8 order-1 lg:order-2">
+                <div class="xl:col-span-8 order-1 lg:order-2">
                   <div class="p-6">
                     <!-- Product Info Header -->
                     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
@@ -1420,11 +1420,11 @@ watch(activeTab, async (newTab) => {
                       </div>
                       <div>
                         <SelectWithIconInput :rules="[required()]" clearable v-model="materialType" label="نوع المادة"
-                          placeholder="اختر نوع المادة" :items="MaterialTypeItems" :hide-details="false"/>
+                          placeholder="اختر نوع المادة" :items="MaterialTypeItems" :hide-details="false" />
                       </div>
 
                       <div>
-                        <PriceInput :rules="[required()]" v-model="minQuantity" label="حد أدنى للكمية"
+                        <TextInput type="number" :rules="[required(), numeric(), positive()]" v-model="minQuantity" label="حد أدنى للكمية"
                           placeholder="أدخل الحد الأدنى" :hide-details="false" />
                       </div>
                     </div>
@@ -1476,7 +1476,7 @@ watch(activeTab, async (newTab) => {
               </h3>
               <!-- Tax Fields Row -->
               <div
-                class="grid grid-cols-1 lg:grid-cols-6 md:grid-cols-3 gap-4 items-center px-6 bg-primary-50 py-3 border-t border-t-gray-300">
+                class="grid grid-cols-1 xl:grid-cols-6 md:grid-cols-3 gap-4 items-center px-6 bg-primary-50 py-3 border-t border-t-gray-300">
                 <SelectWithIconInput v-model="taxType" placeholder="اختر النوع" :items="taxTypeItems"
                   :hide-details="false" show-add-button @add-click="handleAddTaxType"
                   @update:model-value="handleTaxChange" />
@@ -1649,16 +1649,17 @@ watch(activeTab, async (newTab) => {
 
             <!-- Action Buttons -->
             <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col">
-              <ButtonWithIcon variant="flat" color="primary" rounded="4" height="48" custom-class="min-w-56"
-                :prepend-icon="saveIcon" label="حفظ" @click="handleSaveAndCreate" />
+              <ButtonWithIcon variant="flat" color="primary" height="48" rounded="4"
+                custom-class="font-semibold text-base px-6 md:!px-10" :prepend-icon="returnIcon"
+                label="حفظ والعودة للرئيسية" @click="handleSaveAndReturn" />
 
-              <ButtonWithIcon variant="flat" color="primary-50" rounded="4" height="48"
+              <ButtonWithIcon variant="flat" color="primary-50" height="48" rounded="4"
+                custom-class="font-semibold text-base text-primary-700 px-6 md:!px-10" :prepend-icon="saveIcon"
+                label="حفظ وإنشاء جديد" @click="handleSaveAndCreate" />
+
+              <ButtonWithIcon variant="flat" color="primary-50" rounded="4" height="48" prepend-icon="mdi-close"
                 custom-class="font-semibold text-base text-primary-700 px-6 min-w-56" label="إغلاق"
-                @click="handleSaveAndContinue">
-                <template #prepend>
-                  <v-icon>mdi-close</v-icon>
-                </template>
-              </ButtonWithIcon>
+                @click="handleSaveAndContinue" />
             </div>
           </div>
 

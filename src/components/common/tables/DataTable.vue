@@ -196,7 +196,7 @@ const eyeIcon = `<svg width="22" height="16" viewBox="0 0 22 16" fill="none" xml
           </th>
 
           <!-- Dynamic Headers (original order for RTL) -->
-          <th v-for="header in headers" :key="header.key" class="!font-bold !text-gray-600 !text-xs !bg-gray-50"
+          <th v-for="header in headers" :key="header.key" class="!font-bold !text-gray-600 !text-xs !bg-gray-50 whitespace-nowrap"
             :style="header.width ? { width: header.width } : {}">
             {{ header.title }}
           </th>
@@ -208,7 +208,7 @@ const eyeIcon = `<svg width="22" height="16" viewBox="0 0 22 16" fill="none" xml
       <tbody>
         <tr v-for="item in items" :key="item.id" class="border-b border-gray-200 bg-white">
           <!-- Checkbox Column (Right side for RTL) -->
-          <td v-if="showCheckbox" class="!text-start !py-4 !bg-white">
+          <td v-if="showCheckbox" class="!text-start !py-4 !bg-white min-w-[60px]">
             <v-checkbox :model-value="isSelected(item.id)" hide-details density="compact" class="justify-end"
               @change="toggleSelect(item)" />
           </td>
@@ -234,7 +234,7 @@ const eyeIcon = `<svg width="22" height="16" viewBox="0 0 22 16" fill="none" xml
                 <span v-for="(tax, index) in Array.isArray(item[header.key])
                   ? item[header.key]
                   : [item[header.key]]" :key="index"
-                  class="px-3 py-1 rounded-full bg-primary-50 text-primary-700 text-xs font-medium">
+                  class="px-3 py-1 rounded-full bg-primary-50 text-primary-700 text-xs font-medium whitespace-nowrap">
                   {{ tax }}
                 </span>
               </div>
@@ -254,7 +254,7 @@ const eyeIcon = `<svg width="22" height="16" viewBox="0 0 22 16" fill="none" xml
             <!-- Date Formatting for created_at, updated_at, etc. -->
             <template
               v-else-if="header.key === 'created_at' || header.key === 'updated_at' || header.key.includes('_at')">
-              <span class="text-sm text-gray-600">{{ appStore.formatDate(item[header.key], { format: 'short' })
+              <span class="text-sm text-gray-600 whitespace-nowrap">{{ appStore.formatDate(item[header.key], { format: 'short' })
               }}</span>
             </template>
 

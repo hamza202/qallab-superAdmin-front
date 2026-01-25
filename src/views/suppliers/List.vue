@@ -446,8 +446,8 @@ const cleanupInfiniteScroll = () => {
 
 // Lifecycle
 onMounted(async () => {
-    await fetchCities();
-    await fetchSuppliers();
+    fetchCities();
+    fetchSuppliers();
 
     fetchSuppliers();
     nextTick(() => {

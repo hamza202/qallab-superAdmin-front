@@ -676,18 +676,9 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
                   </div>
                 </div>
 
-                <TextInput v-model="mobile" label="الجوال" placeholder="+966 (555) 000-0000" :rules="[required()]"
-                  :hide-details="false" dir="ltr">
-                  <template #prepend-inner>
-                    <span class="text-gray-900 font-semibold me-2 block text-sm">KSA</span>
-                  </template>
-                </TextInput>
-                <TextInput v-model="phone" dir="ltr" label="الهاتف" placeholder="+966 (555) 000-0000"
-                  :hide-details="false">
-                  <template #prepend-inner>
-                    <span class="text-gray-900 font-semibold me-2 block text-sm">KSA</span>
-                  </template>
-                </TextInput>
+                <TelInput v-model="mobile" label="الجوال" />
+                <TelInput v-model="phone" label="الهاتف" />
+
                 <TextInput v-model="email" dir="ltr" label="البريد الالكتروني" placeholder="البريد الالكتروني"
                   :hide-details="false" />
                 <TextInput v-model="commercialName" label="الاسم التجاري" placeholder="Al-Nahda Contracting"
@@ -779,19 +770,22 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
                       <td class="py-3 px-4">
                         <TextInput v-model="contact.email" density="compact" variant="outlined" hide-details
                           placeholder="example@gmail.com" :input-props="{ class: '!min-w-[200px]' }" />
+
                       </td>
                       <td class="py-3 px-4">
-                        <TextInput v-model="contact.telephone" density="compact" variant="outlined" hide-details
-                          placeholder="96600000000+" :input-props="{ class: '!min-w-[150px]' }" />
+                        <!-- <TextInput v-model="contact.telephone" density="compact" variant="outlined" hide-details
+                          placeholder="96600000000+" /> -->
+                        <TelInput v-model="contact.telephone" density="compact" variant="outlined"
+                          :input-props="{ class: '!min-w-[200px]' }" />
                       </td>
                       <td class="py-3 px-4">
-                        <TextInput v-model="contact.mobile" density="compact" variant="outlined" hide-details
-                          placeholder="96600000000+" :input-props="{ class: '!min-w-[150px]' }" />
+                        <TelInput v-model="contact.mobile" density="compact" variant="outlined"
+                          :input-props="{ class: '!min-w-[200px]' }" />
                       </td>
                       <td class="py-3 px-4">
                         <div class="flex items-center gap-2">
-                          <ButtonWithIcon  color="error" size="small" variant="text"
-                            :icon="trashIcon" icon-only @click="deleteContact(index)" />
+                          <ButtonWithIcon color="error" size="small" variant="text" :icon="trashIcon" icon-only
+                            @click="deleteContact(index)" />
                         </div>
                       </td>
                     </tr>
@@ -912,12 +906,11 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
 
       <!-- Action Buttons -->
       <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col">
-        <ButtonWithIcon variant="flat" color="primary" rounded="4" height="48"
-          custom-class="min-w-56" :prepend-icon="saveIcon" label="حفظ" @click="handleSave" />
-        
+        <ButtonWithIcon variant="flat" color="primary" rounded="4" height="48" custom-class="min-w-56"
+          :prepend-icon="saveIcon" label="حفظ" @click="handleSave" />
+
         <ButtonWithIcon prepend-icon="mdi-close" variant="flat" color="primary-50" rounded="4" height="48"
-          custom-class="font-semibold text-base text-primary-700 px-6 min-w-56"
-          label="إغلاق" @click="handleClose" />
+          custom-class="font-semibold text-base text-primary-700 px-6 min-w-56" label="إغلاق" @click="handleClose" />
       </div>
     </div>
   </default-layout>

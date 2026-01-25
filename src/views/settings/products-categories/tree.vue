@@ -952,7 +952,7 @@ const editIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xm
       </div>
 
       <v-form ref="formRef" v-model="isFormValid" @submit.prevent>
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
 
           <div class="bg-white rounded-lg shadow-sm">
             <!-- Header -->
@@ -1000,7 +1000,7 @@ const editIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xm
             </template>
           </div>
 
-          <div class="lg:col-span-2 space-y-6">
+          <div class="xl:col-span-2 space-y-6">
             <!-- Bulk Mode Header - shown when multiple categories selected -->
             <div v-if="isBulkMode" class="bg-primary-50 border border-primary-200 rounded-md p-4">
               <div class="flex items-center gap-3">

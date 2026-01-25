@@ -443,7 +443,7 @@ onBeforeUnmount(() => {
         <!-- Advanced filters row -->
         <div v-if="showAdvancedFilters"
           class="border-y border-y-primary-100 bg-primary-50 px-4 sm:px-6 py-3 flex flex-col gap-3 sm:gap-2">
-          <div class="flex flex-wrap lg:!flex-nowrap gap-3 flex-1 order-1 sm:order-2 justify-end sm:justify-start">
+          <div class="flex flex-wrap xl:!flex-nowrap gap-3 flex-1 order-1 sm:order-2 justify-end sm:justify-start">
             <v-select v-model="filterStatus" :items="statusOptions" item-title="title" item-value="value"
               density="comfortable" variant="outlined" hide-details :placeholder="t('common.status')"
               class="w-full sm:w-40 bg-white" clearable />
@@ -483,9 +483,9 @@ onBeforeUnmount(() => {
               class="small-switch" @update:model-value="() => handleStatusChange(item)" />
           </template>
           <!-- Fix mismatched key for updated_at -->
-          <template #item.updated_at="{ item }">
+          <!-- <template #item.updated_at="{ item }">
             {{ item.updated_at || item.update_at }}
-          </template>
+          </template> -->
         </DataTable>
 
         <!-- Infinite scroll trigger -->

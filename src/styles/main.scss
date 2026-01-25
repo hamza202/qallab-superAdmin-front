@@ -221,3 +221,7 @@ html[dir="rtl"] .v-switch {
     transform: scaleX(-1);
   }
 }
+
+.v-messages__message{
+  @apply md:whitespace-nowrap;
+}

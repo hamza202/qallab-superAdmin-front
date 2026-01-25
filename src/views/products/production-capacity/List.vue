@@ -75,19 +75,10 @@ const nextCursor = ref<string | null>(null)
 const perPage = ref(15)
 const hasMoreData = computed(() => nextCursor.value !== null)
 
-// Selection state
-const selectedRows = ref<number[]>([])
-// const hasSelected = computed(() => selectedRows.value.length > 0)
-
 // Status change dialog
 const showStatusChangeDialog = ref(false)
 const statusChangeLoading = ref(false)
 const itemToChangeStatus = ref<ProductionCapacity | null>(null)
-
-// Delete dialog
-const showDeleteDialog = ref(false)
-const deleteLoading = ref(false)
-const itemToDelete = ref<ProductionCapacity | null>(null)
 
 // Filters
 const showAdvancedFilters = ref(false)
@@ -218,49 +209,6 @@ const handleEdit = (item: any) => {
   router.push({ name: 'ProductsProductionCapacityEdit', params: { id: item.id } })
 }
 
-// Unified Delete Logic
-const deleteMode = ref<'single' | 'bulk'>('single')
-
-const handleDelete = (item: any) => {
-  deleteMode.value = 'single'
-  itemToDelete.value = item
-  showDeleteDialog.value = true
-}
-
-// const handleBulkDelete = () => {
-//   if (selectedRows.value.length === 0) return
-//   deleteMode.value = 'bulk'
-//   itemToDelete.value = null
-//   showDeleteDialog.value = true
-// }
-
-const confirmDelete = async () => {
-  try {
-    deleteLoading.value = true
-    
-    if (deleteMode.value === 'single') {
-      if (!itemToDelete.value) return
-      await api.delete(`/production-capacities/${itemToDelete.value.id}`)
-      tableItems.value = tableItems.value.filter(t => t.id !== itemToDelete.value!.id)
-      success('تم حذف الطاقة الإنتاجية بنجاح')
-    } else {
-      // Bulk delete
-      if (selectedRows.value.length === 0) return
-      await Promise.all(selectedRows.value.map(id => api.delete(`/production-capacities/${id}`)))
-      tableItems.value = tableItems.value.filter(t => !selectedRows.value.includes(t.id))
-      selectedRows.value = []
-      success('تم حذف الطاقات الإنتاجية المحددة بنجاح')
-    }
-  } catch (err: any) {
-    showError(err?.response?.data?.message || 'حدث خطأ أثناء الحذف')
-    console.error('Error deleting production capacities:', err)
-  } finally {
-    deleteLoading.value = false
-    showDeleteDialog.value = false
-    itemToDelete.value = null
-  }
-}
-
 // Handle status change - open confirmation dialog
 const handleStatusChange = (item: any) => {
   itemToChangeStatus.value = { ...item }
@@ -292,15 +240,6 @@ const confirmStatusChange = async () => {
     showStatusChangeDialog.value = false
     itemToChangeStatus.value = null
   }
-}
-
-const handleSelect = (item: any, selected: boolean) => {
-  if (selected) selectedRows.value.push(item.id)
-  else selectedRows.value = selectedRows.value.filter(id => id !== item.id)
-}
-
-const handleSelectAll = (checked: boolean) => {
-  selectedRows.value = checked ? tableItems.value.map(i => i.id) : []
 }
 
 const toggleAdvancedFilters = () => {
@@ -442,7 +381,7 @@ onBeforeUnmount(() => {
 
         <!-- Production Capacity Table -->
         <DataTable :show-view="false" :headers="tableHeaders" :items="tableItems" :loading="isLoading" show-actions
-          @edit="handleEdit" @delete="handleDelete">
+          @edit="handleEdit" :show-delete="false">
           <template #item.is_active="{ item }">
             <v-switch :model-value="item.is_active" hide-details inset density="compact" color="primary"
               class="small-switch" @update:model-value="() => handleStatusChange(item)" />
@@ -459,12 +398,6 @@ onBeforeUnmount(() => {
         </div>
       </div>
     </div>
-
-    <!-- Unified Delete Confirmation Dialog -->
-    <DeleteConfirmDialog v-model="showDeleteDialog" :loading="deleteLoading" 
-      :title="deleteMode === 'single' ? 'حذف الطاقة الإنتاجية' : 'حذف الطاقات الإنتاجية'"
-      :message="deleteMode === 'single' ? `هل أنت متأكد من حذف ${itemToDelete?.name}؟` : `هل أنت متأكد من حذف ${selectedRows.length} طاقة إنتاجية؟`" 
-      @confirm="confirmDelete" />
 
     <!-- Status Change Confirmation Dialog -->
     <StatusChangeDialog v-model="showStatusChangeDialog" :loading="statusChangeLoading"

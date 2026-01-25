@@ -474,18 +474,18 @@ onMounted(async () => {
           </template>
 
           <template #item.salePrice="{ item }">
-            <div class="flex items-center gap-2">
-              <div class="w-[130px]">
+            <div class="flex items-center gap-2 py-2">
+              <div class="w-[160px]">
                 <PriceInput v-model="(item as PriceListRow).priceTon" currency="طن" keep-currency-visible
-                  placeholder="0" :hide-details="true" :input-props="{ class: 'bg-white' }" />
+                  placeholder="0" :input-props="{ class: 'bg-white' }" :rules="[numeric(), positive()]" />
               </div>
-              <div class="w-[130px]">
+              <div class="w-[160px]">
                 <PriceInput v-model="(item as PriceListRow).priceM3" currency="م^3" keep-currency-visible
-                  placeholder="0" :hide-details="true" :input-props="{ class: 'bg-white' }" />
+                  placeholder="0" :input-props="{ class: 'bg-white' }" :rules="[numeric(), positive()]" />
               </div>
-              <div class="w-[130px]">
+              <div class="w-[160px]">
                 <PriceInput v-model="(item as PriceListRow).priceRd" currency="رد" keep-currency-visible placeholder="0"
-                  :hide-details="true" :input-props="{ class: 'bg-white' }" />
+                 :input-props="{ class: 'bg-white' }" :rules="[numeric(), positive()]" />
               </div>
             </div>
           </template>

@@ -296,7 +296,7 @@ const categoryItems = computed(() => [
 
 // Lifecycle
 onMounted(async () => {
-  await fetchCategories()
+  fetchCategories()
   if (productionCapacityId.value) {
     await fetchProductionCapacityItems(productionCapacityId.value)
   }
@@ -340,65 +340,65 @@ onMounted(async () => {
           </template>
 
           <template #item.tonPerHourMin="{ item }">
-            <div class="w-[80px]">
-              <PriceInput v-model="(item as ProductionCapacityRow).tonPerHourMin" placeholder="0" :hide-details="true"
-                :input-props="{ class: 'bg-white' }" 
+            <div class="w-[80px] py-1">
+              <PriceInput v-model="(item as ProductionCapacityRow).tonPerHourMin" placeholder="0"
+                :input-props="{ class: 'bg-white' }" :rules="[numeric(), positive()]"
                 @update:model-value="handleCapacityChange(item as ProductionCapacityRow)" />
             </div>
           </template>
 
           <template #item.tonPerHourMax="{ item }">
             <div class="w-[80px]">
-              <PriceInput v-model="(item as ProductionCapacityRow).tonPerHourMax" placeholder="0" :hide-details="true"
-                :input-props="{ class: 'bg-white' }" 
+              <PriceInput v-model="(item as ProductionCapacityRow).tonPerHourMax" placeholder="0"
+                :input-props="{ class: 'bg-white' }" :rules="[numeric(), positive()]"
                 @update:model-value="handleCapacityChange(item as ProductionCapacityRow)" />
             </div>
           </template>
 
           <template #item.tonPerDayMin="{ item }">
             <div class="w-[80px]">
-              <PriceInput v-model="(item as ProductionCapacityRow).tonPerDayMin" placeholder="0" :hide-details="true"
-                :input-props="{ class: 'bg-white' }" 
+              <PriceInput v-model="(item as ProductionCapacityRow).tonPerDayMin" placeholder="0"
+                :input-props="{ class: 'bg-white' }" :rules="[numeric(), positive()]"
                 @update:model-value="handleCapacityChange(item as ProductionCapacityRow)" />
             </div>
           </template>
 
           <template #item.tonPerDayMax="{ item }">
             <div class="w-[80px]">
-              <PriceInput v-model="(item as ProductionCapacityRow).tonPerDayMax" placeholder="0" :hide-details="true"
-                :input-props="{ class: 'bg-white' }" 
+              <PriceInput v-model="(item as ProductionCapacityRow).tonPerDayMax" placeholder="0"
+                :input-props="{ class: 'bg-white' }" :rules="[numeric(), positive()]"
                 @update:model-value="handleCapacityChange(item as ProductionCapacityRow)" />
             </div>
           </template>
 
           <template #item.tonPerWeekMin="{ item }">
             <div class="w-[80px]">
-              <PriceInput v-model="(item as ProductionCapacityRow).tonPerWeekMin" placeholder="0" :hide-details="true"
-                :input-props="{ class: 'bg-white' }" 
+              <PriceInput v-model="(item as ProductionCapacityRow).tonPerWeekMin" placeholder="0"
+                :input-props="{ class: 'bg-white' }" :rules="[numeric(), positive()]"
                 @update:model-value="handleCapacityChange(item as ProductionCapacityRow)" />
             </div>
           </template>
 
           <template #item.tonPerWeekMax="{ item }">
             <div class="w-[80px]">
-              <PriceInput v-model="(item as ProductionCapacityRow).tonPerWeekMax" placeholder="0" :hide-details="true"
-                :input-props="{ class: 'bg-white' }" 
+              <PriceInput v-model="(item as ProductionCapacityRow).tonPerWeekMax" placeholder="0"
+                :input-props="{ class: 'bg-white' }" :rules="[numeric(), positive()]"
                 @update:model-value="handleCapacityChange(item as ProductionCapacityRow)" />
             </div>
           </template>
 
           <template #item.tonPerMonthMin="{ item }">
             <div class="w-[80px]">
-              <PriceInput v-model="(item as ProductionCapacityRow).tonPerMonthMin" placeholder="0" :hide-details="true"
-                :input-props="{ class: 'bg-white' }" 
+              <PriceInput v-model="(item as ProductionCapacityRow).tonPerMonthMin" placeholder="0"
+                :input-props="{ class: 'bg-white' }" :rules="[numeric(), positive()]"
                 @update:model-value="handleCapacityChange(item as ProductionCapacityRow)" />
             </div>
           </template>
 
           <template #item.tonPerMonthMax="{ item }">
             <div class="w-[80px]">
-              <PriceInput v-model="(item as ProductionCapacityRow).tonPerMonthMax" placeholder="0" :hide-details="true"
-                :input-props="{ class: 'bg-white' }" 
+              <PriceInput v-model="(item as ProductionCapacityRow).tonPerMonthMax" placeholder="0"
+                :input-props="{ class: 'bg-white' }" :rules="[numeric(), positive()]"
                 @update:model-value="handleCapacityChange(item as ProductionCapacityRow)" />
             </div>
           </template>
@@ -406,12 +406,12 @@ onMounted(async () => {
 
         <div class="flex flex-col sm:flex-row gap-3 sm:justify-center mt-6">
           <ButtonWithIcon variant="flat" rounded="4" color="primary" height="44"
-            custom-class="font-semibold text-base sm:min-w-[200px]" :prepend-icon="saveIcon"
-            label="حفظ" @click="handleSave" :loading="saving" :disabled="loading" />
-          
+            custom-class="font-semibold text-base sm:min-w-[200px]" :prepend-icon="saveIcon" label="حفظ"
+            @click="handleSave" :loading="saving" :disabled="loading" />
+
           <ButtonWithIcon variant="flat" rounded="4" color="primary-50" height="44"
-            custom-class="font-semibold text-base text-primary-700 sm:min-w-[200px]"
-            label="إغلاق" @click="handleClose" :disabled="saving">
+            custom-class="font-semibold text-base text-primary-700 sm:min-w-[200px]" label="إغلاق" @click="handleClose"
+            :disabled="saving">
             <template #prepend>
               <v-icon>mdi-close</v-icon>
             </template>

@@ -76,8 +76,8 @@ const handleFileUpload = (event: any) => {
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-900 mb-2">مدة الخدمة</label>
-                    <v-text-field v-model="formData.service_duration" type="number" variant="outlined"
-                        density="comfortable" placeholder="5" hide-details @update:model-value="updateFormData">
+                    <v-text-field v-model="formData.service_duration" type="number" variant="outlined" :rules="[numeric(), positive()]"
+                        density="comfortable" placeholder="أدخل المدة" @update:model-value="updateFormData">
                         <template #append-inner>
                             <v-divider vertical class="mx-2" />
                             <div @mousedown.stop @click.stop>

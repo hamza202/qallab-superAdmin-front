@@ -104,21 +104,21 @@ const infoIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
                 :error-messages="props.formErrors?.['fleet_size']" :hide-details="false" />
 
             <TextInput v-model="formData.branchesCount" @input="() => handleInputUpdate('branches_count')"
-                label="عدد الفروع" placeholder="أدخل عدد الفروع" type="number" :rules="[numeric()]"
+                label="عدد الفروع" placeholder="أدخل عدد الفروع" type="number" :rules="[numeric(),positive()]"
                 :error-messages="props.formErrors?.['branches_count']" :hide-details="false" />
             <SelectInput clearable v-model="formData.operationScope" @update:model-value="emitUpdate"
                 label="نطاق التشغيل " placeholder="اختر نطاق العمليات" :items="operationScopeItems"
                 :error-messages="props.formErrors?.['operation_scope']" :hide-details="false" />
 
             <TextInput v-model="formData.driversCount" @input="() => handleInputUpdate('drivers_count')"
-                label="عدد السائقين" placeholder="أدخل عدد السائقين" type="number" :rules="[numeric()]"
+                label="عدد السائقين" placeholder="أدخل عدد السائقين" type="number" :rules="[numeric(),positive()]"
                 :error-messages="props.formErrors?.['drivers_count']" :hide-details="false" />
 
             <TextInput v-model="formData.supervisorsCount" @input="() => handleInputUpdate('supervisors_count')"
-                label="عدد المشرفين" placeholder="أدخل عدد المشرفين" type="number" :rules="[numeric()]"
+                label="عدد المشرفين" placeholder="أدخل عدد المشرفين" type="number" :rules="[numeric(),positive()]"
                 :error-messages="props.formErrors?.['supervisors_count']" :hide-details="false" />
             <TextInput v-model="formData.dailyTripsAvg" @input="() => handleInputUpdate('daily_trips_avg')"
-                label=" عدد الرحلات اليومية " placeholder="أدخل عدد الرحلات اليومية" type="number" :rules="[numeric()]"
+                label=" عدد الرحلات اليومية " placeholder="أدخل عدد الرحلات اليومية" type="number" :rules="[numeric(),positive()]"
                 :error-messages="props.formErrors?.['daily_trips_avg']" :hide-details="false" />
 
             <SelectInput clearable v-model="formData.operationMode" @update:model-value="emitUpdate"

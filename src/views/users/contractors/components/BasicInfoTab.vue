@@ -8,6 +8,7 @@ const availableLanguages = ref([
 interface Props {
   fullNameTranslations: { ar: string; en: string };
   tradeNameTranslations: { ar: string; en: string };
+  ownerName: string;
   commercialRegister: string;
   taxRegister: string;
   entityType: string | null;
@@ -43,7 +44,7 @@ const clearError = (field: string) => {
 
 const handleInputUpdate = (field: string) => {
   console.log(field);
-  
+
   clearError(field);
   emitUpdate();
 };
@@ -51,6 +52,7 @@ const handleInputUpdate = (field: string) => {
 const formData = reactive({
   fullNameTranslations: props.fullNameTranslations,
   tradeNameTranslations: props.tradeNameTranslations,
+  ownerName: props.ownerName,
   commercialRegister: props.commercialRegister,
   taxRegister: props.taxRegister,
   entityType: props.entityType,
@@ -72,6 +74,7 @@ watch(() => props, (newProps) => {
   Object.assign(formData, {
     fullNameTranslations: newProps.fullNameTranslations,
     tradeNameTranslations: newProps.tradeNameTranslations,
+    ownerName: newProps.ownerName,
     commercialRegister: newProps.commercialRegister,
     taxRegister: newProps.taxRegister,
     entityType: newProps.entityType,
@@ -107,78 +110,76 @@ const markIcon = `<svg width="18" height="22" viewBox="0 0 18 22" fill="none" xm
     <h2 class="text-lg font-bold text-primary-900 mb-4">البيانات العامة</h2>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 gap-y-6 mb-4">
-        <LanguageTabs :languages="availableLanguages" label="الاسم كامل">
-          <template #en>
-            <TextInput v-model="formData.fullNameTranslations.en" @input="() => handleInputUpdate('full_name.en')"
-              placeholder="Enter full name in English" :hide-details="false" :rules="[required()]"
-              :error-messages="props.formErrors?.['full_name.en']" />
-          </template>
-          <template #ar>
-            <TextInput v-model="formData.fullNameTranslations.ar" @input="() => handleInputUpdate('full_name.ar')"
-              placeholder="ادخل الاسم كامل بالعربية" :hide-details="false" :rules="[required()]"
-              :error-messages="props.formErrors?.['full_name.ar']" required />
-          </template>
-        </LanguageTabs>
-        <LanguageTabs :languages="availableLanguages" label="الاسم التجاري">
-          <template #en>
-            <TextInput v-model="formData.tradeNameTranslations.en" @input="() => handleInputUpdate('trade_name.en')"
-              placeholder="Enter trade name in English" :hide-details="false"
-              :error-messages="props.formErrors?.['trade_name.en']" />
-          </template>
-          <template #ar>
-            <TextInput v-model="formData.tradeNameTranslations.ar" @input="() => handleInputUpdate('trade_name.ar')"
-              placeholder="ادخل الاسم التجاري بالعربية" :hide-details="false"
-              :error-messages="props.formErrors?.['trade_name.ar']" required />
-          </template>
-        </LanguageTabs>
-      <TextInput v-model="formData.commercialRegister" @input="() => handleInputUpdate('commercial_register')" 
+      <LanguageTabs :languages="availableLanguages" label="الاسم كامل">
+        <template #en>
+          <TextInput v-model="formData.fullNameTranslations.en" @input="() => handleInputUpdate('full_name.en')"
+            placeholder="Enter full name in English" :hide-details="false" :rules="[required()]"
+            :error-messages="props.formErrors?.['full_name.en']" />
+        </template>
+        <template #ar>
+          <TextInput v-model="formData.fullNameTranslations.ar" @input="() => handleInputUpdate('full_name.ar')"
+            placeholder="ادخل الاسم كامل بالعربية" :hide-details="false" :rules="[required()]"
+            :error-messages="props.formErrors?.['full_name.ar']" required />
+        </template>
+      </LanguageTabs>
+      <LanguageTabs :languages="availableLanguages" label="الاسم التجاري">
+        <template #en>
+          <TextInput v-model="formData.tradeNameTranslations.en" @input="() => handleInputUpdate('trade_name.en')"
+            placeholder="Enter trade name in English" :hide-details="false"
+            :error-messages="props.formErrors?.['trade_name.en']" />
+        </template>
+        <template #ar>
+          <TextInput v-model="formData.tradeNameTranslations.ar" @input="() => handleInputUpdate('trade_name.ar')"
+            placeholder="ادخل الاسم التجاري بالعربية" :hide-details="false"
+            :error-messages="props.formErrors?.['trade_name.ar']" required />
+        </template>
+      </LanguageTabs>
+
+
+      <TextInput v-model="formData.ownerName" @input="() => handleInputUpdate('owner_name')" :rules="[required()]"
+        :error-messages="props.formErrors?.['owner_name']" label="اسم المالك / الشركة المالكة" placeholder="AL-ED"
+        :hide-details="false" required />
+
+
+      <TextInput v-model="formData.commercialRegister" @input="() => handleInputUpdate('commercial_register')"
         label="السجل التجاري" placeholder="32655451" :hide-details="false" :rules="[required()]"
         :error-messages="props.formErrors?.['commercial_register']" required />
 
-      
-      <TextInput v-model="formData.taxRegister" @input="() => handleInputUpdate('tax_register')" 
-        label="الرقم الضريبي" placeholder="216623263" :hide-details="false" :rules="[required()]"
+
+      <TextInput v-model="formData.taxRegister" @input="() => handleInputUpdate('tax_register')" label="الرقم الضريبي"
+        placeholder="216623263" :hide-details="false" :rules="[required()]"
         :error-messages="props.formErrors?.['tax_register']" />
       <SelectWithIconInput clearable v-model="formData.entityType" @update:model-value="emitUpdate" label="نوع الكيان"
         placeholder="شركة مساهمة" :items="entityTypeItems" />
 
-      <TextInput v-model="formData.phone" @input="() => handleInputUpdate('phone')" label="الهاتف" 
-        placeholder="+966 (555) 000-0000" dir="ltr" :hide-details="false" :rules="[required(), saudiPhone()]"
-        :error-messages="props.formErrors?.['phone']">
-        <template #prepend-inner>
-          <span class="text-gray-900 font-semibold me-2 block text-sm">KSA</span>
-        </template>
-      </TextInput>
-      <TextInput v-model="formData.mobile" @input="() => handleInputUpdate('mobile')" label="الجوال" 
-        placeholder="+966 (555) 000-0000" dir="ltr" :hide-details="false" :rules="[saudiPhone()]"
-        :error-messages="props.formErrors?.['mobile']">
-        <template #prepend-inner>
-          <span class="text-gray-900 font-semibold me-2 block text-sm">KSA</span>
-        </template>
-      </TextInput>
+      <TelInput v-model="formData.phone" label="الهاتف" :rules="[required(), saudiPhone()]"
+        :error-messages="props.formErrors?.['phone']" @input="() => handleInputUpdate('phone')" />
+      <TelInput v-model="formData.mobile" label="الجوال" :rules="[required(), saudiPhone()]"
+        :error-messages="props.formErrors?.['mobile']" @input="() => handleInputUpdate('mobile')" />
 
-      <SelectWithIconInput clearable show-add-button v-model="formData.languageId" 
-        @update:model-value="handleInputUpdate('language_id')" label="اللغة"
-        placeholder="English" :items="languageItems" :hide-details="false" :rules="[required()]"
+      <SelectWithIconInput clearable show-add-button v-model="formData.languageId"
+        @update:model-value="handleInputUpdate('language_id')" label="اللغة" placeholder="English"
+        :items="languageItems" :hide-details="false" :rules="[required()]"
         :error-messages="props.formErrors?.['language_id']" />
-      <TextInput v-model="formData.email" @input="() => handleInputUpdate('email')" label="البريد الإلكتروني" 
+      <TextInput v-model="formData.email" @input="() => handleInputUpdate('email')" label="البريد الإلكتروني"
         placeholder="info@buildtrans.sa" required dir="ltr" :hide-details="false" :rules="[required()]"
         :error-messages="props.formErrors?.['email']" />
       <h2 class="text-lg font-bold text-primary-900 mt-6 mb-2 md:col-span-3">بيانات العنوان</h2>
 
-      <SelectWithIconInput clearable v-model="formData.countryId" @update:model-value="handleInputUpdate('country_id')" 
-         label="الدولة" placeholder="اختر" :items="countryItems" 
-        :hide-details="false" :rules="[required()]" :error-messages="props.formErrors?.['country_id']" />
-      <SelectWithIconInput clearable v-model="formData.cityId" @update:model-value="handleInputUpdate('city_id')" 
-         placeholder="اختر" label="المدينة" :items="cityItems" 
-        :hide-details="false" :rules="[required()]" :error-messages="props.formErrors?.['city_id']" />
+      <SelectWithIconInput clearable v-model="formData.countryId" @update:model-value="handleInputUpdate('country_id')"
+        label="الدولة" placeholder="اختر" :items="countryItems" :hide-details="false" :rules="[required()]"
+        :error-messages="props.formErrors?.['country_id']" />
+      <SelectWithIconInput clearable v-model="formData.cityId" @update:model-value="handleInputUpdate('city_id')"
+        placeholder="اختر" label="المدينة" :items="cityItems" :hide-details="false" :rules="[required()]"
+        :error-messages="props.formErrors?.['city_id']" />
       <TextInput v-model="formData.neighborhood" @input="emitUpdate" label="الحي" placeholder="Riyadh" />
 
       <TextInput v-model="formData.streetName" @input="emitUpdate" label="الشارع" placeholder="966" />
       <TextInput v-model="formData.postalCode" @input="emitUpdate" label="الرمز البريدي" placeholder="966" />
       <TextInput v-model="formData.buildingNumber" @input="emitUpdate" label="رقم المبنى" placeholder="25544" />
 
-      <TextInput v-model="formData.address1" dir="ltr" @input="emitUpdate" label="العنوان الوطني" placeholder="Industrial Area">
+      <TextInput v-model="formData.address1" dir="ltr" @input="emitUpdate" label="العنوان الوطني"
+        placeholder="Industrial Area">
         <template #append-inner>
           <span v-html="markIcon"></span>
         </template>

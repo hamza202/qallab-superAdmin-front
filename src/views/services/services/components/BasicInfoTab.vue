@@ -146,7 +146,7 @@ watch(() => formData.value.is_taxable, (isTaxable) => {
 
 
       <div>
-        <TextInput v-model="formData.unit_price" type="number" variant="outlined" density="comfortable"
+        <TextInput v-model="formData.unit_price" type="number" variant="outlined" density="comfortable" :rules="[numeric(), positive()]"
           label="سعر الوحدة" placeholder="ادخل سعر الوحدة" hide-details @update:model-value="updateFormData" />
       </div>
 
@@ -160,7 +160,7 @@ watch(() => formData.value.is_taxable, (isTaxable) => {
 
       <div>
         <TextInput v-model="formData.min_quantity" type="number" variant="outlined" density="comfortable"
-          label="حد أدنى للكمية" placeholder="0" :rules="[minValue(1)]" :hide-details="false"
+          label="حد أدنى للطلب" placeholder="0" :rules="[minValue(1), numeric(), positive()]" :hide-details="false"
           :error-messages="props.formErrors['min_quantity']" @update:model-value="updateFormData"
           @input="delete props.formErrors['min_quantity']" />
       </div>

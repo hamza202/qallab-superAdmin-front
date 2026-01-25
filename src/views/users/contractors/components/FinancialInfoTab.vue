@@ -94,9 +94,9 @@ const infoIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
 <template>
   <div class="mb-6 bg-gray-50 -mx-6">
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 px-6 pt-6 pb-8">
-      <TextInput v-model="debitLimit" @input="emitUpdate" :rules="[numeric()]" :hide-details="false"
+      <TextInput v-model="debitLimit" @input="emitUpdate" :rules="[numeric(),positive()]" :hide-details="false"
         :error-messages="props.formErrors?.['debit_limit']" @update:model-value="clearError('debit_limit')"
-        label="الحد الأعلى للدين" placeholder="ادخل الحد">
+        label="الحد الأعلى للدين" placeholder="ادخل الحد الأعلى للدين">
         <template #append-inner>
           <v-tooltip location="top" content-class="custom-tooltip">
             <template #activator="{ props: tooltipProps }">
@@ -109,9 +109,9 @@ const infoIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
           </v-tooltip>
         </template>
       </TextInput>
-      <TextInput v-model="creditLimit" @input="emitUpdate" :rules="[numeric()]" :hide-details="false"
+      <TextInput v-model="creditLimit" @input="emitUpdate" :rules="[numeric(),positive()]" :hide-details="false"
         :error-messages="props.formErrors?.['credit_limit']" @update:model-value="clearError('credit_limit')"
-        label="الحد الأعلى للائتمان" placeholder="ادخل الحد">
+        label="الحد الأعلى للائتمان" placeholder="ادخل الحد الأعلى للإتمان">
         <template #append-inner>
           <v-tooltip location="top" content-class="custom-tooltip">
             <template #activator="{ props: tooltipProps }">

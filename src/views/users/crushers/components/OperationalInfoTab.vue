@@ -86,14 +86,14 @@ const infoIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
         <!-- Row 1: Production Lines, Rock Type, Crusher Type -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
             <TextInput v-model="formData.productionLines" @input="() => handleInputUpdate('production_lines')"
-                label="عدد خطوط الإنتاج" placeholder="20" type="number" :rules="[numeric()]"
+                label="عدد خطوط الإنتاج" placeholder="20" type="number" :rules="[numeric(),positive()]"
                 :error-messages="props.formErrors?.['production_lines']" :hide-details="false" />
             <SelectWithIconInput clearable v-model="formData.rockType" @update:model-value="emitUpdate"
                 label="نوع الصخر" placeholder="اختر نوع الصخر" :items="rockTypeItems" />
             <SelectWithIconInput clearable v-model="formData.crusherType" @update:model-value="emitUpdate"
                 label="نوع الكسارة" placeholder="اختر نوع الكسارة" :items="crusherTypeItems" />
             <TextInput v-model="formData.feedRate" @input="() => handleInputUpdate('feed_rate')" label="سرعة التغذية"
-                placeholder="20" :rules="[numeric()]" :error-messages="props.formErrors?.['feed_rate']"
+                placeholder="20" :rules="[numeric(),positive()]" :error-messages="props.formErrors?.['feed_rate']"
                 :hide-details="false">
                 <template #append-inner>
                     <v-tooltip location="top" content-class="custom-tooltip">
@@ -109,7 +109,7 @@ const infoIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
             </TextInput>
             <TextInput v-model="formData.maxProduction" :hide-details="false"
                 @input="() => handleInputUpdate('max_production')" label="الحد الأقصى للإنتاج" placeholder="50"
-                :rules="[numeric()]" :error-messages="props.formErrors?.['max_production']">
+                :rules="[numeric(),positive()]" :error-messages="props.formErrors?.['max_production']">
                 <template #append-inner>
                     <v-tooltip location="top" content-class="custom-tooltip">
                         <template #activator="{ props: tooltipProps }">
@@ -124,13 +124,13 @@ const infoIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
             </TextInput>
             <TextInput v-model="formData.currentProduction" :hide-details="false"
                 @input="() => handleInputUpdate('current_production')" label="الإنتاج الحالي" placeholder="45"
-                :rules="[numeric()]" :error-messages="props.formErrors?.['current_production']" />
+                :rules="[numeric(),positive()]" :error-messages="props.formErrors?.['current_production']" />
 
             <SelectWithIconInput clearable v-model="formData.design" @update:model-value="emitUpdate"
                 label="تصميم الكسارة" placeholder="اختر التصميم" :items="crusherDesignItems" />
             <TextInput v-model="formData.workersCount" :hide-details="false"
                 @input="() => handleInputUpdate('workers_count')" label="عدد العمال" placeholder="50" type="number"
-                :rules="[numeric()]" :error-messages="props.formErrors?.['workers_count']" />
+                :rules="[numeric(),positive()]" :error-messages="props.formErrors?.['workers_count']" />
         </div>
     </div>
 </template>

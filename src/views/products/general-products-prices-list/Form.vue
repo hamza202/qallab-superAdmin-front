@@ -301,7 +301,7 @@ const handleSelectAll = (selected: boolean) => {
 
 const bulkSyncItems = async (items: PriceListRow[]) => {
   const payload = {
-    material_type : 0,
+    material_type: 0,
     items: items.map(row => {
       console.log(row);
 
@@ -462,15 +462,15 @@ onMounted(async () => {
           </template>
 
           <template #item.minPrice="{ item }">
-            <div class="w-[150px]">
-              <PriceInput v-model="(item as PriceListRow).priceMin" placeholder="0" :hide-details="true" showRialIcon
-                :input-props="{ class: 'bg-white !text-center' }" />
+            <div class="w-[160px] py-2">
+              <PriceInput v-model="(item as PriceListRow).priceMin" placeholder="0" showRialIcon
+                :input-props="{ class: 'bg-white !text-center' }" :rules="[numeric(), positive()]" />
             </div>
           </template>
           <template #item.maxPrice="{ item }">
-            <div class="w-[150px]">
-              <PriceInput v-model="(item as PriceListRow).priceMax" placeholder="0" :hide-details="true" showRialIcon
-                :input-props="{ class: 'bg-white !text-center' }" />
+            <div class="w-[160px] py-2">
+              <PriceInput v-model="(item as PriceListRow).priceMax" placeholder="0" showRialIcon
+                :input-props="{ class: 'bg-white !text-center' }" :rules="[numeric(), positive()]" />
             </div>
           </template>
 

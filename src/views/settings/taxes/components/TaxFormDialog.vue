@@ -295,7 +295,7 @@ onMounted(() => {
 
     <template #actions>
       <ButtonWithIcon variant="flat" color="primary" height="44" rounded="4"
-        custom-class="font-semibold text-base sm:flex-1" label="حفظ" prepend-icon="mdi-plus" @click="handleSave"
+        custom-class="font-semibold text-base w-full sm:flex-1" label="حفظ" prepend-icon="mdi-plus" @click="handleSave"
         :loading="saving" :disabled="saving" />
 
       <ButtonWithIcon variant="flat" color="primary-50" height="44" rounded="4"

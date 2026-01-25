@@ -62,15 +62,15 @@ const emitUpdate = () => {
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
       <TextInput v-model="formData.ongoingProjects" @input="emitUpdate" label="عدد المشاريع الجارية"
-        placeholder="ادخل العدد" type="number" />
+        placeholder="ادخل العدد" type="number" :rules="[numeric(), positive()]"/>
       <TextInput v-model="formData.completedProjects" @input="emitUpdate" label="عدد المشاريع المكتملة"
-        placeholder="ادخل العدد" type="number" />
+        placeholder="ادخل العدد" type="number" :rules="[numeric(), positive()]"/>
       <TextInput v-model="formData.employeesCount" @input="emitUpdate" label="إجمالي عدد الموظفين"
-        placeholder="ادخل العدد" type="number" />
+        placeholder="ادخل العدد" type="number" :rules="[numeric(), positive()]"/>
       <TextInput v-model="formData.engineersCount" @input="emitUpdate" label="عدد المهندسين" placeholder="ادخل العدد"
-        type="number" />
+        type="number" :rules="[numeric(), positive()]"/>
       <TextInput v-model="formData.techniciansCount" @input="emitUpdate" label="عدد الفنيين" placeholder="ادخل العدد"
-        type="number" />
+        type="number" :rules="[numeric(), positive()]"/>
       <SelectWithIconInput clearable v-model="formData.operationalCapacity" @update:model-value="emitUpdate"
         label="القدرة التشغيلية للمقاول" placeholder="اختر" :items="operationalCapacityItems" />
       <SelectWithIconInput clearable v-model="formData.specialization" @update:model-value="emitUpdate"

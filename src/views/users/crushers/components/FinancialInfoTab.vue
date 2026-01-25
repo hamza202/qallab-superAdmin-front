@@ -113,8 +113,8 @@ const editIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none" xm
   <div class="mb-6 bg-gray-50 -mx-6">
     <!-- Credit and Debt Limits -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 px-6 pt-6 pb-8">
-      <TextInput v-model="creditLimit" @input="emitUpdate" label="الحد الأعلى للائتمان" placeholder="ادخل الحد"
-        :rules="[numeric()]" :hide-details="false" :error-messages="props.formErrors?.['credit_limit']"
+      <TextInput v-model="creditLimit" @input="emitUpdate" label="الحد الأعلى للإتمان" placeholder="ادخل الحد الأعلى للإتمان"
+        :rules="[numeric(),positive()]" :hide-details="false" :error-messages="props.formErrors?.['credit_limit']"
         @update:model-value="clearError('credit_limit')">
         <template #append-inner>
           <v-tooltip location="top" content-class="custom-tooltip">
@@ -128,8 +128,8 @@ const editIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none" xm
           </v-tooltip>
         </template>
       </TextInput>
-      <TextInput v-model="debitLimit" @input="emitUpdate" label="الحد الأعلى للدين" placeholder="ادخل الحد"
-        :rules="[numeric()]" :hide-details="false" :error-messages="props.formErrors?.['debit_limit']"
+      <TextInput v-model="debitLimit" @input="emitUpdate" label="الحد الأعلى للدين" placeholder="ادخل الحد الأعلى للدين"
+        :rules="[numeric(),positive()]" :hide-details="false" :error-messages="props.formErrors?.['debit_limit']"
         @update:model-value="clearError('debit_limit')">
         <template #append-inner>
           <v-tooltip location="top" content-class="custom-tooltip">
