@@ -463,8 +463,8 @@ onBeforeUnmount(() => {
                     custom-class="font-semibold text-base border-gray-300 bg-primary-100 !text-primary-900"
                     :prepend-icon="importIcon" :label="t('common.import')" />
 
-                <ButtonWithIcon variant="flat" color="primary-500" height="40" rounded="0"
-                    custom-class="font-semibold text-base !text-white border !border-primary-200"
+                <ButtonWithIcon variant="flat" height="40" rounded="0"
+                    custom-class="font-semibold text-base border-gray-300 bg-primary-50 !text-primary-900"
                     :prepend-icon="exportIcon" :label="t('common.export')" />
             </div>
 
