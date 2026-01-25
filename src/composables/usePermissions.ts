@@ -22,8 +22,11 @@ export interface Permissions {
     products?: PermissionsGroup;
     services?: PermissionsGroup;
     sales?: PermissionsGroup;
+    projects?: PermissionsGroup;
     purchases?: PermissionsGroup;
+    finance?: PermissionsGroup;
     users?: PermissionsGroup;
+    reports?: PermissionsGroup;
     settings?: PermissionsGroup;
     [key: string]: PermissionsGroup | undefined;
 }
@@ -42,15 +45,33 @@ const routePermissionMap: Record<string, { group: string; key: string }> = {
     '/products/building-material-products-prices': { group: 'products', key: 'building-material-price-lists' },
     '/products/production-capacity': { group: 'products', key: 'production-capacity-lists' },
     '/product-variables': { group: 'products', key: 'aspects' },
+    '/products/product-settings': { group: 'products', key: 'product-settings' },
 
     // Services
     '/services': { group: 'services', key: 'services' },
+    '/services/subscriptions': { group: 'services', key: 'subscriptions' },
+    '/services/prices-list': { group: 'services', key: 'price-lists' },
+    '/services/service-settings': { group: 'services', key: 'service-settings' },
 
     // Sales
     '/customers': { group: 'sales', key: 'customers' },
+    '/sales/invoices': { group: 'sales', key: 'sales-invoices' },
+    '/sales/orders': { group: 'sales', key: 'sales-orders' },
+    '/sales/contracts': { group: 'sales', key: 'contracts' },
+    '/sales/clearing': { group: 'sales', key: 'clearing' },
+
+    // Projects
+    '/projects/list': { group: 'projects', key: 'projects' },
+    '/projects/scheduling': { group: 'projects', key: 'project-scheduling' },
 
     // Purchases
     '/suppliers': { group: 'purchases', key: 'suppliers' },
+    '/suppliers/supplier-settlement': { group: 'purchases', key: 'supplier-settlements' },
+
+    // Finance
+    '/vouchers/list': { group: 'finance', key: 'financial-dashboard' },
+    '/finance/payment-vouchers': { group: 'finance', key: 'payment-vouchers' },
+    '/finance/receipt-vouchers': { group: 'finance', key: 'receipt-vouchers' },
 
     // Users
     '/users': { group: 'users', key: 'users' },
@@ -59,12 +80,17 @@ const routePermissionMap: Record<string, { group: string; key: string }> = {
     '/contractors': { group: 'users', key: 'contractors' },
     '/logistics': { group: 'users', key: 'logistics-companies' },
 
+    // Reports
+    '/reports/sales': { group: 'reports', key: 'sales-reports' },
+    '/reports/purchases': { group: 'reports', key: 'purchase-reports' },
+
     // Settings
     '/settings/units': { group: 'settings', key: 'units' },
     '/settings/test-methodology': { group: 'settings', key: 'test-methodologies' },
     '/settings/tests': { group: 'settings', key: 'tests' },
     '/settings/test-group': { group: 'settings', key: 'test-groups' },
     '/settings/taxes': { group: 'settings', key: 'taxes' },
+    '/settings/tax-rules': { group: 'settings', key: 'taxes' },
     '/settings/countries': { group: 'settings', key: 'countries' },
     '/settings/cities': { group: 'settings', key: 'cities' },
     '/settings/sample-types': { group: 'settings', key: 'sample-types' },
@@ -80,6 +106,12 @@ const routePermissionMap: Record<string, { group: string; key: string }> = {
     '/settings/services-categories/edit': { group: 'settings', key: 'service-categories' },
     '/settings/services-categories/view': { group: 'settings', key: 'service-categories' },
     '/settings/services-categories/tree': { group: 'settings', key: 'tree-service-categories' },
+    '/settings/basic': { group: 'settings', key: 'basic-settings' },
+    '/settings/geo-areas': { group: 'settings', key: 'geo-regions' },
+    '/settings/geo-segments': { group: 'settings', key: 'geo-zones' },
+    '/sales/currencies': { group: 'settings', key: 'currencies' },
+    '/settings/codes': { group: 'settings', key: 'codes-settings' },
+    '/settings/account-types': { group: 'settings', key: 'account-types' },
 };
 
 export function usePermissions() {
@@ -153,21 +185,49 @@ export function usePermissions() {
     const canViewBuildingMaterialPriceLists = computed(() => hasPermission('products', 'building-material-price-lists'));
     const canViewProductionCapacity = computed(() => hasPermission('products', 'production-capacity-lists'));
     const canViewProductVariables = computed(() => hasPermission('products', 'aspects'));
+    const canViewProductSettings = computed(() => hasPermission('products', 'product-settings'));
 
     /**
      * Check if user can view services
      */
     const canViewServices = computed(() => hasPermission('services', 'services'));
+    const canViewSubscriptions = computed(() => hasPermission('services', 'subscriptions'));
+    const canViewPriceLists = computed(() => hasPermission('services', 'price-lists'));
+    const canViewServiceSettings = computed(() => hasPermission('services', 'service-settings'));
 
     /**
      * Check if user can view sales related items
      */
     const canViewCustomers = computed(() => hasPermission('sales', 'customers'));
+    const canViewSalesInvoices = computed(() => hasPermission('sales', 'sales-invoices'));
+    const canViewSalesOrders = computed(() => hasPermission('sales', 'sales-orders'));
+    const canViewContracts = computed(() => hasPermission('sales', 'contracts'));
+    const canViewClearing = computed(() => hasPermission('sales', 'clearing'));
+
+    /**
+     * Check if user can view projects related items
+     */
+    const canViewProjects = computed(() => hasPermission('projects', 'projects'));
+    const canViewProjectScheduling = computed(() => hasPermission('projects', 'project-scheduling'));
 
     /**
      * Check if user can view purchases related items
      */
     const canViewSuppliers = computed(() => hasPermission('purchases', 'suppliers'));
+    const canViewSupplierSettlements = computed(() => hasPermission('purchases', 'supplier-settlements'));
+
+    /**
+     * Check if user can view finance related items
+     */
+    const canViewFinancialDashboard = computed(() => hasPermission('finance', 'financial-dashboard'));
+    const canViewPaymentVouchers = computed(() => hasPermission('finance', 'payment-vouchers'));
+    const canViewReceiptVouchers = computed(() => hasPermission('finance', 'receipt-vouchers'));
+
+    /**
+     * Check if user can view reports related items
+     */
+    const canViewSalesReports = computed(() => hasPermission('reports', 'sales-reports'));
+    const canViewPurchaseReports = computed(() => hasPermission('reports', 'purchase-reports'));
 
     /**
      * Check if user can view users related items
@@ -195,6 +255,13 @@ export function usePermissions() {
     const canViewTreeCategories = computed(() => hasPermission('settings', 'tree-categories'));
     const canViewServiceCategories = computed(() => hasPermission('settings', 'service-categories'));
     const canViewTreeServiceCategories = computed(() => hasPermission('settings', 'tree-service-categories'));
+    const canViewBasicSettings = computed(() => hasPermission('settings', 'basic-settings'));
+    const canViewGeoRegions = computed(() => hasPermission('settings', 'geo-regions'));
+    const canViewGeoZones = computed(() => hasPermission('settings', 'geo-zones'));
+    const canViewCurrencies = computed(() => hasPermission('settings', 'currencies'));
+    const canViewAdvancedSettings = computed(() => hasPermission('settings', 'advanced-settings'));
+    const canViewCodesSettings = computed(() => hasPermission('settings', 'codes-settings'));
+    const canViewAccountTypes = computed(() => hasPermission('settings', 'account-types'));
 
     /**
      * Check if any product permission is available
@@ -205,23 +272,63 @@ export function usePermissions() {
         canViewGeneralPriceLists.value ||
         canViewBuildingMaterialPriceLists.value ||
         canViewProductionCapacity.value ||
-        canViewProductVariables.value
+        canViewProductVariables.value ||
+        canViewProductSettings.value
     );
 
     /**
      * Check if any service permission is available
      */
-    const hasAnyServicePermission = computed(() => canViewServices.value);
+    const hasAnyServicePermission = computed(() =>
+        canViewServices.value ||
+        canViewSubscriptions.value ||
+        canViewPriceLists.value ||
+        canViewServiceSettings.value
+    );
 
     /**
      * Check if any sales permission is available
      */
-    const hasAnySalesPermission = computed(() => canViewCustomers.value);
+    const hasAnySalesPermission = computed(() =>
+        canViewCustomers.value ||
+        canViewSalesInvoices.value ||
+        canViewSalesOrders.value ||
+        canViewContracts.value ||
+        canViewClearing.value
+    );
+
+    /**
+     * Check if any projects permission is available
+     */
+    const hasAnyProjectsPermission = computed(() =>
+        canViewProjects.value ||
+        canViewProjectScheduling.value
+    );
 
     /**
      * Check if any purchases permission is available
      */
-    const hasAnyPurchasesPermission = computed(() => canViewSuppliers.value);
+    const hasAnyPurchasesPermission = computed(() =>
+        canViewSuppliers.value ||
+        canViewSupplierSettlements.value
+    );
+
+    /**
+     * Check if any finance permission is available
+     */
+    const hasAnyFinancePermission = computed(() =>
+        canViewFinancialDashboard.value ||
+        canViewPaymentVouchers.value ||
+        canViewReceiptVouchers.value
+    );
+
+    /**
+     * Check if any reports permission is available
+     */
+    const hasAnyReportsPermission = computed(() =>
+        canViewSalesReports.value ||
+        canViewPurchaseReports.value
+    );
 
     /**
      * Check if any users permission is available
@@ -251,7 +358,14 @@ export function usePermissions() {
         canViewCategories.value ||
         canViewTreeCategories.value ||
         canViewServiceCategories.value ||
-        canViewTreeServiceCategories.value
+        canViewTreeServiceCategories.value ||
+        canViewBasicSettings.value ||
+        canViewGeoRegions.value ||
+        canViewGeoZones.value ||
+        canViewCurrencies.value ||
+        canViewAdvancedSettings.value ||
+        canViewCodesSettings.value ||
+        canViewAccountTypes.value
     );
 
     return {
@@ -269,19 +383,39 @@ export function usePermissions() {
         canViewBuildingMaterialPriceLists,
         canViewProductionCapacity,
         canViewProductVariables,
+        canViewProductSettings,
         hasAnyProductPermission,
 
         // Services permissions
         canViewServices,
+        canViewSubscriptions,
+        canViewPriceLists,
+        canViewServiceSettings,
         hasAnyServicePermission,
 
         // Sales permissions
         canViewCustomers,
+        canViewSalesInvoices,
+        canViewSalesOrders,
+        canViewContracts,
+        canViewClearing,
         hasAnySalesPermission,
+
+        // Projects permissions
+        canViewProjects,
+        canViewProjectScheduling,
+        hasAnyProjectsPermission,
 
         // Purchases permissions
         canViewSuppliers,
+        canViewSupplierSettlements,
         hasAnyPurchasesPermission,
+
+        // Finance permissions
+        canViewFinancialDashboard,
+        canViewPaymentVouchers,
+        canViewReceiptVouchers,
+        hasAnyFinancePermission,
 
         // Users permissions
         canViewUsers,
@@ -290,6 +424,11 @@ export function usePermissions() {
         canViewContractors,
         canViewLogistics,
         hasAnyUsersPermission,
+
+        // Reports permissions
+        canViewSalesReports,
+        canViewPurchaseReports,
+        hasAnyReportsPermission,
 
         // Settings permissions
         canViewUnits,
@@ -306,6 +445,13 @@ export function usePermissions() {
         canViewTreeCategories,
         canViewServiceCategories,
         canViewTreeServiceCategories,
+        canViewBasicSettings,
+        canViewGeoRegions,
+        canViewGeoZones,
+        canViewCurrencies,
+        canViewAdvancedSettings,
+        canViewCodesSettings,
+        canViewAccountTypes,
         hasAnySettingsPermission,
     };
 }

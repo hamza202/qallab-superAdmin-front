@@ -94,8 +94,8 @@
                                         متغيرات المنتج </router-link>
                                 </li>
                                 <li class="relative">
-                                    <router-link to="/sales/invoices"
-                                        :class="[isMenuItemActive('/sales/invoices') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                    <router-link to="/products/product-settings"
+                                        :class="[isMenuItemActive('/products/product-settings') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         اعدادات جدول المنتجات</router-link>
                                 </li>
                             </ul>
@@ -133,18 +133,18 @@
                                 </li>
                                 <li class="relative">
                                     <router-link to="/services/subscriptions"
-                                        :class="[isMenuItemActive('/services/subscriptions') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
-                                        الاشتراكات</router-link>
+                                        :class="[isMenuItemActive('/services/subscriptions') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        إدارة الاشتراكات</router-link>
                                 </li>
                                 <li class="relative">
                                     <router-link to="/services/prices-list"
-                                        :class="[isMenuItemActive('/services/prices-list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
-                                        قوائم الاسعار</router-link>
+                                        :class="[isMenuItemActive('/services/prices-list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        إدارة قوائم الاسعار</router-link>
                                 </li>
                                 <li class="relative">
-                                    <router-link to="/products/production-capacity-list"
-                                        :class="[isMenuItemActive('/products/production-capacity-list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
-                                        إعدادات الخدمات</router-link>
+                                    <router-link to="/services/service-settings"
+                                        :class="[isMenuItemActive('/services/service-settings') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        إدارة إعدادات الخدمات</router-link>
                                 </li>
                             </ul>
 
@@ -277,8 +277,8 @@
                                         إدارة الموردين </router-link>
                                 </li>
                                 <li class="relative">
-                                    <router-link to="/suppliers/list"
-                                        :class="[isMenuItemActive('/suppliers/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                    <router-link to="/suppliers/supplier-settlement"
+                                        :class="[isMenuItemActive('/suppliers/supplier-settlement') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         تسوية حساب موردين</router-link>
                                 </li>
                             </ul>
@@ -555,8 +555,8 @@
                                     </router-link>
                                 </li>
                                 <li class="relative">
-                                    <router-link to="/sales/invoices"
-                                        :class="[isMenuItemActive('/sales/invoices') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                    <router-link to="/sales/currencies"
+                                        :class="[isMenuItemActive('/sales/currencies') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         إدارة العملات</router-link>
                                 </li>
                             </ul>
