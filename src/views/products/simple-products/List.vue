@@ -54,7 +54,7 @@ interface ApiResponse {
   header_table: string
   headers: TableHeader[]
   shownHeaders: TableHeader[]
-  actions?: { can_create: boolean }
+  actions?: { can_create: boolean; can_bulk_delete?: boolean }
 }
 
 // Table columns composable
@@ -74,6 +74,7 @@ const isLoading = ref(false)
 const loadingMore = ref(false)
 const errorMessage = ref<string | null>(null)
 const canCreate = ref(true)
+const canBulkDelete = ref(true)
 
 // Pagination
 const nextCursor = ref<string | null>(null)
@@ -210,6 +211,7 @@ const fetchData = async (cursor?: string | null, append = false) => {
       // Set create permission
       if (response.actions) {
         canCreate.value = response.actions.can_create
+        canBulkDelete.value = response.actions.can_bulk_delete ?? false
       }
     }
 
@@ -252,7 +254,7 @@ const handleBulkDelete = () => {
 const confirmDelete = async () => {
   try {
     deleteLoading.value = true
-    
+
     if (deleteMode.value === 'single') {
       if (!itemToDelete.value) return
       await api.delete(`/items/${itemToDelete.value.id}`)
@@ -400,7 +402,7 @@ onBeforeUnmount(() => {
         <div :class="hasSelected ? 'justify-between' : 'justify-end'"
           class="flex flex-wrap items-center gap-3 border-y border-y-slate-300 px-4 sm:!px-6 py-3">
           <!-- Actions when rows are selected -->
-          <div v-if="hasSelected"
+          <div v-if="hasSelected && canBulkDelete"
             class="flex flex-wrap items-stretch rounded overflow-hidden border border-gray-200 bg-white text-sm">
             <ButtonWithIcon variant="flat" height="40" rounded="0"
               custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
@@ -417,8 +419,8 @@ onBeforeUnmount(() => {
             <v-menu v-model="showHeadersMenu" :close-on-content-click="false">
               <template v-slot:activator="{ props }">
                 <ButtonWithIcon v-bind="props" variant="outlined" rounded="4" color="gray-500" height="40"
-                  custom-class="font-semibold text-base border-gray-400"
-                  :prepend-icon="columnIcon" :label="t('common.columns')" append-icon="mdi-chevron-down" />
+                  custom-class="font-semibold text-base border-gray-400" :prepend-icon="columnIcon"
+                  :label="t('common.columns')" append-icon="mdi-chevron-down" />
               </template>
               <v-list>
                 <v-list-item v-for="header in allHeaders" :key="header.key" @click="toggleHeader(header.key)">
@@ -459,8 +461,8 @@ onBeforeUnmount(() => {
               :placeholder="t('common.category')" class="w-full sm:w-40 bg-white" />
             <div class="flex gap-2 items-center">
               <ButtonWithIcon variant="flat" color="primary-500" rounded="4" height="40"
-                custom-class="px-5 font-semibold !text-white text-sm sm:text-base"
-                :prepend-icon="searchIcon" label="ابحث الآن" @click="handleSearch" />
+                custom-class="px-5 font-semibold !text-white text-sm sm:text-base" :prepend-icon="searchIcon"
+                label="ابحث الآن" @click="handleSearch" />
               <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4" border="sm"
                 custom-class="px-5 font-semibold text-sm sm:text-base !text-primary-800 !border-primary-200"
                 prepend-icon="mdi-refresh" label="إعادة تعيين" @click="resetFilters" />
@@ -475,12 +477,14 @@ onBeforeUnmount(() => {
         </v-alert>
 
         <!-- Simple Products Table -->
-        <DataTable :headers="tableHeaders" :items="tableItems" :loading="isLoading" show-checkbox show-actions
+        <DataTable :headers="tableHeaders" :items="tableItems" :loading="isLoading" :show-checkbox="canBulkDelete" show-actions
           @edit="handleEdit" @delete="handleDelete" @view="handleView" @select="handleSelect"
           @selectAll="handleSelectAll">
           <template #item.is_active="{ item }">
             <v-switch :model-value="item.is_active" hide-details inset density="compact" color="primary"
-              class="small-switch" @update:model-value="() => handleStatusChange(item)" />
+              class="small-switch" @update:model-value="() => handleStatusChange(item)"
+              v-if="item.actions.can_change_status" />
+            <span v-else class="text-sm text-gray-600">--</span>
           </template>
           <!-- Fix mismatched key for updated_at -->
           <!-- <template #item.updated_at="{ item }">
@@ -500,9 +504,9 @@ onBeforeUnmount(() => {
     </div>
 
     <!-- Unified Delete Confirmation Dialog -->
-    <DeleteConfirmDialog v-model="showDeleteDialog" :loading="deleteLoading" 
+    <DeleteConfirmDialog v-model="showDeleteDialog" :loading="deleteLoading"
       :title="deleteMode === 'single' ? 'حذف المنتج' : 'حذف المنتجات'"
-      :message="deleteMode === 'single' ? `هل أنت متأكد من حذف ${itemToDelete?.name}؟` : `هل أنت متأكد من حذف ${selectedRows.length} منتج؟`" 
+      :message="deleteMode === 'single' ? `هل أنت متأكد من حذف ${itemToDelete?.name}؟` : `هل أنت متأكد من حذف ${selectedRows.length} منتج؟`"
       @confirm="confirmDelete" />
 
     <!-- Status Change Confirmation Dialog -->
@@ -512,5 +516,4 @@ onBeforeUnmount(() => {
   </default-layout>
 </template>
 
-<style scoped>
-</style>
+<style scoped></style>

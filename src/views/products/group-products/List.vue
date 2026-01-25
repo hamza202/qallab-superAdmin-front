@@ -65,7 +65,7 @@ interface ApiResponse {
   headers: TableHeader[]
   shownHeaders: TableHeader[]
   sub_item_headers: TableHeader[]
-  actions?: { can_create: boolean }
+  actions?: { can_create: boolean; can_bulk_delete?: boolean }
 }
 
 // Table columns composable
@@ -86,6 +86,7 @@ const isLoading = ref(false)
 const loadingMore = ref(false)
 const errorMessage = ref<string | null>(null)
 const canCreate = ref(true)
+const canBulkDelete = ref(true)
 
 // Pagination
 const nextCursor = ref<string | null>(null)
@@ -251,6 +252,7 @@ const fetchData = async (cursor?: string | null, append = false) => {
       // Set create permission
       if (response.actions) {
         canCreate.value = response.actions.can_create
+        canBulkDelete.value = response.actions.can_bulk_delete ?? false
       }
     }
 
@@ -488,7 +490,7 @@ onBeforeUnmount(() => {
         <div :class="hasSelected ? 'justify-between' : 'justify-end'"
           class="flex flex-wrap items-center gap-3 border-y border-y-slate-300 px-4 sm:!px-6 py-3">
           <!-- Actions when rows are selected -->
-          <div v-if="hasSelected"
+          <div v-if="hasSelected && canBulkDelete"
             class="flex flex-wrap items-stretch rounded overflow-hidden border border-gray-200 bg-white text-sm">
             <ButtonWithIcon variant="flat" height="40" rounded="0"
               custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
@@ -564,7 +566,7 @@ onBeforeUnmount(() => {
 
         <!-- Group Products Table -->
         <GroupedDataTable :headers="tableHeaders" :items="tableItems" :sub-item-headers="computedSubItemHeaders" 
-          :loading="isLoading" show-checkbox show-actions
+          :loading="isLoading" :show-checkbox="canBulkDelete" show-actions
           @edit="handleEdit" @delete="handleDelete" @view="handleView" @select="handleSelect"
           @selectAll="handleSelectAll" @toggleStatus="handleStatusChange" @toggleSubItem="handleSubItemStatusChange" />
 

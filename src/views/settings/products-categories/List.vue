@@ -49,6 +49,7 @@ interface CategoriesResponse {
     shownHeaders: TableHeader[];
     actions: {
         can_create: boolean;
+        can_bulk_delete?: boolean;
     };
 }
 
@@ -77,6 +78,7 @@ const tableItems = ref<Category[]>([]);
 const allHeaders = ref<TableHeader[]>([]);
 const shownHeaders = ref<TableHeader[]>([]);
 const canCreate = ref(false);
+const canBulkDelete = ref(true);
 const header_table = ref('');
 const loading = ref(false);
 const loadingMore = ref(false);
@@ -183,6 +185,7 @@ const fetchCategories = async (cursor?: string | null, append = false) => {
             allHeaders.value = response.headers.filter(h => h.key !== 'id' && h.key !== 'actions');
             shownHeaders.value = response.shownHeaders.filter(h => h.key !== 'id' && h.key !== 'actions');
             canCreate.value = response.actions.can_create;
+            canBulkDelete.value = response.actions.can_bulk_delete ?? false;
             header_table.value = response.header_table
         }
 
@@ -316,7 +319,7 @@ const handleBulkDelete = () => {
 
 const confirmBulkDelete = async () => {
     if (deleteLoading.value) return;
-    
+
     try {
         deleteLoading.value = true;
         await api.post('/categories/bulk-delete', { ids: selectedCategories.value });
@@ -454,12 +457,12 @@ const importIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" 
                         class="flex flex-wrap items-stretch rounded overflow-hidden border border-gray-200 bg-white text-sm">
                         <ButtonWithIcon variant="flat" height="40" rounded="0"
                             custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-                            :prepend-icon="trash_1_icon" color="white" :label="t('common.delete')" 
+                            :prepend-icon="trash_1_icon" color="white" :label="t('common.delete')"
                             @click="handleBulkDelete" />
                         <div class="w-px bg-gray-200"></div>
                         <ButtonWithIcon variant="flat" height="40" rounded="0"
                             custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-                            :prepend-icon="trash_2_icon" color="white" :label="t('common.deleteAll')" 
+                            :prepend-icon="trash_2_icon" color="white" :label="t('common.deleteAll')"
                             @click="handleBulkDelete" />
                     </div>
 
@@ -526,12 +529,14 @@ const importIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" 
                 </div>
 
                 <!-- Categories Table -->
-                <DataTable :headers="tableHeaders" :items="tableItems" :loading="loading" show-checkbox show-actions
-                    @delete="handleDelete" @view="handleView" @select="handleSelectCategory" @edit="handleEdit"
-                    @selectAll="handleSelectAllCategories" :confirm-delete="true">
+                <DataTable :headers="tableHeaders" :items="tableItems" :loading="loading" :show-checkbox="canBulkDelete"
+                    show-actions @delete="handleDelete" @view="handleView" @select="handleSelectCategory"
+                    @edit="handleEdit" @selectAll="handleSelectAllCategories" :confirm-delete="true">
                     <template #item.is_active="{ item }">
-                        <v-switch :model-value="item.is_active" hide-details inset density="compact" class="small-switch" color="primary-600"
-                            @update:model-value="(value) => handleStatusChange(item)" />
+                        <v-switch :model-value="item.is_active" hide-details inset density="compact" color="primary"
+                            class="small-switch" @update:model-value="() => handleStatusChange(item)"
+                            v-if="item.actions.can_change_status" />
+                        <span v-else class="text-sm text-gray-600">--</span>
                     </template>
 
                 </DataTable>
@@ -548,12 +553,8 @@ const importIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" 
 
 
         <!-- Bulk Delete Confirmation Dialog -->
-        <DeleteConfirmDialog 
-            v-model="showDeleteDialog" 
-            :loading="deleteLoading" 
-            title="حذف التصنيفات" 
-            :message="`هل أنت متأكد من حذف ${selectedCategories.length} تصنيف؟`"
-            @confirm="confirmBulkDelete" />
+        <DeleteConfirmDialog v-model="showDeleteDialog" :loading="deleteLoading" title="حذف التصنيفات"
+            :message="`هل أنت متأكد من حذف ${selectedCategories.length} تصنيف؟`" @confirm="confirmBulkDelete" />
 
         <!-- Status Change Confirmation Dialog -->
         <StatusChangeDialog v-model="showStatusChangeDialog" :loading="statusChangeLoading"

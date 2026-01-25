@@ -37,7 +37,10 @@ interface ProductionCapacityResponse {
   supplier: {
     id: number
     name: string
-  }
+  },
+  actions: {
+    can_sync_items: boolean
+  },
   productionCapacityItems: ProductionCapacityItem[]
   is_active: boolean
   created_at: string
@@ -86,7 +89,7 @@ const loading = ref(false)
 const saving = ref(false)
 const modifiedItemIds = ref<Set<number>>(new Set())
 const selectedRows = ref<number[]>([])
-
+const canSyncItems = ref(false)
 // Categories for filtering
 const categories = ref<Array<{ id: number; name: string }>>([])
 const selectedCategory = ref<number | null>(null)
@@ -123,7 +126,7 @@ const fetchProductionCapacityItems = async (productionCapacityId: number) => {
       `/production-capacities/${productionCapacityId}`
     )
     const data = response.data
-
+    canSyncItems.value = data.actions.can_sync_items
     if (data.productionCapacityItems && data.productionCapacityItems.length > 0) {
       allRows.value = data.productionCapacityItems.map((item) => {
         return {
@@ -407,7 +410,7 @@ onMounted(async () => {
         <div class="flex flex-col sm:flex-row gap-3 sm:justify-center mt-6">
           <ButtonWithIcon variant="flat" rounded="4" color="primary" height="44"
             custom-class="font-semibold text-base sm:min-w-[200px]" :prepend-icon="saveIcon" label="حفظ"
-            @click="handleSave" :loading="saving" :disabled="loading" />
+            @click="handleSave" :loading="saving" :disabled="loading" v-if="canSyncItems" />
 
           <ButtonWithIcon variant="flat" rounded="4" color="primary-50" height="44"
             custom-class="font-semibold text-base text-primary-700 sm:min-w-[200px]" label="إغلاق" @click="handleClose"

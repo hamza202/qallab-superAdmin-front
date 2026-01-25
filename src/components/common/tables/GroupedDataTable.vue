@@ -221,7 +221,7 @@ const eyeIcon = `<svg width="22" height="16" viewBox="0 0 22 16" fill="none" xml
               </template>
 
               <!-- Status Switch (for both 'status' and 'is_active' keys) -->
-              <template v-else-if="header.key === 'status' || header.key === 'is_active'">
+              <template v-else-if="(header.key === 'status' || header.key === 'is_active') && item.actions.can_change_status">
                 <div class="flex">
                   <slot :name="`item.${header.key}`" :item="item">
                     <v-switch

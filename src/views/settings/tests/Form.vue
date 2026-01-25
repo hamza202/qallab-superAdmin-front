@@ -182,10 +182,10 @@ onMounted(() => {
             <div class="md:col-span-2 md:row-span-2">
               <LanguageTabs :languages="availableLanguages" label="الوصف">
                 <template #en>
-                  <RichTextEditor v-model="form.descriptionEn" placeholder="Enter description" :hide-details="true" />
+                  <TextareaInput v-model="form.descriptionEn" placeholder="Enter description" :hide-details="true" />
                 </template>
                 <template #ar>
-                  <RichTextEditor v-model="form.descriptionAr" placeholder="ادخل الوصف" :hide-details="true" />
+                  <TextareaInput v-model="form.descriptionAr" placeholder="ادخل الوصف" :hide-details="true" />
                 </template>
               </LanguageTabs>
             </div>

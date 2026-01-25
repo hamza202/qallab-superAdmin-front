@@ -47,9 +47,9 @@ interface ApiResponse {
   data: ProductionCapacity[]
   pagination: Pagination
   header_table: string
-  headers: Record<string, { label: string; sortable: boolean }>
-  shownHeaders: Record<string, { label: string; sortable: boolean }>
-  actions?: { can_create: boolean }
+  headers: TableHeader[]
+  shownHeaders: TableHeader[]
+  actions?: { can_create: boolean; can_bulk_delete?: boolean }
 }
 
 // Table columns composable
@@ -69,16 +69,27 @@ const isLoading = ref(false)
 const loadingMore = ref(false)
 const errorMessage = ref<string | null>(null)
 const canCreate = ref(true)
+const canBulkDelete = ref(true)
 
 // Pagination
 const nextCursor = ref<string | null>(null)
 const perPage = ref(15)
 const hasMoreData = computed(() => nextCursor.value !== null)
 
+// Selection state
+const selectedRows = ref<number[]>([])
+const hasSelected = computed(() => selectedRows.value.length > 0)
+
 // Status change dialog
 const showStatusChangeDialog = ref(false)
 const statusChangeLoading = ref(false)
 const itemToChangeStatus = ref<ProductionCapacity | null>(null)
+
+// Delete dialog
+const showDeleteDialog = ref(false)
+const deleteLoading = ref(false)
+const itemToDelete = ref<ProductionCapacity | null>(null)
+const deleteMode = ref<'single' | 'bulk'>('single')
 
 // Filters
 const showAdvancedFilters = ref(false)
@@ -142,18 +153,6 @@ const tableHeaders = computed(() => {
   return defaultTableHeaders
 })
 
-// === Helper Functions ===
-// Convert headers object to array format
-const convertHeadersToArray = (headersObj: Record<string, { label: string; sortable: boolean }>): TableHeader[] => {
-  return Object.keys(headersObj)
-    .filter(key => key !== 'id' && key !== 'actions')
-    .map(key => ({
-      key,
-      title: headersObj[key].label,
-      sortable: headersObj[key].sortable,
-    }))
-}
-
 // === API Functions ===
 const fetchData = async (cursor?: string | null, append = false) => {
   try {
@@ -182,14 +181,13 @@ const fetchData = async (cursor?: string | null, append = false) => {
 
       // Initialize headers if available from API
       if (response.headers && response.shownHeaders) {
-        const headersArray = convertHeadersToArray(response.headers)
-        const shownHeadersArray = convertHeadersToArray(response.shownHeaders)
-        initHeaders(headersArray, shownHeadersArray)
+        initHeaders(response.headers, response.shownHeaders)
       }
 
       // Set create permission
       if (response.actions) {
         canCreate.value = response.actions.can_create
+        canBulkDelete.value = response.actions.can_bulk_delete ?? false
       }
     }
 
@@ -209,6 +207,24 @@ const handleEdit = (item: any) => {
   router.push({ name: 'ProductsProductionCapacityEdit', params: { id: item.id } })
 }
 
+const handleSelect = (item: any, selected: boolean) => {
+  if (selected) {
+    selectedRows.value.push(item.id)
+  } else {
+    selectedRows.value = selectedRows.value.filter(id => id !== item.id)
+  }
+}
+
+const handleSelectAll = (selected: boolean) => {
+  selectedRows.value = selected ? tableItems.value.map(i => i.id) : []
+}
+
+const confirmDelete = (item: any) => {
+  itemToDelete.value = item
+  deleteMode.value = 'single'
+  showDeleteDialog.value = true
+}
+
 // Handle status change - open confirmation dialog
 const handleStatusChange = (item: any) => {
   itemToChangeStatus.value = { ...item }
@@ -224,7 +240,6 @@ const confirmStatusChange = async () => {
     const newStatus = !itemToChangeStatus.value.is_active
 
     await api.patch(`/production-capacities/${itemToChangeStatus.value.id}/change-status`, { is_active: newStatus })
-    success(`تم ${newStatus ? 'تفعيل' : 'تعطيل'} القدرة الإنتاجية بنجاح`)
     toast.success(`تم ${newStatus ? 'تفعيل' : 'تعطيل'} القدرة الإنتاجية بنجاح`)
 
     // Update local state     
@@ -309,7 +324,7 @@ onBeforeUnmount(() => {
         <ButtonWithIcon variant="flat" height="40" rounded="0"
           custom-class="font-semibold text-base border-gray-300 bg-primary-100 !text-primary-900"
           :prepend-icon="importIcon" :label="t('common.import')" />
-        
+
         <ButtonWithIcon variant="flat" height="40" rounded="0"
           custom-class="font-semibold text-base border-gray-300 bg-primary-50 !text-primary-900"
           :prepend-icon="exportIcon" :label="t('common.export')" />
@@ -323,8 +338,8 @@ onBeforeUnmount(() => {
             <v-menu v-model="showHeadersMenu" :close-on-content-click="false">
               <template v-slot:activator="{ props }">
                 <ButtonWithIcon v-bind="props" variant="outlined" rounded="4" color="gray-500" height="40"
-                  custom-class="font-semibold text-base border-gray-400"
-                  :prepend-icon="columnIcon" :label="t('common.columns')" append-icon="mdi-chevron-down" />
+                  custom-class="font-semibold text-base border-gray-400" :prepend-icon="columnIcon"
+                  :label="t('common.columns')" append-icon="mdi-chevron-down" />
               </template>
               <v-list>
                 <v-list-item v-for="header in allHeaders" :key="header.key" @click="toggleHeader(header.key)">
@@ -365,8 +380,8 @@ onBeforeUnmount(() => {
               :placeholder="t('common.name')" class="w-full sm:w-40 bg-white" />
             <div class="flex gap-2 items-center">
               <ButtonWithIcon variant="flat" color="primary-500" rounded="4" height="40"
-                custom-class="px-5 font-semibold !text-white text-sm sm:text-base"
-                :prepend-icon="searchIcon" label="ابحث الآن" @click="handleSearch" />
+                custom-class="px-5 font-semibold !text-white text-sm sm:text-base" :prepend-icon="searchIcon"
+                label="ابحث الآن" @click="handleSearch" />
               <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4" border="sm"
                 custom-class="px-5 font-semibold text-sm sm:text-base !text-primary-800 !border-primary-200"
                 prepend-icon="mdi-refresh" label="إعادة تعيين" @click="resetFilters" />
@@ -380,11 +395,12 @@ onBeforeUnmount(() => {
         </v-alert>
 
         <!-- Production Capacity Table -->
-        <DataTable :show-view="false" :headers="tableHeaders" :items="tableItems" :loading="isLoading" show-actions
-          @edit="handleEdit" :show-delete="false">
+        <DataTable :headers="tableHeaders" :items="tableItems" :loading="isLoading" :show-checkbox="canBulkDelete" show-actions @edit="handleEdit" @delete="confirmDelete" @select="handleSelect" @selectAll="handleSelectAll">
           <template #item.is_active="{ item }">
             <v-switch :model-value="item.is_active" hide-details inset density="compact" color="primary"
-              class="small-switch" @update:model-value="() => handleStatusChange(item)" />
+              class="small-switch" @update:model-value="() => handleStatusChange(item)"
+              v-if="item.actions.can_change_status" />
+            <span v-else class="text-sm text-gray-600">--</span>
           </template>
         </DataTable>
 

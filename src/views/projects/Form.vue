@@ -387,11 +387,11 @@ const locationIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none
 
                   <LanguageTabs :languages="availableLanguages" label="الوصف">
                     <template #en>
-                      <RichTextEditor v-model="descriptionEnglish" placeholder="Enter description in English"
+                      <TextareaInput v-model="descriptionEnglish" placeholder="Enter description in English"
                         min-height="120px" hide-details />
                     </template>
                     <template #ar>
-                      <RichTextEditor v-model="descriptionArabic" placeholder="ادخل الوصف بالعربية" min-height="120px"
+                      <TextareaInput v-model="descriptionArabic" placeholder="ادخل الوصف بالعربية" min-height="120px"
                         hide-details />
                     </template>
                   </LanguageTabs>

@@ -68,6 +68,9 @@ interface PriceListData {
   is_active: boolean
   is_assigned: boolean
   user_id: number
+  actions: {
+    can_sync_items: boolean
+  }
   price_list_items: Array<{
     id: number
     item_id: number
@@ -108,7 +111,7 @@ const router = useRouter()
 const api = useApi()
 const loading = ref(false)
 const saving = ref(false)
-
+const canSyncItems = ref(false)
 // Categories for filtering
 const categories = ref<ItemCategory[]>([])
 const selectedCategory = ref<number | null>(null)
@@ -175,7 +178,7 @@ const fetchPriceListItems = async (priceListId: number) => {
       { params: { material_type: 0 } }
     )
     const priceListData = response.data
-
+    canSyncItems.value = priceListData.actions.can_sync_items
     if (priceListData.price_list_items && priceListData.price_list_items.length > 0) {
       allRows.value = priceListData.price_list_items.map((itemPrice) => ({
         id: itemPrice.id,
@@ -482,7 +485,7 @@ onMounted(async () => {
         <div class="flex flex-col sm:flex-row gap-3 sm:justify-center mt-6">
           <ButtonWithIcon variant="flat" rounded="4" color="primary" height="44"
             custom-class="font-semibold text-base sm:min-w-[200px]" :prepend-icon="saveIcon" label="حفظ"
-            @click="handleSave" :loading="saving" :disabled="loading" />
+            @click="handleSave" :loading="saving" :disabled="loading" v-if="canSyncItems" />
 
           <ButtonWithIcon variant="flat" rounded="4" color="primary-50" height="44"
             custom-class="font-semibold text-base text-primary-700 sm:min-w-[200px]" label="إغلاق" @click="handleClose"

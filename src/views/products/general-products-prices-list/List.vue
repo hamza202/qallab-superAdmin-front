@@ -65,11 +65,12 @@
         </div>
 
         <!-- Price Lists Table -->
-        <DataTable :headers="tableHeaders" :items="tableItems" :loading="loading" show-actions @edit="handleEdit"
-          :show-view="false" :show-delete="false" :forceShowEdit="true">
+        <DataTable :headers="tableHeaders" :items="tableItems" :loading="loading" show-actions @edit="handleEdit">
           <template #item.is_active="{ item }">
-            <v-switch :model-value="item.is_active" hide-details inset density="compact"
-              @update:model-value="() => handleStatusChange(item)" class="small-switch" color="primary-600" />
+            <v-switch :model-value="item.is_active" hide-details inset density="compact" color="primary"
+              class="small-switch" @update:model-value="() => handleStatusChange(item)"
+              v-if="item.actions.can_change_status" />
+            <span v-else class="text-sm text-gray-600">--</span>
           </template>
         </DataTable>
 
@@ -144,6 +145,7 @@ interface PriceListsResponse {
   shownHeaders: TableHeader[];
   actions: {
     can_create: boolean;
+    can_bulk_delete?: boolean;
   };
 }
 
@@ -186,6 +188,8 @@ const importIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" 
 const tableItems = ref<PriceList[]>([])
 const allHeaders = ref<TableHeader[]>([])
 const shownHeaders = ref<TableHeader[]>([])
+const canCreate = ref(true)
+const canBulkDelete = ref(true)
 const header_table = ref('')
 
 // Computed table headers for DataTable component
@@ -307,6 +311,10 @@ const fetchPriceLists = async (append = false) => {
       tableItems.value = normalizedData
       allHeaders.value = response.headers.filter(h => h.key !== 'id' && h.key !== 'actions')
       shownHeaders.value = response.shownHeaders.filter(h => h.key !== 'id' && h.key !== 'actions')
+      if (response.actions) {
+        canCreate.value = response.actions.can_create
+        canBulkDelete.value = response.actions.can_bulk_delete ?? false
+      }
       header_table.value = response.header_table
     }
 

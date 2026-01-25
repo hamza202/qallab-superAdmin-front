@@ -52,6 +52,7 @@ interface ServicesResponse {
   shownHeaders: TableHeader[]
   actions: {
     can_create: boolean
+    can_bulk_delete?: boolean
   }
 }
 
@@ -103,6 +104,7 @@ const tableItems = ref<Service[]>([])
 const allHeaders = ref<TableHeader[]>([])
 const shownHeaders = ref<TableHeader[]>([])
 const canCreate = ref(false)
+const canBulkDelete = ref(true)
 const header_table = ref('')
 const loading = ref(false)
 const loadingMore = ref(false)
@@ -222,6 +224,7 @@ const fetchServices = async (append = false) => {
       allHeaders.value = response.headers.filter(h => h.key !== 'id' && h.key !== 'actions')
       shownHeaders.value = response.shownHeaders.filter(h => h.key !== 'id' && h.key !== 'actions')
       canCreate.value = response.actions.can_create
+      canBulkDelete.value = response.actions.can_bulk_delete ?? false
       header_table.value = response.header_table
     }
 
@@ -457,7 +460,7 @@ onBeforeUnmount(() => {
       <div class="bg-gray-50 rounded-md -mx-6">
         <div :class="hasSelected ? 'justify-between' : 'justify-end'"
           class="flex flex-wrap items-center gap-3 border-y border-y-slate-300 px-4 sm:px-6 py-3">
-          <div v-if="hasSelected"
+          <div v-if="hasSelected && canBulkDelete"
             class="flex flex-wrap items-stretch rounded overflow-hidden border border-gray-200 bg-white text-sm">
             <ButtonWithIcon variant="flat" height="40" rounded="0"
               custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
@@ -527,12 +530,14 @@ onBeforeUnmount(() => {
           </div>
         </div>
 
-        <DataTable :headers="tableHeaders" :items="tableItems" :loading="loading" show-checkbox show-actions
+        <DataTable :headers="tableHeaders" :items="tableItems" :loading="loading" :show-checkbox="canBulkDelete" show-actions
           @edit="handleEdit" @delete="confirmDelete" @select="handleSelect" @view="handleView"
           @selectAll="handleSelectAll">
           <template #item.is_active="{ item }">
-            <v-switch :model-value="item.is_active" hide-details inset density="compact" class="small-switch" color="primary-600"
-              @update:model-value="(value) => handleStatusChange(item)" />
+            <v-switch :model-value="item.is_active" hide-details inset density="compact" color="primary"
+              class="small-switch" @update:model-value="() => handleStatusChange(item)"
+              v-if="item.actions.can_change_status" />
+            <span v-else class="text-sm text-gray-600">--</span>
           </template>
         </DataTable>
 

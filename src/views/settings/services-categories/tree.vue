@@ -1071,12 +1071,12 @@ const editIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xm
                 <!-- Description with Language Tabs -->
                 <LanguageTabs :languages="availableLanguages" label="تفاصيل التصنيف" class="mb-[20px]">
                   <template #en>
-                    <RichTextEditor v-model="categoryDescriptionEn" placeholder="Enter Category Description in English"
+                    <TextareaInput v-model="categoryDescriptionEn" placeholder="Enter Category Description in English"
                       min-height="120px" :hide-details="false" :rules="[required()]"
                       :error-messages="formErrors['description.en']" @input="delete formErrors['description.en']" />
                   </template>
                   <template #ar>
-                    <RichTextEditor v-model="categoryDescriptionAr" placeholder="ادخل تفاصيل التصنيف بالعربية"
+                    <TextareaInput v-model="categoryDescriptionAr" placeholder="ادخل تفاصيل التصنيف بالعربية"
                       min-height="120px" :hide-details="false" :rules="[required()]"
                       :error-messages="formErrors['description.ar']" @input="delete formErrors['description.ar']" />
                   </template>

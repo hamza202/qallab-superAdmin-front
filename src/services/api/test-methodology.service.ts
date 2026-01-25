@@ -37,6 +37,11 @@ export interface TableHeader {
   sortable?: boolean
 }
 
+export interface Actions {
+    can_create: boolean;
+    can_bulk_delete?: boolean;
+}
+
 export interface TestMethodologyListResponse {
   status: number
   code: number
@@ -47,6 +52,7 @@ export interface TestMethodologyListResponse {
   headers?: TableHeader[]
   shownHeaders?: TableHeader[]
   header_table?: string
+  actions: Actions
 }
 
 const { get, post, delete: destroy, patch } = useApi()

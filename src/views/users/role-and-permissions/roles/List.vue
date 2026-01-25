@@ -282,12 +282,14 @@ interface ApiResponse {
     data: Role[]
     actions: {
         can_create: boolean
+        can_bulk_delete?: boolean
     }
 }
 
 // === State ===
 const roles = ref<Role[]>([])
 const canCreate = ref(false)
+const canBulkDelete = ref(true)
 const rolesLoading = ref(false)
 const statusLoadingId = ref<number | null>(null)
 
@@ -358,6 +360,7 @@ const fetchRoles = async () => {
         
         roles.value = response.data
         canCreate.value = response.actions?.can_create ?? false
+        canBulkDelete.value = response.actions?.can_bulk_delete ?? false
     } catch (err: any) {
         console.error('Error fetching roles:', err)
         errorNotification(err?.response?.data?.message || 'حدث خطأ أثناء جلب البيانات')

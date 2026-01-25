@@ -89,6 +89,7 @@ const tableItems = ref<Contractor[]>([]);
 const allHeaders = ref<TableHeader[]>([]);
 const shownHeaders = ref<TableHeader[]>([]);
 const canCreate = ref(false);
+const canBulkDelete = ref(true);
 const loading = ref(false);
 const loadingMore = ref(false);
 const header_table = ref('')
@@ -175,7 +176,8 @@ const fetchContractors = async (cursor: string | null = null, append: boolean = 
       allHeaders.value = response.headers.filter((h: TableHeader) => h.key !== 'id' && h.key !== 'actions');
       shownHeaders.value = response.shownHeaders.filter((h: TableHeader) => h.key !== 'id' && h.key !== 'actions');
       canCreate.value = response.actions.can_create;
-            header_table.value = response.header_table
+      canBulkDelete.value = response.actions.can_bulk_delete ?? false;
+      header_table.value = response.header_table
     }
 
     nextCursor.value = response.pagination?.next_cursor || null;
@@ -213,8 +215,8 @@ const confirmDelete = async (item: any) => {
 
 
 const handleStatusChange = (item: any) => {
-    itemToChangeStatus.value = { ...item }
-    showStatusChangeDialog.value = true
+  itemToChangeStatus.value = { ...item }
+  showStatusChangeDialog.value = true
 }
 
 const confirmStatusChange = async () => {
@@ -249,7 +251,7 @@ const confirmStatusChange = async () => {
 const fetchConstants = async () => {
   try {
     const response = await api.get('/contractors/constants');
-    
+
     contractorClassificationItems.value = response.data.contractor_classification?.map((item: any) => ({
       title: item.label,
       value: item.key
@@ -319,42 +321,42 @@ const handleSelectAllContractors = (checked: boolean) => {
 };
 
 const toggleHeader = async (headerKey: string) => {
-    const isCurrentlyShown = shownHeaders.value.some(h => h.key === headerKey);
+  const isCurrentlyShown = shownHeaders.value.some(h => h.key === headerKey);
 
-    if (isCurrentlyShown) {
-        shownHeaders.value = shownHeaders.value.filter(h => h.key !== headerKey);
-    } else {
-        const headerToAdd = allHeaders.value.find(h => h.key === headerKey);
-        if (headerToAdd) {
-            shownHeaders.value.push(headerToAdd);
-        }
+  if (isCurrentlyShown) {
+    shownHeaders.value = shownHeaders.value.filter(h => h.key !== headerKey);
+  } else {
+    const headerToAdd = allHeaders.value.find(h => h.key === headerKey);
+    if (headerToAdd) {
+      shownHeaders.value.push(headerToAdd);
     }
+  }
 
-    await updateHeadersOnServer();
+  await updateHeadersOnServer();
 };
 
 const updateHeadersOnServer = async () => {
-    try {
-        updatingHeaders.value = true;
-        const headerKeys = shownHeaders.value.map(h => h.key);
+  try {
+    updatingHeaders.value = true;
+    const headerKeys = shownHeaders.value.map(h => h.key);
 
-        const formData = new FormData();
-        formData.append('table', header_table.value);
-        headerKeys.forEach((header, index) => {
-            formData.append(`header[${index}]`, header);
-        });
+    const formData = new FormData();
+    formData.append('table', header_table.value);
+    headerKeys.forEach((header, index) => {
+      formData.append(`header[${index}]`, header);
+    });
 
-        await api.post('/headers', formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-            },
-        });
-    } catch (err: any) {
-        console.error('Error updating headers:', err);
-        toast.error(err?.response?.data?.message || 'Failed to update headers');
-    } finally {
-        updatingHeaders.value = false;
-    }
+    await api.post('/headers', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  } catch (err: any) {
+    console.error('Error updating headers:', err);
+    toast.error(err?.response?.data?.message || 'Failed to update headers');
+  } finally {
+    updatingHeaders.value = false;
+  }
 };
 
 const applyFilters = () => {
@@ -502,12 +504,15 @@ const toggleAdvancedFilters = () => {
         </div>
 
         <!-- Contractors Table -->
-        <DataTable :headers="tableHeaders" :items="tableItems" :loading="loading" :show-view="false" show-checkbox
+        <DataTable :headers="tableHeaders" :items="tableItems" :loading="loading" :show-checkbox="canBulkDelete"
           show-actions @edit="handleEdit" @delete="confirmDelete" @select="handleSelectContractor"
           @selectAll="handleSelectAllContractors">
           <template #item.is_active="{ item }">
-            <v-switch :model-value="item.status" hide-details inset density="compact"
-              @update:model-value="() => handleStatusChange(item)" class="small-switch" color="primary-600" />
+            <v-switch :model-value="item.status" hide-details inset density="compact" color="primary"
+              class="small-switch" @update:model-value="() => handleStatusChange(item)"
+              v-if="item.actions.can_change_status" />
+            <span v-else class="text-sm text-gray-600">--</span>
+
           </template>
           <template #item.projects="{ item }">
             <div class="flex flex-col gap-2 items-start">

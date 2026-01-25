@@ -1651,11 +1651,11 @@ const trashIcon = `<svg width="17" height="19" viewBox="0 0 17 19" fill="none" x
                     <!-- Description with Language Tabs -->
                     <LanguageTabs :languages="availableLanguages" label="الوصف" class="mb-[20px]">
                       <template #en>
-                        <RichTextEditor v-model="englishDescription" placeholder="Enter description in English"
+                        <TextareaInput v-model="englishDescription" placeholder="Enter description in English"
                           min-height="120px" :hide-details="false" />
                       </template>
                       <template #ar>
-                        <RichTextEditor v-model="arabicDescription" placeholder="ادخل الوصف بالعربية" min-height="120px"
+                        <TextareaInput v-model="arabicDescription" placeholder="ادخل الوصف بالعربية" min-height="120px"
                           :hide-details="false" />
                       </template>
                     </LanguageTabs>

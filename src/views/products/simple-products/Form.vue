@@ -1432,11 +1432,11 @@ watch(activeTab, async (newTab) => {
                     <!-- Description with Language Tabs -->
                     <LanguageTabs :languages="availableLanguages" label="الوصف" class="mb-[20px]">
                       <template #en>
-                        <RichTextEditor :rules="[required()]" v-model="englishDescription"
+                        <TextareaInput :rules="[required()]" v-model="englishDescription"
                           placeholder="Enter description in English" min-height="120px" :hide-details="false" />
                       </template>
                       <template #ar>
-                        <RichTextEditor :rules="[required()]" v-model="arabicDescription"
+                        <TextareaInput :rules="[required()]" v-model="arabicDescription"
                           placeholder="ادخل الوصف بالعربية" min-height="120px" :hide-details="false" />
                       </template>
                     </LanguageTabs>

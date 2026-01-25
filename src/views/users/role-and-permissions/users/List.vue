@@ -331,14 +331,16 @@ interface ApiResponse {
     locale: string
     message: string
     data: User[]
-    actions: {
+    actions?: {
         can_create: boolean
+        can_bulk_delete?: boolean
     }
 }
 
 // === State ===
 const users = ref<User[]>([])
 const canCreate = ref(false)
+const canBulkDelete = ref(true)
 const usersLoading = ref(false)
 const statusLoadingId = ref<number | null>(null)
 
@@ -396,6 +398,7 @@ const fetchUsers = async () => {
         
         users.value = response.data
         canCreate.value = response.actions?.can_create ?? false
+        canBulkDelete.value = response.actions?.can_bulk_delete ?? false
     } catch (err: any) {
         console.error('Error fetching users:', err)
         errorNotification(err?.response?.data?.message || 'حدث خطأ أثناء جلب البيانات')

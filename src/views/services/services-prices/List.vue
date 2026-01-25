@@ -22,12 +22,20 @@ interface ServicePriceList {
   }
   is_active: boolean
   created_at: string
+  actions: {
+    can_create: boolean
+    can_bulk_delete?: boolean
+  }
 }
 
 interface ServicePriceListsResponse {
   success: boolean
   message: string
   data: ServicePriceList[]
+  actions: {
+    can_create: boolean
+    can_bulk_delete?: boolean
+  }
 }
 
 // Services Prices Icon
@@ -77,6 +85,8 @@ const tableHeaders = [
 
 // Data
 const tableItems = ref<ServicePriceList[]>([])
+const canCreate = ref(false)
+const canBulkDelete = ref(true)
 const loading = ref(false)
 const deleteLoading = ref(false)
 
@@ -100,6 +110,8 @@ const fetchServicePriceLists = async () => {
     loading.value = true
     const response = await api.get<ServicePriceListsResponse>('/api/service-price-lists')
     tableItems.value = response.data
+    canCreate.value = response.actions.can_create
+    canBulkDelete.value = response.actions.can_bulk_delete ?? false
   } catch (err: any) {
     console.error('Error fetching service price lists:', err)
     toast.error(err?.response?.data?.message || 'فشل في جلب قوائم أسعار الخدمات')
@@ -223,7 +235,7 @@ onMounted(() => {
         </div>
 
         <!-- Services Prices Table -->
-        <DataTable :headers="tableHeaders" :items="tableItems" :loading="loading" show-checkbox show-actions
+        <DataTable :headers="tableHeaders" :items="tableItems" :loading="loading" :show-checkbox="canBulkDelete" show-actions
           @edit="handleEdit" @delete="handleDelete" @select="handleSelect" @selectAll="handleSelectAll">
           <template #item.name="{ item }">
             <span class="text-sm font-semibold text-gray-900">{{ item.name }}</span>

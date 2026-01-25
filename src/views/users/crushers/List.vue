@@ -55,6 +55,7 @@ interface CrushersResponse {
     header_table: string;
     actions: {
         can_create: boolean;
+        can_bulk_delete?: boolean;
     };
 }
 
@@ -126,6 +127,7 @@ const tableItems = ref<Crusher[]>([]);
 const allHeaders = ref<TableHeader[]>([]);
 const shownHeaders = ref<TableHeader[]>([]);
 const canCreate = ref(false);
+const canBulkDelete = ref(true);
 const loading = ref(false);
 const loadingMore = ref(false);
 const header_table = ref('')
@@ -218,6 +220,7 @@ const fetchCrushers = async (cursor?: string | null, append = false) => {
             allHeaders.value = response.headers.filter(h => h.key !== 'id' && h.key !== 'actions')
             shownHeaders.value = response.shownHeaders.filter(h => h.key !== 'id' && h.key !== 'actions')
             canCreate.value = response.actions.can_create;
+            canBulkDelete.value = response.actions.can_bulk_delete ?? false;
             header_table.value = response.header_table
         }
 
@@ -473,8 +476,7 @@ onBeforeUnmount(() => {
                 <div :class="hasSelectedCrushers ? 'justify-between' : 'justify-end'"
                     class="flex flex-wrap items-center gap-3 border-y border-y-slate-300 px-4 sm:px-6 py-3">
                     <!-- Actions when rows are selected -->
-                    <div v-if="hasSelectedCrushers"
-                        class="flex flex-wrap items-stretch rounded overflow-hidden border border-gray-200 bg-white text-sm">
+                    <div v-if="hasSelectedCrushers" class="flex flex-wrap items-stretch rounded overflow-hidden border border-gray-200 bg-white text-sm">
                         <ButtonWithIcon variant="flat" height="40" rounded="0"
                             custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
                             :prepend-icon="trash_1_icon" color="white" :label="t('common.delete')"
@@ -484,8 +486,8 @@ onBeforeUnmount(() => {
                             custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
                             :prepend-icon="trash_2_icon" color="white" :label="t('common.deleteAll')"
                             @click="handleBulkDelete" />
-                    </div>
 
+                    </div>
 
                     <!-- Main header controls -->
                     <div class="flex flex-wrap gap-3">
@@ -578,13 +580,14 @@ onBeforeUnmount(() => {
                 </div>
 
                 <!-- Crushers Table -->
-                <DataTable :headers="tableHeaders" :items="tableItems" :loading="loading" :show-view="false"
-                    show-checkbox show-actions @edit="handleEdit" @delete="confirmDelete" @select="handleSelectCrusher"
+                <DataTable :headers="tableHeaders" :items="tableItems" :loading="loading" :show-checkbox="canBulkDelete"
+                    show-actions @edit="handleEdit" @delete="confirmDelete" @select="handleSelectCrusher"
                     @selectAll="handleSelectAllCrushers">
                     <template #item.status_value="{ item }">
-                        <v-switch :model-value="item.status" hide-details inset density="compact"
-                            @update:model-value="() => handleStatusChange(item)" class="small-switch"
-                            color="primary-600" />
+                        <v-switch :model-value="item.status" hide-details inset density="compact" color="primary"
+                            class="small-switch" @update:model-value="() => handleStatusChange(item)"
+                            v-if="item.actions.can_change_status" />
+                        <span v-else class="text-sm text-gray-600">--</span>
                     </template>
                 </DataTable>
 

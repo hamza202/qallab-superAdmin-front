@@ -93,7 +93,7 @@ const fetchData = async (cursor?: string | null, append = false) => {
     const params: SampleTypeListParams = {
       per_page: perPage.value,
     };
-    
+
     if (cursor) params.cursor = cursor;
     if (filterName.value) params.name = filterName.value;
     if (filterStatus.value !== null) params.status = String(filterStatus.value);
@@ -105,14 +105,14 @@ const fetchData = async (cursor?: string | null, append = false) => {
       tableItems.value = [...tableItems.value, ...response.data];
     } else {
       tableItems.value = response.data;
-      
+
       // Initialize headers from API response
       if (response.headers && response.shownHeaders) {
         const filteredHeaders = response.headers.filter(h => h.key !== 'id' && h.key !== 'actions');
         const filteredShownHeaders = response.shownHeaders.filter(h => h.key !== 'id' && h.key !== 'actions');
         initHeaders(filteredHeaders, filteredShownHeaders);
       }
-      
+
       canCreate.value = response.actions?.can_create ?? false;
     }
 
@@ -154,7 +154,7 @@ const openDeleteDialog = (item: any) => {
 
 const confirmDelete = async () => {
   if (!itemToDelete.value) return;
-  
+
   try {
     deleteLoading.value = true;
     await sampleTypeService.delete(itemToDelete.value.id);
@@ -183,18 +183,18 @@ const handleStatusToggle = (item: any) => {
 
 const confirmStatusChange = async () => {
   if (!itemToChangeStatus.value) return;
-  
+
   try {
     statusLoading.value = true;
     const newStatus = !itemToChangeStatus.value.is_active;
     await sampleTypeService.changeStatus(itemToChangeStatus.value.id, newStatus);
-    
+
     // Update local state
     const index = tableItems.value.findIndex(i => i.id === itemToChangeStatus.value!.id);
     if (index !== -1) {
       tableItems.value[index].is_active = newStatus;
     }
-    
+
     success(newStatus ? 'تم تفعيل نوع العينة' : 'تم تعطيل نوع العينة');
     showStatusDialog.value = false;
   } catch (err: any) {
@@ -263,186 +263,95 @@ onBeforeUnmount(() => {
       <PageHeader :icon="sampleTypeIcon" title-key="أنواع العينات" description-key="تمكنك من إدارة أنواع العينات" />
 
       <div class="bg-gray-50 rounded-md -mx-6">
-        <div
-          class="flex flex-wrap items-center justify-between gap-3 border-y border-y-slate-300 px-4 sm:px-6 py-3"
-        >
+        <div class="flex flex-wrap items-center justify-between gap-3 border-y border-y-slate-300 px-4 sm:px-6 py-3">
           <h3 class="text-lg font-bold text-gray-900">جدول أنواع العينات</h3>
 
           <!-- Main header controls -->
           <div class="flex flex-wrap gap-3">
             <v-menu v-model="showColumnsMenu" :close-on-content-click="false">
               <template v-slot:activator="{ props }">
-                <ButtonWithIcon 
-                  v-bind="props"
-                  variant="outlined" 
-                  rounded="4" 
-                  color="gray-500" 
-                  height="40"
-                  custom-class="font-semibold text-base border-gray-400"
-                  :prepend-icon="columnIcon" 
-                  :label="t('common.columns')" 
-                  append-icon="mdi-chevron-down" 
-                />
+                <ButtonWithIcon v-bind="props" variant="outlined" rounded="4" color="gray-500" height="40"
+                  custom-class="font-semibold text-base border-gray-400" :prepend-icon="columnIcon"
+                  :label="t('common.columns')" append-icon="mdi-chevron-down" />
               </template>
               <v-card min-width="200">
                 <v-list>
-                  <v-list-item
-                    v-for="header in allColumnHeaders"
-                    :key="header.key"
-                    @click="toggleHeader(header.key)"
-                  >
+                  <v-list-item v-for="header in allColumnHeaders" :key="header.key" @click="toggleHeader(header.key)">
                     <template v-slot:prepend>
-                      <v-checkbox-btn
-                        :model-value="headerCheckStates[header.key]"
-                        @click.stop="toggleHeader(header.key)"
-                      />
+                      <v-checkbox-btn :model-value="headerCheckStates[header.key]"
+                        @click.stop="toggleHeader(header.key)" />
                     </template>
                     <v-list-item-title>{{ header.title }}</v-list-item-title>
                   </v-list-item>
                 </v-list>
               </v-card>
             </v-menu>
-            
-            <ButtonWithIcon 
-              variant="flat" 
-              color="primary-500" 
-              height="40" 
-              rounded="4"
-              custom-class="px-7 font-semibold text-base text-white border !border-primary-200"
-              :prepend-icon="searchIcon" 
-              :label="t('common.advancedSearch')" 
-              @click="toggleAdvancedFilters" 
-            />
 
-            <ButtonWithIcon 
-              v-if="canCreate"
-              variant="flat" 
-              color="primary-100" 
-              height="40" 
-              rounded="4"
+            <ButtonWithIcon variant="flat" color="primary-500" height="40" rounded="4"
+              custom-class="px-7 font-semibold text-base text-white border !border-primary-200"
+              :prepend-icon="searchIcon" :label="t('common.advancedSearch')" @click="toggleAdvancedFilters" />
+
+            <ButtonWithIcon v-if="canCreate" variant="flat" color="primary-100" height="40" rounded="4"
               custom-class="px-7 font-semibold text-base !text-primary-800 border !border-primary-200"
-              :prepend-icon="plusIcon" 
-              :label="t('common.add')" 
-              @click="handleCreate" 
-            />
+              :prepend-icon="plusIcon" :label="t('common.add')" @click="handleCreate" />
           </div>
         </div>
 
         <!-- Advanced filters row -->
-        <div
-          v-if="showAdvancedFilters"
-          class="border-y border-y-primary-100 bg-primary-50 px-4 sm:px-6 py-3 flex flex-col gap-3 sm:gap-2"
-        >
+        <div v-if="showAdvancedFilters"
+          class="border-y border-y-primary-100 bg-primary-50 px-4 sm:px-6 py-3 flex flex-col gap-3 sm:gap-2">
           <div class="flex flex-wrap gap-3 flex-1 justify-between">
             <div class="flex gap-3 flex-1">
-              <TextInput
-                v-model="filterName"
-                density="comfortable"
-                variant="outlined"
-                hide-details
-                :placeholder="t('common.name')"
-                class="w-full sm:w-60 bg-white"
-              />
-              <SelectInput
-                v-model="filterStatus"
-                :items="[
-                  { title: t('common.active'), value: 1 },
-                  { title: t('common.inactive'), value: 0 }
-                ]"
-                density="comfortable"
-                variant="outlined"
-                hide-details
-                :placeholder="t('common.status')"
-                class="w-full sm:w-40 bg-white"
-              />
+              <TextInput v-model="filterName" density="comfortable" variant="outlined" hide-details
+                :placeholder="t('common.name')" class="w-full sm:w-60 bg-white" />
+              <SelectInput v-model="filterStatus" :items="[
+                { title: t('common.active'), value: 1 },
+                { title: t('common.inactive'), value: 0 }
+              ]" density="comfortable" variant="outlined" hide-details :placeholder="t('common.status')"
+                class="w-full sm:w-40 bg-white" />
             </div>
             <div class="flex gap-2 items-center">
-              <ButtonWithIcon 
-                variant="flat" 
-                color="primary-500" 
-                rounded="4" 
-                height="40"
-                custom-class="px-5 font-semibold !text-white text-sm sm:text-base"
-                :prepend-icon="searchIcon" 
-                :label="t('common.search')"
-                @click="applyFilters" 
-              />
-              <ButtonWithIcon 
-                variant="flat" 
-                color="primary-100" 
-                height="40" 
-                rounded="4" 
-                border="sm"
+              <ButtonWithIcon variant="flat" color="primary-500" rounded="4" height="40"
+                custom-class="px-5 font-semibold !text-white text-sm sm:text-base" :prepend-icon="searchIcon"
+                :label="t('common.search')" @click="applyFilters" />
+              <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4" border="sm"
                 custom-class="px-5 font-semibold text-sm sm:text-base !text-primary-800 !border-primary-200"
-                prepend-icon="mdi-refresh" 
-                :label="t('common.reset')"
-                @click="resetFilters" 
-              />
+                prepend-icon="mdi-refresh" :label="t('common.reset')" @click="resetFilters" />
             </div>
           </div>
         </div>
 
         <!-- Data Table -->
-        <DataTable
-          :headers="tableHeaders"
-          :items="tableItems"
-          :loading="loading"
-          :show-view="false"
-          :confirm-delete="false"
-          show-actions
-          @edit="handleEdit"
-          @delete="openDeleteDialog"
-        >
+        <DataTable :headers="tableHeaders" :items="tableItems" :loading="loading" :show-view="false"
+          :confirm-delete="false" show-actions @edit="handleEdit" @delete="openDeleteDialog">
           <!-- Status column with toggle -->
           <template #item.is_active="{ item }">
-            <v-switch 
-              :model-value="item.is_active" 
-              hide-details 
-              inset 
-              density="compact" 
-              class="small-switch" color="primary-600"
-              :disabled="!item.actions?.can_change_status"
-              @update:model-value="() => handleStatusToggle(item)" 
-            />
+
+            <v-switch :model-value="item.is_active" hide-details inset density="compact" color="primary"
+              class="small-switch" @update:model-value="() => handleStatusToggle(item)"
+              v-if="item.actions.can_change_status" />
+            <span v-else class="text-sm text-gray-600">--</span>
+
           </template>
 
 
         </DataTable>
 
         <!-- Loading more indicator -->
-        <div 
-          v-if="hasMoreData" 
-          ref="loadMoreTrigger" 
-          class="flex justify-center py-4"
-        >
-          <v-progress-circular
-            v-if="loadingMore"
-            indeterminate
-            color="primary"
-            size="32"
-          />
+        <div v-if="hasMoreData" ref="loadMoreTrigger" class="flex justify-center py-4">
+          <v-progress-circular v-if="loadingMore" indeterminate color="primary" size="32" />
         </div>
       </div>
     </div>
 
     <!-- Delete Confirmation Dialog -->
-    <DeleteConfirmDialog
-      v-model="showDeleteDialog"
-      :loading="deleteLoading"
-      :item-name="itemToDelete?.name"
-      @confirm="confirmDelete"
-      @cancel="showDeleteDialog = false"
-    />
+    <DeleteConfirmDialog v-model="showDeleteDialog" :loading="deleteLoading" :item-name="itemToDelete?.name"
+      @confirm="confirmDelete" @cancel="showDeleteDialog = false" />
 
     <!-- Status Change Confirmation Dialog -->
-    <StatusChangeDialog
-      v-model="showStatusDialog"
-      :loading="statusLoading"
-      :item-name="itemToChangeStatus?.name"
-      :current-status="itemToChangeStatus?.is_active"
-      @confirm="confirmStatusChange"
-      @cancel="showStatusDialog = false"
-    />
+    <StatusChangeDialog v-model="showStatusDialog" :loading="statusLoading" :item-name="itemToChangeStatus?.name"
+      :current-status="itemToChangeStatus?.is_active" @confirm="confirmStatusChange"
+      @cancel="showStatusDialog = false" />
   </default-layout>
 </template>
 

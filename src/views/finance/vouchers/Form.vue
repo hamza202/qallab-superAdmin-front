@@ -230,11 +230,11 @@ const saveIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xm
 
                         <LanguageTabs :languages="availableLanguages" label="وصف السند" class="md:col-span-2">
                             <template #en>
-                                <RichTextEditor v-model="formData.description"
+                                <TextareaInput v-model="formData.description"
                                     placeholder="Enter description in English" min-height="120px" hide-details />
                             </template>
                             <template #ar>
-                                <RichTextEditor v-model="formData.description" placeholder="ادخل الوصف بالعربية"
+                                <TextareaInput v-model="formData.description" placeholder="ادخل الوصف بالعربية"
                                     min-height="120px" hide-details />
                             </template>
                         </LanguageTabs>

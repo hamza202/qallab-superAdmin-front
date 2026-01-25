@@ -589,12 +589,12 @@ const saveIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xm
                 <!-- Description with Language Tabs -->
                 <LanguageTabs :languages="availableLanguages" label="تفاصيل التصنيف" class="mb-[20px]">
                   <template #en>
-                    <RichTextEditor :rules="[required()]" v-model="categoryDescriptionEn" placeholder="Enter Category Description in English"
+                    <TextareaInput :rules="[required()]" v-model="categoryDescriptionEn" placeholder="Enter Category Description in English"
                       min-height="120px" :hide-details="false"
                       :error-messages="formErrors['description.en']" @input="delete formErrors['description.en']" />
                   </template>
                   <template #ar>
-                    <RichTextEditor :rules="[required()]" v-model="categoryDescriptionAr" placeholder="ادخل تفاصيل التصنيف بالعربية"
+                    <TextareaInput :rules="[required()]" v-model="categoryDescriptionAr" placeholder="ادخل تفاصيل التصنيف بالعربية"
                       min-height="120px" :hide-details="false"
                       :error-messages="formErrors['description.ar']" @input="delete formErrors['description.ar']" />
                   </template>

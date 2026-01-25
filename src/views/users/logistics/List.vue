@@ -54,6 +54,7 @@ interface LogisticsResponse {
     header_table: string;
     actions: {
         can_create: boolean;
+        can_bulk_delete?: boolean;
     };
 }
 
@@ -122,6 +123,7 @@ const tableItems = ref<Logistic[]>([]);
 const allHeaders = ref<TableHeader[]>([]);
 const shownHeaders = ref<TableHeader[]>([]);
 const canCreate = ref(false);
+const canBulkDelete = ref(true);
 const loading = ref(false);
 const loadingMore = ref(false);
 const header_table = ref('')
@@ -214,6 +216,7 @@ const fetchLogistics = async (cursor?: string | null, append = false) => {
             allHeaders.value = response.headers.filter(h => h.key !== 'id' && h.key !== 'actions')
             shownHeaders.value = response.shownHeaders.filter(h => h.key !== 'id' && h.key !== 'actions')
             canCreate.value = response.actions.can_create;
+            canBulkDelete.value = response.actions.can_bulk_delete ?? false;
             header_table.value = response.header_table
         }
 
@@ -460,8 +463,8 @@ onBeforeUnmount(() => {
                     custom-class="font-semibold text-base border-gray-300 bg-primary-100 !text-primary-900"
                     :prepend-icon="importIcon" :label="t('common.import')" />
 
-                <ButtonWithIcon variant="flat" height="40" rounded="0"
-                    custom-class="font-semibold text-base border-gray-300 bg-primary-50 !text-primary-900"
+                <ButtonWithIcon variant="flat" color="primary-500" height="40" rounded="0"
+                    custom-class="font-semibold text-base !text-white border !border-primary-200"
                     :prepend-icon="exportIcon" :label="t('common.export')" />
             </div>
 
@@ -574,13 +577,15 @@ onBeforeUnmount(() => {
                 </div>
 
                 <!-- Logistics Table -->
-                <DataTable :headers="tableHeaders" :items="tableItems" :loading="loading" :show-view="false"
-                    show-checkbox show-actions @edit="handleEdit" @delete="confirmDelete" @select="handleSelectLogistic"
+                <DataTable :headers="tableHeaders" :items="tableItems" :loading="loading" :show-checkbox="canBulkDelete"
+                    show-actions @edit="handleEdit" @delete="confirmDelete" @select="handleSelectLogistic"
                     @selectAll="handleSelectAllLogistics">
                     <template #item.is_active="{ item }">
-                        <v-switch :model-value="item.is_active" hide-details inset density="compact"
-                            @update:model-value="() => handleStatusChange(item)" class="small-switch"
-                            color="primary-600" />
+                        <v-switch :model-value="item.is_active" hide-details inset density="compact" color="primary"
+                            class="small-switch" @update:model-value="() => handleStatusChange(item)"
+                            v-if="item.actions.can_change_status" />
+                        <span v-else class="text-sm text-gray-600">--</span>
+
                     </template>
                     <template #item.material_types="{ item }">
                         {{ item?.material_types?.join(', ') || '--' }}

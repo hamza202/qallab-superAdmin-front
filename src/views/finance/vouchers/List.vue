@@ -58,6 +58,7 @@ interface VouchersResponse {
     shownHeaders: TableHeader[];
     actions: {
         can_create: boolean;
+        can_bulk_delete?: boolean;
     };
 }
 
@@ -120,6 +121,7 @@ const tableItems = ref<Voucher[]>([]);
 const allHeaders = ref<TableHeader[]>([]);
 const shownHeaders = ref<TableHeader[]>([]);
 const canCreate = ref(false);
+const canBulkDelete = ref(true);
 const loading = ref(false);
 const loadingMore = ref(false);
 
@@ -220,6 +222,7 @@ const fetchVouchers = async (cursor?: string | null, append = false) => {
             allHeaders.value = response.headers;
             shownHeaders.value = response.shownHeaders;
             canCreate.value = response.actions.can_create;
+            canBulkDelete.value = response.actions.can_bulk_delete ?? false;
         }
 
         nextCursor.value = response.pagination.next_cursor;
@@ -513,7 +516,7 @@ onBeforeUnmount(() => {
                 </div>
 
                 <!-- Vouchers Table -->
-                <DataTable :headers="tableHeaders" :items="tableItems" :loading="loading" show-checkbox show-actions
+                <DataTable :headers="tableHeaders" :items="tableItems" :loading="loading" :show-checkbox="canBulkDelete" show-actions
                     @edit="handleEdit" @delete="handleDelete" @view="handleView" @select="handleSelectVoucher"
                     @selectAll="handleSelectAllVouchers">
                 </DataTable>

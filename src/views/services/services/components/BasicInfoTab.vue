@@ -128,11 +128,11 @@ watch(() => formData.value.is_taxable, (isTaxable) => {
       <div class="md:col-span-2 md:row-span-2">
         <LanguageTabs :languages="availableLanguages" label="الوصف">
           <template #en>
-            <RichTextEditor v-model="formData.description_en" placeholder="Enter description in English"
+            <TextareaInput v-model="formData.description_en" placeholder="Enter description in English"
               min-height="120px" hide-details @update:model-value="updateFormData" />
           </template>
           <template #ar>
-            <RichTextEditor v-model="formData.description_ar" placeholder="ادخل الوصف بالعربية" min-height="120px"
+            <TextareaInput v-model="formData.description_ar" placeholder="ادخل الوصف بالعربية" min-height="120px"
               hide-details @update:model-value="updateFormData" />
           </template>
         </LanguageTabs>
