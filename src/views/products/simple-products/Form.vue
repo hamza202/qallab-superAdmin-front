@@ -1424,7 +1424,7 @@ watch(activeTab, async (newTab) => {
                       </div>
 
                       <div>
-                        <TextInput type="number" :rules="[required()]" v-model="minQuantity" label="حد أدنى للكمية"
+                        <TextInput type="number" :rules="[required(), numeric(), positive()]" v-model="minQuantity" label="حد أدنى للكمية"
                           placeholder="أدخل الحد الأدنى" :hide-details="false" />
                       </div>
                     </div>

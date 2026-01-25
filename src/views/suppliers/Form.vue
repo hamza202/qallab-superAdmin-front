@@ -730,8 +730,8 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
                           density="compact" :input-props="{ class: 'min-w-[150px]' }" />
                       </td>
                       <td class="py-3 px-4">
-                        <TextInput v-model="contact.email" placeholder="example@gmail.com" :hide-details="true"
-                          density="compact" :input-props="{ class: 'min-w-[150px]' }" />
+                        <TextInput v-model="contact.email" placeholder="example@gmail.com" dir="ltr" :hide-details="true"
+                          density="compact" :input-props="{ class: 'min-w-[180px]' }" />
                       </td>
                       <td class="py-3 px-4">
                         <TelInput v-model="contact.telephone" :hide-details="true" density="compact"

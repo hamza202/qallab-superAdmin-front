@@ -1642,7 +1642,7 @@ const trashIcon = `<svg width="17" height="19" viewBox="0 0 17 19" fill="none" x
                       </div>
 
                       <div>
-                        <TextInput type="number" :rules="[required()]" v-model="minQuantity" label="حد أدنى للكمية"
+                        <TextInput type="number" :rules="[required(),numeric(), positive()]" v-model="minQuantity" label="حد أدنى للكمية"
                           placeholder="أدخل الحد الأدنى" :hide-details="false" />
                       </div>
 
