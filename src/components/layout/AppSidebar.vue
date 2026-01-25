@@ -356,13 +356,8 @@
                             <ul class="space-y-2 text-slate-100">
                                 <li class="relative">
                                     <router-link to="/users/list"
-                                        :class="[isMenuItemActive('/users/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
-                                        المستخدمين </router-link>
-                                </li>
-                                <li class="relative">
-                                    <router-link to="/users/roles"
-                                        :class="[isMenuItemActive('/users/roles') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">الأدوار
-                                        والصلاحيات</router-link>
+                                        :class="[(isMenuItemActive('/users/list') || isMenuItemActive('/roles/list')) ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        المستخدمين والأدوار </router-link>
                                 </li>
                                 <li class="relative">
                                     <router-link to="/crushers/list"

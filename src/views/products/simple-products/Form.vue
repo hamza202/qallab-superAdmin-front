@@ -1404,7 +1404,6 @@ watch(activeTab, async (newTab) => {
                           required('arabicNameRequired'),
                           minLength(2),
                           maxLength(100),
-                          arabicOnly(),
                         ]" :hide-details="false" />
                       </template>
                     </LanguageTabs>
@@ -1555,16 +1554,16 @@ watch(activeTab, async (newTab) => {
               سمات/خصائص المنتج المتقدمة
             </h2>
 
-            <div class="flex flex-wrap gap-8">
-              <CheckboxInput v-model="isManufacturingProduct" label="منتج تصنيع" color="primary" />
-              <CheckboxInput v-model="sellNegative" label="البيع بالسالب" color="primary" />
-              <CheckboxInput v-model="isAvailableForRent" label="قابل للإيجار" color="primary" />
-              <CheckboxInput v-model="isAvailableForReturn" label="قابل للمقايضة" color="primary" />
-              <CheckboxInput v-model="isAvailableForRefund" label="قابل للارجاع" color="primary" />
-              <CheckboxInput v-model="isAvailableForOffset" label="قابل للمقاصة" color="primary" />
-              <CheckboxInput v-model="isAvailableForSelling" label="متاح للبيع" color="primary" />
-              <CheckboxInput v-model="isAvailableForBuying" label="متاح للشراء" color="primary" />
-              <CheckboxInput v-model="isAvailableForPurchase" label="متاح للمشاريع" color="primary" />
+            <div class="flex flex-wrap gap-8 gap-y-2">
+              <CheckboxInput v-model="isManufacturingProduct" label="منتج تصنيع" color="primary" hide-details/>
+              <CheckboxInput v-model="sellNegative" label="البيع بالسالب" color="primary" hide-details/>
+              <CheckboxInput v-model="isAvailableForRent" label="قابل للإيجار" color="primary" hide-details/>
+              <CheckboxInput v-model="isAvailableForReturn" label="قابل للمقايضة" color="primary" hide-details/>
+              <CheckboxInput v-model="isAvailableForRefund" label="قابل للارجاع" color="primary" hide-details/>
+              <CheckboxInput v-model="isAvailableForOffset" label="قابل للمقاصة" color="primary" hide-details/>
+              <CheckboxInput v-model="isAvailableForSelling" label="متاح للبيع" color="primary" hide-details/>
+              <CheckboxInput v-model="isAvailableForBuying" label="متاح للشراء" color="primary" hide-details/>
+              <CheckboxInput v-model="isAvailableForPurchase" label="متاح للمشاريع" color="primary" hide-details/>
             </div>
           </div>
           <!-- Action Buttons for Step 3 -->

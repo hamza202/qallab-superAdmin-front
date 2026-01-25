@@ -173,7 +173,6 @@ const MaterialTypeItems = ref<Array<{ title: string; value: string | number }>>(
 
 // Product Variants Data
 const subProductsGenerated = ref(false);
-const editingRowId = ref<number | null>(null);
 
 // Generate sub products - Logic moved to dynamic generation above
 
@@ -187,16 +186,6 @@ const getCategoryTitle = computed(() => {
   const selectedCategory = categoryItems.value.find((item) => item.value === category.value);
   return selectedCategory?.title || "منتج";
 });
-
-// Start editing a row
-const startEditingRow = (item: any) => {
-  editingRowId.value = item.id;
-};
-
-// Save editing row
-const saveEditingRow = () => {
-  editingRowId.value = null;
-};
 
 // Delete sub product row
 const deleteSubProductRow = (item: any) => {
@@ -1476,9 +1465,7 @@ const trashIcon = `<svg width="17" height="19" viewBox="0 0 17 19" fill="none" x
 <path d="M11.6666 4.16668V3.50001C11.6666 2.56659 11.6666 2.09988 11.4849 1.74336C11.3251 1.42976 11.0702 1.17479 10.7566 1.015C10.4 0.833344 9.93334 0.833344 8.99992 0.833344H7.66658C6.73316 0.833344 6.26645 0.833344 5.90993 1.015C5.59633 1.17479 5.34136 1.42976 5.18157 1.74336C4.99992 2.09988 4.99992 2.56659 4.99992 3.50001V4.16668M6.66659 8.75001V12.9167M9.99992 8.75001V12.9167M0.833252 4.16668H15.8333M14.1666 4.16668V13.5C14.1666 14.9001 14.1666 15.6002 13.8941 16.135C13.6544 16.6054 13.272 16.9878 12.8016 17.2275C12.2668 17.5 11.5667 17.5 10.1666 17.5H6.49992C5.09979 17.5 4.39972 17.5 3.86494 17.2275C3.39454 16.9878 3.01209 16.6054 2.7724 16.135C2.49992 15.6002 2.49992 14.9001 2.49992 13.5V4.16668" stroke="#D92D20" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`;
 
-const pencilIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M1.14662 14.1201C1.18491 13.7755 1.20405 13.6032 1.25618 13.4422C1.30243 13.2993 1.36778 13.1633 1.45045 13.038C1.54363 12.8967 1.66621 12.7741 1.91136 12.5289L12.9166 1.5237C13.8371 0.603225 15.3295 0.603226 16.2499 1.5237C17.1704 2.44417 17.1704 3.93656 16.2499 4.85703L5.24469 15.8623C4.99954 16.1074 4.87696 16.23 4.73566 16.3232C4.61029 16.4058 4.47433 16.4712 4.33146 16.5174C4.17042 16.5696 3.99813 16.5887 3.65356 16.627L0.833252 16.9404L1.14662 14.1201Z" stroke="#1570EF" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>`;
+
 
 // Icons moved to @/components/icons/productIcons.ts
 </script>
@@ -1625,12 +1612,16 @@ const pencilIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" 
                         ]" :hide-details="false" />
                       </template>
                       <template #ar>
-                        <TextInput v-model="arabicName" placeholder="ادخل الاسم بالعربية" :rules="[
-                          required('arabicNameRequired'),
-                          minLength(2),
-                          maxLength(100),
-                          arabicOnly(),
-                        ]" :hide-details="true" />
+                        <TextInput
+                          v-model="arabicName"
+                          placeholder="ادخل الاسم بالعربية"
+                          :rules="[
+                            required('arabicNameRequired'),
+                            minLength(2),
+                            maxLength(100),
+                          ]"
+                          :hide-details="true"
+                        />
                       </template>
                     </LanguageTabs>
 
@@ -1740,44 +1731,26 @@ const pencilIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" 
                         <td class="px-6 py-4 text-right text-sm font-medium text-gray-600">{{ item.name }}</td>
                         <td class="px-6 py-4 text-center text-sm font-medium text-gray-600">{{ item.sku }}</td>
                         <td class="px-2 py-4 text-center">
-                          <template v-if="editingRowId === item.id">
-                            <input v-model="item.salePrice" type="number"
-                              class="w-[110px] px-3 py-2 text-center text-sm border-2 border-solid bg-white border-primary-400 rounded-lg focus:outline-none focus:border-primary-500"
-                              placeholder="0" />
-                          </template>
-                          <template v-else>
-                            <span class="text-sm font-medium text-gray-600">
-                              {{ item.salePrice ? item.salePrice + ' ريال' : '-' }}
-                            </span>
-                          </template>
+                          <input
+                            v-model="item.salePrice"
+                            type="number"
+                            class="w-[110px] px-3 py-2 text-center text-sm border-2 border-solid bg-white border-primary-400 rounded-lg focus:outline-none focus:border-primary-500"
+                            placeholder="0"
+                          />
                         </td>
                         <td class="px-2 py-4 text-center">
-                          <template v-if="editingRowId === item.id">
-                            <input v-model="item.purchasePrice" type="number"
-                              class="w-[110px] px-3 py-2 text-center text-sm border-2 border-solid bg-white border-primary-400 rounded-lg focus:outline-none focus:border-primary-500"
-                              placeholder="0" />
-                          </template>
-                          <template v-else>
-                            <span class="text-sm font-medium text-gray-600">
-                              {{ item.purchasePrice ? item.purchasePrice + ' ريال' : '-' }}
-                            </span>
-                          </template>
+                          <input
+                            v-model="item.purchasePrice"
+                            type="number"
+                            class="w-[110px] px-3 py-2 text-center text-sm border-2 border-solid bg-white border-primary-400 rounded-lg focus:outline-none focus:border-primary-500"
+                            placeholder="0"
+                          />
                         </td>
                         <td class="px-6 py-4 text-center">
                           <div class="flex items-center justify-center gap-1">
-                            <template v-if="editingRowId === item.id">
-                              <v-btn icon color="primary" size="small" class="!px-4 !w-auto" @click="saveEditingRow">
-                                تعديل
-                              </v-btn>
-                            </template>
-                            <template v-else>
-                              <v-btn icon variant="text" color="primary" size="small" @click="startEditingRow(item)">
-                                <span v-html="pencilIcon"></span>
-                              </v-btn>
-                              <v-btn icon variant="text" color="error" size="small" @click="deleteSubProductRow(item)">
-                                <span v-html="trashIcon"></span>
-                              </v-btn>
-                            </template>
+                            <v-btn icon variant="text" color="error" size="small" @click="deleteSubProductRow(item)">
+                              <span v-html="trashIcon"></span>
+                            </v-btn>
                           </div>
                         </td>
                       </tr>
@@ -1890,16 +1863,16 @@ const pencilIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" 
               سمات/خصائص المنتج المتقدمة
             </h2>
 
-            <div class="flex flex-wrap gap-8">
-              <CheckboxInput v-model="isManufacturingProduct" label="منتج تصنيع" color="primary" />
-              <CheckboxInput v-model="sellNegative" label="البيع بالسالب" color="primary" />
-              <CheckboxInput v-model="isAvailableForRent" label="قابل للإيجار" color="primary" />
-              <CheckboxInput v-model="isAvailableForReturn" label="قابل للمقايضة" color="primary" />
-              <CheckboxInput v-model="isAvailableForRefund" label="قابل للارجاع" color="primary" />
-              <CheckboxInput v-model="isAvailableForOffset" label="قابل للمقاصة" color="primary" />
-              <CheckboxInput v-model="isAvailableForSelling" label="متاح للبيع" color="primary" />
-              <CheckboxInput v-model="isAvailableForBuying" label="متاح للشراء" color="primary" />
-              <CheckboxInput v-model="isAvailableForPurchase" label="متاح للمشاريع" color="primary" />
+            <div class="flex flex-wrap gap-8 gap-y-2">
+              <CheckboxInput v-model="isManufacturingProduct" label="منتج تصنيع" color="primary" hide-details/>
+              <CheckboxInput v-model="sellNegative" label="البيع بالسالب" color="primary" hide-details/>
+              <CheckboxInput v-model="isAvailableForRent" label="قابل للإيجار" color="primary" hide-details/>
+              <CheckboxInput v-model="isAvailableForReturn" label="قابل للمقايضة" color="primary" hide-details/>
+              <CheckboxInput v-model="isAvailableForRefund" label="قابل للارجاع" color="primary" hide-details/>
+              <CheckboxInput v-model="isAvailableForOffset" label="قابل للمقاصة" color="primary" hide-details/>
+              <CheckboxInput v-model="isAvailableForSelling" label="متاح للبيع" color="primary" hide-details/>
+              <CheckboxInput v-model="isAvailableForBuying" label="متاح للشراء" color="primary" hide-details/>
+              <CheckboxInput v-model="isAvailableForPurchase" label="متاح للمشاريع" color="primary" hide-details/>
             </div>
           </div>
           <!-- Action Buttons for Step 3 -->

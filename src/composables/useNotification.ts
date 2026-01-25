@@ -1,4 +1,5 @@
 import { ref } from 'vue';
+import { toast, type ToastOptions } from 'vue3-toastify';
 
 export interface Notification {
   show: boolean;
@@ -26,6 +27,29 @@ export function useNotification() {
       type,
       timeout,
     };
+
+    // Use vue3-toastify for actual display
+    const toastOptions: ToastOptions = {
+      autoClose: timeout,
+      position: 'top-left',
+      rtl: true,
+    };
+
+    switch (type) {
+      case 'success':
+        toast.success(message, toastOptions);
+        break;
+      case 'error':
+        toast.error(message, toastOptions);
+        break;
+      case 'warning':
+        toast.warning(message, toastOptions);
+        break;
+      case 'info':
+      default:
+        toast.info(message, toastOptions);
+        break;
+    }
 
     if (timeout > 0) {
       setTimeout(() => {
@@ -66,3 +90,4 @@ export function useNotification() {
 }
 
 export default useNotification;
+

@@ -16,8 +16,6 @@
                     <router-link to="/users/list" class="text-gray-600 hover:text-primary-600">
                         المستخدمين والأدوار
                     </router-link>
-                    <!-- <span class="text-lg text-gray-300">/</span> -->
-                    <!-- <span class="text-primary-700 font-medium bg-primary-50 px-2 py-1 rounded-md">dd</span> -->
                 </div>
 
                 <!-- Page Header -->
@@ -37,11 +35,11 @@
                 <div
                     class="flex lg:items-center lg:justify-between py-4 border-b border-gray-200 flex-col lg:flex-row gap-3 px-6">
                     <div class="flex gap-2 overflow-y-auto">
-                        <ButtonWithIcon to="/users" variant="flat" size="large" label="المستخدمين" color="primary-500"
-                            :rounded="'md'" :prepend-icon="usersIcon_1" custom-class="text-white">
+                        <ButtonWithIcon to="/users/list" variant="flat" size="large" label="المستخدمين" color="white"
+                            :rounded="'md'" :prepend-icon="usersIcon_1" custom-class="!text-gray-400">
                         </ButtonWithIcon>
-                        <ButtonWithIcon to="/roles" variant="flat" size="large" label="الأدوار" color="white"
-                            :rounded="'md'" :prepend-icon="checksIcon" custom-class="!text-gray-400">
+                        <ButtonWithIcon to="/roles/list" variant="flat" size="large" label="الأدوار" color="primary-500"
+                            :rounded="'md'" :prepend-icon="checksIcon" custom-class="text-white">
                         </ButtonWithIcon>
                     </div>
                 </div>
@@ -54,7 +52,7 @@
                                 <!-- Right Side: Donut Chart -->
                                 <div class="md:col-span-2">
                                     <div class="d-flex flex-column bg-gray-50 rounded-3xl h-100 p-5">
-                                        <h3 class="text-lg font-bold text-gray-900 mb-4">المستخدمين الفعّالين :
+                                        <h3 class="text-lg font-bold text-gray-900 mb-4">الأدوار الفعّالة :
                                         </h3>
                                         <v-divider length="250" class="mb-5"></v-divider>
                                         <div class="position-relative mb-4 d-flex justify-center flex-1 flex-wrap gap-3">
@@ -74,11 +72,11 @@
                                                 <div class="d-flex gap-5 align-center justify-center">
                                                     <div class="d-flex align-center gap-2">
                                                         <div class="rounded-md w-[16px] h-[16px] bg-primary-600"></div>
-                                                        <span class="font-bold text-gray-900 text-base">300</span>
+                                                        <span class="font-bold text-gray-900 text-base">{{ activeRolesCount }}</span>
                                                     </div>
                                                     <div class="d-flex align-center gap-2">
                                                         <div class="rounded-md w-[16px] h-[16px] bg-primary-100"></div>
-                                                        <span class="font-bold text-gray-900 text-base">156</span>
+                                                        <span class="font-bold text-gray-900 text-base">{{ inactiveRolesCount }}</span>
                                                     </div>
                                                 </div>
 
@@ -86,10 +84,10 @@
                                         </div>
                                     </div>
                                 </div>
-                                <!-- Left Side: User Roles -->
+                                <!-- Left Side: Role Stats -->
                                 <div class="md:col-span-3">
                                     <div class="bg-gray-50 !rounded-3xl p-5">
-                                        <h3 class="text-lg font-bold text-gray-900 mb-4">المستخدمين والأدوار :
+                                        <h3 class="text-lg font-bold text-gray-900 mb-4">الأدوار والصلاحيات :
                                         </h3>
                                         <v-divider length="250" class="mb-5"></v-divider>
                                         <div class="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-20">
@@ -134,13 +132,14 @@
                                                     </div>
                                                     <span class="text-base font-bold text-gray-900">12</span>
                                                 </div>
+                                            </div>
+                                            <div class="space-y-4">
                                                 <div class="d-flex align-center justify-space-between">
                                                     <div class="d-flex align-center gap-3">
                                                         <v-avatar color="#1570EF" size="42">
                                                             <span v-html="refreshIcon"></span>
                                                         </v-avatar>
-                                                        <span class="text-body-1 font-semibold text-gray-900">المقاصة
-                                                            والمقايضة</span>
+                                                        <span class="text-body-1 font-semibold text-gray-900">المقاصة</span>
                                                     </div>
                                                     <span class="text-base font-bold text-gray-900">65</span>
                                                 </div>
@@ -150,21 +149,9 @@
                                                             <span v-html="walletIcon"></span>
                                                         </v-avatar>
                                                         <span
-                                                            class="text-body-1 font-semibold text-gray-900">المالية</span>
+                                                            class="text-body-1 font-semibold text-gray-900">التمويل</span>
                                                     </div>
                                                     <span class="text-base font-bold text-gray-900">21</span>
-                                                </div>
-                                            </div>
-                                            <div class="space-y-4">
-                                                <div class="d-flex align-center justify-space-between">
-                                                    <div class="d-flex align-center gap-3">
-                                                        <v-avatar color="#697586" size="42">
-                                                            <span v-html="calculatorIcon"></span>
-                                                        </v-avatar>
-                                                        <span
-                                                            class="text-body-1 font-semibold text-gray-900">المحاسبة</span>
-                                                    </div>
-                                                    <span class="text-base font-bold text-gray-900">07</span>
                                                 </div>
                                                 <div class="d-flex align-center justify-space-between">
                                                     <div class="d-flex align-center gap-3">
@@ -178,16 +165,6 @@
                                                 </div>
                                                 <div class="d-flex align-center justify-space-between">
                                                     <div class="d-flex align-center gap-3">
-                                                        <v-avatar color="#6F1877" size="42">
-                                                            <span v-html="columnIcon"></span>
-                                                        </v-avatar>
-                                                        <span class="text-body-1 font-semibold text-gray-900">ادارة
-                                                            المشاريع</span>
-                                                    </div>
-                                                    <span class="text-base font-bold text-gray-900">33</span>
-                                                </div>
-                                                <div class="d-flex align-center justify-space-between">
-                                                    <div class="d-flex align-center gap-3">
                                                         <v-avatar color="#1570EF" size="42">
                                                             <span v-html="fileIcon"></span>
                                                         </v-avatar>
@@ -195,26 +172,6 @@
                                                             class="text-body-1 font-semibold text-gray-900">التقارير</span>
                                                     </div>
                                                     <span class="text-base font-bold text-gray-900">43</span>
-                                                </div>
-                                                <div class="d-flex align-center justify-space-between">
-                                                    <div class="d-flex align-center gap-3">
-                                                        <v-avatar color="#DC6803" size="42">
-                                                            <span v-html="carIcon"></span>
-                                                        </v-avatar>
-                                                        <span
-                                                            class="text-body-1 font-semibold text-gray-900">الناقلات</span>
-                                                    </div>
-                                                    <span class="text-base font-bold text-gray-900">66</span>
-                                                </div>
-                                                <div class="d-flex align-center justify-space-between">
-                                                    <div class="d-flex align-center gap-3">
-                                                        <v-avatar color="#FEC84B" size="42">
-                                                            <span v-html="wallet_2_icon"></span>
-                                                        </v-avatar>
-                                                        <span
-                                                            class="text-body-1 font-semibold text-gray-900">التمويل</span>
-                                                    </div>
-                                                    <span class="text-base font-bold text-gray-900">12</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -231,11 +188,7 @@
                     <div class="flex flex-wrap xl:!flex-nowrap gap-3 items-center">
                         <div class="flex flex-wrap gap-3 flex-1">
                             <TextInput v-model="nameFilter" density="comfortable" variant="outlined" hide-details
-                                placeholder="اسم المستخدم" class="w-full sm:w-60 bg-white" />
-
-                            <SelectInput v-model="rolesFilter" :items="rolesOptions" item-title="title"
-                                item-value="value" density="comfortable" variant="outlined" hide-details
-                                placeholder="الأدوار" class="w-full sm:w-60 bg-white" />
+                                placeholder="اسم الدور" class="w-full sm:w-60 bg-white" />
 
                             <SelectInput v-model="statusFilter" :items="statusOptions" item-title="title"
                                 item-value="value" density="comfortable" variant="outlined" hide-details
@@ -246,12 +199,41 @@
                         <div class="flex gap-2 items-center">
                             <ButtonWithIcon variant="flat" color="primary-500" rounded="4" height="40"
                                 custom-class="px-5 font-semibold !text-white text-sm sm:text-base"
-                                :prepend-icon="searchIcon" label="ابحث الأن" />
+                                :prepend-icon="searchIcon" label="ابحث الأن" @click="fetchRoles" />
 
                             <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4" border="sm"
                                 custom-class="px-5 font-semibold text-sm sm:text-base !text-primary-800 !border-primary-200"
-                                prepend-icon="mdi-refresh" label="إعادة تعيين" />
+                                prepend-icon="mdi-refresh" label="إعادة تعيين" @click="resetFilters" />
                         </div>
+                    </div>
+                </div>
+
+                <!-- Roles Cards Section -->
+                <div class="p-6">
+                    <!-- Add Role Button -->
+                    <div class="flex mb-6" v-if="canCreate">
+                        <ButtonWithIcon @click="handleAddRole" variant="flat" size="large" label="اضافة دور جديد" color="primary-500"
+                            :rounded="'md'" :prepend-icon="plusIcon" custom-class="text-white">
+                        </ButtonWithIcon>
+                    </div>
+
+                    <!-- Loading State -->
+                    <div v-if="rolesLoading" class="flex justify-center items-center py-12">
+                        <v-progress-circular indeterminate color="primary" size="48"></v-progress-circular>
+                    </div>
+
+                    <!-- Roles Grid -->
+                    <div v-else-if="roles.length > 0" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                        <RoleCard v-for="(role, index) in roles" :key="role.id" :role="role" :index="index"
+                            :status-loading="statusLoadingId === role.id" edit-route-name="RolesEdit"
+                            @status-change="handleStatusChange" />
+                    </div>
+
+                    <!-- Empty State -->
+                    <div v-else class="flex flex-col items-center justify-center py-12 text-gray-500">
+                        <span v-html="checksIcon" class="text-gray-300 mb-4"></span>
+                        <p class="text-lg font-medium">لا يوجد أدوار</p>
+                        <p class="text-sm">لم يتم العثور على أدوار مطابقة للبحث</p>
                     </div>
                 </div>
 
@@ -261,27 +243,69 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import ApexCharts from 'vue3-apexcharts'
+import RoleCard from '../component/RoleCard.vue'
+import { useApi } from '@/composables/useApi'
+import { useNotification } from '@/composables/useNotification'
 
-const nameFilter = ref("");
-const rolesFilter = ref(null);
-const statusFilter = ref(null);
+// Composables
+const api = useApi()
+const { success, error: errorNotification } = useNotification()
+const router = useRouter()
 
-const rolesOptions = ref([
-    { title: 'مدير', value: 'admin' },
-    { title: 'مستخدم', value: 'user' },
-    { title: 'محرر', value: 'editor' }
-]);
+// === TypeScript Interfaces ===
+interface Group {
+    group_name: string
+    active_permissions_count: number
+}
+
+interface RoleActions {
+    can_update: boolean
+    can_change_status: boolean
+}
+
+interface Role {
+    id: number
+    role_name: string
+    is_active: boolean
+    groups: Group[]
+    actions?: RoleActions
+}
+
+interface ApiResponse {
+    status: number
+    code: number
+    locale: string
+    message: string
+    data: Role[]
+    actions: {
+        can_create: boolean
+    }
+}
+
+// === State ===
+const roles = ref<Role[]>([])
+const canCreate = ref(false)
+const rolesLoading = ref(false)
+const statusLoadingId = ref<number | null>(null)
+
+// Filters
+const nameFilter = ref("")
+const statusFilter = ref<number | null>(null)
 
 const statusOptions = ref([
-    { title: 'نشط', value: 'active' },
-    { title: 'غير نشط', value: 'inactive' }
-]);
+    { title: 'فعال', value: 1 },
+    { title: 'غير فعال', value: 0 }
+])
 
-const series = [120, 336]
+// === Computed ===
+const activeRolesCount = computed(() => roles.value.filter(r => r.is_active).length)
+const inactiveRolesCount = computed(() => roles.value.filter(r => !r.is_active).length)
+const series = computed(() => [activeRolesCount.value, inactiveRolesCount.value])
 
-const chartOptions = {
+const chartOptions = computed(() => ({
     labels: ['فعال', 'غير فعال'],
     colors: ['#1570EF', '#D1E9FF'],
     legend: {
@@ -307,7 +331,7 @@ const chartOptions = {
                     total: {
                         show: true,
                         label: '',
-                        formatter: () => '456',
+                        formatter: () => String(roles.value.length),
                     },
                 },
             },
@@ -316,13 +340,69 @@ const chartOptions = {
     stroke: {
         width: 0,
     },
+}))
+
+// === API Functions ===
+const fetchRoles = async () => {
+    try {
+        rolesLoading.value = true
+        
+        const params = new URLSearchParams()
+        if (nameFilter.value) params.append('name', nameFilter.value)
+        if (statusFilter.value !== null) params.append('status', String(statusFilter.value))
+        
+        const queryString = params.toString()
+        const url = queryString ? `/roles?${queryString}` : '/roles'
+        
+        const response = await api.get<ApiResponse>(url)
+        
+        roles.value = response.data
+        canCreate.value = response.actions?.can_create ?? false
+    } catch (err: any) {
+        console.error('Error fetching roles:', err)
+        errorNotification(err?.response?.data?.message || 'حدث خطأ أثناء جلب البيانات')
+    } finally {
+        rolesLoading.value = false
+    }
 }
 
-const productIcon = `<svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path opacity="0.12" d="M9.33337 18.6667H46.6667V37.8001C46.6667 41.7205 46.6667 43.6806 45.9038 45.178C45.2326 46.4952 44.1618 47.566 42.8446 48.2371C41.3473 49.0001 39.3871 49.0001 35.4667 49.0001H20.5334C16.613 49.0001 14.6528 49.0001 13.1554 48.2371C11.8383 47.566 10.7674 46.4952 10.0963 45.178C9.33337 43.6806 9.33337 41.7204 9.33337 37.8001V18.6667Z" fill="#1570EF"/>
-<path d="M9.33329 18.6587C8.95061 18.6488 8.67272 18.6267 8.42287 18.577C6.57165 18.2088 5.12453 16.7616 4.75629 14.9104C4.66663 14.4596 4.66663 13.9175 4.66663 12.8333C4.66663 11.7491 4.66663 11.207 4.75629 10.7562C5.12453 8.90502 6.57165 7.4579 8.42287 7.08967C8.87367 7 9.41576 7 10.5 7H45.5C46.5842 7 47.1263 7 47.5771 7.08967C49.4283 7.4579 50.8754 8.90502 51.2436 10.7562C51.3333 11.207 51.3333 11.7491 51.3333 12.8333C51.3333 13.9175 51.3333 14.4596 51.2436 14.9104C50.8754 16.7616 49.4283 18.2088 47.5771 18.577C47.3272 18.6267 47.0493 18.6488 46.6666 18.6587M23.3333 30.3333H32.6666M9.33329 18.6667H46.6666V37.8C46.6666 41.7204 46.6666 43.6805 45.9037 45.1779C45.2326 46.4951 44.1617 47.5659 42.8446 48.237C41.3472 49 39.387 49 35.4666 49H20.5333C16.6129 49 14.6527 49 13.1554 48.237C11.8382 47.5659 10.7674 46.4951 10.0962 45.1779C9.33329 43.6805 9.33329 41.7204 9.33329 37.8V18.6667Z" stroke="#1570EF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>
-`
+const handleStatusChange = async (role: Role, newStatus: boolean) => {
+    try {
+        statusLoadingId.value = role.id
+        
+        await api.patch(`/roles/${role.id}/change-status`, {
+            is_active: newStatus
+        })
+        
+        // Update local state
+        const roleIndex = roles.value.findIndex(r => r.id === role.id)
+        if (roleIndex !== -1) {
+            roles.value[roleIndex].is_active = newStatus
+        }
+        
+        success(newStatus ? 'تم تفعيل الدور بنجاح' : 'تم تعطيل الدور بنجاح')
+    } catch (err: any) {
+        console.error('Error changing status:', err)
+        errorNotification(err?.response?.data?.message || 'حدث خطأ أثناء تغيير الحالة')
+        // Revert the switch state by refreshing data
+        await fetchRoles()
+    } finally {
+        statusLoadingId.value = null
+    }
+}
+
+// === Handlers ===
+const handleAddRole = () => {
+    router.push({ name: 'RolesCreate' })
+}
+
+const resetFilters = () => {
+    nameFilter.value = ''
+    statusFilter.value = null
+    fetchRoles()
+}
+
+// Icons
 const usersIcon_1 = `<svg width="22" height="20" viewBox="0 0 22 20" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M21 19V17C21 15.1362 19.7252 13.5701 18 13.126M14.5 1.29076C15.9659 1.88415 17 3.32131 17 5C17 6.67869 15.9659 8.11585 14.5 8.70924M16 19C16 17.1362 16 16.2044 15.6955 15.4693C15.2895 14.4892 14.5108 13.7105 13.5307 13.3045C12.7956 13 11.8638 13 10 13H7C5.13623 13 4.20435 13 3.46927 13.3045C2.48915 13.7105 1.71046 14.4892 1.30448 15.4693C1 16.2044 1 17.1362 1 19M12.5 5C12.5 7.20914 10.7091 9 8.5 9C6.29086 9 4.5 7.20914 4.5 5C4.5 2.79086 6.29086 1 8.5 1C10.7091 1 12.5 2.79086 12.5 5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`
@@ -367,31 +447,20 @@ const walletIcon = `<svg width="22" height="18" viewBox="0 0 22 18" fill="none" 
 <path d="M19 6.5V4.2C19 3.0799 19 2.51984 18.782 2.09202C18.5903 1.7157 18.2843 1.40974 17.908 1.21799C17.4802 1 16.9201 1 15.8 1H4.2C3.0799 1 2.51984 1 2.09202 1.21799C1.7157 1.40973 1.40973 1.71569 1.21799 2.09202C1 2.51984 1 3.0799 1 4.2V13.8C1 14.9201 1 15.4802 1.21799 15.908C1.40973 16.2843 1.71569 16.5903 2.09202 16.782C2.51984 17 3.07989 17 4.2 17L15.8 17C16.9201 17 17.4802 17 17.908 16.782C18.2843 16.5903 18.5903 16.2843 18.782 15.908C19 15.4802 19 14.9201 19 13.8V11.5M14 9C14 8.53535 14 8.30302 14.0384 8.10982C14.1962 7.31644 14.8164 6.69624 15.6098 6.53843C15.803 6.5 16.0353 6.5 16.5 6.5H18.5C18.9647 6.5 19.197 6.5 19.3902 6.53843C20.1836 6.69624 20.8038 7.31644 20.9616 8.10982C21 8.30302 21 8.53535 21 9C21 9.46466 21 9.69698 20.9616 9.89018C20.8038 10.6836 20.1836 11.3038 19.3902 11.4616C19.197 11.5 18.9647 11.5 18.5 11.5H16.5C16.0353 11.5 15.803 11.5 15.6098 11.4616C14.8164 11.3038 14.1962 10.6836 14.0384 9.89018C14 9.69698 14 9.46465 14 9Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`
 
-const calculatorIcon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M15.5 4.5L4.5 15.5M6.5 8.5V4.5M4.5 6.5H8.5M11.5 13.5H15.5M5.8 19H14.2C15.8802 19 16.7202 19 17.362 18.673C17.9265 18.3854 18.3854 17.9265 18.673 17.362C19 16.7202 19 15.8802 19 14.2V5.8C19 4.11984 19 3.27976 18.673 2.63803C18.3854 2.07354 17.9265 1.6146 17.362 1.32698C16.7202 1 15.8802 1 14.2 1H5.8C4.11984 1 3.27976 1 2.63803 1.32698C2.07354 1.6146 1.6146 2.07354 1.32698 2.63803C1 3.27976 1 4.11984 1 5.8V14.2C1 15.8802 1 16.7202 1.32698 17.362C1.6146 17.9265 2.07354 18.3854 2.63803 18.673C3.27976 19 4.11984 19 5.8 19Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>`
-
 const usersIcon = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M16 3.46776C17.4817 4.20411 18.5 5.73314 18.5 7.5C18.5 9.26686 17.4817 10.7959 16 11.5322M18 16.7664C19.5115 17.4503 20.8725 18.565 22 20M2 20C3.94649 17.5226 6.58918 16 9.5 16C12.4108 16 15.0535 17.5226 17 20M14 7.5C14 9.98528 11.9853 12 9.5 12C7.01472 12 5 9.98528 5 7.5C5 5.01472 7.01472 3 9.5 3C11.9853 3 14 5.01472 14 7.5Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>`
-
-const columnIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M17 17V1M1 17V1M6.33333 5.44445V12.5556C6.33333 13.3839 6.33333 13.7981 6.46866 14.1248C6.64909 14.5604 6.99518 14.9065 7.43078 15.0869C7.75749 15.2222 8.17166 15.2222 9 15.2222C9.82834 15.2222 10.2425 15.2222 10.5692 15.0869C11.0048 14.9065 11.3509 14.5604 11.5313 14.1248C11.6667 13.7981 11.6667 13.3839 11.6667 12.5556V5.44445C11.6667 4.6161 11.6667 4.20193 11.5313 3.87523C11.3509 3.43963 11.0048 3.09354 10.5692 2.9131C10.2425 2.77778 9.82834 2.77778 9 2.77778C8.17166 2.77778 7.75749 2.77778 7.43079 2.9131C6.99518 3.09354 6.64909 3.43962 6.46866 3.87523C6.33333 4.20193 6.33333 4.6161 6.33333 5.44445Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`
 
 const fileIcon = `<svg width="18" height="22" viewBox="0 0 18 22" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M11 1.26953V5.40007C11 5.96012 11 6.24015 11.109 6.45406C11.2049 6.64222 11.3578 6.7952 11.546 6.89108C11.7599 7.00007 12.0399 7.00007 12.6 7.00007H16.7305M13 12H5M13 16H5M7 8H5M11 1H5.8C4.11984 1 3.27976 1 2.63803 1.32698C2.07354 1.6146 1.6146 2.07354 1.32698 2.63803C1 3.27976 1 4.11984 1 5.8V16.2C1 17.8802 1 18.7202 1.32698 19.362C1.6146 19.9265 2.07354 20.3854 2.63803 20.673C3.27976 21 4.11984 21 5.8 21H12.2C13.8802 21 14.7202 21 15.362 20.673C15.9265 20.3854 16.3854 19.9265 16.673 19.362C17 18.7202 17 17.8802 17 16.2V7L11 1Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`
 
-const carIcon = `<svg width="22" height="20" viewBox="0 0 22 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M18 8V4.2C18 3.0799 18 2.51984 17.782 2.09202C17.5903 1.71569 17.2843 1.40973 16.908 1.21799C16.4802 1 15.9201 1 14.8 1H7.2C6.07989 1 5.51984 1 5.09202 1.21799C4.71569 1.40973 4.40973 1.71569 4.21799 2.09202C4 2.51984 4 3.0799 4 4.2V8M4 7H1V6M18 7H21V6M5 11.5H5.01M17 11.5H17.01M5.8 8H16.2C17.8802 8 18.7202 8 19.362 8.32698C19.9265 8.6146 20.3854 9.07354 20.673 9.63803C21 10.2798 21 11.1198 21 12.8V16C21 16.9319 21 17.3978 20.8478 17.7654C20.6448 18.2554 20.2554 18.6448 19.7654 18.8478C19.3978 19 18.9319 19 18 19H17.4C17.0284 19 16.8426 19 16.6871 18.9754C15.8313 18.8398 15.1602 18.1687 15.0246 17.3129C15 17.1574 15 16.9716 15 16.6C15 16.5071 15 16.4606 14.9938 16.4218C14.96 16.2078 14.7922 16.04 14.5782 16.0062C14.5394 16 14.4929 16 14.4 16H7.6C7.5071 16 7.46065 16 7.42178 16.0062C7.20784 16.04 7.04004 16.2078 7.00616 16.4218C7 16.4606 7 16.5071 7 16.6C7 16.9716 7 17.1574 6.97538 17.3129C6.83983 18.1687 6.16865 18.8398 5.31287 18.9754C5.1574 19 4.9716 19 4.6 19H4C3.06812 19 2.60218 19 2.23463 18.8478C1.74458 18.6448 1.35523 18.2554 1.15224 17.7654C1 17.3978 1 16.9319 1 16V12.8C1 11.1198 1 10.2798 1.32698 9.63803C1.6146 9.07354 2.07354 8.6146 2.63803 8.32698C3.27976 8 4.11984 8 5.8 8ZM5.5 11.5C5.5 11.7761 5.27614 12 5 12C4.72386 12 4.5 11.7761 4.5 11.5C4.5 11.2239 4.72386 11 5 11C5.27614 11 5.5 11.2239 5.5 11.5ZM17.5 11.5C17.5 11.7761 17.2761 12 17 12C16.7239 12 16.5 11.7761 16.5 11.5C16.5 11.2239 16.7239 11 17 11C17.2761 11 17.5 11.2239 17.5 11.5Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>`
-
-const wallet_2_icon = `<svg width="20" height="21" viewBox="0 0 20 21" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M14 6.43196V2.93261C14 2.10087 14 1.685 13.8248 1.42943C13.6717 1.20614 13.4346 1.05445 13.1678 1.00904C12.8623 0.957056 12.4847 1.13133 11.7295 1.47988L2.85901 5.57395C2.18551 5.8848 1.84875 6.04022 1.60211 6.28127C1.38406 6.49438 1.21762 6.75451 1.1155 7.04179C1 7.36675 1 7.73764 1 8.47942V13.432M14.5 12.932H14.51M1 9.63196L1 16.232C1 17.3521 1 17.9121 1.21799 18.3399C1.40973 18.7163 1.71569 19.0222 2.09202 19.214C2.51984 19.432 3.07989 19.432 4.2 19.432H15.8C16.9201 19.432 17.4802 19.432 17.908 19.214C18.2843 19.0222 18.5903 18.7163 18.782 18.3399C19 17.9121 19 17.3521 19 16.232V9.63196C19 8.51185 19 7.9518 18.782 7.52398C18.5903 7.14765 18.2843 6.84169 17.908 6.64995C17.4802 6.43196 16.9201 6.43196 15.8 6.43196L4.2 6.43196C3.0799 6.43196 2.51984 6.43196 2.09202 6.64994C1.7157 6.84169 1.40973 7.14765 1.21799 7.52398C1 7.9518 1 8.51185 1 9.63196ZM15 12.932C15 13.2081 14.7761 13.432 14.5 13.432C14.2239 13.432 14 13.2081 14 12.932C14 12.6558 14.2239 12.432 14.5 12.432C14.7761 12.432 15 12.6558 15 12.932Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+const plusIcon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M10 4V16M4 10H16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`
 
 
 onMounted(() => {
+    fetchRoles()
 })
 </script>
