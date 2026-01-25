@@ -21,6 +21,7 @@ export interface Organization {
     id: number
     name: string
   }
+  permissions?: Record<string, Record<string, { can_view_any?: boolean; can_view?: boolean; can_create?: boolean; can_update?: boolean; can_delete?: boolean }>>
 }
 
 export interface User {
@@ -66,7 +67,7 @@ const authService = {
         console.warn('No token provided for logout')
         return
       }
-      
+
       await axios.request({
         method: 'GET',
         url: `${AUTH_BASE_URL}/auth/logout`,

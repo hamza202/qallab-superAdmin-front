@@ -9,6 +9,7 @@ const AUTH_ORGANIZATION_KEY = 'auth_organization'
 const AUTH_ORGANIZATIONS_KEY = 'auth_organizations'
 const AUTH_USER_TYPE_KEY = 'auth_user_type'
 const AUTH_ORG_ID_KEY = 'auth_org_id'
+const AUTH_PERMISSIONS_KEY = 'auth_permissions'
 
 export const useAuthStore = defineStore('auth', () => {
   // State
@@ -52,6 +53,10 @@ export const useAuthStore = defineStore('auth', () => {
     if (organizationId) {
       localStorage.setItem(AUTH_ORG_ID_KEY, JSON.stringify(organizationId))
     }
+    // Store permissions from organization
+    if (authUser.organization?.permissions) {
+      localStorage.setItem(AUTH_PERMISSIONS_KEY, JSON.stringify(authUser.organization.permissions))
+    }
   }
 
   const clearAuthData = () => {
@@ -68,6 +73,7 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.removeItem(AUTH_ORGANIZATIONS_KEY)
     localStorage.removeItem(AUTH_USER_TYPE_KEY)
     localStorage.removeItem(AUTH_ORG_ID_KEY)
+    localStorage.removeItem(AUTH_PERMISSIONS_KEY)
   }
 
   const login = async (email: string, password: string): Promise<boolean> => {

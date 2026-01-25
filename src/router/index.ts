@@ -17,6 +17,7 @@ import { errorRoutes } from "./modules/errors.routes";
 import { servicesRoutes } from "./modules/services.routes";
 import { usersRoutes } from "./modules/users.routes";
 import { financeRoutes } from "./modules/finance.routes";
+import { usePermissions } from "@/composables/usePermissions";
 
 // Auth check helper
 const isAuthenticated = (): boolean => {
@@ -24,7 +25,7 @@ const isAuthenticated = (): boolean => {
 }
 
 // Public routes that don't require authentication
-const publicRoutes = ['Login', 'Register', 'ForgotPassword', 'ResetPassword', 'NotFound', '404', '500']
+const publicRoutes = ['Login', 'Register', 'ForgotPassword', 'ResetPassword', 'NotFound', 'Forbidden', '404', '500', '403']
 
 const routes: RouteRecordRaw[] = [
   ...dashboardRoutes,
@@ -60,7 +61,8 @@ let sidebarScrollTop = 0;
 // Authentication guard
 router.beforeEach((to: RouteLocationNormalized, _from: RouteLocationNormalized, next: NavigationGuardNext) => {
   const routeName = to.name as string
-  
+  const { hasRoutePermission } = usePermissions()
+
   // Save sidebar scroll position
   const sidebar = document.querySelector('.q-sidebar-scroll');
   if (sidebar) {
@@ -81,6 +83,12 @@ router.beforeEach((to: RouteLocationNormalized, _from: RouteLocationNormalized, 
   // Protected route - check authentication
   if (!isAuthenticated()) {
     next({ name: 'Login' })
+    return
+  }
+
+  // Check permissions for the route
+  if (!hasRoutePermission(to.path)) {
+    next({ name: 'Forbidden' })
     return
   }
 

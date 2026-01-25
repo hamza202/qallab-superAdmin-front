@@ -44,6 +44,8 @@
     "errors": {
       "pageNotFound": "Page not found",
       "pageNotFoundDescription": "Sorry, the page you are looking for doesn't exist or has been moved. Here are some helpful links:",
+      "accessDenied": "Access Denied",
+      "accessDeniedDescription": "Sorry, you don't have permission to access this page. Please contact the administrator to get the required permissions.",
       "goBack": "Go back",
       "takeMeHome": "Take me home"
     }
