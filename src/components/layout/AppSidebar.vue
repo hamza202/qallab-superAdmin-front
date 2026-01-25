@@ -93,9 +93,9 @@
                                         :class="[isMenuItemActive('/product-variables/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         متغيرات المنتج </router-link>
                                 </li>
-                                <li class="relative">
-                                    <router-link to="/sales/invoices"
-                                        :class="[isMenuItemActive('/sales/invoices') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                <li v-if="canViewProductSettings" class="relative">
+                                    <router-link to="/products/product-settings"
+                                        :class="[isMenuItemActive('/products/product-settings') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         اعدادات جدول المنتجات</router-link>
                                 </li>
                             </ul>
@@ -131,20 +131,20 @@
                                         :class="[isMenuItemActive('/services/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         إدارة الخدمات </router-link>
                                 </li>
-                                <li class="relative">
+                                <li v-if="canViewSubscriptions" class="relative">
                                     <router-link to="/services/subscriptions"
-                                        :class="[isMenuItemActive('/services/subscriptions') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
-                                        الاشتراكات</router-link>
+                                        :class="[isMenuItemActive('/services/subscriptions') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        إدارة الاشتراكات</router-link>
                                 </li>
-                                <li class="relative">
+                                <li v-if="canViewPriceLists" class="relative">
                                     <router-link to="/services/prices-list"
-                                        :class="[isMenuItemActive('/services/prices-list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
-                                        قوائم الاسعار</router-link>
+                                        :class="[isMenuItemActive('/services/prices-list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        إدارة قوائم الاسعار</router-link>
                                 </li>
-                                <li class="relative">
-                                    <router-link to="/products/production-capacity-list"
-                                        :class="[isMenuItemActive('/products/production-capacity-list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
-                                        إعدادات الخدمات</router-link>
+                                <li v-if="canViewServiceSettings" class="relative">
+                                    <router-link to="/services/service-settings"
+                                        :class="[isMenuItemActive('/services/service-settings') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        إدارة إعدادات الخدمات</router-link>
                                 </li>
                             </ul>
 
@@ -181,22 +181,22 @@
                                         :class="[isMenuItemActive('/customers/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         قائمة العملاء </router-link>
                                 </li>
-                                <li class="relative">
+                                <li v-if="canViewSalesInvoices" class="relative">
                                     <router-link to="/sales/invoices"
                                         :class="[isMenuItemActive('/sales/invoices') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
                                         فواتير المبيعات</router-link>
                                 </li>
-                                <li class="relative">
+                                <li v-if="canViewSalesOrders" class="relative">
                                     <router-link to="/sales/orders"
                                         :class="[isMenuItemActive('/sales/orders') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
                                         طلبات المبيعات</router-link>
                                 </li>
-                                <li class="relative">
+                                <li v-if="canViewContracts" class="relative">
                                     <router-link to="/sales/contracts"
                                         :class="[isMenuItemActive('/sales/contracts') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
                                         العقود</router-link>
                                 </li>
-                                <li class="relative">
+                                <li v-if="canViewClearing" class="relative">
                                     <router-link to="/sales/clearing"
                                         :class="[isMenuItemActive('/sales/clearing') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
                                         المقاصة</router-link>
@@ -207,7 +207,7 @@
                     </v-list-group>
 
                     <!-- المشاريع -->
-                    <v-list-group value="projects" class="mt-1">
+                    <v-list-group v-if="hasAnyProjectsPermission" value="projects" class="mt-1">
                         <template #activator="{ props, isOpen }">
                             <v-list-item v-bind="props"
                                 :class="[{ '!mx-1 gap-5': !isSidebarExpanded }, isProjectsActive ? 'bg-white !text-[#1570EF]' : '', '!ps-[11px]']"
@@ -230,13 +230,13 @@
                         </template>
                         <div class="relative mt-1 ps-10 pe-4 text-sm">
                             <ul class="space-y-2 text-slate-100">
-                                <li class="relative">
+                                <li v-if="canViewProjects" class="relative">
                                     <router-link to="/projects/list"
                                         :class="[isMenuItemActive('/projects/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         إدارة
                                         المشاريع </router-link>
                                 </li>
-                                <li class="relative">
+                                <li v-if="canViewProjectScheduling" class="relative">
                                     <router-link to="/projects/scheduling"
                                         :class="[isMenuItemActive('/projects/scheduling') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
                                         جدولة
@@ -276,9 +276,9 @@
                                         :class="[isMenuItemActive('/suppliers/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         إدارة الموردين </router-link>
                                 </li>
-                                <li class="relative">
-                                    <router-link to="/suppliers/list"
-                                        :class="[isMenuItemActive('/suppliers/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                <li v-if="canViewSupplierSettlements" class="relative">
+                                    <router-link to="/suppliers/supplier-settlement"
+                                        :class="[isMenuItemActive('/suppliers/supplier-settlement') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         تسوية حساب موردين</router-link>
                                 </li>
                             </ul>
@@ -286,7 +286,7 @@
                     </v-list-group>
 
                     <!-- المالية -->
-                    <v-list-group value="finance" class="mt-1">
+                    <v-list-group v-if="hasAnyFinancePermission" value="finance" class="mt-1">
                         <template #activator="{ props, isOpen }">
                             <v-list-item v-bind="props"
                                 :class="[{ '!mx-1 gap-5': !isSidebarExpanded }, isFinanceActive ? 'bg-white !text-[#1570EF]' : '', '!ps-[11px]']"
@@ -309,18 +309,18 @@
                         </template>
                         <div class="relative mt-1 ps-10 pe-4 text-sm pb-2">
                             <ul class="space-y-2 text-slate-100">
-                                <li class="relative">
+                                <li v-if="canViewFinancialDashboard" class="relative">
                                     <router-link to="/vouchers/list"
                                         :class="[isMenuItemActive('/vouchers/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         لوحة
                                         التحكم المالية </router-link>
                                 </li>
-                                <li class="relative">
+                                <li v-if="canViewPaymentVouchers" class="relative">
                                     <router-link to="/finance/payment-vouchers"
                                         :class="[isMenuItemActive('/finance/payment-vouchers') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
                                         سندات الصرف</router-link>
                                 </li>
-                                <li class="relative">
+                                <li v-if="canViewReceiptVouchers" class="relative">
                                     <router-link to="/finance/receipt-vouchers"
                                         :class="[isMenuItemActive('/finance/receipt-vouchers') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
                                         سندات القبض</router-link>
@@ -418,7 +418,7 @@
                     </v-list-group> -->
 
                     <!-- التقارير -->
-                    <v-list-group value="reports" class="mt-1">
+                    <v-list-group v-if="hasAnyReportsPermission" value="reports" class="mt-1">
                         <template #activator="{ props, isOpen }">
                             <v-list-item v-bind="props"
                                 :class="[{ '!mx-1 gap-5': !isSidebarExpanded }, isReportsActive ? 'bg-white !text-[#1570EF]' : '', '!ps-[11px]']"
@@ -441,12 +441,12 @@
                         </template>
                         <div class="relative mt-1 ps-10 pe-4 text-sm">
                             <ul class="space-y-2 text-slate-100">
-                                <li class="relative">
+                                <li v-if="canViewSalesReports" class="relative">
                                     <router-link to="/reports/sales"
                                         :class="[isMenuItemActive('/reports/sales') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">تقارير
                                         المبيعات</router-link>
                                 </li>
-                                <li class="relative">
+                                <li v-if="canViewPurchaseReports" class="relative">
                                     <router-link to="/reports/purchases"
                                         :class="[isMenuItemActive('/reports/purchases') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">تقارير
                                         المشتريات</router-link>
@@ -515,12 +515,12 @@
                                         :class="[isMenuItemActive('/settings/brands/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         العلامة التجارية</router-link>
                                 </li>
-                                <li class="relative">
+                                <li v-if="canViewGeoRegions" class="relative">
                                     <router-link to="/settings/geo-areas/list"
                                         :class="[isMenuItemActive('/settings/geo-areas/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         تقسيمات المناطق الجغرافية</router-link>
                                 </li>
-                                <li class="relative">
+                                <li v-if="canViewGeoZones" class="relative">
                                     <router-link to="/settings/geo-segments/list"
                                         :class="[isMenuItemActive('/settings/geo-segments/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         تقسيمات النطاقات الجغرافية</router-link>
@@ -554,21 +554,21 @@
                                         إدارة المدن
                                     </router-link>
                                 </li>
-                                <li class="relative">
-                                    <router-link to="/sales/invoices"
-                                        :class="[isMenuItemActive('/sales/invoices') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                <li v-if="canViewCurrencies" class="relative">
+                                    <router-link to="/sales/currencies"
+                                        :class="[isMenuItemActive('/sales/currencies') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         إدارة العملات</router-link>
                                 </li>
                             </ul>
                             <h2 class="text-sm font-medium leading-5 my-2">إعدادات متقدمة</h2>
                             <ul class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
-                                <li class="relative">
+                                <li v-if="canViewCodesSettings" class="relative">
                                     <router-link to="/settings/codes"
                                         :class="[isMenuItemActive('/settings/codes') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         اعدادات الاكواد
                                     </router-link>
                                 </li>
-                                <li class="relative">
+                                <li v-if="canViewAccountTypes" class="relative">
                                     <router-link to="/settings/account-types/list"
                                         :class="[isMenuItemActive('/settings/account-types/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         أنواع الحسابات
@@ -660,16 +660,34 @@ const {
     canViewBuildingMaterialPriceLists,
     canViewProductionCapacity,
     canViewProductVariables,
+    canViewProductSettings,
     hasAnyProductPermission,
     // Services
     canViewServices,
+    canViewSubscriptions,
+    canViewPriceLists,
+    canViewServiceSettings,
     hasAnyServicePermission,
     // Sales
     canViewCustomers,
+    canViewSalesInvoices,
+    canViewSalesOrders,
+    canViewContracts,
+    canViewClearing,
     hasAnySalesPermission,
+    // Projects
+    canViewProjects,
+    canViewProjectScheduling,
+    hasAnyProjectsPermission,
     // Purchases
     canViewSuppliers,
+    canViewSupplierSettlements,
     hasAnyPurchasesPermission,
+    // Finance
+    canViewFinancialDashboard,
+    canViewPaymentVouchers,
+    canViewReceiptVouchers,
+    hasAnyFinancePermission,
     // Users
     canViewUsers,
     canViewRoles,
@@ -677,6 +695,10 @@ const {
     canViewContractors,
     canViewLogistics,
     hasAnyUsersPermission,
+    // Reports
+    canViewSalesReports,
+    canViewPurchaseReports,
+    hasAnyReportsPermission,
     // Settings
     canViewUnits,
     canViewTestMethodologies,
@@ -692,6 +714,11 @@ const {
     canViewTreeCategories,
     canViewServiceCategories,
     canViewTreeServiceCategories,
+    canViewGeoRegions,
+    canViewGeoZones,
+    canViewCurrencies,
+    canViewCodesSettings,
+    canViewAccountTypes,
     hasAnySettingsPermission,
 } = usePermissions();
 
