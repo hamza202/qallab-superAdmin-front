@@ -17,6 +17,7 @@ import { errorRoutes } from "./modules/errors.routes";
 import { servicesRoutes } from "./modules/services.routes";
 import { usersRoutes } from "./modules/users.routes";
 import { financeRoutes } from "./modules/finance.routes";
+import { purchasesRoutes } from "./modules/purchases.routes";
 import { usePermissions } from "@/composables/usePermissions";
 
 // Auth check helper
@@ -39,6 +40,7 @@ const routes: RouteRecordRaw[] = [
   ...errorRoutes,
   ...servicesRoutes,
   ...financeRoutes,
+  ...purchasesRoutes,
   {
     path: "/form-and-validation",
     name: "FormAndValidation",

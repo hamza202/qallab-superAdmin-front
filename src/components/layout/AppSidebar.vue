@@ -282,6 +282,20 @@
                                         تسوية حساب موردين</router-link>
                                 </li>
                             </ul>
+                            <h2 class="text-sm font-medium leading-5 my-2">إدارة عروض الأسعار</h2>
+                            <ul class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
+                                <!-- <li  class="relative">
+                                    v-if="canViewRequestForQuotations"
+                                    <router-link to="/purchases/request-for-quotations/create"
+                                        :class="[isMenuItemActive('/purchases/request-for-quotations') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        طلب عروض الأسعار</router-link>
+                                </li> -->
+                                <li  class="relative">
+                                    <router-link to="/purchases/request-for-quotations-material-product/create"
+                                        :class="[isMenuItemActive('/purchases/request-for-quotations-material-product') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        طلب عروض أسعار مواد أولية</router-link>
+                                </li>
+                            </ul>
                         </div>
                     </v-list-group>
 
@@ -682,6 +696,7 @@ const {
     // Purchases
     canViewSuppliers,
     canViewSupplierSettlements,
+    canViewRequestForQuotations,
     hasAnyPurchasesPermission,
     // Finance
     canViewFinancialDashboard,
@@ -727,7 +742,7 @@ const productsRoutes = ['/simple-products', '/group-products', '/products'];
 const servicesRoutes = ['/services'];
 const salesRoutes = ['/customers', '/sales'];
 const projectsRoutes = ['/projects'];
-const purchasesRoutes = ['/suppliers'];
+const purchasesRoutes = ['/suppliers', '/purchases'];
 const financeRoutes = ['/finance'];
 const usersRoutes = ['/users','/roles', '/crushers', '/contractors','/logistics'];
 // const logisticsRoutes = ['/logistics'];
