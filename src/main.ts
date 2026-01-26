@@ -9,6 +9,7 @@ import vuetify from './plugins/vuetify'
 
 // Styles - Order matters! Vuetify first, then Tailwind/custom styles
 import 'vuetify/styles'
+import 'leaflet/dist/leaflet.css'
 import '@mdi/font/css/materialdesignicons.css'
 import 'vue3-toastify/dist/index.css'
 import './styles/main.scss'

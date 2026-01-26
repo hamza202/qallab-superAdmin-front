@@ -23,6 +23,7 @@ declare module 'vue' {
     FileUploadInput: typeof import('./components/common/forms/FileUploadInput.vue')['default']
     GroupedDataTable: typeof import('./components/common/tables/GroupedDataTable.vue')['default']
     LanguageTabs: typeof import('./components/common/forms/LanguageTabs.vue')['default']
+    Map: typeof import('./components/common/Map.vue')['default']
     MapDialog: typeof import('./components/common/MapDialog.vue')['default']
     MultipleSelectInput: typeof import('./components/common/forms/MultipleSelectInput.vue')['default']
     PageHeader: typeof import('./components/common/PageHeader.vue')['default']
