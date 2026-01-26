@@ -1,6 +1,6 @@
-# Qallab superAdmin Portal
+# Qallab Admin Portal
 
-A Vue 3 superAdmin Portal built with TypeScript, supporting Arabic and English languages.
+A Vue 3 Admin Portal built with TypeScript, supporting Arabic and English languages.
 
 ## Tech Stack
 
@@ -19,7 +19,7 @@ A Vue 3 superAdmin Portal built with TypeScript, supporting Arabic and English l
 ## Project Structure
 
 ```
-qallab-superAdmin-front/
+qallab-admin-front/
 ├── public/                    # Public static files
 │   └── favicon.svg            # Site favicon
 ├── src/
@@ -137,7 +137,7 @@ Create a `.env` file based on `.env.example`:
 
 ```env
 # Application title
-VITE_APP_TITLE=Qallab superAdmin Portal
+VITE_APP_TITLE=Qallab admin Portal
 
 # Development port
 VITE_PORT=3001
