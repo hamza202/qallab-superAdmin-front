@@ -295,6 +295,11 @@
                                         :class="[isMenuItemActive('/purchases/request-for-quotations-material-product') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         طلب عروض أسعار مواد أولية</router-link>
                                 </li>
+                                <li  class="relative">
+                                    <router-link to="/purchases/request-for-quotations-fuel/list"
+                                        :class="[isMenuItemActive('/purchases/request-for-quotations-fuel') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        طلب عروض أسعار محروقات</router-link>
+                                </li>
                             </ul>
                         </div>
                     </v-list-group>

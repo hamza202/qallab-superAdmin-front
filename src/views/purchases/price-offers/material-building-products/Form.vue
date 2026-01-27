@@ -2,8 +2,8 @@
 import { ref } from "vue";
 import { useI18n } from 'vue-i18n'
 import AddProductDialog from '../../../../components/purchases/price-offers/AddProductDialog.vue';
-import AddTransportServiceDialog from '../../../../components/purchases/price-offers/AddTransportServiceDialog.vue';
-import TopHeader from '../../../../components/purchases/price-offers/TopHeader.vue';
+import AddTransportServiceDialog from '../../../../components/price-offers/AddTransportServiceDialog.vue';
+import TopHeader from '../../../../components/price-offers/TopHeader.vue';
 
 const { t } = useI18n()
 
