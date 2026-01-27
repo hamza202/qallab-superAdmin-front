@@ -67,6 +67,7 @@ const routePermissionMap: Record<string, { group: string; key: string }> = {
     // Purchases
     '/suppliers': { group: 'purchases', key: 'suppliers' },
     '/suppliers/supplier-settlement': { group: 'purchases', key: 'supplier-settlements' },
+    // '/purchases/request-for-quotations': { group: 'purchases', key: 'request-for-quotations' },
 
     // Finance
     '/vouchers/list': { group: 'finance', key: 'financial-dashboard' },
@@ -215,6 +216,7 @@ export function usePermissions() {
      */
     const canViewSuppliers = computed(() => hasPermission('purchases', 'suppliers'));
     const canViewSupplierSettlements = computed(() => hasPermission('purchases', 'supplier-settlements'));
+    // const canViewRequestForQuotations = computed(() => hasPermission('purchases', 'request-for-quotations'));
 
     /**
      * Check if user can view finance related items
@@ -310,7 +312,8 @@ export function usePermissions() {
      */
     const hasAnyPurchasesPermission = computed(() =>
         canViewSuppliers.value ||
-        canViewSupplierSettlements.value
+        canViewSupplierSettlements.value 
+        // || canViewRequestForQuotations.value
     );
 
     /**
@@ -409,6 +412,7 @@ export function usePermissions() {
         // Purchases permissions
         canViewSuppliers,
         canViewSupplierSettlements,
+        // canViewRequestForQuotations,
         hasAnyPurchasesPermission,
 
         // Finance permissions
