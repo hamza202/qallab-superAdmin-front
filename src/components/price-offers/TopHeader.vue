@@ -13,6 +13,24 @@
             </div>
         </div>
 
+
+        <slot name="code">
+            <div class="flex items-center lg:gap-3 gap-2">
+                <!-- Label -->
+                <span class="text-sm font-semibold text-white">{{ codeLabel }}</span>
+                <!-- Code Badge -->
+                <div
+                    class="flex items-center gap-2 px-2.5 py-1.5 bg-primary-100 border border-primary-300 rounded shadow-xs">
+                    <ButtonWithIcon @click="copyCode" icon-only :icon="fileIcon" color="transparent" size="x-small"
+                        class="!py-0" height="30" />
+
+                    <span class="font-bold text-primary-800 dir-ltr">
+                        {{ code }}
+                    </span>
+                </div>
+            </div>
+
+        </slot>
         <slot name="actions">
             <ButtonWithIcon v-if="props.showAction && props.actionLabel" color="primary-50"
                 class="!text-primary-900 font-bold" :prepend-icon="props.actionIcon" @click="onAction"
@@ -23,7 +41,7 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-
+import { fileIcon } from '@/components/icons/priceOffersIcons'
 const { t } = useI18n();
 
 interface Props {
@@ -32,6 +50,9 @@ interface Props {
     descriptionKey: string;
     actionLabel?: string;
     actionIcon?: string;
+    codeLabel?: string;
+    codeIcon?: string;
+    code?: string;
     showAction?: boolean;
 }
 
@@ -39,6 +60,8 @@ const props = withDefaults(defineProps<Props>(), {
     actionLabel: undefined,
     actionIcon: undefined,
     showAction: true,
+    codeLabel: 'كود العرض',
+    code: '#000'
 });
 
 const emit = defineEmits<{
@@ -48,4 +71,23 @@ const emit = defineEmits<{
 const onAction = () => {
     emit('action');
 };
+
+// Copy product code function
+const copyCode = async () => {
+    try {
+        await navigator.clipboard.writeText(props.code);
+        toast.success("تم نسخ الكود بنجاح");
+    } catch (err) {
+        console.error("Failed to copy:", err);
+        // Fallback for older browsers
+        const textArea = document.createElement("textarea");
+        textArea.value = props.code;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textArea);
+        toast.success("تم نسخ الكود بنجاح");
+    }
+};
+
 </script>

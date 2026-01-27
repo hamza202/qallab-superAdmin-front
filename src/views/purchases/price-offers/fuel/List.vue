@@ -4,7 +4,7 @@ import { useRouter } from "vue-router";
 import { useI18n } from 'vue-i18n'
 import DatePickerInput from '@/components/common/forms/DatePickerInput.vue';
 
-import { GridIcon, importIcon, exportIcon, trash_1_icon, trash_2_icon, columnIcon, trashIcon, editIcon, eyeIcon, searchIcon, plusIcon, refreshIcon } from '../../../../components/icons/priceOffersIcons';
+import { GridIcon, importIcon, exportIcon, trash_1_icon, trash_2_icon, columnIcon, trashIcon, editIcon, eyeIcon, searchIcon, plusIcon, refreshIcon } from '@/components/icons/priceOffersIcons';
 
 const { t } = useI18n()
 
