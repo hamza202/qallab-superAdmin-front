@@ -1,30 +1,30 @@
-# Qallab superAdmin Portal
+# Qallab Admin Portal
 
-A Vue 3 superAdmin Portal built with TypeScript, supporting Arabic and English languages.
+A Vue 3 Admin Portal built with TypeScript, supporting Arabic and English languages.
 
 ## Tech Stack
 
-| Technology | Description |
-|------------|-------------|
-| **Vue 3** | Progressive JavaScript Framework with Composition API |
-| **TypeScript** | Type-safe JavaScript |
-| **Vite** | Fast build tool for development |
-| **Pinia** | State Management |
-| **Vue Router 4** | Routing and navigation |
-| **Vue I18n** | Internationalization (Arabic/English) |
-| **Vuetify 3** | Material Design Component Library |
-| **Tailwind CSS 3** | Utility-first CSS framework |
-| **Axios** | HTTP Client for API requests |
+| Technology         | Description                                           |
+| ------------------ | ----------------------------------------------------- |
+| **Vue 3**          | Progressive JavaScript Framework with Composition API |
+| **TypeScript**     | Type-safe JavaScript                                  |
+| **Vite**           | Fast build tool for development                       |
+| **Pinia**          | State Management                                      |
+| **Vue Router 4**   | Routing and navigation                                |
+| **Vue I18n**       | Internationalization (Arabic/English)                 |
+| **Vuetify 3**      | Material Design Component Library                     |
+| **Tailwind CSS 3** | Utility-first CSS framework                           |
+| **Axios**          | HTTP Client for API requests                          |
 
 ## Project Structure
 
 ```
-qallab-superAdmin-front/
+qallab-Admin-front/
 ├── public/                    # Public static files
 │   └── favicon.svg            # Site favicon
 ├── src/
 │   ├── assets/                # Static assets (images, fonts)
-│   │   
+│   │
 │   │
 │   ├── components/            # Reusable components
 │   │   ├── common/            # Common components (Loader, Dialog, DataTable)
@@ -137,7 +137,7 @@ Create a `.env` file based on `.env.example`:
 
 ```env
 # Application title
-VITE_APP_TITLE=Qallab superAdmin Portal
+VITE_APP_TITLE=Qallab Admin Portal
 
 # Development port
 VITE_PORT=3001
@@ -155,38 +155,50 @@ VITE_FALLBACK_LOCALE=en
 ## Key Files
 
 ### `src/main.ts`
+
 Application entry point - initializes Vue with Pinia, Router, I18n, and Vuetify.
 
 ### `src/App.vue`
+
 Root component - watches locale changes and updates page direction (RTL/LTR).
 
 ### `src/plugins/vuetify.ts`
+
 Vuetify setup with icons, colors, and bilingual support.
 
 ### `tailwind.config.js`
+
 Tailwind CSS configuration with:
+
 - Custom primary color palette
 - Content paths for Vue files
 - `important: '#app'` for Vuetify compatibility
 
 ### `src/plugins/i18n.ts`
+
 Vue I18n setup with Arabic and English translation files.
 
 ### `src/services/api/index.ts`
+
 Axios client with:
+
 - Interceptor to automatically add auth token
 - Interceptor to add locale in headers
 - 401 error handling with automatic logout
 
 ### `src/stores/locale.ts`
+
 Pinia store for locale management:
+
 - `currentLocale` - Current locale
 - `isRtl` - Is direction right-to-left
 - `setLocale()` - Change locale
 - `toggleLocale()` - Toggle between languages
 
 ### `src/stores/auth.ts`
+
 Pinia store for authentication:
+
 - `user` - User data
 - `token` - Auth token
 - `isAuthenticated` - Login status
