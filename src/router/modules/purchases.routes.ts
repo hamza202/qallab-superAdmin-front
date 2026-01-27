@@ -17,7 +17,7 @@ export const purchasesRoutes: RouteRecordRaw[] = [
       {
         path: 'create',
         name: 'RequestForQuotationCreate',
-        component: () => import('@/views/purchases/price-offers/RequestForQuotation.vue'),
+        component: () => import('@/views/purchases/price-offers/tests/RequestForQuotation.vue'),
         meta: {
           title: 'pages.requestForQuotation.create',
         },
@@ -25,7 +25,7 @@ export const purchasesRoutes: RouteRecordRaw[] = [
       {
         path: 'edit/:id',
         name: 'RequestForQuotationEdit',
-        component: () => import('@/views/purchases/price-offers/RequestForQuotation.vue'),
+        component: () => import('@/views/purchases/price-offers/tests/RequestForQuotation.vue'),
         meta: {
           title: 'pages.requestForQuotation.edit',
         },
@@ -33,7 +33,7 @@ export const purchasesRoutes: RouteRecordRaw[] = [
       {
         path: 'view/:id',
         name: 'RequestForQuotationView',
-        component: () => import('@/views/purchases/price-offers/RequestForQuotation.vue'),
+        component: () => import('@/views/purchases/price-offers/tests/RequestForQuotation.vue'),
         meta: {
           title: 'pages.requestForQuotation.view',
         },
@@ -48,7 +48,7 @@ export const purchasesRoutes: RouteRecordRaw[] = [
       {
         path: 'create',
         name: 'RequestForQuotationMaterialProductCreate',
-        component: () => import('@/views/purchases/price-offers/RequestForQuotationMaterialProduct.vue'),
+        component: () => import('@/views/purchases/price-offers/material-building-products/Form.vue'),
         meta: {
           title: 'pages.requestForQuotationMaterialProduct.title',
         },
@@ -56,7 +56,7 @@ export const purchasesRoutes: RouteRecordRaw[] = [
       {
         path: 'edit/:id',
         name: 'RequestForQuotationMaterialProductEdit',
-        component: () => import('@/views/purchases/price-offers/RequestForQuotationMaterialProduct.vue'),
+        component: () => import('@/views/purchases/price-offers/material-building-products/Form.vue'),
         meta: {
           title: 'pages.requestForQuotationMaterialProduct.edit',
         },
@@ -64,7 +64,7 @@ export const purchasesRoutes: RouteRecordRaw[] = [
       {
         path: 'view/:id',
         name: 'RequestForQuotationMaterialProductView',
-        component: () => import('@/views/purchases/price-offers/RequestForQuotationMaterialProduct.vue'),
+        component: () => import('@/views/purchases/price-offers/material-building-products/View.vue'),
         meta: {
           title: 'pages.requestForQuotationMaterialProduct.view',
         },
