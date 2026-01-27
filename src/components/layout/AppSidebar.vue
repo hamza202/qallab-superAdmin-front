@@ -291,7 +291,7 @@
                                         طلب عروض الأسعار</router-link>
                                 </li> -->
                                 <li  class="relative">
-                                    <router-link to="/purchases/request-for-quotations-material-product/create"
+                                    <router-link to="/purchases/request-for-quotations-material-product/list"
                                         :class="[isMenuItemActive('/purchases/request-for-quotations-material-product') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         طلب عروض أسعار مواد أولية</router-link>
                                 </li>
