@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { useI18n } from 'vue-i18n'
-import AddProductDialog from '../../../../components/price-offers/AddProductDialog.vue';
-import TopHeader from '../../../../components/price-offers/TopHeader.vue';
+import AddProductDialog from '@/components/price-offers/AddProductDialog.vue';
+import TopHeader from '@/components/price-offers/TopHeader.vue';
 
-import { fileIcon, mapMarkerIcon, packageIcon, messagePlusIcon, downloadIcon, fileQuestionIcon, microphoneIcon, UploadedFileIcon, fileCheckIcon } from '../../../../components/icons/priceOffersIcons';
+import { fileIcon, mapMarkerIcon, packageIcon, messagePlusIcon, downloadIcon, fileQuestionIcon, microphoneIcon, UploadedFileIcon, fileCheckIcon } from '@/components/icons/priceOffersIcons';
 const { t } = useI18n()
 
 interface ProductItem {
@@ -148,8 +148,8 @@ const items = [
         <div class="request-material-product-page -mx-6">
             <!-- Page Header -->
             <TopHeader :icon="fileQuestionIcon" title-key="pages.requestForQuotationFuel.FormTitle"
-                description-key="pages.requestForQuotationFuel.FormDescription" action-label="طلب جديد"
-                :action-icon="fileIcon" @action="handleNewRequest" />
+                description-key="pages.requestForQuotationFuel.FormDescription" :show-action="false" code="#124098"
+                :code-icon="fileIcon" @action="handleNewRequest" />
 
             <!-- Request Information Section -->
             <div class="p-6">
@@ -231,9 +231,9 @@ const items = [
             <!-- Products Section -->
             <div class="mb-8">
                 <div class="flex flex-wrap gap-3 items-center justify-between bg-primary-50 px-6 py-3">
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-center text-primary-600 gap-2">
                         <span v-html="packageIcon"></span>
-                        <h2 class="text-xl font-bold text-primary-900">المنتجات</h2>
+                        <h2 class="text-xl font-bold ">المنتجات</h2>
                     </div>
                     <ButtonWithIcon color="primary-100" variant="flat" :prepend-icon="downloadIcon"
                         class="!text-primary-900 font-bold">

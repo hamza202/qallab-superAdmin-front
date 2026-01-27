@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { useI18n } from 'vue-i18n'
-import AddProductDialog from '../../../../components/purchases/price-offers/AddProductDialog.vue';
-import AddTransportServiceDialog from '../../../../components/price-offers/AddTransportServiceDialog.vue';
-import TopHeader from '../../../../components/price-offers/TopHeader.vue';
+import AddProductDialog from '@/components/price-offers/AddProductDialog.vue';
+import AddTransportServiceDialog from '@/components/price-offers/AddTransportServiceDialog.vue';
+import TopHeader from '@/components/price-offers/TopHeader.vue';
 
 const { t } = useI18n()
 
@@ -288,8 +288,8 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
         <div class="request-material-product-page -mx-6">
             <!-- Page Header -->
             <TopHeader :icon="formIcon" title-key="pages.requestForQuotationMaterialProduct.FormTitle"
-                description-key="pages.requestForQuotationMaterialProduct.FormDescription" action-label="طلب جديد"
-                :action-icon="fileIcon" @action="handleNewRequest" />
+                description-key="pages.requestForQuotationMaterialProduct.FormDescription":show-action="false" code="#124098"
+                :code-icon="fileIcon" @action="handleNewRequest" />
             
             <!-- Request Information Section -->
             <div class="p-6">
