@@ -247,7 +247,7 @@ const openCreateRequest = () => {
 
                         <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4"
                             custom-class="px-7 font-semibold text-base !text-primary-800 border !border-primary-200"
-                            :prepend-icon="plusIcon" label="أضف مشروع" @click="openCreateRequest" />
+                            :prepend-icon="plusIcon" label="أضف طلب" @click="openCreateRequest" />
                     </div>
                 </div>
 
