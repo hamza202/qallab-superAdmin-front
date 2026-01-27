@@ -293,13 +293,12 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
                             <span v-html="formIcon"></span>
                         </div>
                         <div>
-                            <h1 class="text-lg font-bold">{{ t('pages.requestForQuotationMaterialProduct.title') }}
+                            <h1 class="text-lg font-bold">{{ t('pages.requestForQuotationMaterialProduct.FormTitle') }}
                             </h1>
-                            <p class="text-sm">{{ t('pages.requestForQuotationMaterialProduct.description') }}</p>
+                            <p class="text-sm">{{ t('pages.requestForQuotationMaterialProduct.FormDescription') }}</p>
                         </div>
                     </div>
                 </div>
-
                 <ButtonWithIcon color="primary-50" class="!text-primary-900 font-bold" :prepend-icon="fileIcon"
                     @click="handleNewRequest" label="طلب جديد" />
 
