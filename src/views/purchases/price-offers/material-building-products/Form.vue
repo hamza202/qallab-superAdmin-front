@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { useI18n } from 'vue-i18n'
-import AddProductDialog from './components/AddProductDialog.vue';
-import AddTransportServiceDialog from './components/AddTransportServiceDialog.vue';
+import AddProductDialog from '../../../../components/purchases/price-offers/AddProductDialog.vue';
+import AddTransportServiceDialog from '../../../../components/purchases/price-offers/AddTransportServiceDialog.vue';
+import TopHeader from '../../../../components/purchases/price-offers/TopHeader.vue';
 
 const { t } = useI18n()
 
@@ -104,9 +105,9 @@ const handleAddProduct = () => {
     showAddProductDialog.value = true;
 };
 
-const handleProductSaved = (product: any) => {
-    console.log('Product saved:', product);
-    // Add logic to add product to the list
+const handleProductSaved = (products: any[]) => {
+    console.log('Products saved:', products);
+    // Add logic to add products to the list
 };
 
 const handleEditProduct = (item: ProductItem) => {
@@ -286,24 +287,10 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
     <default-layout>
         <div class="request-material-product-page -mx-6">
             <!-- Page Header -->
-            <div class="bg-primary-500 flex flex-wrap justify-between items-center gap-3 text-white rounded-3xl -mt-6 px-6 py-12">
-                <div class="flex items-start justify-between">
-                    <div class="flex items-center gap-4">
-                        <div class="w-[52px] h-[52px] flex items-center justify-center">
-                            <span v-html="formIcon"></span>
-                        </div>
-                        <div>
-                            <h1 class="text-lg font-bold">{{ t('pages.requestForQuotationMaterialProduct.FormTitle') }}
-                            </h1>
-                            <p class="text-sm">{{ t('pages.requestForQuotationMaterialProduct.FormDescription') }}</p>
-                        </div>
-                    </div>
-                </div>
-                <ButtonWithIcon color="primary-50" class="!text-primary-900 font-bold" :prepend-icon="fileIcon"
-                    @click="handleNewRequest" label="طلب جديد" />
-
-            </div>
-
+            <TopHeader :icon="formIcon" title-key="pages.requestForQuotationMaterialProduct.FormTitle"
+                description-key="pages.requestForQuotationMaterialProduct.FormDescription" action-label="طلب جديد"
+                :action-icon="fileIcon" @action="handleNewRequest" />
+            
             <!-- Request Information Section -->
             <div class="p-6">
                 <div class="flex items-center justify-between mb-6">
@@ -532,7 +519,7 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
         <Map v-model="showMapDialog" @location-selected="handleLocationSelected" />
 
         <!-- Add Product Dialog -->
-        <AddProductDialog v-model="showAddProductDialog" @saved="handleProductSaved" />
+        <AddProductDialog v-model="showAddProductDialog" request-type="raw_materials" @saved="handleProductSaved" />
 
         <!-- Add Transport Service Dialog -->
         <AddTransportServiceDialog v-model="showAddTransportServiceDialog" @saved="handleTransportServiceSaved" />

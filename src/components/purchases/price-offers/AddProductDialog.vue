@@ -1,10 +1,14 @@
 <script setup lang="ts">
-import { computed, reactive, ref } from "vue";
+import { computed, ref } from "vue";
+
+type RequestType = 'raw_materials' | 'fuel' | 'transfer_service';
 
 interface ProductForm {
   name: string;
   quantity: number | null;
   unit: string | null;
+  packing: string | null;
+  supplyType: string | null;
   packageType: string | null;
   deliveryCount: number | null;
   notes: string;
@@ -13,11 +17,12 @@ interface ProductForm {
 
 const props = defineProps<{
   modelValue: boolean;
+  requestType: RequestType;
 }>();
 
 const emit = defineEmits<{
   "update:modelValue": [value: boolean];
-  "saved": [product: ProductForm];
+  "saved": [products: ProductForm[]];
 }>();
 
 const internalOpen = computed({
@@ -28,18 +33,18 @@ const internalOpen = computed({
 const formRef = ref<any>(null);
 const isFormValid = ref(false);
 
-const form = reactive<ProductForm>({
-  name: "اسم المنتج",
-  quantity: null,
-  unit: "",
-  packageType: "",
-  deliveryCount: null,
-  notes: "",
-  image: null,
-});
-
 const products = ref([
-  { name: "اسم المنتج", quantity: null, unit: null, packageType: null, deliveryCount: null, notes: "", image: null }
+  {
+    name: "اسم المنتج",
+    quantity: null,
+    unit: null,
+    packing: null,
+    supplyType: null,
+    packageType: null,
+    deliveryCount: null,
+    notes: "",
+    image: null,
+  }
 ]);
 
 const unitItems = ref([
@@ -75,7 +80,17 @@ const searchQuery = ref('');
 
 const resetForm = () => {
   products.value = [
-    { name: "اسم المنتج", quantity: null, unit: null, packageType: null, deliveryCount: null, notes: "", image: null }
+    {
+      name: "اسم المنتج",
+      quantity: null,
+      unit: null,
+      packing: null,
+      supplyType: null,
+      packageType: null,
+      deliveryCount: null,
+      notes: "",
+      image: null,
+    }
   ];
   searchQuery.value = '';
 };
@@ -90,6 +105,8 @@ const addProduct = () => {
     name: "اسم المنتج",
     quantity: null,
     unit: null,
+    packing: null,
+    supplyType: null,
     packageType: null,
     deliveryCount: null,
     notes: "",
@@ -109,7 +126,7 @@ const handleSave = async () => {
     if (!valid) return;
   }
 
-  emit('saved', form);
+  emit('saved', products.value);
   closeDialog();
 };
 
@@ -200,25 +217,39 @@ const plusIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
                 {{ product.name }}
               </div>
               <!-- Quantity -->
-              <div >
-                <TextInput v-model="product.quantity" type="number" placeholder="الكمية" density="compact" class="min-w-[170px]" />
+              <div>
+                <TextInput v-model="product.quantity" type="number" placeholder="الكمية" density="compact"
+                  class="min-w-[170px]" />
               </div>
 
               <!-- Unit -->
-              <div >
-                <SelectInput v-model="product.unit" :items="unitItems" placeholder="الوحدة" density="compact" class="min-w-[170px]" />
+              <div>
+                <SelectInput v-model="product.unit" :items="unitItems" placeholder="الوحدة" density="compact"
+                  class="min-w-[170px]" />
               </div>
 
 
+              <!-- Packing -->
+              <div v-if="requestType == 'fuel'">
+                <SelectInput   v-model="product.packing" :items="unitItems" placeholder="التعبئة" density="compact"
+                  class="min-w-[170px]" />
+              </div>
+
+              <!-- Supply type -->
+              <div v-if="requestType == 'fuel'">
+                <SelectInput   v-model="product.supplyType" :items="unitItems" placeholder="نوع التوريد" density="compact"
+                  class="min-w-[170px]" />
+              </div>
+
               <!-- Delivery Count -->
-              <div >
-                <TextInput v-model="product.deliveryCount" type="number" placeholder="عدد الرحلات" density="compact"
-                   class="min-w-[170px]" />
+              <div v-if="requestType == 'raw_materials'">
+                <TextInput  v-model="product.deliveryCount" type="number" placeholder="عدد الرحلات" density="compact"
+                  class="min-w-[170px]" />
               </div>
 
               <!-- Package Type -->
-              <div>
-                <SelectInput v-model="product.packageType" :items="packageTypeItems" placeholder="نوع الناقلة"
+              <div v-if="requestType == 'raw_materials'">
+                <SelectInput   v-model="product.packageType" :items="packageTypeItems" placeholder="نوع الناقلة"
                   density="compact" class="min-w-[170px]" />
               </div>
             </div>
@@ -230,7 +261,7 @@ const plusIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
 
     <template #actions>
       <div class="flex items-center justify-center gap-4 flex-1 mt-4">
-        <ButtonWithIcon variant="flat" color="primary" size="large" custom-class="px-8" label="أضف منتجات"
+        <ButtonWithIcon variant="flat" color="primary" size="large" custom-class="px-8" label="إضافة منتج"
           :prepend-icon="plusIcon" @click="handleSave" />
 
         <ButtonWithIcon variant="outlined" color="gray-700" border="gray-300" size="large" custom-class="px-4"
