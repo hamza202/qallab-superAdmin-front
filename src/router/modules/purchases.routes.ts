@@ -86,4 +86,47 @@ export const purchasesRoutes: RouteRecordRaw[] = [
       },
     ],
   },
+    {
+    path: "/purchases/request-for-quotations-fuel",
+    name: "RequestForQuotationsFuel",
+    redirect: "/purchases/request-for-quotations-fuel/list",
+    children: [
+      {
+        path: "list",
+        name: "RequestForQuotationFuelList",
+        component: () =>
+          import("@/views/purchases/price-offers/fuel/List.vue"),
+        meta: {
+          title: "pages.requestForQuotationFuel.title",
+        },
+      },
+      {
+        path: "create",
+        name: "RequestForQuotationFuelCreate",
+        component: () =>
+          import("@/views/purchases/price-offers/fuel/Form.vue"),
+        meta: {
+          title: "pages.requestForQuotationFuel.title",
+        },
+      },
+      {
+        path: "edit/:id",
+        name: "RequestForQuotationFuelEdit",
+        component: () =>
+          import("@/views/purchases/price-offers/fuel/Form.vue"),
+        meta: {
+          title: "pages.requestForQuotationFuel.edit",
+        },
+      },
+      {
+        path: "view/:id",
+        name: "RequestForQuotationFuelView",
+        component: () =>
+          import("@/views/purchases/price-offers/fuel/View.vue"),
+        meta: {
+          title: "pages.requestForQuotationFuel.view",
+        },
+      },
+    ],
+  },
 ];
