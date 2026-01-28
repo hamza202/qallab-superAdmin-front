@@ -4,8 +4,60 @@ import { useI18n } from 'vue-i18n'
 import AddProductDialog from '@/components/price-offers/AddProductDialog.vue';
 import AddTransportServiceDialog from '@/components/price-offers/AddTransportServiceDialog.vue';
 import TopHeader from '@/components/price-offers/TopHeader.vue';
+import { useApi } from '@/composables/useApi';
+import { onMounted } from 'vue';
 
 const { t } = useI18n()
+const api = useApi();
+const requestTypeItems = ref([]);
+const paymentMethodItems = ref([]);
+const transportTypeItems = ref([]);
+const deliveredMethodItems = ref([]);
+const unitItems = ref([]);
+const supplierItems = ref([]);
+
+const fetchConstants = async () => {
+    try {
+        const res = await api.get<any>('/purchases/constants');
+        const data = res.data;
+        if (data) {
+             requestTypeItems.value = data.request_types?.map((i: any) => ({ title: i.label, value: i.key })) || [];
+             paymentMethodItems.value = data.payment_methods?.map((i: any) => ({ title: i.label, value: i.key })) || [];
+             transportTypeItems.value = data.transport_types?.map((i: any) => ({ title: i.label, value: i.key })) || [];
+             deliveredMethodItems.value = data.delivered_methods?.map((i: any) => ({ title: i.label, value: i.key })) || [];
+        }
+    } catch(e) {
+        console.error('Error fetching constants:', e);
+    }
+}
+
+const fetchSuppliers = async () => {
+    try {
+        const res = await api.get<any>('/suppliers/list');
+        if (Array.isArray(res.data)) {
+            supplierItems.value = res.data.map((i: any) => ({ title: i.full_name, value: i.id }));
+        }
+    } catch(e) {
+        console.error('Error fetching suppliers:', e);
+    }
+}
+
+const fetchUnits = async () => {
+    try {
+        const res = await api.get<any>('/units/list');
+        if (Array.isArray(res.data)) {
+            unitItems.value = res.data.map((i: any) => ({ title: i.name, value: i.id }));
+        }
+    } catch(e) {
+        console.error('Error fetching units:', e);
+    }
+}
+
+onMounted(() => {
+    fetchConstants();
+    fetchUnits();
+    fetchSuppliers();
+});
 
 interface ProductItem {
     id: number;
@@ -32,11 +84,11 @@ interface TransportService {
 // Form data with static values
 const formData = ref({
     requestNumber: '#12520226',
-    requestType: 'ثنائي',
-    supplierName: 'حدد المورد',
+    requestType: null,
+    supplier_id: null,
     issueDate: '',
-    requestStatus: 'جديد',
-    paymentMethod: 'آجل',
+    requestStatus: null,
+    paymentMethod: null,
     projectLocation: 'شارع الدكتور عبد القادر كوشك',
     advancePayment: '1550 ريال',
     textNote: '',
@@ -302,16 +354,16 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">نوع الطلب</label>
                         <SelectInput v-model="formData.requestType"
-                            :items="[{ title: 'ثنائي', value: 'ثنائي' }, { title: 'فردي', value: 'فردي' }]"
+                            :items="requestTypeItems" placeholder="حدد نوع الطلب"
                             item-title="title" item-value="value" density="comfortable" />
                     </div>
 
                     <!-- Supplier Name -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">اسم المورد</label>
-                        <SelectInput v-model="formData.supplierName"
-                            :items="[{ title: 'حدد المورد', value: 'حدد المورد' }]" item-title="title"
-                            item-value="value" density="comfortable" />
+                        <SelectInput v-model="formData.supplier_id"
+                            :items="supplierItems" item-title="title"
+                            item-value="value" density="comfortable" placeholder="حدد المورد" />
                     </div>
 
                     <!-- Issue Date -->
@@ -325,16 +377,16 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">حالة الطلب</label>
                         <SelectInput v-model="formData.requestStatus"
-                            :items="[{ title: 'جديد', value: 'جديد' }, { title: 'قيد المعالجة', value: 'قيد المعالجة' }]"
-                            item-title="title" item-value="value" density="comfortable" />
+                            :items="[{ title: 'مسودة', value: '1' }]"
+                            item-title="title" item-value="value" density="comfortable" placeholder="حدد حالة الطلب" />
                     </div>
 
                     <!-- Project Location -->
                     <div class="relative">
                         <label class="text-sm font-medium text-gray-700 mb-2 block">موقع المشروع</label>
                         <div @click="openMapDialog"
-                            class="flex items-center justify-between px-4 py-2 bg-blue-50/60 border-2 border-blue-400 rounded-lg cursor-pointer hover:bg-blue-100 transition-colors">
-                            <span class="text-base font-medium text-blue-900">
+                            class="flex items-center justify-between px-4 py-2 min-h-[48px] border !border-blue-400 rounded-lg cursor-pointer hover:bg-blue-100 transition-colors">
+                            <span class="text-base font-medium text-blue-900 whitespace-nowrap overflow-hidden text-ellipsis ">
                                 {{ formData.projectLocation || 'حدد الموقع' }}
                             </span>
                             <div class="flex items-center gap-2">
@@ -347,7 +399,7 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">طريقة الدفع</label>
                         <SelectInput v-model="formData.paymentMethod"
-                            :items="[{ title: 'آجل', value: 'آجل' }, { title: 'كاش', value: 'كاش' }]" item-title="title"
+                            :items="paymentMethodItems" item-title="title" placeholder="حدد طريقة الدفع"
                             item-value="value" density="comfortable" />
                     </div>
 
@@ -519,10 +571,15 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
         <Map v-model="showMapDialog" @location-selected="handleLocationSelected" />
 
         <!-- Add Product Dialog -->
-        <AddProductDialog v-model="showAddProductDialog" request-type="raw_materials" @saved="handleProductSaved" />
+        <AddProductDialog v-model="showAddProductDialog" request-type="raw_materials" 
+            :transport-types="transportTypeItems"
+            :unit-items="unitItems"
+            @saved="handleProductSaved" />
 
         <!-- Add Transport Service Dialog -->
-        <AddTransportServiceDialog v-model="showAddTransportServiceDialog" @saved="handleTransportServiceSaved" />
+        <AddTransportServiceDialog v-model="showAddTransportServiceDialog" 
+            :delivered-methods="deliveredMethodItems"
+            @saved="handleTransportServiceSaved" />
 
     </default-layout>
 </template>

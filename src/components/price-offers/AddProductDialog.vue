@@ -18,6 +18,8 @@ interface ProductForm {
 const props = defineProps<{
   modelValue: boolean;
   requestType: RequestType;
+  transportTypes?: any[];
+  unitItems?: any[];
 }>();
 
 const emit = defineEmits<{
@@ -47,13 +49,13 @@ const products = ref([
   }
 ]);
 
-const unitItems = ref([
+const unitItemsList = computed(() => props.unitItems || [
   { title: 'طن', value: 'طن' },
   { title: 'متر مربع (m2)', value: 'متر مربع (m2)' },
   { title: 'كيلو جرام', value: 'كيلو جرام' },
 ]);
 
-const packageTypeItems = ref([
+const packageTypeItemsList = computed(() => props.transportTypes || [
   { title: 'شحن 10', value: 'شحن 10' },
   { title: 'شحن 12', value: 'شحن 12' },
   { title: 'شحن 15', value: 'شحن 15' },
@@ -224,21 +226,21 @@ const plusIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
 
               <!-- Unit -->
               <div>
-                <SelectInput v-model="product.unit" :items="unitItems" placeholder="الوحدة" density="compact"
-                  class="min-w-[170px]" />
+                <SelectInput v-model="product.unit" :items="unitItemsList" placeholder="الوحدة" density="compact"
+                  class="min-w-[170px]" item-title="title" item-value="value" />
               </div>
 
 
               <!-- Packing -->
               <div v-if="requestType == 'fuel'">
-                <SelectInput   v-model="product.packing" :items="unitItems" placeholder="التعبئة" density="compact"
-                  class="min-w-[170px]" />
+                <SelectInput   v-model="product.packing" :items="unitItemsList" placeholder="التعبئة" density="compact"
+                  class="min-w-[170px]" item-title="title" item-value="value" />
               </div>
 
               <!-- Supply type -->
               <div v-if="requestType == 'fuel'">
-                <SelectInput   v-model="product.supplyType" :items="unitItems" placeholder="نوع التوريد" density="compact"
-                  class="min-w-[170px]" />
+                <SelectInput   v-model="product.supplyType" :items="unitItemsList" placeholder="نوع التوريد" density="compact"
+                  class="min-w-[170px]" item-title="title" item-value="value" />
               </div>
 
               <!-- Delivery Count -->
@@ -249,8 +251,8 @@ const plusIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
 
               <!-- Package Type -->
               <div v-if="requestType == 'raw_materials'">
-                <SelectInput   v-model="product.packageType" :items="packageTypeItems" placeholder="نوع الناقلة"
-                  density="compact" class="min-w-[170px]" />
+                <SelectInput   v-model="product.packageType" :items="packageTypeItemsList" placeholder="نوع الناقلة"
+                  density="compact" class="min-w-[170px]" item-title="title" item-value="value" />
               </div>
             </div>
           </div>
