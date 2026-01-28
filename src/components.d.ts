@@ -39,5 +39,6 @@ declare module 'vue' {
     TelInput: typeof import('./components/common/forms/TelInput.vue')['default']
     TextareaInput: typeof import('./components/common/forms/TextareaInput.vue')['default']
     TextInput: typeof import('./components/common/forms/textInput.vue')['default']
+    VoiceRecorder: typeof import('./components/common/forms/VoiceRecorder.vue')['default']
   }
 }

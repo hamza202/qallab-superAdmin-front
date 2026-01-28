@@ -1,20 +1,30 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router';
 import AddProductDialog from '@/components/price-offers/AddProductDialog.vue';
 import AddTransportServiceDialog from '@/components/price-offers/AddTransportServiceDialog.vue';
 import TopHeader from '@/components/price-offers/TopHeader.vue';
+import VoiceRecorder from '@/components/common/forms/VoiceRecorder.vue';
 import { useApi } from '@/composables/useApi';
-import { onMounted } from 'vue';
 
 const { t } = useI18n()
 const api = useApi();
-const requestTypeItems = ref([]);
-const paymentMethodItems = ref([]);
-const transportTypeItems = ref([]);
-const deliveredMethodItems = ref([]);
-const unitItems = ref([]);
-const supplierItems = ref([]);
+const route = useRoute();
+const router = useRouter();
+
+// Check if we're in edit mode
+const isEditMode = computed(() => !!route.params.id);
+const routeId = computed(() => route.params.id as string);
+const isLoading = ref(false);
+const isSubmitting = ref(false);
+
+const requestTypeItems = ref<any[]>([]);
+const paymentMethodItems = ref<any[]>([]);
+const transportTypeItems = ref<any[]>([]);
+const amPmIntervalItems = ref<any[]>([]);
+const unitItems = ref<any[]>([]);
+const supplierItems = ref<any[]>([]);
 
 const fetchConstants = async () => {
     try {
@@ -24,7 +34,7 @@ const fetchConstants = async () => {
              requestTypeItems.value = data.request_types?.map((i: any) => ({ title: i.label, value: i.key })) || [];
              paymentMethodItems.value = data.payment_methods?.map((i: any) => ({ title: i.label, value: i.key })) || [];
              transportTypeItems.value = data.transport_types?.map((i: any) => ({ title: i.label, value: i.key })) || [];
-             deliveredMethodItems.value = data.delivered_methods?.map((i: any) => ({ title: i.label, value: i.key })) || [];
+             amPmIntervalItems.value = data.am_pm_interval?.map((i: any) => ({ title: i.label, value: i.key })) || [];
         }
     } catch(e) {
         console.error('Error fetching constants:', e);
@@ -53,31 +63,132 @@ const fetchUnits = async () => {
     }
 }
 
-onMounted(() => {
-    fetchConstants();
-    fetchUnits();
-    fetchSuppliers();
+// Helper function to get transport type name from id
+const getTransportTypeName = (transportTypeId: number | string | null): string => {
+    if (!transportTypeId) return '';
+    const id = Number(transportTypeId);
+    const item = transportTypeItems.value.find((i: any) => i.value === id);
+    return item?.title || '';
+};
+
+// Helper function to get am/pm interval label
+const getAmPmIntervalLabel = (interval: string | null): string => {
+    if (!interval) return '';
+    const item = amPmIntervalItems.value.find((i: any) => i.value === interval);
+    return item?.title || '';
+};
+
+// Fetch form data for edit mode
+const fetchFormData = async () => {
+    if (!isEditMode.value || !routeId.value) return;
+    
+    isLoading.value = true;
+    try {
+        const res = await api.get<any>(`/purchases/building-materials/${routeId.value}`);
+        const data = res.data;
+        
+        if (data) {
+            // Populate form data
+            formData.value.requestType = data.request_type;
+            formData.value.supplier_id = data.supplier_id;
+            formData.value.issueDate = data.request_datetime ? data.request_datetime.split(' ')[0] : '';
+            formData.value.requestStatus = data.status_id;
+            formData.value.paymentMethod = data.payment_method;
+            formData.value.advancePayment = data.upfront_payment;
+            formData.value.target_location = data.target_location;
+            formData.value.target_latitude = data.target_latitude;
+            formData.value.target_longitude = data.target_longitude;
+            formData.value.textNote = data.notes || '';
+            
+            // Populate products (items)
+            if (data.items && Array.isArray(data.items)) {
+                productTableItems.value = data.items.map((item: any) => ({
+                    id: item.id,
+                    item_id: item.item_id,
+                    item_name: item.item_name || '',
+                    unit_id: item.unit_id,
+                    unit_name: item.unit_name || '',
+                    quantity: item.quantity,
+                    transport_type: item.transport_type,
+                    transport_type_name: getTransportTypeName(item.transport_type),
+                    trip_no: item.trip_no,
+                    notes: item.notes || ''
+                }));
+            }
+            
+            // Populate transport service (logistics_detail)
+            if (data.logistics_detail && (data.logistics_detail.from_date || data.logistics_detail.to_date)) {
+                // Convert transport_type strings to numbers
+                let vehicleTypes: number[] = [];
+                if (data.logistics_detail.transport_type) {
+                    if (Array.isArray(data.logistics_detail.transport_type)) {
+                        vehicleTypes = data.logistics_detail.transport_type.map((t: string | number) => Number(t));
+                    } else {
+                        vehicleTypes = [Number(data.logistics_detail.transport_type)];
+                    }
+                }
+                
+                // Get labels for vehicle types
+                const vehicleTypesLabels = vehicleTypes
+                    .map(id => getTransportTypeName(id))
+                    .filter(Boolean)
+                    .join(', ');
+                
+                transportService.value = {
+                    id: data.logistics_detail.id,
+                    from_date: data.logistics_detail.from_date || '',
+                    to_date: data.logistics_detail.to_date || '',
+                    vehicle_types: vehicleTypes,
+                    vehicle_types_labels: vehicleTypesLabels,
+                    am_pm_interval: data.logistics_detail.am_pm_interval || '',
+                    am_pm_interval_label: getAmPmIntervalLabel(data.logistics_detail.am_pm_interval),
+                    notes: data.logistics_detail.notes || ''
+                };
+            }
+        }
+    } catch(e) {
+        console.error('Error fetching form data:', e);
+    } finally {
+        isLoading.value = false;
+    }
+}
+
+onMounted(async () => {
+    await Promise.all([
+        fetchConstants(),
+        fetchUnits(),
+        fetchSuppliers()
+    ]);
+    
+    // Fetch form data if in edit mode
+    if (isEditMode.value) {
+        await fetchFormData();
+    }
 });
 
-interface ProductItem {
-    id: number;
-    image: string;
-    productName: string;
-    quantity: number;
-    unit: string;
-    packageType: string;
-    deliveryCount: number;
+// Interface for product items in the table
+interface ProductTableItem {
+    item_id: number;
+    item_name: string;
+    unit_id: number | null;
+    unit_name: string;
+    quantity: number | null;
+    transport_type: number | null;
+    transport_type_name: string;
+    trip_no: number | null;
     notes: string;
-    actions: string;
+    id?: number; // For edit mode
+    isAdded?: boolean; // For dialog state
 }
 
 interface TransportService {
-    id: number;
-    project: string;
-    fromDate: string;
-    toDate: string;
-    shipmentType: string;
-    deliveryTime: string;
+    id?: number;
+    from_date: string;
+    to_date: string;
+    vehicle_types: number[];
+    vehicle_types_labels: string;
+    am_pm_interval: string;
+    am_pm_interval_label: string;
     notes: string;
 }
 
@@ -86,121 +197,258 @@ const formData = ref({
     requestNumber: '#12520226',
     requestType: null,
     supplier_id: null,
+    target_location: null as string | null,
+    target_latitude: null as string | null,
+    target_longitude: null as string | null,
     issueDate: '',
     requestStatus: null,
     paymentMethod: null,
-    projectLocation: 'شارع الدكتور عبد القادر كوشك',
-    advancePayment: '1550 ريال',
+    advancePayment: null,
     textNote: '',
-    image: null
+    image: null,
+    voice_attachment: null
 });
 
-// Static product items
-const productItems = ref<ProductItem[]>([
-    {
-        id: 1,
-        image: '/images/products/cement.jpg',
-        productName: 'اسمنت بايز كرايت',
-        quantity: 30,
-        unit: 'طن',
-        packageType: 'شكارة 10',
-        deliveryCount: 5,
-        notes: 'لا يوجد',
-        actions: ''
-    },
-    {
-        id: 2,
-        image: '/images/products/tiles.jpg',
-        productName: 'البلاط / السيراميك',
-        quantity: 500,
-        unit: 'متر مربع (m2)',
-        packageType: 'شكارة 12',
-        deliveryCount: 5,
-        notes: 'حتى 100 طن لكل وحدها',
-        actions: ''
-    }
-]);
+// Products table items (dynamically populated from dialog)
+const productTableItems = ref<ProductTableItem[]>([]);
 
-// Static transport services
-const transportServices = ref<TransportService[]>([
-    {
-        id: 1,
-        project: 'مكة',
-        fromDate: '22/6/2025',
-        toDate: '26/7/2026',
-        shipmentType: 'قالب',
-        deliveryTime: 'صباحا',
-        notes: 'لا يوجد'
-    },
-    {
-        id: 2,
-        project: 'القصيم',
-        fromDate: '22/6/2025',
-        toDate: '26/7/2026',
-        shipmentType: 'سطحة',
-        deliveryTime: 'مساءا',
-        notes: 'مقطعة بالكامل'
-    }
-]);
+// Transport service (single item - dynamically populated from dialog)
+const transportService = ref<TransportService | null>(null);
+
+// Computed: check if transport service exists
+const hasTransportService = computed(() => transportService.value !== null);
 
 // Summary data
-const summaryData = ref({
-    productsCount: 2,
-    servicesCount: 0,
-    paymentMethod: 'كاش',
-    advancePayment: '50.000'
-});
+const summaryData = computed(() => ({
+    productsCount: productTableItems.value.length,
+    // servicesCount: transportService.value ? 1 : 0,
+    paymentMethod: paymentMethodItems.value.find((i: any) => i.value === formData.value.paymentMethod)?.title || '',
+    advancePayment: formData.value.advancePayment || 'لا يوجد'
+}));
+
+import { useNotification } from '@/composables/useNotification';
+import { required } from '@/utils/validators';
+
+const { warning } = useNotification();
 
 const showAddProductDialog = ref(false);
+const editingProduct = ref<ProductTableItem | null>(null);
 
 const handleAddProduct = () => {
+    if (!formData.value.supplier_id) {
+        warning('يجب عليك اختيار اسم المورد أولاً');
+        return;
+    }
+    editingProduct.value = null; // Reset edit mode
     showAddProductDialog.value = true;
 };
 
-const handleProductSaved = (products: any[]) => {
-    console.log('Products saved:', products);
-    // Add logic to add products to the list
+const handleProductSaved = (products: ProductTableItem[]) => {
+    // Merge new products while preserving existing notes
+    const newItems: ProductTableItem[] = [];
+    
+    products.forEach(p => {
+        // Find if this product already exists in the table
+        const existing = productTableItems.value.find(existing => existing.item_id === p.item_id);
+        
+        newItems.push({
+            ...p,
+            notes: existing?.notes || p.notes || '' // Preserve existing notes
+        });
+    });
+    
+    productTableItems.value = newItems;
 };
 
-const handleEditProduct = (item: ProductItem) => {
-    console.log('Edit product:', item);
+const handleEditProduct = (item: any) => {
+    // Find the full product data
+    const productToEdit = productTableItems.value.find(p => p.item_id === item.item_id);
+    if (productToEdit) {
+        editingProduct.value = { ...productToEdit, isAdded: true };
+        showAddProductDialog.value = true;
+    }
 };
 
-const handleDeleteProduct = (item: ProductItem) => {
-    const index = productItems.value.findIndex(p => p.id === item.id);
+const handleProductUpdated = (updatedProduct: ProductTableItem) => {
+    const index = productTableItems.value.findIndex(p => p.item_id === updatedProduct.item_id);
     if (index !== -1) {
-        productItems.value.splice(index, 1);
+        // Preserve the notes from the table
+        const existingNotes = productTableItems.value[index].notes;
+        productTableItems.value[index] = {
+            ...updatedProduct,
+            notes: existingNotes || updatedProduct.notes || ''
+        };
+    }
+    editingProduct.value = null;
+};
+
+const handleDeleteProduct = (item: any) => {
+    const index = productTableItems.value.findIndex(p => p.item_id === item.item_id);
+    if (index !== -1) {
+        productTableItems.value.splice(index, 1);
     }
 };
 
 const showAddTransportServiceDialog = ref(false);
+const editingTransportService = ref<TransportService | null>(null);
 
 const handleAddTransportService = () => {
+    editingTransportService.value = null; // Reset edit mode
     showAddTransportServiceDialog.value = true;
 };
 
-const handleTransportServiceSaved = (service: any) => {
-    console.log('Transport service saved:', service);
-    // Add logic to add service to the list
+const handleTransportServiceSaved = (service: TransportService) => {
+    transportService.value = service;
 };
 
-const handleEditTransportService = (item: TransportService) => {
-    console.log('Edit transport service:', item);
+const handleTransportServiceUpdated = (service: TransportService) => {
+    transportService.value = service;
+    editingTransportService.value = null;
+};
+
+const handleEditTransportService = () => {
+    if (transportService.value) {
+        editingTransportService.value = { ...transportService.value };
+        showAddTransportServiceDialog.value = true;
+    }
 };
 
 const handleNewRequest = () => {
     console.log('New Request clicked');
 };
 
-const handleDeleteTransportService = (item: TransportService) => {
-    const index = transportServices.value.findIndex(s => s.id === item.id);
-    if (index !== -1) {
-        transportServices.value.splice(index, 1);
-    }
+const handleDeleteTransportService = () => {
+    transportService.value = null;
 };
 
-const handleSubmit = () => {
-    console.log('Submit request');
+import { useForm } from '@/composables/useForm';
+import { useNotification as useNotify } from '@/composables/useNotification';
+
+const { formRef, isFormValid, validate } = useForm();
+const { success, error } = useNotify();
+
+// Format date to DD-MM-YYYY HH:mm:ss
+const formatDateTime = (date: string | Date): string => {
+    if (!date) return '';
+    const d = new Date(date);
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    const hours = String(d.getHours()).padStart(2, '0');
+    const minutes = String(d.getMinutes()).padStart(2, '0');
+    const seconds = String(d.getSeconds()).padStart(2, '0');
+    return `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
+}
+
+// Format date to DD-MM-YYYY
+const formatDate = (date: string | Date): string => {
+    if (!date) return '';
+    const d = new Date(date);
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    return `${day}-${month}-${year}`;
+}
+
+// Build FormData for submission
+const buildFormData = (): FormData => {
+    const fd = new FormData();
+    
+    // Basic fields
+    fd.append('request_type', formData.value.requestType || '');
+    fd.append('request_datetime', formatDateTime(formData.value.issueDate || new Date()));
+    fd.append('supplier_id', String(formData.value.supplier_id || ''));
+    fd.append('status_id', String(formData.value.requestStatus || 1));
+    fd.append('upfront_payment', String(formData.value.advancePayment || ''));
+    fd.append('payment_method', formData.value.paymentMethod || '');
+    fd.append('target_location', formData.value.target_location || '');
+    fd.append('target_latitude', formData.value.target_latitude || '');
+    fd.append('target_longitude', formData.value.target_longitude || '');
+    fd.append('notes', formData.value.textNote || '');
+    
+    // Logistics detail (transport service)
+    if (transportService.value) {
+        fd.append('logistics_detail[from_date]', formatDate(transportService.value.from_date));
+        fd.append('logistics_detail[to_date]', formatDate(transportService.value.to_date));
+        
+        // Transport types array
+        if (transportService.value.vehicle_types && transportService.value.vehicle_types.length > 0) {
+            transportService.value.vehicle_types.forEach((type, index) => {
+                fd.append(`logistics_detail[transport_type][${index}]`, String(type));
+            });
+        }
+        
+        fd.append('logistics_detail[am_pm_interval]', transportService.value.am_pm_interval || '');
+        fd.append('logistics_detail[notes]', transportService.value.notes || '');
+    }
+    
+    // Items (products)
+    productTableItems.value.forEach((item, index) => {
+        // Only include id in edit mode
+        if (isEditMode.value && item.id) {
+            fd.append(`items[${index}][id]`, String(item.id));
+        }
+        fd.append(`items[${index}][item_id]`, String(item.item_id));
+        fd.append(`items[${index}][unit_id]`, String(item.unit_id || ''));
+        fd.append(`items[${index}][quantity]`, String(item.quantity || ''));
+        fd.append(`items[${index}][transport_type]`, String(item.transport_type || ''));
+        fd.append(`items[${index}][trip_no]`, String(item.trip_no || ''));
+        fd.append(`items[${index}][notes]`, item.notes || '');
+    });
+    
+    // File attachments
+    if (formData.value.image) {
+        fd.append('image', formData.value.image);
+    }
+    
+    // if (formData.value.voice_attachment) {
+    //     fd.append('voice_attachment', formData.value.voice_attachment);
+    // }
+    
+    return fd;
+}
+
+const handleSubmit = async () => {
+    if (!await validate()) return;
+    
+    if (productTableItems.value.length === 0) {
+        warning('يجب إضافة منتج واحد على الأقل');
+        return;
+    }
+    
+    isSubmitting.value = true;
+    
+    try {
+        const fd = buildFormData();
+        
+        let response;
+        if (isEditMode.value) {
+            // Edit mode - PUT request
+            response = await api.post(`/purchases/building-materials/${routeId.value}`, fd, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+        } else {
+            // Create mode - POST request
+            response = await api.post('/purchases/building-materials', fd, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+        }
+        
+        success(isEditMode.value ? 'تم تحديث الطلب بنجاح' : 'تم إنشاء الطلب بنجاح');
+        
+        // Navigate back to list or stay on page based on your preference
+        // router.push({ name: 'RequestForQuotationMaterialProductList' });
+        
+    } catch (e: any) {
+        console.error('Error submitting form:', e);
+        error(e?.response?.data?.message || 'حدث خطأ أثناء حفظ الطلب');
+    } finally {
+        isSubmitting.value = false;
+    }
 };
 
 const handleConvertToPrice = () => {
@@ -208,9 +456,11 @@ const handleConvertToPrice = () => {
 };
 
 const handleLocationSelected = (location: { latitude: string; longitude: string; address: string }) => {
-    console.log('latitude : ', location.latitude);
-    console.log('longitude : ', location.longitude);
-    console.log('address : ', location.address);
+    formData.value.target_latitude = location.latitude;
+    formData.value.target_longitude = location.longitude;
+    formData.value.target_location = location.address;
+    
+    console.log('Location updated:', location);
 };
 
 const showMapDialog = ref(false);
@@ -226,56 +476,39 @@ const headers = [
     { title: 'عدد الرحلات اليومية', key: 'daily_trips' },
     { title: 'ملاحظات', key: 'notes' },
 ]
-const items = [
-    {
-        id: 1,
-        name: 'اسمنت باور كريت',
-        quantity: 30,
-        unit: 'طن',
-        transport_type: 'شحن 10',
-        daily_trips: 5,
-        notes: 'لا يوجد',
-    },
-    {
-        id: 2,
-        name: 'البلاط / السيراميك',
-        quantity: 500,
-        unit: 'متر مربع (m2)',
-        transport_type: 'شحن 12',
-        daily_trips: 5,
-        notes: 'كل 100 طن لوحدها',
-    },
-]
+
+// Computed items for the DataTable (mapped from productTableItems)
+const tableItems = computed(() => productTableItems.value.map(item => ({
+    id: item.item_id, // Required for DataTable
+    item_id: item.item_id,
+    name: item.item_name,
+    quantity: item.quantity,
+    unit: item.unit_name,
+    transport_type: item.transport_type_name,
+    daily_trips: item.trip_no,
+    notes: item.notes,
+})));
 
 const ServicesHeaders = [
-    { title: 'موقع المشروع', key: 'project_location' },
-    { title: 'من تاريخ', key: 'from_date' },
-    { title: 'إلى تاريخ', key: 'to_date' },
-    { title: 'نوع المركبات', key: 'vehicle_type' },
-    { title: 'توقيت الرحلة', key: 'trip_time' },
+    { title: 'تاريخ بدء النقل', key: 'from_date' },
+    { title: 'تاريخ انتهاء النقل', key: 'to_date' },
+    { title: 'نوع المركبات', key: 'vehicle_types_labels' },
+    { title: 'توقيت النقل', key: 'am_pm_interval_label' },
     { title: 'ملاحظات', key: 'notes' },
 ]
 
-const ServicesItems = [
-    {
+// Computed items for the Services DataTable
+const serviceTableItems = computed(() => {
+    if (!transportService.value) return [];
+    return [{
         id: 1,
-        project_location: 'مكة',
-        from_date: '22/6/2025',
-        to_date: '26/7/2026',
-        vehicle_type: 'قلاب',
-        trip_time: 'صباحاً',
-        notes: 'لا يوجد',
-    },
-    {
-        id: 2,
-        project_location: 'القصيم',
-        from_date: '22/6/2025',
-        to_date: '26/7/2026',
-        vehicle_type: 'سطحة',
-        trip_time: 'مساءً',
-        notes: 'مغطاة بالكامل',
-    },
-]
+        from_date: transportService.value.from_date,
+        to_date: transportService.value.to_date,
+        vehicle_types_labels: transportService.value.vehicle_types_labels,
+        am_pm_interval_label: transportService.value.am_pm_interval_label,
+        notes: transportService.value.notes,
+    }];
+});
 
 
 const formIcon = `<svg width="41" height="48" viewBox="0 0 41 48" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -315,10 +548,7 @@ const UploadedFileIcon = `<svg width="24" height="24" viewBox="0 0 24 24" fill="
 </svg>
 `
 
-const microphoneIcon = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M19 10V12C19 15.866 15.866 19 12 19M5 10V12C5 15.866 8.13401 19 12 19M12 19V22M8 22H16M12 15C10.3431 15 9 13.6569 9 12V5C9 3.34315 10.3431 2 12 2C13.6569 2 15 3.34315 15 5V12C15 13.6569 13.6569 15 12 15Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>
-`
+
 
 const fileCheckIcon = `<svg width="19" height="22" viewBox="0 0 19 22" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M17 11.5V5.8C17 4.11984 17 3.27976 16.673 2.63803C16.3854 2.07354 15.9265 1.6146 15.362 1.32698C14.7202 1 13.8802 1 12.2 1H5.8C4.11984 1 3.27976 1 2.63803 1.32698C2.07354 1.6146 1.6146 2.07354 1.32698 2.63803C1 3.27976 1 4.11984 1 5.8V16.2C1 17.8802 1 18.7202 1.32698 19.362C1.6146 19.9265 2.07354 20.3854 2.63803 20.673C3.27976 21 4.11984 21 5.8 21H9M11 10H5M7 14H5M13 6H5M11.5 18L13.5 20L18 15.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -349,69 +579,74 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
                     <h2 class="text-lg font-bold text-primary-900">معلومات الطلب : {{ formData.requestNumber }}</h2>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                    <!-- Request Type -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">نوع الطلب</label>
-                        <SelectInput v-model="formData.requestType"
-                            :items="requestTypeItems" placeholder="حدد نوع الطلب"
-                            item-title="title" item-value="value" density="comfortable" />
-                    </div>
+                <v-form ref="formRef" v-model="isFormValid" @submit.prevent>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                        <!-- Request Type -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">نوع الطلب</label>
+                            <SelectInput v-model="formData.requestType"
+                                :items="requestTypeItems" placeholder="حدد نوع الطلب"
+                                :rules="[required()]"
+                                item-title="title" item-value="value" density="comfortable" />
+                        </div>
 
-                    <!-- Supplier Name -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">اسم المورد</label>
-                        <SelectInput v-model="formData.supplier_id"
-                            :items="supplierItems" item-title="title"
-                            item-value="value" density="comfortable" placeholder="حدد المورد" />
-                    </div>
+                        <!-- Supplier Name -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">اسم المورد</label>
+                            <SelectInput v-model="formData.supplier_id"
+                                :items="supplierItems" item-title="title"
+                                :rules="[required()]"
+                                item-value="value" density="comfortable" placeholder="حدد المورد" />
+                        </div>
 
-                    <!-- Issue Date -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">تاريخ إصدار الطلب</label>
-                        <DatePickerInput v-model="formData.issueDate" type="date" density="comfortable"
-                            placeholder="اختر التاريخ" />
-                    </div>
+                        <!-- Issue Date -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">تاريخ إصدار الطلب</label>
+                            <DatePickerInput v-model="formData.issueDate" type="date" density="comfortable"
+                                placeholder="اختر التاريخ" />
+                        </div>
 
-                    <!-- Request Status -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">حالة الطلب</label>
-                        <SelectInput v-model="formData.requestStatus"
-                            :items="[{ title: 'مسودة', value: '1' }]"
-                            item-title="title" item-value="value" density="comfortable" placeholder="حدد حالة الطلب" />
-                    </div>
+                        <!-- Request Status -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">حالة الطلب</label>
+                            <SelectInput v-model="formData.requestStatus"
+                                :items="[{ title: 'مسودة', value: '1' }]"
+                                item-title="title" item-value="value" density="comfortable" placeholder="حدد حالة الطلب" />
+                        </div>
 
-                    <!-- Project Location -->
-                    <div class="relative">
-                        <label class="text-sm font-medium text-gray-700 mb-2 block">موقع المشروع</label>
-                        <div @click="openMapDialog"
-                            class="flex items-center justify-between px-4 py-2 min-h-[48px] border !border-blue-400 rounded-lg cursor-pointer hover:bg-blue-100 transition-colors">
-                            <span class="text-base font-medium text-blue-900 whitespace-nowrap overflow-hidden text-ellipsis ">
-                                {{ formData.projectLocation || 'حدد الموقع' }}
-                            </span>
+                        <!-- Project Location -->
+                        <div class="relative">
+                            <label class="text-sm font-medium text-gray-700 mb-2 block">موقع المشروع</label>
+                            <div @click="openMapDialog"
+                                class="flex items-center justify-between px-4 py-2 min-h-[48px] border !border-blue-400 rounded-lg cursor-pointer hover:bg-blue-100 transition-colors">
+                                <span class="text-base font-medium text-blue-900 whitespace-nowrap overflow-hidden text-ellipsis ">
+                                    {{ formData.target_location || 'حدد الموقع' }}
+                                </span>
+                                <div class="flex items-center gap-2">
+                                    <span v-html="mapMarkerIcon"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Payment Method -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">طريقة الدفع</label>
+                            <SelectInput v-model="formData.paymentMethod"
+                                :items="paymentMethodItems" item-title="title" placeholder="حدد طريقة الدفع"
+                                :rules="[required()]"
+                                item-value="value" density="comfortable" />
+                        </div>
+
+                        <!-- Advance Payment -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">دفعة مقدمة</label>
                             <div class="flex items-center gap-2">
-                                <span v-html="mapMarkerIcon"></span>
+                                <PriceInput showRialIcon v-model="formData.advancePayment" density="comfortable"
+                                    class="flex-1" placeholder="أدخل قيمة الدفعة" />
                             </div>
                         </div>
                     </div>
-
-                    <!-- Payment Method -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">طريقة الدفع</label>
-                        <SelectInput v-model="formData.paymentMethod"
-                            :items="paymentMethodItems" item-title="title" placeholder="حدد طريقة الدفع"
-                            item-value="value" density="comfortable" />
-                    </div>
-
-                    <!-- Advance Payment -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">دفعة مقدمة</label>
-                        <div class="flex items-center gap-2">
-                            <PriceInput showRialIcon v-model="formData.advancePayment" density="comfortable"
-                                class="flex-1" placeholder="أدخل قيمة الدفعة" />
-                        </div>
-                    </div>
-                </div>
+                </v-form>
             </div>
 
             <!-- Products Section -->
@@ -429,14 +664,16 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
 
                 <!-- Products Table -->
                 <div class="mb-4">
-                    <DataTable :headers="headers" :items="items" show-actions force-show-edit force-show-delete>
+                    <DataTable :headers="headers" :items="tableItems" show-actions force-show-edit force-show-delete
+                        @edit="handleEditProduct"
+                        @delete="handleDeleteProduct">
                         <template #item.notes="{ item }">
                             <v-menu attach="request-material-product-page" location="bottom" offset="8"
                                 :close-on-content-click="false" transition="slide-y-transition">
                                 <template #activator="{ props }">
                                     <div class="flex items-center gap-2 cursor-pointer" v-bind="props">
                                         <v-icon size="20" color="primary" v-html="messagePlusIcon"></v-icon>
-                                        <span class="text-gray-900">{{ item.notes }}</span>
+                                        <span class="text-gray-900">{{ item.notes || 'أضف ملاحظة' }}</span>
                                     </div>
                                 </template>
 
@@ -445,7 +682,8 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
                                     class="pa-4 shadow-[rgba(149,157,165,0.2)_0px_8px_24px] overflow-hidden px-3 py-3"
                                     color="white" rounded="lg" width="300">
                                     <div class="!flex flex-nowrap items-center gap-3">
-                                        <TextInput v-model="item.notes" placeholder="أضف ملاحظة" variant="outlined"
+                                        <TextInput v-model="productTableItems[productTableItems.findIndex(p => p.item_id === item.item_id)].notes" 
+                                            placeholder="أضف ملاحظة" variant="outlined"
                                             density="comfortable" hide-details autofocus class="flex-1" />
                                         <ButtonWithIcon :icon="messagePlusIcon" color="primary" icon-only
                                             size="x-small" />
@@ -481,12 +719,14 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
 
                 <!-- Transport Services Table -->
                 <div class="mb-4">
-                    <DataTable :headers="ServicesHeaders" :items="ServicesItems" show-actions force-show-edit
-                        force-show-delete />
+                    <DataTable :headers="ServicesHeaders" :items="serviceTableItems" show-actions force-show-edit
+                        force-show-delete
+                        @edit="handleEditTransportService"
+                        @delete="handleDeleteTransportService" />
                 </div>
 
-                <!-- Add Transport Service Button -->
-                <div class="flex justify-center">
+                <!-- Add Transport Service Button (only show when no service exists) -->
+                <div class="flex justify-center" v-if="!hasTransportService">
                     <ButtonWithIcon color="primary-100" variant="flat" class="!text-primary-900 font-bold w-75"
                         @click="handleAddTransportService">
                         + إضافة بيانات نقل جديدة
@@ -505,17 +745,10 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
                     </div>
 
                     <!-- Voice Message -->
-                    <div class="rounded-xl bg-white px-4 py-6 mb-3 flex items-center justify-between">
-                        <div>
-                            <p class="text-primary-600 font-bold text-sm mb-2">رسالة صوتية</p>
-                            <p class="text-gray-400 font-medium text-sm">هل تود إرفاق بعض الملاحظات</p>
-                            <p class="text-blue-900 font-medium text-sm">قم بتسجيل رسالتك الصوتية إلى</p>
-                        </div>
-                        <ButtonWithIcon color="primary-500" iconOnly :icon="microphoneIcon" height="75" variant="flat"
-                            class="!text-primary-900 font-bold" customClass="!h-unset"
-                            @click="handleAddTransportService" />
 
-                    </div>
+                    <!-- Voice Message -->
+                    <VoiceRecorder v-model="formData.voice_attachment" />
+
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-2">
                         <!-- Text Note -->
                         <div class="rounded-xl bg-white lg:col-span-2">
@@ -542,10 +775,10 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
                             <span class="">المنتجات</span>
                             <span class="">{{ summaryData.productsCount }}</span>
                         </div>
-                        <div class="flex justify-between items-center py-4 px-6 border-b border-gray-200">
+                        <!-- <div class="flex justify-between items-center py-4 px-6 border-b border-gray-200">
                             <span class="">الخدمات</span>
                             <span class="">{{ summaryData.servicesCount }}</span>
-                        </div>
+                        </div> -->
                         <div class="flex justify-between items-center py-4 px-6 border-b border-gray-200">
                             <span class="">طريقة الدفع</span>
                             <span class="">{{ summaryData.paymentMethod }}</span>
@@ -568,18 +801,29 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
             </div>
         </div>
 
-        <Map v-model="showMapDialog" @location-selected="handleLocationSelected" />
+        <Map v-model="showMapDialog" 
+            :latitude="formData.target_latitude"
+            :longitude="formData.target_longitude"
+            :address="formData.target_location"
+            @location-selected="handleLocationSelected" />
 
         <!-- Add Product Dialog -->
         <AddProductDialog v-model="showAddProductDialog" request-type="raw_materials" 
             :transport-types="transportTypeItems"
             :unit-items="unitItems"
-            @saved="handleProductSaved" />
+            :supplier-id="formData.supplier_id"
+            :edit-product="editingProduct"
+            :existing-products="productTableItems"
+            @saved="handleProductSaved"
+            @product-updated="handleProductUpdated" />
 
         <!-- Add Transport Service Dialog -->
         <AddTransportServiceDialog v-model="showAddTransportServiceDialog" 
-            :delivered-methods="deliveredMethodItems"
-            @saved="handleTransportServiceSaved" />
+            :transport-types="transportTypeItems"
+            :am-pm-interval-options="amPmIntervalItems"
+            :edit-service="editingTransportService"
+            @saved="handleTransportServiceSaved"
+            @updated="handleTransportServiceUpdated" />
 
     </default-layout>
 </template>
