@@ -113,6 +113,8 @@ const routePermissionMap: Record<string, { group: string; key: string }> = {
     '/sales/currencies': { group: 'settings', key: 'currencies' },
     '/settings/codes': { group: 'settings', key: 'codes-settings' },
     '/settings/account-types': { group: 'settings', key: 'account-types' },
+    '/settings/system-statuses': { group: 'settings', key: 'system-statuses' },
+    '/settings/doc-status-transitions': { group: 'settings', key: 'document-status-transitions' },
 };
 
 export function usePermissions() {
@@ -264,6 +266,8 @@ export function usePermissions() {
     const canViewAdvancedSettings = computed(() => hasPermission('settings', 'advanced-settings'));
     const canViewCodesSettings = computed(() => hasPermission('settings', 'codes-settings'));
     const canViewAccountTypes = computed(() => hasPermission('settings', 'account-types'));
+    const canViewSystemStatuses = computed(() => hasPermission('settings', 'system-statuses'));
+    const canViewDocStatusTransitions = computed(() => hasPermission('settings', 'document-status-transitions'));
 
     /**
      * Check if any product permission is available
@@ -368,7 +372,9 @@ export function usePermissions() {
         canViewCurrencies.value ||
         canViewAdvancedSettings.value ||
         canViewCodesSettings.value ||
-        canViewAccountTypes.value
+        canViewAccountTypes.value || 
+        canViewDocStatusTransitions.value ||
+        canViewSystemStatuses.value
     );
 
     return {
@@ -456,6 +462,8 @@ export function usePermissions() {
         canViewAdvancedSettings,
         canViewCodesSettings,
         canViewAccountTypes,
+        canViewSystemStatuses,
+        canViewDocStatusTransitions,
         hasAnySettingsPermission,
     };
 }

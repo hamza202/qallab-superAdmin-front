@@ -393,6 +393,60 @@ export const settingsRoutes: RouteRecordRaw[] = [
       },
     ],
   },
+  {
+    path: "/settings/system-statuses",
+    name: "SystemStatuses",
+    redirect: "/settings/system-statuses/list",
+    children: [
+      {
+        path: "list",
+        name: "SystemStatusesList",
+        component: () => import("@/views/settings/system-statuses/List.vue"),
+        meta: {
+          title: "pages.systemStatuses.title",
+        },
+      },
+    ],
+  },
+  {
+    path: "/settings/doc-status-transitions",
+    name: "DocStatusTransitions",
+    redirect: "/settings/doc-status-transitions/list",
+    children: [
+      {
+        path: "list",
+        name: "DocStatusTransitionsList",
+        component: () => import("@/views/settings/doc-status-transitions/List.vue"),
+        meta: {
+          title: "pages.docStatusTransitions.title",
+        },
+      },
+      {
+        path: "create",
+        name: "DocStatusTransitionsCreate",
+        component: () => import("@/views/settings/doc-status-transitions/Form.vue"),
+        meta: {
+          title: "pages.docStatusTransitions.title",
+        },
+      },
+      {
+        path: "edit/:id",
+        name: "DocStatusTransitionsEdit",
+        component: () => import("@/views/settings/doc-status-transitions/Form.vue"),
+        meta: {
+          title: "pages.docStatusTransitions.title",
+        },
+      },
+      {
+        path: "status-transition/:id",
+        name: "DocStatusTransitionsStatusTransition",
+        component: () => import("@/views/settings/doc-status-transitions/StatusTransitions.vue"),
+        meta: {
+          title: "pages.docStatusTransitions.title",
+        },
+      },
+    ],
+  },
 ];
 
 export default settingsRoutes;

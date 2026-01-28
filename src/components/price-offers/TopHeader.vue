@@ -4,7 +4,7 @@
         <div class="flex items-start justify-between">
             <div class="flex items-center gap-4">
                 <div class="w-[52px] h-[52px] flex items-center justify-center">
-                    <span v-html="props.icon"></span>
+                    <span class="w-[37px] h-[44px]" v-html="props.icon"></span>
                 </div>
                 <div>
                     <h1 class="text-lg font-bold">{{ t(props.titleKey) }}</h1>
@@ -15,7 +15,7 @@
 
 
         <slot name="code">
-            <div class="flex items-center lg:gap-3 gap-2">
+            <div class="flex items-center lg:gap-3 gap-2" v-if="code">
                 <!-- Label -->
                 <span class="text-sm font-semibold text-white">{{ codeLabel }}</span>
                 <!-- Code Badge -->
@@ -75,13 +75,13 @@ const onAction = () => {
 // Copy product code function
 const copyCode = async () => {
     try {
-        await navigator.clipboard.writeText(props.code);
+        await navigator.clipboard.writeText(props.code || '');
         toast.success("تم نسخ الكود بنجاح");
     } catch (err) {
         console.error("Failed to copy:", err);
         // Fallback for older browsers
         const textArea = document.createElement("textarea");
-        textArea.value = props.code;
+        textArea.value = props.code || '';
         document.body.appendChild(textArea);
         textArea.select();
         document.execCommand("copy");

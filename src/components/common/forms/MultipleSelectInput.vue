@@ -17,6 +17,8 @@ interface MultipleSelectInputProps {
     density?: Density;
     disabled?: boolean;
     readonly?: boolean;
+    rules?: any[];
+    errorMessages?: string | string[];
     hideDetails?: boolean | "auto";
     hint?: string;
     persistentHint?: boolean;
@@ -74,7 +76,10 @@ const getItemTitle = (value: string | number): string => {
             :readonly="readonly"
             :hide-details="false"
             :hint="hint"
+            :rules="rules"
+            :error-messages="errorMessages" 
             :persistent-hint="persistentHint"
+            item-disabled="disabled"
             multiple
             v-bind="inputProps"
         >

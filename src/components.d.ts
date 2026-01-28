@@ -15,6 +15,7 @@ declare module 'vue' {
     AuthLayout: typeof import('./layouts/AuthLayout.vue')['default']
     ButtonWithIcon: typeof import('./components/common/buttons/ButtonWithIcon.vue')['default']
     CheckboxInput: typeof import('./components/common/forms/checkboxInput.vue')['default']
+    ColorPickerInput: typeof import('./components/common/forms/ColorPickerInput.vue')['default']
     DataTable: typeof import('./components/common/tables/DataTable.vue')['default']
     DatePickerInput: typeof import('./components/common/forms/DatePickerInput.vue')['default']
     DefaultLayout: typeof import('./layouts/DefaultLayout.vue')['default']

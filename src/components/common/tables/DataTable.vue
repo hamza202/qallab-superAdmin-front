@@ -196,7 +196,8 @@ const eyeIcon = `<svg width="22" height="16" viewBox="0 0 22 16" fill="none" xml
           </th>
 
           <!-- Dynamic Headers (original order for RTL) -->
-          <th v-for="header in headers" :key="header.key" class="!font-bold !text-gray-600 !text-xs !bg-gray-50 whitespace-nowrap"
+          <th v-for="header in headers" :key="header.key"
+            class="!font-bold !text-gray-600 !text-xs !bg-gray-50 whitespace-nowrap"
             :style="header.width ? { width: header.width } : {}">
             {{ header.title }}
           </th>
@@ -254,8 +255,11 @@ const eyeIcon = `<svg width="22" height="16" viewBox="0 0 22 16" fill="none" xml
             <!-- Date Formatting for created_at, updated_at, etc. -->
             <template
               v-else-if="header.key === 'created_at' || header.key === 'updated_at' || header.key.includes('_at')">
-              <span class="text-sm text-gray-600 whitespace-nowrap">{{ appStore.formatDate(item[header.key], { format: 'short' })
-              }}</span>
+              <span class="text-sm text-gray-600 whitespace-nowrap">{{ appStore.formatDate(item[header.key], {
+                format:
+                  'short'
+              })
+                }}</span>
             </template>
 
             <!-- Regular Text -->
@@ -266,24 +270,26 @@ const eyeIcon = `<svg width="22" height="16" viewBox="0 0 22 16" fill="none" xml
 
           <!-- Actions Column (Left side for RTL) -->
           <td v-if="showActions" class="!py-4 !bg-white">
-            <!-- Custom Actions Slot -->
-            <template v-if="$slots['item.actions']">
-              <slot name="item.actions" :item="item" />
-            </template>
-            <!-- Default Actions -->
-            <div v-else class="flex items-center gap-1">
-              <v-btn icon variant="text" v-if="showView && (forceShowView || item.actions?.can_view)" size="small"
-                @click="handleView(item)">
-                <span v-html="eyeIcon"></span>
-              </v-btn>
-              <v-btn icon variant="text" v-if="showEdit && (forceShowEdit || item.actions?.can_update)" color="primary" size="small"
-                @click="handleEdit(item)">
-                <span v-html="editIcon"></span>
-              </v-btn>
-              <v-btn icon variant="text" v-if="showDelete && (forceShowDelete || item.actions?.can_delete)" size="small" color="error"
-                @click="handleDelete(item)">
-                <span v-html="trashIcon"></span>
-              </v-btn>
+            <div class="flex items-center gap-1">
+              <!-- Custom Actions Slot -->
+              <template v-if="$slots['item.actions']">
+                <slot name="item.actions" :item="item" />
+              </template>
+              <!-- Default Actions -->
+              <div class="flex items-center gap-1">
+                <v-btn icon variant="text" v-if="showView && (forceShowView || item.actions?.can_view)" size="small"
+                  @click="handleView(item)">
+                  <span v-html="eyeIcon"></span>
+                </v-btn>
+                <v-btn icon variant="text" v-if="showEdit && (forceShowEdit || item.actions?.can_update)"
+                  color="primary" size="small" @click="handleEdit(item)">
+                  <span v-html="editIcon"></span>
+                </v-btn>
+                <v-btn icon variant="text" v-if="showDelete && (forceShowDelete || item.actions?.can_delete)"
+                  size="small" color="error" @click="handleDelete(item)">
+                  <span v-html="trashIcon"></span>
+                </v-btn>
+              </div>
             </div>
           </td>
         </tr>

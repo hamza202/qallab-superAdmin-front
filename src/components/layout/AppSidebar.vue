@@ -290,12 +290,12 @@
                                         :class="[isMenuItemActive('/purchases/request-for-quotations') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         طلب عروض الأسعار</router-link>
                                 </li> -->
-                                <li  class="relative">
+                                <li class="relative">
                                     <router-link to="/purchases/request-for-quotations-material-product/list"
                                         :class="[isMenuItemActive('/purchases/request-for-quotations-material-product') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         طلب عروض أسعار مواد أولية</router-link>
                                 </li>
-                                <li  class="relative">
+                                <li class="relative">
                                     <router-link to="/purchases/request-for-quotations-fuel/list"
                                         :class="[isMenuItemActive('/purchases/request-for-quotations-fuel') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         طلب عروض أسعار محروقات</router-link>
@@ -390,7 +390,8 @@
                                 </li>
                                 <li v-if="canViewLogistics" class="relative">
                                     <router-link to="/logistics/list"
-                                        :class="[isMenuItemActive('/logistics/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']"> {{ t('pages.logistics.sidebarTitle') }} </router-link>
+                                        :class="[isMenuItemActive('/logistics/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        {{ t('pages.logistics.sidebarTitle') }} </router-link>
                                 </li>
                             </ul>
                         </div>
@@ -617,6 +618,18 @@
                                         أنواع العينات
                                     </router-link>
                                 </li>
+                                <li v-if="canViewSystemStatuses" class="relative">
+                                    <router-link to="/settings/system-statuses/list"
+                                        :class="[isMenuItemActive('/settings/system-statuses/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        حالات النظام
+                                    </router-link>
+                                </li>
+                                <li class="relative" v-if="canViewDocStatusTransitions">
+                                    <router-link to="/settings/doc-status-transitions/list"
+                                        :class="[isMenuItemActive('/settings/doc-status-transitions/list') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        إدارة الوثائق والحالات
+                                    </router-link>
+                                </li>
                             </ul>
 
                         </div>
@@ -728,6 +741,8 @@ const {
     canViewCountries,
     canViewCities,
     canViewSampleTypes,
+    canViewSystemStatuses,
+    canViewDocStatusTransitions,
     canViewBrands,
     canViewManufacturers,
     canViewCategories,
@@ -749,10 +764,10 @@ const salesRoutes = ['/customers', '/sales'];
 const projectsRoutes = ['/projects'];
 const purchasesRoutes = ['/suppliers', '/purchases'];
 const financeRoutes = ['/finance'];
-const usersRoutes = ['/users','/roles', '/crushers', '/contractors','/logistics'];
+const usersRoutes = ['/users', '/roles', '/crushers', '/contractors', '/logistics'];
 // const logisticsRoutes = ['/logistics'];
 const reportsRoutes = ['/reports'];
-const settingsRoutes = ['/products-categories', '/services-categories', '/products-categories/tree', '/units', '/factories', '/brands', '/geo-areas', '/geo-segments', '/tax-rules', '/taxes','/countries', '/cities', '/codes', '/account-types', '/test-group', '/tests', '/test-methodology', '/sample-types', '/settings'];
+const settingsRoutes = ['/products-categories', '/services-categories', '/products-categories/tree', '/units', '/factories', '/brands', '/geo-areas', '/geo-segments', '/tax-rules', '/taxes', '/countries', '/cities', '/codes', '/account-types', '/test-group', '/tests', '/test-methodology', '/sample-types', '/system-statuses', '/doc-status-transitions', '/settings'];
 
 // Helper function to check if route matches (including child routes like /form, /create, /edit/:id, /view/:id)
 const isRouteActive = (basePath) => {
@@ -786,15 +801,15 @@ const isMenuItemActive = (menuLinkPath) => {
         // For settings routes, we need exact match for the last segment (list, tree, etc.)
         // e.g., /settings/products-categories/list should only match that specific link
         const currentParts = currentPath.split('/').filter(p => p);
-        
+
         // Check if both are settings routes with same module
         if (currentParts[0] === 'settings' && currentParts[1] === pathParts[1]) {
             // For list routes, also match create, edit, view
             if (pathParts[2] === 'list') {
-                return currentParts[2] === 'list' || 
-                       currentParts[2] === 'create' || 
-                       currentParts[2] === 'edit' || 
-                       currentParts[2] === 'view';
+                return currentParts[2] === 'list' ||
+                    currentParts[2] === 'create' ||
+                    currentParts[2] === 'edit' ||
+                    currentParts[2] === 'view';
             }
             // For other routes (tree, etc.), require exact match of the third segment
             return currentParts[2] === pathParts[2];
