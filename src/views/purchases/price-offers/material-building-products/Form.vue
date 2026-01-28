@@ -354,6 +354,11 @@ const formatDate = (date: string | Date): string => {
 const buildFormData = (): FormData => {
     const fd = new FormData();
     
+    // Add _method: PUT for edit mode
+    if (isEditMode.value) {
+        fd.append('_method', 'PUT');
+    }
+    
     // Basic fields
     fd.append('request_type', formData.value.requestType || '');
     fd.append('request_datetime', formatDateTime(formData.value.issueDate || new Date()));
@@ -422,8 +427,8 @@ const handleSubmit = async () => {
         const fd = buildFormData();
         
         let response;
-        if (isEditMode.value) {
-            // Edit mode - PUT request
+        if (isEditMode.value && routeId.value) {
+            // Edit mode - POST with _method: PUT and UUID in URL
             response = await api.post(`/purchases/building-materials/${routeId.value}`, fd, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
