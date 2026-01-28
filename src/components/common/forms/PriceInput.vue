@@ -65,6 +65,13 @@ const handleKeydown = (e: KeyboardEvent) => {
     if (!props.allowNegative && e.key === '-') {
         e.preventDefault();
     }
+    // Prevent arrow down from going below 0
+    if (!props.allowNegative && e.key === 'ArrowDown') {
+        const currentValue = Number(props.modelValue) || 0;
+        if (currentValue <= 0) {
+            e.preventDefault();
+        }
+    }
 };
 
 const handleWheel = (e: WheelEvent) => {

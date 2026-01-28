@@ -12,6 +12,7 @@ interface TransportServiceForm {
 
 const props = defineProps<{
   modelValue: boolean;
+  deliveredMethods?: any[];
 }>();
 
 const emit = defineEmits<{
@@ -42,10 +43,9 @@ const tripTimeOptions = ref([
   { title: 'كلاهما', value: 'كلاهما' },
 ]);
 
-const vehicleTypeOptions = ref([
+const vehicleTypeOptionsList = computed(() => props.deliveredMethods || [
   { title: 'قلاب', value: 'قلاب' },
   { title: 'سطحة', value: 'سطحة' },
-  { title: 'مساءً', value: 'مساءً' },
 ]);
 
 const showMapDialog = ref(false);
@@ -137,8 +137,8 @@ const plusIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
           </div>
 
           <!-- Vehicle Types -->
-          <MultipleSelectInput label="نوع المركبات" v-model="form.vehicleTypes" :items="vehicleTypeOptions"
-            placeholder="اختر نوع المركبة" />
+          <MultipleSelectInput label="نوع المركبات" v-model="form.vehicleTypes" :items="vehicleTypeOptionsList"
+            placeholder="اختر نوع المركبة" item-title="title" item-value="value" />
 
           <!-- Notes -->
           <div class="md:col-span-2">

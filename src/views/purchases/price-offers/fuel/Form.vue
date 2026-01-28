@@ -215,8 +215,8 @@ const items = [
                     <div class="relative">
                         <label class="text-sm font-medium text-gray-700 mb-2 block">موقع تسليم المواد</label>
                         <div @click="openMapDialog"
-                            class="flex items-center justify-between px-4 py-2 bg-blue-50/60 border-2 border-blue-400 rounded-lg cursor-pointer hover:bg-blue-100 transition-colors">
-                            <span class="text-base font-medium text-blue-900">
+                            class="flex items-center justify-between px-4 py-2 min-h-[48px] border !border-blue-400 rounded-lg cursor-pointer hover:bg-blue-100 transition-colors">
+                            <span class="text-base font-medium text-blue-900 whitespace-nowrap overflow-hidden text-ellipsis ">
                                 {{ formData.projectLocation || 'حدد الموقع' }}
                             </span>
                             <div class="flex items-center gap-2">
