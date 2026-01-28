@@ -1,18 +1,33 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
+import { useApi } from '@/composables/useApi';
 
 type RequestType = 'raw_materials' | 'fuel' | 'transfer_service';
 
-interface ProductForm {
+interface Category {
+  id: number;
   name: string;
+}
+
+interface SupplierItem {
+  id: number;
+  name: string;
+  code: string;
+  category: Category;
+}
+
+export interface ProductToAdd {
+  item_id: number;
+  item_name: string;
+  unit_id: number | null;
+  unit_name: string;
   quantity: number | null;
-  unit: string | null;
-  packing: string | null;
-  supplyType: string | null;
-  packageType: string | null;
-  deliveryCount: number | null;
+  transport_type: number | null;
+  transport_type_name: string;
+  trip_no: number | null;
   notes: string;
-  image: File | null;
+  isAdded?: boolean;
+  id?: number; // For edit mode
 }
 
 const props = defineProps<{
@@ -20,81 +35,218 @@ const props = defineProps<{
   requestType: RequestType;
   transportTypes?: any[];
   unitItems?: any[];
+  supplierId: number | null;
+  editProduct?: ProductToAdd | null; // Product to edit
+  existingProducts?: ProductToAdd[]; // Already added products
 }>();
 
 const emit = defineEmits<{
   "update:modelValue": [value: boolean];
-  "saved": [products: ProductForm[]];
+  "saved": [products: ProductToAdd[]];
+  "productUpdated": [product: ProductToAdd];
 }>();
+
+const api = useApi();
 
 const internalOpen = computed({
   get: () => props.modelValue,
   set: (val: boolean) => emit('update:modelValue', val),
 });
 
-const formRef = ref<any>(null);
-const isFormValid = ref(false);
+// Edit mode state
+const isEditMode = computed(() => !!props.editProduct);
 
-const products = ref([
-  {
-    name: "اسم المنتج",
-    quantity: null,
-    unit: null,
-    packing: null,
-    supplyType: null,
-    packageType: null,
-    deliveryCount: null,
-    notes: "",
-    image: null,
-  }
-]);
-
-const unitItemsList = computed(() => props.unitItems || [
-  { title: 'طن', value: 'طن' },
-  { title: 'متر مربع (m2)', value: 'متر مربع (m2)' },
-  { title: 'كيلو جرام', value: 'كيلو جرام' },
-]);
-
-const packageTypeItemsList = computed(() => props.transportTypes || [
-  { title: 'شحن 10', value: 'شحن 10' },
-  { title: 'شحن 12', value: 'شحن 12' },
-  { title: 'شحن 15', value: 'شحن 15' },
-]);
-
-const activeTab = ref(0);
-const tabs = ref(['توصيات', 'دراسات', 'دراسات', 'أسمنت', 'أسمنت', 'أسمنت', 'أسمنت', 'أسمنت', 'أسمنت', 'أسمنت', 'أسمنت', 'أسمنت']);
-
+// Data states
+const loading = ref(false);
+const supplierItems = ref<SupplierItem[]>([]);
+const categories = ref<Category[]>([]);
+const activeTabId = ref<number | null>(null);
+const searchQuery = ref('');
 const showFullCategory = ref(false);
 const visibleTabsCount = 6;
 
+// Products with their form data
+const productsList = ref<ProductToAdd[]>([]);
+
+// Edit mode product
+const editProductData = ref<ProductToAdd | null>(null);
+
+const unitItemsList = computed(() => props.unitItems || []);
+const packageTypeItemsList = computed(() => props.transportTypes || []);
+
+// Computed: unique categories from supplier items
+const extractCategories = (items: SupplierItem[]): Category[] => {
+  const categoryMap = new Map<number, Category>();
+  items.forEach(item => {
+    if (item.category && !categoryMap.has(item.category.id)) {
+      categoryMap.set(item.category.id, item.category);
+    }
+  });
+  return Array.from(categoryMap.values());
+};
+
+// Computed: displayed tabs
 const displayedTabs = computed(() => {
   if (showFullCategory.value) {
-    return tabs.value;
+    return categories.value;
   }
-  return tabs.value.slice(0, visibleTabsCount);
+  return categories.value.slice(0, visibleTabsCount);
+});
+
+// Computed: products filtered by active tab and search
+const filteredProducts = computed(() => {
+  let filtered = productsList.value;
+  
+  // Filter by category
+  if (activeTabId.value !== null) {
+    filtered = filtered.filter(product => {
+      const supplierItem = supplierItems.value.find(i => i.id === product.item_id);
+      return supplierItem?.category?.id === activeTabId.value;
+    });
+  }
+  
+  // Filter by search
+  if (searchQuery.value.trim()) {
+    const query = searchQuery.value.trim().toLowerCase();
+    filtered = filtered.filter(product => 
+      product.item_name.toLowerCase().includes(query)
+    );
+  }
+  
+  return filtered;
+});
+
+// Computed: added products (to be emitted)
+const addedProducts = computed(() => {
+  return productsList.value.filter(p => p.isAdded);
+});
+
+// Check if product can be added (has quantity and unit)
+const canAddProduct = (product: ProductToAdd): boolean => {
+  return !!product.quantity && product.quantity > 0 && !!product.unit_id;
+};
+
+// Fetch supplier items
+const fetchSupplierItems = async () => {
+  if (!props.supplierId) return;
+  
+  loading.value = true;
+  try {
+    const res = await api.get<any>(`/items/supplier-items?supplier_id=${props.supplierId}`);
+    if (Array.isArray(res.data)) {
+      supplierItems.value = res.data;
+      categories.value = extractCategories(res.data);
+      
+      // Initialize products list, preserving existing products' state
+      productsList.value = res.data.map((item: SupplierItem) => {
+        // Check if this product was already added
+        const existingProduct = props.existingProducts?.find(p => p.item_id === item.id);
+        
+        if (existingProduct) {
+          return { ...existingProduct, isAdded: true };
+        }
+        
+        return {
+          item_id: item.id,
+          item_name: item.name,
+          unit_id: null,
+          unit_name: '',
+          quantity: null,
+          transport_type: null,
+          transport_type_name: '',
+          trip_no: null,
+          notes: '',
+          isAdded: false,
+        };
+      });
+      
+      // Set first category as active
+      if (categories.value.length > 0) {
+        activeTabId.value = categories.value[0].id;
+      }
+    }
+  } catch (e) {
+    console.error('Error fetching supplier items:', e);
+    supplierItems.value = [];
+    categories.value = [];
+    productsList.value = [];
+  } finally {
+    loading.value = false;
+  }
+};
+
+// Watch for dialog open
+watch(() => props.modelValue, (newVal) => {
+  if (newVal && props.supplierId) {
+    if (isEditMode.value && props.editProduct) {
+      // Edit mode: only show the product to edit
+      editProductData.value = { ...props.editProduct };
+    } else {
+      // Add mode: fetch all supplier items
+      fetchSupplierItems();
+    }
+  }
+});
+
+// Watch for supplier change
+watch(() => props.supplierId, (newVal) => {
+  if (props.modelValue && newVal && !isEditMode.value) {
+    fetchSupplierItems();
+  }
 });
 
 const toggleCategories = () => {
   showFullCategory.value = !showFullCategory.value;
 };
 
-const searchQuery = ref('');
+const toggleProduct = (product: ProductToAdd) => {
+  if (product.isAdded) {
+    // Remove product
+    product.isAdded = false;
+    // Emit updated list immediately
+    emit('saved', addedProducts.value);
+  } else {
+    // Add product (only if valid)
+    if (canAddProduct(product)) {
+      // Get unit name
+      const unit = unitItemsList.value.find((u: any) => u.value === product.unit_id);
+      product.unit_name = unit?.title || '';
+      
+      // Get transport type name
+      const transport = packageTypeItemsList.value.find((t: any) => t.value === product.transport_type);
+      product.transport_type_name = transport?.title || '';
+      
+      product.isAdded = true;
+      // Emit updated list
+      emit('saved', addedProducts.value);
+    }
+  }
+};
+
+// Edit mode: update product
+const handleEditSave = () => {
+  if (editProductData.value && canAddProduct(editProductData.value)) {
+    // Get unit name
+    const unit = unitItemsList.value.find((u: any) => u.value === editProductData.value!.unit_id);
+    editProductData.value.unit_name = unit?.title || '';
+    
+    // Get transport type name
+    const transport = packageTypeItemsList.value.find((t: any) => t.value === editProductData.value!.transport_type);
+    editProductData.value.transport_type_name = transport?.title || '';
+    
+    emit('productUpdated', editProductData.value);
+    closeDialog();
+  }
+};
 
 const resetForm = () => {
-  products.value = [
-    {
-      name: "اسم المنتج",
-      quantity: null,
-      unit: null,
-      packing: null,
-      supplyType: null,
-      packageType: null,
-      deliveryCount: null,
-      notes: "",
-      image: null,
-    }
-  ];
+  supplierItems.value = [];
+  categories.value = [];
+  productsList.value = [];
+  activeTabId.value = null;
   searchQuery.value = '';
+  showFullCategory.value = false;
+  editProductData.value = null;
 };
 
 const closeDialog = () => {
@@ -102,34 +254,13 @@ const closeDialog = () => {
   resetForm();
 };
 
-const addProduct = () => {
-  products.value.push({
-    name: "اسم المنتج",
-    quantity: null,
-    unit: null,
-    packing: null,
-    supplyType: null,
-    packageType: null,
-    deliveryCount: null,
-    notes: "",
-    image: null
-  });
-};
-
-const removeProduct = (index: number) => {
-  if (products.value.length > 1) {
-    products.value.splice(index, 1);
+const handleDone = () => {
+  if (isEditMode.value) {
+    handleEditSave();
+  } else {
+    emit('saved', addedProducts.value);
+    closeDialog();
   }
-};
-
-const handleSave = async () => {
-  if (formRef.value && typeof formRef.value.validate === "function") {
-    const { valid } = await formRef.value.validate();
-    if (!valid) return;
-  }
-
-  emit('saved', products.value);
-  closeDialog();
 };
 
 const handleCancel = () => {
@@ -159,6 +290,21 @@ const plusIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
 <path d="M8 1V15M1 8H15" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
 `
+
+const plusIcon2 = `<svg width="16" height="16" viewBox="0 0 16 16" fill="#ccc" xmlns="http://www.w3.org/2000/svg">
+<path d="M8 1V15M1 8H15" stroke="#ccc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+`
+
+const editIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M13.5 1.5L16.5 4.5M1.5 16.5L2.25 13.5L12 3.75L14.25 6L4.5 15.75L1.5 16.5Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+`
+
+const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M13.5 1.5L16.5 4.5M1.5 16.5L2.25 13.5L12 3.75L14.25 6L4.5 15.75L1.5 16.5Z" stroke="#ccc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+`
 </script>
 
 <template>
@@ -168,22 +314,120 @@ const plusIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
         <span class="!bg-gray-50 border border-gray-100 rounded px-1 py-0.5 text-gray-600">
           <span v-html="cubeIcon"></span>
         </span>
-        إضافة منتج
+        {{ isEditMode ? 'تعديل منتج' : 'إضافة منتج' }}
       </div>
     </template>
 
-    <v-form ref="formRef" v-model="isFormValid" @submit.prevent>
+    <!-- Loading State -->
+    <div v-if="loading" class="flex items-center justify-center py-20">
+      <v-progress-circular indeterminate color="primary" />
+    </div>
+
+    <!-- Edit Mode -->
+    <div v-else-if="isEditMode && editProductData" class="space-y-1 min-h-[200px]">
+      <div class="flex gap-3 rounded-lg border !border-gray-100 p-3 bg-white">
+        <!-- Edit Action Button -->
+        <div class="col-span-1 flex items-center justify-center gap-1">
+          <ButtonWithIcon 
+            :icon="canAddProduct(editProductData) ? editIcon : editIconDisabled" 
+            icon-only 
+            :color="canAddProduct(editProductData) ? 'primary' : 'gray'" 
+            variant="flat" 
+            @click="handleEditSave"
+            :disabled="!canAddProduct(editProductData)"
+            class="!h-full" 
+          />
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 items-center gap-3 flex-1">
+          <div class="sm:col-span-2 md:col-span-4 font-medium text-gray-900">
+            {{ editProductData.item_name }}
+          </div>
+          <!-- Quantity -->
+          <div>
+            <TextInput 
+              v-model="editProductData.quantity" 
+              type="number" 
+              placeholder="الكمية" 
+              density="compact"
+              class="min-w-[170px]" 
+            />
+          </div>
+
+          <!-- Unit -->
+          <div>
+            <SelectInput 
+              v-model="editProductData.unit_id" 
+              :items="unitItemsList" 
+              placeholder="الوحدة" 
+              density="compact"
+              class="min-w-[170px]" 
+              item-title="title" 
+              item-value="value" 
+            />
+          </div>
+
+          <!-- Delivery Count (trip_no) -->
+          <div v-if="requestType == 'raw_materials'">
+            <TextInput 
+              v-model="editProductData.trip_no" 
+              type="number" 
+              placeholder="عدد الرحلات" 
+              density="compact"
+              class="min-w-[170px]" 
+            />
+          </div>
+
+          <!-- Package Type (transport_type) -->
+          <div v-if="requestType == 'raw_materials'">
+            <SelectInput 
+              v-model="editProductData.transport_type" 
+              :items="packageTypeItemsList" 
+              placeholder="نوع الناقلة"
+              density="compact" 
+              class="min-w-[170px]" 
+              item-title="title" 
+              item-value="value" 
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- No Products State -->
+    <div v-else-if="!isEditMode && supplierItems.length === 0" class="flex flex-col items-center justify-center py-20 text-gray-500">
+      <v-icon size="64" color="gray-400">mdi-package-variant-closed</v-icon>
+      <p class="mt-4 text-lg font-medium">لا توجد منتجات تابعة لهذا المزود</p>
+    </div>
+
+    <!-- Add Mode Content -->
+    <template v-else-if="!isEditMode">
       <!-- Tabs -->
       <div class="flex gap-2 mb-6">
         <div class="flex flex-wrap items-center gap-2 mb-6">
-          <ButtonWithIcon v-for="(tab, index) in displayedTabs" :key="index" :color="activeTab === index ? '' : ''"
-            :class="activeTab === index ? 'bg-primary-600 !text-white' : 'bg-gray-100 !text-gray-500'"
-            class="!font-bold !rounded-lg px-6" height="40" @click="activeTab = index" size="small">
-            {{ tab }}
+          <ButtonWithIcon 
+            v-for="category in displayedTabs" 
+            :key="category.id"
+            :class="activeTabId === category.id ? 'bg-primary-600 !text-white' : '!bg-gray-100 !text-gray-500'"
+            class="!font-bold !rounded-lg px-6" 
+            height="40" 
+            @click="activeTabId = category.id" 
+            size="small"
+          >
+            {{ category.name }}
           </ButtonWithIcon>
         </div>
-        <ButtonWithIcon icon-only :icon="arrowDownIcon" color="primary" size="x-small" height="40" class="ms-auto"
-          :class="{ 'rotate-180': showFullCategory }" @click="toggleCategories" />
+        <ButtonWithIcon 
+          v-if="categories.length > visibleTabsCount"
+          icon-only 
+          :icon="arrowDownIcon" 
+          color="primary" 
+          size="x-small" 
+          height="40" 
+          class="ms-auto"
+          :class="{ 'rotate-180': showFullCategory }" 
+          @click="toggleCategories" 
+        />
       </div>
 
       <!-- Search -->
@@ -197,77 +441,113 @@ const plusIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
 
       <!-- Products List -->
       <div class="space-y-1 max-h-[400px] min-h-[250px] overflow-auto custom-scroll">
-        <div v-for="(product, index) in products" :key="index">
-          <!-- Product Image -->
-          <!-- <div class="col-span-1">
-            <div
-              class="w-14 h-14 bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center overflow-hidden">
-              <v-icon v-if="!product.image" size="24" color="gray">mdi-image</v-icon>
-            </div>
-          </div> -->
+        <div v-for="product in filteredProducts" :key="product.item_id">
           <div class="flex gap-3 rounded-lg border !border-gray-100 p-3 bg-white">
             <!-- Actions -->
             <div class="col-span-1 flex items-center justify-center gap-1">
-              <ButtonWithIcon v-if="index === 0" :icon="checkIcon" icon-only color="success" variant="flat"
-                @click="addProduct" class="!h-full" />
-              <ButtonWithIcon v-else :icon="plusIcon" icon-only color="primary" variant="flat" @click="addProduct"
-                class="!h-full" />
+              <ButtonWithIcon 
+                v-if="product.isAdded" 
+                :icon="checkIcon" 
+                icon-only 
+                color="success" 
+                variant="flat"
+                @click="toggleProduct(product)" 
+                class="!h-full" 
+              />
+              <ButtonWithIcon 
+                v-else 
+                :icon="canAddProduct(product) ? plusIcon : plusIcon2" 
+                icon-only 
+                :color="canAddProduct(product) ? 'primary' : 'gray'" 
+                variant="flat" 
+                @click="toggleProduct(product)"
+                :disabled="!canAddProduct(product)"
+                class="!h-full" 
+              />
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 items-center gap-3 items-start">
-              <div class="sm:col-span-2 md:col-span-4">
-                {{ product.name }}
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 items-center gap-3 flex-1">
+              <div class="sm:col-span-2 md:col-span-4 font-medium text-gray-900">
+                {{ product.item_name }}
               </div>
               <!-- Quantity -->
               <div>
-                <TextInput v-model="product.quantity" type="number" placeholder="الكمية" density="compact"
-                  class="min-w-[170px]" />
+                <TextInput 
+                  v-model="product.quantity" 
+                  type="number" 
+                  placeholder="الكمية" 
+                  density="compact"
+                  class="min-w-[170px]" 
+                  :disabled="product.isAdded"
+                />
               </div>
 
               <!-- Unit -->
               <div>
-                <SelectInput v-model="product.unit" :items="unitItemsList" placeholder="الوحدة" density="compact"
-                  class="min-w-[170px]" item-title="title" item-value="value" />
+                <SelectInput 
+                  v-model="product.unit_id" 
+                  :items="unitItemsList" 
+                  placeholder="الوحدة" 
+                  density="compact"
+                  class="min-w-[170px]" 
+                  item-title="title" 
+                  item-value="value" 
+                  :disabled="product.isAdded"
+                />
               </div>
 
-
-              <!-- Packing -->
-              <div v-if="requestType == 'fuel'">
-                <SelectInput   v-model="product.packing" :items="unitItemsList" placeholder="التعبئة" density="compact"
-                  class="min-w-[170px]" item-title="title" item-value="value" />
-              </div>
-
-              <!-- Supply type -->
-              <div v-if="requestType == 'fuel'">
-                <SelectInput   v-model="product.supplyType" :items="unitItemsList" placeholder="نوع التوريد" density="compact"
-                  class="min-w-[170px]" item-title="title" item-value="value" />
-              </div>
-
-              <!-- Delivery Count -->
+              <!-- Delivery Count (trip_no) -->
               <div v-if="requestType == 'raw_materials'">
-                <TextInput  v-model="product.deliveryCount" type="number" placeholder="عدد الرحلات" density="compact"
-                  class="min-w-[170px]" />
+                <TextInput 
+                  v-model="product.trip_no" 
+                  type="number" 
+                  placeholder="عدد الرحلات" 
+                  density="compact"
+                  class="min-w-[170px]" 
+                  :disabled="product.isAdded"
+                />
               </div>
 
-              <!-- Package Type -->
+              <!-- Package Type (transport_type) -->
               <div v-if="requestType == 'raw_materials'">
-                <SelectInput   v-model="product.packageType" :items="packageTypeItemsList" placeholder="نوع الناقلة"
-                  density="compact" class="min-w-[170px]" item-title="title" item-value="value" />
+                <SelectInput 
+                  v-model="product.transport_type" 
+                  :items="packageTypeItemsList" 
+                  placeholder="نوع الناقلة"
+                  density="compact" 
+                  class="min-w-[170px]" 
+                  item-title="title" 
+                  item-value="value" 
+                  :disabled="product.isAdded"
+                />
               </div>
             </div>
           </div>
         </div>
       </div>
-
-    </v-form>
+    </template>
 
     <template #actions>
       <div class="flex items-center justify-center gap-4 flex-1 mt-4">
-        <ButtonWithIcon variant="flat" color="primary" size="large" custom-class="px-8" label="إضافة منتج"
-          :prepend-icon="plusIcon" @click="handleSave" />
+        <ButtonWithIcon 
+          variant="flat" 
+          color="primary" 
+          size="large" 
+          custom-class="px-8" 
+          :label="isEditMode ? 'حفظ التعديلات' : 'تم'"
+          @click="handleDone" 
+          :disabled="!!(isEditMode && editProductData && !canAddProduct(editProductData))"
+        />
 
-        <ButtonWithIcon variant="outlined" color="gray-700" border="gray-300" size="large" custom-class="px-4"
-          label="إلغاء" @click="handleCancel" />
+        <ButtonWithIcon 
+          variant="outlined" 
+          color="gray-700" 
+          border="gray-300" 
+          size="large" 
+          custom-class="px-4"
+          label="إلغاء" 
+          @click="handleCancel" 
+        />
       </div>
     </template>
 

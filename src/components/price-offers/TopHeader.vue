@@ -60,7 +60,7 @@ const props = withDefaults(defineProps<Props>(), {
     actionLabel: undefined,
     actionIcon: undefined,
     showAction: true,
-    codeLabel: 'كود العرض',
+    codeLabel: 'كود الطلب',
     code: '#000'
 });
 

@@ -13,6 +13,7 @@
   "dependencies": {
     "@fawmi/vue-google-maps": "^0.9.79",
     "@mdi/font": "^7.4.47",
+    "@meersagor/wavesurfer-vue": "^2.0.2",
     "@tiptap/extension-heading": "^3.14.0",
     "@tiptap/extension-image": "^3.14.0",
     "@tiptap/extension-link": "^3.14.0",

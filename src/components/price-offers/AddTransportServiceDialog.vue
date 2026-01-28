@@ -1,23 +1,37 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from "vue";
+import { required } from "@/utils/validators";
 
-interface TransportServiceForm {
-  projectLocation: string;
-  fromDate: string;
-  toDate: string;
-  vehicleTypes: string[];
-  tripTime: string;
+export interface LogisticsDetail {
+  from_date: string;
+  to_date: string;
+  transport_type: number[];
+  am_pm_interval: string;
+  notes: string;
+}
+
+export interface TransportServiceTableItem {
+  id?: number;
+  from_date: string;
+  to_date: string;
+  vehicle_types: number[];
+  vehicle_types_labels: string;
+  am_pm_interval: string;
+  am_pm_interval_label: string;
   notes: string;
 }
 
 const props = defineProps<{
   modelValue: boolean;
-  deliveredMethods?: any[];
+  transportTypes?: any[];
+  amPmIntervalOptions?: any[];
+  editService?: TransportServiceTableItem | null;
 }>();
 
 const emit = defineEmits<{
   "update:modelValue": [value: boolean];
-  "saved": [service: TransportServiceForm];
+  "saved": [service: TransportServiceTableItem];
+  "updated": [service: TransportServiceTableItem];
 }>();
 
 const internalOpen = computed({
@@ -25,37 +39,44 @@ const internalOpen = computed({
   set: (val: boolean) => emit('update:modelValue', val),
 });
 
+// Edit mode
+const isEditMode = computed(() => !!props.editService);
+
 const formRef = ref<any>(null);
 const isFormValid = ref(false);
 
-const form = reactive<TransportServiceForm>({
-  projectLocation: "",
-  fromDate: "",
-  toDate: "",
-  vehicleTypes: [],
-  tripTime: "",
+const form = reactive({
+  from_date: "",
+  to_date: "",
+  vehicle_types: [] as number[],
+  am_pm_interval: "",
   notes: "",
 });
 
-const tripTimeOptions = ref([
-  { title: 'صباحاً', value: 'صباحاً' },
-  { title: 'مساءً', value: 'مساءً' },
-  { title: 'كلاهما', value: 'كلاهما' },
+const tripTimeOptionsList = computed(() => props.amPmIntervalOptions || [
+  { title: 'صباحاً', value: 'am' },
+  { title: 'مساءً', value: 'pm' },
+  { title: 'كلاهما', value: 'both' },
 ]);
 
-const vehicleTypeOptionsList = computed(() => props.deliveredMethods || [
-  { title: 'قلاب', value: 'قلاب' },
-  { title: 'سطحة', value: 'سطحة' },
-]);
+const vehicleTypeOptionsList = computed(() => props.transportTypes || []);
 
-const showMapDialog = ref(false);
+// Watch for edit mode to populate form
+watch(() => props.modelValue, (newVal) => {
+  if (newVal && props.editService) {
+    form.from_date = props.editService.from_date || "";
+    form.to_date = props.editService.to_date || "";
+    form.vehicle_types = props.editService.vehicle_types || [];
+    form.am_pm_interval = props.editService.am_pm_interval || "";
+    form.notes = props.editService.notes || "";
+  }
+});
 
 const resetForm = () => {
-  form.projectLocation = "";
-  form.fromDate = "";
-  form.toDate = "";
-  form.vehicleTypes = [];
-  form.tripTime = "";
+  form.from_date = "";
+  form.to_date = "";
+  form.vehicle_types = [];
+  form.am_pm_interval = "";
   form.notes = "";
 };
 
@@ -64,13 +85,18 @@ const closeDialog = () => {
   resetForm();
 };
 
-const openMapDialog = () => {
-  showMapDialog.value = true;
+// Get labels for display
+const getVehicleTypesLabels = (): string => {
+  if (!form.vehicle_types.length) return '';
+  return form.vehicle_types.map(v => {
+    const item = vehicleTypeOptionsList.value.find((i: any) => i.value === v);
+    return item?.title || '';
+  }).filter(Boolean).join(', ');
 };
 
-const handleLocationSelected = (location: { latitude: string; longitude: string; address: string }) => {
-  form.projectLocation = location.address;
-  console.log('Location selected:', location);
+const getAmPmLabel = (): string => {
+  const item = tripTimeOptionsList.value.find((i: any) => i.value === form.am_pm_interval);
+  return item?.title || '';
 };
 
 const handleSave = async () => {
@@ -79,7 +105,22 @@ const handleSave = async () => {
     if (!valid) return;
   }
 
-  emit('saved', form);
+  const serviceData: TransportServiceTableItem = {
+    id: props.editService?.id,
+    from_date: form.from_date,
+    to_date: form.to_date,
+    vehicle_types: form.vehicle_types,
+    vehicle_types_labels: getVehicleTypesLabels(),
+    am_pm_interval: form.am_pm_interval,
+    am_pm_interval_label: getAmPmLabel(),
+    notes: form.notes,
+  };
+
+  if (isEditMode.value) {
+    emit('updated', serviceData);
+  } else {
+    emit('saved', serviceData);
+  }
   closeDialog();
 };
 
@@ -105,7 +146,7 @@ const plusIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
         <span class="!bg-gray-50 border border-gray-100 rounded px-1.5 py-1.5 text-gray-600">
           <span v-html="truckIcon"></span>
         </span>
-        إضافة خدمة نقل
+        {{ isEditMode ? 'تعديل خدمة النقل' : 'إضافة خدمة نقل' }}
       </div>
     </template>
 
@@ -113,10 +154,20 @@ const plusIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
       <div class="space-y-4">
         <!-- Date Range -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <DatePickerInput label="تاريخ بدء النقل" v-model="form.fromDate" placeholder="اختر التاريخ"
-            density="comfortable" hide-details />
-          <DatePickerInput label="تاريخ انتهاء النقل" v-model="form.toDate" placeholder="اختر التاريخ"
-            density="comfortable" hide-details />
+          <DatePickerInput 
+            label="تاريخ بدء النقل" 
+            v-model="form.from_date" 
+            placeholder="اختر التاريخ"
+            density="comfortable" 
+            :rules="[required()]"
+          />
+          <DatePickerInput 
+            label="تاريخ انتهاء النقل" 
+            v-model="form.to_date" 
+            placeholder="اختر التاريخ"
+            density="comfortable" 
+            :rules="[required()]"
+          />
 
           <!-- Trip Time -->
           <div>
@@ -124,10 +175,20 @@ const plusIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
               توقيت النقل <span class="text-red-500">*</span>
             </label>
             <div class="flex items-center gap-4">
-              <v-radio-group v-model="form.tripTime" inline hide-details>
-                <v-radio v-for="option in tripTimeOptions" :key="option.value" :value="option.value" color="primary">
+              <v-radio-group 
+                v-model="form.am_pm_interval" 
+                inline 
+                hide-details
+                :rules="[required()]"
+              >
+                <v-radio 
+                  v-for="option in tripTimeOptionsList" 
+                  :key="option.value" 
+                  :value="option.value" 
+                  color="primary"
+                >
                   <template #label>
-                    <span :class="form.tripTime === option.value ? 'text-primary font-semibold' : 'text-gray-600'">
+                    <span :class="form.am_pm_interval === option.value ? 'text-primary font-semibold' : 'text-gray-600'">
                       {{ option.title }}
                     </span>
                   </template>
@@ -137,13 +198,25 @@ const plusIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
           </div>
 
           <!-- Vehicle Types -->
-          <MultipleSelectInput label="نوع المركبات" v-model="form.vehicleTypes" :items="vehicleTypeOptionsList"
-            placeholder="اختر نوع المركبة" item-title="title" item-value="value" />
+          <MultipleSelectInput 
+            label="نوع المركبات" 
+            v-model="form.vehicle_types" 
+            :items="vehicleTypeOptionsList"
+            placeholder="اختر نوع المركبة" 
+            item-title="title" 
+            item-value="value" 
+          />
 
           <!-- Notes -->
           <div class="md:col-span-2">
-            <TextareaInput label="ملاحظات" v-model="form.notes" placeholder="أدخل الملاحظات" :rows="4"
-              density="comfortable" hide-details />
+            <TextareaInput 
+              label="ملاحظات" 
+              v-model="form.notes" 
+              placeholder="أدخل الملاحظات" 
+              :rows="4"
+              density="comfortable" 
+              hide-details 
+            />
           </div>
         </div>
       </div>
@@ -152,11 +225,25 @@ const plusIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
 
     <template #actions>
       <div class="flex items-center justify-center gap-4 flex-1 mt-4">
-        <ButtonWithIcon variant="flat" color="primary" size="large" custom-class="px-8" label="أضف خدمة"
-          :prepend-icon="plusIcon" @click="handleSave" />
+        <ButtonWithIcon 
+          variant="flat" 
+          color="primary" 
+          size="large" 
+          custom-class="px-8" 
+          :label="isEditMode ? 'حفظ التعديلات' : 'أضف خدمة'"
+          :prepend-icon="isEditMode ? undefined : plusIcon" 
+          @click="handleSave" 
+        />
 
-        <ButtonWithIcon variant="outlined" color="gray-700" border="gray-300" size="large" custom-class="px-4"
-          label="إلغاء" @click="handleCancel" />
+        <ButtonWithIcon 
+          variant="outlined" 
+          color="gray-700" 
+          border="gray-300" 
+          size="large" 
+          custom-class="px-4"
+          label="إلغاء" 
+          @click="handleCancel" 
+        />
       </div>
     </template>
 
