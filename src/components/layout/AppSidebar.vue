@@ -202,6 +202,26 @@
                                         المقاصة</router-link>
                                 </li>
                             </ul>
+                            <h2 class="text-sm font-medium leading-5 my-2">إدارة عروض الأسعار</h2>
+                            <ul class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
+                                <!-- <li  class="relative">
+                                    v-if="canViewRequestForQuotations"
+                                    <router-link to="/purchases/request-for-quotations/create"
+                                        :class="[isMenuItemActive('/purchases/request-for-quotations') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        طلب عروض الأسعار</router-link>
+                                </li> -->
+                                <!-- v-if="canViewBuildingMaterialPriceOffer" -->
+                                <li class="relative" >
+                                    <router-link to="/sales/price-offer-material-product/list"
+                                        :class="[isMenuItemActive('/sales/price-offer-material-product') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        عروض أسعار مواد أولية</router-link>
+                                </li>
+                                <!-- <li class="relative">
+                                    <router-link to="/purchases/request-for-quotations-fuel/list"
+                                        :class="[isMenuItemActive('/purchases/request-for-quotations-fuel') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        عروض أسعار محروقات</router-link>
+                                </li> -->
+                            </ul>
 
                         </div>
                     </v-list-group>
@@ -290,7 +310,7 @@
                                         :class="[isMenuItemActive('/purchases/request-for-quotations') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         طلب عروض الأسعار</router-link>
                                 </li> -->
-                                <li class="relative">
+                                <li class="relative" v-if="canViewBuildingMaterialPriceRequests">
                                     <router-link to="/purchases/request-for-quotations-material-product/list"
                                         :class="[isMenuItemActive('/purchases/request-for-quotations-material-product') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         طلب عروض أسعار مواد أولية</router-link>
@@ -706,6 +726,7 @@ const {
     canViewSalesOrders,
     canViewContracts,
     canViewClearing,
+    canViewBuildingMaterialPriceOffer,
     hasAnySalesPermission,
     // Projects
     canViewProjects,
@@ -714,7 +735,7 @@ const {
     // Purchases
     canViewSuppliers,
     canViewSupplierSettlements,
-    canViewRequestForQuotations,
+    canViewBuildingMaterialPriceRequests,
     hasAnyPurchasesPermission,
     // Finance
     canViewFinancialDashboard,
@@ -760,7 +781,7 @@ const {
 // Define routes for each dropdown group
 const productsRoutes = ['/simple-products', '/group-products', '/products'];
 const servicesRoutes = ['/services'];
-const salesRoutes = ['/customers', '/sales'];
+const salesRoutes = ['/customers', '/sales', '/price-offer-material-product'];
 const projectsRoutes = ['/projects'];
 const purchasesRoutes = ['/suppliers', '/purchases'];
 const financeRoutes = ['/finance'];
