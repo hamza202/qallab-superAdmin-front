@@ -226,4 +226,35 @@ export const purchasesRoutes: RouteRecordRaw[] = [
       },
     ],
   },
+  {
+    path: "/purchases/purchase-invoices",
+    name: "PurchaseInvoices",
+    redirect: "/purchases/purchase-invoices/list",
+    children: [
+      {
+        path: "list",
+        name: "PurchaseInvoicesList",
+        component: () => import("@/views/purchases/purchase-invoices/List.vue"),
+        meta: {
+          title: "pages.PurchaseInvoices.title",
+        },
+      },
+      {
+        path: "create",
+        name: "PurchaseInvoicesCreate",
+        component: () => import("@/views/purchases/purchase-invoices/Form.vue"),
+        meta: {
+          title: "pages.PurchaseInvoices.create",
+        },
+      },
+      {
+        path: "edit/:id",
+        name: "PurchaseInvoicesEdit",
+        component: () => import("@/views/purchases/purchase-invoices/Form.vue"),
+        meta: {
+          title: "pages.PurchaseInvoices.edit",
+        },
+      },
+    ],
+  },
 ];
