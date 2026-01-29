@@ -1,33 +1,33 @@
 import type { RouteRecordRaw } from "vue-router";
 
 export const purchasesRoutes: RouteRecordRaw[] = [
-    {
-    path: '/suppliers',
-    name: 'Suppliers',
-    redirect: '/suppliers/list',
+  {
+    path: "/suppliers",
+    name: "Suppliers",
+    redirect: "/suppliers/list",
     children: [
       {
-        path: 'list',
-        name: 'SuppliersList',
-        component: () => import('@/views/suppliers/List.vue'),
+        path: "list",
+        name: "SuppliersList",
+        component: () => import("@/views/suppliers/List.vue"),
         meta: {
-          title: 'pages.suppliers.title',
+          title: "pages.suppliers.title",
         },
       },
       {
-        path: 'create',
-        name: 'SuppliersCreate',
-        component: () => import('@/views/suppliers/Form.vue'),
+        path: "create",
+        name: "SuppliersCreate",
+        component: () => import("@/views/suppliers/Form.vue"),
         meta: {
-          title: 'pages.suppliers.create',
+          title: "pages.suppliers.create",
         },
       },
       {
-        path: 'edit/:id',
-        name: 'SuppliersEdit',
-        component: () => import('@/views/suppliers/Form.vue'),
+        path: "edit/:id",
+        name: "SuppliersEdit",
+        component: () => import("@/views/suppliers/Form.vue"),
         meta: {
-          title: 'pages.suppliers.edit',
+          title: "pages.suppliers.edit",
         },
       },
     ],
@@ -117,7 +117,7 @@ export const purchasesRoutes: RouteRecordRaw[] = [
       },
     ],
   },
-    {
+  {
     path: "/purchases/request-for-quotations-fuel",
     name: "RequestForQuotationsFuel",
     redirect: "/purchases/request-for-quotations-fuel/list",
@@ -125,8 +125,7 @@ export const purchasesRoutes: RouteRecordRaw[] = [
       {
         path: "list",
         name: "RequestForQuotationFuelList",
-        component: () =>
-          import("@/views/purchases/price-offers/fuel/List.vue"),
+        component: () => import("@/views/purchases/price-offers/fuel/List.vue"),
         meta: {
           title: "pages.requestForQuotationFuel.title",
         },
@@ -134,8 +133,7 @@ export const purchasesRoutes: RouteRecordRaw[] = [
       {
         path: "create",
         name: "RequestForQuotationFuelCreate",
-        component: () =>
-          import("@/views/purchases/price-offers/fuel/Form.vue"),
+        component: () => import("@/views/purchases/price-offers/fuel/Form.vue"),
         meta: {
           title: "pages.requestForQuotationFuel.title",
         },
@@ -143,8 +141,7 @@ export const purchasesRoutes: RouteRecordRaw[] = [
       {
         path: "edit/:id",
         name: "RequestForQuotationFuelEdit",
-        component: () =>
-          import("@/views/purchases/price-offers/fuel/Form.vue"),
+        component: () => import("@/views/purchases/price-offers/fuel/Form.vue"),
         meta: {
           title: "pages.requestForQuotationFuel.edit",
         },
@@ -152,12 +149,50 @@ export const purchasesRoutes: RouteRecordRaw[] = [
       {
         path: "view/:id",
         name: "RequestForQuotationFuelView",
-        component: () =>
-          import("@/views/purchases/price-offers/fuel/View.vue"),
+        component: () => import("@/views/purchases/price-offers/fuel/View.vue"),
         meta: {
           title: "pages.requestForQuotationFuel.view",
         },
       },
+    ],
+  },
+  {
+    path: "/purchases/purchases-requests",
+    name: "PurchasesRequests",
+    redirect: "/purchases/purchases-requests/list",
+    children: [
+      {
+        path: "list",
+        name: "PurchasesRequestsList",
+        component: () => import("@/views/purchases/purchases-requests/List.vue"),
+        meta: {
+          title: "pages.PurchasesRequests.title",
+        },
+      },
+      {
+        path: "create",
+        name: "PurchasesRequestsCreate",
+        component: () => import("@/views/purchases/purchases-requests/Form.vue"),
+        meta: {
+          title: "pages.PurchasesRequests.title",
+        },
+      },
+      {
+        path: "edit/:id",
+        name: "PurchasesRequestsEdit",
+        component: () => import("@/views/purchases/purchases-requests/Form.vue"),
+        meta: {
+          title: "pages.PurchasesRequests.edit",
+        },
+      },
+      // {
+      //   path: "view/:id",
+      //   name: "RequestForQuotationFuelView",
+      //   component: () => import("@/views/purchases/purchases-requests/View.vue"),
+      //   meta: {
+      //     title: "pages.requestForQuotationFuel.view",
+      //   },
+      // },
     ],
   },
 ];

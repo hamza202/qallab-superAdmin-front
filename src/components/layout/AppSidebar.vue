@@ -211,7 +211,7 @@
                                         طلب عروض الأسعار</router-link>
                                 </li> -->
                                 <!-- v-if="canViewBuildingMaterialPriceOffer" -->
-                                <li class="relative" >
+                                <li class="relative">
                                     <router-link to="/sales/price-offer-material-product/list"
                                         :class="[isMenuItemActive('/sales/price-offer-material-product') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         عروض أسعار مواد أولية</router-link>
@@ -221,6 +221,12 @@
                                         :class="[isMenuItemActive('/purchases/request-for-quotations-fuel') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         عروض أسعار محروقات</router-link>
                                 </li> -->
+                                <li class="relative">
+                                    <router-link to="/sales/sales-requests/list"
+                                        :class="[isMenuItemActive('/sales/sales-requests') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        طلبيات المبيعات</router-link>
+                                </li>
+
                             </ul>
 
                         </div>
@@ -319,6 +325,11 @@
                                     <router-link to="/purchases/request-for-quotations-fuel/list"
                                         :class="[isMenuItemActive('/purchases/request-for-quotations-fuel') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         طلب عروض أسعار محروقات</router-link>
+                                </li>
+                                <li class="relative">
+                                    <router-link to="/purchases/purchases-requests/list"
+                                        :class="[isMenuItemActive('/purchases/purchases-requests') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        طلبيات المشتريات</router-link>
                                 </li>
                             </ul>
                         </div>
