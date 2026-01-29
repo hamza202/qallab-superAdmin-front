@@ -59,6 +59,7 @@ const routePermissionMap: Record<string, { group: string; key: string }> = {
     '/sales/orders': { group: 'sales', key: 'sales-orders' },
     '/sales/contracts': { group: 'sales', key: 'contracts' },
     '/sales/clearing': { group: 'sales', key: 'clearing' },
+    // '/sales/price-offer-material-product': { group: 'sales', key: 'sales-building-material-price-offer' },
 
     // Projects
     '/projects/list': { group: 'projects', key: 'projects' },
@@ -67,7 +68,7 @@ const routePermissionMap: Record<string, { group: string; key: string }> = {
     // Purchases
     '/suppliers': { group: 'purchases', key: 'suppliers' },
     '/suppliers/supplier-settlement': { group: 'purchases', key: 'supplier-settlements' },
-    // '/purchases/request-for-quotations': { group: 'purchases', key: 'request-for-quotations' },
+    '/purchases/request-for-quotations-material-product': { group: 'purchases', key: 'purchases-building-material-price-requests' },
 
     // Finance
     '/vouchers/list': { group: 'finance', key: 'financial-dashboard' },
@@ -206,6 +207,7 @@ export function usePermissions() {
     const canViewSalesOrders = computed(() => hasPermission('sales', 'sales-orders'));
     const canViewContracts = computed(() => hasPermission('sales', 'contracts'));
     const canViewClearing = computed(() => hasPermission('sales', 'clearing'));
+    const canViewBuildingMaterialPriceOffer = computed(() => hasPermission('sales', 'sales-building-material-price-offer'));
 
     /**
      * Check if user can view projects related items
@@ -218,7 +220,7 @@ export function usePermissions() {
      */
     const canViewSuppliers = computed(() => hasPermission('purchases', 'suppliers'));
     const canViewSupplierSettlements = computed(() => hasPermission('purchases', 'supplier-settlements'));
-    // const canViewRequestForQuotations = computed(() => hasPermission('purchases', 'request-for-quotations'));
+    const canViewBuildingMaterialPriceRequests = computed(() => hasPermission('purchases', 'purchases-building-material-price-requests'));
 
     /**
      * Check if user can view finance related items
@@ -300,6 +302,7 @@ export function usePermissions() {
         canViewSalesInvoices.value ||
         canViewSalesOrders.value ||
         canViewContracts.value ||
+        canViewBuildingMaterialPriceOffer.value ||
         canViewClearing.value
     );
 
@@ -316,8 +319,8 @@ export function usePermissions() {
      */
     const hasAnyPurchasesPermission = computed(() =>
         canViewSuppliers.value ||
-        canViewSupplierSettlements.value 
-        // || canViewRequestForQuotations.value
+        canViewSupplierSettlements.value || 
+        canViewBuildingMaterialPriceRequests.value
     );
 
     /**
@@ -408,6 +411,7 @@ export function usePermissions() {
         canViewSalesOrders,
         canViewContracts,
         canViewClearing,
+        canViewBuildingMaterialPriceOffer,
         hasAnySalesPermission,
 
         // Projects permissions
@@ -418,7 +422,7 @@ export function usePermissions() {
         // Purchases permissions
         canViewSuppliers,
         canViewSupplierSettlements,
-        // canViewRequestForQuotations,
+        canViewBuildingMaterialPriceRequests,
         hasAnyPurchasesPermission,
 
         // Finance permissions
