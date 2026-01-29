@@ -75,4 +75,43 @@ export const salesRoutes: RouteRecordRaw[] = [
       },
     ],
   },
+    {
+    path: "/sales/sales-requests",
+    name: "SalesRequests",
+    redirect: "/sales/sales-requests/list",
+    children: [
+      {
+        path: "list",
+        name: "SalesRequestsList",
+        component: () => import("@/views/sales/sales-requests/List.vue"),
+        meta: {
+          title: "pages.SalesRequests.title",
+        },
+      },
+      {
+        path: "create",
+        name: "SalesRequestsCreate",
+        component: () => import("@/views/sales/sales-requests/Form.vue"),
+        meta: {
+          title: "pages.SalesRequests.title",
+        },
+      },
+      {
+        path: "edit/:id",
+        name: "SalesRequestsEdit",
+        component: () => import("@/views/sales/sales-requests/Form.vue"),
+        meta: {
+          title: "pages.SalesRequests.edit",
+        },
+      },
+      // {
+      //   path: "view/:id",
+      //   name: "RequestForQuotationFuelView",
+      //   component: () => import("@/views/sales/sales-requests/View.vue"),
+      //   meta: {
+      //     title: "pages.requestForQuotationFuel.view",
+      //   },
+      // },
+    ],
+  },
 ];

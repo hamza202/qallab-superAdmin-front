@@ -27,6 +27,7 @@ interface Props {
   showView?: boolean;
   confirmDelete?: boolean;
   loading?: boolean;
+  smallButtons?: boolean;
   forceShowEdit?: boolean;   // Force show edit without checking item.actions
   forceShowDelete?: boolean; // Force show delete without checking item.actions
   forceShowView?: boolean;   // Force show view without checking item.actions
@@ -38,6 +39,7 @@ const props = withDefaults(defineProps<Props>(), {
   showActions: true,
   showDelete: true,
   showEdit: true,
+  smallButtons: false,
   showView: true,
   confirmDelete: true,
   loading: false,
@@ -259,7 +261,7 @@ const eyeIcon = `<svg width="22" height="16" viewBox="0 0 22 16" fill="none" xml
                 format:
                   'short'
               })
-                }}</span>
+              }}</span>
             </template>
 
             <!-- Regular Text -->
@@ -277,16 +279,16 @@ const eyeIcon = `<svg width="22" height="16" viewBox="0 0 22 16" fill="none" xml
               </template>
               <!-- Default Actions -->
               <div class="flex items-center gap-1">
-                <v-btn icon variant="text" v-if="showView && (forceShowView || item.actions?.can_view)" size="small"
-                  @click="handleView(item)">
+                <v-btn icon variant="text" v-if="showView && (forceShowView || item.actions?.can_view)"
+                  :size="smallButtons ? 'x-small' : 'small'" @click="handleView(item)">
                   <span v-html="eyeIcon"></span>
                 </v-btn>
                 <v-btn icon variant="text" v-if="showEdit && (forceShowEdit || item.actions?.can_update)"
-                  color="primary" size="small" @click="handleEdit(item)">
+                  color="primary" :size="smallButtons ? 'x-small' : 'small'" @click="handleEdit(item)">
                   <span v-html="editIcon"></span>
                 </v-btn>
                 <v-btn icon variant="text" v-if="showDelete && (forceShowDelete || item.actions?.can_delete)"
-                  size="small" color="error" @click="handleDelete(item)">
+                  :size="smallButtons ? 'x-small' : 'small'" color="error" @click="handleDelete(item)">
                   <span v-html="trashIcon"></span>
                 </v-btn>
               </div>
