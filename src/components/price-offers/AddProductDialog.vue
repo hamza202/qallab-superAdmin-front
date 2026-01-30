@@ -22,12 +22,15 @@ export interface ProductToAdd {
   unit_id: number | null;
   unit_name: string;
   quantity: number | null;
-  transport_type: number | null;
-  transport_type_name: string;
-  trip_no: number | null;
+  transport_type?: number | null | undefined;
+  transport_type_name?: string;
+  trip_no?: number | null | undefined;
   notes: string;
   isAdded?: boolean;
-  id?: number; // For edit mode
+  id?: number;
+  unit_price?: number | null;
+  discount?: number | null;
+  [key: string]: unknown; // allow extra fields (e.g. total_amount, tax_amount from sales)
 }
 
 const props = defineProps<{
@@ -35,10 +38,17 @@ const props = defineProps<{
   requestType: RequestType;
   transportTypes?: any[];
   unitItems?: any[];
-  supplierId: number | null;
-  editProduct?: ProductToAdd | null; // Product to edit
-  existingProducts?: ProductToAdd[]; // Already added products
+  supplierId?: number | null;
+  customerId?: number | null;
+  /** 'purchases' = supplier items, transport/trip; 'sales' = customer items, unit_price/discount */
+  variant?: 'purchases' | 'sales';
+  editProduct?: ProductToAdd | null;
+  existingProducts?: ProductToAdd[];
 }>();
+
+const variant = computed(() => props.variant || 'purchases');
+const isSalesMode = computed(() => variant.value === 'sales');
+const entityId = computed(() => isSalesMode.value ? props.customerId : props.supplierId);
 
 const emit = defineEmits<{
   "update:modelValue": [value: boolean];
@@ -121,32 +131,34 @@ const addedProducts = computed(() => {
   return productsList.value.filter(p => p.isAdded);
 });
 
-// Check if product can be added (has quantity and unit)
+// Check if product can be added: الكمية + الوحدة مطلوبة، وفي وضع المبيعات سعر الوحدة مطلوب أيضاً
 const canAddProduct = (product: ProductToAdd): boolean => {
-  return !!product.quantity && product.quantity > 0 && !!product.unit_id;
+  const hasQty = product.quantity != null && product.quantity !== '' && Number(product.quantity) > 0;
+  const hasUnit = !!product.unit_id;
+  if (!hasQty || !hasUnit) return false;
+  if (isSalesMode.value) {
+    const price = product.unit_price;
+    const hasPrice = price !== null && price !== undefined && price !== '' && !Number.isNaN(Number(price)) && Number(price) >= 0;
+    return hasPrice;
+  }
+  return true;
 };
 
-// Fetch supplier items
-const fetchSupplierItems = async () => {
-  if (!props.supplierId) return;
-  
+// Fetch items: نفس الـ endpoint بدون إرسال أي id
+const fetchItems = async () => {
   loading.value = true;
   try {
-    const res = await api.get<any>(`/items/supplier-items?supplier_id=${props.supplierId}`);
+    const res = await api.get<any>('/items/supplier-items');
     if (Array.isArray(res.data)) {
       supplierItems.value = res.data;
       categories.value = extractCategories(res.data);
-      
-      // Initialize products list, preserving existing products' state
+
       productsList.value = res.data.map((item: SupplierItem) => {
-        // Check if this product was already added
         const existingProduct = props.existingProducts?.find(p => p.item_id === item.id);
-        
         if (existingProduct) {
           return { ...existingProduct, isAdded: true };
         }
-        
-        return {
+        const base: ProductToAdd = {
           item_id: item.id,
           item_name: item.name,
           unit_id: null,
@@ -158,15 +170,19 @@ const fetchSupplierItems = async () => {
           notes: '',
           isAdded: false,
         };
+        if (isSalesMode.value) {
+          base.unit_price = null;
+          base.discount = null;
+        }
+        return base;
       });
-      
-      // Set first category as active
+
       if (categories.value.length > 0) {
         activeTabId.value = categories.value[0].id;
       }
     }
   } catch (e) {
-    console.error('Error fetching supplier items:', e);
+    console.error('Error fetching items:', e);
     supplierItems.value = [];
     categories.value = [];
     productsList.value = [];
@@ -177,21 +193,12 @@ const fetchSupplierItems = async () => {
 
 // Watch for dialog open
 watch(() => props.modelValue, (newVal) => {
-  if (newVal && props.supplierId) {
+  if (newVal) {
     if (isEditMode.value && props.editProduct) {
-      // Edit mode: only show the product to edit
       editProductData.value = { ...props.editProduct };
     } else {
-      // Add mode: fetch all supplier items
-      fetchSupplierItems();
+      fetchItems();
     }
-  }
-});
-
-// Watch for supplier change
-watch(() => props.supplierId, (newVal) => {
-  if (props.modelValue && newVal && !isEditMode.value) {
-    fetchSupplierItems();
   }
 });
 
@@ -367,8 +374,30 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
             />
           </div>
 
-          <!-- Delivery Count (trip_no) -->
-          <div v-if="requestType == 'raw_materials'">
+          <!-- Unit Price (sales) -->
+          <div v-if="isSalesMode">
+            <TextInput 
+              v-model="editProductData.unit_price" 
+              type="number" 
+              placeholder="سعر الوحدة" 
+              density="compact"
+              class="min-w-[170px]" 
+            />
+          </div>
+
+          <!-- Discount (sales) -->
+          <div v-if="isSalesMode">
+            <TextInput 
+              v-model="editProductData.discount" 
+              type="number" 
+              placeholder="الخصم" 
+              density="compact"
+              class="min-w-[170px]" 
+            />
+          </div>
+
+          <!-- Delivery Count (trip_no) - purchases only -->
+          <div v-if="!isSalesMode && requestType == 'raw_materials'">
             <TextInput 
               v-model="editProductData.trip_no" 
               type="number" 
@@ -378,8 +407,8 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
             />
           </div>
 
-          <!-- Package Type (transport_type) -->
-          <div v-if="requestType == 'raw_materials'">
+          <!-- Package Type (transport_type) - purchases only -->
+          <div v-if="!isSalesMode && requestType == 'raw_materials'">
             <SelectInput 
               v-model="editProductData.transport_type" 
               :items="packageTypeItemsList" 
@@ -397,7 +426,7 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
     <!-- No Products State -->
     <div v-else-if="!isEditMode && supplierItems.length === 0" class="flex flex-col items-center justify-center py-20 text-gray-500">
       <v-icon size="64" color="gray-400">mdi-package-variant-closed</v-icon>
-      <p class="mt-4 text-lg font-medium">لا توجد منتجات تابعة لهذا المزود</p>
+      <p class="mt-4 text-lg font-medium">{{ isSalesMode ? 'لا توجد منتجات تابعة لهذا العميل' : 'لا توجد منتجات تابعة لهذا المزود' }}</p>
     </div>
 
     <!-- Add Mode Content -->
@@ -496,8 +525,32 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
                 />
               </div>
 
-              <!-- Delivery Count (trip_no) -->
-              <div v-if="requestType == 'raw_materials'">
+              <!-- Unit Price (sales) -->
+              <div v-if="isSalesMode">
+                <TextInput 
+                  v-model="product.unit_price" 
+                  type="number" 
+                  placeholder="سعر الوحدة" 
+                  density="compact"
+                  class="min-w-[170px]" 
+                  :disabled="product.isAdded"
+                />
+              </div>
+
+              <!-- Discount (sales) -->
+              <div v-if="isSalesMode">
+                <TextInput 
+                  v-model="product.discount" 
+                  type="number" 
+                  placeholder="الخصم" 
+                  density="compact"
+                  class="min-w-[170px]" 
+                  :disabled="product.isAdded"
+                />
+              </div>
+
+              <!-- Delivery Count (trip_no) - purchases only -->
+              <div v-if="!isSalesMode && requestType == 'raw_materials'">
                 <TextInput 
                   v-model="product.trip_no" 
                   type="number" 
@@ -508,8 +561,8 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
                 />
               </div>
 
-              <!-- Package Type (transport_type) -->
-              <div v-if="requestType == 'raw_materials'">
+              <!-- Package Type (transport_type) - purchases only -->
+              <div v-if="!isSalesMode && requestType == 'raw_materials'">
                 <SelectInput 
                   v-model="product.transport_type" 
                   :items="packageTypeItemsList" 

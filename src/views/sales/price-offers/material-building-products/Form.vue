@@ -3,16 +3,14 @@ import { ref, computed, onMounted } from "vue";
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router';
 import AddProductDialog from '@/components/price-offers/AddProductDialog.vue';
+import EditSupplyDetailsDialog from '@/components/price-offers/EditSupplyDetailsDialog.vue';
 import TopHeader from '@/components/price-offers/TopHeader.vue';
 import { useApi } from '@/composables/useApi';
 import { fileIcon, mapMarkerIcon, messagePlusIcon, filePlusIcon, busIcon, listIcon, CoinHandIcon, fileCheckIcon } from '@/components/icons/priceOffersIcons';
 import { returnIcon, saveIcon } from '@/components/icons/globalIcons';
-
-const { t } = useI18n()
 const api = useApi();
 const route = useRoute();
 const router = useRouter();
-
 // Check if we're in edit mode
 const isEditMode = computed(() => !!route.params.id);
 const routeId = computed(() => route.params.id as string);
@@ -23,18 +21,20 @@ const requestTypeItems = ref<any[]>([]);
 const paymentMethodItems = ref<any[]>([]);
 const transportTypeItems = ref<any[]>([]);
 const amPmIntervalItems = ref<any[]>([]);
+const feeTypeItems = ref<any[]>([]);
 const unitItems = ref<any[]>([]);
 const customerItems = ref<any[]>([]);
 
 const fetchConstants = async () => {
     try {
-        const res = await api.get<any>('/purchases/constants');
+        const res = await api.get<any>('/sales/quotations/constants');
         const data = res.data;
         if (data) {
-            requestTypeItems.value = data.request_types?.map((i: any) => ({ title: i.label, value: i.key })) || [];
+            requestTypeItems.value = data.quotation_types?.map((i: any) => ({ title: i.label, value: i.key })) || [];
             paymentMethodItems.value = data.payment_methods?.map((i: any) => ({ title: i.label, value: i.key })) || [];
             transportTypeItems.value = data.transport_types?.map((i: any) => ({ title: i.label, value: i.key })) || [];
             amPmIntervalItems.value = data.am_pm_interval?.map((i: any) => ({ title: i.label, value: i.key })) || [];
+            feeTypeItems.value = data.fee_types?.map((i: any) => ({ title: i.label, value: i.key })) || [];
         }
     } catch (e) {
         console.error('Error fetching constants:', e);
@@ -78,75 +78,88 @@ const getAmPmIntervalLabel = (interval: string | null): string => {
     return item?.title || '';
 };
 
-// Fetch form data for edit mode
+// مساعد: اسم الوحدة من unit_id
+const getUnitName = (unitId: number | null): string => {
+    if (unitId == null) return '';
+    const u = unitItems.value.find((i: any) => i.value === unitId || i.value === Number(unitId));
+    return u?.title ?? '';
+};
+
+// Fetch form data for edit mode (استجابة GET /sales/quotations/building-materials/:uuid)
 const fetchFormData = async () => {
     if (!isEditMode.value || !routeId.value) return;
 
     isLoading.value = true;
     try {
-        const res = await api.get<any>(`/purchases/building-materials/${routeId.value}`);
-        const data = res.data;
+        // useApi().get() يرجع جسم الاستجابة مباشرة؛ الباك قد يرجع { data: { ... } } أو الجذر مباشرة
+        const raw = await api.get<any>(`/sales/quotations/building-materials/${routeId.value}`);
+        const data = raw?.data != null ? raw.data : raw;
 
-        if (data) {
-            // Populate form data
-            formData.value.requestType = data.request_type;
-            formData.value.customer_id = data.customer_id;
-            formData.value.price_offer_name = data.price_offer_name || '';
-            formData.value.project_name = data.project_name || '';
-            formData.value.issueDate = data.request_datetime ? data.request_datetime.split(' ')[0] : '';
-            formData.value.requestStatus = data.status_id;
-            formData.value.paymentMethod = data.payment_method;
-            formData.value.advancePayment = data.upfront_payment;
-            formData.value.target_location = data.target_location;
-            formData.value.target_latitude = data.target_latitude;
-            formData.value.target_longitude = data.target_longitude;
-            formData.value.textNote = data.notes || '';
+        if (!data) return;
 
-            // Populate products (items)
-            if (data.items && Array.isArray(data.items)) {
-                productTableItems.value = data.items.map((item: any) => ({
+        // تعبئة بيانات النموذج (مطابق لـ respons.json)
+        formData.value.customer_id = data.customer_id ?? null;
+        formData.value.quotations_datetime = data.quotations_datetime ? String(data.quotations_datetime).split(' ')[0] : '';
+        formData.value.quotation_name = data.quotation_name ?? '';
+        formData.value.quotation_validity_no = data.quotation_validity_no ?? null;
+        formData.value.project_name = data.project_name ?? '';
+        formData.value.quotation_type = data.quotation_type ?? null;
+        formData.value.payment_method = data.payment_method ?? null;
+        formData.value.upfront_payment = data.upfront_payment ?? null;
+        formData.value.invoice_interval = data.invoice_interval ?? null;
+        formData.value.payment_term_no = data.payment_term_no ?? null;
+        formData.value.late_fee_type = data.late_fee_type ?? null;
+        formData.value.late_fee = data.late_fee ?? null;
+        formData.value.cancel_fee_type = data.cancel_fee_type ?? null;
+        formData.value.cancel_fee = data.cancel_fee ?? null;
+        formData.value.target_location = data.target_location ?? null;
+        formData.value.target_latitude = data.target_latitude ?? null;
+        formData.value.target_longitude = data.target_longitude ?? null;
+        formData.value.notes = data.notes ?? '';
+        formData.value.status_id = data.status_id ?? null;
+
+        // جدول المنتجات: دمج data.items مع data.logistics_product_details (مطابق لكل item_id)
+        if (Array.isArray(data.items) && data.items.length > 0) {
+            const logisticsByItemId: Record<number, any> = {};
+            if (Array.isArray(data.logistics_product_details)) {
+                data.logistics_product_details.forEach((log: any) => {
+                    const iid = Number(log.item_id);
+                    if (!logisticsByItemId[iid]) logisticsByItemId[iid] = log;
+                });
+            }
+
+            productTableItems.value = data.items.map((item: any) => {
+                const itemId = Number(item.item_id);
+                const log = logisticsByItemId[itemId];
+                const vehicleTypes = log?.transport_type
+                    ? (Array.isArray(log.transport_type)
+                        ? log.transport_type.map((t: string | number) => Number(t))
+                        : [Number(log.transport_type)])
+                    : [];
+                const transportTypeName = vehicleTypes.length
+                    ? vehicleTypes.map((id: number) => getTransportTypeName(id)).filter(Boolean).join(', ')
+                    : '';
+
+                return {
                     id: item.id,
-                    item_id: item.item_id,
-                    item_name: item.item_name || '',
-                    unit_id: item.unit_id,
-                    unit_name: item.unit_name || '',
-                    quantity: item.quantity,
-                    transport_type: item.transport_type,
-                    transport_type_name: getTransportTypeName(item.transport_type),
-                    trip_no: item.trip_no,
-                    notes: item.notes || ''
-                }));
-            }
-
-            // Populate transport service (logistics_detail)
-            if (data.logistics_detail && (data.logistics_detail.from_date || data.logistics_detail.to_date)) {
-                // Convert transport_type strings to numbers
-                let vehicleTypes: number[] = [];
-                if (data.logistics_detail.transport_type) {
-                    if (Array.isArray(data.logistics_detail.transport_type)) {
-                        vehicleTypes = data.logistics_detail.transport_type.map((t: string | number) => Number(t));
-                    } else {
-                        vehicleTypes = [Number(data.logistics_detail.transport_type)];
-                    }
-                }
-
-                // Get labels for vehicle types
-                const vehicleTypesLabels = vehicleTypes
-                    .map(id => getTransportTypeName(id))
-                    .filter(Boolean)
-                    .join(', ');
-
-                Supply.value = {
-                    id: data.logistics_detail.id,
-                    from_date: data.logistics_detail.from_date || '',
-                    to_date: data.logistics_detail.to_date || '',
+                    item_id: itemId,
+                    item_name: item.item_name ?? '',
+                    unit_id: item.unit_id ?? null,
+                    unit_name: item.unit_name ?? getUnitName(item.unit_id),
+                    quantity: item.quantity ?? null,
+                    unit_price: item.price_per_unit ?? null,
+                    discount: item.discount_val ?? null,
+                    tax_amount: item.total_tax ?? null,
+                    total_amount: item.subtotal_after_tax ?? null,
+                    notes: item.note ?? item.notes ?? '',
+                    trip_no: log?.number_of_trips ?? null,
+                    transport_start_date: log?.trip_start ?? null,
                     vehicle_types: vehicleTypes,
-                    vehicle_types_labels: vehicleTypesLabels,
-                    am_pm_interval: data.logistics_detail.am_pm_interval || '',
-                    am_pm_interval_label: getAmPmIntervalLabel(data.logistics_detail.am_pm_interval),
-                    notes: data.logistics_detail.notes || ''
+                    transport_type_name: transportTypeName,
+                    transport_type: vehicleTypes[0] ?? null,
+                    logistics_detail_id: log?.id ?? null,
                 };
-            }
+            });
         }
     } catch (e) {
         console.error('Error fetching form data:', e);
@@ -168,19 +181,27 @@ onMounted(async () => {
     }
 });
 
-// Interface for product items in the table
+// Interface for product items in the table (sales: unit_price, discount, tax_amount, total_amount)
 interface ProductTableItem {
     item_id: number;
     item_name: string;
     unit_id: number | null;
     unit_name: string;
     quantity: number | null;
-    transport_type: number | null;
-    transport_type_name: string;
-    trip_no: number | null;
+    transport_type?: number | null;
+    transport_type_name?: string;
+    vehicle_types?: (string | number)[]; // نوع المركبات (متعدد) لتفاصيل التوريد
+    trip_no?: number | null;
+    transport_start_date?: string | null;
     notes: string;
-    id?: number; // For edit mode
-    isAdded?: boolean; // For dialog state
+    id?: number;
+    /** من الباك في وضع التعديل لـ items */
+    logistics_detail_id?: number | null;
+    isAdded?: boolean;
+    unit_price?: number | null;
+    discount?: number | null;
+    tax_amount?: number | null;
+    total_amount?: number | null;
 }
 
 interface Supply {
@@ -194,27 +215,30 @@ interface Supply {
     notes: string;
 }
 
-// Form data with static values
+// Form data – أسماء المفاتيح مطابقة لـ request-body.json
 const formData = ref({
     requestNumber: '#12520226',
-    requestType: null,
-    customer_id: null,
-    price_offer_name: '',
-    project_name: '',
+    customer_id: null as number | null,
+    quotations_datetime: '' as string,
+    quotation_name: '',
+    quotation_validity_no: null as number | string | null,
     target_location: null as string | null,
     target_latitude: null as string | null,
     target_longitude: null as string | null,
-    issueDate: '',
-    requestStatus: null,
-    paymentMethod: null,
-    advancePayment: null,
-    delay_fine: null,
-    delay_fine_unit: null,
-    cancel_fine: null,
-    cancel_fine_unit: null,
-    textNote: '',
-    image: null,
-    voice_attachment: null
+    project_name: '',
+    quotation_type: null as string | null,
+    payment_method: null as string | null,
+    upfront_payment: null as number | string | null,
+    invoice_interval: null as number | string | null,
+    payment_term_no: null as number | string | null,
+    late_fee_type: null as string | null,
+    late_fee: null as number | string | null,
+    cancel_fee_type: null as string | null,
+    cancel_fee: null as number | string | null,
+    notes: '',
+    status_id: null as number | null,
+    image: null as File | null,
+    voice_attachment: null as File | null
 });
 
 // Products table items (dynamically populated from dialog)
@@ -229,9 +253,8 @@ const hasSupply = computed(() => Supply.value !== null);
 // Summary data
 const summaryData = computed(() => ({
     productsCount: productTableItems.value.length,
-    // servicesCount: Supply.value ? 1 : 0,
-    paymentMethod: paymentMethodItems.value.find((i: any) => i.value === formData.value.paymentMethod)?.title || '',
-    advancePayment: formData.value.advancePayment || 'لا يوجد'
+    payment_method: paymentMethodItems.value.find((i: any) => i.value === formData.value.payment_method)?.title || '',
+    upfront_payment: formData.value.upfront_payment ?? 'لا يوجد'
 }));
 
 import { useNotification } from '@/composables/useNotification';
@@ -331,67 +354,104 @@ const formatDate = (date: string | Date): string => {
     return `${day}-${month}-${year}`;
 }
 
-// Build FormData for submission
+// Build FormData for submission (sales API: /sales/quotations/building-materials)
 const buildFormData = (): FormData => {
     const fd = new FormData();
 
-    // Basic fields
-    fd.append('request_type', formData.value.requestType || '');
-    fd.append('price_offer_name', formData.value.price_offer_name || '');
-    fd.append('project_name', formData.value.project_name || '');
-    fd.append('request_datetime', formatDateTime(formData.value.issueDate || new Date()));
-    fd.append('customer_id', String(formData.value.customer_id || ''));
-    fd.append('status_id', String(formData.value.requestStatus || 1));
-    fd.append('upfront_payment', String(formData.value.advancePayment || ''));
-    fd.append('payment_method', formData.value.paymentMethod || '');
-    fd.append('target_location', formData.value.target_location || '');
-    fd.append('target_latitude', formData.value.target_latitude || '');
-    fd.append('target_longitude', formData.value.target_longitude || '');
-    fd.append('notes', formData.value.textNote || '');
-
-    // Logistics detail (transport service)
-    if (Supply.value) {
-        fd.append('logistics_detail[from_date]', formatDate(Supply.value.from_date));
-        fd.append('logistics_detail[to_date]', formatDate(Supply.value.to_date));
-
-        // Transport types array
-        if (Supply.value.vehicle_types && Supply.value.vehicle_types.length > 0) {
-            Supply.value.vehicle_types.forEach((type, index) => {
-                fd.append(`logistics_detail[transport_type][${index}]`, String(type));
-            });
-        }
-
-        fd.append('logistics_detail[am_pm_interval]', Supply.value.am_pm_interval || '');
-        fd.append('logistics_detail[notes]', Supply.value.notes || '');
+    // Edit mode: Laravel method spoofing
+    if (isEditMode.value) {
+        fd.append('_method', 'PUT');
     }
 
-    // Items (products)
+    // Basic fields (request-body.json)
+    fd.append('customer_id', String(formData.value.customer_id || ''));
+    fd.append('quotations_datetime', formatDateTime(formData.value.quotations_datetime || new Date()));
+    fd.append('quotation_name', formData.value.quotation_name || '');
+    fd.append('quotation_validity_no', String(formData.value.quotation_validity_no ?? '1'));
+    fd.append('target_location', formData.value.target_location || '');
+    fd.append('target_latitude', String(formData.value.target_latitude || ''));
+    fd.append('target_longitude', String(formData.value.target_longitude || ''));
+    fd.append('project_name', formData.value.project_name || '');
+    fd.append('quotation_type', formData.value.quotation_type || '');
+    fd.append('payment_method', formData.value.payment_method || '');
+    fd.append('upfront_payment', String(formData.value.upfront_payment ?? ''));
+    fd.append('invoice_interval', String(formData.value.invoice_interval ?? '1'));
+    fd.append('payment_term_no', String(formData.value.payment_term_no ?? '1'));
+    fd.append('late_fee_type', formData.value.late_fee_type || '');
+    fd.append('late_fee', String(formData.value.late_fee ?? ''));
+    fd.append('cancel_fee_type', formData.value.cancel_fee_type || '');
+    fd.append('cancel_fee', String(formData.value.cancel_fee ?? ''));
+    fd.append('notes', formData.value.notes || '');
+
+    // Items (products) – items[i][id] only in edit mode
     productTableItems.value.forEach((item, index) => {
-        // Only include id in edit mode
-        if (isEditMode.value && item.id) {
+        if (isEditMode.value && item.id != null) {
             fd.append(`items[${index}][id]`, String(item.id));
         }
         fd.append(`items[${index}][item_id]`, String(item.item_id));
         fd.append(`items[${index}][unit_id]`, String(item.unit_id || ''));
         fd.append(`items[${index}][quantity]`, String(item.quantity || ''));
-        fd.append(`items[${index}][transport_type]`, String(item.transport_type || ''));
-        fd.append(`items[${index}][trip_no]`, String(item.trip_no || ''));
-        fd.append(`items[${index}][notes]`, item.notes || '');
+        fd.append(`items[${index}][item_using]`, 'heavy_equipment');
+        fd.append(`items[${index}][price_per_unit]`, String(item.unit_price ?? ''));
+        fd.append(`items[${index}][discount_type]`, '1');
+        fd.append(`items[${index}][discount_val]`, String(item.discount ?? ''));
+        fd.append(`items[${index}][total_tax]`, String(item.tax_amount ?? ''));
+        fd.append(`items[${index}][note]`, item.notes || '');
     });
 
-    // File attachments
+    // Logistics product details (تفاصيل التوريد) – logistics_product_details[i][id] only in edit mode
+    productTableItems.value.forEach((item, index) => {
+        if (isEditMode.value && item.logistics_detail_id != null) {
+            fd.append(`logistics_product_details[${index}][id]`, String(item.logistics_detail_id));
+        }
+        fd.append(`logistics_product_details[${index}][item_id]`, String(item.item_id));
+        fd.append(`logistics_product_details[${index}][number_of_trips]`, String(item.trip_no ?? ''));
+        fd.append(`logistics_product_details[${index}][trip_start]`, item.transport_start_date ? formatDate(item.transport_start_date) : '');
+        const vehicleTypes = Array.isArray(item.vehicle_types) ? item.vehicle_types : (item.vehicle_types != null ? [item.vehicle_types] : []);
+        vehicleTypes.forEach((type, i) => {
+            fd.append(`logistics_product_details[${index}][transport_type][${i}]`, String(type));
+        });
+    });
+
     if (formData.value.image) {
         fd.append('image', formData.value.image);
     }
 
-    // if (formData.value.voice_attachment) {
-    //     fd.append('voice_attachment', formData.value.voice_attachment);
-    // }
-
     return fd;
 }
 
-const handleSubmit = async () => {
+const getInitialFormData = () => ({
+    requestNumber: '#12520226',
+    customer_id: null as number | null,
+    quotations_datetime: '' as string,
+    quotation_name: '',
+    quotation_validity_no: null as number | string | null,
+    target_location: null as string | null,
+    target_latitude: null as string | null,
+    target_longitude: null as string | null,
+    project_name: '',
+    quotation_type: null as string | null,
+    payment_method: null as string | null,
+    upfront_payment: null as number | string | null,
+    invoice_interval: null as number | string | null,
+    payment_term_no: null as number | string | null,
+    late_fee_type: null as string | null,
+    late_fee: null as number | string | null,
+    cancel_fee_type: null as string | null,
+    cancel_fee: null as number | string | null,
+    notes: '',
+    status_id: null as number | null,
+    image: null as File | null,
+    voice_attachment: null as File | null
+});
+
+const resetForm = () => {
+    formData.value = getInitialFormData();
+    productTableItems.value = [];
+    formRef.value?.reset();
+};
+
+const handleSubmit = async (afterSuccess?: 'reset' | 'navigate') => {
     if (!await validate()) return;
 
     if (productTableItems.value.length === 0) {
@@ -403,32 +463,26 @@ const handleSubmit = async () => {
 
     try {
         const fd = buildFormData();
+        const url = isEditMode.value && routeId.value
+            ? `/sales/quotations/building-materials/${routeId.value}`
+            : '/sales/quotations/building-materials';
 
-        let response;
-        if (isEditMode.value) {
-            // Edit mode - PUT request
-            response = await api.post(`/purchases/building-materials/${routeId.value}`, fd, {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
-            });
-        } else {
-            // Create mode - POST request
-            response = await api.post('/purchases/building-materials', fd, {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
-            });
+        await api.post(url, fd, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+
+        success(isEditMode.value ? 'تم تحديث عرض السعر بنجاح' : 'تم إنشاء عرض السعر بنجاح');
+
+        if (afterSuccess === 'reset') {
+            resetForm();
+        } else if (afterSuccess === 'navigate') {
+            router.push({ name: 'PriceOfferMaterialProductList' });
         }
-
-        success(isEditMode.value ? 'تم تحديث الطلب بنجاح' : 'تم إنشاء الطلب بنجاح');
-
-        // Navigate back to list or stay on page based on your preference
-        // router.push({ name: 'PriceOfferMaterialProductList' });
-
     } catch (e: any) {
         console.error('Error submitting form:', e);
-        error(e?.response?.data?.message || 'حدث خطأ أثناء حفظ الطلب');
+        error(e?.response?.data?.message || 'حدث خطأ أثناء حفظ عرض السعر');
     } finally {
         isSubmitting.value = false;
     }
@@ -447,29 +501,53 @@ const handleLocationSelected = (location: { latitude: string; longitude: string;
 };
 
 const showAddSupplyDialog = ref(false);
-const editingSupply = ref<Supply | null>(null);
+const editingSupplyProductId = ref<number | null>(null);
 
-const handleDeleteSupply = () => {
-    Supply.value = null;
+const supplyDialogProducts = computed(() =>
+    productTableItems.value.map((p) => ({
+        item_id: p.item_id,
+        item_name: p.item_name,
+        quantity: p.quantity,
+        unit_name: p.unit_name || '',
+        transport_start_date: p.transport_start_date || '',
+        trip_no: p.trip_no ?? null,
+        vehicle_types: Array.isArray(p.vehicle_types) ? p.vehicle_types : (p.transport_type != null ? [p.transport_type] : []),
+    }))
+);
+
+const getTransportTypeNameFromIds = (ids: (string | number)[]): string => {
+    if (!ids?.length) return '';
+    return ids
+        .map((id) => transportTypeItems.value.find((i: any) => i.value === id || i.value === Number(id))?.title)
+        .filter(Boolean)
+        .join(', ');
 };
 
 const handleAddSupply = () => {
-    editingSupply.value = null; // Reset edit mode
+    editingSupplyProductId.value = null;
     showAddSupplyDialog.value = true;
 };
 
-const handleSupplySaved = (service: Supply) => {
-    Supply.value = service;
+const handleSupplyDetailsSaved = (rows: { item_id: number; transport_start_date: string; trip_no: number | null; vehicle_types: (string | number)[] }[]) => {
+    rows.forEach((row) => {
+        const product = productTableItems.value.find((p) => p.item_id === row.item_id);
+        if (product) {
+            product.transport_start_date = row.transport_start_date || null;
+            product.trip_no = row.trip_no;
+            product.vehicle_types = row.vehicle_types;
+            product.transport_type_name = getTransportTypeNameFromIds(row.vehicle_types);
+            if (row.vehicle_types?.length) product.transport_type = Number(row.vehicle_types[0]);
+        }
+    });
+    showAddSupplyDialog.value = false;
+    editingSupplyProductId.value = null;
 };
 
-const handleSupplyUpdated = (service: Supply) => {
-    Supply.value = service;
-    editingSupply.value = null;
-};
-
-const handleEditSupply = () => {
-    if (Supply.value) {
-        editingSupply.value = { ...Supply.value };
+const handleEditSupply = (row: { item_id?: number; id?: string | number }) => {
+    const itemId = row.item_id ?? row.id;
+    const product = productTableItems.value.find((p) => p.item_id === itemId || p.item_id === Number(itemId));
+    if (product) {
+        editingSupplyProductId.value = product.item_id;
         showAddSupplyDialog.value = true;
     }
 };
@@ -482,45 +560,102 @@ const openMapDialog = () => {
 
 const headers = [
     { title: 'اسم المنتج', key: 'name' },
-    { title: 'الكمية', key: 'quantity' },
     { title: 'الوحدة', key: 'unit' },
-    { title: 'نوع الناقلة', key: 'transport_type' },
-    { title: 'عدد الرحلات اليومية', key: 'daily_trips' },
+    { title: 'الكمية', key: 'quantity' },
+    { title: 'سعر الوحدة', key: 'unit_price' },
+    { title: 'خصم', key: 'discount' },
+    { title: 'مبلغ الضريبة', key: 'tax_amount' },
+    { title: 'إجمالي المبلغ', key: 'total_amount' },
     { title: 'ملاحظات', key: 'notes' },
 ]
+
+// Helper: compute tax and total for a product row (sales)
+// الضريبة ثابتة 15%
+const TAX_RATE = 0.15;
+
+// المبلغ قبل الضريبة = الكمية * سعر الوحدة - الخصم
+const getSubtotalBeforeTax = (item: ProductTableItem): number => {
+    const qty = Number(item.quantity) || 0;
+    const price = Number(item.unit_price) || 0;
+    const disc = Number(item.discount) || 0;
+    return qty * price - disc;
+};
+
+// مبلغ الضريبة = 15% من (الكمية * سعر الوحدة - الخصم)
+const getTaxAmount = (item: ProductTableItem): number => {
+    const subtotal = getSubtotalBeforeTax(item);
+    return Math.round(subtotal * TAX_RATE * 100) / 100;
+};
+
+// إجمالي المبلغ = (الكمية * سعر الوحدة - الخصم) + 15%
+const getTotalAmount = (item: ProductTableItem): number => {
+    const subtotal = getSubtotalBeforeTax(item);
+    const tax = Math.round(subtotal * TAX_RATE * 100) / 100;
+    return Math.round((subtotal + tax) * 100) / 100;
+};
+
+// ملخص المبالغ من جدول المنتجات (للجدول الجانبي)
+const summaryTotals = computed(() => {
+    const items = productTableItems.value;
+    const subtotalBeforeDiscount = items.reduce((sum, item) => {
+        const qty = Number(item.quantity) || 0;
+        const price = Number(item.unit_price) || 0;
+        return sum + qty * price;
+    }, 0);
+    const totalDiscount = items.reduce((sum, item) => sum + (Number(item.discount) || 0), 0);
+    const subtotalAfterDiscount = Math.round((subtotalBeforeDiscount - totalDiscount) * 100) / 100;
+    const totalTaxAmount = items.reduce((sum, item) => sum + (item.tax_amount ?? getTaxAmount(item)), 0);
+    const finalTotal = Math.round((subtotalAfterDiscount + totalTaxAmount) * 100) / 100;
+    return {
+        subtotalBeforeDiscount: Math.round(subtotalBeforeDiscount * 100) / 100,
+        totalDiscount: Math.round(totalDiscount * 100) / 100,
+        subtotalAfterDiscount,
+        totalTaxAmount: Math.round(totalTaxAmount * 100) / 100,
+        finalTotal
+    };
+});
 
 // Computed items for the DataTable (mapped from productTableItems)
 const tableItems = computed(() => productTableItems.value.map(item => ({
-    id: item.item_id, // Required for DataTable
+    id: item.item_id,
     item_id: item.item_id,
     name: item.item_name,
-    quantity: item.quantity,
     unit: item.unit_name,
-    transport_type: item.transport_type_name,
-    daily_trips: item.trip_no,
+    quantity: item.quantity,
+    unit_price: item.unit_price ?? 0,
+    discount: item.discount ?? 0,
+    tax_amount: item.tax_amount ?? getTaxAmount(item),
+    total_amount: item.total_amount ?? getTotalAmount(item),
     notes: item.notes,
 })));
 
+// جدول تفاصيل التوريد: يعكس المنتجات المضافة أعلاه (المنتج، الكمية، تاريخ بداية النقل، نوع المركبة، عدد الرحلات)
 const ServicesHeaders = [
-    { title: 'تاريخ بدء النقل', key: 'from_date' },
-    { title: 'تاريخ انتهاء النقل', key: 'to_date' },
-    { title: 'نوع المركبات', key: 'vehicle_types_labels' },
-    { title: 'توقيت النقل', key: 'am_pm_interval_label' },
-    { title: 'ملاحظات', key: 'notes' },
-]
+    { title: 'المنتج', key: 'product_name' },
+    { title: 'الكمية', key: 'quantity_display' },
+    { title: 'تاريخ بداية النقل', key: 'transport_start_date' },
+    { title: 'نوع مركبة النقل', key: 'transport_type_name' },
+    { title: 'عدد الرحلات', key: 'trip_no' },
+];
 
-// Computed items for the Services DataTable
-const serviceTableItems = computed(() => {
-    if (!Supply.value) return [];
-    return [{
-        id: 1,
-        from_date: Supply.value.from_date,
-        to_date: Supply.value.to_date,
-        vehicle_types_labels: Supply.value.vehicle_types_labels,
-        am_pm_interval_label: Supply.value.am_pm_interval_label,
-        notes: Supply.value.notes,
-    }];
-});
+// عناصر الجدول مبنية على جدول المنتجات: كل منتج = صف واحد (زر التعديل فقط، بدون حذف)
+const serviceTableItems = computed(() =>
+    productTableItems.value.map((item) => {
+        const qty = item.quantity != null ? String(item.quantity) : '';
+        const unit = item.unit_name || '';
+        const quantity_display = [qty, unit].filter(Boolean).join(' ');
+        return {
+            id: item.item_id,
+            item_id: item.item_id,
+            product_name: item.item_name,
+            quantity_display: quantity_display || '—',
+            transport_start_date: item.transport_start_date || '—',
+            transport_type_name: item.transport_type_name || '—',
+            trip_no: item.trip_no != null ? item.trip_no : '—',
+            actions: { can_update: true, can_delete: false },
+        };
+    })
+);
 
 
 </script>
@@ -541,7 +676,7 @@ const serviceTableItems = computed(() => {
                 </div>
 
                 <v-form ref="formRef" v-model="isFormValid" @submit.prevent>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 items-end">
                         <!-- Customer Name -->
                         <div>
                             <SelectInput v-model="formData.customer_id" :items="customerItems" label="اسم العميل"
@@ -549,21 +684,21 @@ const serviceTableItems = computed(() => {
                                 placeholder="حدد العميل" />
                         </div>
 
-                        <!-- offer name -->
+                        <!-- quotation_name: اسم عرض السعر -->
                         <div>
-                            <TextInput v-model="formData.price_offer_name" placeholder="أدخل الإسم"
+                            <TextInput v-model="formData.quotation_name" placeholder="أدخل الإسم"
                                 label="اسم عرض السعر" :rules="[required()]" density="comfortable" />
                         </div>
 
-                        <!-- Issue Date -->
+                        <!-- quotations_datetime: تاريخ العرض -->
                         <div>
-                            <DatePickerInput v-model="formData.issueDate" type="date" density="comfortable"
+                            <DatePickerInput v-model="formData.quotations_datetime" type="date" density="comfortable"
                                 placeholder="اختر التاريخ" label="تاريخ العرض" />
                         </div>
 
-                        <!-- offer date -->
+                        <!-- quotation_validity_no: تاريخ صلاحية عرض السعر (أيام) -->
                         <div>
-                            <TextInput v-model="formData.price_offer_name" placeholder="أدخل المدة بالأيام"
+                            <TextInput v-model="formData.quotation_validity_no" placeholder="أدخل المدة بالأيام"
                                 label="تاريخ صلاحية عرض السعر" :rules="[required(), numeric()]" density="comfortable">
                                 <template #append-inner>
                                     <span class="text-gray-500 text-sm">
@@ -596,10 +731,10 @@ const serviceTableItems = computed(() => {
                                 :rules="[required()]" density="comfortable" />
                         </div>
 
-                        <!-- reques tType -->
+                        <!-- quotation_type: نوع الطلب -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2"></label>
-                            <SelectInput v-model="formData.requestType" :items="requestTypeItems" label="نوع الطلب"
+                            <SelectInput v-model="formData.quotation_type" :items="requestTypeItems" label="نوع الطلب"
                                 density="comfortable" placeholder="حدد نوع الطلب" />
                         </div>
                     </div>
@@ -664,11 +799,18 @@ const serviceTableItems = computed(() => {
                 </div>
 
                 <DataTable :headers="ServicesHeaders" :items="serviceTableItems" show-actions force-show-edit
-                    force-show-delete @edit="handleEditSupply" @delete="handleDeleteSupply" />
+                    @edit="handleEditSupply" />
 
                 <div class="flex justify-center my-6">
-                    <ButtonWithIcon color="primary-100" variant="flat" class="!text-primary-900 font-bold w-75">
-                        + إضافة تفاصيل التوريد </ButtonWithIcon>
+                    <ButtonWithIcon
+                        color="primary-100"
+                        variant="flat"
+                        class="!text-primary-900 font-bold w-75"
+                        :disabled="productTableItems.length === 0"
+                        @click="handleAddSupply"
+                    >
+                        + تعديل تفاصيل التوريد
+                    </ButtonWithIcon>
                 </div>
             </div>
 
@@ -681,37 +823,43 @@ const serviceTableItems = computed(() => {
                     </div>
                     <div class="p-6">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <SelectInput v-model="formData.requestType" :items="requestTypeItems" density="comfortable"
+                            <!-- payment_method: طريقة الدفع -->
+                            <SelectInput v-model="formData.payment_method" :items="paymentMethodItems" density="comfortable"
                                 placeholder="حدد طريقة الدفع" label="طريقة الدفع" />
-                            <PriceInput showRialIcon v-model="formData.requestType" density="comfortable"
+                            <!-- upfront_payment: دفعة مقدمة -->
+                            <PriceInput showRialIcon v-model="formData.upfront_payment" density="comfortable"
                                 label="دفعة مقدمة" placeholder="أدخل قيمة الدفعة" />
 
-                            <TextInput label="مدة رفع المستخلص" v-model="formData.price_offer_name"
+                            <!-- invoice_interval: مدة رفع المستخلص -->
+                            <PriceInput label="مدة رفع المستخلص" v-model="formData.invoice_interval"
                                 placeholder="أدخل المدة بالأيام" :rules="[required(), numeric()]" density="comfortable">
                                 <template #append-inner>
                                     <span class="text-gray-500 text-sm">
                                         يوم
                                     </span>
                                 </template>
-                            </TextInput>
-                            <TextInput label="مدة السداد" v-model="formData.price_offer_name"
+                            </PriceInput>
+                            <!-- payment_term_no: مدة السداد -->
+                            <PriceInput label="مدة السداد" v-model="formData.payment_term_no"
                                 placeholder="أدخل المدة بالأيام" :rules="[required(), numeric()]" density="comfortable">
                                 <template #append-inner>
                                     <span class="text-gray-500 text-sm">
                                         يوم
                                     </span>
                                 </template>
-                            </TextInput>
+                            </PriceInput>
 
-                            <TextInputWithSelect v-model="formData.delay_fine"
-                                v-model:selectValue="formData.delay_fine_unit" label="غرامة التأخير"
+                            <!-- late_fee / late_fee_type: غرامة التأخير -->
+                            <TextInputWithSelect v-model="formData.late_fee"
+                                v-model:selectValue="formData.late_fee_type" label="غرامة التأخير"
                                 placeholder="أدخل المبلغ" type="number" :rules="[numeric(), positive()]" select-width="70px"
-                                :select-items="[{value: 'rial', title: 'ريال'},{value: 'dolar', title: 'دولار'}]" select-placeholder="اختر" />
+                                :select-items="feeTypeItems" select-placeholder="اختر" />
 
-                            <TextInputWithSelect v-model="formData.cancel_fine"
-                                v-model:selectValue="formData.cancel_fine_unit" label="غرامة الإلغاء"
+                            <!-- cancel_fee / cancel_fee_type: غرامة الإلغاء -->
+                            <TextInputWithSelect v-model="formData.cancel_fee"
+                                v-model:selectValue="formData.cancel_fee_type" label="غرامة الإلغاء"
                                 placeholder="أدخل المبلغ" type="number" :rules="[numeric(), positive()]" select-width="70px"
-                                :select-items="[{value: 'rial', title: 'ريال'},{value: 'dolar', title: 'دولار'}]" select-placeholder="اختر" />
+                                :select-items="feeTypeItems" select-placeholder="اختر" />
                         </div>
                     </div>
                 </div>
@@ -732,63 +880,57 @@ const serviceTableItems = computed(() => {
                         </thead>
                         <!-- Table Body -->
                         <tbody class="text-sm bg-primary-25">
-                            <!-- Received from / Destination -->
                             <tr class="border-b !border-gray-200">
                                 <td class="py-5 px-4 text-center font-bold text-gray-900 border-l !border-gray-200">
                                     المجموع قبل الخصم
                                 </td>
                                 <td class="py-5 px-4 text-center text-gray-600">
-                                    22
+                                    {{ summaryTotals.subtotalBeforeDiscount }}
                                 </td>
                             </tr>
 
-                            <!-- Voucher Number -->
                             <tr class="border-b !border-gray-200">
                                 <td class="py-5 px-4 text-center font-bold text-gray-900 border-l !border-gray-200">
                                     الخصم
                                 </td>
                                 <td class="py-5 px-4 text-center text-gray-600">
-                                    22
+                                    {{ summaryTotals.totalDiscount }}
                                 </td>
                             </tr>
 
-                            <!-- Classification -->
                             <tr class="border-b !border-gray-200">
                                 <td class="py-5 px-4 text-center font-bold text-gray-900 border-l !border-gray-200">
                                     المجموع بعد الخصم
                                 </td>
                                 <td class="py-5 px-4 text-center text-gray-600">
-                                    22
+                                    {{ summaryTotals.subtotalAfterDiscount }}
                                 </td>
                             </tr>
 
-                            <!-- Total Amount -->
                             <tr class="border-b !border-gray-200">
                                 <td class="py-5 px-4 text-center font-bold text-gray-900 border-l !border-gray-200">
                                     الضريبة
                                 </td>
                                 <td class="py-5 px-4 text-center text-gray-600">
-                                    22
+                                    15%
                                 </td>
                             </tr>
 
-                            <!-- Current Balance -->
                             <tr class="border-b !border-gray-200">
                                 <td class="py-5 px-4 text-center font-bold text-gray-900 border-l !border-gray-200">
                                     اجمالي الضريبة
                                 </td>
                                 <td class="py-5 px-4 text-center text-gray-600">
-                                    22
+                                    {{ summaryTotals.totalTaxAmount }}
                                 </td>
                             </tr>
 
-                            <!-- After Operation Balance -->
                             <tr>
                                 <td class="py-5 px-4 text-center font-bold text-gray-900 border-l !border-gray-200">
                                     الإجمالي النهائي
                                 </td>
                                 <td class="py-5 px-4 font-bold text-center text-gray-900">
-                                    22
+                                    {{ summaryTotals.finalTotal }}
                                 </td>
                             </tr>
                         </tbody>
@@ -802,11 +944,15 @@ const serviceTableItems = computed(() => {
                 <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col">
                     <ButtonWithIcon variant="flat" color="primary" height="48" rounded="4"
                         custom-class="font-semibold text-base px-6 md:!px-10" :prepend-icon="returnIcon"
-                        label="حفظ والعودة للرئيسية" />
+                        label="حفظ والعودة للرئيسية"
+                        :loading="isSubmitting"
+                        @click="handleSubmit('navigate')" />
 
                     <ButtonWithIcon variant="flat" color="primary-50" height="48" rounded="4"
                         custom-class="font-semibold text-base text-primary-700 px-6 md:!px-10" :prepend-icon="saveIcon"
-                        label="حفظ وإنشاء جديد" />
+                        label="حفظ وإنشاء جديد"
+                        :loading="isSubmitting"
+                        @click="handleSubmit('reset')" />
                 </div>
             </div>
 
@@ -817,9 +963,19 @@ const serviceTableItems = computed(() => {
 
         <!-- Add Product Dialog -->
         <AddProductDialog v-model="showAddProductDialog" request-type="raw_materials"
+            variant="sales"
             :transport-types="transportTypeItems" :unit-items="unitItems" :customer-id="formData.customer_id"
             :edit-product="editingProduct" :existing-products="productTableItems" @saved="handleProductSaved"
             @product-updated="handleProductUpdated" />
+
+        <!-- Edit Supply Details Dialog -->
+        <EditSupplyDetailsDialog
+            v-model="showAddSupplyDialog"
+            :products="supplyDialogProducts"
+            :transport-type-items="transportTypeItems"
+            :single-product-item-id="editingSupplyProductId"
+            @saved="handleSupplyDetailsSaved"
+        />
     </default-layout>
 </template>
 

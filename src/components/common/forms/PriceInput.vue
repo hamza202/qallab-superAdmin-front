@@ -112,6 +112,7 @@ const rialIcon = `<svg width="13" height="15" viewBox="0 0 13 15" fill="none" xm
                 <span v-if="keepCurrencyVisible && currency && !showCurrencyOnLeft" class="text-xs text-gray-500">{{
                     currency }}</span>
                 <span v-if="showRialIcon" v-html="rialIcon"></span>
+                <slot name="append-inner"></slot>
             </template>
         </v-text-field>
     </div>

@@ -1,263 +1,374 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import { useI18n } from 'vue-i18n'
-import DatePickerInput from '@/components/common/forms/DatePickerInput.vue';
+import { useI18n } from 'vue-i18n';
+import { useApi } from '@/composables/useApi';
+import { useNotification } from '@/composables/useNotification';
+import { useTableColumns } from '@/composables/useTableColumns';
+import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog.vue';
 import { GridIcon, trash_1_icon, trash_2_icon, importIcon, columnIcon, exportIcon, plusIcon, searchIcon } from "@/components/icons/globalIcons";
-import { switchHorisinralIcon, refreshIcon, changeStatusIcon } from '@/components/icons/priceOffersIcons'
-const { t } = useI18n()
+import { switchHorisinralIcon, refreshIcon, changeStatusIcon } from '@/components/icons/priceOffersIcons';
 
+const { t } = useI18n();
 const router = useRouter();
+const api = useApi();
+const { success, error } = useNotification();
 
-const showChangeStatusDialog = ref(false)
-const selectedStatus = ref(null)
-// Prices Offers table data
-const tableHeaders = [
-    { key: "requestName", title: "كود الطلب", width: "150px" },
-    { key: "requestCode", title: "نوع الطلب", width: "120px" },
-    { key: "startDate", title: "اسم المورد", width: "130px" },
-    { key: "endDate", title: "تاريخ الطلب", width: "130px" },
-    { key: "type", title: "موقع المشروع", width: "100px" },
-    { key: "name", title: "طريقة الدفع", width: "120px" },
-    { key: "address", title: "دفعة مقدمة", width: "120px" },
-    { key: "status", title: "الحالة", width: "120px" },
-];
+const TABLE_NAME = 'admin_sale_building_material_quotations';
+const {
+  allHeaders,
+  shownHeaders,
+  updatingHeaders,
+  showHeadersMenu,
+  headerCheckStates,
+  initHeaders,
+  toggleHeader,
+} = useTableColumns(TABLE_NAME);
 
-const tableItems = ref([
-    {
-        id: 1,
-        requestName: "CASD",
-        requestCode: "#1234778",
-        startDate: "22/07/2025",
-        endDate: "22/07/2025",
-        type: "قطعة",
-        name: "QALLAB",
-        address: "الرياض",
-        status: "مكتمل",
-    },
-    {
-        id: 2,
-        requestName: "QALLAB",
-        requestCode: "#1234778",
-        startDate: "22/07/2025",
-        endDate: "22/07/2025",
-        type: "قطعة",
-        name: "QALLAB",
-        address: "مكة",
-        status: "قيد المراجعة",
-    },
-    {
-        id: 3,
-        requestName: "YSTW",
-        requestCode: "#1234778",
-        startDate: "22/07/2025",
-        endDate: "22/07/2025",
-        type: "قطعة",
-        name: "QALLAB",
-        address: "جدة",
-        status: "تأكيد",
-    },
-    {
-        id: 4,
-        requestName: "QALLAB",
-        requestCode: "#1234778",
-        startDate: "22/07/2025",
-        endDate: "22/07/2025",
-        type: "قطعة",
-        name: "QALLAB",
-        address: "تبوك",
-        status: "الغاء",
-    },
-]);
+interface ItemActions {
+  can_update: boolean;
+  can_delete: boolean;
+  can_view: boolean;
+  can_change_status: boolean;
+  can_create_order: boolean;
+}
 
-// Selection state
-const selectedRequests = ref<number[]>([]);
-const hasselectedRequests = computed(() => selectedRequests.value.length > 0);
+interface QuotationItem {
+  uuid: string;
+  customer_name: string;
+  quotation_name: string;
+  code: string;
+  quotations_datetime: string;
+  target_location: string;
+  status: string;
+  quotation_validity_no: number;
+  payment_method: string;
+  final_total: string;
+  status_id: number;
+  actions: ItemActions;
+}
 
-// Filters
+interface TableHeader {
+  key: string;
+  title: string;
+}
+
+interface ListResponse {
+  data: QuotationItem[];
+  pagination: { next_cursor: string | null; previous_cursor: string | null; per_page: number };
+  header_table: string;
+  headers: TableHeader[];
+  shownHeaders: TableHeader[];
+  actions: { can_create: boolean; can_bulk_delete: boolean };
+}
+
+const tableItems = ref<QuotationItem[]>([]);
+const canCreate = ref(true);
+const canBulkDelete = ref(false);
+const loading = ref(false);
+
+const tableHeaders = computed(() =>
+  shownHeaders.value.map((h) => ({ key: h.key, title: h.title, width: '140px' }))
+);
+
+const tableItemsWithId = computed(() =>
+  tableItems.value.map((item) => ({ ...item, id: item.uuid }))
+);
+
+const selectedRequests = ref<string[]>([]);
+const hasSelectedRequests = computed(() => selectedRequests.value.length > 0);
+
 const showAdvancedFilters = ref(false);
 const filterRequestNumber = ref("");
-const filterNameArabic = ref(null);
+const filterNameArabic = ref<string | null>(null);
 const filterNameEnglish = ref("");
 const filterStartDateMin = ref("");
 const filterStartDateMax = ref("");
 
+const showBulkDeleteDialog = ref(false);
+const showDeleteDialog = ref(false);
+const itemToDelete = ref<QuotationItem | null>(null);
+const deleteLoading = ref(false);
+
+const showChangeStatusDialog = ref(false);
+const selectedStatus = ref(null);
+
 const toggleAdvancedFilters = () => {
-    showAdvancedFilters.value = !showAdvancedFilters.value;
+  showAdvancedFilters.value = !showAdvancedFilters.value;
 };
 
 const resetFilters = () => {
-    filterRequestNumber.value = "";
-    filterNameArabic.value = null;
-    filterNameEnglish.value = "";
-    filterStartDateMin.value = "";
-    filterStartDateMax.value = "";
+  filterRequestNumber.value = "";
+  filterNameArabic.value = null;
+  filterNameEnglish.value = "";
+  filterStartDateMin.value = "";
+  filterStartDateMax.value = "";
 };
 
 const applyFilters = () => {
-    console.log("Applying filters...");
+  fetchList();
 };
 
-// Handlers
-const handleEdit = (item: any) => {
-    router.push({ name: "PriceOfferMaterialProductEdit", params: { id: item.id } });
+const fetchList = async () => {
+  loading.value = true;
+  try {
+    const params = new URLSearchParams();
+    if (filterRequestNumber.value) params.append('code', filterRequestNumber.value);
+    if (filterNameEnglish.value) params.append('customer_name', filterNameEnglish.value);
+    if (filterStartDateMin.value) params.append('quotations_datetime_from', filterStartDateMin.value);
+    if (filterStartDateMax.value) params.append('quotations_datetime_to', filterStartDateMax.value);
+
+    const url = params.toString()
+      ? `/sales/quotations/building-materials?${params.toString()}`
+      : '/sales/quotations/building-materials';
+    // useApi().get() يرجع response.data (جسم الاستجابة) مباشرة وليس كائن axios
+    const body = (await api.get(url)) as unknown as ListResponse;
+
+    tableItems.value = Array.isArray(body?.data) ? body.data : [];
+    canCreate.value = body?.actions?.can_create ?? true;
+    canBulkDelete.value = body?.actions?.can_bulk_delete ?? false;
+    initHeaders(body?.headers ?? [], body?.shownHeaders ?? []);
+  } catch (err: any) {
+    console.error('Error fetching quotations list:', err);
+    error(err?.response?.data?.message || 'فشل تحميل قائمة عروض السعر');
+  } finally {
+    loading.value = false;
+  }
 };
 
-const handleDelete = (item: any) => {
-    tableItems.value = tableItems.value.filter((t) => t.id !== item.id);
+const handleToggleHeader = async (headerKey: string) => {
+  await toggleHeader(headerKey).catch((err: any) => {
+    error(err?.response?.data?.message || 'فشل تحديث الأعمدة');
+  });
 };
 
-const handleSelectRequest = (item: any, selected: boolean) => {
-    if (selected) {
-        selectedRequests.value.push(item.id);
-    } else {
-        selectedRequests.value = selectedRequests.value.filter((id) => id !== item.id);
-    }
+const handleEdit = (item: { id?: string | number; uuid?: string }) => {
+  const uuid = item.uuid ?? String(item.id);
+  router.push({ name: 'PriceOfferMaterialProductEdit', params: { id: uuid } });
+};
+
+const handleDelete = (item: { uuid?: string; id?: string | number } & Partial<QuotationItem>) => {
+  itemToDelete.value = item as QuotationItem;
+  showDeleteDialog.value = true;
+};
+
+const confirmDelete = async () => {
+  if (!itemToDelete.value) return;
+  const uuid = itemToDelete.value.uuid;
+  try {
+    deleteLoading.value = true;
+    await api.delete(`/sales/quotations/building-materials/${uuid}`);
+    success('تم حذف عرض السعر بنجاح');
+    showDeleteDialog.value = false;
+    itemToDelete.value = null;
+    await fetchList();
+  } catch (err: any) {
+    console.error('Error deleting quotation:', err);
+    error(err?.response?.data?.message || 'فشل حذف عرض السعر');
+  } finally {
+    deleteLoading.value = false;
+  }
+};
+
+const handleSelectRequest = (item: { id: string | number }, selected: boolean) => {
+  const id = String(item.id);
+  if (selected) {
+    selectedRequests.value.push(id);
+  } else {
+    selectedRequests.value = selectedRequests.value.filter((x) => x !== id);
+  }
 };
 
 const handleSelectAllRequests = (checked: boolean) => {
-    if (checked) {
-        selectedRequests.value = tableItems.value.map((item) => item.id);
-    } else {
-        selectedRequests.value = [];
-    }
+  if (checked) {
+    selectedRequests.value = tableItemsWithId.value.map((i) => String(i.id));
+  } else {
+    selectedRequests.value = [];
+  }
 };
 
-const handleStatusChange = (status: any) => {
-    console.log(status);
-    showChangeStatusDialog.value = false;
-}
 const getStatusClass = (status: string) => {
-    switch (status) {
-        case 'مكتمل':
-            return 'bg-[#ECFDF3] text-[#027A48]';
-        case 'قيد المراجعة':
-            return 'bg-[#FEF0C7] text-[#DC6803]';
-        case 'تأكيد':
-            return 'bg-[#F2F4F7] text-[#344054]';
-        case 'الغاء':
-            return 'bg-[#FEE4E2] text-[#D92D20]';
-        default:
-            return 'bg-[#F2F4F7] text-[#344054]';
-    }
+  switch (status) {
+    case 'مكتمل':
+      return 'bg-[#ECFDF3] text-[#027A48]';
+    case 'قيد المراجعة':
+      return 'bg-[#FEF0C7] text-[#DC6803]';
+    case 'تأكيد':
+      return 'bg-[#F2F4F7] text-[#344054]';
+    case 'الغاء':
+      return 'bg-[#FEE4E2] text-[#D92D20]';
+    case 'مسودة':
+      return 'bg-[#F2F4F7] text-[#344054]';
+    default:
+      return 'bg-[#F2F4F7] text-[#344054]';
+  }
 };
 
 const openCreateRequest = () => {
-    router.push({ name: "PriceOfferMaterialProductCreate" });
+  router.push({ name: "PriceOfferMaterialProductCreate" });
 };
 
+const handleStatusChange = (status: unknown) => {
+  console.log('Change status:', status);
+  showChangeStatusDialog.value = false;
+};
+
+const handleCreateOrder = (item: unknown) => {
+  console.log('Create order for', (item as QuotationItem).uuid);
+};
+
+const handleBulkDelete = () => {
+  if (selectedRequests.value.length === 0) return;
+  showBulkDeleteDialog.value = true;
+};
+
+const confirmBulkDelete = async () => {
+  try {
+    deleteLoading.value = true;
+    await api.post('/sales/quotations/building-materials/bulk-delete', {
+      ids: selectedRequests.value,
+    });
+    success(`تم حذف ${selectedRequests.value.length} عرض بنجاح`);
+    selectedRequests.value = [];
+    await fetchList();
+  } catch (err: any) {
+    console.error('Error bulk deleting:', err);
+    error(err?.response?.data?.message || 'فشل الحذف الجماعي');
+  } finally {
+    deleteLoading.value = false;
+    showBulkDeleteDialog.value = false;
+  }
+};
+
+onMounted(() => {
+  fetchList();
+});
 </script>
 
 <template>
-    <default-layout>
-        <div class="pricesOffers-page">
-            <PageHeader :icon="GridIcon" title-key="pages.PricesOffersMaterialProduct.title"
-                description-key="pages.PricesOffersMaterialProduct.description" />
+  <default-layout>
+    <div class="pricesOffers-page">
+      <PageHeader :icon="GridIcon" title-key="pages.PricesOffersMaterialProduct.title"
+        description-key="pages.PricesOffersMaterialProduct.description" />
 
-            <div
-                class="flex justify-end items-stretch rounded border border-gray-300 w-fit ms-auto mb-4 overflow-hidden bg-white text-sm">
-                <ButtonWithIcon variant="flat" height="40" rounded="0"
-                    custom-class="font-semibold text-base border-gray-300 bg-primary-100 !text-primary-900"
-                    :prepend-icon="importIcon" :label="t('common.import')" />
-                <ButtonWithIcon variant="flat" height="40" rounded="0"
-                    custom-class="font-semibold text-base border-gray-300 bg-primary-50 !text-primary-900"
-                    :prepend-icon="exportIcon" :label="t('common.export')" />
-            </div>
+      <div
+        class="flex justify-end items-stretch rounded border border-gray-300 w-fit ms-auto mb-4 overflow-hidden bg-white text-sm">
+        <ButtonWithIcon variant="flat" height="40" rounded="0"
+          custom-class="font-semibold text-base border-gray-300 bg-primary-100 !text-primary-900"
+          :prepend-icon="importIcon" :label="t('common.import')" />
+        <ButtonWithIcon variant="flat" height="40" rounded="0"
+          custom-class="font-semibold text-base border-gray-300 bg-primary-50 !text-primary-900"
+          :prepend-icon="exportIcon" :label="t('common.export')" />
+      </div>
 
-            <div class="bg-gray-50 rounded-md -mx-6">
-                <div :class="hasselectedRequests ? 'justify-between' : 'justify-end'"
-                    class="flex flex-wrap items-center gap-3 border-y border-y-slate-300 px-4 sm:px-6 py-3">
-                    <!-- Actions when rows are selected -->
-                    <div v-if="hasselectedRequests"
-                        class="flex flex-wrap items-stretch rounded overflow-hidden border border-gray-200 bg-white text-sm">
-                        <ButtonWithIcon variant="flat" height="40" rounded="0"
-                            custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-                            :prepend-icon="trash_1_icon" color="white" :label="t('common.delete')" />
-                        <div class="w-px bg-gray-200"></div>
-                        <ButtonWithIcon variant="flat" height="40" rounded="0"
-                            custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-                            :prepend-icon="trash_2_icon" color="white" :label="t('common.deleteAll')" />
-                    </div>
+      <div class="bg-gray-50 rounded-md -mx-6">
+        <div :class="hasSelectedRequests ? 'justify-between' : 'justify-end'"
+          class="flex flex-wrap items-center gap-3 border-y border-y-slate-300 px-4 sm:px-6 py-3">
+          <div v-if="canBulkDelete && hasSelectedRequests"
+            class="flex flex-wrap items-stretch rounded overflow-hidden border border-gray-200 bg-white text-sm">
+            <ButtonWithIcon variant="flat" height="40" rounded="0"
+              custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
+              :prepend-icon="trash_1_icon" color="white" :label="t('common.delete')" @click="handleBulkDelete" />
+            <div class="w-px bg-gray-200"></div>
+            <ButtonWithIcon variant="flat" height="40" rounded="0"
+              custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
+              :prepend-icon="trash_2_icon" color="white" :label="t('common.deleteAll')" @click="handleBulkDelete" />
+          </div>
 
-                    <!-- Main header controls -->
-                    <div class="flex flex-wrap gap-3">
-                        <ButtonWithIcon variant="outlined" append-icon="mdi-chevron-down" rounded="4" color="gray-500"
-                            height="40" custom-class="font-semibold text-base border-gray-400"
-                            :prepend-icon="columnIcon" :label="t('common.columns')">
-                            <template #append>
-                                <v-icon>mdi-chevron-down</v-icon>
-                            </template>
-                        </ButtonWithIcon>
+          <div class="flex flex-wrap gap-3">
+            <v-menu v-model="showHeadersMenu" :close-on-content-click="false">
+              <template #activator="{ props: menuProps }">
+                <ButtonWithIcon v-bind="menuProps" variant="outlined" append-icon="mdi-chevron-down" rounded="4"
+                  color="gray-500" height="40" custom-class="font-semibold text-base border-gray-400"
+                  :prepend-icon="columnIcon" :label="t('common.columns')" />
+              </template>
+              <v-list>
+                <v-list-item v-for="header in allHeaders" :key="header.key" @click="handleToggleHeader(header.key)">
+                  <template #prepend>
+                    <v-checkbox-btn :model-value="headerCheckStates[header.key]" :disabled="updatingHeaders"
+                      @click.stop="handleToggleHeader(header.key)" />
+                  </template>
+                  <v-list-item-title>{{ header.title }}</v-list-item-title>
+                </v-list-item>
+              </v-list>
+            </v-menu>
 
-                        <ButtonWithIcon variant="flat" color="primary-500" height="40" rounded="4"
-                            custom-class="px-7 font-semibold text-base text-white border !border-primary-200"
-                            :prepend-icon="searchIcon" :label="t('common.advancedSearch')"
-                            @click="toggleAdvancedFilters" />
+            <ButtonWithIcon variant="flat" color="primary-500" height="40" rounded="4"
+              custom-class="px-7 font-semibold text-base text-white border !border-primary-200"
+              :prepend-icon="searchIcon" :label="t('common.advancedSearch')" @click="toggleAdvancedFilters" />
 
-                        <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4"
-                            custom-class="px-7 font-semibold text-base !text-primary-800 border !border-primary-200"
-                            :prepend-icon="plusIcon" label="أضف عرض" @click="openCreateRequest" />
-                    </div>
-                </div>
-
-                <!-- Advanced filters row -->
-                <div v-if="showAdvancedFilters"
-                    class="border-y border-y-primary-100 bg-primary-50 px-4 sm:px-6 py-3 gap-3 flex justify-between flex-wrap">
-                    <div class="flex flex-wrap gap-3 items-end">
-                        <TextInput v-model="filterRequestNumber" density="comfortable" variant="outlined" hide-details
-                            placeholder="كود العرض" class="w-full sm:w-40 bg-white" />
-                        <TextInput v-model="filterNameEnglish" density="comfortable" variant="outlined" hide-details
-                            placeholder="اسم العميل" class="w-full sm:w-40 bg-white" />
-                        <TextInput v-model="filterNameArabic" density="comfortable" variant="outlined" hide-details
-                            placeholder="السعر" class="w-full sm:w-40 bg-white" />
-                        <SelectInput :items="['الموقع', 'الموقع']" v-model="filterNameArabic" density="comfortable"
-                            variant="outlined" hide-details placeholder="موقع المشروع"
-                            class="w-full sm:w-40 bg-white" />
-                        <DatePickerInput v-model="filterStartDateMin" density="comfortable" hide-details
-                            placeholder="تاريخ العرض" class="w-full sm:w-40 bg-white" />
-                    </div>
-                    <div class="flex gap-2 items-center">
-                        <ButtonWithIcon variant="flat" color="primary-500" rounded="4" height="40"
-                            custom-class="px-5 font-semibold !text-white text-sm sm:text-base"
-                            :prepend-icon="searchIcon" label="ابحث" @click="applyFilters" />
-                        <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4" border="sm"
-                            custom-class="px-5 font-semibold text-sm sm:text-base !text-primary-800 !border-primary-200"
-                            prepend-icon="mdi-refresh" label="إعادة تعيين" />
-                    </div>
-                </div>
-
-                <!-- Prices Offers Table -->
-                <DataTable :headers="tableHeaders" :items="tableItems" show-checkbox show-actions force-show-delete
-                    force-show-edit force-show-view @edit="handleEdit" @delete="handleDelete"
-                    @select="handleSelectRequest" @selectAll="handleSelectAllRequests">
-                    <template #item.status="{ item }">
-                        <span
-                            :class="['inline-block px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap', getStatusClass(item.status)]">
-                            {{ item.status }}
-                        </span>
-                    </template>
-                    <template #item.actions="{ item }">
-                        <div class="flex items-center">
-                            <v-btn icon variant="text" size="small">
-                                <span v-html="refreshIcon"></span>
-                            </v-btn>
-                            <v-btn icon variant="text" size="small" color="warning-600"
-                                @click="showChangeStatusDialog = true">
-                                <span v-html="switchHorisinralIcon"></span>
-                            </v-btn>
-                        </div>
-                    </template>
-                </DataTable>
-            </div>
+            <ButtonWithIcon v-if="canCreate" variant="flat" color="primary-100" height="40" rounded="4"
+              custom-class="px-7 font-semibold text-base !text-primary-800 border !border-primary-200"
+              :prepend-icon="plusIcon" label="أضف عرض" @click="openCreateRequest" />
+          </div>
         </div>
 
-        <StatusChangeDialog v-model="showChangeStatusDialog" v-model:selectValue="selectedStatus" title="تغيير الحالة"
-            message="تغيير الحالة:" :show-select="true" :select-items="[
-                { title: 'قيد المراجعة', value: 'under_review' },
-                { title: 'مقبول', value: 'accepted' }
-            ]" :dialog-icon="changeStatusIcon" @confirm="handleStatusChange" />
+        <div v-if="showAdvancedFilters"
+          class="border-y border-y-primary-100 bg-primary-50 px-4 sm:px-6 py-3 gap-3 flex justify-between flex-wrap">
+          <div class="flex flex-wrap gap-3 items-end">
+            <TextInput v-model="filterRequestNumber" density="comfortable" variant="outlined" hide-details
+              placeholder="كود العرض" class="w-full sm:w-40 bg-white" />
+            <TextInput v-model="filterNameEnglish" density="comfortable" variant="outlined" hide-details
+              placeholder="اسم العميل" class="w-full sm:w-40 bg-white" />
+            <TextInput v-model="filterNameArabic" density="comfortable" variant="outlined" hide-details
+              placeholder="السعر" class="w-full sm:w-40 bg-white" />
+            <DatePickerInput v-model="filterStartDateMin" density="comfortable" hide-details
+              placeholder="تاريخ العرض" class="w-full sm:w-40 bg-white" />
+          </div>
+          <div class="flex gap-2 items-center">
+            <ButtonWithIcon variant="flat" color="primary-500" rounded="4" height="40"
+              custom-class="px-5 font-semibold !text-white text-sm sm:text-base"
+              :prepend-icon="searchIcon" label="ابحث" @click="applyFilters" />
+            <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4" border="sm"
+              custom-class="px-5 font-semibold text-sm sm:text-base !text-primary-800 !border-primary-200"
+              prepend-icon="mdi-refresh" label="إعادة تعيين" @click="resetFilters" />
+          </div>
+        </div>
 
-    </default-layout>
+        <DataTable :headers="tableHeaders" :items="tableItemsWithId" :loading="loading"
+          :show-checkbox="canBulkDelete" show-actions
+          @edit="handleEdit" @delete="handleDelete"
+          @select="handleSelectRequest" @selectAll="handleSelectAllRequests">
+          <template #item.quotations_datetime="{ item }">
+            {{ item.quotations_datetime ? new Date(item.quotations_datetime).toLocaleDateString('ar-SA') : '—' }}
+          </template>
+          <template #item.final_total="{ item }">
+            {{ item.final_total ?? '—' }}
+          </template>
+          <template #item.status="{ item }">
+            <span
+              :class="['inline-block px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap', getStatusClass(item.status)]">
+              {{ item.status }}
+            </span>
+          </template>
+          <template #item.actions="{ item }">
+            <div class="flex items-center gap-1">
+              <v-btn v-if="item.actions?.can_create_order" icon variant="text" size="small"
+                @click="handleCreateOrder(item)">
+                <span v-html="refreshIcon"></span>
+              </v-btn>
+              <v-btn v-if="item.actions?.can_change_status" icon variant="text" size="small" color="warning-600"
+                @click="showChangeStatusDialog = true">
+                <span v-html="switchHorisinralIcon"></span>
+              </v-btn>
+            </div>
+          </template>
+        </DataTable>
+      </div>
+    </div>
+
+    <StatusChangeDialog v-model="showChangeStatusDialog" v-model:selectValue="selectedStatus" title="تغيير الحالة"
+      message="تغيير الحالة:" :show-select="true" :select-items="[
+        { title: 'قيد المراجعة', value: 'under_review' },
+        { title: 'مقبول', value: 'accepted' }
+      ]" :dialog-icon="changeStatusIcon" @confirm="handleStatusChange" />
+
+    <DeleteConfirmDialog v-model="showDeleteDialog" :loading="deleteLoading" title="حذف عرض السعر"
+      message="هل أنت متأكد من حذف هذا العرض؟" @confirm="confirmDelete" />
+
+    <DeleteConfirmDialog v-model="showBulkDeleteDialog" :loading="deleteLoading" title="حذف عروض السعر"
+      :message="`هل أنت متأكد من حذف ${selectedRequests.length} عرض؟`" @confirm="confirmBulkDelete" />
+  </default-layout>
 </template>
 
 <style scoped></style>
