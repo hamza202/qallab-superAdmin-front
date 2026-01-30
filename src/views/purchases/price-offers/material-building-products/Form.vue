@@ -100,6 +100,7 @@ const fetchFormData = async () => {
             formData.value.target_latitude = data.target_latitude;
             formData.value.target_longitude = data.target_longitude;
             formData.value.textNote = data.notes || '';
+            formData.value.code = data.code ? String(data.code) : '';
             
             // Populate products (items)
             if (data.items && Array.isArray(data.items)) {
@@ -208,7 +209,8 @@ const formData = ref({
     advancePayment: null,
     textNote: '',
     image: null,
-    voice_attachment: null
+    voice_attachment: null,
+    code: '' as string
 });
 
 // Products table items (dynamically populated from dialog)
@@ -590,8 +592,8 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
         <div class="request-material-product-page -mx-6">
             <!-- Page Header -->
             <TopHeader :icon="formIcon" title-key="pages.requestForQuotationMaterialProduct.FormTitle"
-                description-key="pages.requestForQuotationMaterialProduct.FormDescription":show-action="false" code="#124098"
-                :code-icon="fileIcon" @action="handleNewRequest" />
+                description-key="pages.requestForQuotationMaterialProduct.FormDescription" :show-action="false"
+                :code="isEditMode ? (formData.code || '') : ''" :code-icon="fileIcon" @action="handleNewRequest" />
             
             <!-- Request Information Section -->
             <div class="p-6">

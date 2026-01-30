@@ -738,7 +738,7 @@ const serviceTableItems = computed(() => {
 
                 <div class="flex justify-center my-6">
                     <ButtonWithIcon color="primary-100" variant="flat" class="!text-primary-900 font-bold w-75">
-                        + إضافة تفاصيل التوريد </ButtonWithIcon>
+                        + تعديل تفاصيل التوريد </ButtonWithIcon>
                 </div>
             </div>
 

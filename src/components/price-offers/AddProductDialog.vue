@@ -42,12 +42,15 @@ const props = defineProps<{
   customerId?: number | null;
   /** 'purchases' = supplier items, transport/trip; 'sales' = customer items, unit_price/discount */
   variant?: 'purchases' | 'sales';
+  /** عند true في المشتريات: عرض سعر الوحدة والخصم بدل عدد الرحلات/نوع الناقلة (مثل طلبات المشتريات) */
+  showUnitPriceAndDiscount?: boolean;
   editProduct?: ProductToAdd | null;
   existingProducts?: ProductToAdd[];
 }>();
 
 const variant = computed(() => props.variant || 'purchases');
 const isSalesMode = computed(() => variant.value === 'sales');
+const showPricingFields = computed(() => isSalesMode.value || !!props.showUnitPriceAndDiscount);
 const entityId = computed(() => isSalesMode.value ? props.customerId : props.supplierId);
 
 const emit = defineEmits<{
@@ -133,22 +136,26 @@ const addedProducts = computed(() => {
 
 // Check if product can be added: الكمية + الوحدة مطلوبة، وفي وضع المبيعات سعر الوحدة مطلوب أيضاً
 const canAddProduct = (product: ProductToAdd): boolean => {
-  const hasQty = product.quantity != null && product.quantity !== '' && Number(product.quantity) > 0;
+  const hasQty = product.quantity != null && Number(product.quantity) > 0;
   const hasUnit = !!product.unit_id;
   if (!hasQty || !hasUnit) return false;
-  if (isSalesMode.value) {
+  if (showPricingFields.value) {
     const price = product.unit_price;
-    const hasPrice = price !== null && price !== undefined && price !== '' && !Number.isNaN(Number(price)) && Number(price) >= 0;
+    const hasPrice = price != null && !Number.isNaN(Number(price)) && Number(price) >= 0;
     return hasPrice;
   }
   return true;
 };
 
-// Fetch items: نفس الـ endpoint بدون إرسال أي id
+// Fetch items: للمشتريات مع supplier_id => /items/supplier-items?supplier_id=:id
 const fetchItems = async () => {
   loading.value = true;
   try {
-    const res = await api.get<any>('/items/supplier-items');
+    const isPurchasesWithSupplier = !isSalesMode.value && props.supplierId != null;
+    const url = isPurchasesWithSupplier
+      ? `/items/supplier-items?supplier_id=${props.supplierId}`
+      : '/items/supplier-items';
+    const res = await api.get<any>(url);
     if (Array.isArray(res.data)) {
       supplierItems.value = res.data;
       categories.value = extractCategories(res.data);
@@ -170,7 +177,7 @@ const fetchItems = async () => {
           notes: '',
           isAdded: false,
         };
-        if (isSalesMode.value) {
+        if (showPricingFields.value) {
           base.unit_price = null;
           base.discount = null;
         }
@@ -374,8 +381,8 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
             />
           </div>
 
-          <!-- Unit Price (sales) -->
-          <div v-if="isSalesMode">
+          <!-- Unit Price (sales أو purchases مع showUnitPriceAndDiscount) -->
+          <div v-if="showPricingFields">
             <TextInput 
               v-model="editProductData.unit_price" 
               type="number" 
@@ -385,8 +392,8 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
             />
           </div>
 
-          <!-- Discount (sales) -->
-          <div v-if="isSalesMode">
+          <!-- Discount (sales أو purchases مع showUnitPriceAndDiscount) -->
+          <div v-if="showPricingFields">
             <TextInput 
               v-model="editProductData.discount" 
               type="number" 
@@ -396,8 +403,8 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
             />
           </div>
 
-          <!-- Delivery Count (trip_no) - purchases only -->
-          <div v-if="!isSalesMode && requestType == 'raw_materials'">
+          <!-- Delivery Count (trip_no) - purchases فقط بدون سعر/خصم -->
+          <div v-if="!showPricingFields && requestType == 'raw_materials'">
             <TextInput 
               v-model="editProductData.trip_no" 
               type="number" 
@@ -407,8 +414,8 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
             />
           </div>
 
-          <!-- Package Type (transport_type) - purchases only -->
-          <div v-if="!isSalesMode && requestType == 'raw_materials'">
+          <!-- Package Type (transport_type) - purchases فقط بدون سعر/خصم -->
+          <div v-if="!showPricingFields && requestType == 'raw_materials'">
             <SelectInput 
               v-model="editProductData.transport_type" 
               :items="packageTypeItemsList" 
@@ -525,8 +532,8 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
                 />
               </div>
 
-              <!-- Unit Price (sales) -->
-              <div v-if="isSalesMode">
+              <!-- Unit Price (sales أو purchases مع showUnitPriceAndDiscount) -->
+              <div v-if="showPricingFields">
                 <TextInput 
                   v-model="product.unit_price" 
                   type="number" 
@@ -537,8 +544,8 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
                 />
               </div>
 
-              <!-- Discount (sales) -->
-              <div v-if="isSalesMode">
+              <!-- Discount (sales أو purchases مع showUnitPriceAndDiscount) -->
+              <div v-if="showPricingFields">
                 <TextInput 
                   v-model="product.discount" 
                   type="number" 
@@ -549,8 +556,8 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
                 />
               </div>
 
-              <!-- Delivery Count (trip_no) - purchases only -->
-              <div v-if="!isSalesMode && requestType == 'raw_materials'">
+              <!-- Delivery Count (trip_no) - purchases فقط بدون سعر/خصم -->
+              <div v-if="!showPricingFields && requestType == 'raw_materials'">
                 <TextInput 
                   v-model="product.trip_no" 
                   type="number" 
@@ -561,8 +568,8 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
                 />
               </div>
 
-              <!-- Package Type (transport_type) - purchases only -->
-              <div v-if="!isSalesMode && requestType == 'raw_materials'">
+              <!-- Package Type (transport_type) - purchases فقط بدون سعر/خصم -->
+              <div v-if="!showPricingFields && requestType == 'raw_materials'">
                 <SelectInput 
                   v-model="product.transport_type" 
                   :items="packageTypeItemsList" 

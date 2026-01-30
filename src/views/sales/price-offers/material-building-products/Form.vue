@@ -117,6 +117,7 @@ const fetchFormData = async () => {
         formData.value.target_longitude = data.target_longitude ?? null;
         formData.value.notes = data.notes ?? '';
         formData.value.status_id = data.status_id ?? null;
+        formData.value.code = data.code ? String(data.code) : '';
 
         // جدول المنتجات: دمج data.items مع data.logistics_product_details (مطابق لكل item_id)
         if (Array.isArray(data.items) && data.items.length > 0) {
@@ -238,7 +239,8 @@ const formData = ref({
     notes: '',
     status_id: null as number | null,
     image: null as File | null,
-    voice_attachment: null as File | null
+    voice_attachment: null as File | null,
+    code: '' as string
 });
 
 // Products table items (dynamically populated from dialog)
@@ -679,8 +681,8 @@ const serviceTableItems = computed(() =>
         <div class="request-material-product-page -mx-6 bg-qallab-dashboard-bg space-y-4">
             <!-- Page Header -->
             <TopHeader :icon="filePlusIcon" title-key="pages.PricesOffersMaterialProduct.FormTitle"
-                description-key="pages.PricesOffersMaterialProduct.FormDescription" :show-action="false" code="#124098"
-                :code-icon="fileIcon" @action="handleNewRequest" />
+                description-key="pages.PricesOffersMaterialProduct.FormDescription" :show-action="false"
+                :code="isEditMode ? (formData.code || '') : ''" :code-icon="fileIcon" @action="handleNewRequest" />
 
             <!-- Request Information Section -->
             <div class="p-6 bg-white rounded-3xl border !border-gray-100 ">
