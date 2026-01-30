@@ -212,8 +212,8 @@
                                 </li> -->
                                 <!-- v-if="canViewBuildingMaterialPriceOffer" -->
                                 <li class="relative">
-                                    <router-link to="/sales/price-offer-material-product/list"
-                                        :class="[isMenuItemActive('/sales/price-offer-material-product') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                    <router-link to="/sales/quotations-material-product/list"
+                                        :class="[isMenuItemActive('/sales/quotations-material-product') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         عروض أسعار مواد أولية</router-link>
                                 </li>
                                 <!-- <li class="relative">

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
 import AppDialog from '@/components/common/AppDialog.vue';
-import TextInput from '@/components/common/forms/TextInput.vue';
+import TextInput from '@/components/common/forms/textInput.vue';
 import DatePickerInput from '@/components/common/forms/DatePickerInput.vue';
 import MultipleSelectInput from '@/components/common/forms/MultipleSelectInput.vue';
 import ButtonWithIcon from '@/components/common/buttons/ButtonWithIcon.vue';

@@ -99,7 +99,7 @@ const fetchFormData = async () => {
 
         // تعبئة بيانات النموذج (مطابق لـ respons.json)
         formData.value.customer_id = data.customer_id ?? null;
-        formData.value.quotations_datetime = data.quotations_datetime ? String(data.quotations_datetime).split(' ')[0] : '';
+        formData.value.quotations_datetime = data.quotations_datetime ? String(data.quotations_datetime) : '';
         formData.value.quotation_name = data.quotation_name ?? '';
         formData.value.quotation_validity_no = data.quotation_validity_no ?? null;
         formData.value.project_name = data.project_name ?? '';
@@ -344,6 +344,20 @@ const formatDateTime = (date: string | Date): string => {
     return `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
 }
 
+/** تاريخ ووقت الإرسال الحالي بصيغة DD-MM-YYYY HH:mm:ss (يُستخدم تلقائياً في وضع الإضافة) */
+const getCurrentDateTimeFormatted = (): string => {
+    const d = new Date();
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    const hours = String(d.getHours()).padStart(2, '0');
+    const minutes = String(d.getMinutes()).padStart(2, '0');
+    const seconds = String(d.getSeconds()).padStart(2, '0');
+    return `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
+};
+
+const dateIconSvg = `<svg width="17" height="19" viewBox="0 0 17 19" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15.834 7.50016H0.833984M11.6673 0.833496V4.16683M5.00065 0.833496V4.16683M4.83398 17.5002H11.834C13.2341 17.5002 13.9342 17.5002 14.469 17.2277C14.9394 16.988 15.3218 16.6055 15.5615 16.1351C15.834 15.6004 15.834 14.9003 15.834 13.5002V6.50016C15.834 5.10003 15.834 4.39997 15.5615 3.86519C15.3218 3.39478 14.9394 3.01233 14.469 2.77265C13.9342 2.50016 13.2341 2.50016 11.834 2.50016H4.83398C3.43385 2.50016 2.73379 2.50016 2.19901 2.77265C1.7286 3.01233 1.34615 3.39478 1.10647 3.86519C0.833984 4.39997 0.833984 5.10003 0.833984 6.50016V13.5002C0.833984 14.9003 0.833984 15.6004 1.10647 16.1351C1.34615 16.6055 1.7286 16.988 2.19901 17.2277C2.73379 17.5002 3.43385 17.5002 4.83398 17.5002Z" stroke="#697586" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+
 // Format date to DD-MM-YYYY
 const formatDate = (date: string | Date): string => {
     if (!date) return '';
@@ -365,7 +379,7 @@ const buildFormData = (): FormData => {
 
     // Basic fields (request-body.json)
     fd.append('customer_id', String(formData.value.customer_id || ''));
-    fd.append('quotations_datetime', formatDateTime(formData.value.quotations_datetime || new Date()));
+    fd.append('quotations_datetime', isEditMode.value ? formatDateTime(formData.value.quotations_datetime || new Date()) : getCurrentDateTimeFormatted());
     fd.append('quotation_name', formData.value.quotation_name || '');
     fd.append('quotation_validity_no', String(formData.value.quotation_validity_no ?? '1'));
     fd.append('target_location', formData.value.target_location || '');
@@ -690,10 +704,15 @@ const serviceTableItems = computed(() =>
                                 label="اسم عرض السعر" :rules="[required()]" density="comfortable" />
                         </div>
 
-                        <!-- quotations_datetime: تاريخ العرض -->
-                        <div>
-                            <DatePickerInput v-model="formData.quotations_datetime" type="date" density="comfortable"
-                                placeholder="اختر التاريخ" label="تاريخ العرض" />
+                        <!-- quotations_datetime: تاريخ العرض (في الإضافة يُخفى ويُرسل تلقائياً عند الحفظ، في التعديل عرض فقط) -->
+                        <div v-if="isEditMode">
+                            <TextInput :model-value="formData.quotations_datetime" type="text" disabled
+                                label="تاريخ العرض" density="comfortable" hide-details
+                                :input-props="{ readonly: true }">
+                                <template #prepend-inner>
+                                    <span class="text-gray-500" v-html="dateIconSvg"></span>
+                                </template>
+                            </TextInput>
                         </div>
 
                         <!-- quotation_validity_no: تاريخ صلاحية عرض السعر (أيام) -->

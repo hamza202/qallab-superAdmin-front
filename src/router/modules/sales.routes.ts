@@ -33,9 +33,9 @@ export const salesRoutes: RouteRecordRaw[] = [
     ],
   },
   {
-    path: "/sales/price-offer-material-product",
+    path: "/sales/quotations-material-product",
     name: "PriceOfferMaterialProduct",
-    redirect: "/sales/price-offer-material-product/list",
+    redirect: "/sales/quotations-material-product/list",
     children: [
       {
         path: "list",
