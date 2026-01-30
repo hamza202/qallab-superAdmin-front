@@ -92,6 +92,7 @@ const fetchFormData = async () => {
             formData.value.requestType = data.request_type;
             formData.value.supplier_id = data.supplier_id;
             formData.value.issueDate = data.request_datetime ? data.request_datetime.split(' ')[0] : '';
+            formData.value.request_datetime = data.request_datetime ? String(data.request_datetime) : '';
             formData.value.requestStatus = data.status_id;
             formData.value.paymentMethod = data.payment_method;
             formData.value.advancePayment = data.upfront_payment;
@@ -201,6 +202,7 @@ const formData = ref({
     target_latitude: null as string | null,
     target_longitude: null as string | null,
     issueDate: '',
+    request_datetime: '' as string,
     requestStatus: null,
     paymentMethod: null,
     advancePayment: null,
@@ -340,6 +342,17 @@ const formatDateTime = (date: string | Date): string => {
     return `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
 }
 
+const getCurrentDateTimeFormatted = (): string => {
+    const d = new Date();
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    const hours = String(d.getHours()).padStart(2, '0');
+    const minutes = String(d.getMinutes()).padStart(2, '0');
+    const seconds = String(d.getSeconds()).padStart(2, '0');
+    return `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
+};
+
 // Format date to DD-MM-YYYY
 const formatDate = (date: string | Date): string => {
     if (!date) return '';
@@ -361,7 +374,7 @@ const buildFormData = (): FormData => {
     
     // Basic fields
     fd.append('request_type', formData.value.requestType || '');
-    fd.append('request_datetime', formatDateTime(formData.value.issueDate || new Date()));
+    fd.append('request_datetime', isEditMode.value ? formatDateTime(formData.value.request_datetime || new Date()) : getCurrentDateTimeFormatted());
     fd.append('supplier_id', String(formData.value.supplier_id || ''));
     fd.append('status_id', String(formData.value.requestStatus || 1));
     fd.append('upfront_payment', String(formData.value.advancePayment || ''));
@@ -530,7 +543,9 @@ const mapMarkerIcon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="non
 </clipPath>
 </defs>
 </svg>
-`
+`;
+
+const dateIconSvg = `<svg width="17" height="19" viewBox="0 0 17 19" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15.834 7.50016H0.833984M11.6673 0.833496V4.16683M5.00065 0.833496V4.16683M4.83398 17.5002H11.834C13.2341 17.5002 13.9342 17.5002 14.469 17.2277C14.9394 16.988 15.3218 16.6055 15.5615 16.1351C15.834 15.6004 15.834 14.9003 15.834 13.5002V6.50016C15.834 5.10003 15.834 4.39997 15.5615 3.86519C15.3218 3.39478 14.9394 3.01233 14.469 2.77265C13.9342 2.50016 13.2341 2.50016 11.834 2.50016H4.83398C3.43385 2.50016 2.73379 2.50016 2.19901 2.77265C1.7286 3.01233 1.34615 3.39478 1.10647 3.86519C0.833984 4.39997 0.833984 5.10003 0.833984 6.50016V13.5002C0.833984 14.9003 0.833984 15.6004 1.10647 16.1351C1.34615 16.6055 1.7286 16.988 2.19901 17.2277C2.73379 17.5002 3.43385 17.5002 4.83398 17.5002Z" stroke="#697586" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 
 const downloadIcon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M17.5 12.5V13.5C17.5 14.9001 17.5 15.6002 17.2275 16.135C16.9878 16.6054 16.6054 16.9878 16.135 17.2275C15.6002 17.5 14.9001 17.5 13.5 17.5H6.5C5.09987 17.5 4.3998 17.5 3.86502 17.2275C3.39462 16.9878 3.01217 16.6054 2.77248 16.135C2.5 15.6002 2.5 14.9001 2.5 13.5V12.5M14.1667 8.33333L10 12.5M10 12.5L5.83333 8.33333M10 12.5V2.5" stroke="#194185" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -604,11 +619,15 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
                                 item-value="value" density="comfortable" placeholder="حدد المورد" />
                         </div>
 
-                        <!-- Issue Date -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">تاريخ إصدار الطلب</label>
-                            <DatePickerInput v-model="formData.issueDate" type="date" density="comfortable"
-                                placeholder="اختر التاريخ" />
+                        <!-- تاريخ إصدار الطلب: يظهر في التعديل فقط (عرض فقط)، ويُرسل تلقائياً عند الحفظ -->
+                        <div v-if="isEditMode">
+                            <TextInput :model-value="formData.request_datetime" type="text" disabled
+                                label="تاريخ إصدار الطلب" density="comfortable" hide-details
+                                :input-props="{ readonly: true }">
+                                <template #prepend-inner>
+                                    <span class="text-gray-500" v-html="dateIconSvg"></span>
+                                </template>
+                            </TextInput>
                         </div>
 
                         <!-- Request Status -->
