@@ -200,7 +200,8 @@ const eyeIcon = `<svg width="22" height="16" viewBox="0 0 22 16" fill="none" xml
           <!-- Dynamic Headers (original order for RTL) -->
           <th v-for="header in headers" :key="header.key"
             class="!font-bold !text-gray-600 !text-xs !bg-gray-50 whitespace-nowrap"
-            :style="header.width ? { width: header.width } : {}">
+            :style="header.width ? { width: header.width } : {}"
+            :class="header.align ? `text-${header.align}` : ''">
             {{ header.title }}
           </th>
 

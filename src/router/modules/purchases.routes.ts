@@ -195,4 +195,66 @@ export const purchasesRoutes: RouteRecordRaw[] = [
       // },
     ],
   },
+  {
+    path: "/purchases/receipt-vouchers",
+    name: "ReceiptVouchers",
+    redirect: "/purchases/receipt-vouchers/list",
+    children: [
+      {
+        path: "list",
+        name: "ReceiptVouchersList",
+        component: () => import("@/views/purchases/receipt-vouchers/List.vue"),
+        meta: {
+          title: "pages.ReceiptVouchers.title",
+        },
+      },
+      {
+        path: "create",
+        name: "ReceiptVouchersCreate",
+        component: () => import("@/views/purchases/receipt-vouchers/Form.vue"),
+        meta: {
+          title: "pages.ReceiptVouchers.FormTitle",
+        },
+      },
+      {
+        path: "edit/:id",
+        name: "ReceiptVouchersEdit",
+        component: () => import("@/views/purchases/receipt-vouchers/Form.vue"),
+        meta: {
+          title: "pages.ReceiptVouchers.edit",
+        },
+      },
+    ],
+  },
+  {
+    path: "/purchases/purchase-invoices",
+    name: "PurchaseInvoices",
+    redirect: "/purchases/purchase-invoices/list",
+    children: [
+      {
+        path: "list",
+        name: "PurchaseInvoicesList",
+        component: () => import("@/views/purchases/purchase-invoices/List.vue"),
+        meta: {
+          title: "pages.PurchaseInvoices.title",
+        },
+      },
+      {
+        path: "create",
+        name: "PurchaseInvoicesCreate",
+        component: () => import("@/views/purchases/purchase-invoices/Form.vue"),
+        meta: {
+          title: "pages.PurchaseInvoices.create",
+        },
+      },
+      {
+        path: "edit/:id",
+        name: "PurchaseInvoicesEdit",
+        component: () => import("@/views/purchases/purchase-invoices/Form.vue"),
+        meta: {
+          title: "pages.PurchaseInvoices.edit",
+        },
+      },
+    ],
+  },
 ];

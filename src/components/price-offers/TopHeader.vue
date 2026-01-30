@@ -61,7 +61,7 @@ const props = withDefaults(defineProps<Props>(), {
     actionIcon: undefined,
     showAction: true,
     codeLabel: 'كود الطلب',
-    code: '#000'
+    code: ''
 });
 
 const emit = defineEmits<{

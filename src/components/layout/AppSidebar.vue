@@ -331,6 +331,16 @@
                                         :class="[isMenuItemActive('/purchases/purchases-requests') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         طلبيات المشتريات</router-link>
                                 </li>
+                                <li class="relative">
+                                    <router-link to="/purchases/receipt-vouchers/list"
+                                        :class="[isMenuItemActive('/purchases/receipt-vouchers') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        وثائق الأستلام</router-link>
+                                </li>
+                                <li class="relative">
+                                    <router-link to="/purchases/purchase-invoices/list"
+                                        :class="[isMenuItemActive('/purchases/purchase-invoices') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        فواتير المشتريات</router-link>
+                                </li>
                             </ul>
                         </div>
                     </v-list-group>
