@@ -70,7 +70,7 @@ const internalSelectValue = computed({
     >
       <template #append-inner>
         <v-divider vertical class="mx-2" />
-        <div class="h-full flex items-center bg-gray-100 px-2 -mx-3 rounded-tl-lg !rounded-bl-lg" @mousedown.stop @click.stop>
+        <div class="h-full flex items-center bg-gray-100 px-2 -mx-3 rounded-tl-lg !rounded-bl-lg" :style="{ width: selectWidth, minWidth: selectWidth }" @mousedown.stop @click.stop>
           <v-select
             v-model="internalSelectValue"
             :placeholder="selectPlaceholder"
@@ -80,7 +80,6 @@ const internalSelectValue = computed({
             hide-details
             bg-color="transparent"
             class="inner-select"
-            :style="{ width: selectWidth, minWidth: selectWidth }"
             :disabled="disabled"
           />
         </div>
@@ -89,13 +88,9 @@ const internalSelectValue = computed({
   </div>
 </template>
 
-<style scoped>
-:deep(.inner-select .v-field__input) {
-}
-
-:deep(.inner-select .v-field__append-inner) {
-}
-
-:deep(.inner-select .v-input__control) {
+<style>
+.inner-select.v-select .v-field{
+  box-shadow: none !important;
+  border: 0 !important;
 }
 </style>

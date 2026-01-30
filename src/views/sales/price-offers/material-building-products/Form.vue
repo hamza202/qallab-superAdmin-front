@@ -871,13 +871,13 @@ const serviceTableItems = computed(() =>
                             <!-- late_fee / late_fee_type: غرامة التأخير -->
                             <TextInputWithSelect v-model="formData.late_fee"
                                 v-model:selectValue="formData.late_fee_type" label="غرامة التأخير"
-                                placeholder="أدخل المبلغ" type="number" :rules="[numeric(), positive()]" select-width="70px"
+                                placeholder="أدخل المبلغ" type="number" :rules="[numeric(), positive()]" select-width="110px"
                                 :select-items="feeTypeItems" select-placeholder="اختر" />
 
                             <!-- cancel_fee / cancel_fee_type: غرامة الإلغاء -->
                             <TextInputWithSelect v-model="formData.cancel_fee"
                                 v-model:selectValue="formData.cancel_fee_type" label="غرامة الإلغاء"
-                                placeholder="أدخل المبلغ" type="number" :rules="[numeric(), positive()]" select-width="70px"
+                                placeholder="أدخل المبلغ" type="number" :rules="[numeric(), positive()]" select-width="110px"
                                 :select-items="feeTypeItems" select-placeholder="اختر" />
                         </div>
                     </div>
