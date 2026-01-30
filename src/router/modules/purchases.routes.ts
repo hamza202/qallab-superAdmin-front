@@ -75,6 +75,31 @@ export const purchasesRoutes: RouteRecordRaw[] = [
     ],
   },
   {
+    path: "/purchases/quotations-material-product",
+    name: "QuotationsMaterialProduct",
+    redirect: "/purchases/quotations-material-product/list",
+    children: [
+      {
+        path: "list",
+        name: "QuotationsMaterialProductList",
+        component: () =>
+          import("@/views/purchases/quotations/material-product/List.vue"),
+        meta: {
+          title: "pages.QuotationsMaterialProduct.title",
+        },
+      },
+      {
+        path: "view/:id",
+        name: "QuotationsMaterialProductView",
+        component: () =>
+          import("@/views/purchases/quotations/material-product/View.vue"),
+        meta: {
+          title: "pages.QuotationsMaterialProduct.view",
+        },
+      },
+    ],
+  },
+  {
     path: "/purchases/request-for-quotations-material-product",
     name: "RequestForQuotationsMaterialProduct",
     redirect: "/purchases/request-for-quotations-material-product/list",

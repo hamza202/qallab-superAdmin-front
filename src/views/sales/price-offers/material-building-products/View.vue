@@ -187,8 +187,7 @@
 
                             <!-- Products Table -->
                             <div class="mb-4">
-                                <DataTable :headers="headers" :items="items" show-actions force-show-edit
-                                    force-show-delete />
+                                <DataTable :headers="headers" :items="items" :showActions="false" />
                             </div>
                         </div>
                     </v-tabs-window-item>
@@ -203,8 +202,7 @@
 
                             <!-- Transport Services Table -->
                             <div class="mb-4">
-                                <DataTable :headers="ServicesHeaders" :items="ServicesItems" show-actions
-                                    force-show-edit force-show-delete />
+                                <DataTable :headers="ServicesHeaders" :items="ServicesItems" :showActions="false" />
                             </div>
                         </div>
                     </v-tabs-window-item>
