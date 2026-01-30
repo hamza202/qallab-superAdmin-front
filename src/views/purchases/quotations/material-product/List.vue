@@ -353,5 +353,3 @@ onMounted(() => {
       :message="`هل أنت متأكد من حذف ${selectedRequests.length} عرض؟`" @confirm="confirmBulkDelete" />
   </default-layout>
 </template>
-
-<style scoped></style>
