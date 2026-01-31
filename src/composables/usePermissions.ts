@@ -68,7 +68,7 @@ const routePermissionMap: Record<string, { group: string; key: string }> = {
     // Purchases
     '/suppliers': { group: 'purchases', key: 'suppliers' },
     '/suppliers/supplier-settlement': { group: 'purchases', key: 'supplier-settlements' },
-    '/purchases/request-for-quotations-material-product': { group: 'purchases', key: 'purchases-building-material-price-requests' },
+    // '/purchases/requests/material-product': { group: 'purchases', key: 'purchases-building-material-price-requests' },
 
     // Finance
     '/vouchers/list': { group: 'finance', key: 'financial-dashboard' },

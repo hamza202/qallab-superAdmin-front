@@ -8,8 +8,8 @@ import { useTableColumns } from '@/composables/useTableColumns';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog.vue';
 import DatePickerInput from '@/components/common/forms/DatePickerInput.vue';
 import { GridIcon, fileCheckIcon, trash_1_icon, trash_2_icon, importIcon, columnIcon, exportIcon, plusIcon, searchIcon } from "@/components/icons/globalIcons";
-import { switchHorisinralIcon, changeStatusIcon } from '@/components/icons/priceOffersIcons';
-import StatusChangeDialog from '@/components/common/StatusChangeDialog.vue';
+import { switchHorisinralIcon } from '@/components/icons/priceOffersIcons';
+import StatusChangeFeature from '@/components/common/StatusChangeFeature.vue';
 
 const { t } = useI18n();
 const router = useRouter();
@@ -236,9 +236,11 @@ const confirmBulkDelete = async () => {
 
 // Status change (can_change_status)
 const showChangeStatusDialog = ref(false);
-const selectedStatus = ref<any>(null);
-const handleStatusChange = (_status: any) => {
-  showChangeStatusDialog.value = false;
+const itemToChangeStatus = ref<OrderItem | null>(null);
+
+const openChangeStatusDialog = (item: OrderItem | Record<string, unknown>) => {
+  itemToChangeStatus.value = item as OrderItem;
+  showChangeStatusDialog.value = true;
 };
 
 onMounted(() => {
@@ -458,7 +460,7 @@ onMounted(() => {
                 variant="text"
                 size="x-small"
                 color="warning-600"
-                @click="showChangeStatusDialog = true"
+                @click="openChangeStatusDialog(item)"
               >
                 <span v-html="switchHorisinralIcon"></span>
               </v-btn>
@@ -495,18 +497,13 @@ onMounted(() => {
       @confirm="confirmBulkDelete"
     />
 
-    <StatusChangeDialog
+    <StatusChangeFeature
       v-model="showChangeStatusDialog"
-      v-model:selectValue="selectedStatus"
+      :item="itemToChangeStatus"
+      :change-status-url="`/purchases/orders/building-materials/${itemToChangeStatus?.uuid}/change-status`"
       title="تغيير الحالة"
       message="تغيير الحالة:"
-      :show-select="true"
-      :select-items="[
-        { title: 'قيد المراجعة', value: 'under_review' },
-        { title: 'مقبول', value: 'accepted' }
-      ]"
-      :dialog-icon="changeStatusIcon"
-      @confirm="handleStatusChange"
+      @success="fetchList"
     />
   </default-layout>
 </template>

@@ -33,23 +33,15 @@ export const purchasesRoutes: RouteRecordRaw[] = [
     ],
   },
   {
-    path: "/purchases/request-for-quotations",
+    path: "/purchases/requests/request-for-quotation",
     name: "RequestForQuotations",
-    redirect: "/purchases/request-for-quotations/list",
+    redirect: "/purchases/requests/request-for-quotation/create",
     children: [
-      //   {
-      //     path: 'list',
-      //     name: 'RequestForQuotationList',
-      //     component: () => import('@/views/purchases/price-offers/RequestForQuotation.vue'),
-      //     meta: {
-      //       title: 'pages.requestForQuotation.title',
-      //     },
-      //   },
       {
         path: "create",
         name: "RequestForQuotationCreate",
         component: () =>
-          import("@/views/purchases/price-offers/tests/RequestForQuotation.vue"),
+          import("@/views/purchases/requests/tests/RequestForQuotation.vue"),
         meta: {
           title: "pages.requestForQuotation.create",
         },
@@ -58,7 +50,7 @@ export const purchasesRoutes: RouteRecordRaw[] = [
         path: "edit/:id",
         name: "RequestForQuotationEdit",
         component: () =>
-          import("@/views/purchases/price-offers/tests/RequestForQuotation.vue"),
+          import("@/views/purchases/requests/tests/RequestForQuotation.vue"),
         meta: {
           title: "pages.requestForQuotation.edit",
         },
@@ -67,7 +59,7 @@ export const purchasesRoutes: RouteRecordRaw[] = [
         path: "view/:id",
         name: "RequestForQuotationView",
         component: () =>
-          import("@/views/purchases/price-offers/tests/RequestForQuotation.vue"),
+          import("@/views/purchases/requests/tests/RequestForQuotation.vue"),
         meta: {
           title: "pages.requestForQuotation.view",
         },
@@ -100,15 +92,15 @@ export const purchasesRoutes: RouteRecordRaw[] = [
     ],
   },
   {
-    path: "/purchases/request-for-quotations-material-product",
+    path: "/purchases/requests/material-product",
     name: "RequestForQuotationsMaterialProduct",
-    redirect: "/purchases/request-for-quotations-material-product/list",
+    redirect: "/purchases/requests/material-product/list",
     children: [
       {
         path: "list",
         name: "RequestForQuotationMaterialProductList",
         component: () =>
-          import("@/views/purchases/price-offers/material-building-products/List.vue"),
+          import("@/views/purchases/requests/material-product/List.vue"),
         meta: {
           title: "pages.requestForQuotationMaterialProduct.title",
         },
@@ -117,7 +109,7 @@ export const purchasesRoutes: RouteRecordRaw[] = [
         path: "create",
         name: "RequestForQuotationMaterialProductCreate",
         component: () =>
-          import("@/views/purchases/price-offers/material-building-products/Form.vue"),
+          import("@/views/purchases/requests/material-product/Form.vue"),
         meta: {
           title: "pages.requestForQuotationMaterialProduct.title",
         },
@@ -126,7 +118,7 @@ export const purchasesRoutes: RouteRecordRaw[] = [
         path: "edit/:id",
         name: "RequestForQuotationMaterialProductEdit",
         component: () =>
-          import("@/views/purchases/price-offers/material-building-products/Form.vue"),
+          import("@/views/purchases/requests/material-product/Form.vue"),
         meta: {
           title: "pages.requestForQuotationMaterialProduct.edit",
         },
@@ -135,7 +127,7 @@ export const purchasesRoutes: RouteRecordRaw[] = [
         path: "view/:id",
         name: "RequestForQuotationMaterialProductView",
         component: () =>
-          import("@/views/purchases/price-offers/material-building-products/View.vue"),
+          import("@/views/purchases/requests/material-product/View.vue"),
         meta: {
           title: "pages.requestForQuotationMaterialProduct.view",
         },
@@ -143,14 +135,14 @@ export const purchasesRoutes: RouteRecordRaw[] = [
     ],
   },
   {
-    path: "/purchases/request-for-quotations-fuel",
+    path: "/purchases/requests/fuels",
     name: "RequestForQuotationsFuel",
-    redirect: "/purchases/request-for-quotations-fuel/list",
+    redirect: "/purchases/requests/fuels/list",
     children: [
       {
         path: "list",
         name: "RequestForQuotationFuelList",
-        component: () => import("@/views/purchases/price-offers/fuel/List.vue"),
+        component: () => import("@/views/purchases/requests/fuels/List.vue"),
         meta: {
           title: "pages.requestForQuotationFuel.title",
         },
@@ -158,7 +150,7 @@ export const purchasesRoutes: RouteRecordRaw[] = [
       {
         path: "create",
         name: "RequestForQuotationFuelCreate",
-        component: () => import("@/views/purchases/price-offers/fuel/Form.vue"),
+        component: () => import("@/views/purchases/requests/fuels/Form.vue"),
         meta: {
           title: "pages.requestForQuotationFuel.title",
         },
@@ -166,7 +158,7 @@ export const purchasesRoutes: RouteRecordRaw[] = [
       {
         path: "edit/:id",
         name: "RequestForQuotationFuelEdit",
-        component: () => import("@/views/purchases/price-offers/fuel/Form.vue"),
+        component: () => import("@/views/purchases/requests/fuels/Form.vue"),
         meta: {
           title: "pages.requestForQuotationFuel.edit",
         },
@@ -174,7 +166,7 @@ export const purchasesRoutes: RouteRecordRaw[] = [
       {
         path: "view/:id",
         name: "RequestForQuotationFuelView",
-        component: () => import("@/views/purchases/price-offers/fuel/View.vue"),
+        component: () => import("@/views/purchases/requests/fuels/View.vue"),
         meta: {
           title: "pages.requestForQuotationFuel.view",
         },

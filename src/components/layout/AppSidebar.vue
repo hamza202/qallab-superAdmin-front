@@ -206,8 +206,8 @@
                             <ul class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
                                 <!-- <li  class="relative">
                                     v-if="canViewRequestForQuotations"
-                                    <router-link to="/purchases/request-for-quotations/create"
-                                        :class="[isMenuItemActive('/purchases/request-for-quotations') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                    <router-link to="/purchases/requests/request-for-quotation/create"
+                                        :class="[isMenuItemActive('/purchases/requests/request-for-quotation') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         طلب عروض الأسعار</router-link>
                                 </li> -->
                                 <!-- v-if="canViewBuildingMaterialPriceOffer" -->
@@ -217,8 +217,8 @@
                                         عروض أسعار مواد أولية</router-link>
                                 </li>
                                 <!-- <li class="relative">
-                                    <router-link to="/purchases/request-for-quotations-fuel/list"
-                                        :class="[isMenuItemActive('/purchases/request-for-quotations-fuel') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                    <router-link to="/purchases/requests/fuels/list"
+                                        :class="[isMenuItemActive('/purchases/requests/fuels') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         عروض أسعار محروقات</router-link>
                                 </li> -->
                                 <li class="relative">
@@ -312,13 +312,13 @@
                             <ul class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
                                 <!-- <li  class="relative">
                                     v-if="canViewRequestForQuotations"
-                                    <router-link to="/purchases/request-for-quotations/create"
-                                        :class="[isMenuItemActive('/purchases/request-for-quotations') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                    <router-link to="/purchases/requests/request-for-quotation/create"
+                                        :class="[isMenuItemActive('/purchases/requests/request-for-quotation') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         طلب عروض الأسعار</router-link>
                                 </li> -->
                                 <li class="relative" v-if="canViewBuildingMaterialPriceRequests">
-                                    <router-link to="/purchases/request-for-quotations-material-product/list"
-                                        :class="[isMenuItemActive('/purchases/request-for-quotations-material-product') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                    <router-link to="/purchases/requests/material-product/list"
+                                        :class="[isMenuItemActive('/purchases/requests/material-product') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         طلب عروض أسعار مواد أولية</router-link>
                                 </li>
                                 <li class="relative">
@@ -327,8 +327,8 @@
                                         عروض اسعار مواد اوليه</router-link>
                                 </li>
                                 <li class="relative">
-                                    <router-link to="/purchases/request-for-quotations-fuel/list"
-                                        :class="[isMenuItemActive('/purchases/request-for-quotations-fuel') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                    <router-link to="/purchases/requests/fuels/list"
+                                        :class="[isMenuItemActive('/purchases/requests/fuels') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         طلب عروض أسعار محروقات</router-link>
                                 </li>
                                 <li class="relative">
