@@ -18,6 +18,7 @@ declare module 'vue' {
     ColorPickerInput: typeof import('./components/common/forms/ColorPickerInput.vue')['default']
     DataTable: typeof import('./components/common/tables/DataTable.vue')['default']
     DatePickerInput: typeof import('./components/common/forms/DatePickerInput.vue')['default']
+    DateTimePickerInput: typeof import('./components/common/forms/DateTimePickerInput.vue')['default']
     DefaultLayout: typeof import('./layouts/DefaultLayout.vue')['default']
     DeleteConfirmDialog: typeof import('./components/common/DeleteConfirmDialog.vue')['default']
     EditableDataTable: typeof import('./components/common/tables/EditableDataTable.vue')['default']

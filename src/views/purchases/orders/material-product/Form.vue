@@ -48,11 +48,6 @@ const fetchConstants = async () => {
     const res = await api.get<any>("/purchases/constants");
     const data = res.data;
     if (data) {
-      requestTypeItems.value =
-        data.request_types?.map((i: any) => ({
-          title: i.label,
-          value: i.key,
-        })) || [];
       paymentMethodItems.value =
         data.payment_methods?.map((i: any) => ({
           title: i.label,
@@ -83,6 +78,11 @@ const fetchOrdersConstants = async () => {
       feeTypeItems.value =
         data.fee_types?.map((i: any) => ({ title: i.label, value: i.key })) ||
         [];
+        requestTypeItems.value =
+        data.po_types?.map((i: any) => ({
+          title: i.label,
+          value: i.key,
+        })) || [];
     }
   } catch (e) {
     console.error("Error fetching orders constants:", e);
@@ -141,19 +141,26 @@ const fetchFormData = async () => {
   isLoading.value = true;
   try {
     const res = await api.get<any>(
-      `/purchases/building-materials/${routeId.value}`,
+      `/purchases/orders/building-materials/${routeId.value}`,
     );
     const data = res.data;
 
     if (data) {
       // Populate form data
-      formData.value.requestType = data.request_type;
+      formData.value.code = data.code || "";
+      formData.value.sale_quotation_code = data.sale_quotation_code || null;
       formData.value.supplier_id = data.supplier_id;
       formData.value.price_offer_name = data.price_offer_name || "";
       formData.value.project_name = data.project_name || "";
+      formData.value.po_type = data.po_type || "";
+      formData.value.invoice_interval = data.invoice_interval ?? null;
+      formData.value.payment_term_no = data.payment_term_no ?? null;
       formData.value.issueDate = data.request_datetime
         ? data.request_datetime.split(" ")[0]
         : "";
+      formData.value.po_datetime = normalizePoDateTime(
+        data.po_datetime || data.request_datetime || "",
+      );
       formData.value.requestStatus = data.status_id;
       formData.value.paymentMethod = data.payment_method;
       formData.value.advancePayment = data.upfront_payment;
@@ -168,6 +175,25 @@ const fetchFormData = async () => {
       formData.value.cancel_fee_type = data.cancel_fee_type ?? null;
       formData.value.cancel_fee = data.cancel_fee ?? null;
       formData.value.textNote = data.notes || "";
+
+      const attached = data.po_attached_logistics_detail || null;
+      if (attached) {
+        formData.value.transport_start_date = attached.from_date || "";
+        formData.value.transport_end_date = attached.to_date || "";
+        formData.value.execution_period =
+          attached.actual_execution_duration ?? null;
+        formData.value.daily_trips = attached.trip_no ?? null;
+        formData.value.transport_movements = attached.transport_no ?? null;
+        formData.value.transport_vehicle_type = Array.isArray(
+          attached.transport_type,
+        )
+          ? attached.transport_type.map((t: string | number) => Number(t))
+          : [];
+        formData.value.loading_responsible =
+          attached.loading_responsible_party || "";
+        formData.value.unloading_responsible =
+          attached.downloading_responsible_party || "";
+      }
 
       // جدول المنتجات: دمج data.items مع po_logistics_product_details / logistics_product_details (مطابق لكل item_id)
       if (data.items && Array.isArray(data.items)) {
@@ -328,10 +354,8 @@ interface Supply {
 
 // Form data with static values
 const formData = ref({
-  requestNumber: "#12520226",
-  requestType: null,
-//   delegation_method: null,
-  delegation_limit: "#123434",
+  sale_quotation_code: null,
+  code: "",
   source_location: null as string | null,
   source_latitude: null as string | null,
   source_longitude: null as string | null,
@@ -340,7 +364,7 @@ const formData = ref({
   target_longitude: null as string | null,
   supplier_id: null,
   supplier_name: null,
-  request_date: "",
+  po_datetime: "",
 
   // Supply Additional Info Section
   transport_movements: null,
@@ -354,7 +378,7 @@ const formData = ref({
   transport_vehicle_type: [] as (string | number)[],
 
   // مطابقة request-body.json
-  po_type: "po_with_logistics" as string,
+  po_type: null as string | null,
   invoice_interval: null as number | null,
   payment_term_no: null as number | null,
   late_fee_type: null as string | null,
@@ -465,19 +489,6 @@ import { useNotification as useNotify } from "@/composables/useNotification";
 const { formRef, isFormValid, validate } = useForm();
 const { success, error } = useNotify();
 
-// Format date to DD-MM-YYYY HH:mm:ss
-const formatDateTime = (date: string | Date): string => {
-  if (!date) return "";
-  const d = new Date(date);
-  const day = String(d.getDate()).padStart(2, "0");
-  const month = String(d.getMonth() + 1).padStart(2, "0");
-  const year = d.getFullYear();
-  const hours = String(d.getHours()).padStart(2, "0");
-  const minutes = String(d.getMinutes()).padStart(2, "0");
-  const seconds = String(d.getSeconds()).padStart(2, "0");
-  return `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
-};
-
 // Format date to DD-MM-YYYY
 const formatDate = (date: string | Date): string => {
   if (!date) return "";
@@ -488,13 +499,60 @@ const formatDate = (date: string | Date): string => {
   return `${day}-${month}-${year}`;
 };
 
+const formatDateTimeDmy = (date: Date): string => {
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = date.getFullYear();
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  const seconds = String(date.getSeconds()).padStart(2, "0");
+  return `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
+};
+
+const normalizePoDateTime = (value: string): string => {
+  if (!value) return "";
+  const trimmed = value.trim();
+  if (/^\d{2}-\d{2}-\d{4}\s+\d{2}:\d{2}:\d{2}$/.test(trimmed)) {
+    return trimmed;
+  }
+  if (/^\d{4}-\d{2}-\d{2}/.test(trimmed)) {
+    const [datePart, timePart] = trimmed.split(" ");
+    const [year, month, day] = datePart.split("-").map(Number);
+    const [hours, minutes, seconds] = (timePart || "00:00:00")
+      .split(":")
+      .map(Number);
+    if (year && month && day) {
+      const d = new Date(
+        year,
+        month - 1,
+        day,
+        hours || 0,
+        minutes || 0,
+        seconds || 0,
+      );
+      return formatDateTimeDmy(d);
+    }
+  }
+  const parsed = new Date(trimmed);
+  if (!Number.isNaN(parsed.getTime())) {
+    return formatDateTimeDmy(parsed);
+  }
+  return trimmed;
+};
+
 // Build FormData for submission (مفاتيح مطابقة لـ request-body.json مستقبلاً)
 const buildFormData = (): FormData => {
   const fd = new FormData();
 
-  // Basic fields (مطابقة request-body: po_type, po_datetime = التاريخ والوقت الفعلي للطلب، supplier_id, ...)
-  fd.append("po_type", formData.value.po_type ?? "po_with_logistics");
-  fd.append("po_datetime", formatDateTime(new Date()));
+  // Basic fields (مطابقة request-body: po_type, po_datetime, supplier_id, ...)
+  fd.append("po_type", formData.value.po_type || "");
+  fd.append(
+    "po_datetime",
+    normalizePoDateTime(formData.value.po_datetime || ""),
+  );
+  if (isEditMode.value) {
+        fd.append('_method', 'PUT');
+    }
   fd.append("supplier_id", String(formData.value.supplier_id || ""));
   fd.append("source_location", formData.value.source_location || "");
   fd.append("source_latitude", String(formData.value.source_latitude ?? ""));
@@ -507,9 +565,9 @@ const buildFormData = (): FormData => {
   fd.append("upfront_payment", String(formData.value.advancePayment ?? ""));
   fd.append("invoice_interval", String(formData.value.invoice_interval ?? 1));
   fd.append("payment_term_no", String(formData.value.payment_term_no ?? 3));
-  fd.append("late_fee_type", formData.value.late_fee_type || "");
+  fd.append("late_fee_type", String(formData.value.late_fee_type ?? ""));
   fd.append("late_fee", String(formData.value.late_fee ?? ""));
-  fd.append("cancel_fee_type", formData.value.cancel_fee_type || "");
+  fd.append("cancel_fee_type", String(formData.value.cancel_fee_type ?? ""));
   fd.append("cancel_fee", String(formData.value.cancel_fee ?? ""));
   fd.append("notes", formData.value.textNote || "");
 
@@ -576,6 +634,12 @@ const buildFormData = (): FormData => {
 
   // po_logistics_product_details (تفاصيل توريد لكل منتج - مرتبط بـ item_id)
   productTableItems.value.forEach((item, index) => {
+    if (isEditMode.value && item.logistics_detail_id) {
+      fd.append(
+        `po_logistics_product_details[${index}][id]`,
+        String(item.logistics_detail_id),
+      );
+    }
     fd.append(
       `po_logistics_product_details[${index}][item_id]`,
       String(item.item_id),
@@ -638,7 +702,7 @@ const handleSubmit = async (options?: { redirectToList?: boolean }) => {
 
     let response;
     if (isEditMode.value) {
-      response = await api.put(
+      response = await api.post(
         `/purchases/orders/building-materials/${routeId.value}`,
         fd,
         {
@@ -923,7 +987,7 @@ const serviceTableItems = computed(() =>
         title-key="pages.OrdersMaterialProduct.FormTitle"
         description-key="pages.OrdersMaterialProduct.FormDescription"
         :show-action="false"
-        code="#124098"
+        :code="isEditMode ? formData.code : ''"
         :code-icon="fileIcon"
         @action="handleNewRequest"
       />
@@ -955,11 +1019,10 @@ const serviceTableItems = computed(() =>
 
             <!-- Request Date -->
             <div>
-              <DatePickerInput
-                v-model="formData.request_date"
-                type="date"
+              <DateTimePickerInput
+                v-model="formData.po_datetime"
                 density="comfortable"
-                placeholder="اختر"
+                placeholder="اختر التاريخ والوقت"
                 label="تاريخ الطلبية"
               />
             </div>
@@ -967,7 +1030,7 @@ const serviceTableItems = computed(() =>
             <!-- Request Type -->
             <div>
               <SelectInput
-                v-model="formData.requestType"
+                v-model="formData.po_type"
                 :items="requestTypeItems"
                 label="نوع الطلبية"
                 density="comfortable"
@@ -1042,7 +1105,8 @@ const serviceTableItems = computed(() =>
             </div> -->
 
             <TextInput
-              v-model="formData.delegation_limit"
+              v-model="formData.sale_quotation_code"
+              v-if="formData.sale_quotation_code"
               readonly
               label="كود عرض السعر"
               density="comfortable"
