@@ -212,8 +212,8 @@
                                 </li> -->
                                 <!-- v-if="canViewBuildingMaterialPriceOffer" -->
                                 <li class="relative">
-                                    <router-link to="/sales/quotations-material-product/list"
-                                        :class="[isMenuItemActive('/sales/quotations-material-product') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                    <router-link to="/sales/quotations/material-product/list"
+                                        :class="[isMenuItemActive('/sales/quotations/material-product') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         عروض أسعار مواد أولية</router-link>
                                 </li>
                                 <!-- <li class="relative">
@@ -322,8 +322,8 @@
                                         طلب عروض أسعار مواد أولية</router-link>
                                 </li>
                                 <li class="relative">
-                                    <router-link to="/purchases/quotations-material-product/list"
-                                        :class="[isMenuItemActive('/purchases/quotations-material-product') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                    <router-link to="/purchases/quotations/material-product/list"
+                                        :class="[isMenuItemActive('/purchases/quotations/material-product') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         عروض اسعار مواد اوليه</router-link>
                                 </li>
                                 <li class="relative">
@@ -332,8 +332,8 @@
                                         طلب عروض أسعار محروقات</router-link>
                                 </li>
                                 <li class="relative">
-                                    <router-link to="/purchases/purchases-requests/list"
-                                        :class="[isMenuItemActive('/purchases/purchases-requests') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                    <router-link to="/purchases/orders/material-product/list"
+                                        :class="[isMenuItemActive('/purchases/orders/material-product') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         طلبيات المشتريات</router-link>
                                 </li>
                                 <li class="relative">

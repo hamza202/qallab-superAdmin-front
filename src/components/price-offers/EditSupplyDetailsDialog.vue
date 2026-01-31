@@ -4,6 +4,8 @@ import AppDialog from '@/components/common/AppDialog.vue';
 import TextInput from '@/components/common/forms/textInput.vue';
 import DatePickerInput from '@/components/common/forms/DatePickerInput.vue';
 import MultipleSelectInput from '@/components/common/forms/MultipleSelectInput.vue';
+import SelectInput from '@/components/common/forms/SelectInput.vue';
+import PriceInput from '@/components/common/forms/PriceInput.vue';
 import ButtonWithIcon from '@/components/common/buttons/ButtonWithIcon.vue';
 
 export interface SupplyDetailRow {
@@ -14,6 +16,10 @@ export interface SupplyDetailRow {
   transport_start_date: string;
   trip_no: number | null;
   vehicle_types: (string | number)[];
+  /** سعة الرحلة (اختياري - يُعرض في طلبات المشتريات) */
+  trip_capacity?: number | null;
+  /** توقيت الرحلة (اختياري - يُعرض في طلبات المشتريات) */
+  am_pm_interval?: string | null;
 }
 
 const props = defineProps<{
@@ -22,6 +28,10 @@ const props = defineProps<{
   transportTypeItems?: { title: string; value: string | number }[];
   /** عند التعديل من جدول تفاصيل التوريد: عرض منتج واحد فقط */
   singleProductItemId?: number | null;
+  /** إظهار حقل سعة الرحلة (طلبات المشتريات فقط) */
+  showTripCapacity?: boolean;
+  /** عناصر توقيت الرحلة - إذا أُرسلت يظهر الحقل (صباحاً/مساءً/كلاهما) */
+  amPmIntervalItems?: { title: string; value: string }[];
 }>();
 
 const emit = defineEmits<{
@@ -66,6 +76,8 @@ watch(
         transport_start_date: p.transport_start_date || '',
         trip_no: p.trip_no,
         vehicle_types: Array.isArray(p.vehicle_types) ? [...p.vehicle_types] : (p.vehicle_types != null ? [p.vehicle_types] : []),
+        trip_capacity: p.trip_capacity ?? null,
+        am_pm_interval: p.am_pm_interval ?? null,
       }));
     }
   },
@@ -145,6 +157,32 @@ const truckIcon = `<svg width="22" height="20" viewBox="0 0 22 20" fill="none" x
             v-model="row.vehicle_types"
             :items="vehicleOptions"
             placeholder="نوع المركبات"
+            density="compact"
+            item-title="title"
+            item-value="value"
+            class="w-full"
+            hide-details
+          />
+        </div>
+
+        <!-- 5. سعة الرحلة (اختياري - طلبات المشتريات) -->
+        <div v-if="showTripCapacity" class="min-w-[120px] shrink-0">
+          <PriceInput
+            v-model="row.trip_capacity"
+            type="number"
+            placeholder="سعة الرحلة"
+            density="compact"
+            class="w-full"
+            hide-details
+          />
+        </div>
+
+        <!-- 6. توقيت الرحلة (اختياري - طلبات المشتريات) -->
+        <div v-if="amPmIntervalItems?.length" class="min-w-[140px] shrink-0">
+          <SelectInput
+            v-model="row.am_pm_interval"
+            :items="amPmIntervalItems"
+            placeholder="توقيت الرحلة"
             density="compact"
             item-title="title"
             item-value="value"

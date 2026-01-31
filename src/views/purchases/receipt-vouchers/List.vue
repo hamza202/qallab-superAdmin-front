@@ -139,7 +139,7 @@ const openCreateVoucher = () => {
                     المشتريات
                 </span>
                 <span class="text-lg text-gray-300">/</span>
-                <router-link to="/purchases/purchases-requests" class="text-gray-600 hover:text-primary-600">
+                <router-link to="/purchases/orders/material-product/list" class="text-gray-600 hover:text-primary-600">
                     قائمة طلبيات المشتريات
                 </router-link>
                 <span class="text-lg text-gray-300">/</span>

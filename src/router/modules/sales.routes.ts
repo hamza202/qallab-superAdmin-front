@@ -33,15 +33,15 @@ export const salesRoutes: RouteRecordRaw[] = [
     ],
   },
   {
-    path: "/sales/quotations-material-product",
+    path: "/sales/quotations/material-product",
     name: "PriceOfferMaterialProduct",
-    redirect: "/sales/quotations-material-product/list",
+    redirect: "/sales/quotations/material-product/list",
     children: [
       {
         path: "list",
         name: "PriceOfferMaterialProductList",
         component: () =>
-          import("@/views/sales/price-offers/material-building-products/List.vue"),
+          import("@/views/sales/quotations/material-product/List.vue"),
         meta: {
           title: "pages.PriceOfferMaterialProduct.title",
         },
@@ -50,7 +50,7 @@ export const salesRoutes: RouteRecordRaw[] = [
         path: "create",
         name: "PriceOfferMaterialProductCreate",
         component: () =>
-          import("@/views/sales/price-offers/material-building-products/Form.vue"),
+          import("@/views/sales/quotations/material-product/Form.vue"),
         meta: {
           title: "pages.PriceOfferMaterialProduct.title",
         },
@@ -59,7 +59,7 @@ export const salesRoutes: RouteRecordRaw[] = [
         path: "edit/:id",
         name: "PriceOfferMaterialProductEdit",
         component: () =>
-          import("@/views/sales/price-offers/material-building-products/Form.vue"),
+          import("@/views/sales/quotations/material-product/Form.vue"),
         meta: {
           title: "pages.PriceOfferMaterialProduct.edit",
         },
@@ -68,7 +68,7 @@ export const salesRoutes: RouteRecordRaw[] = [
         path: "view/:id",
         name: "PriceOfferMaterialProductView",
         component: () =>
-          import("@/views/sales/price-offers/material-building-products/View.vue"),
+          import("@/views/sales/quotations/material-product/View.vue"),
         meta: {
           title: "pages.PriceOfferMaterialProduct.view",
         },

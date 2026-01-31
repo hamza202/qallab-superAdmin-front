@@ -108,6 +108,13 @@
       "list": "Roles List",
       "create": "Add Role",
       "edit": "Edit Role"
+    },
+    "OrdersMaterialProduct": {
+      "title": "Purchase Orders Table",
+      "description": "Manage purchase orders",
+      "FormTitle": "Purchase Order - Building Materials",
+      "FormDescription": "Create purchase order for building materials",
+      "edit": "Edit Purchase Order"
     }
   }
 }

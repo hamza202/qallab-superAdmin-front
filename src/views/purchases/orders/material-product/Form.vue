@@ -215,7 +215,7 @@ const fetchFormData = async () => {
             subtotal_after_discount: item.subtotal_after_discount ?? null,
             trip_start: log?.trip_start ?? null,
             number_of_trips: log?.number_of_trips ?? null,
-            price_per_trip: log?.price_per_trip ?? null,
+            trip_capacity: log?.trip_capacity ?? null,
             am_pm_interval: log?.am_pm_interval ?? null,
             vehicle_types: vehicleTypes.length
               ? vehicleTypes
@@ -291,9 +291,9 @@ interface ProductTableItem {
   unit_id: number | null;
   unit_name: string;
   quantity: number | null;
-  transport_type: number | null;
-  transport_type_name: string;
-  trip_no: number | null;
+  transport_type?: number | null;
+  transport_type_name?: string;
+  trip_no?: number | null;
   notes: string;
   id?: number; // For edit mode
   isAdded?: boolean; // For dialog state
@@ -309,7 +309,7 @@ interface ProductTableItem {
   // تفاصيل التوريد لكل منتج (ربط po_logistics_product_details بـ item_id)
   trip_start?: string | null;
   number_of_trips?: number | null;
-  price_per_trip?: number | null;
+  trip_capacity?: number | null;
   am_pm_interval?: string | null;
   vehicle_types?: number[];
   logistics_detail_id?: number | null;
@@ -401,7 +401,7 @@ const handleAddProduct = () => {
   showAddProductDialog.value = true;
 };
 
-const handleProductSaved = (products: ProductTableItem[]) => {
+const handleProductSaved = (products: any[]) => {
   // Merge new products while preserving existing notes
   const newItems: ProductTableItem[] = [];
 
@@ -414,7 +414,7 @@ const handleProductSaved = (products: ProductTableItem[]) => {
     newItems.push({
       ...p,
       notes: existing?.notes || p.notes || "", // Preserve existing notes
-    });
+    } as ProductTableItem);
   });
 
   productTableItems.value = newItems;
@@ -426,12 +426,12 @@ const handleEditProduct = (item: any) => {
     (p) => p.item_id === item.item_id,
   );
   if (productToEdit) {
-    editingProduct.value = { ...productToEdit, isAdded: true };
+    editingProduct.value = { ...productToEdit, isAdded: true } as any;
     showAddProductDialog.value = true;
   }
 };
 
-const handleProductUpdated = (updatedProduct: ProductTableItem) => {
+const handleProductUpdated = (updatedProduct: any) => {
   const index = productTableItems.value.findIndex(
     (p) => p.item_id === updatedProduct.item_id,
   );
@@ -441,7 +441,7 @@ const handleProductUpdated = (updatedProduct: ProductTableItem) => {
     productTableItems.value[index] = {
       ...updatedProduct,
       notes: existingNotes || updatedProduct.notes || "",
-    };
+    } as ProductTableItem;
   }
   editingProduct.value = null;
 };
@@ -593,8 +593,8 @@ const buildFormData = (): FormData => {
       String(item.number_of_trips ?? item.trip_no ?? ""),
     );
     fd.append(
-      `po_logistics_product_details[${index}][price_per_trip]`,
-      String(item.price_per_unit ?? item.unit_price ?? ""),
+      `po_logistics_product_details[${index}][trip_capacity]`,
+      String(item.trip_capacity ?? ""),
     );
     fd.append(
       `po_logistics_product_details[${index}][am_pm_interval]`,
@@ -658,10 +658,10 @@ const handleSubmit = async (options?: { redirectToList?: boolean }) => {
     success(isEditMode.value ? "تم تحديث الطلب بنجاح" : "تم إنشاء الطلب بنجاح");
 
     if (options?.redirectToList) {
-      router.push({ name: "PurchasesRequestsList" });
+      router.push({ name: "OrdersMaterialProductList" });
     } else {
       // حفظ وإنشاء جديد: الانتقال لصفحة إنشاء طلب جديد
-      router.push({ name: "PurchasesRequestsCreate" });
+      router.push({ name: "OrdersMaterialProductCreate" });
     }
   } catch (e: any) {
     console.error("Error submitting form:", e);
@@ -700,7 +700,7 @@ const supplyDialogProducts = computed(() =>
   productTableItems.value.map((p) => ({
     item_id: p.item_id,
     item_name: p.item_name,
-    quantity: p.quantity,
+    quantity: p.quantity ?? null,
     unit_name: p.unit_name || "",
     transport_start_date: p.trip_start || "",
     trip_no: p.number_of_trips ?? p.trip_no ?? null,
@@ -709,6 +709,8 @@ const supplyDialogProducts = computed(() =>
       : p.transport_type != null
         ? [p.transport_type]
         : [],
+    trip_capacity: p.trip_capacity ?? null,
+    am_pm_interval: p.am_pm_interval ?? null,
   }))
 );
 
@@ -735,6 +737,8 @@ const handleSupplyDetailsSaved = (
     transport_start_date: string;
     trip_no: number | null;
     vehicle_types: (string | number)[];
+    trip_capacity?: number | null;
+    am_pm_interval?: string | null;
   }[]
 ) => {
   rows.forEach((row) => {
@@ -750,6 +754,8 @@ const handleSupplyDetailsSaved = (
         getTransportTypeNameFromIds(row.vehicle_types);
       if (row.vehicle_types?.length)
         product.transport_type = Number(row.vehicle_types[0]);
+      product.trip_capacity = row.trip_capacity ?? null;
+      product.am_pm_interval = row.am_pm_interval ?? null;
     }
   });
   showAddSupplyDialog.value = false;
@@ -868,13 +874,15 @@ const summaryTotals = computed(() => {
   };
 });
 
-// جدول تفاصيل التوريد: يعكس المنتجات المضافة أعلاه (المنتج، الكمية، تاريخ بداية النقل، نوع المركبة، عدد الرحلات) – نفس لوجيك المبيعات
+// جدول تفاصيل التوريد: يعكس المنتجات المضافة أعلاه (المنتج، الكمية، تاريخ بداية النقل، نوع المركبة، عدد الرحلات، سعة الرحلة، توقيت الرحلة)
 const ServicesHeaders = [
   { title: "المنتج", key: "product_name" },
   { title: "الكمية", key: "quantity_display" },
   { title: "تاريخ بداية النقل", key: "transport_start_date" },
   { title: "نوع مركبة النقل", key: "transport_type_name" },
   { title: "عدد الرحلات", key: "trip_no" },
+  { title: "سعة الرحلة", key: "trip_capacity" },
+  { title: "توقيت الرحلة", key: "am_pm_interval_label" },
 ];
 
 // عناصر الجدول مبنية على جدول المنتجات: كل منتج = صف واحد (زر التعديل فقط، بدون حذف)
@@ -896,6 +904,8 @@ const serviceTableItems = computed(() =>
           : item.trip_no != null
             ? item.trip_no
             : "—",
+      trip_capacity: item.trip_capacity ?? "—",
+      am_pm_interval_label: getAmPmIntervalLabel(item.am_pm_interval ?? null) || "—",
       actions: { can_update: true, can_delete: false },
     };
   })
@@ -910,8 +920,8 @@ const serviceTableItems = computed(() =>
       <!-- Page Header -->
       <TopHeader
         :icon="filePlusIcon"
-        title-key="pages.PurchasesRequests.FormTitle"
-        description-key="pages.PurchasesRequests.FormDescription"
+        title-key="pages.OrdersMaterialProduct.FormTitle"
+        description-key="pages.OrdersMaterialProduct.FormDescription"
         :show-action="false"
         code="#124098"
         :code-icon="fileIcon"
@@ -1524,6 +1534,8 @@ const serviceTableItems = computed(() =>
       :products="supplyDialogProducts"
       :transport-type-items="transportTypeItems"
       :single-product-item-id="editingSupplyProductId"
+      show-trip-capacity
+      :am-pm-interval-items="amPmIntervalItems"
       @saved="handleSupplyDetailsSaved"
     />
   </default-layout>

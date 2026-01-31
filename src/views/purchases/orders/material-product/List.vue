@@ -100,7 +100,7 @@ const applyFilters = () => {
 
 // Handlers
 const handleEdit = (item: any) => {
-    router.push({ name: "PurchasesRequestsEdit", params: { id: item.id } });
+    router.push({ name: "OrdersMaterialProductEdit", params: { id: item.id } });
 };
 
 const handleDelete = (item: any) => {
@@ -143,7 +143,7 @@ const getStatusClass = (status: string) => {
 };
 
 const openCreateRequest = () => {
-    router.push({ name: "PurchasesRequestsCreate" });
+    router.push({ name: "OrdersMaterialProductCreate" });
 };
 
 </script>
@@ -151,8 +151,8 @@ const openCreateRequest = () => {
 <template>
     <default-layout>
         <div class="pricesOffers-page">
-            <PageHeader :icon="GridIcon" title-key="pages.PurchasesRequests.title"
-                description-key="pages.PurchasesRequests.description" />
+            <PageHeader :icon="GridIcon" title-key="pages.OrdersMaterialProduct.title"
+                description-key="pages.OrdersMaterialProduct.description" />
 
             <div
                 class="flex justify-end items-stretch rounded border border-gray-300 w-fit ms-auto mb-4 overflow-hidden bg-white text-sm">

@@ -8,11 +8,11 @@
             <span v-html="homeIcon"></span>
           </router-link>
           <span class="text-lg text-gray-300">/</span>
-          <router-link to="/purchases/quotations-material-product/list" class="text-gray-600 hover:text-primary-600">
+          <router-link to="/purchases/quotations/material-product/list" class="text-gray-600 hover:text-primary-600">
             المشتريات
           </router-link>
           <span class="text-lg text-gray-300">/</span>
-          <router-link to="/purchases/quotations-material-product/list" class="text-gray-600 hover:text-primary-600">
+          <router-link to="/purchases/quotations/material-product/list" class="text-gray-600 hover:text-primary-600">
             عروض اسعار مواد اوليه
           </router-link>
           <span class="text-lg text-gray-300">/</span>

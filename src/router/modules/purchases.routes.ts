@@ -75,9 +75,9 @@ export const purchasesRoutes: RouteRecordRaw[] = [
     ],
   },
   {
-    path: "/purchases/quotations-material-product",
+    path: "/purchases/quotations/material-product",
     name: "QuotationsMaterialProduct",
-    redirect: "/purchases/quotations-material-product/list",
+    redirect: "/purchases/quotations/material-product/list",
     children: [
       {
         path: "list",
@@ -182,42 +182,37 @@ export const purchasesRoutes: RouteRecordRaw[] = [
     ],
   },
   {
-    path: "/purchases/purchases-requests",
-    name: "PurchasesRequests",
-    redirect: "/purchases/purchases-requests/list",
+    path: "/purchases/orders/material-product",
+    name: "OrdersMaterialProduct",
+    redirect: "/purchases/orders/material-product/list",
     children: [
       {
         path: "list",
-        name: "PurchasesRequestsList",
-        component: () => import("@/views/purchases/purchases-requests/List.vue"),
+        name: "OrdersMaterialProductList",
+        component: () =>
+          import("@/views/purchases/orders/material-product/List.vue"),
         meta: {
-          title: "pages.PurchasesRequests.title",
+          title: "pages.OrdersMaterialProduct.title",
         },
       },
       {
         path: "create",
-        name: "PurchasesRequestsCreate",
-        component: () => import("@/views/purchases/purchases-requests/Form.vue"),
+        name: "OrdersMaterialProductCreate",
+        component: () =>
+          import("@/views/purchases/orders/material-product/Form.vue"),
         meta: {
-          title: "pages.PurchasesRequests.title",
+          title: "pages.OrdersMaterialProduct.title",
         },
       },
       {
         path: "edit/:id",
-        name: "PurchasesRequestsEdit",
-        component: () => import("@/views/purchases/purchases-requests/Form.vue"),
+        name: "OrdersMaterialProductEdit",
+        component: () =>
+          import("@/views/purchases/orders/material-product/Form.vue"),
         meta: {
-          title: "pages.PurchasesRequests.edit",
+          title: "pages.OrdersMaterialProduct.edit",
         },
       },
-      // {
-      //   path: "view/:id",
-      //   name: "RequestForQuotationFuelView",
-      //   component: () => import("@/views/purchases/purchases-requests/View.vue"),
-      //   meta: {
-      //     title: "pages.requestForQuotationFuel.view",
-      //   },
-      // },
     ],
   },
   {
