@@ -6,6 +6,9 @@ import { useApi } from '@/composables/useApi';
 import { useNotification } from '@/composables/useNotification';
 import { useTableColumns } from '@/composables/useTableColumns';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog.vue';
+import StatusChangeFeature from '@/components/common/StatusChangeFeature.vue';
+import { switcStatusIcon } from '@/components/icons/priceOffersIcons';
+
 
 const { t } = useI18n();
 const router = useRouter();
@@ -40,6 +43,7 @@ interface BuildingMaterialRequest {
   payment_method: string;
   upfront_payment: number;
   status: string;
+  status_id: number;
   actions: ItemActions;
 }
 
@@ -223,6 +227,15 @@ const confirmBulkDelete = async () => {
     deleteLoading.value = false;
     showBulkDeleteDialog.value = false;
   }
+};
+
+// Status change (can_change_status)
+const showChangeStatusDialog = ref(false);
+const itemToChangeStatus = ref<BuildingMaterialRequest | null>(null);
+
+const openChangeStatusDialog = (item: BuildingMaterialRequest | Record<string, unknown>) => {
+  itemToChangeStatus.value = item as BuildingMaterialRequest;
+  showChangeStatusDialog.value = true;
 };
 
 // Icons (same as original)
@@ -474,8 +487,10 @@ onMounted(() => {
                 icon
                 variant="text"
                 size="small"
+                color="warning-600"
+                @click="openChangeStatusDialog(item)"
               >
-                <span v-html="refreshIcon"></span>
+                <span v-html="switcStatusIcon"></span>
               </v-btn>
             </div>
           </template>
@@ -490,6 +505,15 @@ onMounted(() => {
       title="حذف الطلبات"
       :message="`هل أنت متأكد من حذف ${selectedRequests.length} طلب؟`"
       @confirm="confirmBulkDelete"
+    />
+
+    <StatusChangeFeature
+      v-model="showChangeStatusDialog"
+      :item="itemToChangeStatus"
+      :change-status-url="`/sales/building-materials/${itemToChangeStatus?.uuid}/change-status`"
+      title="تغيير الحالة"
+      message="تغيير الحالة:"
+      @success="fetchList"
     />
   </default-layout>
 </template>

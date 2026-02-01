@@ -56,7 +56,7 @@ export const salesRoutes: RouteRecordRaw[] = [
         },
       },
       {
-        path: "edit/:uuid",
+        path: "edit/:id",
         name: "SalesRequestsMaterialProductEdit",
         component: () =>
           import("@/views/sales/requests/material-product/Form.vue"),

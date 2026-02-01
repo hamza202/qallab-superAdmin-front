@@ -28,7 +28,7 @@ const supplierItems = ref<any[]>([]);
 
 const fetchConstants = async () => {
     try {
-        const res = await api.get<any>('/sales/constants');
+        const res = await api.get<any>('/purchases/constants');
         const data = res.data;
         if (data) {
              requestTypeItems.value = data.request_types?.map((i: any) => ({ title: i.label, value: i.key })) || [];
@@ -93,7 +93,6 @@ const fetchFormData = async () => {
             formData.value.supplier_id = data.supplier_id;
             formData.value.issueDate = data.request_datetime ? data.request_datetime.split(' ')[0] : '';
             formData.value.request_datetime = data.request_datetime ? String(data.request_datetime) : '';
-            formData.value.requestStatus = data.status_id;
             formData.value.paymentMethod = data.payment_method;
             formData.value.advancePayment = data.upfront_payment;
             formData.value.target_location = data.target_location;
@@ -204,7 +203,6 @@ const formData = ref({
     target_longitude: null as string | null,
     issueDate: '',
     request_datetime: '' as string,
-    requestStatus: null,
     paymentMethod: null,
     advancePayment: null,
     textNote: '',
@@ -378,7 +376,6 @@ const buildFormData = (): FormData => {
     fd.append('request_type', formData.value.requestType || '');
     fd.append('request_datetime', isEditMode.value ? formatDateTime(formData.value.request_datetime || new Date()) : getCurrentDateTimeFormatted());
     fd.append('supplier_id', String(formData.value.supplier_id || ''));
-    fd.append('status_id', String(formData.value.requestStatus || 1));
     fd.append('upfront_payment', String(formData.value.advancePayment || ''));
     fd.append('payment_method', formData.value.paymentMethod || '');
     fd.append('target_location', formData.value.target_location || '');
@@ -632,14 +629,6 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
                             </TextInput>
                         </div>
 
-                        <!-- Request Status -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">حالة الطلب</label>
-                            <SelectInput v-model="formData.requestStatus"
-                                :items="[{ title: 'مسودة', value: '1' }]"
-                                item-title="title" item-value="value" density="comfortable" placeholder="حدد حالة الطلب" />
-                        </div>
-
                         <!-- Project Location -->
                         <div class="relative">
                             <label class="text-sm font-medium text-gray-700 mb-2 block">موقع المشروع</label>
@@ -819,7 +808,7 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
                     <div class="mt-3 flex items-center gap-3">
                         <ButtonWithIcon color="primary-50" class="flex-1 text-primary-700" height="48" size="large"
                             @click="handleConvertToPrice" label="تحويل إلى عرض سعر" />
-                        <ButtonWithIcon color="primary" class="flex-1" label="إرسال الطلب" height="48" size="large"
+                        <ButtonWithIcon color="primary" class="flex-1" label="حفظ" height="48" size="large"
                             @click="handleSubmit" />
                     </div>
                 </div>
