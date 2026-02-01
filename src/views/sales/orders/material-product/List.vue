@@ -8,7 +8,7 @@ import { useTableColumns } from '@/composables/useTableColumns';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog.vue';
 import DatePickerInput from '@/components/common/forms/DatePickerInput.vue';
 import { GridIcon, fileCheckIcon, trash_1_icon, trash_2_icon, importIcon, columnIcon, exportIcon, plusIcon, searchIcon } from "@/components/icons/globalIcons";
-import { switchHorisinralIcon } from '@/components/icons/priceOffersIcons';
+import { switcStatusIcon } from '@/components/icons/priceOffersIcons';
 import StatusChangeFeature from '@/components/common/StatusChangeFeature.vue';
 
 const { t } = useI18n();
@@ -462,7 +462,7 @@ onMounted(() => {
                 color="warning-600"
                 @click="openChangeStatusDialog(item)"
               >
-                <span v-html="switchHorisinralIcon"></span>
+                <span v-html="switcStatusIcon"></span>
               </v-btn>
               <v-btn
                 v-if="item.actions?.can_receive_doc"
