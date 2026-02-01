@@ -57,6 +57,7 @@ const routePermissionMap: Record<string, { group: string; key: string }> = {
     '/customers': { group: 'sales', key: 'customers' },
     '/sales/invoices': { group: 'sales', key: 'sales-invoices' },
     '/sales/orders': { group: 'sales', key: 'sales-orders' },
+    '/sales/orders/material-product': { group: 'sales', key: 'sales-orders' },
     '/sales/contracts': { group: 'sales', key: 'contracts' },
     '/sales/clearing': { group: 'sales', key: 'clearing' },
     // '/sales/price-offer-material-product': { group: 'sales', key: 'sales-building-material-price-offer' },

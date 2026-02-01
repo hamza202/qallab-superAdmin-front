@@ -187,8 +187,8 @@
                                         فواتير المبيعات</router-link>
                                 </li>
                                 <li v-if="canViewSalesOrders" class="relative">
-                                    <router-link to="/sales/orders"
-                                        :class="[isMenuItemActive('/sales/orders') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
+                                    <router-link to="/sales/orders/material-product/list"
+                                        :class="[isMenuItemActive('/sales/orders/material-product') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">إدارة
                                         طلبات المبيعات</router-link>
                                 </li>
                                 <li v-if="canViewContracts" class="relative">
@@ -204,13 +204,11 @@
                             </ul>
                             <h2 class="text-sm font-medium leading-5 my-2">إدارة عروض الأسعار</h2>
                             <ul class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
-                                <!-- <li  class="relative">
-                                    v-if="canViewRequestForQuotations"
-                                    <router-link to="/purchases/requests/request-for-quotation/create"
-                                        :class="[isMenuItemActive('/purchases/requests/request-for-quotation') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
-                                        طلب عروض الأسعار</router-link>
-                                </li> -->
-                                <!-- v-if="canViewBuildingMaterialPriceOffer" -->
+                                <li class="relative">
+                                    <router-link to="/sales/requests/material-product/list"
+                                        :class="[isMenuItemActive('/sales/requests/material-product') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        طلب عروض أسعار مواد أولية</router-link>
+                                </li>
                                 <li class="relative">
                                     <router-link to="/sales/quotations/material-product/list"
                                         :class="[isMenuItemActive('/sales/quotations/material-product') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
@@ -222,8 +220,8 @@
                                         عروض أسعار محروقات</router-link>
                                 </li> -->
                                 <li class="relative">
-                                    <router-link to="/sales/sales-requests/list"
-                                        :class="[isMenuItemActive('/sales/sales-requests') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                    <router-link to="/sales/orders/material-product/list"
+                                        :class="[isMenuItemActive('/sales/orders/material-product') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         طلبيات المبيعات</router-link>
                                 </li>
 

@@ -40,16 +40,16 @@ const transportTypeItems = ref<any[]>([]);
 const amPmIntervalItems = ref<any[]>([]);
 const feeTypeItems = ref<any[]>([]);
 const unitItems = ref<any[]>([]);
-const supplierItems = ref<any[]>([]);
+const customerItems = ref<any[]>([]);
 
-/** /purchases/constants – request_types, payment_methods, transport_types, am_pm_interval (response2.json) */
-const fetchConstants = async () => {
+/** /sales/orders/constants – fee_types لغرامة التأخير وغرامة الإلغاء (respons.json) */
+const fetchOrdersConstants = async () => {
   try {
-    const res = await api.get<any>("/purchases/constants");
+    const res = await api.get<any>("/sales/orders/constants");
     const data = res.data;
     if (data) {
-      paymentMethodItems.value =
-        data.payment_methods?.map((i: any) => ({
+      amPmIntervalItems.value =
+        data.am_pm_interval?.map((i: any) => ({
           title: i.label,
           value: i.key,
         })) || [];
@@ -58,28 +58,16 @@ const fetchConstants = async () => {
           title: i.label,
           value: i.key,
         })) || [];
-      amPmIntervalItems.value =
-        data.am_pm_interval?.map((i: any) => ({
+      paymentMethodItems.value =
+        data.payment_methods?.map((i: any) => ({
           title: i.label,
           value: i.key,
         })) || [];
-    }
-  } catch (e) {
-    console.error("Error fetching constants:", e);
-  }
-};
-
-/** /purchases/orders/constants – fee_types لغرامة التأخير وغرامة الإلغاء (respons.json) */
-const fetchOrdersConstants = async () => {
-  try {
-    const res = await api.get<any>("/purchases/orders/constants");
-    const data = res.data;
-    if (data) {
       feeTypeItems.value =
         data.fee_types?.map((i: any) => ({ title: i.label, value: i.key })) ||
         [];
         requestTypeItems.value =
-        data.po_types?.map((i: any) => ({
+        data.so_types?.map((i: any) => ({
           title: i.label,
           value: i.key,
         })) || [];
@@ -89,17 +77,17 @@ const fetchOrdersConstants = async () => {
   }
 };
 
-const fetchSuppliers = async () => {
+const fetchCustomers = async () => {
   try {
-    const res = await api.get<any>("/suppliers/list");
+    const res = await api.get<any>("/customers/list");
     if (Array.isArray(res.data)) {
-      supplierItems.value = res.data.map((i: any) => ({
+      customerItems.value = res.data.map((i: any) => ({
         title: i.full_name,
         value: i.id,
       }));
     }
   } catch (e) {
-    console.error("Error fetching suppliers:", e);
+    console.error("Error fetching customers:", e);
   }
 };
 
@@ -141,7 +129,7 @@ const fetchFormData = async () => {
   isLoading.value = true;
   try {
     const res = await api.get<any>(
-      `/purchases/orders/building-materials/${routeId.value}`,
+      `/sales/orders/building-materials/${routeId.value}`,
     );
     const data = res.data;
 
@@ -149,17 +137,17 @@ const fetchFormData = async () => {
       // Populate form data
       formData.value.code = data.code || "";
       formData.value.sale_quotation_code = data.sale_quotation_code || null;
-      formData.value.supplier_id = data.supplier_id;
+      formData.value.customer_id = data.customer_id;
       formData.value.price_offer_name = data.price_offer_name || "";
       formData.value.project_name = data.project_name || "";
-      formData.value.po_type = data.po_type || "";
+      formData.value.so_type = data.so_type || "";
       formData.value.invoice_interval = data.invoice_interval ?? null;
       formData.value.payment_term_no = data.payment_term_no ?? null;
       formData.value.issueDate = data.request_datetime
         ? data.request_datetime.split(" ")[0]
         : "";
-      formData.value.po_datetime = normalizePoDateTime(
-        data.po_datetime || data.request_datetime || "",
+      formData.value.so_datetime = normalizePoDateTime(
+        data.so_datetime || data.request_datetime || "",
       );
       formData.value.requestStatus = data.status_id;
       formData.value.paymentMethod = data.payment_method;
@@ -176,7 +164,7 @@ const fetchFormData = async () => {
       formData.value.cancel_fee = data.cancel_fee ?? null;
       formData.value.textNote = data.notes || "";
 
-      const attached = data.po_attached_logistics_detail || null;
+      const attached = data.so_attached_logistics_detail || null;
       if (attached) {
         formData.value.transport_start_date = attached.from_date || "";
         formData.value.transport_end_date = attached.to_date || "";
@@ -195,11 +183,11 @@ const fetchFormData = async () => {
           attached.downloading_responsible_party || "";
       }
 
-      // جدول المنتجات: دمج data.items مع po_logistics_product_details / logistics_product_details (مطابق لكل item_id)
+      // جدول المنتجات: دمج data.items مع so_logistics_product_details / logistics_product_details (مطابق لكل item_id)
       if (data.items && Array.isArray(data.items)) {
         const logisticsByItemId: Record<number, any> = {};
         const logisticsList =
-          data.po_logistics_product_details ?? data.logistics_product_details;
+          data.so_logistics_product_details ?? data.logistics_product_details;
         if (Array.isArray(logisticsList)) {
           logisticsList.forEach((log: any) => {
             const iid = Number(log.item_id);
@@ -253,9 +241,9 @@ const fetchFormData = async () => {
         });
       }
 
-      // Populate transport service من logistics_detail أو po_attached_logistics_detail
+      // Populate transport service من logistics_detail أو so_attached_logistics_detail
       const attachedLogistics =
-        data.po_attached_logistics_detail ?? data.logistics_detail;
+        data.so_attached_logistics_detail ?? data.logistics_detail;
       if (
         attachedLogistics &&
         (attachedLogistics.from_date || attachedLogistics.to_date)
@@ -298,10 +286,9 @@ const fetchFormData = async () => {
 
 onMounted(async () => {
   await Promise.all([
-    fetchConstants(),
     fetchOrdersConstants(),
     fetchUnits(),
-    fetchSuppliers(),
+    fetchCustomers(),
   ]);
 
   // Fetch form data if in edit mode
@@ -310,7 +297,7 @@ onMounted(async () => {
   }
 });
 
-// Interface for product items (مطابق لـ request-body items + po_logistics_product_details مرتبط بـ item_id)
+// Interface for product items (مطابق لـ request-body items + so_logistics_product_details مرتبط بـ item_id)
 interface ProductTableItem {
   item_id: number;
   item_name: string;
@@ -332,7 +319,7 @@ interface ProductTableItem {
   total_tax?: number | null;
   subtotal_before_discount?: number | null;
   subtotal_after_discount?: number | null;
-  // تفاصيل التوريد لكل منتج (ربط po_logistics_product_details بـ item_id)
+  // تفاصيل التوريد لكل منتج (ربط so_logistics_product_details بـ item_id)
   trip_start?: string | null;
   number_of_trips?: number | null;
   trip_capacity?: number | null;
@@ -362,9 +349,9 @@ const formData = ref({
   target_location: null as string | null,
   target_latitude: null as string | null,
   target_longitude: null as string | null,
-  supplier_id: null,
-  supplier_name: null,
-  po_datetime: "",
+  customer_id: null,
+  customer_name: null,
+  so_datetime: "",
 
   // Supply Additional Info Section
   transport_movements: null,
@@ -378,7 +365,7 @@ const formData = ref({
   transport_vehicle_type: [] as (string | number)[],
 
   // مطابقة request-body.json
-  po_type: null as string | null,
+  so_type: null as string | null,
   invoice_interval: null as number | null,
   payment_term_no: null as number | null,
   late_fee_type: null as string | null,
@@ -417,10 +404,6 @@ const showAddProductDialog = ref(false);
 const editingProduct = ref<ProductTableItem | null>(null);
 
 const handleAddProduct = () => {
-  if (!formData.value.supplier_id) {
-    warning("يجب عليك اختيار اسم المورد أولاً");
-    return;
-  }
   editingProduct.value = null; // Reset edit mode
   showAddProductDialog.value = true;
 };
@@ -544,16 +527,16 @@ const normalizePoDateTime = (value: string): string => {
 const buildFormData = (): FormData => {
   const fd = new FormData();
 
-  // Basic fields (مطابقة request-body: po_type, po_datetime, supplier_id, ...)
-  fd.append("po_type", formData.value.po_type || "");
+  // Basic fields (مطابقة request-body: so_type, so_datetime, customer_id, ...)
+  fd.append("so_type", formData.value.so_type || "");
   fd.append(
-    "po_datetime",
-    normalizePoDateTime(formData.value.po_datetime || ""),
+    "so_datetime",
+    normalizePoDateTime(formData.value.so_datetime || ""),
   );
   if (isEditMode.value) {
         fd.append('_method', 'PUT');
     }
-  fd.append("supplier_id", String(formData.value.supplier_id || ""));
+  fd.append("customer_id", String(formData.value.customer_id || ""));
   fd.append("source_location", formData.value.source_location || "");
   fd.append("source_latitude", String(formData.value.source_latitude ?? ""));
   fd.append("source_longitude", String(formData.value.source_longitude ?? ""));
@@ -571,41 +554,41 @@ const buildFormData = (): FormData => {
   fd.append("cancel_fee", String(formData.value.cancel_fee ?? ""));
   fd.append("notes", formData.value.textNote || "");
 
-  // po_attached_logistics_detail (بيانات التوريد الإضافية من الفورم - مطابق request-body.json)
+  // so_attached_logistics_detail (بيانات التوريد الإضافية من الفورم - مطابق request-body.json)
   fd.append(
-    "po_attached_logistics_detail[from_date]",
+    "so_attached_logistics_detail[from_date]",
     formatDate(formData.value.transport_start_date),
   );
   fd.append(
-    "po_attached_logistics_detail[to_date]",
+    "so_attached_logistics_detail[to_date]",
     formatDate(formData.value.transport_end_date),
   );
   fd.append(
-    "po_attached_logistics_detail[actual_execution_duration]",
+    "so_attached_logistics_detail[actual_execution_duration]",
     String(formData.value.execution_period ?? ""),
   );
   fd.append(
-    "po_attached_logistics_detail[trip_no]",
+    "so_attached_logistics_detail[trip_no]",
     String(formData.value.daily_trips ?? ""),
   );
   fd.append(
-    "po_attached_logistics_detail[transport_no]",
+    "so_attached_logistics_detail[transport_no]",
     String(formData.value.transport_movements ?? ""),
   );
   if (formData.value.transport_vehicle_type && formData.value.transport_vehicle_type.length > 0) {
     formData.value.transport_vehicle_type.forEach((type, index) => {
       fd.append(
-        `po_attached_logistics_detail[transport_type][${index}]`,
+        `so_attached_logistics_detail[transport_type][${index}]`,
         String(type),
       );
     });
   }
   fd.append(
-    "po_attached_logistics_detail[loading_responsible_party]",
+    "so_attached_logistics_detail[loading_responsible_party]",
     formData.value.loading_responsible || "",
   );
   fd.append(
-    "po_attached_logistics_detail[downloading_responsible_party]",
+    "so_attached_logistics_detail[downloading_responsible_party]",
     formData.value.unloading_responsible || "",
   );
 
@@ -632,42 +615,42 @@ const buildFormData = (): FormData => {
     fd.append(`items[${index}][notes]`, item.notes ?? "");
   });
 
-  // po_logistics_product_details (تفاصيل توريد لكل منتج - مرتبط بـ item_id)
+  // so_logistics_product_details (تفاصيل توريد لكل منتج - مرتبط بـ item_id)
   productTableItems.value.forEach((item, index) => {
     if (isEditMode.value && item.logistics_detail_id) {
       fd.append(
-        `po_logistics_product_details[${index}][id]`,
+        `so_logistics_product_details[${index}][id]`,
         String(item.logistics_detail_id),
       );
     }
     fd.append(
-      `po_logistics_product_details[${index}][item_id]`,
+      `so_logistics_product_details[${index}][item_id]`,
       String(item.item_id),
     );
     fd.append(
-      `po_logistics_product_details[${index}][quantity]`,
+      `so_logistics_product_details[${index}][quantity]`,
       String(item.quantity || ""),
     );
     fd.append(
-      `po_logistics_product_details[${index}][trip_start]`,
+      `so_logistics_product_details[${index}][trip_start]`,
       item.trip_start || "",
     );
     fd.append(
-      `po_logistics_product_details[${index}][number_of_trips]`,
+      `so_logistics_product_details[${index}][number_of_trips]`,
       String(item.number_of_trips ?? item.trip_no ?? ""),
     );
     fd.append(
-      `po_logistics_product_details[${index}][trip_capacity]`,
+      `so_logistics_product_details[${index}][trip_capacity]`,
       String(item.trip_capacity ?? ""),
     );
     fd.append(
-      `po_logistics_product_details[${index}][am_pm_interval]`,
+      `so_logistics_product_details[${index}][am_pm_interval]`,
       item.am_pm_interval || "",
     );
     if (item.vehicle_types && item.vehicle_types.length > 0) {
       item.vehicle_types.forEach((t: number, i: number) => {
         fd.append(
-          `po_logistics_product_details[${index}][transport_type][${i}]`,
+          `so_logistics_product_details[${index}][transport_type][${i}]`,
           String(t),
         );
       });
@@ -697,9 +680,9 @@ const resetForm = () => {
     target_location: null,
     target_latitude: null,
     target_longitude: null,
-    supplier_id: null,
-    supplier_name: null,
-    po_datetime: "",
+    customer_id: null,
+    customer_name: null,
+    so_datetime: "",
     transport_movements: null,
     daily_trips: null,
     loading_responsible: "",
@@ -709,7 +692,7 @@ const resetForm = () => {
     execution_period: null,
     execution_period_unit: null,
     transport_vehicle_type: [],
-    po_type: null,
+    so_type: null,
     invoice_interval: null,
     payment_term_no: null,
     late_fee_type: null,
@@ -754,7 +737,7 @@ const handleSubmit = async (options?: { redirectToList?: boolean }) => {
     let response;
     if (isEditMode.value) {
       response = await api.post(
-        `/purchases/orders/building-materials/${routeId.value}`,
+        `/sales/orders/building-materials/${routeId.value}`,
         fd,
         {
           headers: {
@@ -763,7 +746,7 @@ const handleSubmit = async (options?: { redirectToList?: boolean }) => {
         },
       );
     } else {
-      response = await api.post("/purchases/orders/building-materials", fd, {
+      response = await api.post("/sales/orders/building-materials", fd, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -773,10 +756,10 @@ const handleSubmit = async (options?: { redirectToList?: boolean }) => {
     success(isEditMode.value ? "تم تحديث الطلب بنجاح" : "تم إنشاء الطلب بنجاح");
 
     if (options?.redirectToList) {
-      router.push({ name: "OrdersMaterialProductList" });
+      router.push({ name: "SalesOrdersMaterialProductList" });
     } else {
       resetForm();
-      router.push({ name: "OrdersMaterialProductCreate" });
+      router.push({ name: "SalesOrdersMaterialProductCreate" });
     }
   } catch (e: any) {
     console.error("Error submitting form:", e);
@@ -1054,13 +1037,13 @@ const serviceTableItems = computed(() =>
           <div
             class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
           >
-            <!-- اسم المورد (يُستخدم لجلب المنتجات وإرسال supplier_id) -->
+            <!-- اسم العميل -->
             <div>
               <SelectInput
-                v-model="formData.supplier_id"
-                :items="supplierItems"
-                placeholder="اختر المورد"
-                label="اسم المورد"
+                v-model="formData.customer_id"
+                :items="customerItems"
+                placeholder="اختر العميل"
+                label="اسم العميل"
                 :rules="[required()]"
                 density="comfortable"
                 item-title="title"
@@ -1071,7 +1054,7 @@ const serviceTableItems = computed(() =>
             <!-- Request Date -->
             <div>
               <DateTimePickerInput
-                v-model="formData.po_datetime"
+                v-model="formData.so_datetime"
                 density="comfortable"
                 placeholder="اختر التاريخ والوقت"
                 label="تاريخ الطلبية"
@@ -1081,7 +1064,7 @@ const serviceTableItems = computed(() =>
             <!-- Request Type -->
             <div>
               <SelectInput
-                v-model="formData.po_type"
+                v-model="formData.so_type"
                 :items="requestTypeItems"
                 label="نوع الطلبية"
                 density="comfortable"
@@ -1462,7 +1445,7 @@ const serviceTableItems = computed(() =>
                 </template>
               </TextInput>
 
-              <!-- late_fee / late_fee_type: غرامة التأخير (من /purchases/orders/constants fee_types) -->
+              <!-- late_fee / late_fee_type: غرامة التأخير (من /sales/orders/constants fee_types) -->
               <TextInputWithSelect
                 v-model="formData.late_fee"
                 v-model:selectValue="formData.late_fee_type"
@@ -1488,7 +1471,7 @@ const serviceTableItems = computed(() =>
                 select-placeholder="اختر"
               />
 
-              <!-- <SelectInput v-model="formData.account" :items="supplierItems" label="الحساب"
+              <!-- <SelectInput v-model="formData.account" :items="customerItems" label="الحساب"
                                 :rules="[required()]" density="comfortable" placeholder="حدد الحساب" /> -->
             </div>
           </div>
@@ -1636,7 +1619,6 @@ const serviceTableItems = computed(() =>
       show-unit-price-and-discount
       :transport-types="transportTypeItems"
       :unit-items="unitItems"
-      :supplier-id="formData.supplier_id"
       :edit-product="editingProduct"
       :existing-products="productTableItems"
       @saved="handleProductSaved"

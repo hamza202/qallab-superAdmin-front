@@ -33,6 +33,40 @@ export const salesRoutes: RouteRecordRaw[] = [
     ],
   },
   {
+    path: "/sales/requests/material-product",
+    name: "SalesRequestsMaterialProduct",
+    redirect: "/sales/requests/material-product/list",
+    children: [
+      {
+        path: "list",
+        name: "SalesRequestsMaterialProductList",
+        component: () =>
+          import("@/views/sales/requests/material-product/List.vue"),
+        meta: {
+          title: "pages.SalesRequestsMaterialProduct.title",
+        },
+      },
+      {
+        path: "create",
+        name: "SalesRequestsMaterialProductCreate",
+        component: () =>
+          import("@/views/sales/requests/material-product/Form.vue"),
+        meta: {
+          title: "pages.SalesRequestsMaterialProduct.title",
+        },
+      },
+      {
+        path: "edit/:uuid",
+        name: "SalesRequestsMaterialProductEdit",
+        component: () =>
+          import("@/views/sales/requests/material-product/Form.vue"),
+        meta: {
+          title: "pages.SalesRequestsMaterialProduct.edit",
+        },
+      },
+    ],
+  },
+  {
     path: "/sales/quotations/material-product",
     name: "PriceOfferMaterialProduct",
     redirect: "/sales/quotations/material-product/list",
@@ -76,42 +110,34 @@ export const salesRoutes: RouteRecordRaw[] = [
     ],
   },
     {
-    path: "/sales/sales-requests",
+    path: "/sales/orders/material-product",
     name: "SalesRequests",
-    redirect: "/sales/sales-requests/list",
+    redirect: "/sales/orders/material-product/list",
     children: [
       {
         path: "list",
-        name: "SalesRequestsList",
-        component: () => import("@/views/sales/sales-requests/List.vue"),
+        name: "SalesOrdersMaterialProductList",
+        component: () => import("@/views/sales/orders/material-product/List.vue"),
         meta: {
           title: "pages.SalesRequests.title",
         },
       },
       {
         path: "create",
-        name: "SalesRequestsCreate",
-        component: () => import("@/views/sales/sales-requests/Form.vue"),
+        name: "SalesOrdersMaterialProductCreate",
+        component: () => import("@/views/sales/orders/material-product/Form.vue"),
         meta: {
           title: "pages.SalesRequests.title",
         },
       },
       {
         path: "edit/:id",
-        name: "SalesRequestsEdit",
-        component: () => import("@/views/sales/sales-requests/Form.vue"),
+        name: "SalesOrdersMaterialProductEdit",
+        component: () => import("@/views/sales/orders/material-product/Form.vue"),
         meta: {
           title: "pages.SalesRequests.edit",
         },
       },
-      // {
-      //   path: "view/:id",
-      //   name: "RequestForQuotationFuelView",
-      //   component: () => import("@/views/sales/sales-requests/View.vue"),
-      //   meta: {
-      //     title: "pages.requestForQuotationFuel.view",
-      //   },
-      // },
     ],
   },
 ];
