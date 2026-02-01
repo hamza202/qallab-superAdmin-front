@@ -43,7 +43,7 @@ const fetchConstants = async () => {
 
 const fetchSuppliers = async () => {
     try {
-        const res = await api.get<any>('/suppliers/list');
+        const res = await api.get<any>('/customers/list');
         if (Array.isArray(res.data)) {
             supplierItems.value = res.data.map((i: any) => ({ title: i.full_name, value: i.id }));
         }
@@ -90,7 +90,7 @@ const fetchFormData = async () => {
         if (data) {
             // Populate form data
             formData.value.requestType = data.request_type;
-            formData.value.supplier_id = data.supplier_id;
+            formData.value.customer_id = data.customer_id;
             formData.value.issueDate = data.request_datetime ? data.request_datetime.split(' ')[0] : '';
             formData.value.request_datetime = data.request_datetime ? String(data.request_datetime) : '';
             formData.value.paymentMethod = data.payment_method;
@@ -197,7 +197,7 @@ interface TransportService {
 const formData = ref({
     requestNumber: '#12520226',
     requestType: null,
-    supplier_id: null,
+    customer_id: null,
     target_location: null as string | null,
     target_latitude: null as string | null,
     target_longitude: null as string | null,
@@ -237,10 +237,6 @@ const showAddProductDialog = ref(false);
 const editingProduct = ref<ProductTableItem | null>(null);
 
 const handleAddProduct = () => {
-    if (!formData.value.supplier_id) {
-        warning('يجب عليك اختيار اسم المورد أولاً');
-        return;
-    }
     editingProduct.value = null; // Reset edit mode
     showAddProductDialog.value = true;
 };
@@ -375,7 +371,7 @@ const buildFormData = (): FormData => {
     // Basic fields
     fd.append('request_type', formData.value.requestType || '');
     fd.append('request_datetime', isEditMode.value ? formatDateTime(formData.value.request_datetime || new Date()) : getCurrentDateTimeFormatted());
-    fd.append('supplier_id', String(formData.value.supplier_id || ''));
+    fd.append('customer_id', String(formData.value.customer_id || ''));
     fd.append('upfront_payment', String(formData.value.advancePayment || ''));
     fd.append('payment_method', formData.value.paymentMethod || '');
     fd.append('target_location', formData.value.target_location || '');
@@ -611,11 +607,11 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
 
                         <!-- Supplier Name -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">اسم المورد</label>
-                            <SelectInput v-model="formData.supplier_id"
+                            <label class="block text-sm font-medium text-gray-700 mb-2">اسم العميل</label>
+                            <SelectInput v-model="formData.customer_id"
                                 :items="supplierItems" item-title="title"
                                 :rules="[required()]"
-                                item-value="value" density="comfortable" placeholder="حدد المورد" />
+                                item-value="value" density="comfortable" placeholder="حدد العميل" />
                         </div>
 
                         <!-- تاريخ إصدار الطلب: يظهر في التعديل فقط (عرض فقط)، ويُرسل تلقائياً عند الحفظ -->
@@ -826,7 +822,6 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
         <AddProductDialog v-model="showAddProductDialog" request-type="raw_materials" 
             :transport-types="transportTypeItems"
             :unit-items="unitItems"
-            :supplier-id="formData.supplier_id"
             :edit-product="editingProduct"
             :existing-products="productTableItems"
             @saved="handleProductSaved"
