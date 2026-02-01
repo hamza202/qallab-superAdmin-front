@@ -806,8 +806,8 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
 
                     <!-- Action Buttons -->
                     <div class="mt-3 flex items-center gap-3">
-                        <ButtonWithIcon color="primary-50" class="flex-1 text-primary-700" height="48" size="large"
-                            @click="handleConvertToPrice" label="تحويل إلى عرض سعر" />
+                        <!-- <ButtonWithIcon color="primary-50" class="flex-1 text-primary-700" height="48" size="large"
+                            @click="handleConvertToPrice" label="تحويل إلى عرض سعر" /> -->
                         <ButtonWithIcon color="primary" class="flex-1" label="إرسال الطلب" height="48" size="large"
                             @click="handleSubmit" />
                     </div>
