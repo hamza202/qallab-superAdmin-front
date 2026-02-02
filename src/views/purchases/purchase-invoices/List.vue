@@ -4,7 +4,7 @@ import { useRouter } from "vue-router";
 import { useI18n } from 'vue-i18n'
 import DatePickerInput from '@/components/common/forms/DatePickerInput.vue';
 import { GridIcon, refreshIcon, trash_1_icon, trash_2_icon, importIcon, columnIcon, exportIcon, plusIcon, searchIcon ,printerIcon} from "@/components/icons/globalIcons";
-import {switchHorisinralIcon} from '@/components/icons/priceOffersIcons'
+import {switcStatusIcon} from '@/components/icons/priceOffersIcons'
 const { t } = useI18n()
 
 const router = useRouter();
@@ -224,7 +224,7 @@ const openCreateInvoice = () => {
                             </v-btn>
                             <v-btn icon variant="text" size="x-small" color="warning-600"
                                 @click="showChangeStatusDialog = true">
-                                <span v-html="switchHorisinralIcon"></span>
+                                <span v-html="switcStatusIcon"></span>
                             </v-btn>
                         </div>
                     </template>

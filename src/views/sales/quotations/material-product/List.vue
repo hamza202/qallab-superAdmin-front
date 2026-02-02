@@ -7,7 +7,7 @@ import { useNotification } from '@/composables/useNotification';
 import { useTableColumns } from '@/composables/useTableColumns';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog.vue';
 import { GridIcon, trash_1_icon, trash_2_icon, importIcon, columnIcon, exportIcon, plusIcon, searchIcon } from "@/components/icons/globalIcons";
-import { switchHorisinralIcon, refreshIcon, changeStatusIcon } from '@/components/icons/priceOffersIcons';
+import { switcStatusIcon, refreshIcon, changeStatusIcon } from '@/components/icons/priceOffersIcons';
 
 const { t } = useI18n();
 const router = useRouter();
@@ -349,7 +349,7 @@ onMounted(() => {
               </v-btn>
               <v-btn v-if="item.actions?.can_change_status" icon variant="text" size="small" color="warning-600"
                 @click="showChangeStatusDialog = true">
-                <span v-html="switchHorisinralIcon"></span>
+                <span v-html="switcStatusIcon"></span>
               </v-btn>
             </div>
           </template>
