@@ -67,6 +67,45 @@ export const salesRoutes: RouteRecordRaw[] = [
     ],
   },
   {
+    path: "/sales/so-pickups",
+    name: "SalesSoPickups",
+    redirect: "/sales/so-pickups/list",
+    children: [
+      {
+        path: "list",
+        name: "SalesSoPickupsList",
+        component: () => import("@/views/sales/so-pickups/List.vue"),
+        meta: {
+          title: "pages.SalesSoPickups.title",
+        },
+      },
+      {
+        path: "pickup/:orderId",
+        name: "SalesSoPickupsPickup",
+        component: () => import("@/views/sales/so-pickups/PickupForm.vue"),
+        meta: {
+          title: "pages.SalesOrdersMaterialProduct.pickup",
+        },
+      },
+      {
+        path: "edit/:id",
+        name: "SalesSoPickupsEdit",
+        component: () => import("@/views/sales/so-pickups/PickupForm.vue"),
+        meta: {
+          title: "pages.SalesSoPickups.edit",
+        },
+      },
+      {
+        path: "view/:id",
+        name: "SalesSoPickupsView",
+        component: () => import("@/views/sales/so-pickups/View.vue"),
+        meta: {
+          title: "pages.SalesSoPickups.view",
+        },
+      },
+    ],
+  },
+  {
     path: "/sales/quotations/material-product",
     name: "PriceOfferMaterialProduct",
     redirect: "/sales/quotations/material-product/list",

@@ -116,6 +116,14 @@
       "FormDescription": "Create purchase order for building materials",
       "edit": "Edit Purchase Order"
     },
+    "SalesOrdersMaterialProduct": {
+      "pickupTitle": "Add Delivery Appointment",
+      "pickupDescr": "Add a delivery appointment booking action"
+    },
+    "SalesSoPickups": {
+      "title": "Delivery Appointments",
+      "description": "Manage delivery appointments"
+    },
     "ReceivingDocs": {
       "title": "Receiving Documents Table",
       "description": "Enables you to manage purchase orders",

@@ -269,6 +269,14 @@
       "FormTitle": "طلبية مبيعات مواد بناء أولية",
       "FormDescription": "إصدار طلبية مبيعات مواد بناء"
     },
+    "SalesOrdersMaterialProduct": {
+      "pickupTitle": "إضافة حجز موعد تسليم",
+      "pickupDescr": "إضافة إجراء حجز موعد تسليم"
+    },
+    "SalesSoPickups": {
+      "title": "حجوزات التسليم",
+      "description": "إدارة حجوزات التسليم"
+    },
     "ReceiptVouchers": {
       "title": "جدول سندات الاستلام",
       "description": "تمكنك من ادارة طلبيات المشتريات",
