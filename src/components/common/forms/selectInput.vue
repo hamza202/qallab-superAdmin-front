@@ -33,6 +33,7 @@ interface SelectInputProps {
     multiple?: boolean;
     inputProps?: Record<string, any>;
     labelClass?: string;
+    itemProps?: any;
 }
 
 const props = withDefaults(defineProps<SelectInputProps>(), {
@@ -78,7 +79,10 @@ const internalValue = computed({
             :hint="hint"
             :persistent-hint="persistentHint"
             :multiple="multiple" 
-            v-bind="inputProps" 
+            item-title="title"
+            item-value="value"
+            :item-props="itemProps"
+            v-bind="{ ...inputProps, ...$attrs }" 
         />
     </div>
 </template>

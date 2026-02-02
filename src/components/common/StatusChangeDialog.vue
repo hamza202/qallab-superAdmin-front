@@ -4,6 +4,7 @@ import { computed, ref } from 'vue';
 interface SelectItem {
   title: string;
   value: any;
+  disabled?: boolean;
 }
 
 interface Props {
@@ -115,6 +116,7 @@ const infoIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none" xm
               density="comfortable"
               item-title="title"
               item-value="value"
+              :item-props="(item: SelectItem) => ({ disabled: item.disabled })"
               hide-details
             />
           </div>
