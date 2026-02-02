@@ -3,13 +3,26 @@ import { ref, computed, watch } from 'vue';
 import { useApi } from '@/composables/useApi';
 import { useNotification } from '@/composables/useNotification';
 import { changeStatusIcon } from '@/components/icons/priceOffersIcons';
-import StatusChangeDialog from '@/components/common/StatusChangeDialog.vue';
 
-/** Option from full-document-workflow API (allowed_next_statuses / allowed_rollback_statuses) */
-interface WorkflowStatusOption {
+/** Workflow item from full-document-workflow API */
+interface WorkflowItem {
   id: number;
-  name: string;
-  color?: string;
+  status_id: number;
+  status_name: string;
+  status_slug?: string | null;
+  status_color?: string;
+  status_level?: string;
+  status_level_label?: string;
+  is_required?: boolean;
+  is_current: boolean;
+  is_enabled: boolean;
+  disable_reason?: string | null;
+  transition_type?: string | null;
+  next_status?: number[] | null;
+  previous_status?: number[] | null;
+  rollback_status?: number[] | null;
+  has_auto_action?: boolean;
+  custom_flags?: unknown;
 }
 
 /** Item interface - the item must have these properties for status change to work */
@@ -45,7 +58,7 @@ const { success, error } = useNotification();
 
 // Internal state
 const selectedStatus = ref<number | null>(null);
-const statusTransitionOptions = ref<{ title: string; value: number }[]>([]);
+const statusTransitionOptions = ref<{ title: string; value: number; disabled: boolean }[]>([]);
 const statusTransitionLoading = ref(false);
 const submitting = ref(false);
 
@@ -75,23 +88,22 @@ const fetchStatusTransitions = async (item: StatusChangeItem) => {
   statusTransitionOptions.value = [];
   statusTransitionLoading.value = true;
 
-  const docId = item.doc_id ?? item.id ?? item.uuid;
+  const docId = item.doc_id ?? item.id;
 
   try {
     const res = await api.get('/doc-status-transitions/full-document-workflow', {
       params: { doc_id: docId, current_status_id: item.status_id },
     });
 
-    // API: { data: { allowed_next_statuses: [{ id, name, color }], ... } } or sometimes inner data is res.data directly
+    // API: { data: { workflow: [...], ... } } or sometimes inner data is res.data directly
     const raw = res.data as Record<string, unknown>;
     const payload = (raw?.data as Record<string, unknown> | undefined) ?? raw;
-    const next = (payload?.allowed_next_statuses as WorkflowStatusOption[] | undefined) ?? [];
-    const rollback = (payload?.allowed_rollback_statuses as WorkflowStatusOption[] | undefined) ?? [];
-    const all = [...next, ...rollback];
+    const workflow = (payload?.workflow as WorkflowItem[] | undefined) ?? [];
 
-    statusTransitionOptions.value = all.map((s) => ({
-      title: s.name ?? String(s.id),
-      value: s.id,
+    statusTransitionOptions.value = workflow.map((s) => ({
+      title: s.status_name ?? String(s.status_id),
+      value: s.status_id,
+      disabled: !s.is_enabled,
     }));
   } catch (err: any) {
     console.error('Error fetching status transitions:', err);
@@ -113,7 +125,8 @@ const handleStatusChange = async (convertedStatusId: any) => {
 
   try {
     const formData = new FormData();
-    const docId = props.item.doc_id ?? props.item.id ?? props.item.uuid;
+    // doc_id from list response (required by change-status API)
+    const docId = props.item.doc_id ?? props.item.id;
     formData.append('doc_id', String(docId));
     formData.append('current_status_id', String(props.item.status_id));
     formData.append('converted_status_id', String(convertedStatusId));
