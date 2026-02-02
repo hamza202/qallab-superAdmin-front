@@ -4,7 +4,7 @@ import AppDialog from '@/components/common/AppDialog.vue';
 import TextInput from '@/components/common/forms/textInput.vue';
 import DatePickerInput from '@/components/common/forms/DatePickerInput.vue';
 import MultipleSelectInput from '@/components/common/forms/MultipleSelectInput.vue';
-import SelectInput from '@/components/common/forms/SelectInput.vue';
+import SelectInput from '@/components/common/forms/selectInput.vue';
 import PriceInput from '@/components/common/forms/PriceInput.vue';
 import ButtonWithIcon from '@/components/common/buttons/ButtonWithIcon.vue';
 

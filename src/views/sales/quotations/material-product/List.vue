@@ -6,8 +6,9 @@ import { useApi } from '@/composables/useApi';
 import { useNotification } from '@/composables/useNotification';
 import { useTableColumns } from '@/composables/useTableColumns';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog.vue';
+import StatusChangeFeature from '@/components/common/StatusChangeFeature.vue';
 import { GridIcon, trash_1_icon, trash_2_icon, importIcon, columnIcon, exportIcon, plusIcon, searchIcon } from "@/components/icons/globalIcons";
-import { switcStatusIcon, refreshIcon, changeStatusIcon } from '@/components/icons/priceOffersIcons';
+import { switcStatusIcon, refreshIcon } from '@/components/icons/priceOffersIcons';
 
 const { t } = useI18n();
 const router = useRouter();
@@ -91,7 +92,12 @@ const itemToDelete = ref<QuotationItem | null>(null);
 const deleteLoading = ref(false);
 
 const showChangeStatusDialog = ref(false);
-const selectedStatus = ref(null);
+const itemToChangeStatus = ref<QuotationItem | null>(null);
+
+const openChangeStatusDialog = (item: QuotationItem | Record<string, unknown>) => {
+  itemToChangeStatus.value = item as QuotationItem;
+  showChangeStatusDialog.value = true;
+};
 
 const toggleAdvancedFilters = () => {
   showAdvancedFilters.value = !showAdvancedFilters.value;
@@ -206,11 +212,6 @@ const getStatusClass = (status: string) => {
 
 const openCreateRequest = () => {
   router.push({ name: "PriceOfferMaterialProductCreate" });
-};
-
-const handleStatusChange = (status: unknown) => {
-  console.log('Change status:', status);
-  showChangeStatusDialog.value = false;
 };
 
 const handleCreateOrder = (item: unknown) => {
@@ -348,7 +349,7 @@ onMounted(() => {
                 <span v-html="refreshIcon"></span>
               </v-btn>
               <v-btn v-if="item.actions?.can_change_status" icon variant="text" size="small" color="warning-600"
-                @click="showChangeStatusDialog = true">
+                @click="openChangeStatusDialog(item)">
                 <span v-html="switcStatusIcon"></span>
               </v-btn>
             </div>
@@ -357,11 +358,14 @@ onMounted(() => {
       </div>
     </div>
 
-    <StatusChangeDialog v-model="showChangeStatusDialog" v-model:selectValue="selectedStatus" title="تغيير الحالة"
-      message="تغيير الحالة:" :show-select="true" :select-items="[
-        { title: 'قيد المراجعة', value: 'under_review' },
-        { title: 'مقبول', value: 'accepted' }
-      ]" :dialog-icon="changeStatusIcon" @confirm="handleStatusChange" />
+    <StatusChangeFeature
+      v-model="showChangeStatusDialog"
+      :item="itemToChangeStatus"
+      :change-status-url="`/sales/quotations/building-materials/${itemToChangeStatus?.uuid}/change-status`"
+      title="تغيير الحالة"
+      message="تغيير الحالة:"
+      @success="fetchList"
+    />
 
     <DeleteConfirmDialog v-model="showDeleteDialog" :loading="deleteLoading" title="حذف عرض السعر"
       message="هل أنت متأكد من حذف هذا العرض؟" @confirm="confirmDelete" />
