@@ -199,7 +199,7 @@ onMounted(async () => {
 
                         <!-- Rollback Status Selection -->
                         <MultipleSelectInput v-model="form.rollback_status" clearable :items="availableRollbackStatuses"
-                            label="حالات التراجع" placeholder="اختر الحالات" :rules="[required()]"
+                            label="حالات التراجع" placeholder="اختر الحالات"
                             :error-messages="formErrors['rollback_status']"
                             @update:model-value="delete formErrors['rollback_status']" />
                     </div>
