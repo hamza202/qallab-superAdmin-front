@@ -335,8 +335,8 @@
                                         طلبيات المشتريات</router-link>
                                 </li>
                                 <li class="relative">
-                                    <router-link to="/purchases/receipt-vouchers/list"
-                                        :class="[isMenuItemActive('/purchases/receipt-vouchers') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                    <router-link to="/purchases/receiving-docs/list"
+                                        :class="[isMenuItemActive('/purchases/receiving-docs') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         وثائق الأستلام</router-link>
                                 </li>
                                 <li class="relative">

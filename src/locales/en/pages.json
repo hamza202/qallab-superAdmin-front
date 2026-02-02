@@ -115,6 +115,11 @@
       "FormTitle": "Purchase Order - Building Materials",
       "FormDescription": "Create purchase order for building materials",
       "edit": "Edit Purchase Order"
+    },
+    "ReceivingDocs": {
+      "title": "Receiving Documents Table",
+      "description": "Enables you to manage purchase orders",
+      "edit": "Edit Receiving Document"
     }
   }
 }

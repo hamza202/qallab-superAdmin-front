@@ -208,32 +208,32 @@ export const purchasesRoutes: RouteRecordRaw[] = [
     ],
   },
   {
-    path: "/purchases/receipt-vouchers",
-    name: "ReceiptVouchers",
-    redirect: "/purchases/receipt-vouchers/list",
+    path: "/purchases/receiving-docs",
+    name: "ReceivingDocs",
+    redirect: "/purchases/receiving-docs/list",
     children: [
       {
         path: "list",
-        name: "ReceiptVouchersList",
-        component: () => import("@/views/purchases/receipt-vouchers/List.vue"),
+        name: "ReceivingDocsList",
+        component: () => import("@/views/purchases/receiving-docs/List.vue"),
         meta: {
-          title: "pages.ReceiptVouchers.title",
+          title: "pages.ReceivingDocs.title",
         },
       },
       {
         path: "create",
-        name: "ReceiptVouchersCreate",
-        component: () => import("@/views/purchases/receipt-vouchers/Form.vue"),
+        name: "ReceivingDocsCreate",
+        component: () => import("@/views/purchases/receiving-docs/Form.vue"),
         meta: {
-          title: "pages.ReceiptVouchers.FormTitle",
+          title: "pages.ReceivingDocs.title",
         },
       },
       {
         path: "edit/:id",
-        name: "ReceiptVouchersEdit",
-        component: () => import("@/views/purchases/receipt-vouchers/Form.vue"),
+        name: "ReceivingDocsEdit",
+        component: () => import("@/views/purchases/receiving-docs/Form.vue"),
         meta: {
-          title: "pages.ReceiptVouchers.edit",
+          title: "pages.ReceivingDocs.edit",
         },
       },
     ],
