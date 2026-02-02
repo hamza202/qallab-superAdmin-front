@@ -189,7 +189,7 @@ onMounted(async () => {
                         <!-- Previous Status Selection -->
                         <MultipleSelectInput v-model="form.previous_status" clearable :items="availablePreviousStatuses"
                             label="الحالات السابقة" placeholder="اختر الحالات"
-                            :rules="[status_level === 'temp' || status_level === 'end' ? required() : '']"
+                            :rules="[status_level === 'temp' || status_level === 'end' ? required() : null]"
                             :error-messages="formErrors['previous_status']"
                             @update:model-value="delete formErrors['previous_status']"
                             :disabled="status_level === 'start'" />
@@ -197,7 +197,7 @@ onMounted(async () => {
                         <!-- Next Status Selection -->
                         <MultipleSelectInput v-model="form.next_status" clearable :items="availableNextStatuses"
                             label="الحالات التالية" placeholder="اختر الحالات"
-                            :rules="[status_level === 'temp' || status_level === 'start' ? required() : '']"
+                            :rules="[status_level === 'temp' || status_level === 'start' ? required() : null]"
                             :error-messages="formErrors['next_status']"
                             @update:model-value="delete formErrors['next_status']"
                             :disabled="status_level === 'end'" />
