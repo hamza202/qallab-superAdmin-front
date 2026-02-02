@@ -26,6 +26,7 @@ const formRef = ref<any>(null);
 const isFormValid = ref(false);
 const loadingTransitionData = ref(false);
 const saving = ref(false);
+const status_level = ref(null)
 const status_label = ref('')
 const form = reactive<TransitionForm>({
     status_id: null,
@@ -55,10 +56,9 @@ const availableNextStatuses = computed(() => {
 const availableRollbackStatuses = computed(() => {
     // Only show previously selected statuses
     const selectedInPrevious = form.previous_status || [];
-    const selectedInNext = form.next_status || [];
-    const excludedIds = [...selectedInPrevious, ...selectedInNext];
+    const excludedIds = [...selectedInPrevious];
 
-    return systemStatuses.value.filter(status => status.value !== Number(form.status_id) && !excludedIds.includes(status.value));
+    return systemStatuses.value.filter(status => status.value !== Number(form.status_id) && excludedIds.includes(status.value));
 });
 
 const fetchTransitionData = async (transitionId: string) => {
@@ -70,6 +70,7 @@ const fetchTransitionData = async (transitionId: string) => {
         form.id = transition.id;
         form.status_id = transition.status_id || null;
         form.next_status = transition.next_status || [];
+        status_level.value = transition.status_level
         form.previous_status = transition.previous_status || [];
         form.rollback_status = transition.rollback_status || [];
 
@@ -187,21 +188,26 @@ onMounted(async () => {
 
                         <!-- Previous Status Selection -->
                         <MultipleSelectInput v-model="form.previous_status" clearable :items="availablePreviousStatuses"
-                            label="الحالات السابقة" placeholder="اختر الحالات" :rules="[required()]"
+                            label="الحالات السابقة" placeholder="اختر الحالات"
+                            :rules="[status_level === 'temp' || status_level === 'end' ? required() : '']"
                             :error-messages="formErrors['previous_status']"
-                            @update:model-value="delete formErrors['previous_status']" />
+                            @update:model-value="delete formErrors['previous_status']"
+                            :disabled="status_level === 'start'" />
 
                         <!-- Next Status Selection -->
                         <MultipleSelectInput v-model="form.next_status" clearable :items="availableNextStatuses"
-                            label="الحالات التالية" placeholder="اختر الحالات" :rules="[required()]"
+                            label="الحالات التالية" placeholder="اختر الحالات"
+                            :rules="[status_level === 'temp' || status_level === 'start' ? required() : '']"
                             :error-messages="formErrors['next_status']"
-                            @update:model-value="delete formErrors['next_status']" />
+                            @update:model-value="delete formErrors['next_status']"
+                            :disabled="status_level === 'end'" />
 
                         <!-- Rollback Status Selection -->
                         <MultipleSelectInput v-model="form.rollback_status" clearable :items="availableRollbackStatuses"
                             label="حالات التراجع" placeholder="اختر الحالات"
                             :error-messages="formErrors['rollback_status']"
-                            @update:model-value="delete formErrors['rollback_status']" />
+                            @update:model-value="delete formErrors['rollback_status']"
+                            :disabled="status_level === 'start'" />
                     </div>
 
                     <!-- <div class="flex items-center gap-2 text-primary-600 mb-8">
