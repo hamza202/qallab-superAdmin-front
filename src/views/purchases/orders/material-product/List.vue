@@ -187,6 +187,11 @@ const handleSelectAllRequests = (checked: boolean) => {
   }
 };
 
+const handleView = (item: { id?: string | number; uuid?: string }) => {
+    const uuid = item.uuid ?? String(item.id);
+    router.push({ name: 'OrdersMaterialProductView', params: { id: uuid } });
+};
+
 const getStatusClass = (status: string) => {
   switch (status) {
     case 'مكتمل':
@@ -437,6 +442,7 @@ onMounted(() => {
           :show-checkbox="canBulkDelete"
           show-actions
           smallButtons
+          @view="handleView"
           @edit="handleEdit"
           @delete="handleDelete"
           @select="handleSelectRequest"

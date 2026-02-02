@@ -13,13 +13,12 @@
                         المشتريات
                     </router-link>
                     <span class="text-lg text-gray-300">/</span>
-                    <router-link to="/purchases/quotations/material-product/list"
+                    <router-link to="/purchases/orders/material-product/list"
                         class="text-gray-600 hover:text-primary-600">
-                        عروض الأسعار
+                        طلبات المشتريات
                     </router-link>
                     <span class="text-lg text-gray-300">/</span>
-                    <span class="text-primary-700 font-medium bg-primary-50 px-2 py-1 rounded-md">{{ QuotationName ||
-                        '--' }}</span>
+                    <span class="text-primary-700 font-medium bg-primary-50 px-2 py-1 rounded-md">{{ orderCode }}</span>
                 </div>
 
                 <!-- Page Header -->
@@ -30,17 +29,17 @@
                                 <span v-html="archiveIcon" class="text-primary-600"></span>
                             </div>
                             <div>
-                                <h1 class="text-lg font-bold text-gray-900 mb-1">{{ QuotationName || '--' }}</h1>
-                                <p class="text-sm text-gray-600">تفاصيل عرض السعر والمعلومات الخاصة به</p>
+                                <h1 class="text-lg font-bold text-gray-900 mb-1">{{ orderCode }}</h1>
+                                <p class="text-sm text-gray-600">تفاصيل الطلبية والمعلومات الخاصة بها</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Main Content -->
-                <!-- Quotation Information Section -->
+                <!-- Order Information Section -->
                 <div class="p-6 border-b !border-gray-200">
-                    <h2 class="text-lg font-bold text-primary-900 mb-6">معلومات عرض السعر</h2>
+                    <h2 class="text-lg font-bold text-primary-900 mb-6">معلومات الطلبية</h2>
 
                     <div class="flex flex-wrap gap-4">
                         <div class="info-item-bordered flex-1 px-6 py-4">
@@ -49,13 +48,13 @@
                         </div>
                         <v-divider vertical class="my-6"></v-divider>
                         <div class="info-item-bordered flex-1 px-6 py-4">
-                            <label class="font-semibold text-sm text-gray-500 mb-2 block">الفئة</label>
-                            <p class="text-base font-semibold text-gray-900">{{ categoryLabel }}</p>
+                            <label class="font-semibold text-sm text-gray-500 mb-2 block">نوع الطلبية</label>
+                            <p class="text-base font-semibold text-gray-900">{{ orderType }}</p>
                         </div>
                         <v-divider vertical class="my-6"></v-divider>
                         <div class="info-item-bordered flex-1 px-6 py-4">
-                            <label class="font-semibold text-sm text-gray-500 mb-2 block">تاريخ عرض السعر</label>
-                            <p class="text-base font-semibold text-gray-900">{{ quotationDateTime }}</p>
+                            <label class="font-semibold text-sm text-gray-500 mb-2 block">تاريخ إنشاء الطلبية</label>
+                            <p class="text-base font-semibold text-gray-900">{{ orderDateTime }}</p>
                         </div>
                         <v-divider vertical class="my-6"></v-divider>
                         <div class="info-item-bordered flex-1 px-6 py-4">
@@ -70,14 +69,8 @@
                         </div>
                         <v-divider vertical class="my-6"></v-divider>
                         <div class="info-item-bordered flex-1 px-6 py-4">
-                            <label class="font-semibold text-sm text-gray-500 mb-2 block">طريقة الدفع</label>
-                            <p class="text-base font-semibold text-gray-900">{{ paymentMethodLabel }}</p>
-                        </div>
-                        <v-divider vertical class="my-6"></v-divider>
-                        <div class="info-item-bordered flex-1 px-6 py-4">
-                            <label class="font-semibold text-sm text-gray-500 mb-2 block">الدفعة المقدمة</label>
-                            <p class="text-sm text-gray-700 leading-relaxed flex gap-1 items-center">{{ upfrontPayment
-                                }} <span v-html="rialIcon"></span></p>
+                            <label class="font-semibold text-sm text-gray-500 mb-2 block">العقد</label>
+                            <p class="text-base font-semibold text-gray-900">{{ contractNumber }}</p>
                         </div>
                     </div>
                 </div>
@@ -87,7 +80,7 @@
                     <div class="bg-primary-50 px-6 py-3">
                         <div class="flex items-center gap-2 text-primary-600">
                             <span v-html="packageIcon"></span>
-                            <h2 class="text-base font-bold">جدول عناصر عرض السعر</h2>
+                            <h2 class="text-base font-bold">جدول عناصر الطلبية</h2>
                         </div>
                     </div>
                     <div>
@@ -180,75 +173,86 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useApi } from '@/composables/useApi'
 import { useNotification } from '@/composables/useNotification'
-import { rialIcon, archiveIcon, homeIcon } from '@/components/icons/globalIcons'
+import { archiveIcon, homeIcon } from '@/components/icons/globalIcons'
 import { busIcon, truckIcon, packageIcon } from '@/components/icons/priceOffersIcons'
 const route = useRoute()
 const api = useApi()
 const { error } = useNotification()
 
 const isLoading = ref(false)
-const quotationData = ref<any>(null)
+const orderData = ref<any>(null)
 
 // Get route ID
 const routeId = computed(() => route.params.id as string)
 
-// Fetch quotation data
-const fetchQuotationData = async () => {
+// Fetch order data
+const fetchOrderData = async () => {
     if (!routeId.value) return
 
     isLoading.value = true
     try {
-        const res = await api.get<any>(`/purchases/quotations/building-materials/${routeId.value}`)
-        quotationData.value = res.data
+        const res = await api.get<any>(`/purchases/orders/building-materials/${routeId.value}`)
+        orderData.value = res.data
     } catch (e: any) {
-        console.error('Error fetching quotation data:', e)
-        error(e?.response?.data?.message || 'فشل تحميل بيانات عرض السعر')
+        console.error('Error fetching order data:', e)
+        error(e?.response?.data?.message || 'فشل تحميل بيانات الطلبية')
     } finally {
         isLoading.value = false
     }
 }
 
 onMounted(() => {
-    fetchQuotationData()
+    fetchOrderData()
 })
 
 // Computed properties for display
-const quotationCode = computed(() => quotationData.value?.uuid || '')
-const QuotationName = computed(() => quotationData.value?.quotation_name || '')
-const projectName = computed(() => quotationData.value?.project_name || '—')
-const categoryLabel = computed(() => quotationData.value?.category_label || '—')
-const supplierName = computed(() => quotationData.value?.supplier?.name || '—')
-const quotationDateTime = computed(() => {
-    const dt = quotationData.value?.quotations_datetime
-    return dt ? new Date(dt).toLocaleDateString('ar-SA') : '—'
+const orderCode = computed(() => orderData.value?.code || '')
+const projectName = computed(() => orderData.value?.project_name || '—')
+const orderType = computed(() => {
+    const type = orderData.value?.po_type
+    if (type === 'po_without_logistics') return 'شراء مع نقل'
+    if (type === 'po_with_logistics') return 'شراء مع نقل'
+    return type || '—'
 })
-const targetLocation = computed(() => quotationData.value?.target_location || '—')
-const paymentMethodLabel = computed(() => quotationData.value?.payment_method_label || '—')
-const upfrontPayment = computed(() => quotationData.value?.upfront_payment || 0)
+const supplierName = computed(() => orderData.value?.supplier_id ? `مورد ${orderData.value.supplier_id}` : '—')
+const orderDateTime = computed(() => {
+    const dt = orderData.value?.po_datetime
+    return dt ? new Date(dt).toLocaleDateString('en-US') : '—'
+})
+const targetLocation = computed(() => orderData.value?.target_location || '—')
+const contractNumber = computed(() => orderData.value?.contract_number || 'عقد 1')
+const paymentMethod = computed(() => {
+    const method = orderData.value?.payment_method
+    if (method === 'cash') return 'كاش'
+    if (method === 'deferred') return 'آجل'
+    return method || '—'
+})
+const upfrontPayment = computed(() => orderData.value?.upfront_payment || 0)
+const finalTotal = computed(() => orderData.value?.final_total || '0')
 
 // Products table
 const productItems = computed(() => {
-    if (!quotationData.value?.items) return []
-    return quotationData.value.items.map((item: any) => ({
+    if (!orderData.value?.items) return []
+    return orderData.value.items.map((item: any) => ({
         id: item.id,
-        item_name: item.item?.name || '—',
-        unit: item.unit?.name || '—',
+        item_name: item.item_id ? `منتج ${item.item_id}` : '—',
+        unit: item.unit_id ? `وحدة ${item.unit_id}` : '—',
         quantity: item.quantity || 0,
-        unit_price: item.price_per_unit || '—',
-        discount: item.discount_val || '—',
-        tax: item.total_tax || '—',
-        subtotal: item.subtotal_after_tax || '—',
+        unit_price: item.price_per_unit || 0,
+        discount: item.discount_val || 0,
+        tax: item.total_tax || 0,
+        subtotal: item.subtotal_after_tax || 0,
     }))
 })
 
 // Transport details table
 const transportItems = computed(() => {
-    if (!quotationData.value?.logistics_product_details) return []
-    return quotationData.value.logistics_product_details.map((item: any) => ({
+    if (!orderData.value?.po_logistics_product_details) return []
+    return orderData.value.po_logistics_product_details.map((item: any) => ({
         id: item.id,
-        item_name: item.item?.name || '—',
+        item_name: item.item_id ? `منتج ${item.item_id}` : '—',
         quantity: item.quantity || 0,
-        trip_start: item.trip_start ? new Date(item.trip_start).toLocaleDateString('ar-SA') : '—',
+        trip_start: item.trip_start ? new Date(item.trip_start).toLocaleDateString('en-US') : '—',
         number_of_trips: item.number_of_trips || 0,
         vehicle_type: Array.isArray(item.transport_type) ? item.transport_type.join(', ') : (item.transport_type || '—'),
         trip_capacity: item.trip_capacity || 0,
@@ -257,13 +261,13 @@ const transportItems = computed(() => {
 })
 
 // Additional logistics
-const hasAdditionalLogistics = computed(() => !!quotationData.value?.attached_logistics_detail)
+const hasAdditionalLogistics = computed(() => !!orderData.value?.po_attached_logistics_detail)
 const additionalLogistics = computed(() => {
-    const logistics = quotationData.value?.attached_logistics_detail
+    const logistics = orderData.value?.po_attached_logistics_detail
     if (!logistics) return {}
     return {
-        from_date: logistics.from_date ? new Date(logistics.from_date).toLocaleDateString('ar-SA') : '—',
-        to_date: logistics.to_date ? new Date(logistics.to_date).toLocaleDateString('ar-SA') : '—',
+        from_date: logistics.from_date ? new Date(logistics.from_date).toLocaleDateString('en-US') : '—',
+        to_date: logistics.to_date ? new Date(logistics.to_date).toLocaleDateString('en-US') : '—',
         actual_execution_duration: logistics.actual_execution_duration || 0,
         vehicle_type: Array.isArray(logistics.transport_type) ? logistics.transport_type.join(', ') : (logistics.transport_type || '—'),
         transport_no: logistics.transport_no || 0,

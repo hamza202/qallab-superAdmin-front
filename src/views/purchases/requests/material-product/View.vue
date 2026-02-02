@@ -13,11 +13,13 @@
                         المشتريات
                     </router-link>
                     <span class="text-lg text-gray-300">/</span>
-                    <router-link to="/settings/products-categories" class="text-gray-600 hover:text-primary-600">
+                    <router-link to="/purchases/requests/material-product/list"
+                        class="text-gray-600 hover:text-primary-600">
                         طلبات عروض أسعار مواد بناء أولية
                     </router-link>
                     <span class="text-lg text-gray-300">/</span>
-                    <span class="text-primary-700 font-medium bg-primary-50 px-2 py-1 rounded-md">#238592</span>
+                    <span class="text-primary-700 font-medium bg-primary-50 px-2 py-1 rounded-md">{{ requestCode
+                        }}</span>
                 </div>
 
                 <!-- Page Header -->
@@ -25,11 +27,11 @@
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-4">
                             <div class="w-16 h-16 bg-primary-50 rounded-lg flex items-center justify-center">
-                                <span v-html="productIcon" class="text-primary-600"></span>
+                                <span v-html="archiveIcon" class="text-primary-600"></span>
                             </div>
                             <div>
-                                <h1 class="text-lg font-bold text-gray-900 mb-1">dff</h1>
-                                <p class="text-sm text-gray-600">dfg</p>
+                                <h1 class="text-lg font-bold text-gray-900 mb-1">{{ requestCode }}</h1>
+                                <p class="text-sm text-gray-600">طلب عرض سعر مواد بناء أولية</p>
                             </div>
                         </div>
                     </div>
@@ -62,48 +64,44 @@
                             <div class="flex flex-wrap gap-4">
                                 <div class="info-item-bordered flex-1 px-6 py-4">
                                     <label class="font-semibold text-sm text-gray-500 mb-2 block">نوع الطلب</label>
-                                    <p class="text-base font-semibold text-gray-900">dfs</p>
+                                    <p class="text-base font-semibold text-gray-900">{{ requestType }}</p>
                                 </div>
                                 <v-divider vertical class="my-6"></v-divider>
                                 <div class="info-item-bordered flex-1 px-6 py-4">
                                     <label class="font-semibold text-sm text-gray-500 mb-2 block">اسم المورد</label>
-                                    <p class="text-base font-semibold text-gray-900">dfs
-                                    </p>
+                                    <p class="text-base font-semibold text-gray-900">{{ supplierName }}</p>
                                 </div>
                                 <v-divider vertical class="my-6"></v-divider>
                                 <div class="info-item-bordered flex-1 px-6 py-4">
                                     <label class="font-semibold text-sm text-gray-500 mb-2 block">تاريخ اصدار
                                         الطلب</label>
-                                    <p class="text-base font-semibold text-gray-900">dsfgs</p>
+                                    <p class="text-base font-semibold text-gray-900">{{ requestDateTime }}</p>
                                 </div>
                                 <v-divider vertical class="my-6"></v-divider>
                                 <div class="info-item-bordered flex-1 px-6 py-4">
                                     <label class="font-semibold text-sm text-gray-500 mb-2 block">حالة الطلب</label>
                                     <p class="text-base font-semibold text-gray-900">
-                                        <span>
-                                            ffff
-                                        </span>
+                                        <span>{{ statusText }}</span>
                                     </p>
                                 </div>
                                 <v-divider vertical class="my-6"></v-divider>
                                 <div class="info-item-bordered flex-1 px-6 py-4">
                                     <label class="font-semibold text-sm text-gray-500 mb-2 block">موقع المشروع</label>
                                     <p class="text-base font-semibold text-gray-900">
-                                        <span>
-                                            ffff
-                                        </span>
+                                        <span>{{ targetLocation }}</span>
                                     </p>
                                 </div>
                             </div>
                             <div class="flex gap-4 mt-4">
                                 <div class="info-item-bordered  px-6 py-4">
                                     <label class="font-semibold text-sm text-gray-500 mb-2 block">طريقة الدفع</label>
-                                    <p class="text-sm text-gray-700 leading-relaxed">sdg</p>
+                                    <p class="text-sm text-gray-700 leading-relaxed">{{ paymentMethod }}</p>
                                 </div>
                                 <v-divider vertical class="my-6"></v-divider>
                                 <div class="info-item-bordered px-6 py-4">
                                     <label class="font-semibold text-sm text-gray-500 mb-2 block">دفعة مقدمة</label>
-                                    <p class="text-sm text-gray-700 leading-relaxed">sdg</p>
+                                    <p class="text-sm text-gray-700 leading-relaxed flex gap-1 items-center">{{ upfrontPayment }} <span
+                                            v-html="rialIcon"></span></p>
                                 </div>
                             </div>
                         </div>
@@ -139,7 +137,8 @@
                                     </div>
 
                                     <div class="rounded-md overflow-hidden">
-                                        <v-img src="https://placehold.co/600x400" class="w-full h-full object-cover "></v-img>
+                                        <v-img src="https://placehold.co/600x400"
+                                            class="w-full h-full object-cover "></v-img>
                                     </div>
                                 </div>
                             </div>
@@ -179,76 +178,157 @@
                     <v-tabs-window-item :value="1">
                         <div class="mb-8">
                             <div class="bg-primary-50 px-6 py-3">
-                                <div class="flex items-center gap-2">
+                                <div class="flex items-center gap-2 text-primary-900">
                                     <span v-html="packageIcon"></span>
-                                    <h2 class="text-lg font-bold text-primary-900">المنتجات</h2>
+                                    <h2 class="text-lg font-bold ">المنتجات</h2>
                                 </div>
                             </div>
 
                             <!-- Products Table -->
                             <div class="mb-4">
-                                <DataTable :headers="headers" :items="items" show-actions force-show-edit
-                                    force-show-delete />
+                                <DataTable :headers="headers" :items="productItems" />
                             </div>
                         </div>
                     </v-tabs-window-item>
                     <v-tabs-window-item :value="2">
                         <div class="mb-8">
                             <div class="flex flex-wrap gap-3 items-center justify-between bg-primary-50 px-6 py-3">
-                                <div class="flex items-center gap-2">
+                                <div class="flex items-center gap-2 text-primary-900">
                                     <span v-html="truckIcon"></span>
-                                    <h2 class="text-lg font-bold text-primary-900">خدمة النقل</h2>
+                                    <h2 class="text-lg font-bold ">خدمة النقل</h2>
                                 </div>
                             </div>
 
                             <!-- Transport Services Table -->
                             <div class="mb-4">
-                                <DataTable :headers="ServicesHeaders" :items="ServicesItems" show-actions
-                                    force-show-edit force-show-delete />
+                                <DataTable :headers="ServicesHeaders" :items="transportServiceItems" />
                             </div>
                         </div>
                     </v-tabs-window-item>
                 </v-tabs-window>
             </div>
         </div>
+
+        <!-- Loading Overlay -->
+        <v-overlay :model-value="isLoading" contained class="align-center justify-center">
+            <v-progress-circular indeterminate color="primary" size="64" />
+        </v-overlay>
     </default-layout>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
+import { useApi } from '@/composables/useApi'
+import { useNotification } from '@/composables/useNotification'
+import { rialIcon , archiveIcon,homeIcon, fileCheckIcon} from '@/components/icons/globalIcons'
+import { playIcon, UploadedFileIcon, truckIcon, packageIcon} from '@/components/icons/priceOffersIcons'
+const route = useRoute()
+const api = useApi()
+const { error } = useNotification()
+
 const activeTab = ref(0)
+const isLoading = ref(false)
+const requestData = ref<any>(null)
 
-const productIcon = `<svg width="49" height="44" viewBox="0 0 49 44" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M5.66667 12.6587C5.28398 12.6488 5.00609 12.6267 4.75625 12.577C2.90502 12.2088 1.4579 10.7616 1.08967 8.91042C1 8.45963 1 7.91753 1 6.83333C1 5.74914 1 5.20704 1.08967 4.75625C1.4579 2.90502 2.90502 1.4579 4.75625 1.08967C5.20704 1 5.74914 1 6.83333 1H41.8333C42.9175 1 43.4596 1 43.9104 1.08967C45.7616 1.4579 47.2088 2.90502 47.577 4.75625C47.6667 5.20704 47.6667 5.74914 47.6667 6.83333C47.6667 7.91753 47.6667 8.45963 47.577 8.91042C47.2088 10.7616 45.7616 12.2088 43.9104 12.577C43.6606 12.6267 43.3827 12.6488 43 12.6587M19.6667 24.3333H29M5.66667 12.6667H43V31.8C43 35.7204 43 37.6805 42.237 39.1779C41.5659 40.4951 40.4951 41.5659 39.1779 42.237C37.6806 43 35.7204 43 31.8 43H16.8667C12.9463 43 10.9861 43 9.48873 42.237C8.1716 41.5659 7.10073 40.4951 6.42962 39.1779C5.66667 37.6805 5.66667 35.7204 5.66667 31.8V12.6667Z" stroke="#1570EF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>`
+// Get route ID
+const routeId = computed(() => route.params.id as string)
 
-const homeIcon = `<svg width="17" height="18" viewBox="0 0 17 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M5.00016 13.1109H11.6668M7.51491 1.24755L1.86299 5.64348C1.48518 5.93734 1.29628 6.08426 1.16019 6.26826C1.03963 6.43125 0.949831 6.61487 0.895186 6.81009C0.833496 7.03048 0.833496 7.26979 0.833496 7.74842V13.7775C0.833496 14.711 0.833496 15.1777 1.01515 15.5342C1.17494 15.8478 1.42991 16.1028 1.74351 16.2625C2.10003 16.4442 2.56674 16.4442 3.50016 16.4442H13.1668C14.1003 16.4442 14.567 16.4442 14.9235 16.2625C15.2371 16.1028 15.4921 15.8478 15.6518 15.5342C15.8335 15.1777 15.8335 14.711 15.8335 13.7775V7.74842C15.8335 7.26979 15.8335 7.03048 15.7718 6.81009C15.7172 6.61487 15.6274 6.43125 15.5068 6.26826C15.3707 6.08426 15.1818 5.93734 14.804 5.64349L9.15208 1.24755C8.85931 1.01984 8.71293 0.90598 8.55129 0.862214C8.40866 0.823598 8.25833 0.823598 8.11571 0.862214C7.95407 0.90598 7.80768 1.01984 7.51491 1.24755Z" stroke="#697586" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>`
+// Fetch request data
+const fetchRequestData = async () => {
+    if (!routeId.value) return
 
-const playIcon = `<svg width="20" height="23" viewBox="0 0 20 23" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M18.75 9.36414C20.0833 10.1339 20.0833 12.0584 18.75 12.8282L3 21.9215C1.66666 22.6913 -1.09859e-06 21.7291 -1.03129e-06 20.1895L-2.36336e-07 2.00292C-1.69038e-07 0.463322 1.66667 -0.498927 3 0.270873L18.75 9.36414Z" fill="white"/>
-</svg>`
+    isLoading.value = true
+    try {
+        const res = await api.get<any>(`/purchases/building-materials/${routeId.value}`)
+        requestData.value = res.data
+    } catch (e: any) {
+        console.error('Error fetching request data:', e)
+        error(e?.response?.data?.message || 'فشل تحميل بيانات الطلب')
+    } finally {
+        isLoading.value = false
+    }
+}
 
-const UploadedFileIcon = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M20 7V6.8C20 5.11984 20 4.27976 19.673 3.63803C19.3854 3.07354 18.9265 2.6146 18.362 2.32698C17.7202 2 16.8802 2 15.2 2H8.8C7.11984 2 6.27976 2 5.63803 2.32698C5.07354 2.6146 4.6146 3.07354 4.32698 3.63803C4 4.27976 4 5.11984 4 6.8V17.2C4 18.8802 4 19.7202 4.32698 20.362C4.6146 20.9265 5.07354 21.3854 5.63803 21.673C6.27976 22 7.11984 22 8.8 22H12.5M12.5 11H8M11.5 15H8M16 7H8M18 18V12.5C18 11.6716 18.6716 11 19.5 11C20.3284 11 21 11.6716 21 12.5V18C21 19.6569 19.6569 21 18 21C16.3431 21 15 19.6569 15 18V14" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>
-`
-const fileCheckIcon = `<svg width="19" height="22" viewBox="0 0 19 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M17 11.5V5.8C17 4.11984 17 3.27976 16.673 2.63803C16.3854 2.07354 15.9265 1.6146 15.362 1.32698C14.7202 1 13.8802 1 12.2 1H5.8C4.11984 1 3.27976 1 2.63803 1.32698C2.07354 1.6146 1.6146 2.07354 1.32698 2.63803C1 3.27976 1 4.11984 1 5.8V16.2C1 17.8802 1 18.7202 1.32698 19.362C1.6146 19.9265 2.07354 20.3854 2.63803 20.673C3.27976 21 4.11984 21 5.8 21H9M11 10H5M7 14H5M13 6H5M11.5 18L13.5 20L18 15.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>`
+onMounted(() => {
+    fetchRequestData()
+})
 
+// Computed properties for display
+const requestCode = computed(() => requestData.value?.code || '')
+const requestType = computed(() => {
+    const type = requestData.value?.request_type
+    if (type === 'purchase_request_without_logistics') return 'طلب بدون خدمة نقل'
+    if (type === 'purchase_request_with_logistics') return 'طلب مع خدمة نقل'
+    return type || ''
+})
+const supplierName = computed(() => requestData.value?.supplier_name || '')
+const requestDateTime = computed(() => {
+    const dt = requestData.value?.request_datetime
+    return dt ? new Date(dt).toLocaleDateString('en-US') : ''
+})
+const statusText = computed(() => requestData.value?.status_id ? `حالة ${requestData.value.status_id}` : '')
+const targetLocation = computed(() => requestData.value?.target_location || '')
+const paymentMethod = computed(() => {
+    const method = requestData.value?.payment_method
+    if (method === 'cash') return 'كاش'
+    if (method === 'deferred') return 'آجل'
+    return method || ''
+})
+const upfrontPayment = computed(() => requestData.value?.upfront_payment || 0)
 
-const packageIcon = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M20.5 7.27783L12 12.0001M12 12.0001L3.49997 7.27783M12 12.0001L12 21.5001M21 16.0586V7.94153C21 7.59889 21 7.42757 20.9495 7.27477C20.9049 7.13959 20.8318 7.01551 20.7354 6.91082C20.6263 6.79248 20.4766 6.70928 20.177 6.54288L12.777 2.43177C12.4934 2.27421 12.3516 2.19543 12.2015 2.16454C12.0685 2.13721 11.9315 2.13721 11.7986 2.16454C11.6484 2.19543 11.5066 2.27421 11.223 2.43177L3.82297 6.54288C3.52345 6.70928 3.37369 6.79248 3.26463 6.91082C3.16816 7.01551 3.09515 7.13959 3.05048 7.27477C3 7.42757 3 7.59889 3 7.94153V16.0586C3 16.4013 3 16.5726 3.05048 16.7254C3.09515 16.8606 3.16816 16.9847 3.26463 17.0893C3.37369 17.2077 3.52345 17.2909 3.82297 17.4573L11.223 21.5684C11.5066 21.726 11.6484 21.8047 11.7986 21.8356C11.9315 21.863 12.0685 21.863 12.2015 21.8356C12.3516 21.8047 12.4934 21.726 12.777 21.5684L20.177 17.4573C20.4766 17.2909 20.6263 17.2077 20.7354 17.0893C20.8318 16.9847 20.9049 16.8606 20.9495 16.7254C21 16.5726 21 16.4013 21 16.0586Z" stroke="#194185" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-<path d="M16.5 9.5L7.5 4.5" stroke="#194185" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>
-`
+// Products table
+const productItems = computed(() => {
+    if (!requestData.value?.items) return []
+    return requestData.value.items.map((item: any) => ({
+        id: item.id,
+        name: item.item_name,
+        quantity: item.quantity,
+        unit: item.unit_name,
+        transport_type: getTransportTypeName(item.transport_type),
+        daily_trips: item.trip_no || 0,
+        notes: item.notes || 'لا يوجد',
+    }))
+})
 
-const truckIcon = `<svg width="22" height="20" viewBox="0 0 22 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M15 14V4.2C15 3.0799 15 2.51984 14.782 2.09202C14.5903 1.71569 14.2843 1.40973 13.908 1.21799C13.4802 1 12.9201 1 11.8 1H4.2C3.0799 1 2.51984 1 2.09202 1.21799C1.71569 1.40973 1.40973 1.71569 1.21799 2.09202C1 2.51984 1 3.0799 1 4.2V10.8C1 11.9201 1 12.4802 1.21799 12.908C1.40973 13.2843 1.71569 13.5903 2.09202 13.782C2.51984 14 3.0799 14 4.2 14H15ZM15 14H19.4C19.9601 14 20.2401 14 20.454 13.891C20.6422 13.7951 20.7951 13.6422 20.891 13.454C21 13.2401 21 12.9601 21 12.4V9.66274C21 9.41815 21 9.29586 20.9724 9.18077C20.9479 9.07873 20.9075 8.98119 20.8526 8.89172C20.7908 8.7908 20.7043 8.70432 20.5314 8.53137L18.4686 6.46863C18.2957 6.29568 18.2092 6.2092 18.1083 6.14736C18.0188 6.09253 17.9213 6.05213 17.8192 6.02763C17.7041 6 17.5818 6 17.3373 6H15M8 16.5C8 17.8807 6.88071 19 5.5 19C4.11929 19 3 17.8807 3 16.5C3 15.1193 4.11929 14 5.5 14C6.88071 14 8 15.1193 8 16.5ZM19 16.5C19 17.8807 17.8807 19 16.5 19C15.1193 19 14 17.8807 14 16.5C14 15.1193 15.1193 14 16.5 14C17.8807 14 19 15.1193 19 16.5Z" stroke="#194185" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>
-`
+// Transport service table
+const transportServiceItems = computed(() => {
+    const logistics = requestData.value?.logistics_detail
+    if (!logistics || (!logistics.from_date && !logistics.to_date)) return []
+
+    return [{
+        id: 1,
+        project_location: targetLocation.value,
+        from_date: logistics.from_date ? new Date(logistics.from_date).toLocaleDateString('en-US') : '',
+        to_date: logistics.to_date ? new Date(logistics.to_date).toLocaleDateString('en-US') : '',
+        vehicle_type: getTransportTypeName(logistics.transport_type),
+        trip_time: getAmPmIntervalName(logistics.am_pm_interval),
+        notes: logistics.notes || 'لا يوجد',
+    }]
+})
+
+// Helper functions
+const getTransportTypeName = (type: any) => {
+    if (!type) return ''
+    // You can map transport type IDs to names here
+    return `نوع ${type}`
+}
+
+const getAmPmIntervalName = (interval: any) => {
+    if (interval === 'am') return 'صباحاً'
+    if (interval === 'pm') return 'مساءً'
+    if (interval === 'both') return 'صباحاً ومساءً'
+    return interval || ''
+}
+
+// Summary data
+const summaryData = computed(() => ({
+    productsCount: productItems.value.length,
+    servicesCount: transportServiceItems.value.length,
+    paymentMethod: paymentMethod.value,
+    advancePayment: upfrontPayment.value
+}))
+
 
 // Tabs configuration
 const tabs = [
@@ -278,14 +358,7 @@ const tabs = [
 // Tab helpers
 const isTabActive = (tabValue: number) => activeTab.value === tabValue
 
-// Summary data
-const summaryData = ref({
-    productsCount: 2,
-    servicesCount: 0,
-    paymentMethod: 'كاش',
-    advancePayment: '50.000'
-});
-
+// Table headers
 const headers = [
     { title: 'اسم المنتج', key: 'name' },
     { title: 'الكمية', key: 'quantity' },
@@ -293,26 +366,6 @@ const headers = [
     { title: 'نوع الناقلة', key: 'transport_type' },
     { title: 'عدد الرحلات اليومية', key: 'daily_trips' },
     { title: 'ملاحظات', key: 'notes' },
-]
-const items = [
-    {
-        id: 1,
-        name: 'اسمنت باور كريت',
-        quantity: 30,
-        unit: 'طن',
-        transport_type: 'شحن 10',
-        daily_trips: 5,
-        notes: 'لا يوجد',
-    },
-    {
-        id: 2,
-        name: 'البلاط / السيراميك',
-        quantity: 500,
-        unit: 'متر مربع (m2)',
-        transport_type: 'شحن 12',
-        daily_trips: 5,
-        notes: 'كل 100 طن لوحدها',
-    },
 ]
 
 const ServicesHeaders = [
@@ -322,27 +375,6 @@ const ServicesHeaders = [
     { title: 'نوع المركبات', key: 'vehicle_type' },
     { title: 'توقيت الرحلة', key: 'trip_time' },
     { title: 'ملاحظات', key: 'notes' },
-]
-
-const ServicesItems = [
-    {
-        id: 1,
-        project_location: 'مكة',
-        from_date: '22/6/2025',
-        to_date: '26/7/2026',
-        vehicle_type: 'قلاب',
-        trip_time: 'صباحاً',
-        notes: 'لا يوجد',
-    },
-    {
-        id: 2,
-        project_location: 'القصيم',
-        from_date: '22/6/2025',
-        to_date: '26/7/2026',
-        vehicle_type: 'سطحة',
-        trip_time: 'مساءً',
-        notes: 'مغطاة بالكامل',
-    },
 ]
 
 </script>
