@@ -122,12 +122,52 @@
     },
     "SalesSoPickups": {
       "title": "Delivery Appointments",
-      "description": "Manage delivery appointments"
+      "description": "Manage delivery appointments",
+      "edit": "Edit delivery appointment",
+      "view": "View delivery appointment",
+      "viewPage": {
+        "retry": "Retry",
+        "headerSubtitle": "Delivery appointment details and related information",
+        "breadcrumb": {
+          "sales": "Sales",
+          "pickupsList": "Delivery Appointments"
+        },
+        "orderInfo": {
+          "title": "Order Information",
+          "transportCompany": "Transport Company",
+          "date": "Date",
+          "coordinatesSendCount": "Coordinates send count",
+          "tripTiming": "Trip timing",
+          "loadingResponsible": "Loading responsible",
+          "driver": "Driver",
+          "tripCost": "Trip cost",
+          "unloadingLocation": "Unloading location",
+          "loadingLocation": "Loading location",
+          "unloadingResponsible": "Unloading responsible",
+          "vehicleCount": "Vehicle count",
+          "vehicleType": "Vehicle type",
+          "notes": "Notes"
+        },
+        "productsTable": {
+          "title": "Products",
+          "productImage": "Product image",
+          "productName": "Product name",
+          "quantity": "Quantity",
+          "unit": "Unit",
+          "vehicleType": "Carrier type",
+          "tripsCount": "Carriers count",
+          "notes": "Notes"
+        },
+        "errors": {
+          "loadFailed": "Failed to load delivery appointment details"
+        }
+      }
     },
     "ReceivingDocs": {
       "title": "Receiving Documents Table",
       "description": "Enables you to manage purchase orders",
-      "edit": "Edit Receiving Document"
+      "edit": "Edit Receiving Document",
+      "view": "View Receiving Document"
     }
   }
 }

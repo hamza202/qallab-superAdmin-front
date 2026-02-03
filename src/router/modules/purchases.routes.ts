@@ -245,6 +245,14 @@ export const purchasesRoutes: RouteRecordRaw[] = [
           title: "pages.ReceivingDocs.edit",
         },
       },
+      {
+        path: "view/:id",
+        name: "ReceivingDocsView",
+        component: () => import("@/views/purchases/receiving-docs/View.vue"),
+        meta: {
+          title: "pages.ReceivingDocs.view",
+        },
+      },
     ],
   },
   {
@@ -274,6 +282,31 @@ export const purchasesRoutes: RouteRecordRaw[] = [
         component: () => import("@/views/purchases/purchase-invoices/Form.vue"),
         meta: {
           title: "pages.PurchaseInvoices.edit",
+        },
+      },
+    ],
+  },
+  {
+    path: "/purchases/quotations/fuels",
+    name: "QuotationsFuels",
+    redirect: "/purchases/quotations/fuels/list",
+    children: [
+      {
+        path: "list",
+        name: "QuotationsFuelsList",
+        component: () =>
+          import("@/views/purchases/quotations/fuels/List.vue"),
+        meta: {
+          title: "pages.QuotationsFuels.title",
+        },
+      },
+      {
+        path: "view/:id",
+        name: "QuotationsFuelsView",
+        component: () =>
+          import("@/views/purchases/quotations/fuels/View.vue"),
+        meta: {
+          title: "pages.QuotationsFuels.view",
         },
       },
     ],

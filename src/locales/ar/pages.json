@@ -275,7 +275,46 @@
     },
     "SalesSoPickups": {
       "title": "حجوزات التسليم",
-      "description": "إدارة حجوزات التسليم"
+      "description": "إدارة حجوزات التسليم",
+      "edit": "تعديل حجز التسليم",
+      "view": "عرض حجز التسليم",
+      "viewPage": {
+        "retry": "إعادة المحاولة",
+        "headerSubtitle": "تفاصيل حجز التسليم والمعلومات الخاصة به",
+        "breadcrumb": {
+          "sales": "المبيعات",
+          "pickupsList": "حجوزات التسليم"
+        },
+        "orderInfo": {
+          "title": "معلومات الطلب",
+          "transportCompany": "شركة النقل",
+          "date": "التاريخ",
+          "coordinatesSendCount": "عدد مرات إرسال الإحداثيات",
+          "tripTiming": "توقيت الرحلة",
+          "loadingResponsible": "مسؤول التحميل",
+          "driver": "السائق",
+          "tripCost": "تكلفة الرحلة",
+          "unloadingLocation": "موقع التنزيل",
+          "loadingLocation": "موقع التحميل",
+          "unloadingResponsible": "مسؤول التنزيل",
+          "vehicleCount": "عدد المركبات",
+          "vehicleType": "نوع المركبة",
+          "notes": "ملاحظات"
+        },
+        "productsTable": {
+          "title": "المنتجات",
+          "productImage": "صورة المنتج",
+          "productName": "اسم المنتج",
+          "quantity": "الكمية",
+          "unit": "الوحدة",
+          "vehicleType": "نوع الناقلة",
+          "tripsCount": "عدد الناقلات",
+          "notes": "ملاحظات"
+        },
+        "errors": {
+          "loadFailed": "فشل تحميل تفاصيل حجز التسليم"
+        }
+      }
     },
     "ReceiptVouchers": {
       "title": "جدول سندات الاستلام",
@@ -294,7 +333,8 @@
     "ReceivingDocs": {
       "title": "جدول سندات الاستلام",
       "description": "تمكنك من ادارة طلبيات المشتريات",
-      "edit": "تعديل سند استلام"
+      "edit": "تعديل سند استلام",
+      "view": "عرض سند الاستلام"
     }
   }
 }

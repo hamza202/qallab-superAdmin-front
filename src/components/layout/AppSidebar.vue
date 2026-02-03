@@ -334,6 +334,11 @@
                                         طلب عروض أسعار محروقات</router-link>
                                 </li>
                                 <li class="relative">
+                                    <router-link to="/purchases/quotations/fuels/list"
+                                        :class="[isMenuItemActive('/purchases/quotations/fuels') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        عروض أسعار محروقات</router-link>
+                                </li>
+                                <li class="relative">
                                     <router-link to="/purchases/orders/material-product/list"
                                         :class="[isMenuItemActive('/purchases/orders/material-product') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         طلبيات المشتريات</router-link>
