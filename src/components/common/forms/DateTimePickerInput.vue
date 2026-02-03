@@ -46,10 +46,45 @@ const emit = defineEmits<{
   (e: "update:modelValue", value: string | null): void;
 }>();
 
-const internalValue = computed<string | null>({
-  get: () => props.modelValue,
+const parseDateTime = (value: string | null): Date | null => {
+  if (!value) return null;
+  const [datePart, timePart] = value.trim().split(" ");
+  if (!datePart) return null;
+  const [year, month, day] = datePart.split("-").map((n) => Number(n));
+  const [hours, minutes, seconds] = (timePart || "00:00:00")
+    .split(":")
+    .map((n) => Number(n));
+  if (!year || !month || !day) return null;
+  return new Date(year, month - 1, day, hours || 0, minutes || 0, seconds || 0);
+};
+
+const formatDateTime = (date: Date | null): string => {
+  if (!date) return "";
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  const seconds = String(date.getSeconds()).padStart(2, "0");
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+};
+
+const displayFormat = (value: Date | Date[]): string => {
+  if (Array.isArray(value)) {
+    const first = value[0] ? new Date(value[0]) : null;
+    return formatDateTime(first);
+  }
+  return formatDateTime(value);
+};
+
+const internalValue = computed<Date | null>({
+  get: () => parseDateTime(props.modelValue),
   set: (val) => {
-    emit("update:modelValue", val || null);
+    if (!val) {
+      emit("update:modelValue", null);
+      return;
+    }
+    emit("update:modelValue", formatDateTime(val));
   },
 });
 </script>
@@ -60,53 +95,25 @@ const internalValue = computed<string | null>({
       {{ label }}
     </label>
 
-    <VueDatePicker
-      v-model="internalValue"
-      model-type="format"
-      :formats="{ input: 'dd-MM-yyyy HH:mm:ss', preview: 'dd-MM-yyyy HH:mm:ss' }"
-      :text-input="{
-        format: 'dd-MM-yyyy HH:mm:ss',
-        enterSubmit: true,
-        tabSubmit: true,
-        openMenu: false,
-        selectOnFocus: true,
-        applyOnBlur: true,
-      }"
-      :action-row="{
-        showSelect: false,
-        showCancel: false,
-        showPreview: false,
-      }"
-      :time-config="{ enableSeconds: true, is24: true, timePickerInline: true }"
-      :disabled="disabled"
-      :readonly="readonly"
-      :clearable="clearable"
-      :placeholder="placeholder"
-      :min-date="min || undefined"
-      :max-date="max || undefined"
-      auto-apply
-    >
+    <VueDatePicker v-model="internalValue" :format="displayFormat" :text-input="{
+      format: 'yyyy-MM-dd HH:mm:ss',
+      enterSubmit: true,
+      tabSubmit: true,
+      openMenu: false,
+      selectOnFocus: true,
+      applyOnBlur: true,
+    }" :action-row="{
+      showSelect: true,
+      showCancel: true,
+      showPreview: false,
+    }" :time-config="{ enableSeconds: true, is24: true, timePickerInline: true }" :disabled="disabled"
+      :readonly="readonly" :clearable="clearable" :placeholder="placeholder" :min-date="min || undefined"
+      :max-date="max || undefined" auto-apply>
       <template #dp-input="{ value, onInput, onBlur, onFocus, toggleMenu }">
-        <v-text-field
-          :model-value="value"
-          :placeholder="placeholder"
-          variant="outlined"
-          :color="color"
-          :density="density"
-          :disabled="disabled"
-          :readonly="readonly"
-          :error-messages="errorMessages"
-          :rules="rules"
-          :clearable="clearable"
-          :hide-details="hideDetails"
-          :hint="hint"
-          :persistent-hint="persistentHint"
-          class="!text-right"
-          @update:model-value="onInput"
-          @focus="onFocus"
-          @blur="onBlur"
-          @click="toggleMenu"
-        >
+        <v-text-field :model-value="value" :placeholder="placeholder" variant="outlined" :color="color"
+          :density="density" :disabled="disabled" :readonly="readonly" :error-messages="errorMessages" :rules="rules"
+          :clearable="clearable" :hide-details="hideDetails" :hint="hint" :persistent-hint="persistentHint"
+          class="!text-right" @update:model-value="onInput" @focus="onFocus" @blur="onBlur" @click="toggleMenu">
           <template #prepend-inner>
             <slot name="prepend-inner">
             </slot>
@@ -126,21 +133,26 @@ const internalValue = computed<string | null>({
 .date-picker-input-wrapper {
   width: 100%;
 }
-html[dir="rtl"] .date-picker-input-wrapper  .v-text-field input{
-    text-align: right !important;
-  }
-html[dir="ltr"] .date-picker-input-wrapper  .v-text-field input{
-    text-align: left !important;
-  }
-  html[dir="rtl"] .date-picker-input-wrapper  .dp--clear-btn{
-    left: 0 !important;
-    right: auto !important;
-  }
-  html[dir="ltr"] .date-picker-input-wrapper  .dp--clear-btn{
-    right: 0 !important;
-    left: auto !important;
-  }
-  html[dir="rtl"] .dp--arrow-btn-nav{
-    transform: rotate(180deg) !important;
-  }
+
+html[dir="rtl"] .date-picker-input-wrapper .v-text-field input {
+  text-align: right !important;
+}
+
+html[dir="ltr"] .date-picker-input-wrapper .v-text-field input {
+  text-align: left !important;
+}
+
+html[dir="rtl"] .date-picker-input-wrapper .dp--clear-btn {
+  left: 0 !important;
+  right: auto !important;
+}
+
+html[dir="ltr"] .date-picker-input-wrapper .dp--clear-btn {
+  right: 0 !important;
+  left: auto !important;
+}
+
+html[dir="rtl"] .dp--arrow-btn-nav {
+  transform: rotate(180deg) !important;
+}
 </style>

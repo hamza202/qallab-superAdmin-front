@@ -2,7 +2,7 @@
 import { computed, ref, watch } from "vue";
 import { useApi } from '@/composables/useApi';
 
-type RequestType = 'raw_materials' | 'fuel' | 'transfer_service';
+type RequestType = 'raw_materials' | 'fuel' | 'transfer_service' | 'trips';
 
 interface Category {
   id: number;
@@ -23,6 +23,7 @@ export interface ProductToAdd {
   unit_name: string;
   quantity: number | null;
   transport_type?: number | null | undefined;
+  transport_count?: number | null | undefined;
   transport_type_name?: string;
   trip_no?: number | null | undefined;
   notes: string;
@@ -172,6 +173,7 @@ const fetchItems = async () => {
           unit_name: '',
           quantity: null,
           transport_type: null,
+          transport_count: null,
           transport_type_name: '',
           trip_no: null,
           notes: '',
@@ -426,6 +428,19 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
               item-value="value" 
             />
           </div>
+
+            <!-- Package Type (transport_count) - purchases فقط بدون سعر/خصم -->
+          <div v-if="!showPricingFields && requestType == 'trips'">
+            <TextInput 
+              v-model="product.transport_count" 
+              type="number" 
+              placeholder="عدد الناقلات"
+              density="compact" 
+              class="min-w-[170px]" 
+              :disabled="product.isAdded"
+            />
+          </div>
+
         </div>
       </div>
     </div>
@@ -476,7 +491,7 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
       </div>
 
       <!-- Products List -->
-      <div class="space-y-1 max-h-[400px] min-h-[250px] overflow-auto custom-scroll">
+      <div class="space-y-1 max-h-[350px] min-h-[250px] overflow-auto custom-scroll">
         <div v-for="product in filteredProducts" :key="product.item_id">
           <div class="flex gap-3 rounded-lg border !border-gray-100 p-3 bg-white">
             <!-- Actions -->
@@ -569,7 +584,7 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
               </div>
 
               <!-- Package Type (transport_type) - purchases فقط بدون سعر/خصم -->
-              <div v-if="!showPricingFields && requestType == 'raw_materials'">
+              <div v-if="!showPricingFields && requestType == 'raw_materials' || !showPricingFields && requestType == 'trips'">
                 <SelectInput 
                   v-model="product.transport_type" 
                   :items="packageTypeItemsList" 
@@ -578,6 +593,18 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
                   class="min-w-[170px]" 
                   item-title="title" 
                   item-value="value" 
+                  :disabled="product.isAdded"
+                />
+              </div>
+
+              <!-- Package Type (transport_count) - purchases فقط بدون سعر/خصم -->
+              <div v-if="!showPricingFields && requestType == 'trips'">
+                <TextInput 
+                  v-model="product.transport_count" 
+                  type="number" 
+                  placeholder="عدد الناقلات"
+                  density="compact" 
+                  class="min-w-[170px]" 
                   :disabled="product.isAdded"
                 />
               </div>

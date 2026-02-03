@@ -229,6 +229,11 @@
                                         :class="[$route.path.includes('/sales/so-pickups') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         حجوزات التسليم</router-link>
                                 </li>
+                                <li class="relative">
+                                    <router-link to="/sales/trips/list"
+                                        :class="[$route.path.includes('/sales/trips') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        جدول الرحلات</router-link>
+                                </li>
                             </ul>
 
                         </div>

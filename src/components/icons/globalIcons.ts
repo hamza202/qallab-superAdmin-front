@@ -80,7 +80,7 @@ export const arrowsTriangleIcon = `<svg width="20" height="20" viewBox="0 0 20 2
 </svg>
 `
 export const returnIcon = `<svg width="17" height="13" viewBox="0 0 17 13" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M0.833332 4.16671H12.0833C14.1544 4.16671 15.8333 5.84564 15.8333 7.91671C15.8333 9.98778 14.1544 11.6667 12.0833 11.6667H8.33333M0.833332 4.16671L4.16667 0.833374M0.833332 4.16671L4.16667 7.50004" stroke="white" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M0.833332 4.16671H12.0833C14.1544 4.16671 15.8333 5.84564 15.8333 7.91671C15.8333 9.98778 14.1544 11.6667 12.0833 11.6667H8.33333M0.833332 4.16671L4.16667 0.833374M0.833332 4.16671L4.16667 7.50004" stroke="currentColor" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`;
 
 export const saveIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
