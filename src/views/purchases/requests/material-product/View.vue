@@ -258,8 +258,8 @@ onMounted(() => {
 const requestCode = computed(() => requestData.value?.code || '')
 const requestType = computed(() => {
     const type = requestData.value?.request_type
-    if (type === 'purchase_request_without_logistics') return 'طلب بدون خدمة نقل'
-    if (type === 'purchase_request_with_logistics') return 'طلب مع خدمة نقل'
+    if (type === 'request_without_logistics') return 'طلب بدون خدمة نقل'
+    if (type === 'request_with_logistics') return 'طلب مع خدمة نقل'
     return type || ''
 })
 const supplierName = computed(() => requestData.value?.supplier_name || '')
