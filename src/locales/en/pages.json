@@ -181,6 +181,14 @@
       "FormDescription": "Add purchase request for fuel quotations",
       "edit": "Edit purchase request for fuel quotations",
       "view": "View purchase request for fuel quotations"
+    },
+    "PurchasesRequestsMaterialProduct": {
+      "title": "Purchase Requests for Material Product Quotations",
+      "description": "View and manage purchase requests for material product quotations",
+      "FormTitle": "Purchase Request for Material Product Quotations",
+      "FormDescription": "Add purchase request for material product quotations",
+      "edit": "Edit purchase request for material product quotations",
+      "view": "View purchase request for material product quotations"
     }
   }
 }

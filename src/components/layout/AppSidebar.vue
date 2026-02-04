@@ -447,16 +447,43 @@
                     عروض أسعار مواد أولية</router-link
                   >
                 </li>
+                <li class="relative">
+                  <router-link
+                    to="/sales/requests/fuels/list"
+                    :class="[
+                      $route.path.includes('/sales/requests/fuels')
+                        ? 'font-bold text-qallab-yellow'
+                        : 'text-white hover:text-qallab-yellow',
+                    ]"
+                  >
+                    طلب عروض أسعار محروقات
+                  </router-link>
+                </li>
+                <li class="relative">
+                  <router-link
+                    to="/sales/quotations/fuels/list"
+                    :class="[
+                      $route.path.includes('/sales/quotations/fuels')
+                        ? 'font-bold text-qallab-yellow'
+                        : 'text-white hover:text-qallab-yellow',
+                    ]"
+                  >
+                    عروض أسعار المحروقات</router-link
+                  >
+                </li>
                 <!-- <li class="relative">
                                     <router-link to="/purchases/requests/fuels/list"
                                         :class="[isMenuItemActive('/purchases/requests/fuels') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         عروض أسعار محروقات</router-link>
                                 </li> -->
-                
               </ul>
 
-              <h2 class="text-sm font-medium leading-5 my-2">طلبيات المبيعات</h2>
-              <ul class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
+              <h2 class="text-sm font-medium leading-5 my-2">
+                طلبيات المبيعات
+              </h2>
+              <ul
+                class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5"
+              >
                 <li class="relative">
                   <router-link
                     to="/sales/orders/material-product/list"
