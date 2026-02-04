@@ -168,6 +168,19 @@
       "description": "Enables you to manage purchase orders",
       "edit": "Edit Receiving Document",
       "view": "View Receiving Document"
+    },
+    "QuotationsFuels": {
+      "title": "Fuel Quotations",
+      "description": "View and manage fuel quotations",
+      "view": "View fuel quotation"
+    },
+    "PurchasesRequestsFuels": {
+      "title": "Purchase Requests for Fuel Quotations",
+      "description": "View and manage purchase requests for fuel quotations",
+      "FormTitle": "Purchase Request for Fuel Quotations",
+      "FormDescription": "Add purchase request for fuel quotations",
+      "edit": "Edit purchase request for fuel quotations",
+      "view": "View purchase request for fuel quotations"
     }
   }
 }
