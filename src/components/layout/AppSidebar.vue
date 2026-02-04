@@ -329,6 +329,11 @@
                                         طلب عروض أسعار مواد أولية</router-link>
                                 </li>
                                 <li class="relative">
+                                    <router-link to="/purchases/requests/logistics/list"
+                                        :class="[isMenuItemActive('/purchases/requests/logistics') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                                        طلب عرض سعر خدمة نقل</router-link>
+                                </li>
+                                <li class="relative">
                                     <router-link to="/purchases/quotations/material-product/list"
                                         :class="[isMenuItemActive('/purchases/quotations/material-product') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         عروض اسعار مواد اوليه</router-link>

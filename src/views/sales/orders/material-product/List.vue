@@ -253,8 +253,8 @@ onMounted(() => {
     <div class="pricesOffers-page">
       <PageHeader
         :icon="GridIcon"
-        title-key="pages.OrdersMaterialProduct.title"
-        description-key="pages.OrdersMaterialProduct.description"
+        title-key="pages.SalesRequests.title"
+        description-key="pages.SalesRequests.description"
       />
 
       <div

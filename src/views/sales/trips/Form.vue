@@ -19,13 +19,12 @@ interface ProductTableItem {
   unit_name: string;
   quantity: number | null;
   transport_type: number | null;
-  transport_count: number | null;
+  transport_no: number | null;
   transport_type_name: string;
   notes: string;
   id?: number; // For edit mode
   isAdded?: boolean; // For dialog state
 }
-
 
 const api = useApi();
 const route = useRoute();
@@ -43,46 +42,63 @@ const isSubmitting = ref(false);
 const tripCode = ref("");
 
 const formData = ref({
-  supplier_id: null as number | null,
-  transport_company: null,
-  loading_datetime: "",
-  loading_location: "",
-  loading_latitude: "",
-  loading_longitude: "",
-  company_name: "",
-  unloading_location: "",
-  unloading_datetime: "",
-  unloading_responsible: "",
-  update_count: "",
-  waybill_number: "",
-  density_ton: "",
-  density_m3: "",
-  trip_cost: "",
-  trip_cost_currency: "ريال",
-  trip_status: "صائح",
-  trip_time: true,
+  so_pickup_id: null as number | null,
+  supplier_logistic_id: null as number | null,
+  planned_arrival_loading: "",
+  planned_arrival_downloading: "",
+  total_quantity_ton: null as number | null,
+  total_quantity_m3: null as number | null,
+  tracking_no_point: null as number | null,
+  bill_of_lading: null as number | null,
+  am_pm_interval: "" as string,
+  loading_responsible_party: "",
+  downloading_responsible_party: "",
+  trip_value: null as number | null,
+  target_location: "",
+  target_latitude: null as number | null,
+  target_longitude: null as number | null,
+  source_location: "",
+  source_latitude: null as number | null,
+  source_longitude: null as number | null,
   notes: "",
 });
 
 const statusItems = ref<any[]>([]);
 const unitItems = ref<any[]>([]);
 const transportTypeItems = ref<any[]>([]);
-
+const supplierItems = ref<any[]>([]);
 const productTableItems = ref<ProductTableItem[]>([]);
 const showAddProductDialog = ref(false);
 const editingProduct = ref<ProductTableItem | null>(null);
 const showMapDialog = ref(false);
+const amPmIntervalItems = ref<any[]>([]);
+const formErrors = ref<Record<string, string[]>>({});
 
 const fetchConstants = async () => {
   try {
     const res = await api.get<any>('/sales/trips/constants');
     const data = res.data;
     if (data) {
-      statusItems.value = data.statuses?.map((i: any) => ({ title: i.label, value: i.key })) || [];
+      amPmIntervalItems.value = data.am_pm_interval?.map((i: any) => ({ title: i.label, value: i.key })) || [];
       transportTypeItems.value = data.transport_types?.map((i: any) => ({ title: i.label, value: i.key })) || [];
     }
   } catch (e) {
     console.error('Error fetching constants:', e);
+  }
+}
+
+const fetchSuppliers = async () => {
+  try {
+    const res = await api.get<any>('/suppliers/list', {
+      params: {
+        service_type: 'logistic_company'
+      }
+    });
+    if (Array.isArray(res.data)) {
+      supplierItems.value = res.data.map((i: any) => ({ title: i.full_name, value: i.id }));
+    }
+  } catch (e) {
+    console.error('Error fetching suppliers:', e);
   }
 }
 
@@ -100,6 +116,43 @@ const fetchUnits = async () => {
   }
 };
 
+const fetchSoPickupData = async () => {
+  if (!pickupId.value) return;
+    console.log('sss');
+
+  isLoading.value = true;
+  try {
+    const res = await api.get<any>(`/sales/so-pickups/${pickupId.value}`);
+    const data = res?.data != null ? res.data : res;
+
+    if (!data) return;
+
+    // Set the so_pickup_id in formData
+    formData.value.so_pickup_id = data.id || null;
+
+    // Populate products from SO pickup items
+    if (data.items && Array.isArray(data.items)) {
+      productTableItems.value = data.items.map((item: any) => ({
+        item_id: item.item_id,
+        item_name: item.item_name || '',
+        unit_id: item.unit_id,
+        unit_name: item.unit_name || '',
+        quantity: item.quantity || null,
+        transport_type: null,
+        transport_no: '',
+        transport_type_name: '',
+        notes: '',
+        isAdded: true
+      }));
+    }
+  } catch (err: any) {
+    console.error('Error fetching SO pickup data:', err);
+    error(err?.response?.data?.message || 'فشل تحميل بيانات طلب الاستلام');
+  } finally {
+    isLoading.value = false;
+  }
+};
+
 const getTransportTypeName = (typeValue: string | number): string => {
   const found = transportTypeItems.value.find(t => t.value === typeValue);
   return found ? found.title : '';
@@ -107,6 +160,7 @@ const getTransportTypeName = (typeValue: string | number): string => {
 
 const fetchFormData = async () => {
   if (!isEditMode.value || !routeId.value) return;
+    console.log('ttt');
 
   isLoading.value = true;
   try {
@@ -114,27 +168,26 @@ const fetchFormData = async () => {
     const data = raw?.data != null ? raw.data : raw;
 
     if (!data) return;
-
     tripCode.value = data.code || "";
     formData.value = {
-      supplier_id: data.supplier_id || null,
-      transport_company: data.transport_company || null,
-      loading_datetime: data.loading_datetime || "",
-      loading_location: data.loading_location || "",
-      loading_latitude: data.loading_latitude || "",
-      loading_longitude: data.loading_longitude || "",
-      company_name: data.company_name || "",
-      unloading_location: data.unloading_location || "",
-      unloading_datetime: data.unloading_datetime || "",
-      unloading_responsible: data.unloading_responsible || "",
-      update_count: data.update_count || "",
-      waybill_number: data.waybill_number || "",
-      density_ton: data.density_ton || "",
-      density_m3: data.density_m3 || "",
-      trip_cost: data.trip_cost || "",
-      trip_cost_currency: data.trip_cost_currency || "ريال",
-      trip_status: data.trip_status || "صائح",
-      trip_time: data.trip_time || true,
+      so_pickup_id: data.so_pickup_id || null,
+      supplier_logistic_id: data.supplier_logistic_id || null,
+      planned_arrival_loading: data.planned_arrival_loading || "",
+      planned_arrival_downloading: data.planned_arrival_downloading || "",
+      total_quantity_ton: data.total_quantity_ton || null,
+      total_quantity_m3: data.total_quantity_m3 || null,
+      tracking_no_point: data.tracking_no_point || null,
+      bill_of_lading: data.bill_of_lading || null,
+      am_pm_interval: data.am_pm_interval || "",
+      loading_responsible_party: data.loading_responsible_party || "",
+      downloading_responsible_party: data.downloading_responsible_party || "",
+      trip_value: data.trip_value || null,
+      target_location: data.target_location || "",
+      target_latitude: data.target_latitude || null,
+      target_longitude: data.target_longitude || null,
+      source_location: data.source_location || "",
+      source_latitude: data.source_latitude || null,
+      source_longitude: data.source_longitude || null,
       notes: data.notes || "",
     };
 
@@ -147,7 +200,7 @@ const fetchFormData = async () => {
         unit_name: item.unit_name || '',
         quantity: item.quantity,
         transport_type: item.transport_type,
-        transport_count: item.transport_count,
+        transport_no: item.transport_no,
         transport_type_name: getTransportTypeName(item.transport_type),
         notes: item.notes || '',
         isAdded: true
@@ -171,6 +224,37 @@ const handleSubmit = async (option: SubmitOption) => {
     return;
   }
 
+  // Clear previous errors
+  formErrors.value = {};
+
+  // Validate required fields
+  if (!formData.value.supplier_logistic_id) {
+    formErrors.value['supplier_logistic_id'] = ['الحقل supplier logistic id مطلوب.'];
+  }
+  if (!formData.value.target_location) {
+    formErrors.value['target_location'] = ['الحقل موقع التسليم مطلوب.'];
+  }
+  if (!formData.value.target_latitude) {
+    formErrors.value['target_latitude'] = ['الحقل خط عرض موقع التسليم مطلوب.'];
+  }
+  if (!formData.value.target_longitude) {
+    formErrors.value['target_longitude'] = ['الحقل خط طول موقع التسليم مطلوب.'];
+  }
+  if (!formData.value.source_location) {
+    formErrors.value['source_location'] = ['الحقل موقع الانطلاق مطلوب.'];
+  }
+  if (!formData.value.source_latitude) {
+    formErrors.value['source_latitude'] = ['الحقل خط عرض موقع الانطلاق مطلوب.'];
+  }
+  if (!formData.value.source_longitude) {
+    formErrors.value['source_longitude'] = ['الحقل خط طول موقع الانطلاق مطلوب.'];
+  }
+
+  if (Object.keys(formErrors.value).length > 0) {
+    error('يرجى ملء جميع الحقول المطلوبة');
+    return;
+  }
+
   isSubmitting.value = true;
   try {
     const payload = {
@@ -179,7 +263,7 @@ const handleSubmit = async (option: SubmitOption) => {
         item_id: item.item_id,
         unit_id: item.unit_id,
         quantity: item.quantity,
-        transport_count: item.transport_count,
+        transport_no: item.transport_no,
         transport_type: item.transport_type,
         notes: item.notes
       })),
@@ -198,28 +282,29 @@ const handleSubmit = async (option: SubmitOption) => {
     } else {
       // Reset form for new entry
       formData.value = {
-        supplier_id: null,
-        transport_company: null,
-        loading_datetime: "",
-        loading_latitude: "",
-        loading_longitude: "",
-        loading_location: "",
-        company_name: "",
-        unloading_location: "",
-        unloading_datetime: "",
-        unloading_responsible: "",
-        update_count: "",
-        waybill_number: "",
-        density_ton: "",
-        density_m3: "",
-        trip_cost: "",
-        trip_cost_currency: "ریال",
-        trip_status: "صائح",
-        trip_time: true,
+        so_pickup_id: null,
+        supplier_logistic_id: null,
+        planned_arrival_loading: "",
+        planned_arrival_downloading: "",
+        total_quantity_ton: null,
+        total_quantity_m3: null,
+        tracking_no_point: null,
+        bill_of_lading: null,
+        am_pm_interval: "",
+        loading_responsible_party: "",
+        downloading_responsible_party: "",
+        trip_value: null,
+        target_location: "",
+        target_latitude: null,
+        target_longitude: null,
+        source_location: "",
+        source_latitude: null,
+        source_longitude: null,
         notes: "",
       };
       productTableItems.value = [];
       tripCode.value = "";
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   } catch (err: any) {
     console.error('Error submitting form:', err);
@@ -229,13 +314,22 @@ const handleSubmit = async (option: SubmitOption) => {
   }
 };
 
+const currentMapType = ref<'source' | 'target'>('source');
+
 const handleLocationSelected = (location: { latitude: string; longitude: string; address: string }) => {
-  formData.value.loading_latitude = location.latitude;
-  formData.value.loading_longitude = location.longitude;
-  formData.value.loading_location = location.address;
+  if (currentMapType.value === 'target') {
+    formData.value.target_latitude = parseFloat(location.latitude);
+    formData.value.target_longitude = parseFloat(location.longitude);
+    formData.value.target_location = location.address;
+  } else {
+    formData.value.source_latitude = parseFloat(location.latitude);
+    formData.value.source_longitude = parseFloat(location.longitude);
+    formData.value.source_location = location.address;
+  }
 };
 
-const openMapDialog = () => {
+const openMapDialog = (type: 'source' | 'target' = 'source') => {
+  currentMapType.value = type;
   showMapDialog.value = true;
 };
 
@@ -249,7 +343,7 @@ const headers = [
   { title: 'الكمية', key: 'quantity' },
   { title: 'الوحدة', key: 'unit' },
   { title: 'نوع الناقلة', key: 'transport_type' },
-  { title: 'عدد الناقلات', key: 'transport_count' },
+  { title: 'عدد الناقلات', key: 'transport_no' },
   { title: 'ملاحظات', key: 'notes' },
 ];
 
@@ -271,7 +365,7 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
   quantity: item.quantity,
   unit: item.unit_name,
   transport_type: item.transport_type_name,
-  transport_count: item.transport_count,
+  transport_no: item.transport_no || '--',
   notes: item.notes,
 })));
 
@@ -305,9 +399,12 @@ const handleDeleteProduct = (item: any) => {
 onMounted(async () => {
   fetchUnits();
   fetchConstants();
-
+  fetchSuppliers();
   if (routeId.value) {
     await fetchFormData();
+  } else if (pickupId.value) {
+    // If pickupId exists, fetch SO pickup data to populate items
+    await fetchSoPickupData();
   }
 });
 </script>
@@ -331,86 +428,98 @@ onMounted(async () => {
         <v-form ref="formRef" v-model="isFormValid" @submit.prevent>
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-6">
             <div>
-              <selectInput :items="[]" v-model="formData.transport_company" label="شركة النقل" density="comfortable"
-                placeholder="اختر" />
+              <selectInput :items="supplierItems" v-model="formData.supplier_logistic_id" label="شركة النقل"
+                density="comfortable" placeholder="اختر" :hide-details="false"
+                :rules="[required()]"
+                :error-messages="formErrors['supplier_logistic_id']" 
+                @update:model-value="delete formErrors['supplier_logistic_id']" />
             </div>
             <div class="relative">
               <label class="text-sm font-medium text-gray-700 mb-2 block">موقع التحميل</label>
-              <div @click="openMapDialog"
-                class="flex items-center justify-between px-4 py-2 min-h-[48px] border !border-blue-400 rounded-lg cursor-pointer hover:bg-blue-100 transition-colors">
+              <div @click="openMapDialog('source'); delete formErrors['source_location']; delete formErrors['source_latitude']; delete formErrors['source_longitude']"
+                class="flex items-center justify-between px-4 py-2 min-h-[48px] border rounded-lg cursor-pointer hover:bg-blue-100 transition-colors"
+                :class="formErrors['source_location'] || formErrors['source_latitude'] || formErrors['source_longitude'] ? '!border-red-500' : '!border-blue-400'">
                 <span class="text-base font-medium text-blue-900 whitespace-nowrap overflow-hidden text-ellipsis ">
-                  {{ formData.loading_location || 'حدد الموقع' }}
+                  {{ formData.source_location || 'حدد الموقع' }}
                 </span>
                 <div class="flex items-center gap-2">
                   <span v-html="mapMarkerIcon"></span>
                 </div>
               </div>
+              <div v-if="formErrors['source_location'] || formErrors['source_latitude'] || formErrors['source_longitude']" class="text-red-500 text-xs mt-1">
+                {{ formErrors['source_location']?.[0] || formErrors['source_latitude']?.[0] || formErrors['source_longitude']?.[0] }}
+              </div>
             </div>
             <div>
-              <DateTimePickerInput v-model="formData.loading_datetime" label="تاريخ / وقت التحميل" density="comfortable"
-                placeholder="2024-03-01 / 02:30 PM" />
+              <DateTimePickerInput v-model="formData.planned_arrival_downloading" label="تاريخ / وقت التحميل"
+                density="comfortable" placeholder="2024-03-01 / 02:30 PM" />
             </div>
             <div>
-              <TextInput v-model="formData.company_name" label="مسؤول التحميل" density="comfortable"
+              <TextInput v-model="formData.downloading_responsible_party" label="مسؤول التحميل" density="comfortable"
                 placeholder="أدخل اسم مسؤول التحميل" />
             </div>
             <div class="relative">
               <label class="text-sm font-medium text-gray-700 mb-2 block">موقع التنزيل</label>
-              <div @click="openMapDialog"
-                class="flex items-center justify-between px-4 py-2 min-h-[48px] border !border-blue-400 rounded-lg cursor-pointer hover:bg-blue-100 transition-colors">
+              <div @click="openMapDialog('target'); delete formErrors['target_location']; delete formErrors['target_latitude']; delete formErrors['target_longitude']"
+                class="flex items-center justify-between px-4 py-2 min-h-[48px] border rounded-lg cursor-pointer hover:bg-blue-100 transition-colors"
+                :class="formErrors['target_location'] || formErrors['target_latitude'] || formErrors['target_longitude'] ? '!border-red-500' : '!border-blue-400'">
                 <span class="text-base font-medium text-blue-900 whitespace-nowrap overflow-hidden text-ellipsis ">
-                  {{ formData.unloading_location || 'حدد الموقع' }}
+                  {{ formData.target_location || 'حدد الموقع' }}
                 </span>
                 <div class="flex items-center gap-2">
                   <span v-html="mapMarkerIcon"></span>
                 </div>
               </div>
+              <div v-if="formErrors['target_location'] || formErrors['target_latitude'] || formErrors['target_longitude']" class="text-red-500 text-xs mt-1">
+                {{ formErrors['target_location']?.[0] || formErrors['target_latitude']?.[0] || formErrors['target_longitude']?.[0] }}
+              </div>
             </div>
             <div>
-              <DateTimePickerInput v-model="formData.unloading_datetime" type="datetime" label="تاريخ / وقت التنزيل"
-                density="comfortable" placeholder="2024-03-01 / 02:30 PM" />
+              <DateTimePickerInput v-model="formData.planned_arrival_loading" type="datetime"
+                label="تاريخ / وقت التنزيل" density="comfortable" placeholder="2024-03-01 / 02:30 PM" />
             </div>
             <div>
-              <TextInput v-model="formData.unloading_responsible" label="مسؤول التنزيل" density="comfortable"
+              <TextInput v-model="formData.loading_responsible_party" label="مسؤول التنزيل" density="comfortable"
                 placeholder="أدخل اسم مسؤول التنزيل" />
             </div>
             <div>
-              <TextInput v-model="formData.update_count" label="عدد مرات إرسال الإحداثيات" density="comfortable"
-                type="number" placeholder="أدخل عدد مرات إرسال الإحداثيات" />
+              <PriceInput v-model="formData.tracking_no_point" label="عدد مرات إرسال الإحداثيات" density="comfortable"
+                 placeholder="أدخل عدد مرات إرسال الإحداثيات" />
             </div>
             <div>
-              <TextInput v-model="formData.waybill_number" label="رقم بوليصة الشحن" density="comfortable"
+              <PriceInput v-model="formData.bill_of_lading" label="رقم بوليصة الشحن" density="comfortable"
                 placeholder="أدخل رقم بوليصة الشحن" />
             </div>
             <div>
-              <TextInput v-model="formData.density_ton" label="الكمية الكلية / طن" density="comfortable" type="number"
+              <PriceInput v-model="formData.total_quantity_ton" label="الكمية الكلية / طن" density="comfortable"
                 placeholder="أدخل الكمية بالطن" />
             </div>
             <div>
-              <TextInput v-model="formData.density_m3" label="الكمية الكلية / م^3" density="comfortable"
+              <PriceInput v-model="formData.total_quantity_m3" label="الكمية الكلية / م^3" density="comfortable"
                 placeholder="أدخل الكمية بالمتر المكعب" />
             </div>
             <div>
-              <PriceInput v-model="formData.trip_cost" show-rial-icon label="مبلغ الرحلة" density="comfortable"
+              <PriceInput v-model="formData.trip_value" show-rial-icon label="مبلغ الرحلة" density="comfortable"
                 placeholder="أدخل مبلغ الرحلة" />
             </div>
             <div>
               <label class="block text-sm font-semibold text-gray-900 mb-2">توقيت الرحلة</label>
-              <v-radio-group v-model="formData.trip_time" inline hide-details>
-                <v-radio :value="true" color="primary">
+              <v-radio-group v-model="formData.am_pm_interval" inline hide-details>
+                <v-radio :value="item.value" color="primary" v-for="item in amPmIntervalItems" :key="item.value">
                   <template #label>
-                    <span :class="formData.trip_time ? 'text-primary font-semibold' : 'text-gray-600'">
-                      صباحاً
+                    <span
+                      :class="formData.am_pm_interval === item.value ? 'text-primary font-semibold' : 'text-gray-600'">
+                      {{ item.title }}
                     </span>
                   </template>
                 </v-radio>
-                <v-radio :value="false" color="primary">
+                <!-- <v-radio :value="false" color="primary">
                   <template #label>
                     <span :class="!formData.trip_time ? 'text-primary font-semibold' : 'text-gray-600'">
                       مساءً
                     </span>
                   </template>
-                </v-radio>
+                </v-radio> -->
               </v-radio-group>
             </div>
 
@@ -474,7 +583,6 @@ onMounted(async () => {
 
       <!-- Action Buttons -->
       <div class="mt-3 flex items-center justify-center gap-3 flex-wrap">
-        <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col">
           <ButtonWithIcon variant="flat" color="primary" height="48" rounded="4"
             custom-class="font-semibold text-base px-6 md:!px-10" :prepend-icon="returnIcon"
             label="حفظ والعودة الى قائمة الحجوزات" :loading="isSubmitting" :disabled="isSubmitting"
@@ -487,17 +595,19 @@ onMounted(async () => {
             custom-class="font-semibold text-base text-primary-700 px-6 md:!px-10" :prepend-icon="saveIcon"
             label="حفظ وانشاء جديد" :loading="isSubmitting" :disabled="isSubmitting"
             @click="handleSubmit('create_new')" />
-        </div>
       </div>
     </div>
 
     <!-- Add Product Dialog -->
     <AddProductDialog v-model="showAddProductDialog" request-type="trips" :transport-types="transportTypeItems"
-      :unit-items="unitItems" :supplier-id="formData.supplier_id" :edit-product="editingProduct"
+      :unit-items="unitItems" :edit-product="editingProduct"
       :existing-products="productTableItems" @saved="handleProductSaved" @product-updated="handleProductUpdated" />
 
-    <Map v-model="showMapDialog" :latitude="formData.loading_latitude" :longitude="formData.loading_longitude"
-      :address="formData.loading_location" @location-selected="handleLocationSelected" />
+    <Map v-model="showMapDialog"
+      :latitude="String(currentMapType === 'target' ? (formData.target_latitude || '') : (formData.source_latitude || ''))"
+      :longitude="String(currentMapType === 'target' ? (formData.target_longitude || '') : (formData.source_longitude || ''))"
+      :address="String(currentMapType === 'target' ? (formData.target_location || '') : (formData.source_location || ''))"
+      @location-selected="handleLocationSelected" />
 
   </default-layout>
 </template>

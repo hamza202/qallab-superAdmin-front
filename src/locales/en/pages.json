@@ -175,6 +175,14 @@
       "list": "Trips List",
       "create": "Add Trip",
       "edit": "Edit Trip"
+    },
+    "purchasesLogistics": {
+      "title": "Logistics Service Requests",
+      "description": "Allows you to manage logistics service requests",
+      "list": "Logistics Service Requests List",
+      "create": "Create Logistics Service Request",
+      "edit": "Edit Logistics Service Request",
+      "view": "View Logistics Service Request"
     }
   }
 }
