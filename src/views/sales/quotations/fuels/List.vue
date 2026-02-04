@@ -1,21 +1,22 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, nextTick, onBeforeUnmount } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from 'vue-i18n';
 import { useApi } from '@/composables/useApi';
 import { useNotification } from '@/composables/useNotification';
 import { useTableColumns } from '@/composables/useTableColumns';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog.vue';
+import DatePickerInput from '@/components/common/forms/DatePickerInput.vue';
+import { GridIcon, trash_1_icon, trash_2_icon, importIcon, columnIcon, exportIcon, plusIcon, searchIcon } from "@/components/icons/globalIcons";
+import { switchHorisinralIcon, changeStatusIcon } from '@/components/icons/priceOffersIcons';
 import StatusChangeFeature from '@/components/common/StatusChangeFeature.vue';
-import { GridIcon, trash_1_icon, trash_2_icon, importIcon, columnIcon, exportIcon, searchIcon } from "@/components/icons/globalIcons";
-import { switcStatusIcon } from '@/components/icons/priceOffersIcons';
 
 const { t } = useI18n();
 const router = useRouter();
 const api = useApi();
 const { success, error } = useNotification();
 
-const TABLE_NAME = 'admin_purchase_building_material_quotations';
+const TABLE_NAME = 'admin_sale_fuel_quotations';
 const {
   allHeaders,
   shownHeaders,
@@ -63,14 +64,9 @@ interface ListResponse {
 }
 
 const tableItems = ref<QuotationItem[]>([]);
+const canCreate = ref(false);
 const canBulkDelete = ref(false);
 const loading = ref(false);
-const loadingMore = ref(false);
-const nextCursor = ref<string | null>(null);
-const perPage = ref(15);
-const hasMoreData = computed(() => nextCursor.value !== null);
-const loadMoreTrigger = ref<HTMLElement | null>(null);
-const observer = ref<IntersectionObserver | null>(null);
 
 const tableHeaders = computed(() =>
   shownHeaders.value.map((h) => ({ key: h.key, title: h.title, width: '140px' }))
@@ -98,11 +94,6 @@ const deleteLoading = ref(false);
 const showChangeStatusDialog = ref(false);
 const itemToChangeStatus = ref<QuotationItem | null>(null);
 
-const openChangeStatusDialog = (item: QuotationItem | Record<string, unknown>) => {
-  itemToChangeStatus.value = item as QuotationItem;
-  showChangeStatusDialog.value = true;
-};
-
 const toggleAdvancedFilters = () => {
   showAdvancedFilters.value = !showAdvancedFilters.value;
 };
@@ -119,57 +110,29 @@ const applyFilters = () => {
   fetchList();
 };
 
-const fetchList = async (append = false) => {
-  if (append) loadingMore.value = true;
-  else loading.value = true;
+const fetchList = async () => {
+  loading.value = true;
   try {
     const params = new URLSearchParams();
-    params.append('per_page', String(perPage.value));
-    if (append && nextCursor.value) params.append('cursor', nextCursor.value);
     if (filterRequestNumber.value) params.append('code', filterRequestNumber.value);
     if (filterNameEnglish.value) params.append('customer_name', filterNameEnglish.value);
     if (filterStartDateMin.value) params.append('quotations_datetime_from', filterStartDateMin.value);
     if (filterStartDateMax.value) params.append('quotations_datetime_to', filterStartDateMax.value);
 
-    const url = `/purchases/quotations/building-materials?${params.toString()}`;
+    const url = params.toString()
+      ? `/sales/quotations/fuels?${params.toString()}`
+      : '/sales/quotations/fuels';
     const body = (await api.get(url)) as unknown as ListResponse;
 
-    const data = Array.isArray(body?.data) ? body.data : [];
-    if (append) {
-      tableItems.value = [...tableItems.value, ...data];
-    } else {
-      tableItems.value = data;
-      canBulkDelete.value = body?.actions?.can_bulk_delete ?? false;
-      initHeaders(body?.headers ?? [], body?.shownHeaders ?? []);
-    }
-    nextCursor.value = body?.pagination?.next_cursor ?? null;
+    tableItems.value = Array.isArray(body?.data) ? body.data : [];
+    canCreate.value = body?.actions?.can_create ?? false;
+    canBulkDelete.value = body?.actions?.can_bulk_delete ?? false;
+    initHeaders(body?.headers ?? [], body?.shownHeaders ?? []);
   } catch (err: any) {
     console.error('Error fetching quotations list:', err);
     error(err?.response?.data?.message || 'فشل تحميل قائمة عروض السعر');
   } finally {
     loading.value = false;
-    loadingMore.value = false;
-  }
-};
-
-const setupInfiniteScroll = () => {
-  if (!loadMoreTrigger.value) return;
-  observer.value = new IntersectionObserver(
-    (entries) => {
-      const entry = entries[0];
-      if (entry?.isIntersecting && hasMoreData.value && !loadingMore.value && !loading.value) {
-        fetchList(true);
-      }
-    },
-    { root: null, rootMargin: '100px', threshold: 0.1 }
-  );
-  observer.value.observe(loadMoreTrigger.value);
-};
-
-const cleanupInfiniteScroll = () => {
-  if (observer.value && loadMoreTrigger.value) {
-    observer.value.unobserve(loadMoreTrigger.value);
-    observer.value.disconnect();
   }
 };
 
@@ -181,11 +144,12 @@ const handleToggleHeader = async (headerKey: string) => {
 
 const handleView = (item: { id?: string | number; uuid?: string }) => {
   const uuid = item.uuid ?? String(item.id);
-  router.push({ name: 'QuotationsMaterialProductView', params: { id: uuid } });
+  router.push({ name: 'SalesQuotationsFuelsView', params: { id: uuid } });
 };
 
 const handleEdit = (item: { id?: string | number; uuid?: string }) => {
-  handleView(item);
+  const uuid = item.uuid ?? String(item.id);
+  router.push({ name: 'SalesQuotationsFuelsEdit', params: { id: uuid } });
 };
 
 const handleDelete = (item: { uuid?: string; id?: string | number } & Partial<QuotationItem>) => {
@@ -198,7 +162,7 @@ const confirmDelete = async () => {
   const uuid = itemToDelete.value.uuid;
   try {
     deleteLoading.value = true;
-    await api.delete(`/purchases/quotations/building-materials/${uuid}`);
+    await api.delete(`/sales/quotations/fuels/${uuid}`);
     success('تم حذف عرض السعر بنجاح');
     showDeleteDialog.value = false;
     itemToDelete.value = null;
@@ -245,6 +209,15 @@ const getStatusClass = (status: string) => {
   }
 };
 
+const openChangeStatusDialog = (item: QuotationItem | Record<string, unknown>) => {
+  itemToChangeStatus.value = item as QuotationItem;
+  showChangeStatusDialog.value = true;
+};
+
+const openCreateQuotation = () => {
+  router.push({ name: 'SalesQuotationsFuelsCreate' });
+};
+
 const handleBulkDelete = () => {
   if (selectedRequests.value.length === 0) return;
   showBulkDeleteDialog.value = true;
@@ -253,7 +226,7 @@ const handleBulkDelete = () => {
 const confirmBulkDelete = async () => {
   try {
     deleteLoading.value = true;
-    await api.post('/purchases/quotations/building-materials/bulk-delete', {
+    await api.post('/sales/quotations/fuels/bulk-delete', {
       ids: selectedRequests.value,
     });
     success(`تم حذف ${selectedRequests.value.length} عرض بنجاح`);
@@ -270,19 +243,14 @@ const confirmBulkDelete = async () => {
 
 onMounted(() => {
   fetchList();
-  nextTick(() => setupInfiniteScroll());
-});
-
-onBeforeUnmount(() => {
-  cleanupInfiniteScroll();
 });
 </script>
 
 <template>
   <default-layout>
     <div class="pricesOffers-page">
-      <PageHeader :icon="GridIcon" title-key="pages.QuotationsMaterialProduct.title"
-        description-key="pages.QuotationsMaterialProduct.description" />
+      <PageHeader :icon="GridIcon" title-key="pages.SalesQuotationsFuels.title"
+        description-key="pages.SalesQuotationsFuels.description" />
 
       <div
         class="flex justify-end items-stretch rounded border border-gray-300 w-fit ms-auto mb-4 overflow-hidden bg-white text-sm">
@@ -329,6 +297,18 @@ onBeforeUnmount(() => {
             <ButtonWithIcon variant="flat" color="primary-500" height="40" rounded="4"
               custom-class="px-7 font-semibold text-base text-white border !border-primary-200"
               :prepend-icon="searchIcon" :label="t('common.advancedSearch')" @click="toggleAdvancedFilters" />
+
+            <ButtonWithIcon
+              v-if="canCreate"
+              variant="flat"
+              color="primary-100"
+              height="40"
+              rounded="4"
+              custom-class="px-7 font-semibold text-base !text-primary-800 border !border-primary-200"
+              :prepend-icon="plusIcon"
+              label="أضف عرض سعر"
+              @click="openCreateQuotation"
+            />
           </div>
         </div>
 
@@ -374,26 +354,19 @@ onBeforeUnmount(() => {
             <div class="flex items-center gap-1">
               <v-btn v-if="item.actions?.can_change_status" icon variant="text" size="small" color="warning-600"
                 @click="openChangeStatusDialog(item)">
-                <span v-html="switcStatusIcon"></span>
+                <span v-html="switchHorisinralIcon"></span>
               </v-btn>
             </div>
           </template>
         </DataTable>
-
-        <div ref="loadMoreTrigger" class="h-4"></div>
-        <div v-if="loadingMore" class="flex justify-center items-center py-4">
-          <v-progress-circular indeterminate color="primary" size="32" />
-          <span class="mr-2 text-gray-600">جاري تحميل المزيد...</span>
-        </div>
       </div>
     </div>
 
+    <!-- Status Change Dialog -->
     <StatusChangeFeature
       v-model="showChangeStatusDialog"
       :item="itemToChangeStatus"
-      :change-status-url="`/purchases/quotations/building-materials/${itemToChangeStatus?.uuid}/change-status`"
-      title="تغيير الحالة"
-      message="تغيير الحالة:"
+      :change-status-url="`/sales/quotations/fuels/${itemToChangeStatus?.uuid}/change-status`"
       @success="fetchList"
     />
 

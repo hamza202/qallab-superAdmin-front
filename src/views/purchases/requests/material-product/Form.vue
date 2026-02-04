@@ -457,8 +457,7 @@ const handleSubmit = async () => {
         
         success(isEditMode.value ? 'تم تحديث الطلب بنجاح' : 'تم إنشاء الطلب بنجاح');
         
-        // Navigate back to list or stay on page based on your preference
-        // router.push({ name: 'RequestForQuotationMaterialProductList' });
+        router.push({ name: 'RequestForQuotationMaterialProductList' });
         
     } catch (e: any) {
         console.error('Error submitting form:', e);
@@ -588,7 +587,7 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
     <default-layout>
         <div class="request-material-product-page -mx-6">
             <!-- Page Header -->
-            <TopHeader :icon="formIcon" title-key="pages.requestForQuotationMaterialProduct.FormTitle"
+            <TopHeader :icon="formIcon" title-key="pages.PurchasesRequestsMaterialProduct.FormTitle"
                 description-key="pages.requestForQuotationMaterialProduct.FormDescription" :show-action="false"
                 :code="isEditMode ? (formData.code || '') : ''" :code-icon="fileIcon" @action="handleNewRequest" />
             

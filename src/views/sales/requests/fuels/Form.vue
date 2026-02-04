@@ -30,18 +30,6 @@ const unitItems = ref<any[]>([]);
 const deliveryMethodItems = ref<any[]>([]);
 const supplyTypeItems = ref<any[]>([]);
 const fillingsItems = ref<any[]>([]);
-const supplierItems = ref<any[]>([]);
-
-const fetchSuppliers = async () => {
-    try {
-        const res = await api.get<any>('/suppliers/list');
-        if (Array.isArray(res.data)) {
-            supplierItems.value = res.data.map((i: any) => ({ title: i.full_name, value: i.id }));
-        }
-    } catch (e) {
-        console.error('Error fetching suppliers:', e);
-    }
-};
 
 const fetchConstants = async () => {
     try {
@@ -94,7 +82,7 @@ const fetchFormData = async () => {
     
     isLoading.value = true;
     try {
-        const res = await api.get<any>(`/purchases/fuels/${routeId.value}`);
+        const res = await api.get<any>(`/sales/fuels/${routeId.value}`);
         const data = res.data;
         
         if (data) {
@@ -110,7 +98,6 @@ const fetchFormData = async () => {
             formData.value.responsiblePhone = data.responsible_phone ?? null;
             formData.value.deliveryMethod = (data.delivery_method ?? logistics.delivered_method) ?? null;
             formData.value.supplyType = (data.supply_type ?? logistics.supply_type) ?? null;
-            formData.value.supplier_id = data.supplier_id ?? null;
             formData.value.target_location = data.target_location ?? null;
             formData.value.target_latitude = data.target_latitude ?? null;
             formData.value.target_longitude = data.target_longitude ?? null;
@@ -153,8 +140,7 @@ const fetchFormData = async () => {
 onMounted(async () => {
     await Promise.all([
         fetchConstants(),
-        fetchUnits(),
-        fetchSuppliers()
+        fetchUnits()
     ]);
     
     // Fetch form data if in edit mode
@@ -186,7 +172,6 @@ interface ProductTableItem {
 const formData = ref({
     requestNumber: '#12520226',
     requestType: null as string | null,
-    supplier_id: null as number | null,
     deliveryStartDate: '' as string,
     request_datetime: '' as string,
     paymentMethod: null as string | null,
@@ -228,18 +213,7 @@ const { warning } = useNotification();
 const showAddProductDialog = ref(false);
 const editingProduct = ref<ProductTableItem | null>(null);
 
-// Items endpoint for modal: same pattern as material-product (supplier items by supplier_id)
-const fuelsItemsEndpoint = computed(() =>
-    formData.value.supplier_id
-        ? `/items/supplier-items?supplier_id=${formData.value.supplier_id}&with_category=true`
-        : ''
-);
-
 const handleAddProduct = () => {
-    if (!formData.value.supplier_id) {
-        warning('يجب عليك اختيار اسم المورد أولاً');
-        return;
-    }
     editingProduct.value = null; // Reset edit mode
     showAddProductDialog.value = true;
 };
@@ -296,24 +270,10 @@ import { useNotification as useNotify } from '@/composables/useNotification';
 const { formRef, isFormValid, validate } = useForm();
 const { success, error } = useNotify();
 
-// Normalize request_datetime to API format: d-m-Y H:i:s (e.g. 28-01-2026 14:30:00)
-const toRequestDateTimeFormat = (value: string | Date | null | undefined): string => {
-    if (value == null || value === '') return '';
-    const str = typeof value === 'string' ? value.trim() : '';
-    // Already in d-m-Y H:i:s or d-m-Y H:i (DateTimePickerInput may send dd-MM-yyyy HH:mm:ss)
-    const match = str.match(/^(\d{1,2})-(\d{1,2})-(\d{4})\s+(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?$/);
-    if (match) {
-        const [, day, month, year, hours, minutes, seconds] = match;
-        const d = day.padStart(2, '0');
-        const m = month.padStart(2, '0');
-        const h = hours.padStart(2, '0');
-        const min = minutes.padStart(2, '0');
-        const s = (seconds ?? '0').padStart(2, '0');
-        return `${d}-${m}-${year} ${h}:${min}:${s}`;
-    }
-    // Parse as Date (e.g. ISO string) and format to d-m-Y H:i:s
-    const d = new Date(value);
-    if (isNaN(d.getTime())) return '';
+// Format date to DD-MM-YYYY HH:mm:ss
+const formatDateTime = (date: string | Date): string => {
+    if (!date) return '';
+    const d = new Date(date);
     const day = String(d.getDate()).padStart(2, '0');
     const month = String(d.getMonth() + 1).padStart(2, '0');
     const year = d.getFullYear();
@@ -321,7 +281,7 @@ const toRequestDateTimeFormat = (value: string | Date | null | undefined): strin
     const minutes = String(d.getMinutes()).padStart(2, '0');
     const seconds = String(d.getSeconds()).padStart(2, '0');
     return `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
-};
+}
 
 const getCurrentDateTimeFormatted = (): string => {
     const d = new Date();
@@ -355,26 +315,20 @@ const buildFormData = (): FormData => {
     }
     
     // Basic fields (aligned with Store endpoint)
-    fd.append('request_type', formData.value.requestType || '');
     fd.append('request_datetime', formData.value.request_datetime
-        ? toRequestDateTimeFormat(formData.value.request_datetime)
+        ? formatDateTime(formData.value.request_datetime)
         : getCurrentDateTimeFormatted());
-    if (formData.value.deliveryStartDate) fd.append('delivery_start_date', formData.value.deliveryStartDate);
     fd.append('upfront_payment', String(formData.value.advancePayment || ''));
     fd.append('payment_method', formData.value.paymentMethod || '');
     fd.append('responsible_person', formData.value.responsibleName || '');
     if (formData.value.responsiblePhone) fd.append('responsible_phone', formData.value.responsiblePhone);
-    if (formData.value.deliveryMethod) fd.append('delivery_method', formData.value.deliveryMethod);
-    if (formData.value.supplyType) fd.append('supply_type', formData.value.supplyType);
-    if (formData.value.supplier_id != null) fd.append('supplier_id', String(formData.value.supplier_id));
     fd.append('target_location', formData.value.target_location || '');
     fd.append('target_latitude', String(formData.value.target_latitude ?? ''));
     fd.append('target_longitude', String(formData.value.target_longitude ?? ''));
     fd.append('source_location', formData.value.source_location || '');
     fd.append('source_latitude', String(formData.value.source_latitude ?? ''));
     fd.append('source_longitude', String(formData.value.source_longitude ?? ''));
-    if (formData.value.supplyDuration != null) fd.append('supply_duration', String(formData.value.supplyDuration));
-    if (formData.value.deliveryDuration != null) fd.append('delivery_duration', String(formData.value.deliveryDuration));
+    fd.append('notes', formData.value.textNote || '');
 
     // logistics_detail (required by API – Postman keys)
     fd.append('logistics_detail[from_date]', formatDateDdMmYyyy(formData.value.deliveryStartDate) || '');
@@ -382,7 +336,6 @@ const buildFormData = (): FormData => {
     fd.append('logistics_detail[supply_interval]', formData.value.supplyDuration != null && formData.value.supplyDuration !== '' ? String(formData.value.supplyDuration) : '');
     fd.append('logistics_detail[delivered_interval]', formData.value.deliveryDuration != null && formData.value.deliveryDuration !== '' ? String(formData.value.deliveryDuration) : '');
     fd.append('logistics_detail[delivered_method]', formData.value.deliveryMethod || '');
-    fd.append('notes', formData.value.textNote || '');
     
     // Items (products) – keys per Postman: item_id, unit_id, quantity, supply_type, filling, notes
     productTableItems.value.forEach((item, index) => {
@@ -402,10 +355,6 @@ const buildFormData = (): FormData => {
         fd.append('image', formData.value.image[0]);
     }
     
-    // if (formData.value.voice_attachment) {
-    //     fd.append('voice_attachment', formData.value.voice_attachment);
-    // }
-    
     return fd;
 }
 
@@ -413,9 +362,15 @@ const handleSubmit = async () => {
     if (!await validate()) return;
     
     locationError.value = null;
+    sourceLocationError.value = null;
     if (!formData.value.target_location?.trim()) {
         locationError.value = 'يجب تحديد موقع تسليم المواد';
         warning('يجب تحديد موقع تسليم المواد');
+        return;
+    }
+    if (!formData.value.source_location?.trim()) {
+        sourceLocationError.value = 'الحقل موقع الانطلاق مطلوب.';
+        warning('الحقل موقع الانطلاق مطلوب.');
         return;
     }
     
@@ -431,14 +386,14 @@ const handleSubmit = async () => {
         
         if (isEditMode.value && routeId.value) {
             // Edit mode - POST with _method: PUT and UUID in URL
-            await api.post(`/purchases/fuels/${routeId.value}`, fd, {
+            await api.post(`/sales/fuels/${routeId.value}`, fd, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
             });
         } else {
             // Create mode - POST request
-            await api.post('/purchases/fuels', fd, {
+            await api.post('/sales/fuels', fd, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
@@ -447,8 +402,8 @@ const handleSubmit = async () => {
         
         success(isEditMode.value ? 'تم تحديث الطلب بنجاح' : 'تم إنشاء الطلب بنجاح');
         
-        // Navigate back to fuels list
-        router.push({ name: 'RequestForQuotationFuelList' });
+        // Navigate back to list
+        router.push({ name: 'SalesRequestsFuelsList' });
         
     } catch (e: any) {
         console.error('Error submitting form:', e);
@@ -480,11 +435,13 @@ const handleSourceLocationSelected = (location: { latitude: string; longitude: s
     formData.value.source_latitude = location.latitude;
     formData.value.source_longitude = location.longitude;
     formData.value.source_location = location.address;
+    sourceLocationError.value = null;
 };
 
 const showMapDialog = ref(false);
 const showSourceMapDialog = ref(false);
 const locationError = ref<string | null>(null);
+const sourceLocationError = ref<string | null>(null);
 
 const openMapDialog = () => {
     showMapDialog.value = true;
@@ -521,8 +478,8 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
     <default-layout>
         <div class="request-material-product-page -mx-6">
             <!-- Page Header (كود العرض #124098) -->
-            <TopHeader :icon="fileQuestionIcon" title-key="pages.PurchasesRequestsFuels.FormTitle"
-                description-key="pages.PurchasesRequestsFuels.FormDescription" :show-action="false"
+            <TopHeader :icon="fileQuestionIcon" title-key="pages.SalesRequestsFuels.FormTitle"
+                description-key="pages.SalesRequestsFuels.FormDescription" :show-action="false"
                 :code="isEditMode ? (formData.code ? '#' + formData.code : '') : '#124098'" :code-icon="fileIcon" />
 
             <!-- البيانات الأساسية -->
@@ -534,20 +491,13 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
 
                 <v-form ref="formRef" v-model="isFormValid" @submit.prevent>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                        <!-- Row 1: تاريخ الطلب, اسم المورد, اسم المسؤول*, هاتف المسؤول* -->
+                        <!-- Row 1: تاريخ الطلب, اسم المسؤول*, هاتف المسؤول* -->
                         <div>
                             <DateTimePickerInput v-model="formData.request_datetime"
                                 label="تاريخ الطلب"
                                 density="comfortable"
                                 placeholder="اختر التاريخ والوقت"
                             />
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">اسم المورد <span class="text-error-600">*</span></label>
-                            <SelectInput v-model="formData.supplier_id"
-                                :items="supplierItems" item-title="title" item-value="value"
-                                placeholder="حدد المورد" density="comfortable" :rules="[required()]" />
                         </div>
 
                         <div>
@@ -600,18 +550,20 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
                             <p v-if="locationError" class="text-error-600 text-xs mt-1">{{ locationError }}</p>
                         </div>
 
-                        <!-- موقع استلام المواد -->
                         <div class="relative">
-                            <label class="text-sm font-medium text-gray-700 mb-2 block">موقع استلام المواد</label>
+                            <label class="text-sm font-medium text-gray-700 mb-2 block">موقع الانطلاق <span class="text-error-600">*</span></label>
                             <div @click="openSourceMapDialog"
-                                class="flex items-center justify-between px-4 py-2 min-h-[48px] border rounded-lg cursor-pointer transition-colors !border-blue-400 hover:bg-blue-100">
-                                <span class="text-base font-medium text-blue-900 whitespace-nowrap overflow-hidden text-ellipsis">
-                                    {{ formData.source_location || 'حدد الموقع' }}
+                                class="flex items-center justify-between px-4 py-2 min-h-[48px] border rounded-lg cursor-pointer transition-colors"
+                                :class="sourceLocationError ? '!border-error-500 bg-error-50' : '!border-blue-400 hover:bg-blue-100'">
+                                <span class="text-base font-medium whitespace-nowrap overflow-hidden text-ellipsis"
+                                    :class="sourceLocationError ? 'text-error-700' : 'text-blue-900'">
+                                    {{ formData.source_location || 'حدد موقع الانطلاق' }}
                                 </span>
                                 <div class="flex items-center gap-2">
                                     <span v-html="mapMarkerIcon"></span>
                                 </div>
                             </div>
+                            <p v-if="sourceLocationError" class="text-error-600 text-xs mt-1">{{ sourceLocationError }}</p>
                         </div>
 
                         <!-- Row 3: تاريخ بدء التسليم*, نوع التوريد*, مدة التوريد, مدة التسليم -->
@@ -796,19 +748,18 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
             :longitude="formData.target_longitude"
             :address="formData.target_location"
             @location-selected="handleLocationSelected" />
-
         <Map v-model="showSourceMapDialog"
             :latitude="formData.source_latitude"
             :longitude="formData.source_longitude"
             :address="formData.source_location"
             @location-selected="handleSourceLocationSelected" />
 
-        <!-- Add Product Dialog (items based on supplier_id, same as material-product) -->
+        <!-- Add Product Dialog -->
         <AddProductDialogFuels v-model="showAddProductDialog"
             :fillings-options="fillingsItems"
             :unit-items="unitItems"
             :supply-type-options="supplyTypeItems"
-            :items-endpoint="fuelsItemsEndpoint"
+            items-endpoint="/items/active-list?with_category=true"
             :edit-product="editingProduct"
             :existing-products="productTableItems"
             @saved="handleProductSaved"

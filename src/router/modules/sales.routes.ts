@@ -148,7 +148,7 @@ export const salesRoutes: RouteRecordRaw[] = [
       },
     ],
   },
-    {
+  {
     path: "/sales/orders/material-product",
     name: "SalesRequests",
     redirect: "/sales/orders/material-product/list",
@@ -156,7 +156,8 @@ export const salesRoutes: RouteRecordRaw[] = [
       {
         path: "list",
         name: "SalesOrdersMaterialProductList",
-        component: () => import("@/views/sales/orders/material-product/List.vue"),
+        component: () =>
+          import("@/views/sales/orders/material-product/List.vue"),
         meta: {
           title: "pages.SalesRequests.title",
         },
@@ -164,7 +165,8 @@ export const salesRoutes: RouteRecordRaw[] = [
       {
         path: "create",
         name: "SalesOrdersMaterialProductCreate",
-        component: () => import("@/views/sales/orders/material-product/Form.vue"),
+        component: () =>
+          import("@/views/sales/orders/material-product/Form.vue"),
         meta: {
           title: "pages.SalesRequests.title",
         },
@@ -172,7 +174,8 @@ export const salesRoutes: RouteRecordRaw[] = [
       {
         path: "edit/:id",
         name: "SalesOrdersMaterialProductEdit",
-        component: () => import("@/views/sales/orders/material-product/Form.vue"),
+        component: () =>
+          import("@/views/sales/orders/material-product/Form.vue"),
         meta: {
           title: "pages.SalesRequests.edit",
         },
@@ -206,6 +209,87 @@ export const salesRoutes: RouteRecordRaw[] = [
         component: () => import("@/views/sales/trips/Form.vue"),
         meta: {
           title: "pages.SalesTrips.edit",
+        },
+      },
+    ],
+  },
+
+  // Sales Requests Fuels
+  {
+    path: "/sales/requests/fuels",
+    name: "SalesRequestsFuels",
+    redirect: "/sales/requests/fuels/list",
+    children: [
+      {
+        path: "list",
+        name: "SalesRequestsFuelsList",
+        component: () => import("@/views/sales/requests/fuels/List.vue"),
+        meta: {
+          title: "pages.SalesRequestsFuels.title",
+        },
+      },
+      {
+        path: "create",
+        name: "SalesRequestsFuelsCreate",
+        component: () => import("@/views/sales/requests/fuels/Form.vue"),
+        meta: {
+          title: "pages.SalesRequestsFuels.FormTitle",
+        },
+      },
+      {
+        path: "edit/:id",
+        name: "SalesRequestsFuelsEdit",
+        component: () => import("@/views/sales/requests/fuels/Form.vue"),
+        meta: {
+          title: "pages.SalesRequestsFuels.FormTitle",
+        },
+      },
+      {
+        path: "view/:id",
+        name: "SalesRequestsFuelsView",
+        component: () => import("@/views/sales/requests/fuels/View.vue"),
+        meta: {
+          title: "pages.SalesRequestsFuels.title",
+        },
+      },
+    ],
+  },
+  // Sales Quotations Fuels
+  {
+    path: "/sales/quotations/fuels",
+    name: "SalesQuotationsFuels",
+    redirect: "/sales/quotations/fuels/list",
+    children: [
+      {
+        path: "list",
+        name: "SalesQuotationsFuelsList",
+        component: () => import("@/views/sales/quotations/fuels/List.vue"),
+        meta: {
+          title: "pages.SalesQuotationsFuels.title",
+        },
+      },
+      {
+        path: "create",
+        name: "SalesQuotationsFuelsCreate",
+        component: () => import("@/views/sales/quotations/fuels/Form.vue"),
+        meta: {
+          title: "pages.SalesQuotationsFuels.FormTitle",
+        },
+      },
+      {
+        path: "edit/:id",
+        name: "SalesQuotationsFuelsEdit",
+        component: () => import("@/views/sales/quotations/fuels/Form.vue"),
+        meta: {
+          title: "pages.SalesQuotationsFuels.FormTitle",
+        },
+      },
+      {
+        path: "view/:id",
+        name: "SalesQuotationsFuelsView",
+        component: () => import("@/views/sales/quotations/fuels/View.vue"),
+        meta: {
+          title: "pages.SalesQuotationsFuels.title",
         },
       },
     ],

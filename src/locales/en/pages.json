@@ -183,6 +183,27 @@
       "create": "Create Logistics Service Request",
       "edit": "Edit Logistics Service Request",
       "view": "View Logistics Service Request"
+    },
+    "QuotationsFuels": {
+      "title": "Fuel Quotations",
+      "description": "View and manage fuel quotations",
+      "view": "View fuel quotation"
+    },
+    "PurchasesRequestsFuels": {
+      "title": "Purchase Requests for Fuel Quotations",
+      "description": "View and manage purchase requests for fuel quotations",
+      "FormTitle": "Purchase Request for Fuel Quotations",
+      "FormDescription": "Add purchase request for fuel quotations",
+      "edit": "Edit purchase request for fuel quotations",
+      "view": "View purchase request for fuel quotations"
+    },
+    "PurchasesRequestsMaterialProduct": {
+      "title": "Purchase Requests for Material Product Quotations",
+      "description": "View and manage purchase requests for material product quotations",
+      "FormTitle": "Purchase Request for Material Product Quotations",
+      "FormDescription": "Add purchase request for material product quotations",
+      "edit": "Edit purchase request for material product quotations",
+      "view": "View purchase request for material product quotations"
     }
   }
 }

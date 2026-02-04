@@ -10,10 +10,10 @@
                     </router-link>
                     <span class="text-lg text-gray-300">/</span>
                     <router-link to="/settings" class="text-gray-600 hover:text-primary-600">
-                        المشتريات
+                        المبيعات
                     </router-link>
                     <span class="text-lg text-gray-300">/</span>
-                    <router-link to="/purchases/requests/fuels/list"
+                    <router-link to="/sales/requests/fuels/list"
                         class="text-gray-600 hover:text-primary-600">
                         طلبات عروض أسعار محروقات
                     </router-link>
@@ -262,7 +262,7 @@ const fetchRequestData = async () => {
 
     isLoading.value = true
     try {
-        const res = await api.get<any>(`/purchases/fuels/${routeId.value}`)
+        const res = await api.get<any>(`/sales/fuels/${routeId.value}`)
         requestData.value = res.data
     } catch (e: any) {
         console.error('Error fetching request data:', e)

@@ -16,7 +16,7 @@ const router = useRouter();
 const api = useApi();
 const { success, error } = useNotification();
 
-const TABLE_NAME = 'admin_purchases_fuels';
+const TABLE_NAME = 'admin_sales_fuels';
 const {
   allHeaders,
   shownHeaders,
@@ -34,11 +34,11 @@ interface ItemActions {
   can_change_status: boolean;
 }
 
-interface BuildingMaterialRequest {
+interface FuelRequest {
   uuid: string;
   id?: string | number;
   doc_id?: string | number;
-  supplier_name: string;
+  customer_name: string;
   request_type: string;
   code: string;
   target_location: string;
@@ -58,7 +58,7 @@ interface TableHeader {
 }
 
 interface ListResponse {
-  data: BuildingMaterialRequest[];
+  data: FuelRequest[];
   pagination: { next_cursor: string | null; previous_cursor: string | null; per_page: number };
   header_table: string;
   headers: TableHeader[];
@@ -67,7 +67,7 @@ interface ListResponse {
 }
 
 // API state
-const tableItems = ref<BuildingMaterialRequest[]>([]);
+const tableItems = ref<FuelRequest[]>([]);
 const canCreate = ref(false);
 const canBulkDelete = ref(false);
 const loading = ref(false);
@@ -97,12 +97,12 @@ const filterStartDateMax = ref('');
 // Delete dialog (single shared dialog for both single and bulk)
 const showDeleteDialog = ref(false);
 const showBulkDeleteDialog = ref(false);
-const itemToDelete = ref<BuildingMaterialRequest | null>(null);
+const itemToDelete = ref<FuelRequest | null>(null);
 const deleteLoading = ref(false);
 
 // Status change dialog
 const showChangeStatusDialog = ref(false);
-const itemToChangeStatus = ref<BuildingMaterialRequest | null>(null);
+const itemToChangeStatus = ref<FuelRequest | null>(null);
 
 const isDeleteDialogOpen = computed({
   get: () => showDeleteDialog.value || showBulkDeleteDialog.value,
@@ -149,13 +149,13 @@ const fetchList = async () => {
   try {
     const params = new URLSearchParams();
     if (filterRequestNumber.value) params.append('code', filterRequestNumber.value);
-    if (filterNameEnglish.value) params.append('supplier_name', filterNameEnglish.value);
+    if (filterNameEnglish.value) params.append('customer_name', filterNameEnglish.value);
     if (filterStartDateMin.value) params.append('request_datetime_from', filterStartDateMin.value);
     if (filterStartDateMax.value) params.append('request_datetime_to', filterStartDateMax.value);
 
     const url = params.toString()
-      ? `/purchases/fuels?${params.toString()}`
-      : '/purchases/fuels';
+      ? `/sales/fuels?${params.toString()}`
+      : '/sales/fuels';
     const res = await api.get<ListResponse>(url);
 
     tableItems.value = res.data || [];
@@ -163,7 +163,7 @@ const fetchList = async () => {
     canBulkDelete.value = res.actions?.can_bulk_delete ?? false;
     initHeaders(res.headers || [], res.shownHeaders || []);
   } catch (err: any) {
-    console.error('Error fetching building materials list:', err);
+    console.error('Error fetching sales fuels list:', err);
     error(err?.response?.data?.message || 'فشل تحميل قائمة الطلبات');
   } finally {
     loading.value = false;
@@ -181,13 +181,13 @@ const handleToggleHeader = async (headerKey: string) => {
 const handleEdit = (item: { id?: string | number; uuid?: string }) => {
   const id = item.uuid ?? String(item.id);
   router.push({
-    name: 'RequestForQuotationFuelEdit',
+    name: 'SalesRequestsFuelsEdit',
     params: { id },
   });
 };
 
-const handleDelete = (item: { uuid?: string; id?: string | number } & Partial<BuildingMaterialRequest>) => {
-  itemToDelete.value = item as BuildingMaterialRequest;
+const handleDelete = (item: { uuid?: string; id?: string | number } & Partial<FuelRequest>) => {
+  itemToDelete.value = item as FuelRequest;
   showDeleteDialog.value = true;
 };
 
@@ -198,7 +198,7 @@ const confirmDelete = async () => {
   itemToDelete.value = null;
   try {
     deleteLoading.value = true;
-    await api.delete(`/purchases/fuels/${uuid}`);
+    await api.delete(`/sales/fuels/${uuid}`);
     success('تم حذف الطلب بنجاح');
     await fetchList();
   } catch (err: any) {
@@ -259,17 +259,17 @@ const getStatusStyle = (item: Record<string, unknown>): Record<string, string> |
 };
 
 const openCreateRequest = () => {
-  router.push({ name: 'RequestForQuotationFuelCreate' });
+  router.push({ name: 'SalesRequestsFuelsCreate' });
 };
 
 const handleView = (item: any) => {
-    router.push({ name: "PurchasesRequestsFuelsView", params: { id: item.uuid } });
+    router.push({ name: "SalesRequestsFuelsView", params: { id: item.uuid } });
 };
 
 
 
-const openChangeStatusDialog = (item: BuildingMaterialRequest | Record<string, unknown>) => {
-  itemToChangeStatus.value = item as BuildingMaterialRequest;
+const openChangeStatusDialog = (item: FuelRequest | Record<string, unknown>) => {
+  itemToChangeStatus.value = item as FuelRequest;
   showChangeStatusDialog.value = true;
 };
 
@@ -281,7 +281,7 @@ const handleBulkDelete = () => {
 const confirmBulkDelete = async () => {
   try {
     deleteLoading.value = true;
-    await api.post('/purchases/fuels/bulk-delete', {
+    await api.post('/sales/fuels/bulk-delete', {
       ids: selectedRequests.value,
     });
     success(`تم حذف ${selectedRequests.value.length} طلب بنجاح`);
@@ -306,8 +306,8 @@ onMounted(() => {
     <div class="pricesOffers-page">
       <PageHeader
         :icon="GridIcon"
-        title-key="pages.PurchasesRequestsFuels.title"
-        description-key="pages.PurchasesRequestsFuels.description"
+        title-key="pages.SalesRequestsFuels.title"
+        description-key="pages.SalesRequestsFuels.description"
       />
 
       <div
@@ -442,7 +442,7 @@ onMounted(() => {
               density="comfortable"
               variant="outlined"
               hide-details
-              placeholder="اسم المورد"
+              placeholder="اسم العميل"
               class="w-full sm:w-40 bg-white"
             />
             <TextInput
@@ -550,7 +550,7 @@ onMounted(() => {
     <StatusChangeFeature
       v-model="showChangeStatusDialog"
       :item="itemToChangeStatus"
-      :change-status-url="`/purchases/fuels/${itemToChangeStatus?.uuid}/change-status`"
+      :change-status-url="`/sales/fuels/${itemToChangeStatus?.uuid}/change-status`"
       @success="fetchList"
     />
   </default-layout>

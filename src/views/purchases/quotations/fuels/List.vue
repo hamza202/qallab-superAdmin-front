@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, nextTick, onBeforeUnmount } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from 'vue-i18n';
 import { useApi } from '@/composables/useApi';
@@ -7,7 +7,8 @@ import { useNotification } from '@/composables/useNotification';
 import { useTableColumns } from '@/composables/useTableColumns';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog.vue';
 import { GridIcon, trash_1_icon, trash_2_icon, importIcon, columnIcon, exportIcon, searchIcon } from "@/components/icons/globalIcons";
-import { switchHorisinralIcon, changeStatusIcon } from '@/components/icons/priceOffersIcons';
+import { switchHorisinralIcon } from '@/components/icons/priceOffersIcons';
+import StatusChangeFeature from '@/components/common/StatusChangeFeature.vue';
 
 const { t } = useI18n();
 const router = useRouter();
@@ -64,6 +65,12 @@ interface ListResponse {
 const tableItems = ref<QuotationItem[]>([]);
 const canBulkDelete = ref(false);
 const loading = ref(false);
+const loadingMore = ref(false);
+const nextCursor = ref<string | null>(null);
+const perPage = ref(15);
+const hasMoreData = computed(() => nextCursor.value !== null);
+const loadMoreTrigger = ref<HTMLElement | null>(null);
+const observer = ref<IntersectionObserver | null>(null);
 
 const tableHeaders = computed(() =>
   shownHeaders.value.map((h) => ({ key: h.key, title: h.title, width: '140px' }))
@@ -89,7 +96,7 @@ const itemToDelete = ref<QuotationItem | null>(null);
 const deleteLoading = ref(false);
 
 const showChangeStatusDialog = ref(false);
-const selectedStatus = ref(null);
+const itemToChangeStatus = ref<QuotationItem | null>(null);
 
 const toggleAdvancedFilters = () => {
   showAdvancedFilters.value = !showAdvancedFilters.value;
@@ -107,28 +114,57 @@ const applyFilters = () => {
   fetchList();
 };
 
-const fetchList = async () => {
-  loading.value = true;
+const fetchList = async (append = false) => {
+  if (append) loadingMore.value = true;
+  else loading.value = true;
   try {
     const params = new URLSearchParams();
+    params.append('per_page', String(perPage.value));
+    if (append && nextCursor.value) params.append('cursor', nextCursor.value);
     if (filterRequestNumber.value) params.append('code', filterRequestNumber.value);
     if (filterNameEnglish.value) params.append('customer_name', filterNameEnglish.value);
     if (filterStartDateMin.value) params.append('quotations_datetime_from', filterStartDateMin.value);
     if (filterStartDateMax.value) params.append('quotations_datetime_to', filterStartDateMax.value);
 
-    const url = params.toString()
-      ? `/purchases/quotations/fuels?${params.toString()}`
-      : '/purchases/quotations/fuels';
+    const url = `/purchases/quotations/fuels?${params.toString()}`;
     const body = (await api.get(url)) as unknown as ListResponse;
 
-    tableItems.value = Array.isArray(body?.data) ? body.data : [];
-    canBulkDelete.value = body?.actions?.can_bulk_delete ?? false;
-    initHeaders(body?.headers ?? [], body?.shownHeaders ?? []);
+    const data = Array.isArray(body?.data) ? body.data : [];
+    if (append) {
+      tableItems.value = [...tableItems.value, ...data];
+    } else {
+      tableItems.value = data;
+      canBulkDelete.value = body?.actions?.can_bulk_delete ?? false;
+      initHeaders(body?.headers ?? [], body?.shownHeaders ?? []);
+    }
+    nextCursor.value = body?.pagination?.next_cursor ?? null;
   } catch (err: any) {
     console.error('Error fetching quotations list:', err);
     error(err?.response?.data?.message || 'فشل تحميل قائمة عروض السعر');
   } finally {
     loading.value = false;
+    loadingMore.value = false;
+  }
+};
+
+const setupInfiniteScroll = () => {
+  if (!loadMoreTrigger.value) return;
+  observer.value = new IntersectionObserver(
+    (entries) => {
+      const entry = entries[0];
+      if (entry?.isIntersecting && hasMoreData.value && !loadingMore.value && !loading.value) {
+        fetchList(true);
+      }
+    },
+    { root: null, rootMargin: '100px', threshold: 0.1 }
+  );
+  observer.value.observe(loadMoreTrigger.value);
+};
+
+const cleanupInfiniteScroll = () => {
+  if (observer.value && loadMoreTrigger.value) {
+    observer.value.unobserve(loadMoreTrigger.value);
+    observer.value.disconnect();
   }
 };
 
@@ -204,8 +240,9 @@ const getStatusClass = (status: string) => {
   }
 };
 
-const handleStatusChange = (status: unknown) => {
-  showChangeStatusDialog.value = false;
+const openChangeStatusDialog = (item: QuotationItem | Record<string, unknown>) => {
+  itemToChangeStatus.value = item as QuotationItem;
+  showChangeStatusDialog.value = true;
 };
 
 const handleBulkDelete = () => {
@@ -233,6 +270,11 @@ const confirmBulkDelete = async () => {
 
 onMounted(() => {
   fetchList();
+  nextTick(() => setupInfiniteScroll());
+});
+
+onBeforeUnmount(() => {
+  cleanupInfiniteScroll();
 });
 </script>
 
@@ -331,20 +373,27 @@ onMounted(() => {
           <template #item.actions="{ item }">
             <div class="flex items-center gap-1">
               <v-btn v-if="item.actions?.can_change_status" icon variant="text" size="small" color="warning-600"
-                @click="showChangeStatusDialog = true">
+                @click="openChangeStatusDialog(item)">
                 <span v-html="switchHorisinralIcon"></span>
               </v-btn>
             </div>
           </template>
         </DataTable>
+
+        <div ref="loadMoreTrigger" class="h-4"></div>
+        <div v-if="loadingMore" class="flex justify-center items-center py-4">
+          <v-progress-circular indeterminate color="primary" size="32" />
+          <span class="mr-2 text-gray-600">جاري تحميل المزيد...</span>
+        </div>
       </div>
     </div>
 
-    <StatusChangeDialog v-model="showChangeStatusDialog" v-model:selectValue="selectedStatus" title="تغيير الحالة"
-      message="تغيير الحالة:" :show-select="true" :select-items="[
-        { title: 'قيد المراجعة', value: 'under_review' },
-        { title: 'مقبول', value: 'accepted' }
-      ]" :dialog-icon="changeStatusIcon" @confirm="handleStatusChange" />
+    <StatusChangeFeature
+      v-model="showChangeStatusDialog"
+      :item="itemToChangeStatus"
+      :change-status-url="`/purchases/quotations/fuels/${itemToChangeStatus?.uuid}/change-status`"
+      @success="fetchList"
+    />
 
     <DeleteConfirmDialog v-model="showDeleteDialog" :loading="deleteLoading" title="حذف عرض السعر"
       message="هل أنت متأكد من حذف هذا العرض؟" @confirm="confirmDelete" />

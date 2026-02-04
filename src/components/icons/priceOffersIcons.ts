@@ -145,6 +145,10 @@ export const switcStatusIcon = `<svg width="24" height="24" viewBox="0 0 24 24" 
 <path d="M20 17H4M4 17L8 13M4 17L8 21M4 7H20M20 7L16 3M20 7L16 11" stroke="#DC6803" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
 `
+export const switchHorisinralIcon = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M20 17H4M4 17L8 13M4 17L8 21M4 7H20M20 7L16 3M20 7L16 11" stroke="#DC6803" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+`
 
 export const changeStatusIcon = `<svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
 <rect x="4" y="4" width="48" height="48" rx="24" fill="#D1E9FF"/>

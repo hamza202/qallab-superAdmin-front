@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, nextTick, onBeforeUnmount } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { useApi } from "@/composables/useApi";
@@ -74,6 +74,12 @@ const tableItems = ref<ReceivingDoc[]>([]);
 const canCreate = ref(false);
 const canBulkDelete = ref(false);
 const loading = ref(false);
+const loadingMore = ref(false);
+const nextCursor = ref<string | null>(null);
+const perPage = ref(15);
+const hasMoreData = computed(() => nextCursor.value !== null);
+const loadMoreTrigger = ref<HTMLElement | null>(null);
+const observer = ref<IntersectionObserver | null>(null);
 
 // Table headers for DataTable (from shownHeaders)
 const tableHeaders = computed(() =>
@@ -121,11 +127,14 @@ const applyFilters = () => {
   fetchList();
 };
 
-// API: fetch list
-const fetchList = async () => {
-  loading.value = true;
+// API: fetch list (append = true for infinite scroll)
+const fetchList = async (append = false) => {
+  if (append) loadingMore.value = true;
+  else loading.value = true;
   try {
     const params = new URLSearchParams();
+    params.append("per_page", String(perPage.value));
+    if (append && nextCursor.value) params.append("cursor", nextCursor.value);
     if (filterCode.value) params.append("code", filterCode.value);
     if (filterPurchaseOrderCode.value)
       params.append("purchase_order_code", filterPurchaseOrderCode.value);
@@ -133,20 +142,46 @@ const fetchList = async () => {
       params.append("receiving_date", filterReceivingDate.value);
     if (filterStatus.value) params.append("status", filterStatus.value);
 
-    const url = params.toString()
-      ? `/purchases/receiving-docs?${params.toString()}`
-      : "/purchases/receiving-docs";
+    const url = `/purchases/receiving-docs?${params.toString()}`;
     const res = await api.get<ListResponse>(url);
 
-    tableItems.value = res.data || [];
-    canCreate.value = res.actions?.can_create ?? false;
-    canBulkDelete.value = res.actions?.can_bulk_delete ?? false;
-    initHeaders(res.headers || [], res.shownHeaders || []);
+    const data = res.data || [];
+    if (append) {
+      tableItems.value = [...tableItems.value, ...data];
+    } else {
+      tableItems.value = data;
+      canCreate.value = res.actions?.can_create ?? false;
+      canBulkDelete.value = res.actions?.can_bulk_delete ?? false;
+      initHeaders(res.headers || [], res.shownHeaders || []);
+    }
+    nextCursor.value = res.pagination?.next_cursor ?? null;
   } catch (err: any) {
     console.error("Error fetching receiving docs list:", err);
     error(err?.response?.data?.message || "فشل تحميل قائمة سندات الاستلام");
   } finally {
     loading.value = false;
+    loadingMore.value = false;
+  }
+};
+
+const setupInfiniteScroll = () => {
+  if (!loadMoreTrigger.value) return;
+  observer.value = new IntersectionObserver(
+    (entries) => {
+      const entry = entries[0];
+      if (entry?.isIntersecting && hasMoreData.value && !loadingMore.value && !loading.value) {
+        fetchList(true);
+      }
+    },
+    { root: null, rootMargin: "100px", threshold: 0.1 }
+  );
+  observer.value.observe(loadMoreTrigger.value);
+};
+
+const cleanupInfiniteScroll = () => {
+  if (observer.value && loadMoreTrigger.value) {
+    observer.value.unobserve(loadMoreTrigger.value);
+    observer.value.disconnect();
   }
 };
 
@@ -252,6 +287,11 @@ const confirmBulkDelete = async () => {
 
 onMounted(() => {
   fetchList();
+  nextTick(() => setupInfiniteScroll());
+});
+
+onBeforeUnmount(() => {
+  cleanupInfiniteScroll();
 });
 </script>
 
@@ -465,6 +505,12 @@ onMounted(() => {
             </span>
           </template>
         </DataTable>
+
+        <div ref="loadMoreTrigger" class="h-4"></div>
+        <div v-if="loadingMore" class="flex justify-center items-center py-4">
+          <v-progress-circular indeterminate color="primary" size="32" />
+          <span class="mr-2 text-gray-600">جاري تحميل المزيد...</span>
+        </div>
       </div>
     </div>
 
