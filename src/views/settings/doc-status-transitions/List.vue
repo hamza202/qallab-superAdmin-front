@@ -468,9 +468,13 @@ onBeforeUnmount(() => {
 
                 </DataTable>
 
+                <!-- Infinite scroll trigger (always in DOM so IntersectionObserver can attach) -->
+                <div ref="loadMoreTrigger" class="h-4"></div>
+
                 <!-- Loading more indicator -->
-                <div v-if="hasMoreData" ref="loadMoreTrigger" class="flex justify-center py-4">
-                    <v-progress-circular v-if="loadingMore" indeterminate color="primary" size="32" />
+                <div v-if="loadingMore" class="flex justify-center items-center py-4">
+                    <v-progress-circular indeterminate color="primary" size="32" />
+                    <span class="mr-2 text-gray-600">جاري تحميل المزيد...</span>
                 </div>
             </div>
         </div>

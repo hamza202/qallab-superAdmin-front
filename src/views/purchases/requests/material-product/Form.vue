@@ -457,8 +457,7 @@ const handleSubmit = async () => {
         
         success(isEditMode.value ? 'تم تحديث الطلب بنجاح' : 'تم إنشاء الطلب بنجاح');
         
-        // Navigate back to list or stay on page based on your preference
-        // router.push({ name: 'RequestForQuotationMaterialProductList' });
+        router.push({ name: 'RequestForQuotationMaterialProductList' });
         
     } catch (e: any) {
         console.error('Error submitting form:', e);
