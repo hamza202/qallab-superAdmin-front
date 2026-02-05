@@ -57,31 +57,14 @@ const internalSelectValue = computed({
 <template>
   <div>
     <label v-if="label" class="block text-sm font-semibold text-gray-900 mb-2">{{ label }}</label>
-    <v-text-field
-      v-model="internalValue"
-      :type="type"
-      variant="outlined"
-      :rules="rules"
-      :density="density"
-      :placeholder="placeholder"
-      :disabled="disabled"
-      :readonly="readonly"
-      :hide-details="hideDetails"
-    >
+    <v-text-field v-model="internalValue" :type="type" variant="outlined" :rules="rules" :density="density"
+      :placeholder="placeholder" :disabled="disabled" :readonly="readonly" :hide-details="hideDetails">
       <template #append-inner>
         <v-divider vertical class="mx-2" />
-        <div class="h-full flex items-center bg-gray-100 px-2 -mx-3 rounded-tl-lg !rounded-bl-lg" :style="{ width: selectWidth, minWidth: selectWidth }" @mousedown.stop @click.stop>
-          <v-select
-            v-model="internalSelectValue"
-            :placeholder="selectPlaceholder"
-            :items="selectItems"
-            variant="plain"
-            density="compact"
-            hide-details
-            bg-color="transparent"
-            class="inner-select"
-            :disabled="disabled"
-          />
+        <div class="h-full flex items-center bg-gray-100 px-2 -mx-3 rounded-tl-lg !rounded-bl-lg"
+          :style="{ width: selectWidth, minWidth: selectWidth }" @mousedown.stop @click.stop>
+          <v-select v-model="internalSelectValue" :placeholder="selectPlaceholder" :items="selectItems" variant="plain"
+            density="compact" hide-details bg-color="transparent" class="inner-select" :disabled="disabled" />
         </div>
       </template>
     </v-text-field>
@@ -89,8 +72,20 @@ const internalSelectValue = computed({
 </template>
 
 <style>
-.inner-select.v-select .v-field{
+.inner-select.v-select .v-field {
   box-shadow: none !important;
   border: 0 !important;
+}
+.inner-select.v-select .v-field__input {
+  padding: 0 !important;
+}
+
+.inner-select.v-select .v-field .v-field__input>input {
+  align-self: center !important;
+}
+
+.inner-select.v-select .v-field__append-inner{
+  align-items: center;
+  padding: 0
 }
 </style>

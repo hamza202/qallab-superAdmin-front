@@ -420,9 +420,9 @@ onMounted(async () => {
 
       <!-- Basic Information -->
       <div class="bg-white rounded-3xl border !border-gray-100">
-        <div class="flex items-center gap-2 text-primary-900 px-6 pt-6">
-          <h2 class="text-lg font-bold">معلومات الرحلة</h2>
-          <span v-if="tripCode">{{ tripCode }}</span>
+        <div class="flex items-center gap-2 text-primary-900 px-6 pt-6 text-lg font-bold">
+          <h2>معلومات الرحلة</h2>
+          <span v-if="tripCode" class="dir-ltr">#{{ tripCode }}</span>
         </div>
 
         <v-form ref="formRef" v-model="isFormValid" @submit.prevent>
