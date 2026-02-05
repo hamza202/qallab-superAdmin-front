@@ -268,10 +268,6 @@ const showAddProductDialog = ref(false);
 const editingProduct = ref<ProductTableItem | null>(null);
 
 const handleAddProduct = () => {
-    if (!formData.value.customer_id) {
-        warning('يجب عليك اختيار اسم العميل أولاً');
-        return;
-    }
     editingProduct.value = null; // Reset edit mode
     showAddProductDialog.value = true;
 };

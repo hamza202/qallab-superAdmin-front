@@ -25,6 +25,7 @@ const isSubmitting = ref(false);
 const paymentMethodItems = ref<any[]>([]);
 const feeTypeItems = ref<any[]>([]);
 const unitItems = ref<any[]>([]);
+const customerItems = ref<any[]>([]);
 const deliveryMethodItems = ref<any[]>([]);
 const supplyTypeItems = ref<any[]>([]);
 const itemUsingItems = ref<any[]>([]); // الاستخدام
@@ -58,6 +59,17 @@ const fetchUnits = async () => {
     }
 }
 
+const fetchCustomers = async () => {
+    try {
+        const res = await api.get<any>('/customers/list');
+        if (Array.isArray(res.data)) {
+            customerItems.value = res.data.map((i: any) => ({ title: i.full_name, value: i.id }));
+        }
+    } catch (e) {
+        console.error('Error fetching customers:', e);
+    }
+}
+
 // Helper: الاستخدام (item_using) label from constants.item_usings
 const getItemUsingName = (key: string | null): string => {
     if (key == null) return '';
@@ -77,6 +89,7 @@ const fetchFormData = async () => {
         if (!data) return;
 
         // Populate form data
+        formData.value.customer_id = data.customer_id ?? null;
         formData.value.quotations_datetime = data.quotations_datetime ? String(data.quotations_datetime) : '';
         formData.value.quotation_name = data.quotation_name ?? '';
         formData.value.quotation_validity_no = data.quotation_validity_no ?? null;
@@ -86,7 +99,7 @@ const fetchFormData = async () => {
         formData.value.target_latitude = data.target_latitude ?? null;
         formData.value.target_longitude = data.target_longitude ?? null;
         formData.value.project_name = data.project_name ?? '';
-        formData.value.from_date = data.from_date ?? '';
+        formData.value.quotation_from_date = data.quotation_from_date ?? data.from_date ?? '';
         formData.value.supply_type = data.supply_type ?? null;
         formData.value.supply_interval = data.supply_interval ?? null;
         formData.value.delivered_interval = data.delivered_interval ?? null;
@@ -129,7 +142,8 @@ const fetchFormData = async () => {
 onMounted(async () => {
     await Promise.all([
         fetchConstants(),
-        fetchUnits()
+        fetchUnits(),
+        fetchCustomers()
     ]);
 
     if (isEditMode.value) {
@@ -157,6 +171,7 @@ interface ProductTableItem {
 
 // Form data
 const formData = ref({
+    customer_id: null as number | null,
     quotations_datetime: '' as string,
     quotation_name: '',
     quotation_validity_no: null as number | string | null,
@@ -166,7 +181,7 @@ const formData = ref({
     target_latitude: null as string | null,
     target_longitude: null as string | null,
     project_name: '',
-    from_date: '' as string, // تاريخ بدء التسليم
+    quotation_from_date: '' as string, // تاريخ بدء التسليم
     supply_type: null as string | null,
     supply_interval: null as number | string | null,
     delivered_interval: null as number | string | null,
@@ -243,6 +258,10 @@ const existingProductsForDialog = computed<FuelQuotationProductToAdd[]>(() =>
 );
 
 const handleAddProduct = () => {
+    if (!formData.value.customer_id) {
+        warning('يجب عليك اختيار اسم العميل أولاً');
+        return;
+    }
     editingProduct.value = null;
     showAddProductDialog.value = true;
 };
@@ -316,30 +335,6 @@ import { useNotification as useNotify } from '@/composables/useNotification';
 const { formRef, isFormValid, validate } = useForm();
 const { success, error } = useNotify();
 
-// Format date to DD-MM-YYYY HH:mm:ss
-const formatDateTime = (date: string | Date): string => {
-    if (!date) return '';
-    const d = new Date(date);
-    const day = String(d.getDate()).padStart(2, '0');
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const year = d.getFullYear();
-    const hours = String(d.getHours()).padStart(2, '0');
-    const minutes = String(d.getMinutes()).padStart(2, '0');
-    const seconds = String(d.getSeconds()).padStart(2, '0');
-    return `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
-}
-
-const getCurrentDateTimeFormatted = (): string => {
-    const d = new Date();
-    const day = String(d.getDate()).padStart(2, '0');
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const year = d.getFullYear();
-    const hours = String(d.getHours()).padStart(2, '0');
-    const minutes = String(d.getMinutes()).padStart(2, '0');
-    const seconds = String(d.getSeconds()).padStart(2, '0');
-    return `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
-};
-
 // Format date to DD-MM-YYYY
 const formatDateDdMmYyyy = (dateStr: string | null | undefined): string => {
     if (!dateStr) return '';
@@ -359,17 +354,19 @@ const buildFormData = (): FormData => {
         fd.append('_method', 'PUT');
     }
 
+    fd.append('customer_id', String(formData.value.customer_id || ''));
+
     // Basic fields from Postman API
     fd.append('responsible_person', formData.value.responsible_person || '');
     if (formData.value.responsible_phone) fd.append('responsible_phone', formData.value.responsible_phone);
-    fd.append('quotations_datetime', formData.value.quotations_datetime ? formatDateTime(formData.value.quotations_datetime) : getCurrentDateTimeFormatted());
+    fd.append('quotations_datetime', formData.value.quotations_datetime || '');
     fd.append('quotation_name', formData.value.quotation_name || '');
     fd.append('quotation_validity_no', String(formData.value.quotation_validity_no ?? '1'));
     fd.append('target_location', formData.value.target_location || '');
     fd.append('target_latitude', String(formData.value.target_latitude || ''));
     fd.append('target_longitude', String(formData.value.target_longitude || ''));
     fd.append('project_name', formData.value.project_name || '');
-    fd.append('from_date', formatDateDdMmYyyy(formData.value.from_date) || '');
+    fd.append('quotation_from_date', formatDateDdMmYyyy(formData.value.quotation_from_date) || '');
     fd.append('supply_type', formData.value.supply_type || '');
     fd.append('supply_interval', String(formData.value.supply_interval ?? ''));
     fd.append('delivered_interval', String(formData.value.delivered_interval ?? ''));
@@ -404,6 +401,7 @@ const buildFormData = (): FormData => {
 }
 
 const getInitialFormData = () => ({
+    customer_id: null as number | null,
     quotations_datetime: '' as string,
     quotation_name: '',
     quotation_validity_no: null as number | string | null,
@@ -413,7 +411,7 @@ const getInitialFormData = () => ({
     target_latitude: null as string | null,
     target_longitude: null as string | null,
     project_name: '',
-    from_date: '' as string,
+    quotation_from_date: '' as string,
     supply_type: null as string | null,
     supply_interval: null as number | string | null,
     delivered_interval: null as number | string | null,
@@ -591,6 +589,13 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
 
                 <v-form ref="formRef" v-model="isFormValid" @submit.prevent>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 items-end">
+                        <!-- Customer Name -->
+                        <div>
+                            <SelectInput v-model="formData.customer_id" :items="customerItems" label="اسم العميل"
+                                item-title="title" :rules="[required()]" item-value="value" density="comfortable"
+                                placeholder="حدد العميل" />
+                        </div>
+
                         <!-- Responsible Person -->
                         <div>
                             <TextInput v-model="formData.responsible_person" placeholder="أدخل اسم المسؤول"
@@ -619,12 +624,12 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
 
                         <!-- Quotation Validity -->
                         <div>
-                            <TextInput v-model="formData.quotation_validity_no" placeholder="أدخل المدة بالأيام"
+                            <PriceInput v-model="formData.quotation_validity_no" placeholder="أدخل المدة بالأيام"
                                 label="صلاحية عرض السعر" :rules="[required()]" density="comfortable">
                                 <template #append-inner>
                                     <span class="text-gray-500 text-sm">يوم</span>
                                 </template>
-                            </TextInput>
+                            </PriceInput>
                         </div>
 
                         <!-- Project Location -->
@@ -653,7 +658,7 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
                         <!-- From Date (تاريخ بدء التسليم) -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">تاريخ بدء التسليم</label>
-                            <DatePickerInput v-model="formData.from_date" type="date" density="comfortable"
+                            <DatePickerInput v-model="formData.quotation_from_date" type="date" density="comfortable"
                                 placeholder="اختر التاريخ" />
                         </div>
 
@@ -881,7 +886,7 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
             :item-using-options="itemUsingItems"
             :unit-items="unitItems"
             :discount-type-options="discountTypeItems"
-            items-endpoint="/items/active-list?with_category=true"
+            items-endpoint="/items/supplier-items"
             :edit-product="editProductForDialog"
             :existing-products="existingProductsForDialog"
             @saved="handleProductSaved"
