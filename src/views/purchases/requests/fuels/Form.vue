@@ -296,44 +296,6 @@ import { useNotification as useNotify } from '@/composables/useNotification';
 const { formRef, isFormValid, validate } = useForm();
 const { success, error } = useNotify();
 
-// Normalize request_datetime to API format: d-m-Y H:i:s (e.g. 28-01-2026 14:30:00)
-const toRequestDateTimeFormat = (value: string | Date | null | undefined): string => {
-    if (value == null || value === '') return '';
-    const str = typeof value === 'string' ? value.trim() : '';
-    // Already in d-m-Y H:i:s or d-m-Y H:i (DateTimePickerInput may send dd-MM-yyyy HH:mm:ss)
-    const match = str.match(/^(\d{1,2})-(\d{1,2})-(\d{4})\s+(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?$/);
-    if (match) {
-        const [, day, month, year, hours, minutes, seconds] = match;
-        const d = day.padStart(2, '0');
-        const m = month.padStart(2, '0');
-        const h = hours.padStart(2, '0');
-        const min = minutes.padStart(2, '0');
-        const s = (seconds ?? '0').padStart(2, '0');
-        return `${d}-${m}-${year} ${h}:${min}:${s}`;
-    }
-    // Parse as Date (e.g. ISO string) and format to d-m-Y H:i:s
-    const d = new Date(value);
-    if (isNaN(d.getTime())) return '';
-    const day = String(d.getDate()).padStart(2, '0');
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const year = d.getFullYear();
-    const hours = String(d.getHours()).padStart(2, '0');
-    const minutes = String(d.getMinutes()).padStart(2, '0');
-    const seconds = String(d.getSeconds()).padStart(2, '0');
-    return `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
-};
-
-const getCurrentDateTimeFormatted = (): string => {
-    const d = new Date();
-    const day = String(d.getDate()).padStart(2, '0');
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const year = d.getFullYear();
-    const hours = String(d.getHours()).padStart(2, '0');
-    const minutes = String(d.getMinutes()).padStart(2, '0');
-    const seconds = String(d.getSeconds()).padStart(2, '0');
-    return `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
-};
-
 // Format date to DD-MM-YYYY for logistics_detail[from_date]
 const formatDateDdMmYyyy = (dateStr: string | null | undefined): string => {
     if (!dateStr) return '';
@@ -356,9 +318,7 @@ const buildFormData = (): FormData => {
     
     // Basic fields (aligned with Store endpoint)
     fd.append('request_type', formData.value.requestType || '');
-    fd.append('request_datetime', formData.value.request_datetime
-        ? toRequestDateTimeFormat(formData.value.request_datetime)
-        : getCurrentDateTimeFormatted());
+    fd.append('request_datetime', formData.value.request_datetime || '');
     if (formData.value.deliveryStartDate) fd.append('delivery_start_date', formData.value.deliveryStartDate);
     fd.append('upfront_payment', String(formData.value.advancePayment || ''));
     fd.append('payment_method', formData.value.paymentMethod || '');
@@ -657,16 +617,6 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
                                     <span class="text-gray-500 text-sm"> يوم </span>
                                 </template>
                             </TextInput>
-                        </div>
-
-                        <!-- تاريخ إصدار الطلب (عرض فقط في التعديل) -->
-                        <div v-if="isEditMode">
-                            <DateTimePickerInput v-model="formData.request_datetime"
-                                label="تاريخ إصدار الطلب"
-                                density="comfortable"
-                                placeholder="اختر التاريخ والوقت"
-                                readonly
-                            />
                         </div>
                     </div>
                 </v-form>
