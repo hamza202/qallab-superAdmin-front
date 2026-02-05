@@ -97,7 +97,7 @@
                                     <label class="font-semibold text-sm text-gray-500 mb-2 block">حالة المنتج</label>
                                     <p class="text-base font-semibold text-gray-900">
                                         <span :class="product.is_active ? 'text-green-600' : 'text-red-600'">
-                                            {{ product.is_active ? 'فعال' : 'غير فعال' }}
+                                            {{ product.is_active ? 'فعالة' : 'غير فعال' }}
                                         </span>
                                     </p>
                                 </div>
