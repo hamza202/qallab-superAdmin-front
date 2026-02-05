@@ -158,6 +158,47 @@ const getTransportTypeName = (typeValue: string | number): string => {
   return found ? found.title : '';
 };
 
+const formatDateTimeDmy = (date: Date): string => {
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = date.getFullYear();
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  const seconds = String(date.getSeconds()).padStart(2, "0");
+  return `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
+};
+
+const normalizePoDateTime = (value: string): string => {
+  if (!value) return "";
+  const trimmed = value.trim();
+  if (/^\d{2}-\d{2}-\d{4}\s+\d{2}:\d{2}:\d{2}$/.test(trimmed)) {
+    return trimmed;
+  }
+  if (/^\d{4}-\d{2}-\d{2}/.test(trimmed)) {
+    const [datePart, timePart] = trimmed.split(" ");
+    const [year, month, day] = datePart.split("-").map(Number);
+    const [hours, minutes, seconds] = (timePart || "00:00:00")
+      .split(":")
+      .map(Number);
+    if (year && month && day) {
+      const d = new Date(
+        year,
+        month - 1,
+        day,
+        hours || 0,
+        minutes || 0,
+        seconds || 0,
+      );
+      return formatDateTimeDmy(d);
+    }
+  }
+  const parsed = new Date(trimmed);
+  if (!Number.isNaN(parsed.getTime())) {
+    return formatDateTimeDmy(parsed);
+  }
+  return trimmed;
+};
+
 const fetchFormData = async () => {
   if (!isEditMode.value || !routeId.value) return;
     console.log('ttt');
@@ -172,8 +213,8 @@ const fetchFormData = async () => {
     formData.value = {
       so_pickup_id: data.so_pickup_id || null,
       supplier_logistic_id: data.supplier_logistic_id || null,
-      planned_arrival_loading: data.planned_arrival_loading || "",
-      planned_arrival_downloading: data.planned_arrival_downloading || "",
+      planned_arrival_loading: normalizePoDateTime(String(data.planned_arrival_loading)) || "",
+      planned_arrival_downloading: normalizePoDateTime(String(data.planned_arrival_downloading)) || "",
       total_quantity_ton: data.total_quantity_ton || null,
       total_quantity_m3: data.total_quantity_m3 || null,
       tracking_no_point: data.tracking_no_point || null,
@@ -475,7 +516,7 @@ onMounted(async () => {
               </div>
             </div>
             <div>
-              <DateTimePickerInput v-model="formData.planned_arrival_loading" type="datetime"
+              <DateTimePickerInput v-model="formData.planned_arrival_loading"
                 label="تاريخ / وقت التنزيل" density="comfortable" placeholder="2024-03-01 / 02:30 PM" />
             </div>
             <div>

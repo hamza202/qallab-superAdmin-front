@@ -172,6 +172,11 @@ const handleEdit = (item: { id?: string | number; uuid?: string }) => {
   router.push({ name: 'SalesTripsEdit', params: { id: uuid } });
 };
 
+const handleView = (item: { id?: string | number; uuid?: string }) => {
+  const uuid = item.uuid ?? String(item.id);
+  router.push({ name: 'SalesTripsView', params: { id: uuid } });
+};
+
 const handleDelete = (item: { uuid?: string; id?: string | number } & Partial<TripItem>) => {
   itemToDelete.value = item as TripItem;
   showDeleteDialog.value = true;
@@ -381,7 +386,7 @@ onBeforeUnmount(() => {
 
         <DataTable :headers="tableHeaders" :items="tableItemsWithId" :loading="loading"
           :show-checkbox="canBulkDelete" show-actions
-          @edit="handleEdit" @delete="handleDelete"
+          @edit="handleEdit" @delete="handleDelete" @view="handleView"
           @select="handleSelectRequest" @selectAll="handleSelectAllRequests">
           <template #item.trip_date="{ item }">
             {{ item.trip_date ? new Date(item.trip_date).toLocaleDateString('ar-SA') : '—' }}

@@ -211,6 +211,14 @@ export const salesRoutes: RouteRecordRaw[] = [
           title: "pages.SalesTrips.edit",
         },
       },
+      {
+        path: "view/:id",
+        name: "SalesTripsView",
+        component: () => import("@/views/sales/trips/View.vue"),
+        meta: {
+          title: "pages.SalesTrips.title",
+        },
+      },
     ],
   },
 
