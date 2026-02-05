@@ -182,6 +182,38 @@ export const salesRoutes: RouteRecordRaw[] = [
       },
     ],
   },
+  {
+    path: "/sales/trips",
+    name: "SalesTrips",
+    redirect: "/sales/trips/list",
+    children: [
+      {
+        path: "list",
+        name: "SalesTripslist",
+        component: () => import("@/views/sales/trips/List.vue"),
+        meta: {
+          title: "pages.SalesTrips.title",
+        },
+      },
+      {
+        path: "create/:pickupId",
+        name: "SalesTripsCreate",
+        component: () => import("@/views/sales/trips/Form.vue"),
+        meta: {
+          title: "pages.SalesTrips.title",
+        },
+      },
+      {
+        path: "edit/:id",
+        name: "SalesTripsEdit",
+        component: () => import("@/views/sales/trips/Form.vue"),
+        meta: {
+          title: "pages.SalesTrips.edit",
+        },
+      },
+    ],
+  },
+
   // Sales Requests Fuels
   {
     path: "/sales/requests/fuels",

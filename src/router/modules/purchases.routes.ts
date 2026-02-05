@@ -311,4 +311,47 @@ export const purchasesRoutes: RouteRecordRaw[] = [
       },
     ],
   },
+  {
+    path: "/purchases/requests/logistics",
+    name: "PurchasesLogistics",
+    redirect: "/purchases/requests/logistics/list",
+    children: [
+      {
+        path: "list",
+        name: "PurchasesLogisticsList",
+        component: () =>
+          import("@/views/purchases/requests/logistics/List.vue"),
+        meta: {
+          title: "pages.purchasesLogistics.title",
+        },
+      },
+      {
+        path: "create",
+        name: "PurchasesLogisticsCreate",
+        component: () =>
+          import("@/views/purchases/requests/logistics/Form.vue"),
+        meta: {
+          title: "pages.purchasesLogistics.create",
+        },
+      },
+      {
+        path: "edit/:id",
+        name: "PurchasesLogisticsEdit",
+        component: () =>
+          import("@/views/purchases/requests/logistics/Form.vue"),
+        meta: {
+          title: "pages.purchasesLogistics.edit",
+        },
+      },
+      {
+        path: "view/:id",
+        name: "PurchasesLogisticsView",
+        component: () =>
+          import("@/views/purchases/requests/logistics/View.vue"),
+        meta: {
+          title: "pages.purchasesLogistics.view",
+        },
+      },
+    ],
+  },
 ];

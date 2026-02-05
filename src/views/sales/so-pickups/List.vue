@@ -7,7 +7,7 @@ import { useNotification } from '@/composables/useNotification';
 import { useTableColumns } from '@/composables/useTableColumns';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog.vue';
 import { GridIcon, trash_1_icon, trash_2_icon, importIcon, columnIcon, exportIcon, searchIcon } from "@/components/icons/globalIcons";
-import { switcStatusIcon } from '@/components/icons/priceOffersIcons';
+import { switcStatusIcon, truckIcon } from '@/components/icons/priceOffersIcons';
 import StatusChangeFeature from '@/components/common/StatusChangeFeature.vue';
 
 const { t } = useI18n();
@@ -171,6 +171,11 @@ const handleView = (item: { id?: string | number; uuid?: string }) => {
 const handleEdit = (item: { id?: string | number; uuid?: string }) => {
     const id = item.uuid ?? String(item.id);
     router.push({ name: 'SalesSoPickupsEdit', params: { id } });
+};
+
+const openCreateTrip = (item: { id?: string | number; uuid?: string }) => {
+    const id = item.uuid ?? String(item.id);
+    router.push({ name: 'SalesTripsCreate', params: { pickupId : id } });
 };
 
 const handleDelete = (item: { uuid?: string; id?: string | number } & Partial<PickupItem>) => {
@@ -374,6 +379,10 @@ onBeforeUnmount(() => {
                     </template>
                     <template #item.actions="{ item }">
                         <div class="flex items-center">
+                            <v-btn icon variant="text" size="x-small"
+                                color="success" @click="openCreateTrip(item)">
+                                <span v-html="truckIcon"></span>
+                            </v-btn>
                             <v-btn v-if="item.actions?.can_change_status" icon variant="text" size="x-small"
                                 color="warning-600" @click="openChangeStatusDialog(item)">
                                 <span v-html="switcStatusIcon"></span>

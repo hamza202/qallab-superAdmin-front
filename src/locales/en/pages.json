@@ -169,6 +169,21 @@
       "edit": "Edit Receiving Document",
       "view": "View Receiving Document"
     },
+    "SalesTrips": {
+      "title": "Trips",
+      "description": "Allows you to manage trips",
+      "list": "Trips List",
+      "create": "Add Trip",
+      "edit": "Edit Trip"
+    },
+    "purchasesLogistics": {
+      "title": "Logistics Service Requests",
+      "description": "Allows you to manage logistics service requests",
+      "list": "Logistics Service Requests List",
+      "create": "Create Logistics Service Request",
+      "edit": "Edit Logistics Service Request",
+      "view": "View Logistics Service Request"
+    },
     "QuotationsFuels": {
       "title": "Fuel Quotations",
       "description": "View and manage fuel quotations",
