@@ -46,7 +46,7 @@
                         <div class="info-item-bordered flex-1 px-6 py-4">
                             <label class="font-semibold text-sm text-gray-500 mb-2 block">شركة النقل</label>
                             <p class="text-base font-semibold text-gray-900">{{
-                                getSupplierName(tripData?.supplier_logistic_id) || '—' }}</p>
+                                getSupplierName || '—' }}</p>
                         </div>
                         <v-divider vertical class="my-6"></v-divider>
                         <div class="info-item-bordered flex-1 px-6 py-4">
@@ -200,11 +200,11 @@ const fetchSuppliers = async () => {
     }
 }
 
-const getSupplierName = (id: string | null | undefined) => {
-    if (!id) return ''
-    const item = supplierItems.value.find((i: any) => i.value === id)
-    return item?.title || String(id)
-}
+const getSupplierName = computed(() => {
+    if (!tripData.value?.supplier_logistic_id) return ''
+    const item = supplierItems.value.find((i: any) => i.value === tripData.value?.supplier_logistic_id)
+    return item?.title || String(tripData.value?.supplier_logistic_id)
+})
 
 // Computed properties for display
 const tripCode = computed(() => tripData.value?.code || '—')

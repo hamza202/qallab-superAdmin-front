@@ -307,11 +307,6 @@
                   ]">
                     عروض أسعار المحروقات</router-link>
                 </li>
-                <li class="relative">
-                  <router-link to="/sales/trips/list"
-                    :class="[$route.path.includes('/sales/trips') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
-                    جدول الرحلات</router-link>
-                </li>
               </ul>
 
               <h2 class="text-sm font-medium leading-5 my-2">
@@ -333,6 +328,11 @@
                       : 'text-white hover:text-qallab-yellow',
                   ]">
                     حجوزات التسليم</router-link>
+                </li>
+                <li class="relative">
+                  <router-link to="/sales/trips/list"
+                    :class="[$route.path.includes('/sales/trips') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                    جدول الرحلات</router-link>
                 </li>
               </ul>
             </div>

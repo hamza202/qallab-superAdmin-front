@@ -118,7 +118,7 @@ const fetchUnits = async () => {
 
 const fetchSoPickupData = async () => {
   if (!pickupId.value) return;
-    console.log('sss');
+  console.log('sss');
 
   isLoading.value = true;
   try {
@@ -158,6 +158,10 @@ const getTransportTypeName = (typeValue: string | number): string => {
   return found ? found.title : '';
 };
 
+const getUnitName = (unit_id: any): string => {
+  const found = unitItems.value.find(u => u.value === unit_id);
+  return found ? found.title : '';
+}
 const formatDateTimeDmy = (date: Date): string => {
   const day = String(date.getDate()).padStart(2, "0");
   const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -201,7 +205,7 @@ const normalizePoDateTime = (value: string): string => {
 
 const fetchFormData = async () => {
   if (!isEditMode.value || !routeId.value) return;
-    console.log('ttt');
+  console.log('ttt');
 
   isLoading.value = true;
   try {
@@ -313,14 +317,16 @@ const handleSubmit = async (option: SubmitOption) => {
     };
 
     if (isEditMode.value) {
+      await api.put(`/sales/trips/${routeId.value}`, payload);
       success('تم تحديث الرحلة بنجاح');
     } else {
+      await api.put(`/sales/trips/${routeId.value}`, payload);
       success('تم إنشاء الرحلة بنجاح');
     }
 
     if (option === 'trips_list') {
       router.push({ name: 'SalesTripslist' });
-    }else if (option === 'pickup_list') {
+    } else if (option === 'pickup_list') {
       router.push({ name: 'SalesSoPickupsList' });
     } else {
       // Reset form for new entry
@@ -406,7 +412,7 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
   item_id: item.item_id,
   name: item.item_name,
   quantity: item.quantity,
-  unit: item.unit_name,
+  unit: item.unit_name || getUnitName(item.unit_id),
   transport_type: item.transport_type_name,
   transport_no: item.transport_no || '--',
   notes: item.notes,
@@ -472,14 +478,14 @@ onMounted(async () => {
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-6">
             <div>
               <selectInput :items="supplierItems" v-model="formData.supplier_logistic_id" label="شركة النقل"
-                density="comfortable" placeholder="اختر" :hide-details="false"
-                :rules="[required()]"
-                :error-messages="formErrors['supplier_logistic_id']" 
+                density="comfortable" placeholder="اختر" :hide-details="false" :rules="[required()]"
+                :error-messages="formErrors['supplier_logistic_id']"
                 @update:model-value="delete formErrors['supplier_logistic_id']" />
             </div>
             <div class="relative">
               <label class="text-sm font-medium text-gray-700 mb-2 block">موقع التحميل</label>
-              <div @click="openMapDialog('source'); delete formErrors['source_location']; delete formErrors['source_latitude']; delete formErrors['source_longitude']"
+              <div
+                @click="openMapDialog('source'); delete formErrors['source_location']; delete formErrors['source_latitude']; delete formErrors['source_longitude']"
                 class="flex items-center justify-between px-4 py-2 min-h-[48px] border rounded-lg cursor-pointer hover:bg-blue-100 transition-colors"
                 :class="formErrors['source_location'] || formErrors['source_latitude'] || formErrors['source_longitude'] ? '!border-red-500' : '!border-blue-400'">
                 <span class="text-base font-medium text-blue-900 whitespace-nowrap overflow-hidden text-ellipsis ">
@@ -489,8 +495,11 @@ onMounted(async () => {
                   <span v-html="mapMarkerIcon"></span>
                 </div>
               </div>
-              <div v-if="formErrors['source_location'] || formErrors['source_latitude'] || formErrors['source_longitude']" class="text-red-500 text-xs mt-1">
-                {{ formErrors['source_location']?.[0] || formErrors['source_latitude']?.[0] || formErrors['source_longitude']?.[0] }}
+              <div
+                v-if="formErrors['source_location'] || formErrors['source_latitude'] || formErrors['source_longitude']"
+                class="text-red-500 text-xs mt-1">
+                {{ formErrors['source_location']?.[0] || formErrors['source_latitude']?.[0] ||
+                  formErrors['source_longitude']?.[0] }}
               </div>
             </div>
             <div>
@@ -503,7 +512,8 @@ onMounted(async () => {
             </div>
             <div class="relative">
               <label class="text-sm font-medium text-gray-700 mb-2 block">موقع التنزيل</label>
-              <div @click="openMapDialog('target'); delete formErrors['target_location']; delete formErrors['target_latitude']; delete formErrors['target_longitude']"
+              <div
+                @click="openMapDialog('target'); delete formErrors['target_location']; delete formErrors['target_latitude']; delete formErrors['target_longitude']"
                 class="flex items-center justify-between px-4 py-2 min-h-[48px] border rounded-lg cursor-pointer hover:bg-blue-100 transition-colors"
                 :class="formErrors['target_location'] || formErrors['target_latitude'] || formErrors['target_longitude'] ? '!border-red-500' : '!border-blue-400'">
                 <span class="text-base font-medium text-blue-900 whitespace-nowrap overflow-hidden text-ellipsis ">
@@ -513,13 +523,16 @@ onMounted(async () => {
                   <span v-html="mapMarkerIcon"></span>
                 </div>
               </div>
-              <div v-if="formErrors['target_location'] || formErrors['target_latitude'] || formErrors['target_longitude']" class="text-red-500 text-xs mt-1">
-                {{ formErrors['target_location']?.[0] || formErrors['target_latitude']?.[0] || formErrors['target_longitude']?.[0] }}
+              <div
+                v-if="formErrors['target_location'] || formErrors['target_latitude'] || formErrors['target_longitude']"
+                class="text-red-500 text-xs mt-1">
+                {{ formErrors['target_location']?.[0] || formErrors['target_latitude']?.[0] ||
+                  formErrors['target_longitude']?.[0] }}
               </div>
             </div>
             <div>
-              <DateTimePickerInput v-model="formData.planned_arrival_loading"
-                label="تاريخ / وقت التنزيل" density="comfortable" placeholder="2024-03-01 / 02:30 PM" />
+              <DateTimePickerInput v-model="formData.planned_arrival_loading" label="تاريخ / وقت التنزيل"
+                density="comfortable" placeholder="2024-03-01 / 02:30 PM" />
             </div>
             <div>
               <TextInput v-model="formData.loading_responsible_party" label="مسؤول التنزيل" density="comfortable"
@@ -527,7 +540,7 @@ onMounted(async () => {
             </div>
             <div>
               <PriceInput v-model="formData.tracking_no_point" label="عدد مرات إرسال الإحداثيات" density="comfortable"
-                 placeholder="أدخل عدد مرات إرسال الإحداثيات" />
+                placeholder="أدخل عدد مرات إرسال الإحداثيات" />
             </div>
             <div>
               <PriceInput v-model="formData.bill_of_lading" label="رقم بوليصة الشحن" density="comfortable"
@@ -626,25 +639,25 @@ onMounted(async () => {
 
       <!-- Action Buttons -->
       <div class="mt-3 flex items-center justify-center gap-3 flex-wrap">
-          <ButtonWithIcon variant="flat" color="primary" height="48" rounded="4"
-            custom-class="font-semibold text-base px-6 md:!px-10" :prepend-icon="returnIcon"
-            label="حفظ والعودة الى قائمة الحجوزات" :loading="isSubmitting" :disabled="isSubmitting"
-            @click="handleSubmit('pickup_list')" />
-          <ButtonWithIcon variant="flat" color="primary-50" height="48" rounded="4"
-            custom-class="font-semibold text-base text-primary-700 px-6 md:!px-10" :prepend-icon="returnIcon"
-            label="حفظ والعودة لجدول الرحلات" :loading="isSubmitting" :disabled="isSubmitting"
-            @click="handleSubmit('trips_list')" />
-          <ButtonWithIcon variant="flat" color="primary-50" height="48" rounded="4"
-            custom-class="font-semibold text-base text-primary-700 px-6 md:!px-10" :prepend-icon="saveIcon"
-            label="حفظ وانشاء جديد" :loading="isSubmitting" :disabled="isSubmitting"
-            @click="handleSubmit('create_new')" />
+        <ButtonWithIcon variant="flat" color="primary" height="48" rounded="4"
+          custom-class="font-semibold text-base px-6 md:!px-10" :prepend-icon="returnIcon"
+          label="حفظ والعودة الى قائمة الحجوزات" :loading="isSubmitting" :disabled="isSubmitting"
+          @click="handleSubmit('pickup_list')" />
+        <ButtonWithIcon variant="flat" color="primary-50" height="48" rounded="4"
+          custom-class="font-semibold text-base text-primary-700 px-6 md:!px-10" :prepend-icon="returnIcon"
+          label="حفظ والعودة لجدول الرحلات" :loading="isSubmitting" :disabled="isSubmitting"
+          @click="handleSubmit('trips_list')" />
+        <ButtonWithIcon variant="flat" color="primary-50" height="48" rounded="4"
+          custom-class="font-semibold text-base text-primary-700 px-6 md:!px-10" :prepend-icon="saveIcon"
+          label="حفظ وانشاء جديد" :loading="isSubmitting" :disabled="isSubmitting"
+          @click="handleSubmit('create_new')" />
       </div>
     </div>
 
     <!-- Add Product Dialog -->
     <AddProductDialog v-model="showAddProductDialog" request-type="trips" :transport-types="transportTypeItems"
-      :unit-items="unitItems" :edit-product="editingProduct"
-      :existing-products="productTableItems" @saved="handleProductSaved" @product-updated="handleProductUpdated" />
+      :unit-items="unitItems" :edit-product="editingProduct" :existing-products="productTableItems"
+      @saved="handleProductSaved" @product-updated="handleProductUpdated" />
 
     <Map v-model="showMapDialog"
       :latitude="String(currentMapType === 'target' ? (formData.target_latitude || '') : (formData.source_latitude || ''))"
