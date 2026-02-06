@@ -35,6 +35,7 @@ interface ItemActions {
 }
 
 interface QuotationItem {
+  id: number;
   uuid: string;
   customer_name: string;
   quotation_name: string;
@@ -249,7 +250,19 @@ const openCreateRequest = () => {
 };
 
 const handleCreateOrder = (item: unknown) => {
-  console.log('Create order for', (item as QuotationItem).uuid);
+  const tableItem = item as QuotationItem & { id: string | number };
+  // Find original item from tableItems to get the numeric id
+  const originalItem = tableItems.value.find((q) => q.uuid === tableItem.uuid);
+  const numericId = originalItem?.id;
+  
+  router.push({ 
+    name: 'SalesOrdersMaterialProductCreate',
+    query: { 
+      from_quotation: tableItem.uuid,
+      quotation_code: tableItem.code,
+      sale_quotation_id: numericId ? String(numericId) : undefined
+    }
+  });
 };
 
 const handleBulkDelete = () => {

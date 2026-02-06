@@ -48,13 +48,6 @@ const vehicleOptions = computed(() => props.transportTypeItems || []);
 
 const rows = ref<SupplyDetailRow[]>([]);
 
-const displayProducts = computed(() => {
-  if (props.singleProductItemId != null) {
-    return props.products.filter((p) => p.item_id === props.singleProductItemId);
-  }
-  return props.products;
-});
-
 const getQuantityDisplay = (row: SupplyDetailRow) => {
   const q = row.quantity != null ? String(row.quantity) : '';
   const u = row.unit_name || '';
@@ -112,8 +105,8 @@ const truckIcon = `<svg width="22" height="20" viewBox="0 0 22 20" fill="none" x
 
     <div class="space-y-3 min-h-[200px] max-h-[70vh] overflow-y-auto custom-scroll px-1">
       <div
-        v-for="row in rows"
-        :key="row.item_id"
+        v-for="(row, index) in rows"
+        :key="`${index}-${row.item_id}`"
         class="flex flex-wrap gap-3 rounded-lg border border-gray-100 p-3 bg-white items-end"
       >
         <!-- 1. اسم المنتج + الكمية والوحدة (معطّل) - أيمن في RTL -->
@@ -131,7 +124,7 @@ const truckIcon = `<svg width="22" height="20" viewBox="0 0 22 20" fill="none" x
         <!-- 2. تاريخ بداية النقل -->
         <div class="min-w-[160px] shrink-0">
           <DatePickerInput
-            v-model="row.transport_start_date"
+            v-model="rows[index].transport_start_date"
             placeholder="تاريخ بداية النقل"
             density="compact"
             class="w-full"
@@ -142,7 +135,7 @@ const truckIcon = `<svg width="22" height="20" viewBox="0 0 22 20" fill="none" x
         <!-- 3. عدد الرحلات -->
         <div class="min-w-[120px] shrink-0">
           <TextInput
-            v-model="row.trip_no"
+            v-model="rows[index].trip_no"
             type="number"
             placeholder="عدد الرحلات"
             density="compact"
@@ -154,7 +147,7 @@ const truckIcon = `<svg width="22" height="20" viewBox="0 0 22 20" fill="none" x
         <!-- 4. نوع المركبات -->
         <div class="min-w-[200px] flex-1 shrink-0">
           <MultipleSelectInput
-            v-model="row.vehicle_types"
+            v-model="rows[index].vehicle_types"
             :items="vehicleOptions"
             placeholder="نوع المركبات"
             density="compact"
@@ -168,19 +161,20 @@ const truckIcon = `<svg width="22" height="20" viewBox="0 0 22 20" fill="none" x
         <!-- 5. سعة الرحلة (اختياري - طلبات المشتريات) -->
         <div v-if="showTripCapacity" class="min-w-[120px] shrink-0">
           <PriceInput
-            v-model="row.trip_capacity"
+            :model-value="rows[index].trip_capacity ?? null"
             type="number"
             placeholder="سعة الرحلة"
             density="compact"
             class="w-full"
             hide-details
+            @update:model-value="(v) => (rows[index].trip_capacity = typeof v === 'number' ? v : null)"
           />
         </div>
 
         <!-- 6. توقيت الرحلة (اختياري - طلبات المشتريات) -->
         <div v-if="amPmIntervalItems?.length" class="min-w-[140px] shrink-0">
           <SelectInput
-            v-model="row.am_pm_interval"
+            :model-value="rows[index].am_pm_interval ?? null"
             :items="amPmIntervalItems"
             placeholder="توقيت الرحلة"
             density="compact"
@@ -188,6 +182,7 @@ const truckIcon = `<svg width="22" height="20" viewBox="0 0 22 20" fill="none" x
             item-value="value"
             class="w-full"
             hide-details
+            @update:model-value="(v) => (rows[index].am_pm_interval = typeof v === 'string' ? v : null)"
           />
         </div>
       </div>

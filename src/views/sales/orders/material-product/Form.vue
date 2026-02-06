@@ -31,6 +31,10 @@ const router = useRouter();
 // Check if we're in edit mode
 const isEditMode = computed(() => !!route.params.id);
 const routeId = computed(() => route.params.id as string);
+// Check if creating order from quotation
+const fromQuotationId = computed(() => route.query.from_quotation as string | undefined);
+const fromQuotationCode = computed(() => route.query.quotation_code as string | undefined);
+const saleQuotationId = computed(() => route.query.sale_quotation_id as string | undefined);
 const isLoading = ref(false);
 const isSubmitting = ref(false);
 
@@ -284,6 +288,118 @@ const fetchFormData = async () => {
   }
 };
 
+// Helper function to get unit name from id
+const getUnitName = (unitId: number | null): string => {
+  if (unitId == null) return "";
+  const unit = unitItems.value.find((u: any) => u.value === unitId || u.value === Number(unitId));
+  return unit?.title || "";
+};
+
+// Fetch quotation data and pre-fill form when creating order from quotation
+const fetchQuotationForOrder = async () => {
+  if (!fromQuotationId.value) return;
+
+  // Set quotation code from query param
+  if (fromQuotationCode.value) {
+    formData.value.sale_quotation_code = fromQuotationCode.value as any;
+  }
+
+  isLoading.value = true;
+  try {
+    const res = await api.get<any>(`/sales/quotations/building-materials/${fromQuotationId.value}`);
+    const data = res.data;
+
+    if (data) {
+      // Set quotation code from API response if not already set from query param
+      if (data.code && !fromQuotationCode.value) {
+        formData.value.sale_quotation_code = data.code;
+      }
+      
+      // Map quotation fields to order form fields
+      formData.value.customer_id = data.customer_id != null ? Number(data.customer_id) : null;
+      formData.value.project_name = data.project_name || "";
+      formData.value.target_location = data.target_location || null;
+      formData.value.target_latitude = data.target_latitude || null;
+      formData.value.target_longitude = data.target_longitude || null;
+      formData.value.paymentMethod = data.payment_method || null;
+      formData.value.advancePayment = data.upfront_payment || null;
+      formData.value.invoice_interval = data.invoice_interval != null ? Number(data.invoice_interval) : null;
+      formData.value.payment_term_no = data.payment_term_no != null ? Number(data.payment_term_no) : null;
+      formData.value.late_fee_type = data.late_fee_type || null;
+      formData.value.late_fee = data.late_fee != null ? Number(data.late_fee) : null;
+      formData.value.cancel_fee_type = data.cancel_fee_type || null;
+      formData.value.cancel_fee = data.cancel_fee != null ? Number(data.cancel_fee) : null;
+      formData.value.textNote = data.notes || "";
+      
+      // Map quotation_type to so_type if available
+      if (data.quotation_type) {
+        formData.value.so_type = data.quotation_type;
+      }
+
+      // Map products (items) from quotation to order
+      if (data.items && Array.isArray(data.items)) {
+        const logisticsByItemId: Record<number, any> = {};
+        const logisticsList = data.logistics_product_details;
+        if (Array.isArray(logisticsList)) {
+          logisticsList.forEach((log: any) => {
+            const iid = Number(log.item_id);
+            if (!logisticsByItemId[iid]) logisticsByItemId[iid] = log;
+          });
+        }
+
+        productTableItems.value = data.items.map((item: any) => {
+          const itemId = Number(item.item_id);
+          const log = logisticsByItemId[itemId];
+          const vehicleTypes = log?.transport_type
+            ? Array.isArray(log.transport_type)
+              ? log.transport_type.map((t: string | number) => Number(t))
+              : [Number(log.transport_type)]
+            : [];
+          const transportTypeName = vehicleTypes.length
+            ? vehicleTypes
+                .map((id: number) => getTransportTypeName(id))
+                .filter(Boolean)
+                .join(", ")
+            : "";
+
+          // Get unit name from unitItems if not provided in response
+          const unitName = item.unit_name || item.unit?.name || getUnitName(item.unit_id);
+
+          return {
+            item_id: itemId,
+            item_name: item.item_name || item.item?.name || "",
+            unit_id: item.unit_id ?? null,
+            unit_name: unitName,
+            quantity: item.quantity ?? null,
+            transport_type: vehicleTypes[0] ?? null,
+            transport_type_name: transportTypeName,
+            trip_no: log?.number_of_trips ?? null,
+            notes: item.note || item.notes || "",
+            price_per_unit: item.price_per_unit ?? null,
+            unit_price: item.price_per_unit ?? null,
+            discount: item.discount_val ?? null,
+            discount_type: item.discount_type ?? null,
+            discount_val: item.discount_val ?? null,
+            // Use exact values from API without recalculation
+            total_tax: item.total_tax ?? null,
+            subtotal_before_discount: item.subtotal_before_discount ?? null,
+            subtotal_after_discount: item.subtotal_after_tax ?? item.subtotal_after_discount ?? null,
+            trip_start: log?.trip_start ?? null,
+            number_of_trips: log?.number_of_trips ?? null,
+            trip_capacity: log?.trip_capacity ?? null,
+            am_pm_interval: log?.am_pm_interval ?? null,
+            vehicle_types: vehicleTypes,
+          };
+        });
+      }
+    }
+  } catch (e) {
+    console.error("Error fetching quotation data:", e);
+  } finally {
+    isLoading.value = false;
+  }
+};
+
 onMounted(async () => {
   await Promise.all([
     fetchOrdersConstants(),
@@ -294,6 +410,9 @@ onMounted(async () => {
   // Fetch form data if in edit mode
   if (isEditMode.value) {
     await fetchFormData();
+  } else if (fromQuotationId.value) {
+    // Fetch quotation data if creating order from quotation
+    await fetchQuotationForOrder();
   }
 });
 
@@ -349,7 +468,7 @@ const formData = ref({
   target_location: null as string | null,
   target_latitude: null as string | null,
   target_longitude: null as string | null,
-  customer_id: null,
+  customer_id: null as number | null,
   customer_name: null,
   so_datetime: "",
 
@@ -421,6 +540,10 @@ const handleProductSaved = (products: any[]) => {
     newItems.push({
       ...p,
       notes: existing?.notes || p.notes || "", // Preserve existing notes
+      // Clear cached values to force recalculation
+      total_tax: null,
+      subtotal_before_discount: null,
+      subtotal_after_discount: null,
     } as ProductTableItem);
   });
 
@@ -448,6 +571,10 @@ const handleProductUpdated = (updatedProduct: any) => {
     productTableItems.value[index] = {
       ...updatedProduct,
       notes: existingNotes || updatedProduct.notes || "",
+      // Clear cached values to force recalculation
+      total_tax: null,
+      subtotal_before_discount: null,
+      subtotal_after_discount: null,
     } as ProductTableItem;
   }
   editingProduct.value = null;
@@ -526,6 +653,11 @@ const normalizePoDateTime = (value: string): string => {
 // Build FormData for submission (مفاتيح مطابقة لـ request-body.json مستقبلاً)
 const buildFormData = (): FormData => {
   const fd = new FormData();
+
+  // Include sale_quotation_id if creating order from quotation
+  if (saleQuotationId.value) {
+    fd.append("sale_quotation_id", saleQuotationId.value);
+  }
 
   // Basic fields (مطابقة request-body: so_type, so_datetime, customer_id, ...)
   fd.append("so_type", formData.value.so_type || "");
