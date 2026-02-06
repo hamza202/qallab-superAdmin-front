@@ -468,7 +468,7 @@ const formData = ref({
   target_location: null as string | null,
   target_latitude: null as string | null,
   target_longitude: null as string | null,
-  customer_id: null,
+  customer_id: null as number | null,
   customer_name: null,
   so_datetime: "",
 
@@ -540,6 +540,10 @@ const handleProductSaved = (products: any[]) => {
     newItems.push({
       ...p,
       notes: existing?.notes || p.notes || "", // Preserve existing notes
+      // Clear cached values to force recalculation
+      total_tax: null,
+      subtotal_before_discount: null,
+      subtotal_after_discount: null,
     } as ProductTableItem);
   });
 
@@ -567,6 +571,10 @@ const handleProductUpdated = (updatedProduct: any) => {
     productTableItems.value[index] = {
       ...updatedProduct,
       notes: existingNotes || updatedProduct.notes || "",
+      // Clear cached values to force recalculation
+      total_tax: null,
+      subtotal_before_discount: null,
+      subtotal_after_discount: null,
     } as ProductTableItem;
   }
   editingProduct.value = null;
