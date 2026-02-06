@@ -626,10 +626,10 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
 
 
 onMounted(async () => {
-    await fetchConstants()
-    await fetchUnits()
-    await fetchSuppliers()
-    await fetchCategories()
+    fetchConstants()
+    fetchUnits()
+    fetchSuppliers()
+    fetchCategories()
 
     // Fetch form data if in edit mode
     if (isEditMode.value) {
@@ -771,7 +771,7 @@ onMounted(async () => {
                                 <div class="info-item-bordered  px-4 py-2">
                                     <label class="font-semibold text-sm text-gray-500 mb-2 block">مدة التنفيذ</label>
                                     <p class="text-base font-semibold text-gray-900">{{ detail.actual_execution_interval
-                                    }}
+                                        }}
                                     </p>
                                 </div>
                                 <v-divider vertical class="my-6"></v-divider>
@@ -810,7 +810,7 @@ onMounted(async () => {
                                     <label class="font-semibold text-sm text-gray-500 mb-2 block">مسؤول التفريغ
                                     </label>
                                     <p class="text-base font-semibold text-gray-900">{{ detail.loading_responsible_party
-                                    }} </p>
+                                        }} </p>
                                 </div>
                                 <v-divider vertical class="my-6"></v-divider>
                                 <div class="info-item-bordered px-4 py-2">
