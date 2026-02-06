@@ -7,7 +7,7 @@ import { useNotification } from '@/composables/useNotification';
 import { useTableColumns } from '@/composables/useTableColumns';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog.vue';
 import StatusChangeFeature from '@/components/common/StatusChangeFeature.vue';
-import { switcStatusIcon } from '@/components/icons/priceOffersIcons';
+import { switcStatusIcon, refreshIcon } from '@/components/icons/priceOffersIcons';
 
 
 const { t } = useI18n();
@@ -31,6 +31,7 @@ interface ItemActions {
   can_update: boolean;
   can_delete: boolean;
   can_change_status: boolean;
+  can_create_quotation: boolean;
 }
 
 interface BuildingMaterialRequest {
@@ -77,9 +78,6 @@ const observer = ref<IntersectionObserver | null>(null);
 const tableHeaders = computed(() =>
   shownHeaders.value.map((h) => ({ key: h.key, title: h.title, width: '140px' }))
 );
-const refreshIcon = `<svg width="17" height="19" viewBox="0 0 17 19" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M10.1667 17.6667C10.1667 17.6667 10.8744 17.5656 13.8033 14.6366C16.7322 11.7077 16.7322 6.95897 13.8033 4.03003C12.7656 2.9923 11.4994 2.32224 10.1667 2.01986M10.1667 17.6667H15.1667M10.1667 17.6667L10.1667 12.6667M6.83333 1.00016C6.83333 1.00016 6.12563 1.10126 3.1967 4.0302C0.267767 6.95913 0.267767 11.7079 3.1967 14.6368C4.23443 15.6745 5.5006 16.3446 6.83333 16.647M6.83333 1.00016L1.83333 1M6.83333 1.00016L6.83333 6" stroke="#175CD3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>`;
 // Selection (we use uuid as id for rows)
 const selectedRequests = ref<string[]>([]);
 const hasSelectedRequests = computed(() => selectedRequests.value.length > 0);
@@ -271,6 +269,22 @@ const itemToChangeStatus = ref<BuildingMaterialRequest | null>(null);
 const openChangeStatusDialog = (item: BuildingMaterialRequest | Record<string, unknown>) => {
   itemToChangeStatus.value = item as BuildingMaterialRequest;
   showChangeStatusDialog.value = true;
+};
+
+const handleCreateQuotation = (item: unknown) => {
+  const tableItem = item as BuildingMaterialRequest & { id: string | number };
+  // Find original item from tableItems to get the numeric id
+  const originalItem = tableItems.value.find((r) => r.uuid === tableItem.uuid);
+  const numericId = originalItem ? (originalItem as any).id : undefined;
+  
+  router.push({ 
+    name: 'PriceOfferMaterialProductCreate',
+    query: { 
+      from_request: tableItem.uuid,
+      request_code: tableItem.code,
+      sale_requests_id: numericId ? String(numericId) : undefined
+    }
+  });
 };
 
 // Icons (same as original)
@@ -521,7 +535,16 @@ onBeforeUnmount(() => {
             </span>
           </template>
           <template #item.actions="{ item }">
-            <div class="flex items-center">
+            <div class="flex items-center gap-1">
+              <v-btn
+                v-if="item.actions?.can_create_quotation"
+                icon
+                variant="text"
+                size="small"
+                @click="handleCreateQuotation(item)"
+              >
+                <span v-html="refreshIcon"></span>
+              </v-btn>
               <v-btn
                 v-if="item.actions?.can_change_status"
                 icon

@@ -11,11 +11,15 @@ import { returnIcon, saveIcon } from '@/components/icons/globalIcons';
 const api = useApi();
 const route = useRoute();
 const router = useRouter();
-// Check if we're in edit mode
 const isEditMode = computed(() => !!route.params.id);
 const routeId = computed(() => route.params.id as string);
 const isLoading = ref(false);
 const isSubmitting = ref(false);
+
+// Query params for creating quotation from request
+const fromRequestId = computed(() => route.query.from_request as string | undefined);
+const fromRequestCode = computed(() => route.query.request_code as string | undefined);
+const saleRequestsId = computed(() => route.query.sale_requests_id as string | undefined);
 
 const requestTypeItems = ref<any[]>([]);
 const paymentMethodItems = ref<any[]>([]);
@@ -169,6 +173,90 @@ const fetchFormData = async () => {
     }
 }
 
+// Fetch request data and pre-fill form when creating quotation from request
+const fetchRequestForQuotation = async () => {
+    if (!fromRequestId.value) return;
+
+    isLoading.value = true;
+    try {
+        const res = await api.get<any>(`/sales/building-materials/${fromRequestId.value}`);
+        const data = res.data;
+
+        if (data) {
+            // Map request fields to quotation form fields
+            formData.value.customer_id = data.customer_id != null ? Number(data.customer_id) : null;
+            formData.value.project_name = data.project_name || '';
+            formData.value.target_location = data.target_location || null;
+            formData.value.target_latitude = data.target_latitude || null;
+            formData.value.target_longitude = data.target_longitude || null;
+            formData.value.payment_method = data.payment_method || null;
+            formData.value.upfront_payment = data.upfront_payment || null;
+            formData.value.invoice_interval = data.invoice_interval != null ? Number(data.invoice_interval) : null;
+            formData.value.payment_term_no = data.payment_term_no != null ? Number(data.payment_term_no) : null;
+            formData.value.late_fee_type = data.late_fee_type || null;
+            formData.value.late_fee = data.late_fee != null ? Number(data.late_fee) : null;
+            formData.value.cancel_fee_type = data.cancel_fee_type || null;
+            formData.value.cancel_fee = data.cancel_fee != null ? Number(data.cancel_fee) : null;
+            formData.value.notes = data.notes || '';
+            
+            // Map request_type to quotation_type if available
+            if (data.request_type) {
+                formData.value.quotation_type = data.request_type;
+            }
+
+            // Map products (items) from request to quotation
+            if (data.items && Array.isArray(data.items)) {
+                const logisticsByItemId: Record<number, any> = {};
+                const logisticsList = data.logistics_product_details;
+                if (Array.isArray(logisticsList)) {
+                    logisticsList.forEach((log: any) => {
+                        const iid = Number(log.item_id);
+                        if (!logisticsByItemId[iid]) logisticsByItemId[iid] = log;
+                    });
+                }
+
+                productTableItems.value = data.items.map((item: any) => {
+                    const itemId = Number(item.item_id);
+                    const log = logisticsByItemId[itemId];
+                    const vehicleTypes = log?.transport_type
+                        ? Array.isArray(log.transport_type)
+                            ? log.transport_type.map((t: string | number) => Number(t))
+                            : [Number(log.transport_type)]
+                        : [];
+                    const transportTypeName = vehicleTypes.length
+                        ? vehicleTypes
+                            .map((id: number) => getTransportTypeName(id))
+                            .filter(Boolean)
+                            .join(', ')
+                        : '';
+
+                    return {
+                        item_id: itemId,
+                        item_name: item.item_name || item.item?.name || '',
+                        unit_id: item.unit_id ?? null,
+                        unit_name: item.unit_name || getUnitName(item.unit_id),
+                        quantity: item.quantity ?? null,
+                        transport_type: vehicleTypes[0] ?? null,
+                        transport_type_name: transportTypeName,
+                        trip_no: log?.number_of_trips ?? null,
+                        notes: item.note || item.notes || '',
+                        unit_price: item.price_per_unit ?? null,
+                        discount: item.discount_val ?? null,
+                        tax_amount: item.total_tax ?? null,
+                        total_amount: item.subtotal_after_tax ?? null,
+                        transport_start_date: log?.trip_start ?? null,
+                        vehicle_types: vehicleTypes,
+                    };
+                });
+            }
+        }
+    } catch (e) {
+        console.error('Error fetching request data:', e);
+    } finally {
+        isLoading.value = false;
+    }
+};
+
 onMounted(async () => {
     await Promise.all([
         fetchConstants(),
@@ -179,6 +267,9 @@ onMounted(async () => {
     // Fetch form data if in edit mode
     if (isEditMode.value) {
         await fetchFormData();
+    } else if (fromRequestId.value) {
+        // Fetch request data if creating quotation from request
+        await fetchRequestForQuotation();
     }
 });
 
@@ -373,6 +464,11 @@ const buildFormData = (): FormData => {
     // Edit mode: Laravel method spoofing
     if (isEditMode.value) {
         fd.append('_method', 'PUT');
+    }
+
+    // Include sale_requests_id if creating quotation from request
+    if (saleRequestsId.value) {
+        fd.append('sale_requests_id', saleRequestsId.value);
     }
 
     // Basic fields (request-body.json)
