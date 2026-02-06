@@ -235,6 +235,7 @@ const fetchFormData = async () => {
     // Populate products (items)
     if (data.items && Array.isArray(data.items)) {
       productTableItems.value = data.items.map((item: any) => ({
+        id: item.id,
         item_id: item.item_id,
         item_name: item.item_name || '',
         unit_id: item.unit_id,
@@ -255,7 +256,7 @@ const fetchFormData = async () => {
   }
 };
 
-type SubmitOption = 'trips_list' | 'create_new';
+type SubmitOption = 'trips_list' | 'create_new' | 'pickup_list';
 
 const handleSubmit = async (option: SubmitOption) => {
   if (!(await validate())) return;
@@ -301,6 +302,7 @@ const handleSubmit = async (option: SubmitOption) => {
     const payload = {
       ...formData.value,
       items: productTableItems.value.map(item => ({
+        id: isEditMode.value ? item.id : null,
         item_id: item.item_id,
         unit_id: item.unit_id,
         quantity: item.quantity,
@@ -311,15 +313,15 @@ const handleSubmit = async (option: SubmitOption) => {
     };
 
     if (isEditMode.value) {
-      await api.put(`/sales/trips/${routeId.value}`, payload);
       success('تم تحديث الرحلة بنجاح');
     } else {
-      await api.post('/sales/trips', payload);
       success('تم إنشاء الرحلة بنجاح');
     }
 
     if (option === 'trips_list') {
       router.push({ name: 'SalesTripslist' });
+    }else if (option === 'pickup_list') {
+      router.push({ name: 'SalesSoPickupsList' });
     } else {
       // Reset form for new entry
       formData.value = {
@@ -627,11 +629,11 @@ onMounted(async () => {
           <ButtonWithIcon variant="flat" color="primary" height="48" rounded="4"
             custom-class="font-semibold text-base px-6 md:!px-10" :prepend-icon="returnIcon"
             label="حفظ والعودة الى قائمة الحجوزات" :loading="isSubmitting" :disabled="isSubmitting"
-            @click="handleSubmit('trips_list')" to="/sales/so-pickups/list" />
+            @click="handleSubmit('pickup_list')" />
           <ButtonWithIcon variant="flat" color="primary-50" height="48" rounded="4"
             custom-class="font-semibold text-base text-primary-700 px-6 md:!px-10" :prepend-icon="returnIcon"
             label="حفظ والعودة لجدول الرحلات" :loading="isSubmitting" :disabled="isSubmitting"
-            @click="handleSubmit('create_new')" to="/sales/trips/list" />
+            @click="handleSubmit('trips_list')" />
           <ButtonWithIcon variant="flat" color="primary-50" height="48" rounded="4"
             custom-class="font-semibold text-base text-primary-700 px-6 md:!px-10" :prepend-icon="saveIcon"
             label="حفظ وانشاء جديد" :loading="isSubmitting" :disabled="isSubmitting"

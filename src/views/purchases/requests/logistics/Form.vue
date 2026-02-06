@@ -626,10 +626,10 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
 
 
 onMounted(async () => {
-    fetchConstants()
-    fetchUnits()
-    fetchSuppliers()
-    fetchCategories()
+    await fetchConstants()
+    await fetchUnits()
+    await fetchSuppliers()
+    await fetchCategories()
 
     // Fetch form data if in edit mode
     if (isEditMode.value) {
@@ -869,7 +869,7 @@ onMounted(async () => {
                         <h2 class="text-xl font-bold ">المنتجات</h2>
                     </div>
                     <ButtonWithIcon color="primary-100" variant="flat" :prepend-icon="downloadIcon"
-                        class="!text-primary-900 font-bold">
+                        class="!text-primary-900 font-bold ">
                         استيراد من ملف إكسل
                     </ButtonWithIcon>
                 </div>
@@ -882,7 +882,7 @@ onMounted(async () => {
 
                 <!-- Add Product Button -->
                 <div class="flex justify-center">
-                    <ButtonWithIcon color="primary-100" variant="flat" class="!text-primary-900 font-bold w-75"
+                    <ButtonWithIcon color="primary-100" variant="flat" class="!text-primary-900 font-bold w-75 mb-4"
                         @click="handleAddProduct">
                         + إضافة منتج جديد
                     </ButtonWithIcon>
