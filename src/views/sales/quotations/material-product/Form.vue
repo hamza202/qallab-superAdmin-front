@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
-import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router';
 import AddProductDialog from '@/components/price-offers/AddProductDialog.vue';
 import EditSupplyDetailsDialog from '@/components/price-offers/EditSupplyDetailsDialog.vue';
@@ -18,7 +17,6 @@ const isSubmitting = ref(false);
 
 // Query params for creating quotation from request
 const fromRequestId = computed(() => route.query.from_request as string | undefined);
-const fromRequestCode = computed(() => route.query.request_code as string | undefined);
 const saleRequestsId = computed(() => route.query.sale_requests_id as string | undefined);
 
 const requestTypeItems = ref<any[]>([]);
@@ -418,7 +416,7 @@ import { useForm } from '@/composables/useForm';
 import { useNotification as useNotify } from '@/composables/useNotification';
 
 const { formRef, isFormValid, validate } = useForm();
-const { success, error } = useNotify();
+const { success, apiError } = useNotify();
 
 // Format date to DD-MM-YYYY HH:mm:ss
 const formatDateTime = (date: string | Date): string => {
@@ -590,7 +588,7 @@ const handleSubmit = async (afterSuccess?: 'reset' | 'navigate') => {
         }
     } catch (e: any) {
         console.error('Error submitting form:', e);
-        error(e?.response?.data?.message || 'حدث خطأ أثناء حفظ عرض السعر');
+        apiError(e, 'حدث خطأ أثناء حفظ عرض السعر');
     } finally {
         isSubmitting.value = false;
     }

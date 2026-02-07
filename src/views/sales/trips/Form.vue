@@ -30,7 +30,7 @@ const api = useApi();
 const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();
-const { success, error, warning } = useNotification();
+const { success, error, warning, apiError } = useNotification();
 const { formRef, isFormValid, validate } = useForm();
 
 const isEditMode = computed(() => !!route.params.id);
@@ -308,7 +308,7 @@ const handleSubmit = async (option: SubmitOption) => {
     }
   } catch (err: any) {
     console.error('Error submitting form:', err);
-    error(err?.response?.data?.message || 'فشل حفظ الرحلة');
+    apiError(err);
   } finally {
     isSubmitting.value = false;
   }

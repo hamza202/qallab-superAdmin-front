@@ -16,7 +16,7 @@ const api = useApi();
 const route = useRoute();
 const router = useRouter();
 const { formRef, isFormValid, validate } = useForm();
-const { success, error, warning } = useNotification();
+const { success, error, warning, apiError } = useNotification();
 
 // Edit mode: route has id (pickup uuid). Create mode: route has orderId (sale_order_id).
 const routeId = computed(() => route.params.id as string | undefined);
@@ -311,20 +311,7 @@ const handleSubmit = async (option: SubmitOption) => {
     }
   } catch (e: any) {
     console.error("Error submitting pickup:", e);
-    const responseData = e?.response?.data;
-    const msg =
-      responseData?.message ||
-      (isEditMode.value ? "حدث خطأ أثناء تحديث حجز الموعد" : "حدث خطأ أثناء حفظ حجز الموعد");
-    if (responseData?.errors && typeof responseData.errors === "object") {
-      const messages: string[] = [];
-      Object.values(responseData.errors).forEach((fieldErrors: any) => {
-        if (Array.isArray(fieldErrors)) messages.push(...fieldErrors);
-        else if (typeof fieldErrors === "string") messages.push(fieldErrors);
-      });
-      messages.forEach((m) => error(m));
-    } else {
-      error(msg);
-    }
+    apiError(e);
   } finally {
     isSubmitting.value = false;
   }

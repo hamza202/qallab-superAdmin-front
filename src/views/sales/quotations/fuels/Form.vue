@@ -333,7 +333,7 @@ import { useForm } from '@/composables/useForm';
 import { useNotification as useNotify } from '@/composables/useNotification';
 
 const { formRef, isFormValid, validate } = useForm();
-const { success, error } = useNotify();
+const { success, apiError } = useNotify();
 
 // Format date to DD-MM-YYYY
 const formatDateDdMmYyyy = (dateStr: string | null | undefined): string => {
@@ -471,18 +471,7 @@ const handleSubmit = async (afterSuccess?: 'reset' | 'navigate') => {
         }
     } catch (e: any) {
         console.error('Error submitting form:', e);
-        const data = e?.response?.data;
-        const errMessages: string[] = [];
-        if (data?.errors && typeof data.errors === 'object') {
-            Object.values(data.errors).forEach((val) => {
-                const list = Array.isArray(val) ? val : [val];
-                list.forEach((msg) => { if (msg && String(msg).trim()) errMessages.push(String(msg).trim()); });
-            });
-        }
-        const toasterMessage = errMessages.length
-            ? errMessages.join(' ')
-            : (data?.message || 'حدث خطأ أثناء حفظ عرض السعر');
-        error(toasterMessage);
+        apiError(e, 'حدث خطأ أثناء حفظ عرض السعر');
     } finally {
         isSubmitting.value = false;
     }
