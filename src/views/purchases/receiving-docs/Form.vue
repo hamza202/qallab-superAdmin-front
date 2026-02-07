@@ -14,7 +14,7 @@ const api = useApi();
 const route = useRoute();
 const router = useRouter();
 const { formRef, isFormValid, validate, scrollToFirstError } = useForm();
-const { success, error, warning } = useNotification();
+const { success, error, warning, apiError } = useNotification();
 
 // Table form ref for validation
 const tableFormRef = ref<any>(null);
@@ -224,7 +224,7 @@ const handleSubmitToReceivingDocs = async () => {
 
     } catch (e: any) {
         console.error('Error submitting form:', e);
-        error(e?.response?.data?.message || 'حدث خطأ أثناء حفظ سند الاستلام');
+        apiError(e);
     } finally {
         isSubmitting.value = false;
     }
@@ -263,7 +263,7 @@ const handleSubmitToOrdersList = async () => {
 
     } catch (e: any) {
         console.error('Error submitting form:', e);
-        error(e?.response?.data?.message || 'حدث خطأ أثناء حفظ سند الاستلام');
+        apiError(e);
     } finally {
         isSubmitting.value = false;
     }

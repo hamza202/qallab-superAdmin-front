@@ -220,10 +220,12 @@ const summaryData = computed(() => ({
     advancePayment: formData.value.advancePayment != null && formData.value.advancePayment !== '' ? String(formData.value.advancePayment) : 'لا يوجد'
 }));
 
+
+
 import { useNotification } from '@/composables/useNotification';
 import { required } from '@/utils/validators';
 
-const { warning } = useNotification();
+const { success, warning, apiError } = useNotification();
 
 const showAddProductDialog = ref(false);
 const editingProduct = ref<ProductTableItem | null>(null);
@@ -291,10 +293,8 @@ const handleDeleteProduct = (item: any) => {
 };
 
 import { useForm } from '@/composables/useForm';
-import { useNotification as useNotify } from '@/composables/useNotification';
 
 const { formRef, isFormValid, validate } = useForm();
-const { success, error } = useNotify();
 
 // Format date to DD-MM-YYYY for logistics_detail[from_date]
 const formatDateDdMmYyyy = (dateStr: string | null | undefined): string => {
@@ -412,18 +412,7 @@ const handleSubmit = async () => {
         
     } catch (e: any) {
         console.error('Error submitting form:', e);
-        const data = e?.response?.data;
-        const errMessages: string[] = [];
-        if (data?.errors && typeof data.errors === 'object') {
-            Object.values(data.errors).forEach((val) => {
-                const list = Array.isArray(val) ? val : [val];
-                list.forEach((msg) => { if (msg && String(msg).trim()) errMessages.push(String(msg).trim()); });
-            });
-        }
-        const toasterMessage = errMessages.length
-            ? errMessages.join(' ')
-            : (data?.message || 'حدث خطأ أثناء حفظ الطلب');
-        error(toasterMessage);
+        apiError(e);
     } finally {
         isSubmitting.value = false;
     }

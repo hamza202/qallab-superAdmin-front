@@ -174,7 +174,7 @@ interface ProductTableItem {
     unit_id: number | null;
     unit_name: string;
     quantity: number | null;
-    transport_type: number | null;
+    transport_type: number | null | undefined;
     transport_type_name: string;
     trip_no: number | null;
     notes: string;

@@ -411,7 +411,7 @@ const Supply = ref<Supply | null>(null);
 import { useNotification } from "@/composables/useNotification";
 import { required, numeric, positive } from "@/utils/validators";
 
-const { warning } = useNotification();
+
 
 const showAddProductDialog = ref(false);
 const editingProduct = ref<ProductTableItem | null>(null);
@@ -484,10 +484,9 @@ const handleNewRequest = () => {
 };
 
 import { useForm } from "@/composables/useForm";
-import { useNotification as useNotify } from "@/composables/useNotification";
 
 const { formRef, isFormValid, validate } = useForm();
-const { success, error } = useNotify();
+const { success, error, warning, apiError } = useNotification();
 
 // Format date to DD-MM-YYYY
 const formatDate = (date: string | Date): string => {
@@ -780,7 +779,7 @@ const handleSubmit = async (options?: { redirectToList?: boolean }) => {
     }
   } catch (e: any) {
     console.error("Error submitting form:", e);
-    error(e?.response?.data?.message || "حدث خطأ أثناء حفظ الطلب");
+    apiError(e);
   } finally {
     isSubmitting.value = false;
   }

@@ -548,7 +548,8 @@ const getInitialFormData = () => ({
     notes: '',
     status_id: null as number | null,
     image: null as File | null,
-    voice_attachment: null as File | null
+    voice_attachment: null as File | null,
+    code: '' as string
 });
 
 const resetForm = () => {

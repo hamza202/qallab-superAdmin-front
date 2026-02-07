@@ -2,7 +2,7 @@
 import { computed, ref, watch } from "vue";
 import { useApi } from '@/composables/useApi';
 
-type RequestType = 'raw_materials' | 'fuel' | 'transfer_service' | 'trips';
+type RequestType = 'raw_materials' | 'fuel' | 'transfer_service' | 'trips' | 'logistics';
 
 interface Category {
   id: number;

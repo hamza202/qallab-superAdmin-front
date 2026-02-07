@@ -8,10 +8,10 @@ import TopHeader from '@/components/price-offers/TopHeader.vue';
 import { useApi } from '@/composables/useApi';
 import { fileIcon, mapMarkerIcon, packageIcon, downloadIcon, fileQuestionIcon, busIcon, globeIcon } from '@/components/icons/priceOffersIcons';
 import { useForm } from '@/composables/useForm';
-import { useNotification as useNotify } from '@/composables/useNotification';
+import { useNotification } from '@/composables/useNotification';
 import { binIcon, fileCheckIcon, returnIcon, saveIcon } from "@/components/icons/globalIcons";
 const { formRef, isFormValid, validate } = useForm();
-const { success, error } = useNotify();
+const { success, warning, apiError } = useNotification();
 
 const { t } = useI18n()
 const api = useApi();
@@ -263,10 +263,7 @@ const summaryData = computed(() => ({
     advancePayment: formData.value.advancePayment || 'لا يوجد'
 }));
 
-import { useNotification } from '@/composables/useNotification';
-import { required } from '@/utils/validators';
 
-const { warning } = useNotification();
 
 const showAddProductDialog = ref(false);
 const editingProduct = ref<ProductTableItem | null>(null);
@@ -582,7 +579,8 @@ const handleSubmit = async (type: any) => {
 
     } catch (e: any) {
         console.error('Error submitting form:', e);
-        error(e?.response?.data?.message || 'حدث خطأ أثناء حفظ الطلب');
+
+        apiError(e);
     } finally {
         isSubmitting.value = false;
     }
@@ -624,6 +622,10 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
     unit: item.unit_name
 })));
 
+
+const handleNewRequest = () => {
+    router.push({ name: 'PurchasesLogisticsCreate' });
+};
 
 onMounted(async () => {
     fetchConstants()

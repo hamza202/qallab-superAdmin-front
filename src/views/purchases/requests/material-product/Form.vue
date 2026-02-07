@@ -231,7 +231,7 @@ const summaryData = computed(() => ({
 import { useNotification } from '@/composables/useNotification';
 import { required } from '@/utils/validators';
 
-const { warning } = useNotification();
+const { success, warning, apiError } = useNotification();
 
 const showAddProductDialog = ref(false);
 const editingProduct = ref<ProductTableItem | null>(null);
@@ -324,10 +324,8 @@ const handleDeleteTransportService = () => {
 };
 
 import { useForm } from '@/composables/useForm';
-import { useNotification as useNotify } from '@/composables/useNotification';
 
-const { formRef, isFormValid, validate } = useForm();
-const { success, error } = useNotify();
+const { isFormValid, validate } = useForm();
 
 // Format date to DD-MM-YYYY HH:mm:ss
 const formatDateTime = (date: string | Date): string => {
@@ -461,7 +459,7 @@ const handleSubmit = async () => {
         
     } catch (e: any) {
         console.error('Error submitting form:', e);
-        error(e?.response?.data?.message || 'حدث خطأ أثناء حفظ الطلب');
+        apiError(e);
     } finally {
         isSubmitting.value = false;
     }
