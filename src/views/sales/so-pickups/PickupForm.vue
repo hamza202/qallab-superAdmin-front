@@ -51,6 +51,7 @@ const formData = ref({
 
 /** Pickup product row for AddPickupProductDialog */
 interface PickupProductItem {
+  id?: number;
   item_id: number;
   item_name: string;
   unit_id: number | null;
@@ -80,6 +81,7 @@ const fetchUnits = async () => {
 
 /** Show response shape for edit mode */
 interface ShowPickupItem {
+  id?: number;
   item_id: number;
   item_name?: string;
   unit_id?: number | null;
@@ -133,6 +135,7 @@ const fetchPickupForEdit = async () => {
             ? (unitItems.value.find((u) => u.value === unitId)?.title ?? "")
             : "");
         return {
+          id: it.id,
           item_id: it.item_id,
           item_name: it.item_name ?? "",
           unit_id: unitId,
@@ -192,6 +195,7 @@ const handleProductSaved = (products: PickupProductToAdd[]) => {
   const newItems: PickupProductItem[] = products.map((p) => {
     const existing = productTableItems.value.find((x) => x.item_id === p.item_id);
     return {
+      ...(existing?.id && { id: existing.id }),
       item_id: p.item_id,
       item_name: p.item_name || "",
       unit_id: p.unit_id ?? null,
@@ -217,7 +221,9 @@ const handleProductUpdated = (updatedProduct: PickupProductToAdd) => {
   const index = productTableItems.value.findIndex((p) => p.item_id === updatedProduct.item_id);
   if (index !== -1) {
     const existingNotes = productTableItems.value[index].notes;
+    const existingId = productTableItems.value[index].id;
     productTableItems.value[index] = {
+      ...(existingId && { id: existingId }),
       item_id: updatedProduct.item_id,
       item_name: updatedProduct.item_name || "",
       unit_id: updatedProduct.unit_id ?? null,
@@ -257,6 +263,7 @@ const buildPayload = () => ({
   so_pickup_date: formData.value.so_pickup_date,
   notes: formData.value.notes,
   items: productTableItems.value.map((item) => ({
+    ...(item.id && { id: item.id }),
     item_id: item.item_id,
     unit_id: item.unit_id,
     quantity: item.quantity,

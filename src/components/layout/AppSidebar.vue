@@ -248,13 +248,13 @@
                       : 'text-white hover:text-qallab-yellow',
                   ]">إدارة فواتير المبيعات</router-link>
                 </li>
-                <li v-if="canViewSalesOrders" class="relative">
+                <!-- <li v-if="canViewSalesOrders" class="relative">
                   <router-link to="/sales/orders/material-product/list" :class="[
                     isMenuItemActive('/sales/orders/material-product')
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">إدارة طلبات المبيعات</router-link>
-                </li>
+                </li> -->
                 <li v-if="canViewContracts" class="relative">
                   <router-link to="/sales/contracts" :class="[
                     isMenuItemActive('/sales/contracts')
@@ -307,11 +307,6 @@
                   ]">
                     عروض أسعار المحروقات</router-link>
                 </li>
-                <li class="relative">
-                  <router-link to="/sales/trips/list"
-                    :class="[$route.path.includes('/sales/trips') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
-                    جدول الرحلات</router-link>
-                </li>
               </ul>
 
               <h2 class="text-sm font-medium leading-5 my-2">
@@ -333,6 +328,11 @@
                       : 'text-white hover:text-qallab-yellow',
                   ]">
                     حجوزات التسليم</router-link>
+                </li>
+                <li class="relative">
+                  <router-link to="/sales/trips/list"
+                    :class="[$route.path.includes('/sales/trips') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                    جدول الرحلات</router-link>
                 </li>
               </ul>
             </div>
