@@ -325,7 +325,7 @@ const handleDeleteTransportService = () => {
 
 import { useForm } from '@/composables/useForm';
 
-const { isFormValid, validate } = useForm();
+const { formRef, isFormValid, validate } = useForm();
 
 // Format date to DD-MM-YYYY HH:mm:ss
 const formatDateTime = (date: string | Date): string => {
