@@ -302,4 +302,43 @@ export const salesRoutes: RouteRecordRaw[] = [
       },
     ],
   },
+  {
+    path: "/sales/invoices",
+    name: "SalesInvoices",
+    redirect: "/sales/invoices/list",
+    children: [
+      {
+        path: "list",
+        name: "SalesInvoicesList",
+        component: () => import("@/views/sales/invoices/List.vue"),
+        meta: {
+          title: "pages.SalesInvoices.title",
+        },
+      },
+      {
+        path: "create",
+        name: "SalesInvoicesCreate",
+        component: () => import("@/views/sales/invoices/Form.vue"),
+        meta: {
+          title: "pages.SalesInvoices.FormTitle",
+        },
+      },
+      {
+        path: "edit/:id",
+        name: "SalesInvoicesEdit",
+        component: () => import("@/views/sales/invoices/Form.vue"),
+        meta: {
+          title: "pages.SalesInvoices.FormTitle",
+        },
+      },
+      {
+        path: "view/:id",
+        name: "SalesInvoicesView",
+        component: () => import("@/views/sales/invoices/View.vue"),
+        meta: {
+          title: "pages.SalesInvoices.title",
+        },
+      },
+    ],
+  },
 ];
