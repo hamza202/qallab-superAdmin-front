@@ -320,7 +320,7 @@ const handleSubmit = async (option: SubmitOption) => {
       await api.put(`/sales/trips/${routeId.value}`, payload);
       success('تم تحديث الرحلة بنجاح');
     } else {
-      await api.put(`/sales/trips/${routeId.value}`, payload);
+      await api.post(`/sales/trips`, payload);
       success('تم إنشاء الرحلة بنجاح');
     }
 
