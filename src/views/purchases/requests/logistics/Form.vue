@@ -773,7 +773,7 @@ onMounted(async () => {
                                 <div class="info-item-bordered  px-4 py-2">
                                     <label class="font-semibold text-sm text-gray-500 mb-2 block">مدة التنفيذ</label>
                                     <p class="text-base font-semibold text-gray-900">{{ detail.actual_execution_interval
-                                    }}
+                                        }}
                                     </p>
                                 </div>
                                 <v-divider vertical class="my-6"></v-divider>
@@ -812,7 +812,7 @@ onMounted(async () => {
                                     <label class="font-semibold text-sm text-gray-500 mb-2 block">مسؤول التفريغ
                                     </label>
                                     <p class="text-base font-semibold text-gray-900">{{ detail.loading_responsible_party
-                                    }} </p>
+                                        }} </p>
                                 </div>
                                 <v-divider vertical class="my-6"></v-divider>
                                 <div class="info-item-bordered px-4 py-2">
@@ -871,7 +871,7 @@ onMounted(async () => {
                         <h2 class="text-xl font-bold ">المنتجات</h2>
                     </div>
                     <ButtonWithIcon color="primary-100" variant="flat" :prepend-icon="downloadIcon"
-                        class="!text-primary-900 font-bold">
+                        class="!text-primary-900 font-bold ">
                         استيراد من ملف إكسل
                     </ButtonWithIcon>
                 </div>
@@ -884,7 +884,7 @@ onMounted(async () => {
 
                 <!-- Add Product Button -->
                 <div class="flex justify-center">
-                    <ButtonWithIcon color="primary-100" variant="flat" class="!text-primary-900 font-bold w-75"
+                    <ButtonWithIcon color="primary-100" variant="flat" class="!text-primary-900 font-bold w-75 mb-4"
                         @click="handleAddProduct">
                         + إضافة منتج جديد
                     </ButtonWithIcon>
