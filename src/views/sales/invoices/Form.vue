@@ -538,11 +538,11 @@ const summaryTotalTaxable = computed(() =>
     0
 );
 const summaryTotalTax = computed(() =>
-    summaryData.value?.total_taxes ??
+    summaryData.value?.total_taxes.toFixed(2) ??
     0
 );
 const summaryTotalDue = computed(() =>
-    summaryData.value?.final_total ??
+    summaryData.value?.final_total.toFixed(2) ??
     0
 );
 
