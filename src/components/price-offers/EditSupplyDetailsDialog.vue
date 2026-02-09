@@ -167,7 +167,10 @@ const truckIcon = `<svg width="22" height="20" viewBox="0 0 22 20" fill="none" x
             density="compact"
             class="w-full"
             hide-details
-            @update:model-value="(v) => (rows[index].trip_capacity = typeof v === 'number' ? v : null)"
+            @update:model-value="(v) => {
+              const numericValue = v === '' || v === null ? null : Number(v);
+              rows[index].trip_capacity = Number.isFinite(numericValue) ? numericValue : null;
+            }"
           />
         </div>
 

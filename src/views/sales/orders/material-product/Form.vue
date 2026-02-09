@@ -987,7 +987,7 @@ const handleSupplyDetailsSaved = (
         getTransportTypeNameFromIds(row.vehicle_types);
       if (row.vehicle_types?.length)
         product.transport_type = Number(row.vehicle_types[0]);
-      product.trip_capacity = row.trip_capacity ?? null;
+      product.trip_capacity = Number(row.trip_capacity) ?? null;
       product.am_pm_interval = row.am_pm_interval ?? null;
     }
   });
