@@ -26,9 +26,9 @@
                     <div class="flex items-center gap-2">
                         <div class="hidden sm:flex flex-col text-end">
                             <span class="text-sm font-semibold text-gray-900">
-                                Mohammed Saqer
+                                {{ authStore.userName }}
                             </span>
-                            <span class="text-xs text-gray-600">mohawck@qallab.com</span>
+                            <span class="text-xs text-gray-600">{{ authStore.userEmail }}</span>
                         </div>
 
                         <v-avatar class="position-relative overflow-visible">
