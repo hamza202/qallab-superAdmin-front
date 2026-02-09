@@ -141,6 +141,7 @@ const fetchFormData = async () => {
       // Populate form data
       formData.value.code = data.code || "";
       formData.value.sale_quotation_code = data.sale_quotation_code || null;
+      formData.value.po_reference = data.po_reference || null;
       formData.value.customer_id = data.customer_id;
       formData.value.price_offer_name = data.price_offer_name || "";
       formData.value.project_name = data.project_name || "";
@@ -462,6 +463,7 @@ interface Supply {
 // Form data with static values
 const formData = ref({
   sale_quotation_code: null,
+  po_reference: null,
   code: "",
   source_location: null as string | null,
   source_latitude: null as string | null,
@@ -676,6 +678,7 @@ const buildFormData = (): FormData => {
   fd.append("target_latitude", String(formData.value.target_latitude ?? ""));
   fd.append("target_longitude", String(formData.value.target_longitude ?? ""));
   fd.append("project_name", formData.value.project_name || "");
+  fd.append("po_reference", formData.value.po_reference || "");
   fd.append("payment_method", formData.value.paymentMethod || "");
   fd.append("upfront_payment", String(formData.value.advancePayment ?? ""));
   fd.append("invoice_interval", String(formData.value.invoice_interval ?? 1));
@@ -805,6 +808,7 @@ const buildFormData = (): FormData => {
 const resetForm = () => {
   formData.value = {
     sale_quotation_code: null,
+    po_reference: null,
     code: "",
     source_location: null,
     source_latitude: null,
@@ -1150,8 +1154,8 @@ const serviceTableItems = computed(() =>
       <!-- Page Header -->
       <TopHeader
         :icon="filePlusIcon"
-        title-key="pages.OrdersMaterialProduct.FormTitle"
-        description-key="pages.OrdersMaterialProduct.FormDescription"
+        title-key="pages.SalesRequests.FormTitle"
+        description-key="pages.SalesRequests.FormDescription"
         :show-action="false"
         :code="isEditMode ? formData.code : ''"
         :code-icon="fileIcon"
@@ -1249,7 +1253,6 @@ const serviceTableItems = computed(() =>
               <TextInput
                 v-model="formData.project_name"
                 label="المشروع"
-                :rules="[required()]"
                 density="comfortable"
                 placeholder="ادخل اسم المشروع"
               />
@@ -1291,6 +1294,30 @@ const serviceTableItems = computed(() =>
                     />
                   </template>
                   <div>كود عرض السعر</div>
+                </v-tooltip>
+              </template>
+            </TextInput>
+
+            <TextInput
+              v-model="formData.po_reference"
+              label="الرقم المرجعي"
+              density="comfortable"
+              placeholder="أدخل الرقم المرجعي"
+              :hide-details="true"
+            >
+              <template #append-inner>
+                <v-tooltip location="top" content-class="custom-tooltip">
+                  <template #activator="{ props: tooltipProps }">
+                    <ButtonWithIcon
+                      variant="text"
+                      size="small"
+                      density="compact"
+                      custom-class="!min-w-0 p-0"
+                      :prepend-icon="HelpCircleIcon"
+                      v-bind="tooltipProps"
+                    />
+                  </template>
+                  <div>الرقم المرجعي</div>
                 </v-tooltip>
               </template>
             </TextInput>

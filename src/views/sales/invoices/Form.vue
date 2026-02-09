@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, watch, nextTick } from "vue";
+import { ref, computed, onMounted, watch, nextTick, reactive } from "vue";
 import { useRoute, useRouter } from 'vue-router';
 import TopHeader from '@/components/price-offers/TopHeader.vue';
 import { useApi } from '@/composables/useApi';
@@ -30,6 +30,26 @@ const customerCommercialRegister = computed(() => customerData.value?.commercial
 const customerAddress = computed(() => customerData.value?.address || {});
 const unitItems = ref<any[]>([]);
 const discountTypeItems = ref<any[]>([]);
+const summaryData = ref<any>(null);
+const isPopulatingForm = ref(false);
+const skipNextSaleOrderItemsFetch = ref(false);
+const formErrors = reactive<Record<string, string>>({});
+
+const scrollToTop = () => {
+    if (typeof window === 'undefined') return;
+    const container = document.querySelector('.main-scroll');
+    if (container instanceof HTMLElement) {
+        container.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+};
+
+const clearFieldError = (field: string) => {
+    if (formErrors[field]) {
+        delete formErrors[field];
+    }
+};
 
 // Interface for product items in the table
 interface ProductTableItem {
@@ -51,7 +71,7 @@ interface ProductTableItem {
 // Form data with static values
 const getDefaultFormData = () => ({
     customer_id: null,
-    order_type: null,
+    so_type: null,
     sale_order_id: null,
     invoice_issues_datetime: null as string | null,
     invoice_due_datetime: null as string | null,
@@ -92,7 +112,7 @@ const mapOrderItemsToProducts = (items: any[] = []) => {
         discount_type: item.discount_type,
         discount_val: item.discount_val,
         total_tax: item.total_tax,
-        taxable_amount: item.taxable_amount,
+        taxable_amount: item.total_applied_taxes,
         subtotal_after_tax: item.subtotal_after_tax ?? item.subtotal_after_discount,
     }));
 };
@@ -114,10 +134,19 @@ const fetchOrderItems = async (saleOrderId: number | string | null) => {
         const orders = Array.isArray(res.data) ? res.data : res.data?.data;
         const firstOrder = Array.isArray(orders) ? orders[0] : null;
         const items = firstOrder?.items || [];
-        if (items.length <= 0)
+        if (items.length <= 0) {
             warning('يجب أن تحتوي الطلبية على منتج واحد على الأقل لإتمام الفاتورة')
-        else
+        } else {
             productTableItems.value = mapOrderItemsToProducts(items);
+            summaryData.value = {
+                total_quantity: firstOrder.total_quantity,
+                total_discount: firstOrder.total_discount,
+                total_out_taxes: firstOrder.total_out_taxes,
+                total_applied_taxes: firstOrder.total_applied_taxes,
+                total_taxes: firstOrder.total_taxes,
+                final_total: firstOrder.final_total,
+            };
+        }
     } catch (e) {
         console.error('Error fetching sale order items:', e);
     }
@@ -200,44 +229,44 @@ const fetchCustomerDetails = async (customerId: number | string | null) => {
 };
 
 const formatDateTimeDmy = (date: Date): string => {
-  const day = String(date.getDate()).padStart(2, "0");
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const year = date.getFullYear();
-  const hours = String(date.getHours()).padStart(2, "0");
-  const minutes = String(date.getMinutes()).padStart(2, "0");
-  const seconds = String(date.getSeconds()).padStart(2, "0");
-  return `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    const seconds = String(date.getSeconds()).padStart(2, "0");
+    return `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
 };
 
 const normalizePoDateTime = (value: string): string => {
-  if (!value) return "";
-  const trimmed = value.trim();
-  if (/^\d{2}-\d{2}-\d{4}\s+\d{2}:\d{2}:\d{2}$/.test(trimmed)) {
-    return trimmed;
-  }
-  if (/^\d{4}-\d{2}-\d{2}/.test(trimmed)) {
-    const [datePart, timePart] = trimmed.split(" ");
-    const [year, month, day] = datePart.split("-").map(Number);
-    const [hours, minutes, seconds] = (timePart || "00:00:00")
-      .split(":")
-      .map(Number);
-    if (year && month && day) {
-      const d = new Date(
-        year,
-        month - 1,
-        day,
-        hours || 0,
-        minutes || 0,
-        seconds || 0,
-      );
-      return formatDateTimeDmy(d);
+    if (!value) return "";
+    const trimmed = value.trim();
+    if (/^\d{2}-\d{2}-\d{4}\s+\d{2}:\d{2}:\d{2}$/.test(trimmed)) {
+        return trimmed;
     }
-  }
-  const parsed = new Date(trimmed);
-  if (!Number.isNaN(parsed.getTime())) {
-    return formatDateTimeDmy(parsed);
-  }
-  return trimmed;
+    if (/^\d{4}-\d{2}-\d{2}/.test(trimmed)) {
+        const [datePart, timePart] = trimmed.split(" ");
+        const [year, month, day] = datePart.split("-").map(Number);
+        const [hours, minutes, seconds] = (timePart || "00:00:00")
+            .split(":")
+            .map(Number);
+        if (year && month && day) {
+            const d = new Date(
+                year,
+                month - 1,
+                day,
+                hours || 0,
+                minutes || 0,
+                seconds || 0,
+            );
+            return formatDateTimeDmy(d);
+        }
+    }
+    const parsed = new Date(trimmed);
+    if (!Number.isNaN(parsed.getTime())) {
+        return formatDateTimeDmy(parsed);
+    }
+    return trimmed;
 };
 
 // Fetch form data for edit mode
@@ -245,6 +274,7 @@ const fetchFormData = async () => {
     if (!isEditMode.value || !routeId.value) return;
 
     isLoading.value = true;
+    isPopulatingForm.value = true;
     try {
         const res = await api.get<any>(`/sales/invoices/building-materials/${routeId.value}`);
         const data = res.data;
@@ -253,6 +283,8 @@ const fetchFormData = async () => {
             // Populate form data
             formData.value.customer_id = data.customer_id;
             formData.value.sale_order_id = data.sale_order_id;
+            formData.value.so_type = data.so_type
+            skipNextSaleOrderItemsFetch.value = true;
             formData.value.invoice_issues_datetime = normalizePoDateTime(data.invoice_issues_datetime) || '';
             formData.value.invoice_due_datetime = normalizePoDateTime(data.invoice_due_datetime) || '';
             formData.value.invoice_creation_date = data.invoice_creation_date || ''
@@ -260,14 +292,35 @@ const fetchFormData = async () => {
             formData.value.notes = data.notes;
             InvoiceCode.value = data.code || ''
             fetchCustomerDetails(data.customer_id);
+            if (data.customer_id && data.so_type) {
+                await fetchOrdersByCustomerAndType(data.customer_id, data.so_type);
+                if (data.sale_order_id) {
+                    const exists = ordersItems.value.some(order => order.value === data.sale_order_id);
+                    if (!exists) {
+                        ordersItems.value.push({
+                            title: data.sale_order_code || `طلب #${data.sale_order_id}`,
+                            value: data.sale_order_id,
+                        });
+                    }
+                }
+            }
             if (data.items && Array.isArray(data.items)) {
                 productTableItems.value = mapOrderItemsToProducts(data.items);
             }
+            summaryData.value = {
+                total_quantity: data.total_quantity,
+                total_discount: data.total_discount,
+                total_out_taxes: data.total_out_taxes,
+                total_applied_taxes: data.total_applied_taxes,
+                total_taxes: data.total_taxes,
+                final_total: data.final_total,
+            };
         }
     } catch (e) {
         console.error('Error fetching form data:', e);
     } finally {
         isLoading.value = false;
+        isPopulatingForm.value = false;
     }
 }
 
@@ -281,6 +334,7 @@ const buildFormData = (): FormData => {
     fd.append('invoice_issues_datetime', String(formData.value.invoice_issues_datetime || ''));
     fd.append('invoice_due_datetime', String(formData.value.invoice_due_datetime || 1));
     fd.append('sale_order_id', String(formData.value.sale_order_id || ''));
+    fd.append('so_type', String(formData.value.so_type || ''));
     fd.append('notes', formData.value.notes || '');
 
     // Items (products)
@@ -312,10 +366,11 @@ const resetFormState = async () => {
     productTableItems.value = [];
     InvoiceCode.value = '';
     ordersItems.value = [];
+    summaryData.value = null;
+    skipNextSaleOrderItemsFetch.value = false;
+    Object.keys(formErrors).forEach(key => delete formErrors[key]);
     await nextTick();
-    if (typeof window !== 'undefined') {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+    scrollToTop();
     if (formRef.value?.resetValidation) {
         formRef.value.resetValidation();
     }
@@ -329,6 +384,7 @@ const handleSubmit = async (type: any) => {
         return;
     }
 
+    Object.keys(formErrors).forEach(key => delete formErrors[key]);
     isSubmitting.value = true;
     try {
         const fd = buildFormData();
@@ -352,6 +408,12 @@ const handleSubmit = async (type: any) => {
 
     } catch (e: any) {
         console.error('Error submitting form:', e);
+        if (e?.response?.data?.errors) {
+            const apiErrors = e.response.data.errors;
+            Object.keys(apiErrors).forEach((key) => {
+                formErrors[key] = Array.isArray(apiErrors[key]) ? apiErrors[key][0] : apiErrors[key];
+            });
+        }
         error(e?.response?.data?.message || 'حدث خطأ أثناء حفظ الفاتورة');
     } finally {
         isSubmitting.value = false;
@@ -460,23 +522,28 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
 })));
 
 const summaryTotalQuantities = computed(() =>
-    productTableItems.value.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0)
+    summaryData.value?.total_quantity ??
+    0
 );
 const summaryTotalExcludingTax = computed(() =>
-    productTableItems.value.reduce((sum, item) => sum + (Number(item.price_per_unit) || 0), 0)
+    summaryData.value?.total_out_taxes ??
+    0
 );
 const summaryTotalDiscounts = computed(() =>
-    productTableItems.value.reduce((sum, item) => sum + (Number(item.discount_val) || 0), 0).toFixed(2)
+    summaryData.value?.total_discount ??
+    0
 );
 const summaryTotalTaxable = computed(() =>
-    productTableItems.value.reduce((sum, item) => sum + (Number(item.taxable_amount) || 0), 0).toFixed(2)
+    summaryData.value?.total_applied_taxes ??
+    0
 );
 const summaryTotalTax = computed(() =>
-    productTableItems.value.reduce((sum, item) => sum + (Number(item.total_tax) || 0), 0).toFixed(2)
+    summaryData.value?.total_taxes.toFixed(2) ??
+    0
 );
 const summaryTotalDue = computed(() =>
-    productTableItems.value.reduce((sum, item) => sum + (Number(item.subtotal_after_tax) || 0), 0).toFixed(2)
-
+    summaryData.value?.final_total.toFixed(2) ??
+    0
 );
 
 watch(
@@ -487,9 +554,11 @@ watch(
 );
 
 watch(
-    [() => formData.value.customer_id, () => formData.value.order_type],
+    [() => formData.value.customer_id, () => formData.value.so_type],
     ([customerId, orderType]) => {
-        formData.value.sale_order_id = null;
+        if (!isPopulatingForm.value) {
+            formData.value.sale_order_id = null;
+        }
         if (!customerId || !orderType) {
             ordersItems.value = [];
             return;
@@ -502,6 +571,10 @@ watch(
 watch(
     () => formData.value.sale_order_id,
     (saleOrderId) => {
+        if (skipNextSaleOrderItemsFetch.value) {
+            skipNextSaleOrderItemsFetch.value = false;
+            return;
+        }
         fetchOrderItems(saleOrderId);
     }
 );
@@ -539,22 +612,28 @@ onMounted(async () => {
                 </div>
 
                 <v-form ref="formRef" v-model="isFormValid" @submit.prevent>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 gap-y-6">
                         <!-- Customer Name -->
                         <div>
                             <SelectInput v-model="formData.customer_id" :items="customerItems" placeholder="اختر"
-                                label="اسم العميل" density="comfortable" />
+                                label="اسم العميل" density="comfortable" :rules="[required()]"
+                                :error-messages="formErrors['customer_id']"
+                                @update:model-value="clearFieldError('customer_id')" clearable />
                         </div>
 
                         <div>
-                            <SelectInput v-model="formData.order_type" :items="orderTypes" placeholder="اختر"
-                                label="نوع الطلبية" density="comfortable" />
+                            <SelectInput v-model="formData.so_type" :items="orderTypes" placeholder="اختر"
+                                label="نوع الطلبية" density="comfortable" :rules="[required()]"
+                                :error-messages="formErrors['so_type']"
+                                @update:model-value="clearFieldError('so_type')" clearable />
                         </div>
 
                         <!-- Purchase Request Code -->
                         <div>
                             <SelectInput v-model="formData.sale_order_id" placeholder="اختر الطلبية"
-                                label="كود طلبية المبيعات" :items="ordersItems" density="comfortable" />
+                                label="كود طلبية المبيعات" :items="ordersItems" density="comfortable"
+                                :rules="[required()]" :error-messages="formErrors['sale_order_id']" 
+                                @update:model-value="clearFieldError('sale_order_id')" clearable :disabled="!formData.so_type || !formData.customer_id" />
                         </div>
 
                         <!-- Invoice Creation Date -->
@@ -623,7 +702,7 @@ onMounted(async () => {
                 </div>
 
                 <!-- Products Table -->
-                <DataTable :headers="headers" @edit="handleEditProduct" :items="tableItems" force-show-edit />
+                <DataTable :headers="headers" @edit="handleEditProduct" :items="tableItems" />
             </div>
 
             <!-- Summary Table Section -->
@@ -687,10 +766,10 @@ onMounted(async () => {
                             <!-- Tax Total -->
                             <tr class="border-b !border-gray-200">
                                 <td class="py-4 px-4 text-center font-bold text-gray-900 border-l !border-gray-200">
-                                     الضريبة
+                                    الضريبة
                                 </td>
                                 <td class="py-4 px-4 text-center text-gray-600">
-                                   15%
+                                    15%
                                 </td>
                             </tr>
 
@@ -729,11 +808,11 @@ onMounted(async () => {
             <!-- Action Buttons -->
             <div class="mt-3 flex items-center justify-center gap-3">
                 <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col">
-                    <ButtonWithIcon variant="flat" color="primary" height="48" rounded="4"
+                    <ButtonWithIcon variant="flat" color="primary" height="48" rounded="4" :loading="isSubmitting"
                         custom-class="font-semibold text-base px-6 md:!px-10" :prepend-icon="returnIcon"
                         label="حفظ والعودة للرئيسية" @click="handleSubmit('backToList')" />
 
-                    <ButtonWithIcon variant="flat" color="primary-50" height="48" rounded="4"
+                    <ButtonWithIcon variant="flat" color="primary-50" height="48" rounded="4" :loading="isSubmitting"
                         custom-class="font-semibold text-base text-primary-700 px-6 md:!px-10" :prepend-icon="saveIcon"
                         label="حفظ وإنشاء جديد" @click="handleSubmit('createNew')" />
                 </div>
