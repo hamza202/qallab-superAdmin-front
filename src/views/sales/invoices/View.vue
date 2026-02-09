@@ -45,12 +45,12 @@
                     <div class="flex flex-wrap gap-4">
                         <div class="info-item-bordered flex-1 px-6 py-4">
                             <label class="font-semibold text-sm text-gray-500 mb-2 block">اسم العميل</label>
-                            <p class="text-base font-semibold text-gray-900">{{ invoiceData?.customer_id || '—' }}</p>
+                            <p class="text-base font-semibold text-gray-900">{{ invoiceData?.customer_name || '—' }}</p>
                         </div>
                         <v-divider vertical class="my-6"></v-divider>
                         <div class="info-item-bordered flex-1 px-6 py-4">
                             <label class="font-semibold text-sm text-gray-500 mb-2 block">كود طلبية المبيعات</label>
-                            <p class="text-base font-semibold text-gray-900">{{ invoiceData?.sale_order_id || '—' }}</p>
+                            <p class="text-base font-semibold text-gray-900">{{ invoiceData?.sale_order_code || '—' }}</p>
                         </div>
                         <v-divider vertical class="my-6"></v-divider>
                         <div class="info-item-bordered flex-1 px-6 py-4">
@@ -146,8 +146,8 @@ const itemsData = computed(() => {
     if (!invoiceData.value?.items) return []
     return invoiceData.value.items.map((item: any) => ({
         id: item.id,
-        item_id: item.item_id || '—',
-        unit_id: item.unit_id || '—',
+        item_name: item.item_name || '—',
+        unit_name: item.unit_name || '—',
         quantity: item.quantity || 0,
         price_per_unit: item.price_per_unit || 0,
         discount_val: item.discount_val || 0,
@@ -158,8 +158,8 @@ const itemsData = computed(() => {
 })
 
 const itemHeaders = [
-    { title: 'اسم المنتج', key: 'item_id' },
-    { title: 'الوحدة', key: 'unit_id' },
+    { title: 'اسم المنتج', key: 'item_name' },
+    { title: 'الوحدة', key: 'unit_name' },
     { title: 'الكمية', key: 'quantity' },
     { title: 'سعر الوحدة', key: 'price_per_unit' },
     { title: 'خصم', key: 'discount_val' },
