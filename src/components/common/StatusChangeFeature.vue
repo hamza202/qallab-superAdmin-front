@@ -83,8 +83,8 @@ watch(
   { immediate: true }
 );
 
-const fetchStatusTransitions = async (item: StatusChangeItem) => {
-  selectedStatus.value = null;
+const fetchStatusTransitions = async (item: StatusChangeItem) => {  
+  selectedStatus.value = item.status_id;
   statusTransitionOptions.value = [];
   statusTransitionLoading.value = true;
 
@@ -155,6 +155,7 @@ const handleStatusChange = async (convertedStatusId: any) => {
     :message="message"
     :show-select="true"
     :select-items="statusTransitionOptions"
+    :initial-select-value="item?.status_id ?? null"
     :loading="statusTransitionLoading || submitting"
     :dialog-icon="changeStatusIcon"
     @confirm="handleStatusChange"
