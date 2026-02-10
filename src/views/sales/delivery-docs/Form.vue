@@ -276,7 +276,7 @@ const handleSubmitToOrdersList = async () => {
         <div class="receiving-docs-page -mx-6 bg-qallab-dashboard-bg space-y-4">
             <!-- Page Header -->
             <TopHeader :icon="fileCheckIcon" title-key="pages.DeliveryDocs.title"
-                description-key="pages.DeliveryDocs.description" :show-action="false"
+                :description-key="isEditMode ? 'pages.DeliveryDocs.edit' : 'pages.DeliveryDocs.create'" :show-action="false"
                 :code="isEditMode ? formData.code : ''" />
 
             <!-- Loading State -->
