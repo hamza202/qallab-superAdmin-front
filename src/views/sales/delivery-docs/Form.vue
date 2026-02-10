@@ -358,6 +358,7 @@ const handleSubmitToOrdersList = async () => {
                                 <PriceInput
                                     v-model="receiptItems[getItemIndex(item)].base_quantity"
                                     placeholder="الكمية الأساسية" density="comfortable"
+                                    disabled
                                     class="w-32" :input-props="{ class: '!text-center' }"
                                     :rules="[required()]" />
                             </template>
