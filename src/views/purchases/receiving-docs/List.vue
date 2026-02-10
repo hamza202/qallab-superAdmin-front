@@ -16,6 +16,8 @@ import {
   exportIcon,
   importIcon,
 } from "@/components/icons/globalIcons";
+import StatusChangeFeature from '@/components/common/StatusChangeFeature.vue';
+import { switcStatusIcon } from '@/components/icons/priceOffersIcons';
 
 const { t } = useI18n();
 const router = useRouter();
@@ -285,6 +287,15 @@ const confirmBulkDelete = async () => {
   }
 };
 
+// Status change (can_change_status)
+const showChangeStatusDialog = ref(false);
+const itemToChangeStatus = ref<ReceivingDoc | null>(null);
+
+const openChangeStatusDialog = (item: ReceivingDoc | Record<string, unknown>) => {
+  itemToChangeStatus.value = item as ReceivingDoc;
+  showChangeStatusDialog.value = true;
+};
+
 onMounted(() => {
   fetchList();
   nextTick(() => setupInfiniteScroll());
@@ -504,6 +515,19 @@ onBeforeUnmount(() => {
               {{ item.status }}
             </span>
           </template>
+          <template #item.actions="{ item }">
+            <div class="flex items-center">
+              <v-btn
+                v-if="item.actions?.can_change_status"
+                icon
+                variant="text"
+                size="small"
+                @click="openChangeStatusDialog(item)"
+              >
+                <span v-html="switcStatusIcon"></span>
+              </v-btn>
+            </div>
+          </template>
         </DataTable>
 
         <div ref="loadMoreTrigger" class="h-4"></div>
@@ -521,6 +545,15 @@ onBeforeUnmount(() => {
       title="حذف سندات الاستلام"
       :message="`هل أنت متأكد من حذف ${selectedItems.length} سند استلام؟`"
       @confirm="confirmBulkDelete"
+    />
+
+    <StatusChangeFeature
+      v-model="showChangeStatusDialog"
+      :item="itemToChangeStatus"
+      :change-status-url="`/purchases/receiving-docs/${itemToChangeStatus?.uuid}/change-status`"
+      title="تغيير الحالة"
+      message="تغيير الحالة:"
+      @success="fetchList"
     />
   </default-layout>
 </template>
