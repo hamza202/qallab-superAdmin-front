@@ -207,13 +207,13 @@ const confirmStatusChange = async () => {
             tableItems.value[index].status_value = newStatus ? 'فعال' : 'غير فعال';
         }
 
-        itemToChangeStatus.value = null;
     } catch (err: any) {
         console.error('Error changing customer status:', err);
         error(err?.response?.data?.message || 'فشل تغيير حالة العميل');
     } finally {
         statusChangeLoading.value = false;
         showStatusChangeDialog.value = false;
+        itemToChangeStatus.value = null;
     }
 };
 
@@ -412,7 +412,7 @@ onBeforeUnmount(() => {
                     <template #item.status="{ item }">
                         <v-switch v-if="item.actions.can_change_status" :model-value="item.status" hide-details inset
                             density="compact" class="small-switch" color="primary-600"
-                            @click="handleStatusChange(item)" />
+                             @update:model-value="() => handleStatusChange(item)" />
                         <span v-else class="text-sm text-gray-600">--</span>
                     </template>
                 </DataTable>
