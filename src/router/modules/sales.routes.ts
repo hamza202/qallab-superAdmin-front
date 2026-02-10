@@ -341,4 +341,44 @@ export const salesRoutes: RouteRecordRaw[] = [
       },
     ],
   },
+    {
+    path: "/sales/delivery-docs",
+    name: "DeliveryDocs",
+    redirect: "/sales/delivery-docs/list",
+    children: [
+      {
+        path: "list",
+        name: "DeliveryDocsList",
+        component: () => import("@/views/sales/delivery-docs/List.vue"),
+        meta: {
+          title: "pages.DeliveryDocs.title",
+        },
+      },
+      {
+        path: "create",
+        name: "DeliveryDocsCreate",
+        component: () => import("@/views/sales/delivery-docs/Form.vue"),
+        meta: {
+          title: "pages.DeliveryDocs.title",
+        },
+      },
+      {
+        path: "edit/:id",
+        name: "DeliveryDocsEdit",
+        component: () => import("@/views/sales/delivery-docs/Form.vue"),
+        meta: {
+          title: "pages.DeliveryDocs.edit",
+        },
+      },
+      {
+        path: "view/:id",
+        name: "DeliveryDocsView",
+        component: () => import("@/views/sales/delivery-docs/View.vue"),
+        meta: {
+          title: "pages.DeliveryDocs.view",
+        },
+      },
+    ],
+  },
+
 ];
