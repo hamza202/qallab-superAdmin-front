@@ -31,6 +31,12 @@ const router = useRouter();
 // Check if we're in edit mode
 const isEditMode = computed(() => !!route.params.id);
 const routeId = computed(() => route.params.id as string);
+// Check if creating order from quotation
+const fromQuotationId = computed(() => route.query.from_quotation as string | undefined);
+const fromQuotationCode = computed(() => route.query.quotation_code as string | undefined);
+const purchaseQuotationId = computed(() => route.query.purchase_quotation_id as string | undefined);
+// Track if data is loaded from quotation (to disable supplier select)
+const isFromQuotation = ref(false);
 const isLoading = ref(false);
 const isSubmitting = ref(false);
 
@@ -296,6 +302,132 @@ const fetchFormData = async () => {
   }
 };
 
+// Helper function to get unit name from id
+const getUnitName = (unitId: number | null): string => {
+  if (unitId == null) return "";
+  const unit = unitItems.value.find((u: any) => u.value === unitId || u.value === Number(unitId));
+  return unit?.title || "";
+};
+
+// Fetch quotation data and pre-fill form when creating order from quotation
+const fetchQuotationForOrder = async () => {
+  if (!fromQuotationId.value) return;
+
+  // Set quotation code from query param
+  if (fromQuotationCode.value) {
+    formData.value.purchase_quotation_code = fromQuotationCode.value as any;
+  }
+
+  isLoading.value = true;
+  try {
+    const res = await api.get<any>(`/purchases/quotations/building-materials/${fromQuotationId.value}`);
+    const data = res.data;
+
+    if (data) {
+      // Mark as loaded from quotation to disable supplier select
+      isFromQuotation.value = true;
+      
+      // Set quotation code from API response if not already set from query param
+      if (data.code && !fromQuotationCode.value) {
+        formData.value.purchase_quotation_code = data.code;
+      }
+      
+      // Map quotation fields to order form fields
+      // supplier can come as object {id, name} or as supplier_id
+      formData.value.supplier_id = data.supplier?.id != null 
+        ? Number(data.supplier.id) 
+        : (data.supplier_id != null ? Number(data.supplier_id) : null);
+      formData.value.project_name = data.project_name || "";
+      formData.value.target_location = data.target_location || null;
+      formData.value.target_latitude = data.target_latitude || null;
+      formData.value.target_longitude = data.target_longitude || null;
+      formData.value.source_location = data.source_location || null;
+      formData.value.source_latitude = data.source_latitude || null;
+      formData.value.source_longitude = data.source_longitude || null;
+      formData.value.paymentMethod = data.payment_method || null;
+      formData.value.advancePayment = data.upfront_payment || null;
+      formData.value.invoice_interval = data.invoice_interval != null ? Number(data.invoice_interval) : null;
+      formData.value.payment_term_no = data.payment_term_no != null ? Number(data.payment_term_no) : null;
+      formData.value.late_fee_type = data.late_fee_type || null;
+      formData.value.late_fee = data.late_fee != null ? Number(data.late_fee) : null;
+      formData.value.cancel_fee_type = data.cancel_fee_type || null;
+      formData.value.cancel_fee = data.cancel_fee != null ? Number(data.cancel_fee) : null;
+      formData.value.textNote = data.notes || "";
+      
+      // Map quotation_type to po_type if available
+      if (data.quotation_type) {
+        formData.value.po_type = data.quotation_type;
+      }
+
+      // Map products (items) from quotation to order
+      if (data.items && Array.isArray(data.items)) {
+        // Build logistics map by item.id (the actual product id, not the record id)
+        const logisticsByItemId: Record<number, any> = {};
+        const logisticsList = data.logistics_product_details;
+        if (Array.isArray(logisticsList)) {
+          logisticsList.forEach((log: any) => {
+            // item.id is the actual product id in logistics_product_details
+            const iid = Number(log.item?.id || log.item_id);
+            if (!logisticsByItemId[iid]) logisticsByItemId[iid] = log;
+          });
+        }
+
+        productTableItems.value = data.items.map((item: any) => {
+          // item.item.id is the actual product id, item.id is the record id
+          const itemId = Number(item.item?.id || item.item_id);
+          const log = logisticsByItemId[itemId];
+          const vehicleTypes = log?.transport_type
+            ? Array.isArray(log.transport_type)
+              ? log.transport_type.map((t: string | number) => Number(t))
+              : [Number(log.transport_type)]
+            : [];
+          const transportTypeName = vehicleTypes.length
+            ? vehicleTypes
+                .map((id: number) => getTransportTypeName(id))
+                .filter(Boolean)
+                .join(", ")
+            : "";
+
+          // Get unit name from unit object or unitItems
+          const unitId = item.unit?.id || item.unit_id;
+          const unitName = item.unit?.name || item.unit_name || getUnitName(unitId);
+
+          return {
+            item_id: itemId,
+            item_name: item.item?.name || item.item_name || item.name || "",
+            unit_id: unitId ?? null,
+            unit_name: unitName,
+            quantity: item.quantity ?? null,
+            transport_type: vehicleTypes[0] ?? null,
+            transport_type_name: transportTypeName,
+            trip_no: log?.number_of_trips ?? null,
+            notes: item.note || item.notes || "",
+            price_per_unit: item.price_per_unit ?? null,
+            unit_price: item.price_per_unit ?? null,
+            discount: item.discount_val ?? null,
+            discount_type: item.discount_type ?? null,
+            discount_val: item.discount_val ?? null,
+            // Set to null to allow recalculation when editing
+            total_tax: null,
+            subtotal_before_discount: null,
+            subtotal_after_discount: null,
+            trip_start: log?.trip_start ?? null,
+            number_of_trips: log?.number_of_trips ?? null,
+            trip_capacity: log?.trip_capacity ?? null,
+            am_pm_interval: log?.am_pm_interval ?? null,
+            vehicle_types: vehicleTypes,
+            isAdded: true, // Mark as added to allow editing
+          };
+        });
+      }
+    }
+  } catch (e) {
+    console.error("Error fetching quotation data:", e);
+  } finally {
+    isLoading.value = false;
+  }
+};
+
 onMounted(async () => {
   await Promise.all([
     fetchConstants(),
@@ -307,6 +439,9 @@ onMounted(async () => {
   // Fetch form data if in edit mode
   if (isEditMode.value) {
     await fetchFormData();
+  } else if (fromQuotationId.value) {
+    // Fetch quotation data if creating order from quotation
+    await fetchQuotationForOrder();
   }
 });
 
@@ -355,6 +490,7 @@ interface Supply {
 // Form data with static values
 const formData = ref({
   sale_quotation_code: null,
+  purchase_quotation_code: null as string | null,
   code: "",
   source_location: null as string | null,
   source_latitude: null as string | null,
@@ -362,7 +498,7 @@ const formData = ref({
   target_location: null as string | null,
   target_latitude: null as string | null,
   target_longitude: null as string | null,
-  supplier_id: null,
+  supplier_id: null as number | null,
   supplier_name: null,
   po_datetime: "",
 
@@ -426,22 +562,34 @@ const handleAddProduct = () => {
 };
 
 const handleProductSaved = (products: any[]) => {
-  // Merge new products while preserving existing notes
-  const newItems: ProductTableItem[] = [];
-
+  // Merge new products with existing ones
+  const existingItems = [...productTableItems.value];
+  
   products.forEach((p) => {
     // Find if this product already exists in the table
-    const existing = productTableItems.value.find(
+    const existingIndex = existingItems.findIndex(
       (existing) => existing.item_id === p.item_id,
     );
 
-    newItems.push({
-      ...p,
-      notes: existing?.notes || p.notes || "", // Preserve existing notes
-    } as ProductTableItem);
+    if (existingIndex !== -1) {
+      // Update existing product, preserve notes
+      const existingNotes = existingItems[existingIndex].notes;
+      existingItems[existingIndex] = {
+        ...p,
+        notes: existingNotes || p.notes || "",
+        isAdded: true,
+      } as ProductTableItem;
+    } else {
+      // Add new product
+      existingItems.push({
+        ...p,
+        notes: p.notes || "",
+        isAdded: true,
+      } as ProductTableItem);
+    }
   });
 
-  productTableItems.value = newItems;
+  productTableItems.value = existingItems;
 };
 
 const handleEditProduct = (item: any) => {
@@ -542,6 +690,11 @@ const normalizePoDateTime = (value: string): string => {
 // Build FormData for submission (مفاتيح مطابقة لـ request-body.json مستقبلاً)
 const buildFormData = (): FormData => {
   const fd = new FormData();
+
+  // Include purchase_quotation_id if creating order from quotation
+  if (purchaseQuotationId.value) {
+    fd.append("purchase_quotation_id", purchaseQuotationId.value);
+  }
 
   // Basic fields (مطابقة request-body: po_type, po_datetime, supplier_id, ...)
   fd.append("po_type", formData.value.po_type || "");
@@ -689,6 +842,7 @@ const buildFormData = (): FormData => {
 const resetForm = () => {
   formData.value = {
     sale_quotation_code: null,
+    purchase_quotation_code: null,
     code: "",
     source_location: null,
     source_latitude: null,
@@ -1057,6 +1211,7 @@ const serviceTableItems = computed(() =>
             <div>
               <SelectInput
                 v-model="formData.supplier_id"
+                :disabled="isFromQuotation"
                 :items="supplierItems"
                 placeholder="اختر المورد"
                 label="اسم المورد"
@@ -1155,8 +1310,8 @@ const serviceTableItems = computed(() =>
             </div> -->
 
             <TextInput
-              v-model="formData.sale_quotation_code"
-              v-if="formData.sale_quotation_code"
+              v-model="formData.purchase_quotation_code"
+              v-if="formData.purchase_quotation_code"
               readonly
               label="كود عرض السعر"
               density="comfortable"

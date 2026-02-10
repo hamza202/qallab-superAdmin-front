@@ -229,9 +229,10 @@ const fetchFormData = async () => {
             price_per_unit: item.price_per_unit ?? null,
             discount_type: item.discount_type ?? null,
             discount_val: item.discount_val ?? null,
-            total_tax: item.total_tax ?? null,
-            subtotal_before_discount: item.subtotal_before_discount ?? null,
-            subtotal_after_discount: item.subtotal_after_discount ?? null,
+            // تعيين القيم المحسوبة لـ null لإجبار إعادة الحساب عند التعديل
+            total_tax: null,
+            subtotal_before_discount: null,
+            subtotal_after_discount: null,
             trip_start: log?.trip_start ?? null,
             number_of_trips: log?.number_of_trips ?? null,
             trip_capacity: log?.trip_capacity ?? null,
