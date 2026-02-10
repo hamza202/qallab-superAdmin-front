@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from "vue";
+import { ref, computed, onMounted, reactive } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useApi } from "@/composables/useApi";
 import { useNotification } from "@/composables/useNotification";
+import { infoCircleIcon } from "@/components/icons/globalIcons";
 
 // Available languages
 const availableLanguages = ref([
@@ -74,7 +75,10 @@ interface CustomerPayload {
   mobile: string;
   phone: string;
   email: string;
-  trade_name: string;
+  trade_name: {
+    en: string;
+    ar: string;
+  };
   legal_name: string;
   entity_type: string | null;
   commercial_register: string;
@@ -117,6 +121,12 @@ const customerId = ref<number | null>(null);
 // Form ref
 const formRef = ref<any>(null);
 const isFormValid = ref(false);
+
+// Form errors from backend validation
+const formErrors = reactive<Record<string, string>>({});
+
+// Page loading
+const pageLoading = ref(false);
 
 // Tabs
 const activeTab = ref(0);
@@ -180,7 +190,8 @@ const accountType = ref<string>('individual');
 const customerCode = ref("CU-5478544");
 const fullNameAr = ref("");
 const fullNameEn = ref("");
-const commercialName = ref("");
+const commercialNameAr = ref("");
+const commercialNameEn = ref("");
 const legalName = ref("");
 const mobile = ref("");
 const phone = ref("");
@@ -272,9 +283,9 @@ const fetchCountries = async () => {
   }
 };
 
-const fetchCities = async (countryId: number) => {
+const fetchCities = async () => {
   try {
-    const response = await api.get<{ data: ListItem[] }>(`/cities/list?country_id=${countryId}`);
+    const response = await api.get<{ data: ListItem[] }>(`/cities/list`);
     cityItems.value = response.data.map(item => ({
       title: item.name,
       value: item.id
@@ -348,13 +359,14 @@ const fetchCustomerData = async () => {
 
     // Basic Info
     accountType.value = data.customer_type;
-    fullNameAr.value = data.full_name;
-    fullNameEn.value = data.full_name;
+    fullNameAr.value = data.full_name_translations?.ar || data.full_name || '';
+    fullNameEn.value = data.full_name_translations?.en || data.full_name || '';
     customerCode.value = data.customer_code;
     mobile.value = data.mobile;
     phone.value = data.phone;
     email.value = data.email;
-    commercialName.value = data.trade_name;
+    commercialNameAr.value = data.trade_name_translations?.ar || data.trade_name || '';
+    commercialNameEn.value = data.trade_name_translations?.en || data.trade_name || '';
     legalName.value = data.legal_name;
     entityType.value = data.entity_type;
     taxNumber.value = data.commercial_register;
@@ -370,11 +382,6 @@ const fetchCustomerData = async () => {
       buildingNumber.value = data.address.building_number;
       nationalAddress.value = data.address.address_1;
       address2.value = data.address.address_2;
-
-      // Fetch cities for selected country
-      if (data.address.country_id) {
-        await fetchCities(data.address.country_id);
-      }
     }
 
     // Contact List
@@ -418,7 +425,10 @@ const buildPayload = (step: number): CustomerPayload => {
     mobile: mobile.value,
     phone: phone.value,
     email: email.value,
-    trade_name: commercialName.value,
+    trade_name: {
+      en: commercialNameEn.value,
+      ar: commercialNameAr.value
+    },
     legal_name: legalName.value,
     entity_type: entityType.value,
     commercial_register: taxNumber.value,
@@ -455,6 +465,9 @@ const buildPayload = (step: number): CustomerPayload => {
 
 const saveStep = async (step: number) => {
   try {
+    // Clear previous errors
+    Object.keys(formErrors).forEach(key => delete formErrors[key]);
+
     saving.value = true;
     const payload = buildPayload(step);
 
@@ -473,18 +486,20 @@ const saveStep = async (step: number) => {
       customerId.value = response.data.customer_id;
     }
 
-    success(response.message || 'Customer saved successfully');
+    success(response.message || 'تم حفظ العميل بنجاح');
     return true;
   } catch (err: any) {
     console.error('Error saving customer:', err);
 
-    // Handle validation errors
-    if (err?.response?.data?.errors) {
-      const errors = err.response.data.errors;
-      const errorMessages = Object.values(errors).flat().join('\n');
-      error(errorMessages);
+    // Handle validation errors (422 status)
+    if (err?.response?.status === 422 && err?.response?.data?.errors) {
+      const apiErrors = err.response.data.errors;
+      Object.keys(apiErrors).forEach(key => {
+        formErrors[key] = apiErrors[key][0];
+      });
+      error(err?.response?.data?.message || 'يرجى تصحيح الأخطاء في النموذج');
     } else {
-      error(err?.response?.data?.message || 'Failed to save customer');
+      error(err?.response?.data?.message || 'فشل حفظ العميل');
     }
     return false;
   } finally {
@@ -520,10 +535,12 @@ const deleteContact = (index: number) => {
 };
 
 const handleSave = async () => {
-  const { valid } = await formRef.value?.validate();
-  if (!valid) {
-    error('Please fill all required fields');
-    return;
+  if (formRef.value && typeof formRef.value.validate === 'function') {
+    const { valid } = await formRef.value.validate();
+    if (!valid) {
+      error('يرجى تصحيح الأخطاء في النموذج');
+      return;
+    }
   }
 
   // Save step 1 (basic info)
@@ -547,33 +564,23 @@ const handleClose = () => {
   router.push({ name: "CustomersList" });
 };
 
-// Watch country change to fetch cities
-const handleCountryChange = async (countryId: string | number | null | (string | number)[]) => {
-  // Handle array case (shouldn't happen for single select, but type-safe)
-  const singleValue = Array.isArray(countryId) ? countryId[0] : countryId;
-
-  if (singleValue) {
-    city.value = null;
-    const numericId = typeof singleValue === 'string' ? parseInt(singleValue) : singleValue;
-    await fetchCities(numericId);
-  }
-};
 
 // Lifecycle
 onMounted(async () => {
-  // Fetch all dropdown data
+  pageLoading.value = true;
   await Promise.all([
     fetchConstants(),
     fetchCountries(),
+    fetchCities(),
     fetchCustomerCategories(),
     fetchSalesMans(),
     fetchTreeChartCards()
   ]);
 
-  // If editing, fetch customer data
   if (isEditing.value) {
     await fetchCustomerData();
   }
+  pageLoading.value = false;
 });
 
 // Icons
@@ -649,23 +656,27 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
               <!-- Account Type -->
               <div class="mb-4">
                 <span class="text-sm font-semibold text-gray-700 mb-1 block">نوع حساب العميل</span>
-                <v-radio-group v-model="accountType" inline hide-details>
-                  <v-radio label="فردي" value="individual" color="primary" />
-                  <v-radio label="تجاري" value="commercial" color="primary" />
+                <v-radio-group v-model="accountType" inline hide-details
+                  @update:model-value="delete formErrors['customer_type']">
+                  <v-radio :label="item.title" :value="item.value" color="primary" v-for="item in customerTypeItems" :key="item.value" />
                 </v-radio-group>
+                <div v-if="formErrors['customer_type']" class="text-error text-xs mt-1">{{ formErrors['customer_type']
+                  }}</div>
               </div>
 
               <!-- Row 1: Full Name, Customer Code -->
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4 gap-y-6 mb-4">
                 <div class="md:col-span-2">
                   <LanguageTabs :languages="availableLanguages" label="الاسم كامل">
                     <template #en>
-                      <TextInput v-model="fullNameEn" placeholder="Enter full name in English" :rules="[required()]"
-                        :hide-details="true" />
+                      <TextInput v-model="fullNameEn" placeholder="Full name (English)" :rules="[required()]"
+                        :hide-details="false" :error-messages="formErrors['full_name.en']"
+                        @input="delete formErrors['full_name.en']" />
                     </template>
                     <template #ar>
-                      <TextInput v-model="fullNameAr" placeholder="ادخل الاسم كامل بالعربية" :rules="[required()]"
-                        :hide-details="true" />
+                      <TextInput v-model="fullNameAr" placeholder="الاسم الكامل بالعربية" :rules="[required()]"
+                        :hide-details="false" :error-messages="formErrors['full_name.ar']"
+                        @input="delete formErrors['full_name.ar']" />
                     </template>
                   </LanguageTabs>
                 </div>
@@ -676,19 +687,38 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
                   </div>
                 </div>
 
-                <TelInput v-model="mobile" label="الجوال" />
-                <TelInput v-model="phone" label="الهاتف" />
+                <TelInput v-model="mobile" label="الجوال" :rules="[required(), saudiPhone()]"
+                  :error-messages="formErrors['mobile']" @input="delete formErrors['mobile']" />
+                <TelInput v-model="phone" label="الهاتف" :error-messages="formErrors['phone']"
+                  @input="delete formErrors['phone']" :rules="[saudiPhone()]" />
 
-                <TextInput v-model="email" dir="ltr" label="البريد الالكتروني" placeholder="البريد الالكتروني"
-                  :hide-details="false" />
-                <TextInput v-model="commercialName" label="الاسم التجاري" placeholder="Al-Nahda Contracting"
-                  :hide-details="false" />
-                <TextInput v-model="legalName" label="الاسم القانوني" placeholder="Al-Nahda Construction LLC"
-                  :hide-details="false" />
-                <SelectWithIconInput show-add-button v-model="entityType" label="نوع الكيان" placeholder="Establishment"
-                  :items="entityTypeItems" :hide-details="false" />
+                <TextInput v-model="email" dir="ltr" label="البريد الالكتروني" placeholder="مثال: name@domain.com"
+                  :rules="[required()]" :hide-details="false" :error-messages="formErrors['email']"
+                  @input="delete formErrors['email']" />
 
-                <TextInput v-model="taxNumber" label="السجل التجاري" placeholder="1255" :hide-details="false" />
+                <LanguageTabs :languages="availableLanguages" label="الاسم التجاري">
+                  <template #en>
+                    <TextInput v-model="commercialNameEn" placeholder="Trade name (English)"
+                      :rules="[required()]" :hide-details="false" :error-messages="formErrors['trade_name.en']"
+                      @input="delete formErrors['trade_name.en']" />
+                  </template>
+                  <template #ar>
+                    <TextInput v-model="commercialNameAr" placeholder="الاسم التجاري بالعربية"
+                      :rules="[required()]" :hide-details="false" :error-messages="formErrors['trade_name.ar']"
+                      @input="delete formErrors['trade_name.ar']" />
+                  </template>
+                </LanguageTabs>
+
+                <TextInput v-model="legalName" label="الاسم القانوني" placeholder="ادخل الاسم القانوني"
+                  :hide-details="false" :error-messages="formErrors['legal_name']"
+                  @input="delete formErrors['legal_name']" />
+                <SelectWithIconInput show-add-button v-model="entityType" label="نوع الكيان" placeholder="اختر نوع الكيان"
+                  :items="entityTypeItems" :hide-details="false" :error-messages="formErrors['entity_type']"
+                  @update:model-value="delete formErrors['entity_type']" />
+
+                <TextInput v-model="taxNumber" label="السجل التجاري" placeholder="ادخل رقم السجل التجاري" :hide-details="false"
+                  :error-messages="formErrors['commercial_register']"
+                  @input="delete formErrors['commercial_register']" />
               </div>
             </div>
 
@@ -719,21 +749,41 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
               <div v-if="basicInfoSubTab === 0" class="bg-gray-50 rounded-lg p-6 mt-4">
                 <!-- Row 1: Country, City, Postal Code -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                  <SelectInput v-model="country" label="الدولة" placeholder="الدولة" :items="countryItems"
-                    :hide-details="false" @update:model-value="handleCountryChange" />
-                  <SelectInput v-model="city" label="المدينة" placeholder="المدينة" :items="cityItems"
-                    :hide-details="false" :disabled="!country" />
-                  <TextInput v-model="postalCode" label="الرمز البريدي" placeholder="00000" :hide-details="false" />
-                  <TextInput v-model="district" label="اسم الحي" placeholder="الحي" :hide-details="false" />
-                  <TextInput v-model="streetName" label="اسم الشارع" placeholder="الشارع" :hide-details="false" />
-                  <TextInput v-model="buildingNumber" label="رقم المبنى" placeholder="00000" :hide-details="false" />
-                  <TextInput v-model="nationalAddress" label="العنوان الوطني" placeholder="ادخل العنوان"
-                    :hide-details="false">
-                    <template #prepend-inner>
-                      <v-icon size="small" color="gray">mdi-help-circle-outline</v-icon>
+                  <SelectInput v-model="country" label="الدولة" placeholder="اختر الدولة" :items="countryItems" clearable
+                    :hide-details="false" :error-messages="formErrors['address.country_id']"
+                    @update:model-value="delete formErrors['address.country_id']" />
+                  <SelectInput v-model="city" label="المدينة" placeholder="اختر المدينة" :items="cityItems" clearable
+                    :hide-details="false" :error-messages="formErrors['address.city_id']"
+                    @update:model-value="delete formErrors['address.city_id']" />
+                  <TextInput v-model="postalCode" label="الرمز البريدي" placeholder="مثال: 12345" :hide-details="false"
+                    :error-messages="formErrors['address.postal_code']"
+                    @input="delete formErrors['address.postal_code']" />
+                  <TextInput v-model="district" label="اسم الحي" placeholder="ادخل اسم الحي" :hide-details="false"
+                    :error-messages="formErrors['address.neighborhood']"
+                    @input="delete formErrors['address.neighborhood']" />
+                  <TextInput v-model="streetName" label="اسم الشارع" placeholder="ادخل اسم الشارع" :hide-details="false"
+                    :error-messages="formErrors['address.street_name']"
+                    @input="delete formErrors['address.street_name']" />
+                  <TextInput v-model="buildingNumber" label="رقم المبنى" placeholder="ادخل رقم المبنى" :hide-details="false"
+                    :error-messages="formErrors['address.building_number']"
+                    @input="delete formErrors['address.building_number']" />
+                  <TextInput v-model="nationalAddress" label="العنوان الوطني" placeholder="اكتب العنوان الوطني الكامل"
+                    :hide-details="false" :error-messages="formErrors['address.address_1']"
+                    @input="delete formErrors['address.address_1']">
+                    <template #append-inner>
+                      <v-tooltip location="top" content-class="custom-tooltip">
+                        <template #activator="{ props: tooltipProps }">
+                          <ButtonWithIcon variant="text" size="small" density="compact" custom-class="!min-w-0 p-0"
+                            :prepend-icon="infoCircleIcon" v-bind="tooltipProps" />
+                        </template>
+                        <div>
+                          العنوان الوطني
+                        </div>
+                      </v-tooltip>
                     </template>
                   </TextInput>
-                  <TextInput v-model="address2" label="عنوان 2" placeholder="العنوان" :hide-details="false" />
+                  <TextInput v-model="address2" label="عنوان 2" placeholder="تفاصيل عنوان إضافية" :hide-details="false"
+                    :error-messages="formErrors['address.address_2']" @input="delete formErrors['address.address_2']" />
                 </div>
               </div>
               <!-- Contact List Sub-tab -->
@@ -761,26 +811,26 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
                     <tr v-for="(contact, index) in contacts" :key="index" class="border-b border-gray-200">
                       <td class="py-3 px-4">
                         <TextInput v-model="contact.first_name" density="compact" variant="outlined" hide-details
-                          placeholder="الاسم الاول" :input-props="{ class: '!min-w-[160px]' }" />
+                          placeholder="اكتب الاسم الأول" :input-props="{ class: '!min-w-[160px]' }" />
                       </td>
                       <td class="py-3 px-4">
                         <TextInput v-model="contact.last_name" density="compact" variant="outlined" hide-details
-                          placeholder="الاسم الاخير" :input-props="{ class: '!min-w-[160px]' }" />
+                          placeholder="اكتب الاسم الأخير" :input-props="{ class: '!min-w-[160px]' }" />
                       </td>
                       <td class="py-3 px-4">
                         <TextInput v-model="contact.email" density="compact" variant="outlined" hide-details
-                          placeholder="example@gmail.com" :input-props="{ class: '!min-w-[200px]' }" />
+                          placeholder="اكتب البريد الإلكتروني" :input-props="{ class: '!min-w-[200px]' }" />
 
                       </td>
                       <td class="py-3 px-4">
                         <!-- <TextInput v-model="contact.telephone" density="compact" variant="outlined" hide-details
                           placeholder="96600000000+" /> -->
                         <TelInput v-model="contact.telephone" density="compact" variant="outlined"
-                          :input-props="{ class: '!min-w-[200px]' }" />
+                          :input-props="{ class: '!min-w-[200px]' }" :rules="[saudiPhone()]" />
                       </td>
                       <td class="py-3 px-4">
                         <TelInput v-model="contact.mobile" density="compact" variant="outlined"
-                          :input-props="{ class: '!min-w-[200px]' }" />
+                          :input-props="{ class: '!min-w-[200px]' }" :rules="[saudiPhone()]" />
                       </td>
                       <td class="py-3 px-4">
                         <div class="flex items-center gap-2">
@@ -804,16 +854,19 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
           <div class="mb-6 bg-gray-50 rounded-lg p-6">
             <!-- Row 1: Price Type, Price List, Customer Classification -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-              <SelectInput v-model="priceType" label="نوع السعر" placeholder="نوع السعر" :items="priceTypeItems"
-                :hide-details="false" />
+              <SelectInput v-model="priceType" label="نوع السعر" placeholder="اختر نوع السعر" :items="priceTypeItems"
+                :hide-details="false" :error-messages="formErrors['price_type']"
+                @update:model-value="delete formErrors['price_type']" />
               <!-- <SelectWithIconInput v-model="priceList" label="قائمة الاسعار" placeholder="قائمة الاسعار"
                 :items="priceListItems" :hide-details="false"  @add-click="handleAddPriceList" /> -->
               <SelectWithIconInput show-add-button v-model="customerClassification" label="تصنيف العميل"
-                placeholder="تصنيف العميل" :items="customerClassificationItems" :hide-details="false"
-                @add-click="handleAddClassification" />
+                placeholder="اختر تصنيف العميل" :items="customerClassificationItems" :hide-details="false"
+                :error-messages="formErrors['customer_classification_id']" @add-click="handleAddClassification"
+                @update:model-value="delete formErrors['customer_classification_id']" />
               <SelectWithIconInput show-add-button v-model="salesRepresentative" label="مندوب المبيعات"
-                placeholder="مندوب المبيعات" :items="salesRepresentativeItems" :hide-details="false"
-                @add-click="handleAddSalesRep" />
+                placeholder="اختر مندوب المبيعات" :items="salesRepresentativeItems" :hide-details="false"
+                :error-messages="formErrors['sales_man_id']" @add-click="handleAddSalesRep"
+                @update:model-value="delete formErrors['sales_man_id']" />
               <div>
                 <span class="text-sm font-semibold text-gray-700 mb-1 block">انشاء حساب خاص في شجرة المحاسبة</span>
                 <v-radio-group v-model="createAccountInTree" inline hide-details>
@@ -821,18 +874,25 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
                   <v-radio label="لا" :value="false" color="primary" />
                 </v-radio-group>
               </div>
-              <SelectWithIconInput v-model="account" label="الحساب" placeholder="الحساب" :items="accountItems"
-                :hide-details="false" @add-click="handleAddAccount" />
-              <SelectInput v-model="relatedCustomers" label="العملاء المرتبطين" placeholder="العملاء المرتبطين"
-                :items="relatedCustomersItems" :hide-details="false" multiple />
-              <TextInput v-model="minimumCredit" label="الحد الادنى (دائن)" placeholder="الحد الادنى" type="number"
-                :hide-details="false" />
-              <TextInput v-model="maximumCredit" label="الحد الاعلى (دائن)" placeholder="الحد الاعلى" type="number"
-                :hide-details="false" />
-              <TextInput v-model="minimumDebit" label="الحد الادنى (مدين)" placeholder="الحد الادنى" type="number"
-                :hide-details="false" />
-              <TextInput v-model="maximumDebit" label="الحد الاعلى (مدين)" placeholder="الحد الاعلى" type="number"
-                :hide-details="false" />
+              <SelectWithIconInput v-model="account" label="الحساب" placeholder="اختر الحساب" :items="accountItems"
+                :hide-details="false" :error-messages="formErrors['tree_chart_card_id']" @add-click="handleAddAccount"
+                @update:model-value="delete formErrors['tree_chart_card_id']" />
+              <SelectInput v-model="relatedCustomers" label="العملاء المرتبطين" placeholder="اختر العملاء المرتبطين"
+                :items="relatedCustomersItems" :hide-details="false" multiple
+                :error-messages="formErrors['related_customers']"
+                @update:model-value="delete formErrors['related_customers']" />
+              <PriceInput v-model="minimumCredit" label="الحد الادنى (دائن)" placeholder="اكتب الحد الأدنى للدائن" 
+                :hide-details="false" :error-messages="formErrors['minimum_credit']"
+                @input="delete formErrors['minimum_credit']" />
+              <PriceInput v-model="maximumCredit" label="الحد الاعلى (دائن)" placeholder="اكتب الحد الأعلى للدائن" 
+                :hide-details="false" :error-messages="formErrors['maximum_credit']"
+                @input="delete formErrors['maximum_credit']" />
+              <PriceInput v-model="minimumDebit" label="الحد الادنى (مدين)" placeholder="اكتب الحد الأدنى للمدين" 
+                :hide-details="false" :error-messages="formErrors['minimum_debit']"
+                @input="delete formErrors['minimum_debit']" />
+              <PriceInput v-model="maximumDebit" label="الحد الاعلى (مدين)" placeholder="اكتب الحد الأعلى للمدين" 
+                :hide-details="false" :error-messages="formErrors['maximum_debit']"
+                @input="delete formErrors['maximum_debit']" />
               <div>
                 <span class="text-sm font-semibold text-gray-700 mb-1 block">الحالة الافتراضية</span>
                 <div class="flex items-center gap-3 mt-1">
@@ -895,7 +955,7 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
                   <div class="text-center">
                     <div class="text-xs font-semibold text-gray-600 mb-1">آخر تحديث</div>
                     <div class="text-sm font-medium text-gray-700">{{ new
-                      Date(balance.last_validated_date).toLocaleDateString('ar-SA') }}</div>
+                      Date(balance.last_validated_date).toLocaleDateString('en-US') }}</div>
                   </div>
                 </div>
               </div>
@@ -907,12 +967,18 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
       <!-- Action Buttons -->
       <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col">
         <ButtonWithIcon variant="flat" color="primary" rounded="4" height="48" custom-class="min-w-56"
-          :prepend-icon="saveIcon" label="حفظ" @click="handleSave" />
+          :prepend-icon="saveIcon" label="حفظ" @click="handleSave" :loading="saving" />
 
         <ButtonWithIcon prepend-icon="mdi-close" variant="flat" color="primary-50" rounded="4" height="48"
-          custom-class="font-semibold text-base text-primary-700 px-6 min-w-56" label="إغلاق" @click="handleClose" />
+          :disabled="saving" custom-class="font-semibold text-base text-primary-700 px-6 min-w-56" label="إغلاق"
+          @click="handleClose" />
       </div>
     </div>
+
+    <v-overlay :model-value="pageLoading" contained class="align-center justify-center">
+      <v-progress-circular indeterminate color="primary" />
+    </v-overlay>
+
   </default-layout>
 </template>
 

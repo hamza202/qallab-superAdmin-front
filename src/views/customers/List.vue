@@ -92,9 +92,6 @@ const filterMobile = ref("");
 const filterCommercialRegister = ref("");
 const filterCity = ref<string | null>(null);
 const filterStatus = ref<string | null>(null);
-
-const cityItems = ["الرياض", "جدة", "الطائف", "مكة", "المدينة"];
-
 const toggleAdvancedFilters = () => {
     showAdvancedFilters.value = !showAdvancedFilters.value;
 };
@@ -367,8 +364,7 @@ onBeforeUnmount(() => {
                                     @click="handleToggleHeader(header.key)">
                                     <template #prepend>
                                         <v-checkbox-btn :model-value="headerCheckStates[header.key]"
-                                            :disabled="updatingHeaders"
-                                            @click.stop="handleToggleHeader(header.key)" />
+                                            :disabled="updatingHeaders" @click.stop="handleToggleHeader(header.key)" />
                                     </template>
                                     <v-list-item-title>{{ header.title }}</v-list-item-title>
                                 </v-list-item>
@@ -414,8 +410,10 @@ onBeforeUnmount(() => {
                     show-actions @edit="handleEdit" @delete="confirmDelete" @select="handleSelectCustomer"
                     @selectAll="handleSelectAllCustomers">
                     <template #item.status="{ item }">
-                        <v-switch :model-value="item.status" hide-details inset density="compact" class="small-switch"
-                            color="primary-600" @click="handleStatusChange(item)" />
+                        <v-switch v-if="item.actions.can_change_status" :model-value="item.status" hide-details inset
+                            density="compact" class="small-switch" color="primary-600"
+                            @click="handleStatusChange(item)" />
+                        <span v-else class="text-sm text-gray-600">--</span>
                     </template>
                 </DataTable>
 
