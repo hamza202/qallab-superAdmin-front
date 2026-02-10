@@ -392,7 +392,7 @@ const fetchCustomerData = async () => {
 
     // Accounting Info
     priceType.value = data.price_type;
-    customerClassification.value = data.customer_classification_id;
+    customerClassification.value = data.customer_category_id;
     salesRepresentative.value = data.sales_man_id;
     account.value = data.tree_chart_card_id;
     relatedCustomers.value = data.related_customers?.map((id: string) => parseInt(id)) || [];
