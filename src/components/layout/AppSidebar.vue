@@ -330,18 +330,22 @@
                     حجوزات التسليم</router-link>
                 </li>
                 <li class="relative">
+                  <router-link to="/sales/trips/list"
+                    :class="[$route.path.includes('/sales/trips') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                    جدول الرحلات</router-link>
+                </li>
+              </ul>
+              <h2 class="text-sm font-medium leading-5 my-2">
+                وثائق التسليم
+              </h2>
+              <ul class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
+                <li class="relative">
                   <router-link to="/sales/delivery-docs/list" :class="[
                     $route.path.includes('/sales/delivery-docs')
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
                     وثائق التسليم</router-link>
-                </li>
-
-                <li class="relative">
-                  <router-link to="/sales/trips/list"
-                    :class="[$route.path.includes('/sales/trips') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
-                    جدول الرحلات</router-link>
                 </li>
               </ul>
               <h2 class="text-sm font-medium leading-5 my-2">
