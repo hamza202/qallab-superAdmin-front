@@ -163,7 +163,7 @@
               </v-list-item>
             </template>
             <div class="relative mt-1 ps-10 pe-4 text-sm">
-              <ul class="space-y-2 text-slate-100">
+              <ul class="space-y-2 text-slate-100 mb-3">
                 <li v-if="canViewServices" class="relative">
                   <router-link to="/services/list" :class="[
                     isMenuItemActive('/services/list')
@@ -173,14 +173,14 @@
                     إدارة الخدمات
                   </router-link>
                 </li>
-                <li v-if="canViewSubscriptions" class="relative">
+                <!-- <li v-if="canViewSubscriptions" class="relative">
                   <router-link to="/services/subscriptions" :class="[
                     isMenuItemActive('/services/subscriptions')
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
                     إدارة الاشتراكات</router-link>
-                </li>
+                </li> -->
                 <li v-if="canViewPriceLists" class="relative">
                   <router-link to="/services/prices-list" :class="[
                     isMenuItemActive('/services/prices-list')
@@ -189,14 +189,14 @@
                   ]">
                     إدارة قوائم الاسعار</router-link>
                 </li>
-                <li v-if="canViewServiceSettings" class="relative">
+                <!-- <li v-if="canViewServiceSettings" class="relative">
                   <router-link to="/services/service-settings" :class="[
                     isMenuItemActive('/services/service-settings')
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
                     إدارة إعدادات الخدمات</router-link>
-                </li>
+                </li> -->
               </ul>
             </div>
           </v-list-group>
@@ -255,7 +255,7 @@
                       : 'text-white hover:text-qallab-yellow',
                   ]">إدارة طلبات المبيعات</router-link>
                 </li> -->
-                <li v-if="canViewContracts" class="relative">
+                <!-- <li v-if="canViewContracts" class="relative">
                   <router-link to="/sales/contracts" :class="[
                     isMenuItemActive('/sales/contracts')
                       ? 'font-bold text-qallab-yellow'
@@ -268,7 +268,7 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">إدارة المقاصة</router-link>
-                </li>
+                </li> -->
               </ul>
               <h2 class="text-sm font-medium leading-5 my-2">
                 إدارة عروض الأسعار
@@ -330,6 +330,15 @@
                     حجوزات التسليم</router-link>
                 </li>
                 <li class="relative">
+                  <router-link to="/sales/delivery-docs/list" :class="[
+                    $route.path.includes('/sales/delivery-docs')
+                      ? 'font-bold text-qallab-yellow'
+                      : 'text-white hover:text-qallab-yellow',
+                  ]">
+                    وثائق التسليم</router-link>
+                </li>
+
+                <li class="relative">
                   <router-link to="/sales/trips/list"
                     :class="[$route.path.includes('/sales/trips') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                     جدول الرحلات</router-link>
@@ -352,7 +361,7 @@
           </v-list-group>
 
           <!-- المشاريع -->
-          <v-list-group v-if="hasAnyProjectsPermission" value="projects" class="mt-1">
+          <!-- <v-list-group v-if="hasAnyProjectsPermission" value="projects" class="mt-1">
             <template #activator="{ props, isOpen }">
               <v-list-item v-bind="props" :class="[
                 { '!mx-1 gap-5': !isSidebarExpanded },
@@ -399,7 +408,7 @@
                 </li>
               </ul>
             </div>
-          </v-list-group>
+          </v-list-group> -->
 
           <!-- المشتريات -->
           <v-list-group v-if="hasAnyPurchasesPermission" value="purchases" class="mt-1">

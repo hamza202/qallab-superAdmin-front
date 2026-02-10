@@ -236,7 +236,7 @@ const basicInfoSubTab = ref(0);
 const fetchConstants = async () => {
   try {
     loadingConstants.value = true;
-    const response = await api.get<{ data: CustomerConstants }>('/admin/api/customers/constants');
+    const response = await api.get<{ data: CustomerConstants }>('/customers/constants');
 
     customerTypeItems.value = response.data.types.map(item => ({
       title: item.label,
@@ -262,7 +262,7 @@ const fetchConstants = async () => {
 
 const fetchCountries = async () => {
   try {
-    const response = await api.get<{ data: ListItem[] }>('/admin/api/countries/list');
+    const response = await api.get<{ data: ListItem[] }>('/countries/list');
     countryItems.value = response.data.map(item => ({
       title: item.name,
       value: item.id
@@ -274,7 +274,7 @@ const fetchCountries = async () => {
 
 const fetchCities = async (countryId: number) => {
   try {
-    const response = await api.get<{ data: ListItem[] }>(`/admin/api/cities/list?country_id=${countryId}`);
+    const response = await api.get<{ data: ListItem[] }>(`/cities/list?country_id=${countryId}`);
     cityItems.value = response.data.map(item => ({
       title: item.name,
       value: item.id
@@ -286,7 +286,7 @@ const fetchCities = async (countryId: number) => {
 
 const fetchCustomerCategories = async () => {
   try {
-    const response = await api.get<{ data: ListItem[] }>('/admin/api/customer-categories/list');
+    const response = await api.get<{ data: ListItem[] }>('/customer-categories/list');
     customerClassificationItems.value = response.data.map(item => ({
       title: item.name,
       value: item.id
@@ -298,7 +298,7 @@ const fetchCustomerCategories = async () => {
 
 const fetchSalesMans = async () => {
   try {
-    const response = await api.get<{ data: ListItem[] }>('/admin/api/sales-man/list');
+    const response = await api.get<{ data: ListItem[] }>('/sales-man/list');
     salesRepresentativeItems.value = response.data.map(item => ({
       title: item.name,
       value: item.id
@@ -310,7 +310,7 @@ const fetchSalesMans = async () => {
 
 const fetchTreeChartCards = async () => {
   try {
-    const response = await api.get<{ data: ListItem[] }>('/admin/api/tree-chart-cards/list');
+    const response = await api.get<{ data: ListItem[] }>('/tree-chart-cards/list');
     accountItems.value = response.data.map(item => ({
       title: item.name,
       value: item.id
@@ -324,7 +324,7 @@ const fetchRelatedCustomers = async () => {
   if (!customerId.value) return;
   try {
     const response = await api.get<{ data: { id: number; full_name: string }[] }>(
-      `/admin/api/customers/list?related_customer=${customerId.value}`
+      `/customers/list?related_customer=${customerId.value}`
     );
     relatedCustomersItems.value = response.data.map(item => ({
       title: item.full_name,
@@ -340,7 +340,7 @@ const fetchCustomerData = async () => {
 
   try {
     loading.value = true;
-    const response = await api.get<any>(`/admin/api/customers/${route.params.id}`);
+    const response = await api.get<any>(`/customers/${route.params.id}`);
     const data = response.data;
 
     // Set customer ID
@@ -462,10 +462,10 @@ const saveStep = async (step: number) => {
 
     if (customerId.value) {
       // Update existing customer
-      response = await api.put(`/admin/api/customers/${customerId.value}`, payload);
+      response = await api.put(`/customers/${customerId.value}`, payload);
     } else {
       // Create new customer
-      response = await api.post('/admin/api/customers', payload);
+      response = await api.post('/customers', payload);
     }
 
     // Store customer ID for subsequent saves
