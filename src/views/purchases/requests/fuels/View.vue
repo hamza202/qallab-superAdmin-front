@@ -273,7 +273,7 @@ const fetchRequestData = async () => {
 }
 
 onMounted(async () => {
-    await fetchConstants()
+     fetchConstants()
     await fetchRequestData()
 })
 
@@ -311,7 +311,7 @@ const requestDateTime = computed(() => {
     const d = new Date(dt)
     return d.toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })
 })
-const statusText = computed(() => requestData.value?.status_id ? `حالة ${requestData.value.status_id}` : '')
+const statusText = computed(() => requestData.value?.status_name || '--')
 const targetLocation = computed(() => requestData.value?.target_location || '')
 const sourceLocation = computed(() => requestData.value?.source_location || '')
 const paymentMethod = computed(() => {

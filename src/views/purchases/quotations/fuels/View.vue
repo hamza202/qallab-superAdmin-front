@@ -221,7 +221,7 @@ const categoryLabel = computed(() => quotationData.value?.category_label || '—
 const supplierName = computed(() => quotationData.value?.supplier?.name || '—')
 const quotationDateTime = computed(() => {
     const dt = quotationData.value?.quotations_datetime
-    return dt ? new Date(dt).toLocaleDateString('ar-SA') : '—'
+    return dt ? new Date(dt).toLocaleDateString('en-US') : '—'
 })
 const targetLocation = computed(() => quotationData.value?.target_location || '—')
 const paymentMethodLabel = computed(() => quotationData.value?.payment_method_label || '—')

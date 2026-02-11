@@ -263,7 +263,7 @@ const openCreateRequest = () => {
 };
 
 const handleView = (item: any) => {
-    router.push({ name: "PurchasesRequestsFuelsView", params: { id: item.uuid } });
+    router.push({ name: "RequestForQuotationFuelView", params: { id: item.uuid } });
 };
 
 

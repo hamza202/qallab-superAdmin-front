@@ -220,7 +220,7 @@ const categoryLabel = computed(() => quotationData.value?.category_label || '—
 const supplierName = computed(() => quotationData.value?.supplier?.name || '—')
 const quotationDateTime = computed(() => {
     const dt = quotationData.value?.quotations_datetime
-    return dt ? new Date(dt).toLocaleDateString('ar-SA') : '—'
+    return dt ? new Date(dt).toLocaleDateString('en-US') : '—'
 })
 const targetLocation = computed(() => quotationData.value?.target_location || '—')
 const paymentMethodLabel = computed(() => quotationData.value?.payment_method_label || '—')
@@ -248,9 +248,9 @@ const transportItems = computed(() => {
         id: item.id,
         item_name: item.item?.name || '—',
         quantity: item.quantity || 0,
-        trip_start: item.trip_start ? new Date(item.trip_start).toLocaleDateString('ar-SA') : '—',
+        trip_start: item.trip_start ? new Date(item.trip_start).toLocaleDateString('en-US') : '—',
         number_of_trips: item.number_of_trips || 0,
-        vehicle_type: Array.isArray(item.transport_type) ? item.transport_type.join(', ') : (item.transport_type || '—'),
+        vehicle_type: Array.isArray(item.transport_type_label) ? item.transport_type_label.join(', ') : (item.transport_type_label || '—'),
         trip_capacity: item.trip_capacity || 0,
         trip_time: getAmPmIntervalName(item.am_pm_interval),
     }))

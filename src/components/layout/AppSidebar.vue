@@ -122,14 +122,14 @@
                     متغيرات المنتج
                   </router-link>
                 </li>
-                <li v-if="canViewProductSettings" class="relative">
+                <!-- <li v-if="canViewProductSettings" class="relative">
                   <router-link to="/products/product-settings" :class="[
                     isMenuItemActive('/products/product-settings')
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
                     اعدادات جدول المنتجات</router-link>
-                </li>
+                </li> -->
               </ul>
             </div>
           </v-list-group>
@@ -454,14 +454,14 @@
                     إدارة الموردين
                   </router-link>
                 </li>
-                <li v-if="canViewSupplierSettlements" class="relative">
+                <!-- <li v-if="canViewSupplierSettlements" class="relative">
                   <router-link to="/suppliers/supplier-settlement" :class="[
                     isMenuItemActive('/suppliers/supplier-settlement')
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
                     تسوية حساب موردين</router-link>
-                </li>
+                </li> -->
               </ul>
               <h2 class="text-sm font-medium leading-5 my-2">
                 إدارة عروض الأسعار
@@ -550,7 +550,7 @@
           </v-list-group>
 
           <!-- المالية -->
-          <v-list-group v-if="hasAnyFinancePermission" value="finance" class="mt-1">
+          <!-- <v-list-group v-if="hasAnyFinancePermission" value="finance" class="mt-1">
             <template #activator="{ props, isOpen }">
               <v-list-item v-bind="props" :class="[
                 { '!mx-1 gap-5': !isSidebarExpanded },
@@ -604,7 +604,7 @@
                 </li>
               </ul>
             </div>
-          </v-list-group>
+          </v-list-group> -->
 
           <!-- المستخدمين -->
           <v-list-group v-if="hasAnyUsersPermission" value="users" class="mt-1">
@@ -715,7 +715,7 @@
                     </v-list-group> -->
 
           <!-- التقارير -->
-          <v-list-group v-if="hasAnyReportsPermission" value="reports" class="mt-1">
+          <!-- <v-list-group v-if="hasAnyReportsPermission" value="reports" class="mt-1">
             <template #activator="{ props, isOpen }">
               <v-list-item v-bind="props" :class="[
                 { '!mx-1 gap-5': !isSidebarExpanded },
@@ -760,7 +760,7 @@
                 </li>
               </ul>
             </div>
-          </v-list-group>
+          </v-list-group> -->
 
           <!-- الإعدادات -->
           <v-list-group v-if="hasAnySettingsPermission" value="settings" class="mt-1">

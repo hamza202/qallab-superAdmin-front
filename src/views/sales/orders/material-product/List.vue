@@ -180,6 +180,10 @@ const handleEdit = (item: { id?: string | number; uuid?: string }) => {
   const id = item.uuid ?? String(item.id);
   router.push({ name: "SalesOrdersMaterialProductEdit", params: { id } });
 };
+const handleView = (item: { id?: string | number; uuid?: string }) => {
+  const id = item.uuid ?? String(item.id);
+  router.push({ name: "SalesOrdersMaterialProductView", params: { id } });
+};
 
 const showDeleteDialog = ref(false);
 const itemToDelete = ref<{ id: string } | null>(null);
@@ -490,6 +494,7 @@ onBeforeUnmount(() => {
           show-actions
           smallButtons
           @edit="handleEdit"
+          @view="handleView"
           @delete="handleDelete"
           @select="handleSelectRequest"
           @selectAll="handleSelectAllRequests"

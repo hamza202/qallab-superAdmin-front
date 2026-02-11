@@ -187,6 +187,14 @@ const handleEdit = (item: { id?: string | number; uuid?: string }) => {
   });
 };
 
+const handleView = (item: { id?: string | number; uuid?: string }) => {
+  const id = item.uuid ?? String(item.id);
+  router.push({
+    name: 'SalesRequestsMaterialProductView',
+    params: { id },
+  });
+};
+
 const confirmDelete = async (item: { id?: string | number }) => {
   try {
     deleteLoading.value = true;
@@ -520,6 +528,7 @@ onBeforeUnmount(() => {
           :show-checkbox="canBulkDelete"
           show-actions
           @edit="handleEdit"
+          @view="handleView"
           @delete="confirmDelete"
           @select="handleSelectRequest"
           @selectAll="handleSelectAllRequests"

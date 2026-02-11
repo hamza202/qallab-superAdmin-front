@@ -64,6 +64,15 @@ export const salesRoutes: RouteRecordRaw[] = [
           title: "pages.SalesRequestsMaterialProduct.edit",
         },
       },
+      {
+        path: "view/:id",
+        name: "SalesRequestsMaterialProductView",
+        component: () =>
+          import("@/views/sales/requests/material-product/View.vue"),
+        meta: {
+          title: "pages.SalesRequestsMaterialProduct.view",
+        },
+      },
     ],
   },
   {
@@ -178,6 +187,15 @@ export const salesRoutes: RouteRecordRaw[] = [
           import("@/views/sales/orders/material-product/Form.vue"),
         meta: {
           title: "pages.SalesRequests.edit",
+        },
+      },
+      {
+        path: "view/:id",
+        name: "SalesOrdersMaterialProductView",
+        component: () =>
+          import("@/views/sales/orders/material-product/View.vue"),
+        meta: {
+          title: "pages.SalesRequests.view",
         },
       },
     ],

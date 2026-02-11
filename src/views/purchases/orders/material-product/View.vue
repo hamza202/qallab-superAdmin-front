@@ -214,13 +214,13 @@ const orderType = computed(() => {
     if (type === 'po_with_logistics') return 'شراء مع نقل'
     return type || '—'
 })
-const supplierName = computed(() => orderData.value?.supplier_id ? `مورد ${orderData.value.supplier_id}` : '—')
+const supplierName = computed(() => orderData.value?.supplier_name || '—')
 const orderDateTime = computed(() => {
     const dt = orderData.value?.po_datetime
     return dt ? new Date(dt).toLocaleDateString('en-US') : '—'
 })
 const targetLocation = computed(() => orderData.value?.target_location || '—')
-const contractNumber = computed(() => orderData.value?.contract_number || 'عقد 1')
+const contractNumber = computed(() => orderData.value?.contract_number || '—')
 const paymentMethod = computed(() => {
     const method = orderData.value?.payment_method
     if (method === 'cash') return 'كاش'
@@ -235,8 +235,8 @@ const productItems = computed(() => {
     if (!orderData.value?.items) return []
     return orderData.value.items.map((item: any) => ({
         id: item.id,
-        item_name: item.item_id ? `منتج ${item.item_id}` : '—',
-        unit: item.unit_id ? `وحدة ${item.unit_id}` : '—',
+        item_name: item.item_name || '—',
+        unit: item.unit_name || '—',
         quantity: item.quantity || 0,
         unit_price: item.price_per_unit || 0,
         discount: item.discount_val || 0,
@@ -250,7 +250,7 @@ const transportItems = computed(() => {
     if (!orderData.value?.po_logistics_product_details) return []
     return orderData.value.po_logistics_product_details.map((item: any) => ({
         id: item.id,
-        item_name: item.item_id ? `منتج ${item.item_id}` : '—',
+        item_name: item.item_name || '—',
         quantity: item.quantity || 0,
         trip_start: item.trip_start ? new Date(item.trip_start).toLocaleDateString('en-US') : '—',
         number_of_trips: item.number_of_trips || 0,

@@ -9,11 +9,11 @@
                         <span v-html="homeIcon"></span>
                     </router-link>
                     <span class="text-lg text-gray-300">/</span>
-                    <router-link to="/settings" class="text-gray-600 hover:text-primary-600">
-                        المشتريات
+                    <router-link to="/sales" class="text-gray-600 hover:text-primary-600">
+                        المبيعات
                     </router-link>
                     <span class="text-lg text-gray-300">/</span>
-                    <router-link to="/purchases/requests/material-product/list"
+                    <router-link to="/sales/requests/material-product/list"
                         class="text-gray-600 hover:text-primary-600">
                         طلبات عروض أسعار مواد بناء أولية
                     </router-link>
@@ -240,7 +240,7 @@ const fetchRequestData = async () => {
 
     isLoading.value = true
     try {
-        const res = await api.get<any>(`/purchases/building-materials/${routeId.value}`)
+        const res = await api.get<any>(`/sales/building-materials/${routeId.value}`)
         requestData.value = res.data
     } catch (e: any) {
         console.error('Error fetching request data:', e)

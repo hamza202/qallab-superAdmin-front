@@ -188,26 +188,20 @@ const handleEdit = (item: { id?: string | number; uuid?: string }) => {
   router.push({ name: 'PriceOfferMaterialProductEdit', params: { id: uuid } });
 };
 
-const handleDelete = (item: { uuid?: string; id?: string | number } & Partial<QuotationItem>) => {
-  itemToDelete.value = item as QuotationItem;
-  showDeleteDialog.value = true;
+const handleView = (item: { id?: string | number; uuid?: string }) => {
+  const uuid = item.uuid ?? String(item.id);
+  router.push({ name: 'PriceOfferMaterialProductView', params: { id: uuid } });
 };
 
-const confirmDelete = async () => {
-  if (!itemToDelete.value) return;
-  const uuid = itemToDelete.value.uuid;
+const confirmDelete = async (item:any) => {
   try {
-    deleteLoading.value = true;
-    await api.delete(`/sales/quotations/building-materials/${uuid}`);
+    await api.delete(`/sales/quotations/building-materials/${item.uuid}`);
     success('تم حذف عرض السعر بنجاح');
-    showDeleteDialog.value = false;
-    itemToDelete.value = null;
     await fetchList();
   } catch (err: any) {
     console.error('Error deleting quotation:', err);
     error(err?.response?.data?.message || 'فشل حذف عرض السعر');
   } finally {
-    deleteLoading.value = false;
   }
 };
 
@@ -380,7 +374,7 @@ onBeforeUnmount(() => {
 
         <DataTable :headers="tableHeaders" :items="tableItemsWithId" :loading="loading"
           :show-checkbox="canBulkDelete" show-actions
-          @edit="handleEdit" @delete="handleDelete"
+          @edit="handleEdit" @delete="confirmDelete" @view="handleView"
           @select="handleSelectRequest" @selectAll="handleSelectAllRequests">
           <template #item.quotations_datetime="{ item }">
             {{ item.quotations_datetime ? new Date(item.quotations_datetime).toLocaleDateString('ar-SA') : '—' }}
@@ -424,9 +418,6 @@ onBeforeUnmount(() => {
       message="تغيير الحالة:"
       @success="fetchList"
     />
-
-    <DeleteConfirmDialog v-model="showDeleteDialog" :loading="deleteLoading" title="حذف عرض السعر"
-      message="هل أنت متأكد من حذف هذا العرض؟" @confirm="confirmDelete" />
 
     <DeleteConfirmDialog v-model="showBulkDeleteDialog" :loading="deleteLoading" title="حذف عروض السعر"
       :message="`هل أنت متأكد من حذف ${selectedRequests.length} عرض؟`" @confirm="confirmBulkDelete" />
