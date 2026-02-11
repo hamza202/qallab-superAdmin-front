@@ -1526,7 +1526,7 @@ const serviceTableItems = computed(() =>
               <TextInput
                 v-model="formData.transport_movements"
                 placeholder="أدخل العدد"
-                label="عدد حركات النقل"
+                label="عدد مركبات النقل"
                 type="number"
                 density="comfortable"
               />
