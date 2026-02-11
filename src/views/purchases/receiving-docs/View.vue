@@ -54,7 +54,7 @@
                         <v-divider vertical class="my-6"></v-divider>
                         <div class="info-item-bordered flex-1 px-6 py-4">
                             <label class="font-semibold text-sm text-gray-500 mb-2 block">تاريخ الاستلام</label>
-                            <p class="text-base font-semibold text-gray-900">{{ receivingDocData?.receiving_date }}</p>
+                            <p class="text-base font-semibold text-gray-900">{{ receivingDocData?.receiving_date || '—' }}</p>
                         </div>
                         <v-divider vertical class="my-6"></v-divider>
                         <div class="info-item-bordered flex-1 px-6 py-4">
@@ -126,8 +126,8 @@ onMounted(() => {
 const documentCode = computed(() => receivingDocData.value?.code || '—')
 const purchaseOrderCode = computed(() => receivingDocData.value?.purchase_order_code || '—')
 const statusLabel = computed(() => {
-    const statusId = receivingDocData.value?.status_id
-    if (statusId === 1) return 'جاهزة'
+    const status = receivingDocData.value?.status_name
+    if (status) return status
     return '—'
 })
 
@@ -136,7 +136,7 @@ const itemsData = computed(() => {
     if (!receivingDocData.value?.items) return []
     return receivingDocData.value.items.map((item: any) => ({
         id: item.id,
-        item_name: item.item_id || '—',
+        item_name: item.item_name || '—',
         base_quantity: item.base_quantity || 0,
         quantity_from_supplier: item.quantity_from_supplier || 0,
         quantity_from_transport: item.quantity_from_transport || 0,

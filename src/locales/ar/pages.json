@@ -285,6 +285,10 @@
           "sales": "المبيعات",
           "pickupsList": "حجوزات التسليم"
         },
+        "labels": {
+          "morning": "صباحاً",
+          "evening": "مساءً"
+        },
         "orderInfo": {
           "title": "معلومات الطلب",
           "transportCompany": "شركة النقل",
@@ -296,7 +300,7 @@
           "tripCost": "تكلفة الرحلة",
           "unloadingLocation": "موقع التنزيل",
           "loadingLocation": "موقع التحميل",
-          "unloadingResponsible": "مسؤول التنزيل",
+          "unloadingResponsible": "مسؤول التفريغ",
           "vehicleCount": "عدد المركبات",
           "vehicleType": "نوع المركبة",
           "notes": "ملاحظات"
