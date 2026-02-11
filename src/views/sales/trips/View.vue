@@ -46,7 +46,7 @@
                         <div class="info-item-bordered flex-1 px-6 py-4">
                             <label class="font-semibold text-sm text-gray-500 mb-2 block">شركة النقل</label>
                             <p class="text-base font-semibold text-gray-900">{{
-                                getSupplierName || '—' }}</p>
+                                tripData?.supplier_logistic_name || '—' }}</p>
                         </div>
                         <v-divider vertical class="my-6"></v-divider>
                         <div class="info-item-bordered flex-1 px-6 py-4">
@@ -183,29 +183,6 @@ const fetchTripData = async () => {
     }
 }
 
-const supplierItems = ref<any[]>([]);
-
-const fetchSuppliers = async () => {
-    try {
-        const res = await api.get<any>('/suppliers/list', {
-            params: {
-                service_type: 'logistic_company'
-            }
-        });
-        if (Array.isArray(res.data)) {
-            supplierItems.value = res.data.map((i: any) => ({ title: i.full_name, value: i.id }));
-        }
-    } catch (e) {
-        console.error('Error fetching suppliers:', e);
-    }
-}
-
-const getSupplierName = computed(() => {
-    if (!tripData.value?.supplier_logistic_id) return ''
-    const item = supplierItems.value.find((i: any) => i.value === tripData.value?.supplier_logistic_id)
-    return item?.title || String(tripData.value?.supplier_logistic_id)
-})
-
 // Computed properties for display
 const tripCode = computed(() => tripData.value?.code || '—')
 
@@ -232,7 +209,6 @@ const itemHeaders = [
 ]
 
 onMounted(() => {
-    fetchSuppliers()
     fetchTripData()
 })
 
