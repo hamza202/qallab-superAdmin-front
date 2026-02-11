@@ -32,6 +32,7 @@ interface ItemActions {
     can_delete: boolean;
     can_view: boolean;
     can_change_status: boolean;
+    can_print?: boolean;
 }
 
 interface InvoiceItem {
@@ -190,6 +191,28 @@ const handleView = (item: { id?: string | number; uuid?: string }) => {
 const handleEdit = (item: { id?: string | number; uuid?: string }) => {
     const uuid = item.uuid ?? String(item.id);
     router.push({ name: 'SalesInvoicesEdit', params: { id: uuid } });
+};
+
+const handlePrint = (item: { id?: string | number; uuid?: string }) => {
+    const uuid = item.uuid ?? String(item.id);
+    const route = router.resolve({ name: 'SalesInvoicesPrint', params: { id: uuid } });
+    const printUrl = route.href.startsWith('/') ? `${window.location.origin}${route.href}` : route.href;
+
+    const iframe = document.createElement('iframe');
+    iframe.style.cssText = 'position:fixed;top:0;left:-9999px;width:210mm;height:297mm;border:none;opacity:0;pointer-events:none;';
+    document.body.appendChild(iframe);
+
+    const handleMessage = (e: MessageEvent) => {
+        if (e.data?.type === 'invoice-print-ready' && e.source === iframe.contentWindow && iframe.contentWindow) {
+            window.removeEventListener('message', handleMessage);
+            iframe.contentWindow.print();
+            setTimeout(() => {
+                if (iframe.parentNode) document.body.removeChild(iframe);
+            }, 1000);
+        }
+    };
+    window.addEventListener('message', handleMessage);
+    iframe.src = printUrl;
 };
 
 const confirmDelete = async (item: { uuid?: string; id?: string | number } & Partial<InvoiceItem>) => {
@@ -416,7 +439,8 @@ onBeforeUnmount(() => {
                     </template>
                     <template #item.actions="{ item }">
                         <div class="flex items-center">
-                            <v-btn icon variant="text" color="success-700" size="x-small">
+                            <v-btn v-if="item.actions?.can_print" icon variant="text" color="success-700" size="x-small"
+                                @click="handlePrint(item)">
                                 <span class="w-5" v-html="printerIcon"></span>
                             </v-btn>
 

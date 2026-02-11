@@ -339,6 +339,14 @@ export const salesRoutes: RouteRecordRaw[] = [
           title: "pages.SalesInvoices.title",
         },
       },
+      {
+        path: "print/:id",
+        name: "SalesInvoicesPrint",
+        component: () => import("@/views/sales/invoices/Print.vue"),
+        meta: {
+          title: "pages.SalesInvoices.print",
+        },
+      },
     ],
   },
     {

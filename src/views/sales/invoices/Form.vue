@@ -20,7 +20,6 @@ const routeId = computed(() => route.params.id as string);
 const isLoading = ref(false);
 const pageLoading = ref(false);
 const isSubmitting = ref(false);
-const customerItems = ref<any[]>([]);
 const orderTypes = ref<any[]>([]);
 const ordersItems = ref<any[]>([]);
 const InvoiceCode = ref('')
@@ -63,6 +62,7 @@ interface ProductTableItem {
     discount_val: number | null;
     total_tax: number | null;
     taxable_amount: number | null;
+    total_out_taxes: number | null;
     subtotal_after_tax: number | null;
     id?: number; // For edit mode
     isAdded?: boolean; // For dialog state
@@ -86,20 +86,6 @@ const formData = ref(getDefaultFormData());
 const productTableItems = ref<ProductTableItem[]>([]);
 
 
-const fetchCustomers = async () => {
-    try {
-        const res = await api.get<any>("/customers/list");
-        if (Array.isArray(res.data)) {
-            customerItems.value = res.data.map((i: any) => ({
-                title: i.full_name,
-                value: i.id,
-            }));
-        }
-    } catch (e) {
-        console.error("Error fetching customers:", e);
-    }
-};
-
 const mapOrderItemsToProducts = (items: any[] = []) => {
     return items.map((item: any) => ({
         id: item.id,
@@ -113,6 +99,7 @@ const mapOrderItemsToProducts = (items: any[] = []) => {
         discount_val: item.discount_val,
         total_tax: item.total_tax,
         taxable_amount: item.total_applied_taxes,
+        total_out_taxes: item.total_out_taxes ?? item.taxable_amount ?? (item.subtotal_after_tax != null && item.total_tax != null ? Number(item.subtotal_after_tax) - Number(item.total_tax) : null),
         subtotal_after_tax: item.subtotal_after_tax ?? item.subtotal_after_discount,
     }));
 };
@@ -137,6 +124,10 @@ const fetchOrderItems = async (saleOrderId: number | string | null) => {
         if (items.length <= 0) {
             warning('يجب أن تحتوي الطلبية على منتج واحد على الأقل لإتمام الفاتورة')
         } else {
+            if (firstOrder?.customer_id != null) {
+                formData.value.customer_id = firstOrder.customer_id;
+                fetchCustomerDetails(firstOrder.customer_id);
+            }
             productTableItems.value = mapOrderItemsToProducts(items);
             summaryData.value = {
                 total_quantity: firstOrder.total_quantity,
@@ -188,17 +179,16 @@ const fetchOrdersByCustomerAndType = async (
     customerId: number | string | null,
     orderType: number | string | null
 ) => {
-    if (!customerId || !orderType) {
+    if (!orderType) {
         ordersItems.value = [];
         return;
     }
 
     try {
+        const params: Record<string, string | number> = { so_type: orderType };
+        if (customerId) params.customer_id = customerId;
         const res = await api.get<any>('/sales/orders/list', {
-            params: {
-                customer_id: customerId,
-                so_type: orderType,
-            },
+            params,
         });
 
         const rawData = Array.isArray(res.data) ? res.data : res.data?.data;
@@ -439,6 +429,7 @@ const editProductForDialog = computed<any>(() => {
         discount_type: p.discount_type,
         total_tax: p.total_tax,
         taxable_amount: p.taxable_amount,
+        total_out_taxes: p.total_out_taxes,
         isAdded: p.isAdded,
         id: p.id,
     };
@@ -467,6 +458,7 @@ const handleProductUpdated = (updatedProduct: any) => {
             discount_type: updatedProduct.discount_type ?? 2,
             total_tax: updatedProduct.total_tax ?? null,
             taxable_amount: updatedProduct.taxable_amount ?? null,
+            total_out_taxes: updatedProduct.total_out_taxes ?? (updatedProduct.taxable_amount != null ? updatedProduct.taxable_amount : null),
             subtotal_after_tax: updatedProduct.taxable_amount != null && updatedProduct.total_tax != null
                 ? +(Number(updatedProduct.taxable_amount) + Number(updatedProduct.total_tax)).toFixed(2)
                 : null,
@@ -490,6 +482,7 @@ const existingProductsForDialog = computed<any[]>(() =>
         discount_type: p.discount_type,
         total_tax: p.total_tax,
         taxable_amount: p.taxable_amount,
+        total_out_taxes: p.total_out_taxes,
         isAdded: p.isAdded,
         id: p.id,
     }))
@@ -501,10 +494,10 @@ const headers = [
     { title: 'الوحدة', key: 'unit' },
     { title: 'الكمية', key: 'quantity' },
     { title: 'سعر الوحدة', key: 'price_per_unit' },
-    { title: 'خصم', key: 'discount_val' },
+    { title: 'الخصم', key: 'discount_val' },
     { title: 'المبلغ الخاضع للضريبة', key: 'taxable_amount' },
     { title: 'مبلغ الضريبة', key: 'total_tax' },
-    { title: 'إجمالي المبلغ', key: 'subtotal_after_tax' },
+    { title: 'إجمالي المبلغ', key: 'total_out_taxes' },
 ]
 
 // Computed items for the DataTable (mapped from productTableItems)
@@ -518,7 +511,7 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
     discount_val: item.discount_val,
     taxable_amount: item.taxable_amount,
     total_tax: item.total_tax,
-    subtotal_after_tax: item.subtotal_after_tax,
+    total_out_taxes: item.total_out_taxes,
 })));
 
 const summaryTotalQuantities = computed(() =>
@@ -559,7 +552,7 @@ watch(
         if (!isPopulatingForm.value) {
             formData.value.sale_order_id = null;
         }
-        if (!customerId || !orderType) {
+        if (!orderType) {
             ordersItems.value = [];
             return;
         }
@@ -583,7 +576,6 @@ watch(
 onMounted(async () => {
     pageLoading.value = true
     await Promise.all([
-        fetchCustomers(),
         fetchConstants(),
         fetchUnits()
     ]);
@@ -613,14 +605,6 @@ onMounted(async () => {
 
                 <v-form ref="formRef" v-model="isFormValid" @submit.prevent>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 gap-y-6">
-                        <!-- Customer Name -->
-                        <div>
-                            <SelectInput v-model="formData.customer_id" :items="customerItems" placeholder="اختر"
-                                label="اسم العميل" density="comfortable" :rules="[required()]"
-                                :error-messages="formErrors['customer_id']"
-                                @update:model-value="clearFieldError('customer_id')" clearable />
-                        </div>
-
                         <div>
                             <SelectInput v-model="formData.so_type" :items="orderTypes" placeholder="اختر"
                                 label="نوع الطلبية" density="comfortable" :rules="[required()]"
@@ -633,7 +617,7 @@ onMounted(async () => {
                             <SelectInput v-model="formData.sale_order_id" placeholder="اختر الطلبية"
                                 label="كود طلبية المبيعات" :items="ordersItems" density="comfortable"
                                 :rules="[required()]" :error-messages="formErrors['sale_order_id']" 
-                                @update:model-value="clearFieldError('sale_order_id')" clearable :disabled="!formData.so_type || !formData.customer_id" />
+                                @update:model-value="clearFieldError('sale_order_id')" clearable :disabled="!formData.so_type" />
                         </div>
 
                         <!-- Invoice Creation Date -->
@@ -706,7 +690,7 @@ onMounted(async () => {
             </div>
 
             <!-- Summary Table Section -->
-            <div class="flex justify-center gap-4 bg-qallab-dashboard-bg py-5 px-2">
+            <div class="flex justify-end gap-4 bg-qallab-dashboard-bg py-5 px-2">
                 <div class="rounded-2xl overflow-hidden border !border-gray-200 bg-primary-25 w-full max-w-md">
                     <table class="w-full">
                         <!-- Table Header -->

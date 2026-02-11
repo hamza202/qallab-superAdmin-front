@@ -13,7 +13,7 @@
                         المبيعات
                     </router-link>
                     <span class="text-lg text-gray-300">/</span>
-                    <router-link to="/sales/invoices/list" class="text-gray-600 hover:text-primary-600">
+                    <router-link to="/sales/invoices/material-product/list" class="text-gray-600 hover:text-primary-600">
                         فواتير المبيعات
                     </router-link>
                     <span class="text-lg text-gray-300">/</span>
