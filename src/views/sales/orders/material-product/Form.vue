@@ -1493,7 +1493,11 @@ const serviceTableItems = computed(() =>
                 placeholder="أدخل المدة بالأيام"
                 :rules="[required()]"
                 density="comfortable"
-              />
+              >
+                <template #append-inner>
+                  <span class="text-gray-500 text-sm"> يوم </span>
+                </template>
+              </PriceInput>
             </div>
 
             <!-- Transport Vehicle Type -->

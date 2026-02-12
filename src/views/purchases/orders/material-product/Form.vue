@@ -1506,7 +1506,11 @@ const serviceTableItems = computed(() =>
                 type="number"
                 :rules="[required()]"
                 density="comfortable"
-              />
+              >
+                <template #append-inner>
+                  <span class="text-gray-500 text-sm"> يوم </span>
+                </template>
+              </PriceInput>
             </div>
 
             <!-- Transport Vehicle Type -->
@@ -1526,7 +1530,7 @@ const serviceTableItems = computed(() =>
               <TextInput
                 v-model="formData.transport_movements"
                 placeholder="أدخل العدد"
-                label="عدد حركات النقل"
+                label="عدد مركبات النقل"
                 type="number"
                 density="comfortable"
               />

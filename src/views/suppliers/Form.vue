@@ -593,7 +593,7 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
                   :items="currencyItems" :rules="[required()]" :hide-details="false"
                   :error-messages="formErrors['default_currency_id']"
                   @update:model-value="delete formErrors['default_currency_id']" />
-                <TelInput v-model="phone" label="الجوال" :rules="[required(), saudiPhone()]"
+                <TelInput v-model="mobile" label="الجوال" :rules="[required(), saudiPhone()]"
                   :error-messages="formErrors['mobile']" @input="delete formErrors['mobile']" />
                 <TelInput v-model="phone" label="الهاتف" :rules="[saudiPhone()]" :error-messages="formErrors['phone']"
                   @input="delete formErrors['phone']" />
