@@ -303,17 +303,17 @@ const requestType = computed(() => {
     if (type === 'purchase_request_with_logistics') return 'طلب شراء مع لوجستيات'
     return type || ''
 })
-const responsiblePerson = computed(() => requestData.value?.responsible_person || '')
-const responsiblePhone = computed(() => requestData.value?.responsible_phone || '')
+const responsiblePerson = computed(() => requestData.value?.responsible_person || '--')
+const responsiblePhone = computed(() => requestData.value?.responsible_phone || '--')
 const requestDateTime = computed(() => {
     const dt = requestData.value?.request_datetime
     if (!dt) return ''
     const d = new Date(dt)
     return d.toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })
 })
-const statusText = computed(() => requestData.value?.status_id ? `حالة ${requestData.value.status_id}` : '')
-const targetLocation = computed(() => requestData.value?.target_location || '')
-const sourceLocation = computed(() => requestData.value?.source_location || '')
+const statusText = computed(() => requestData.value?.status_name || '--')
+const targetLocation = computed(() => requestData.value?.target_location || '--')
+const sourceLocation = computed(() => requestData.value?.source_location || '--')
 const paymentMethod = computed(() => {
     const method = requestData.value?.payment_method
     if (method === 'cash') return 'كاش'
@@ -331,7 +331,7 @@ const upfrontPaymentFormatted = computed(() => {
 const productItems = computed(() => {
     if (!requestData.value?.items) return []
     return requestData.value.items.map((item: any) => {
-        const fillingKey = item.filling ?? item.transport_type
+        const fillingKey = item.filling ?? item.transport_type_label
         const qty = item.quantity != null ? (typeof item.quantity === 'string' ? parseFloat(item.quantity) : item.quantity) : null
         return {
             id: item.id,

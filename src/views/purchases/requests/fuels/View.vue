@@ -74,7 +74,7 @@
                                 <v-divider vertical class="my-6"></v-divider>
                                 <div class="info-item-bordered flex-1 px-6 py-4">
                                     <label class="font-semibold text-sm text-gray-500 mb-2 block">هاتف المسؤول</label>
-                                    <p class="text-base font-semibold text-gray-900">{{ responsiblePhone }}</p>
+                                    <p class="text-base font-semibold text-gray-900 dir-ltr text-end">{{ responsiblePhone }}</p>
                                 </div>
                                 <v-divider vertical class="my-6"></v-divider>
                                 <div class="info-item-bordered flex-1 px-6 py-4">
@@ -331,7 +331,7 @@ const upfrontPaymentFormatted = computed(() => {
 const productItems = computed(() => {
     if (!requestData.value?.items) return []
     return requestData.value.items.map((item: any) => {
-        const fillingKey = item.filling ?? item.transport_type
+        const fillingKey = item.filling ?? item.transport_type_label
         const qty = item.quantity != null ? (typeof item.quantity === 'string' ? parseFloat(item.quantity) : item.quantity) : null
         return {
             id: item.id,

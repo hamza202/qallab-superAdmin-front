@@ -134,6 +134,7 @@ const tripPeriodLabel = computed(() => {
   const value = detail.value?.am_pm_interval
   if (value === 'am') return t('pages.SalesSoPickups.viewPage.labels.morning') || 'صباحاً'
   if (value === 'pm') return t('pages.SalesSoPickups.viewPage.labels.evening') || 'مساءً'
+  if (value === 'both') return 'صباحاً ومساءً'
   return '—'
 })
 

@@ -258,7 +258,7 @@ const transportItems = computed(() => {
         quantity: item.quantity || 0,
         trip_start: item.trip_start ? new Date(item.trip_start).toLocaleDateString('en-US') : '—',
         number_of_trips: item.number_of_trips || 0,
-        vehicle_type: Array.isArray(item.transport_type) ? item.transport_type.join(', ') : (item.transport_type || '—'),
+        vehicle_type: Array.isArray(item.transport_type_label) ? item.transport_type_label.join(', ') : (item.transport_type_label || '—'),
         trip_capacity: item.trip_capacity || 0,
         trip_time: getAmPmIntervalName(item.am_pm_interval),
     }))
@@ -273,7 +273,7 @@ const additionalLogistics = computed(() => {
         from_date: logistics.from_date ? new Date(logistics.from_date).toLocaleDateString('en-US') : '—',
         to_date: logistics.to_date ? new Date(logistics.to_date).toLocaleDateString('en-US') : '—',
         actual_execution_duration: logistics.actual_execution_duration || 0,
-        vehicle_type: Array.isArray(logistics.transport_type) ? logistics.transport_type.join(', ') : (logistics.transport_type || '—'),
+        vehicle_type: Array.isArray(logistics.transport_type_label) ? logistics.transport_type_label.join(', ') : (logistics.transport_type_label || '—'),
         transport_no: logistics.transport_no || 0,
         trip_no: logistics.trip_no || 0,
         loading_responsible: logistics.loading_responsible_party || '—',

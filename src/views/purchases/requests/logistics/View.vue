@@ -147,7 +147,7 @@
                             <div class="info-item-bordered flex-1 px-6 py-4">
                                 <label class="font-semibold text-sm text-gray-500 mb-2 block">نوع مركبة النقل</label>
                                 <p class="text-base font-semibold text-gray-900">{{
-                                    getTransportTypeName(detail.transport_type) }}</p>
+                                    Array.isArray(detail.transport_type_label) ? detail.transport_type_label.join(', ') : (detail.transport_type_label || '—') }}</p>
                             </div>
                             <v-divider vertical class="my-6"></v-divider>
                             <div class="info-item-bordered flex-1 px-6 py-4">
@@ -294,7 +294,7 @@ const logisticsTableData = computed(() => {
         am_pm: getAmPmLabel(detail.am_pm_interval),
         from_date: detail.from_date,
         to_date: detail.to_date,
-        transport_type: getTransportTypeName(detail.transport_type),
+        transport_type: Array.isArray(detail.transport_type_label) ? detail.transport_type_label.join(', ') : (detail.transport_type_label || '—'),
         transport_no: detail.transport_no,
         loading_party: detail.loading_responsible_party,
         downloading_party: detail.downloading_responsible_party,
@@ -314,17 +314,6 @@ const getCategoryName = (categories: number[]) => {
 }
 
 
-const getTransportTypeName = (types: number[]) => {
-    if (!types || types.length === 0) return '—'
-
-    // Get transport types from constants
-    const transportTypes = constantsData.value?.transport_types || []
-
-    return types.map(typeId => {
-        const transportType = transportTypes.find((t: any) => t.key == typeId)
-        return transportType?.label || typeId.toString()
-    }).join(', ')
-}
 
 const getAmPmLabel = (interval: string) => {
     if (!interval) return '—'
