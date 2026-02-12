@@ -45,7 +45,7 @@
                     <div class="flex flex-wrap gap-4">
                         <div class="info-item-bordered flex-1 px-6 py-4">
                             <label class="font-semibold text-sm text-gray-500 mb-2 block">اسم العميل</label>
-                            <p class="text-base font-semibold text-gray-900">{{ supplierName }}</p>
+                            <p class="text-base font-semibold text-gray-900">{{ customerName }}</p>
                         </div>
                         <v-divider vertical class="my-6"></v-divider>
                         <div class="info-item-bordered flex-1 px-6 py-4">
@@ -213,11 +213,11 @@ onMounted(() => {
 })
 
 // Computed properties for display
-const quotationCode = computed(() => quotationData.value?.uuid || '')
+const quotationCode = computed(() => quotationData.value?.code || '')
 const QuotationName = computed(() => quotationData.value?.quotation_name || '')
 const projectName = computed(() => quotationData.value?.project_name || '—')
 const categoryLabel = computed(() => quotationData.value?.category_label || '—')
-const supplierName = computed(() => quotationData.value?.supplier?.name || '—')
+const customerName = computed(() => quotationData.value?.customer_name || '—')
 const quotationDateTime = computed(() => {
     const dt = quotationData.value?.quotations_datetime
     return dt ? new Date(dt).toLocaleDateString('en-US') : '—'
@@ -271,7 +271,7 @@ const additionalLogistics = computed(() => {
         from_date: logistics.from_date ? new Date(logistics.from_date).toLocaleDateString('ar-SA') : '—',
         to_date: logistics.to_date ? new Date(logistics.to_date).toLocaleDateString('ar-SA') : '—',
         actual_execution_duration: logistics.actual_execution_duration || 0,
-        vehicle_type: Array.isArray(logistics.transport_type) ? logistics.transport_type.join(', ') : (logistics.transport_type || '—'),
+        vehicle_type: Array.isArray(logistics.transport_type_label) ? logistics.transport_type_label.join(', ') : (logistics.transport_type_label || '—'),
         transport_no: logistics.transport_no || 0,
         trip_no: logistics.trip_no || 0,
         loading_responsible: logistics.loading_responsible_party || '—',

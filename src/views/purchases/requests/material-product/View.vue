@@ -285,7 +285,7 @@ const productItems = computed(() => {
         name: item.item_name,
         quantity: item.quantity,
         unit: item.unit_name,
-        transport_type: getTransportTypeName(item.transport_type),
+        transport_type: Array.isArray(item.transport_type_label) ? item.transport_type_label.join(', ') : (item.transport_type_label || '—'),
         daily_trips: item.trip_no || 0,
         notes: item.notes || 'لا يوجد',
     }))
@@ -301,18 +301,13 @@ const transportServiceItems = computed(() => {
         project_location: targetLocation.value,
         from_date: logistics.from_date ? new Date(logistics.from_date).toLocaleDateString('en-US') : '',
         to_date: logistics.to_date ? new Date(logistics.to_date).toLocaleDateString('en-US') : '',
-        vehicle_type: getTransportTypeName(logistics.transport_type),
+        vehicle_type: Array.isArray(logistics.transport_type_label) ? logistics.transport_type_label.join(', ') : (logistics.transport_type_label || '—'),
         trip_time: getAmPmIntervalName(logistics.am_pm_interval),
         notes: logistics.notes || 'لا يوجد',
     }]
 })
 
 // Helper functions
-const getTransportTypeName = (type: any) => {
-    if (!type) return ''
-    // You can map transport type IDs to names here
-    return `نوع ${type}`
-}
 
 const getAmPmIntervalName = (interval: any) => {
     if (interval === 'am') return 'صباحاً'
