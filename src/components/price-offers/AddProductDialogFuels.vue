@@ -68,6 +68,9 @@ const visibleTabsCount = 6;
 const productsList = ref<FuelProductToAdd[]>([]);
 const editProductData = ref<FuelProductToAdd | null>(null);
 
+// Track manually unchecked products (to prevent auto-check)
+const manuallyUnchecked = ref<Set<number>>(new Set());
+
 const unitItemsList = computed(() => props.unitItems || []);
 const fillingsOptionsList = computed(() => props.fillingsOptions || []);
 const supplyTypeOptionsList = computed(() => props.supplyTypeOptions || []);
@@ -119,7 +122,7 @@ const fetchItems = async () => {
     items.value = data;
     categories.value = extractCategories(data);
 
-    productsList.value = data.map((item: ApiItem) => {
+    const mappedProducts = data.map((item: ApiItem) => {
       const existing = props.existingProducts?.find(p => p.item_id === item.id);
       if (existing) return { ...existing, isAdded: true };
       return {
@@ -138,6 +141,13 @@ const fetchItems = async () => {
         unit_price: null,
         discount: null,
       } as FuelProductToAdd;
+    });
+
+    // Sort on dialog open: products with values (isAdded) come first
+    productsList.value = mappedProducts.sort((a: FuelProductToAdd, b: FuelProductToAdd) => {
+      if (a.isAdded && !b.isAdded) return -1;
+      if (!a.isAdded && b.isAdded) return 1;
+      return 0;
     });
 
     if (categories.value.length > 0) activeTabId.value = categories.value[0].id;
@@ -166,9 +176,10 @@ const toggleCategories = () => {
 };
 
 const toggleProduct = (product: FuelProductToAdd) => {
+  // Toggle isAdded state (mark/unmark for batch save)
   if (product.isAdded) {
     product.isAdded = false;
-    emit('saved', addedProducts.value);
+    manuallyUnchecked.value.add(product.item_id);
   } else {
     if (canAddProduct(product)) {
       const unit = unitItemsList.value.find((u: any) => u.value === product.unit_id);
@@ -178,9 +189,32 @@ const toggleProduct = (product: FuelProductToAdd) => {
       const supply = supplyTypeOptionsList.value.find((s: any) => s.value === product.supply_type);
       product.supply_type_name = supply?.title || '';
       product.isAdded = true;
-      emit('saved', addedProducts.value);
+      manuallyUnchecked.value.delete(product.item_id);
     }
   }
+  // Note: No emit here - will emit all at once when clicking "تم"
+};
+
+// Auto-check product when required fields are filled (unless manually unchecked)
+const shouldAutoCheck = (product: FuelProductToAdd): boolean => {
+  return canAddProduct(product) && !product.isAdded && !manuallyUnchecked.value.has(product.item_id);
+};
+
+// Check if product should show as checked (either manually or auto)
+const isProductChecked = (product: FuelProductToAdd): boolean => {
+  if (product.isAdded) return true;
+  if (shouldAutoCheck(product)) {
+    // Auto-fill names when auto-checking
+    const unit = unitItemsList.value.find((u: any) => u.value === product.unit_id);
+    product.unit_name = unit?.title || '';
+    const filling = fillingsOptionsList.value.find((f: any) => f.value === product.transport_type);
+    product.transport_type_name = filling?.title || '';
+    const supply = supplyTypeOptionsList.value.find((s: any) => s.value === product.supply_type);
+    product.supply_type_name = supply?.title || '';
+    product.isAdded = true;
+    return true;
+  }
+  return false;
 };
 
 const handleEditSave = () => {
@@ -203,6 +237,7 @@ const resetForm = () => {
   activeTabId.value = null;
   searchQuery.value = '';
   showFullCategory.value = false;
+  manuallyUnchecked.value.clear();
   editProductData.value = null;
 };
 
@@ -215,7 +250,10 @@ const handleDone = () => {
   if (isEditMode.value) {
     handleEditSave();
   } else {
-    emit('saved', addedProducts.value);
+    // Only save products that are explicitly marked as added (isAdded = true)
+    const productsToSave = productsList.value.filter(p => p.isAdded);
+    
+    emit('saved', productsToSave);
     closeDialog();
   }
 };
@@ -351,7 +389,7 @@ const plusIconDisabled = `<svg width="16" height="16" viewBox="0 0 16 16" fill="
           <div class="flex gap-3 rounded-lg border !border-gray-100 p-3 bg-white">
             <div class="col-span-1 flex items-center justify-center gap-1">
               <ButtonWithIcon
-                v-if="product.isAdded"
+                v-if="isProductChecked(product)"
                 :icon="checkIcon"
                 icon-only
                 color="success"
@@ -360,13 +398,21 @@ const plusIconDisabled = `<svg width="16" height="16" viewBox="0 0 16 16" fill="
                 class="!h-full"
               />
               <ButtonWithIcon
-                v-else
-                :icon="canAddProduct(product) ? plusIcon : plusIconDisabled"
+                v-else-if="canAddProduct(product)"
+                :icon="plusIcon"
                 icon-only
-                :color="canAddProduct(product) ? 'primary' : 'gray'"
+                color="primary"
                 variant="flat"
                 @click="toggleProduct(product)"
-                :disabled="!canAddProduct(product)"
+                class="!h-full"
+              />
+              <ButtonWithIcon
+                v-else
+                :icon="plusIconDisabled"
+                icon-only
+                color="gray"
+                variant="flat"
+                disabled
                 class="!h-full"
               />
             </div>
@@ -376,13 +422,13 @@ const plusIconDisabled = `<svg width="16" height="16" viewBox="0 0 16 16" fill="
                 {{ product.item_name }}
               </div>
               <div>
-                <TextInput v-model="product.quantity" type="number" placeholder="الكمية" density="compact" class="min-w-[170px]" :disabled="product.isAdded" />
+                <TextInput v-model="product.quantity" type="number" placeholder="الكمية" density="compact" class="min-w-[170px]" />
               </div>
               <div>
-                <SelectInput v-model="product.unit_id" :items="unitItemsList" placeholder="الوحدة" density="compact" class="min-w-[170px]" item-title="title" item-value="value" :disabled="product.isAdded" />
+                <SelectInput v-model="product.unit_id" :items="unitItemsList" placeholder="الوحدة" density="compact" class="min-w-[170px]" item-title="title" item-value="value" />
               </div>
               <div>
-                <SelectInput v-model="product.transport_type" :items="fillingsOptionsList" placeholder="التعبئة" density="compact" class="min-w-[170px]" item-title="title" item-value="value" :disabled="product.isAdded" />
+                <SelectInput v-model="product.transport_type" :items="fillingsOptionsList" placeholder="التعبئة" density="compact" class="min-w-[170px]" item-title="title" item-value="value" />
               </div>
               <div>
                 <SelectInput
@@ -394,7 +440,6 @@ const plusIconDisabled = `<svg width="16" height="16" viewBox="0 0 16 16" fill="
                   class="min-w-[170px]"
                   item-title="title"
                   item-value="value"
-                  :disabled="product.isAdded"
                 />
               </div>
             </div>

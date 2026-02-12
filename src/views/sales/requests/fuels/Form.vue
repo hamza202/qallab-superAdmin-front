@@ -89,7 +89,7 @@ const fetchFormData = async () => {
             const logistics = data.logistics_detail || {};
             // Populate form data (top-level and logistics_detail)
             formData.value.requestType = data.request_type ?? null;
-            formData.value.request_datetime = data.request_datetime ? String(data.request_datetime) : '';
+            formData.value.request_datetime = data.request_datetime ? formatDateTime(data.request_datetime) : '';
             formData.value.deliveryStartDate = (data.delivery_start_date || logistics.from_date || '')
                 .toString().split(' ')[0] || '';
             formData.value.paymentMethod = data.payment_method ?? null;
@@ -314,9 +314,7 @@ const buildFormData = (): FormData => {
     }
     
     // Basic fields (aligned with Store endpoint)
-    fd.append('request_datetime', formData.value.request_datetime
-        ? formatDateTime(formData.value.request_datetime)
-        : getCurrentDateTimeFormatted());
+    fd.append('request_datetime', formData.value.request_datetime || '');
     fd.append('upfront_payment', String(formData.value.advancePayment || ''));
     fd.append('payment_method', formData.value.paymentMethod || '');
     fd.append('responsible_person', formData.value.responsibleName || '');
@@ -747,7 +745,7 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
             :fillings-options="fillingsItems"
             :unit-items="unitItems"
             :supply-type-options="supplyTypeItems"
-            items-endpoint="/items/active-list?with_category=true"
+            items-endpoint="/items/list?material_type=2"
             :edit-product="editingProduct"
             :existing-products="productTableItems"
             @saved="handleProductSaved"

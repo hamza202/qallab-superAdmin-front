@@ -68,6 +68,9 @@ const visibleTabsCount = 6;
 const productsList = ref<FuelQuotationProductToAdd[]>([]);
 const editProductData = ref<FuelQuotationProductToAdd | null>(null);
 
+// Track manually unchecked products (to prevent auto-check)
+const manuallyUnchecked = ref<Set<number>>(new Set());
+
 const unitItemsList = computed(() => props.unitItems || []);
 const itemUsingOptionsList = computed(() => props.itemUsingOptions || []);
 const discountTypeOptionsList = computed(() => props.discountTypeOptions || [
@@ -134,7 +137,7 @@ const fetchItems = async () => {
     items.value = data;
     categories.value = extractCategories(data);
 
-    productsList.value = data.map((item: ApiItem) => {
+    const mappedProducts = data.map((item: ApiItem) => {
       const existing = props.existingProducts?.find(p => p.item_id === item.id);
       if (existing) return { ...existing, isAdded: true };
       return {
@@ -152,6 +155,13 @@ const fetchItems = async () => {
         notes: '',
         isAdded: false,
       } as FuelQuotationProductToAdd;
+    });
+
+    // Sort on dialog open: products with values (isAdded) come first
+    productsList.value = mappedProducts.sort((a: FuelQuotationProductToAdd, b: FuelQuotationProductToAdd) => {
+      if (a.isAdded && !b.isAdded) return -1;
+      if (!a.isAdded && b.isAdded) return 1;
+      return 0;
     });
 
     if (categories.value.length > 0) activeTabId.value = categories.value[0].id;
@@ -180,9 +190,10 @@ const toggleCategories = () => {
 };
 
 const toggleProduct = (product: FuelQuotationProductToAdd) => {
+  // Toggle isAdded state (mark/unmark for batch save)
   if (product.isAdded) {
     product.isAdded = false;
-    emit('saved', addedProducts.value);
+    manuallyUnchecked.value.add(product.item_id);
   } else {
     if (canAddProduct(product)) {
       const unit = unitItemsList.value.find((u: any) => u.value === product.unit_id);
@@ -190,9 +201,30 @@ const toggleProduct = (product: FuelQuotationProductToAdd) => {
       const itemUsing = itemUsingOptionsList.value.find((f: any) => f.value === product.item_using);
       product.item_using_name = itemUsing?.title || '';
       product.isAdded = true;
-      emit('saved', addedProducts.value);
+      manuallyUnchecked.value.delete(product.item_id);
     }
   }
+  // Note: No emit here - will emit all at once when clicking "تم"
+};
+
+// Auto-check product when required fields are filled (unless manually unchecked)
+const shouldAutoCheck = (product: FuelQuotationProductToAdd): boolean => {
+  return canAddProduct(product) && !product.isAdded && !manuallyUnchecked.value.has(product.item_id);
+};
+
+// Check if product should show as checked (either manually or auto)
+const isProductChecked = (product: FuelQuotationProductToAdd): boolean => {
+  if (product.isAdded) return true;
+  if (shouldAutoCheck(product)) {
+    // Auto-fill names when auto-checking
+    const unit = unitItemsList.value.find((u: any) => u.value === product.unit_id);
+    product.unit_name = unit?.title || '';
+    const itemUsing = itemUsingOptionsList.value.find((f: any) => f.value === product.item_using);
+    product.item_using_name = itemUsing?.title || '';
+    product.isAdded = true;
+    return true;
+  }
+  return false;
 };
 
 const handleEditSave = () => {
@@ -214,6 +246,7 @@ const resetForm = () => {
   searchQuery.value = '';
   showFullCategory.value = false;
   editProductData.value = null;
+  manuallyUnchecked.value.clear();
 };
 
 const closeDialog = () => {
@@ -225,7 +258,10 @@ const handleDone = () => {
   if (isEditMode.value) {
     handleEditSave();
   } else {
-    emit('saved', addedProducts.value);
+    // Only save products that are explicitly marked as added (isAdded = true)
+    const productsToSave = productsList.value.filter(p => p.isAdded);
+    
+    emit('saved', productsToSave);
     closeDialog();
   }
 };
@@ -373,7 +409,7 @@ const plusIconDisabled = `<svg width="16" height="16" viewBox="0 0 16 16" fill="
           <div class="flex gap-3 rounded-lg border !border-gray-100 p-4 bg-white">
             <div class="col-span-1 flex items-center justify-center gap-1">
               <ButtonWithIcon
-                v-if="product.isAdded"
+                v-if="isProductChecked(product)"
                 :icon="checkIcon"
                 icon-only
                 color="success"
@@ -382,13 +418,21 @@ const plusIconDisabled = `<svg width="16" height="16" viewBox="0 0 16 16" fill="
                 class="!h-full"
               />
               <ButtonWithIcon
-                v-else
-                :icon="canAddProduct(product) ? plusIcon : plusIconDisabled"
+                v-else-if="canAddProduct(product)"
+                :icon="plusIcon"
                 icon-only
-                :color="canAddProduct(product) ? 'primary' : 'gray'"
+                color="primary"
                 variant="flat"
                 @click="toggleProduct(product)"
-                :disabled="!canAddProduct(product)"
+                class="!h-full"
+              />
+              <ButtonWithIcon
+                v-else
+                :icon="plusIconDisabled"
+                icon-only
+                color="gray"
+                variant="flat"
+                disabled
                 class="!h-full"
               />
             </div>
@@ -400,13 +444,13 @@ const plusIconDisabled = `<svg width="16" height="16" viewBox="0 0 16 16" fill="
               <!-- Row 1: الوحدة، الكمية، سعر الوحدة -->
               <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
-                  <SelectInput v-model="product.unit_id" :items="unitItemsList" placeholder="الوحدة" density="compact" item-title="title" item-value="value" :disabled="product.isAdded" />
+                  <SelectInput v-model="product.unit_id" :items="unitItemsList" placeholder="الوحدة" density="compact" item-title="title" item-value="value" />
                 </div>
                 <div>
-                  <TextInput v-model="product.quantity" type="number" placeholder="الكمية" density="compact" :disabled="product.isAdded" />
+                  <TextInput v-model="product.quantity" type="number" placeholder="الكمية" density="compact" />
                 </div>
                 <div>
-                  <TextInput v-model="product.unit_price" type="number" placeholder="سعر الوحدة" density="compact" :disabled="product.isAdded" />
+                  <TextInput v-model="product.unit_price" type="number" placeholder="سعر الوحدة" density="compact" />
                 </div>
               </div>
               <!-- Row 2: الخصم، الإجمالي، الاستخدام -->
@@ -421,14 +465,13 @@ const plusIconDisabled = `<svg width="16" height="16" viewBox="0 0 16 16" fill="
                     select-width="80px"
                     :select-items="discountTypeOptionsList"
                     select-placeholder="اختر"
-                    :disabled="product.isAdded"
                   />
                 </div>
                 <div>
                   <TextInput :model-value="calculateTotal(product)" type="number" placeholder="الإجمالي" density="compact" disabled />
                 </div>
                 <div>
-                  <SelectInput v-model="product.item_using" :items="itemUsingOptionsList" placeholder="الاستخدام" density="compact" item-title="title" item-value="value" :disabled="product.isAdded" />
+                  <SelectInput v-model="product.item_using" :items="itemUsingOptionsList" placeholder="الاستخدام" density="compact" item-title="title" item-value="value" />
                 </div>
               </div>
             </div>

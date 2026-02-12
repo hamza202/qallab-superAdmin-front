@@ -82,6 +82,9 @@ const visibleTabsCount = 6;
 // Products with their form data
 const productsList = ref<ProductToAdd[]>([]);
 
+// Track manually unchecked products (to prevent auto-check)
+const manuallyUnchecked = ref<Set<number>>(new Set());
+
 // Edit mode product
 const editProductData = ref<ProductToAdd | null>(null);
 
@@ -107,7 +110,7 @@ const displayedTabs = computed(() => {
   return categories.value.slice(0, visibleTabsCount);
 });
 
-// Computed: products filtered by active tab and search
+// Computed: products filtered by active tab and search (order is set on dialog open, not during typing)
 const filteredProducts = computed(() => {
   let filtered = productsList.value;
   
@@ -161,7 +164,7 @@ const fetchItems = async () => {
       supplierItems.value = res.data;
       categories.value = extractCategories(res.data);
 
-      productsList.value = res.data.map((item: SupplierItem) => {
+      const mappedProducts = res.data.map((item: SupplierItem) => {
         const existingProduct = props.existingProducts?.find(p => p.item_id === item.id);
         if (existingProduct) {
           return { ...existingProduct, isAdded: true };
@@ -184,6 +187,13 @@ const fetchItems = async () => {
           base.discount = null;
         }
         return base;
+      });
+
+      // Sort on dialog open: products with values (isAdded) come first
+      productsList.value = mappedProducts.sort((a: ProductToAdd, b: ProductToAdd) => {
+        if (a.isAdded && !b.isAdded) return -1;
+        if (!a.isAdded && b.isAdded) return 1;
+        return 0;
       });
 
       if (categories.value.length > 0) {
@@ -216,13 +226,13 @@ const toggleCategories = () => {
 };
 
 const toggleProduct = (product: ProductToAdd) => {
+  // Toggle isAdded state (mark/unmark for batch save)
   if (product.isAdded) {
-    // Remove product
+    // Unmark product and add to manually unchecked list
     product.isAdded = false;
-    // Emit updated list immediately
-    emit('saved', addedProducts.value);
+    manuallyUnchecked.value.add(product.item_id);
   } else {
-    // Add product (only if valid)
+    // Mark product as added (only if valid)
     if (canAddProduct(product)) {
       // Get unit name
       const unit = unitItemsList.value.find((u: any) => u.value === product.unit_id);
@@ -233,10 +243,31 @@ const toggleProduct = (product: ProductToAdd) => {
       product.transport_type_name = transport?.title || '';
       
       product.isAdded = true;
-      // Emit updated list
-      emit('saved', addedProducts.value);
+      // Remove from manually unchecked list
+      manuallyUnchecked.value.delete(product.item_id);
     }
   }
+  // Note: No emit here - will emit all at once when clicking "تم"
+};
+
+// Auto-check product when required fields are filled (unless manually unchecked)
+const shouldAutoCheck = (product: ProductToAdd): boolean => {
+  return canAddProduct(product) && !product.isAdded && !manuallyUnchecked.value.has(product.item_id);
+};
+
+// Check if product should show as checked (either manually or auto)
+const isProductChecked = (product: ProductToAdd): boolean => {
+  if (product.isAdded) return true;
+  if (shouldAutoCheck(product)) {
+    // Auto-fill names when auto-checking
+    const unit = unitItemsList.value.find((u: any) => u.value === product.unit_id);
+    product.unit_name = unit?.title || '';
+    const transport = packageTypeItemsList.value.find((t: any) => t.value === product.transport_type);
+    product.transport_type_name = transport?.title || '';
+    product.isAdded = true;
+    return true;
+  }
+  return false;
 };
 
 // Edit mode: update product
@@ -263,6 +294,7 @@ const resetForm = () => {
   searchQuery.value = '';
   showFullCategory.value = false;
   editProductData.value = null;
+  manuallyUnchecked.value.clear();
 };
 
 const closeDialog = () => {
@@ -274,7 +306,10 @@ const handleDone = () => {
   if (isEditMode.value) {
     handleEditSave();
   } else {
-    emit('saved', addedProducts.value);
+    // Only save products that are explicitly marked as added (isAdded = true)
+    const productsToSave = productsList.value.filter(p => p.isAdded);
+    
+    emit('saved', productsToSave);
     closeDialog();
   }
 };
@@ -496,7 +531,7 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
             <!-- Actions -->
             <div class="col-span-1 flex items-center justify-center gap-1">
               <ButtonWithIcon 
-                v-if="product.isAdded" 
+                v-if="isProductChecked(product)" 
                 :icon="checkIcon" 
                 icon-only 
                 color="success" 
@@ -505,13 +540,21 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
                 class="!h-full" 
               />
               <ButtonWithIcon 
-                v-else 
-                :icon="canAddProduct(product) ? plusIcon : plusIcon2" 
+                v-else-if="canAddProduct(product)" 
+                :icon="plusIcon" 
                 icon-only 
-                :color="canAddProduct(product) ? 'primary' : 'gray'" 
+                color="primary" 
+                variant="flat"
+                @click="toggleProduct(product)" 
+                class="!h-full" 
+              />
+              <ButtonWithIcon 
+                v-else 
+                :icon="plusIcon2" 
+                icon-only 
+                color="gray" 
                 variant="flat" 
-                @click="toggleProduct(product)"
-                :disabled="!canAddProduct(product)"
+                disabled
                 class="!h-full" 
               />
             </div>
@@ -528,7 +571,6 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
                   placeholder="الكمية" 
                   density="compact"
                   class="min-w-[170px]" 
-                  :disabled="product.isAdded"
                 />
               </div>
 
@@ -542,7 +584,6 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
                   class="min-w-[170px]" 
                   item-title="title" 
                   item-value="value" 
-                  :disabled="product.isAdded"
                 />
               </div>
 
@@ -554,7 +595,6 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
                   placeholder="سعر الوحدة" 
                   density="compact"
                   class="min-w-[170px]" 
-                  :disabled="product.isAdded"
                 />
               </div>
 
@@ -566,7 +606,6 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
                   placeholder="الخصم" 
                   density="compact"
                   class="min-w-[170px]" 
-                  :disabled="product.isAdded"
                 />
               </div>
 
@@ -578,7 +617,6 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
                   placeholder="عدد الرحلات" 
                   density="compact"
                   class="min-w-[170px]" 
-                  :disabled="product.isAdded"
                 />
               </div>
 
@@ -592,7 +630,6 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
                   class="min-w-[170px]" 
                   item-title="title" 
                   item-value="value" 
-                  :disabled="product.isAdded"
                 />
               </div>
 
@@ -604,7 +641,6 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
                   placeholder="عدد الناقلات"
                   density="compact" 
                   class="min-w-[170px]" 
-                  :disabled="product.isAdded"
                 />
               </div>
             </div>
