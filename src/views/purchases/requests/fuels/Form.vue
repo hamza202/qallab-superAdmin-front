@@ -233,7 +233,7 @@ const editingProduct = ref<ProductTableItem | null>(null);
 // Items endpoint for modal: same pattern as material-product (supplier items by supplier_id)
 const fuelsItemsEndpoint = computed(() =>
     formData.value.supplier_id
-        ? `/items/supplier-items?supplier_id=${formData.value.supplier_id}&with_category=true`
+        ? `/items/supplier-items?supplier_id=${formData.value.supplier_id}&material_type=2`
         : ''
 );
 
@@ -252,6 +252,9 @@ const handleProductSaved = (products: FuelProductToAdd[]) => {
         const existing = productTableItems.value.find(existing => existing.item_id === p.item_id);
         newItems.push({
             ...p,
+            // Recalculate names to ensure fresh data
+            transport_type_name: getFillingName(p.transport_type),
+            supply_type_name: supplyTypeItems.value.find((s: any) => s.value === p.supply_type)?.title || '',
             trip_no: p.trip_no ?? null,
             unit_price: p.unit_price ?? null,
             discount: p.discount ?? null,
@@ -276,6 +279,9 @@ const handleProductUpdated = (updatedProduct: FuelProductToAdd) => {
         const existingNotes = productTableItems.value[index].notes;
         productTableItems.value[index] = {
             ...updatedProduct,
+            // Ensure names are correct using local lookup
+            transport_type_name: getFillingName(updatedProduct.transport_type),
+            supply_type_name: supplyTypeItems.value.find((s: any) => s.value === updatedProduct.supply_type)?.title || '',
             trip_no: updatedProduct.trip_no ?? null,
             unit_price: updatedProduct.unit_price ?? null,
             discount: updatedProduct.discount ?? null,
@@ -579,10 +585,9 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
                         </div>
 
                         <div>
-                            <TextInput
+                            <PriceInput
                                 label="مدة التوريد"
                                 v-model="formData.supplyDuration"
-                                type="number"
                                 placeholder="أدخل المدة"
                                 density="comfortable"
                                 hide-details
@@ -590,7 +595,7 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
                                 <template #append-inner>
                                     <span class="text-gray-500 text-sm"> يوم </span>
                                 </template>
-                            </TextInput>
+                            </PriceInput>
                         </div>
 
                         <div>
@@ -746,6 +751,7 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
         <AddProductDialogFuels v-model="showAddProductDialog"
             :fillings-options="fillingsItems"
             :unit-items="unitItems"
+
             :supply-type-options="supplyTypeItems"
             :items-endpoint="fuelsItemsEndpoint"
             :edit-product="editingProduct"

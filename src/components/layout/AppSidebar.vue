@@ -522,7 +522,7 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
-                    طلبيات المشتريات</router-link>
+                    طلبيات مواد بناء اولية</router-link>
                 </li>
                 <li class="relative">
                   <router-link to="/purchases/receiving-docs/list" :class="[

@@ -219,18 +219,30 @@ const handleAddProduct = () => {
 };
 
 const handleProductSaved = (products: FuelProductToAdd[]) => {
-    const newItems: ProductTableItem[] = [];
-    products.forEach(p => {
-        const existing = productTableItems.value.find(existing => existing.item_id === p.item_id);
-        newItems.push({
+    // Build a set of item_ids coming from the dialog
+    const dialogItemIds = new Set(products.map(p => p.item_id));
+    
+    // Keep existing products that were NOT part of the dialog session
+    const preservedItems: ProductTableItem[] = productTableItems.value.filter(
+        existing => !dialogItemIds.has(existing.item_id)
+    );
+    
+    // Build the new/updated items from the dialog
+    const dialogItems: ProductTableItem[] = products.map(p => {
+        const existing = productTableItems.value.find(e => e.item_id === p.item_id);
+        return {
             ...p,
             trip_no: p.trip_no ?? null,
             unit_price: p.unit_price ?? null,
             discount: p.discount ?? null,
-            notes: existing?.notes || p.notes || ''
-        });
+            transport_type_name: getFillingName(p.transport_type) || getTransportTypeName(p.transport_type),
+            notes: existing?.notes || p.notes || '',
+            id: existing?.id ?? undefined, // Preserve the server-side ID for edit mode
+        };
     });
-    productTableItems.value = newItems;
+    
+    // Merge: preserved existing items + dialog items
+    productTableItems.value = [...preservedItems, ...dialogItems];
 };
 
 const handleEditProduct = (item: any) => {
@@ -745,7 +757,7 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
             :fillings-options="fillingsItems"
             :unit-items="unitItems"
             :supply-type-options="supplyTypeItems"
-            items-endpoint="/items/list?material_type=2"
+            items-endpoint="/items/supplier-items?material_type=2"
             :edit-product="editingProduct"
             :existing-products="productTableItems"
             @saved="handleProductSaved"

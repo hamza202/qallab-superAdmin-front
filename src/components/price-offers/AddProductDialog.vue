@@ -45,6 +45,7 @@ const props = defineProps<{
   variant?: 'purchases' | 'sales';
   /** عند true في المشتريات: عرض سعر الوحدة والخصم بدل عدد الرحلات/نوع الناقلة (مثل طلبات المشتريات) */
   showUnitPriceAndDiscount?: boolean;
+  itemsQueryParams?: Record<string, string | number>;
   editProduct?: ProductToAdd | null;
   existingProducts?: ProductToAdd[];
 }>();
@@ -156,9 +157,18 @@ const fetchItems = async () => {
   loading.value = true;
   try {
     const isPurchasesWithSupplier = !isSalesMode.value && props.supplierId != null;
-    const url = isPurchasesWithSupplier
+    let url = isPurchasesWithSupplier
       ? `/items/supplier-items?supplier_id=${props.supplierId}`
       : '/items/supplier-items';
+
+    if (props.itemsQueryParams) {
+      const params = new URLSearchParams();
+      Object.entries(props.itemsQueryParams).forEach(([key, value]) => {
+        params.append(key, String(value));
+      });
+      url += (url.includes('?') ? '&' : '?') + params.toString();
+    }
+    
     const res = await api.get<any>(url);
     if (Array.isArray(res.data)) {
       supplierItems.value = res.data;
@@ -565,9 +575,8 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
               </div>
               <!-- Quantity -->
               <div>
-                <TextInput 
-                  v-model="product.quantity" 
-                  type="number" 
+                <PriceInput 
+                  v-model="product.quantity"
                   placeholder="الكمية" 
                   density="compact"
                   class="min-w-[170px]" 
@@ -589,9 +598,8 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
 
               <!-- Unit Price (sales أو purchases مع showUnitPriceAndDiscount) -->
               <div v-if="showPricingFields">
-                <TextInput 
+                <PriceInput 
                   v-model="product.unit_price" 
-                  type="number" 
                   placeholder="سعر الوحدة" 
                   density="compact"
                   class="min-w-[170px]" 
@@ -600,9 +608,8 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
 
               <!-- Discount (sales أو purchases مع showUnitPriceAndDiscount) -->
               <div v-if="showPricingFields">
-                <TextInput 
+                <PriceInput 
                   v-model="product.discount" 
-                  type="number" 
                   placeholder="الخصم" 
                   density="compact"
                   class="min-w-[170px]" 
@@ -611,9 +618,8 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
 
               <!-- Delivery Count (trip_no) - purchases فقط بدون سعر/خصم -->
               <div v-if="!showPricingFields && requestType == 'raw_materials'">
-                <TextInput 
+                <PriceInput 
                   v-model="product.trip_no" 
-                  type="number" 
                   placeholder="عدد الرحلات" 
                   density="compact"
                   class="min-w-[170px]" 
@@ -635,9 +641,8 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
 
               <!-- Package Type (transport_no) - purchases فقط بدون سعر/خصم -->
               <div v-if="!showPricingFields && requestType == 'trips'">
-                <TextInput 
+                <PriceInput 
                   v-model="product.transport_no" 
-                  type="number" 
                   placeholder="عدد الناقلات"
                   density="compact" 
                   class="min-w-[170px]" 

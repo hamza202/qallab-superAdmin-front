@@ -1790,6 +1790,7 @@ const serviceTableItems = computed(() =>
     <!-- Add Product Dialog -->
     <AddProductDialog
       v-model="showAddProductDialog"
+      :items-query-params="{ material_type: 1 }"
       request-type="raw_materials"
       show-unit-price-and-discount
       :transport-types="transportTypeItems"
