@@ -599,10 +599,9 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
                         </div>
 
                         <div>
-                            <TextInput
+                            <PriceInput
                                 label="مدة التسليم"
                                 v-model="formData.deliveryDuration"
-                                type="number"
                                 placeholder="أدخل المدة"
                                 density="comfortable"
                                 hide-details
@@ -610,7 +609,7 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
                                 <template #append-inner>
                                     <span class="text-gray-500 text-sm"> يوم </span>
                                 </template>
-                            </TextInput>
+                            </PriceInput>
                         </div>
                     </div>
                 </v-form>

@@ -1503,7 +1503,6 @@ const serviceTableItems = computed(() =>
                 v-model="formData.execution_period"
                 label="مدة التنفيذ"
                 placeholder="أدخل المدة بالأيام"
-                type="number"
                 :rules="[required()]"
                 density="comfortable"
               >
@@ -1527,23 +1526,21 @@ const serviceTableItems = computed(() =>
             </div>
             <!-- Number of Transport Movements -->
             <div>
-              <TextInput
+              <PriceInput
                 v-model="formData.transport_movements"
                 placeholder="أدخل العدد"
                 label="عدد مركبات النقل"
-                type="number"
                 density="comfortable"
               />
             </div>
 
             <!-- Number of Daily Trips -->
             <div>
-              <TextInput
+              <PriceInput
                 v-model="formData.daily_trips"
                 placeholder="أدخل العدد"
                 label="عدد الرحلات الكلي"
                 :rules="[required()]"
-                type="number"
                 density="comfortable"
               />
             </div>

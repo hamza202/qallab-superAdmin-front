@@ -258,10 +258,6 @@ const existingProductsForDialog = computed<FuelQuotationProductToAdd[]>(() =>
 );
 
 const handleAddProduct = () => {
-    if (!formData.value.customer_id) {
-        warning('يجب عليك اختيار اسم العميل أولاً');
-        return;
-    }
     editingProduct.value = null;
     showAddProductDialog.value = true;
 };
@@ -875,7 +871,7 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
             :item-using-options="itemUsingItems"
             :unit-items="unitItems"
             :discount-type-options="discountTypeItems"
-            items-endpoint="/items/supplier-items"
+            items-endpoint="/items/supplier-items?material_type=2"
             :edit-product="editProductForDialog"
             :existing-products="existingProductsForDialog"
             @saved="handleProductSaved"
