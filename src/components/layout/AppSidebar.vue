@@ -319,7 +319,7 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
-                    طلبيات المبيعات</router-link>
+                    طلبيات بناء مواد اولية</router-link>
                 </li>
                 <li class="relative">
                   <router-link to="/sales/so-pickups/list" :class="[
