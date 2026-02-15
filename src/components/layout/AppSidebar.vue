@@ -525,6 +525,19 @@
                     طلبيات مواد بناء اولية</router-link>
                 </li>
                 <li class="relative">
+                  <router-link to="/purchases/orders/fuels/list" :class="[
+                    isMenuItemActive('/purchases/orders/fuels')
+                      ? 'font-bold text-qallab-yellow'
+                      : 'text-white hover:text-qallab-yellow',
+                  ]">
+                    طلبيات محروقات</router-link>
+                </li>
+              </ul>
+              <h2 class="text-sm font-medium leading-5 my-2">
+                وثائق الأستلام
+              </h2>
+              <ul class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
+                  <li class="relative">
                   <router-link to="/purchases/receiving-docs/list" :class="[
                     isMenuItemActive('/purchases/receiving-docs')
                       ? 'font-bold text-qallab-yellow'

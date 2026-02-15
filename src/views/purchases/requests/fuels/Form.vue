@@ -478,7 +478,7 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
             <!-- Page Header (كود العرض #124098) -->
             <TopHeader :icon="fileQuestionIcon" title-key="pages.PurchasesRequestsFuels.FormTitle"
                 description-key="pages.PurchasesRequestsFuels.FormDescription" :show-action="false"
-                :code="isEditMode ? (formData.code ? '#' + formData.code : '') : '#124098'" :code-icon="fileIcon" />
+                :code="isEditMode ? (formData.code ? '#' + formData.code : '') : ''" :code-icon="fileIcon" />
 
             <!-- البيانات الأساسية -->
             <div class="p-6 bg-white rounded-3xl border !border-gray-100">

@@ -217,6 +217,49 @@ export const purchasesRoutes: RouteRecordRaw[] = [
     ],
   },
   {
+    path: "/purchases/orders/fuels",
+    name: "OrdersFuels",
+    redirect: "/purchases/orders/fuels/list",
+    children: [
+      {
+        path: "list",
+        name: "OrdersFuelsList",
+        component: () =>
+          import("@/views/purchases/orders/fuels/List.vue"),
+        meta: {
+          title: "pages.OrdersFuels.title",
+        },
+      },
+      {
+        path: "create",
+        name: "OrdersFuelsCreate",
+        component: () =>
+          import("@/views/purchases/orders/fuels/Form.vue"),
+        meta: {
+          title: "pages.OrdersFuels.title",
+        },
+      },
+      {
+        path: "edit/:id",
+        name: "OrdersFuelsEdit",
+        component: () =>
+          import("@/views/purchases/orders/fuels/Form.vue"),
+        meta: {
+          title: "pages.OrdersFuels.edit",
+        },
+      },
+      {
+        path: "view/:id",
+        name: "OrdersFuelsView",
+        component: () =>
+          import("@/views/purchases/orders/fuels/View.vue"),
+        meta: {
+          title: "pages.OrdersFuels.view",
+        },
+      },
+    ],
+  },
+  {
     path: "/purchases/receiving-docs",
     name: "ReceivingDocs",
     redirect: "/purchases/receiving-docs/list",
