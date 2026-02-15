@@ -32,7 +32,7 @@ const CALENDAR_ICON = `<svg width="17" height="19" viewBox="0 0 17 19" fill="non
 const props = withDefaults(defineProps<Props>(), {
   color: "primary-300",
   density: "comfortable",
-  hideDetails: true,
+  hideDetails: false,
   clearable: false,
   labelClass: "",
   showCalendarIcon: true,
