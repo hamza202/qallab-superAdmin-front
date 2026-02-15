@@ -102,7 +102,7 @@
                     <div class="bg-primary-50 px-6 py-4">
                         <div class="flex items-center gap-2 text-primary-600 font-bold">
                             <span class="w-[18px]" v-html="fileCheckIcon"></span>
-                            <h2 class="text-base">جدول عناصر فاتورة المبيعات</h2>
+                            <h2 class="text-base">جدول عناصر فاتورة المشتريات</h2>
                         </div>
                     </div>
 
