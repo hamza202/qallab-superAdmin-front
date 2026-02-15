@@ -1076,6 +1076,7 @@ const serviceTableItems = computed(() =>
         <!-- Add Product Dialog -->
         <AddProductDialog v-model="showAddProductDialog" request-type="raw_materials"
             variant="sales"
+            :items-query-params="{ material_type: 1 }"
             :transport-types="transportTypeItems" :unit-items="unitItems" :customer-id="formData.customer_id"
             :edit-product="editingProduct" :existing-products="productTableItems" @saved="handleProductSaved"
             @product-updated="handleProductUpdated" />

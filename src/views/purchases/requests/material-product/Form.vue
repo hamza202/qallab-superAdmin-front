@@ -245,7 +245,7 @@ const handleAddProduct = () => {
     showAddProductDialog.value = true;
 };
 
-const handleProductSaved = (products: ProductTableItem[]) => {
+const handleProductSaved = (products: any[]) => {
     // Merge new products while preserving existing notes
     const newItems: ProductTableItem[] = [];
     
@@ -254,8 +254,17 @@ const handleProductSaved = (products: ProductTableItem[]) => {
         const existing = productTableItems.value.find(existing => existing.item_id === p.item_id);
         
         newItems.push({
-            ...p,
-            notes: existing?.notes || p.notes || '' // Preserve existing notes
+            item_id: p.item_id,
+            item_name: p.item_name,
+            unit_id: p.unit_id,
+            unit_name: p.unit_name,
+            quantity: p.quantity,
+            transport_type: p.transport_type ?? null,
+            trip_no: p.trip_no ?? null,
+            transport_type_name: getTransportTypeName(p.transport_type),
+            notes: existing?.notes || p.notes || '', // Preserve existing notes
+            id: p.id,
+            isAdded: p.isAdded
         });
     });
     
@@ -271,14 +280,23 @@ const handleEditProduct = (item: any) => {
     }
 };
 
-const handleProductUpdated = (updatedProduct: ProductTableItem) => {
+const handleProductUpdated = (updatedProduct: any) => {
     const index = productTableItems.value.findIndex(p => p.item_id === updatedProduct.item_id);
     if (index !== -1) {
         // Preserve the notes from the table
         const existingNotes = productTableItems.value[index].notes;
         productTableItems.value[index] = {
-            ...updatedProduct,
-            notes: existingNotes || updatedProduct.notes || ''
+            item_id: updatedProduct.item_id,
+            item_name: updatedProduct.item_name,
+            unit_id: updatedProduct.unit_id,
+            unit_name: updatedProduct.unit_name,
+            quantity: updatedProduct.quantity,
+            transport_type: updatedProduct.transport_type ?? null,
+            trip_no: updatedProduct.trip_no ?? null,
+            transport_type_name: getTransportTypeName(updatedProduct.transport_type),
+            notes: existingNotes || updatedProduct.notes || '',
+            id: updatedProduct.id,
+            isAdded: updatedProduct.isAdded
         };
     }
     editingProduct.value = null;
@@ -436,17 +454,16 @@ const handleSubmit = async () => {
     try {
         const fd = buildFormData();
         
-        let response;
         if (isEditMode.value && routeId.value) {
             // Edit mode - POST with _method: PUT and UUID in URL
-            response = await api.post(`/purchases/building-materials/${routeId.value}`, fd, {
+            await api.post(`/purchases/building-materials/${routeId.value}`, fd, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
             });
         } else {
             // Create mode - POST request
-            response = await api.post('/purchases/building-materials', fd, {
+            await api.post('/purchases/building-materials', fd, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
@@ -465,9 +482,7 @@ const handleSubmit = async () => {
     }
 };
 
-const handleConvertToPrice = () => {
-    console.log('Convert to price offer');
-};
+
 
 const handleLocationSelected = (location: { latitude: string; longitude: string; address: string }) => {
     formData.value.target_latitude = location.latitude;
@@ -826,6 +841,7 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
             :supplier-id="formData.supplier_id"
             :edit-product="editingProduct"
             :existing-products="productTableItems"
+            :items-query-params="{ material_type: 1 }"
             @saved="handleProductSaved"
             @product-updated="handleProductUpdated" />
 

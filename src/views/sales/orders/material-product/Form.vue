@@ -1778,6 +1778,7 @@ const serviceTableItems = computed(() =>
       request-type="raw_materials"
       show-unit-price-and-discount
       :transport-types="transportTypeItems"
+      :items-query-params="{ material_type: 1 }"
       :unit-items="unitItems"
       :edit-product="editingProduct"
       :existing-products="productTableItems"

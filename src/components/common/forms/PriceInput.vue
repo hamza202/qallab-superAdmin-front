@@ -123,6 +123,7 @@ const rialIcon = `<svg width="13" height="15" viewBox="0 0 13 15" fill="none" xm
 .price-input :deep(input[type="number"]::-webkit-outer-spin-button),
 .price-input :deep(input[type="number"]::-webkit-inner-spin-button) {
     -webkit-appearance: none;
+    appearance: none;
     margin: 0;
 }
 
