@@ -108,6 +108,102 @@
       "list": "Roles List",
       "create": "Add Role",
       "edit": "Edit Role"
+    },
+    "OrdersMaterialProduct": {
+      "title": "Purchase Orders Table",
+      "description": "Manage purchase orders",
+      "FormTitle": "Purchase Order - Building Materials",
+      "FormDescription": "Create purchase order for building materials",
+      "edit": "Edit Purchase Order"
+    },
+    "SalesOrdersMaterialProduct": {
+      "pickupTitle": "Add Delivery Appointment",
+      "pickupDescr": "Add a delivery appointment booking action"
+    },
+    "SalesSoPickups": {
+      "title": "Delivery Appointments",
+      "description": "Manage delivery appointments",
+      "edit": "Edit delivery appointment",
+      "view": "View delivery appointment",
+      "viewPage": {
+        "retry": "Retry",
+        "headerSubtitle": "Delivery appointment details and related information",
+        "breadcrumb": {
+          "sales": "Sales",
+          "pickupsList": "Delivery Appointments"
+        },
+        "orderInfo": {
+          "title": "Order Information",
+          "transportCompany": "Transport Company",
+          "date": "Date",
+          "coordinatesSendCount": "Coordinates send count",
+          "tripTiming": "Trip timing",
+          "loadingResponsible": "Loading responsible",
+          "driver": "Driver",
+          "tripCost": "Trip cost",
+          "unloadingLocation": "Unloading location",
+          "loadingLocation": "Loading location",
+          "unloadingResponsible": "Unloading responsible",
+          "vehicleCount": "Vehicle count",
+          "vehicleType": "Vehicle type",
+          "notes": "Notes"
+        },
+        "productsTable": {
+          "title": "Products",
+          "productImage": "Product image",
+          "productName": "Product name",
+          "quantity": "Quantity",
+          "unit": "Unit",
+          "vehicleType": "Carrier type",
+          "tripsCount": "Carriers count",
+          "notes": "Notes"
+        },
+        "errors": {
+          "loadFailed": "Failed to load delivery appointment details"
+        }
+      }
+    },
+    "ReceivingDocs": {
+      "title": "Receiving Documents Table",
+      "description": "Enables you to manage purchase orders",
+      "edit": "Edit Receiving Document",
+      "view": "View Receiving Document"
+    },
+    "SalesTrips": {
+      "title": "Trips",
+      "description": "Allows you to manage trips",
+      "list": "Trips List",
+      "create": "Add Trip",
+      "edit": "Edit Trip"
+    },
+    "purchasesLogistics": {
+      "title": "Logistics Service Requests",
+      "description": "Allows you to manage logistics service requests",
+      "list": "Logistics Service Requests List",
+      "create": "Create Logistics Service Request",
+      "edit": "Edit Logistics Service Request",
+      "view": "View Logistics Service Request"
+    },
+    "QuotationsFuels": {
+      "title": "Fuel Quotations",
+      "description": "View and manage fuel quotations",
+      "view": "View fuel quotation"
+    },
+    "PurchasesRequestsFuels": {
+      "title": "Purchase Requests for Fuel Quotations",
+      "description": "View and manage purchase requests for fuel quotations",
+      "FormTitle": "Purchase Request for Fuel Quotations",
+      "FormDescription": "Add purchase request for fuel quotations",
+      "edit": "Edit purchase request for fuel quotations",
+      "view": "View purchase request for fuel quotations"
+    },
+    "PurchasesRequestsMaterialProduct": {
+      "title": "Purchase Requests for Material Product Quotations",
+      "description": "View and manage purchase requests for material product quotations",
+      "FormTitle": "Purchase Request for Material Product Quotations",
+      "FormDescription": "Add purchase request for material product quotations",
+      "edit": "Edit purchase request for material product quotations",
+      "view": "View purchase request for material product quotations"
     }
   }
 }

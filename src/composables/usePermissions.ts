@@ -57,8 +57,10 @@ const routePermissionMap: Record<string, { group: string; key: string }> = {
     '/customers': { group: 'sales', key: 'customers' },
     '/sales/invoices': { group: 'sales', key: 'sales-invoices' },
     '/sales/orders': { group: 'sales', key: 'sales-orders' },
+    '/sales/orders/material-product': { group: 'sales', key: 'sales-orders' },
     '/sales/contracts': { group: 'sales', key: 'contracts' },
     '/sales/clearing': { group: 'sales', key: 'clearing' },
+    // '/sales/price-offer-material-product': { group: 'sales', key: 'sales-building-material-price-offer' },
 
     // Projects
     '/projects/list': { group: 'projects', key: 'projects' },
@@ -67,6 +69,7 @@ const routePermissionMap: Record<string, { group: string; key: string }> = {
     // Purchases
     '/suppliers': { group: 'purchases', key: 'suppliers' },
     '/suppliers/supplier-settlement': { group: 'purchases', key: 'supplier-settlements' },
+    // '/purchases/requests/material-product': { group: 'purchases', key: 'purchases-building-material-price-requests' },
 
     // Finance
     '/vouchers/list': { group: 'finance', key: 'financial-dashboard' },
@@ -112,6 +115,8 @@ const routePermissionMap: Record<string, { group: string; key: string }> = {
     '/sales/currencies': { group: 'settings', key: 'currencies' },
     '/settings/codes': { group: 'settings', key: 'codes-settings' },
     '/settings/account-types': { group: 'settings', key: 'account-types' },
+    '/settings/system-statuses': { group: 'settings', key: 'system-statuses' },
+    '/settings/doc-status-transitions': { group: 'settings', key: 'document-status-transitions' },
 };
 
 export function usePermissions() {
@@ -203,6 +208,7 @@ export function usePermissions() {
     const canViewSalesOrders = computed(() => hasPermission('sales', 'sales-orders'));
     const canViewContracts = computed(() => hasPermission('sales', 'contracts'));
     const canViewClearing = computed(() => hasPermission('sales', 'clearing'));
+    const canViewBuildingMaterialPriceOffer = computed(() => hasPermission('sales', 'sales-building-material-price-offer'));
 
     /**
      * Check if user can view projects related items
@@ -215,6 +221,7 @@ export function usePermissions() {
      */
     const canViewSuppliers = computed(() => hasPermission('purchases', 'suppliers'));
     const canViewSupplierSettlements = computed(() => hasPermission('purchases', 'supplier-settlements'));
+    const canViewBuildingMaterialPriceRequests = computed(() => hasPermission('purchases', 'purchases-building-material-price-requests'));
 
     /**
      * Check if user can view finance related items
@@ -262,6 +269,8 @@ export function usePermissions() {
     const canViewAdvancedSettings = computed(() => hasPermission('settings', 'advanced-settings'));
     const canViewCodesSettings = computed(() => hasPermission('settings', 'codes-settings'));
     const canViewAccountTypes = computed(() => hasPermission('settings', 'account-types'));
+    const canViewSystemStatuses = computed(() => hasPermission('settings', 'system-statuses'));
+    const canViewDocStatusTransitions = computed(() => hasPermission('settings', 'document-status-transitions'));
 
     /**
      * Check if any product permission is available
@@ -294,6 +303,7 @@ export function usePermissions() {
         canViewSalesInvoices.value ||
         canViewSalesOrders.value ||
         canViewContracts.value ||
+        canViewBuildingMaterialPriceOffer.value ||
         canViewClearing.value
     );
 
@@ -310,7 +320,8 @@ export function usePermissions() {
      */
     const hasAnyPurchasesPermission = computed(() =>
         canViewSuppliers.value ||
-        canViewSupplierSettlements.value
+        canViewSupplierSettlements.value || 
+        canViewBuildingMaterialPriceRequests.value
     );
 
     /**
@@ -365,7 +376,9 @@ export function usePermissions() {
         canViewCurrencies.value ||
         canViewAdvancedSettings.value ||
         canViewCodesSettings.value ||
-        canViewAccountTypes.value
+        canViewAccountTypes.value || 
+        canViewDocStatusTransitions.value ||
+        canViewSystemStatuses.value
     );
 
     return {
@@ -399,6 +412,7 @@ export function usePermissions() {
         canViewSalesOrders,
         canViewContracts,
         canViewClearing,
+        canViewBuildingMaterialPriceOffer,
         hasAnySalesPermission,
 
         // Projects permissions
@@ -409,6 +423,7 @@ export function usePermissions() {
         // Purchases permissions
         canViewSuppliers,
         canViewSupplierSettlements,
+        canViewBuildingMaterialPriceRequests,
         hasAnyPurchasesPermission,
 
         // Finance permissions
@@ -452,6 +467,8 @@ export function usePermissions() {
         canViewAdvancedSettings,
         canViewCodesSettings,
         canViewAccountTypes,
+        canViewSystemStatuses,
+        canViewDocStatusTransitions,
         hasAnySettingsPermission,
     };
 }

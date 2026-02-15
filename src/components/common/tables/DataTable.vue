@@ -27,6 +27,7 @@ interface Props {
   showView?: boolean;
   confirmDelete?: boolean;
   loading?: boolean;
+  smallButtons?: boolean;
   forceShowEdit?: boolean;   // Force show edit without checking item.actions
   forceShowDelete?: boolean; // Force show delete without checking item.actions
   forceShowView?: boolean;   // Force show view without checking item.actions
@@ -38,6 +39,7 @@ const props = withDefaults(defineProps<Props>(), {
   showActions: true,
   showDelete: true,
   showEdit: true,
+  smallButtons: false,
   showView: true,
   confirmDelete: true,
   loading: false,
@@ -196,8 +198,10 @@ const eyeIcon = `<svg width="22" height="16" viewBox="0 0 22 16" fill="none" xml
           </th>
 
           <!-- Dynamic Headers (original order for RTL) -->
-          <th v-for="header in headers" :key="header.key" class="!font-bold !text-gray-600 !text-xs !bg-gray-50 whitespace-nowrap"
-            :style="header.width ? { width: header.width } : {}">
+          <th v-for="header in headers" :key="header.key"
+            class="!font-bold !text-gray-600 !text-xs !bg-gray-50 whitespace-nowrap"
+            :style="header.width ? { width: header.width } : {}"
+            :class="header.align ? `text-${header.align}` : ''">
             {{ header.title }}
           </th>
 
@@ -254,7 +258,10 @@ const eyeIcon = `<svg width="22" height="16" viewBox="0 0 22 16" fill="none" xml
             <!-- Date Formatting for created_at, updated_at, etc. -->
             <template
               v-else-if="header.key === 'created_at' || header.key === 'updated_at' || header.key.includes('_at')">
-              <span class="text-sm text-gray-600 whitespace-nowrap">{{ appStore.formatDate(item[header.key], { format: 'short' })
+              <span class="text-sm text-gray-600 whitespace-nowrap">{{ appStore.formatDate(item[header.key], {
+                format:
+                  'short'
+              })
               }}</span>
             </template>
 
@@ -266,24 +273,26 @@ const eyeIcon = `<svg width="22" height="16" viewBox="0 0 22 16" fill="none" xml
 
           <!-- Actions Column (Left side for RTL) -->
           <td v-if="showActions" class="!py-4 !bg-white">
-            <!-- Custom Actions Slot -->
-            <template v-if="$slots['item.actions']">
-              <slot name="item.actions" :item="item" />
-            </template>
-            <!-- Default Actions -->
-            <div v-else class="flex items-center gap-1">
-              <v-btn icon variant="text" v-if="showView && (forceShowView || item.actions?.can_view)" size="small"
-                @click="handleView(item)">
-                <span v-html="eyeIcon"></span>
-              </v-btn>
-              <v-btn icon variant="text" v-if="showEdit && (forceShowEdit || item.actions?.can_update)" color="primary" size="small"
-                @click="handleEdit(item)">
-                <span v-html="editIcon"></span>
-              </v-btn>
-              <v-btn icon variant="text" v-if="showDelete && (forceShowDelete || item.actions?.can_delete)" size="small" color="error"
-                @click="handleDelete(item)">
-                <span v-html="trashIcon"></span>
-              </v-btn>
+            <div class="flex items-center gap-1">
+              <!-- Custom Actions Slot -->
+              <template v-if="$slots['item.actions']">
+                <slot name="item.actions" :item="item" />
+              </template>
+              <!-- Default Actions -->
+              <div class="flex items-center gap-1">
+                <v-btn icon variant="text" v-if="showView && (forceShowView || item.actions?.can_view)"
+                  :size="smallButtons ? 'x-small' : 'small'" @click="handleView(item)">
+                  <span v-html="eyeIcon"></span>
+                </v-btn>
+                <v-btn icon variant="text" v-if="showEdit && (forceShowEdit || item.actions?.can_update)"
+                  color="primary" :size="smallButtons ? 'x-small' : 'small'" @click="handleEdit(item)">
+                  <span v-html="editIcon"></span>
+                </v-btn>
+                <v-btn icon variant="text" v-if="showDelete && (forceShowDelete || item.actions?.can_delete)"
+                  :size="smallButtons ? 'x-small' : 'small'" color="error" @click="handleDelete(item)">
+                  <span v-html="trashIcon"></span>
+                </v-btn>
+              </div>
             </div>
           </td>
         </tr>

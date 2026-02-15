@@ -65,6 +65,13 @@ const handleKeydown = (e: KeyboardEvent) => {
     if (!props.allowNegative && e.key === '-') {
         e.preventDefault();
     }
+    // Prevent arrow down from going below 0
+    if (!props.allowNegative && e.key === 'ArrowDown') {
+        const currentValue = Number(props.modelValue) || 0;
+        if (currentValue <= 0) {
+            e.preventDefault();
+        }
+    }
 };
 
 const handleWheel = (e: WheelEvent) => {
@@ -105,6 +112,7 @@ const rialIcon = `<svg width="13" height="15" viewBox="0 0 13 15" fill="none" xm
                 <span v-if="keepCurrencyVisible && currency && !showCurrencyOnLeft" class="text-xs text-gray-500">{{
                     currency }}</span>
                 <span v-if="showRialIcon" v-html="rialIcon"></span>
+                <slot name="append-inner"></slot>
             </template>
         </v-text-field>
     </div>
@@ -115,6 +123,7 @@ const rialIcon = `<svg width="13" height="15" viewBox="0 0 13 15" fill="none" xm
 .price-input :deep(input[type="number"]::-webkit-outer-spin-button),
 .price-input :deep(input[type="number"]::-webkit-inner-spin-button) {
     -webkit-appearance: none;
+    appearance: none;
     margin: 0;
 }
 

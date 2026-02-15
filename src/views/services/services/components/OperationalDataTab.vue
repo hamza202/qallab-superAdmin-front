@@ -4,8 +4,8 @@ import DatePickerInput from '@/components/common/forms/DatePickerInput.vue';
 
 // Available languages
 const availableLanguages = ref([
-  { code: "en", name: "En", flag: "/img/en.svg", dir: "ltr" as const },
-  { code: "ar", name: "AR", flag: "/img/sa.svg", dir: "rtl" as const },
+    { code: "en", name: "En", flag: "/img/en.svg", dir: "ltr" as const },
+    { code: "ar", name: "AR", flag: "/img/sa.svg", dir: "rtl" as const },
 ])
 
 const props = defineProps<{
@@ -57,17 +57,20 @@ const handleFileUpload = (event: any) => {
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="mb-6">
                     <label class="block text-sm font-semibold text-gray-900 mb-2">هل تحتاج موعد؟</label>
-                    <v-radio-group v-model="formData.requires_scheduling" inline hide-details @update:model-value="updateFormData">
+                    <v-radio-group v-model="formData.requires_scheduling" inline hide-details
+                        @update:model-value="updateFormData">
                         <v-radio :value="true" color="primary">
                             <template #label>
-                                <span :class="formData.requires_scheduling ? 'text-primary font-semibold' : 'text-gray-600'">
+                                <span
+                                    :class="formData.requires_scheduling ? 'text-primary font-semibold' : 'text-gray-600'">
                                     نعم
                                 </span>
                             </template>
                         </v-radio>
                         <v-radio :value="false" color="primary">
                             <template #label>
-                                <span :class="!formData.requires_scheduling ? 'text-primary font-semibold' : 'text-gray-600'">
+                                <span
+                                    :class="!formData.requires_scheduling ? 'text-primary font-semibold' : 'text-gray-600'">
                                     لا
                                 </span>
                             </template>
@@ -75,18 +78,26 @@ const handleFileUpload = (event: any) => {
                     </v-radio-group>
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-gray-900 mb-2">مدة الخدمة</label>
-                    <v-text-field v-model="formData.service_duration" type="number" variant="outlined" :rules="[numeric(), positive()]"
-                        density="comfortable" placeholder="أدخل المدة" @update:model-value="updateFormData">
+                    <!-- <label class="block text-sm font-semibold text-gray-900 mb-2">مدة الخدمة</label>
+                    <v-text-field v-model="formData.service_duration" type="number" variant="outlined"
+                        :rules="[numeric(), positive()]" density="comfortable" placeholder="أدخل المدة"
+                        @update:model-value="updateFormData">
                         <template #append-inner>
                             <v-divider vertical class="mx-2" />
                             <div @mousedown.stop @click.stop>
-                                <v-select v-model="formData.service_duration_unit" placeholder="اختر" :items="durationUnitItems"
-                                    variant="plain" density="compact" hide-details class="inner-select"
-                                    style="width: 100px; min-width: 100px;" @update:model-value="updateFormData" />
+                                <v-select v-model="formData.service_duration_unit" placeholder="اختر"
+                                    :items="durationUnitItems" variant="plain" density="compact" hide-details
+                                    class="inner-select" style="width: 100px; min-width: 100px;"
+                                    @update:model-value="updateFormData" />
                             </div>
                         </template>
-                    </v-text-field>
+                    </v-text-field> -->
+                    <TextInputWithSelect v-model="formData.service_duration"
+                        v-model:selectValue="formData.service_duration_unit" label="مدة الخدمة" placeholder="أدخل المدة"
+                        type="number" :rules="[numeric(), positive()]" :select-items="durationUnitItems"
+                        select-placeholder="اختر" select-width="100px" @update:model-value="updateFormData"
+                        @update:select-value="updateFormData" />
+
                 </div>
             </div>
         </div>
@@ -97,17 +108,20 @@ const handleFileUpload = (event: any) => {
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
                     <label class="block text-sm font-semibold text-gray-900 mb-2">تتطلب موافقة</label>
-                    <v-radio-group v-model="formData.requires_approval" inline hide-details @update:model-value="updateFormData">
+                    <v-radio-group v-model="formData.requires_approval" inline hide-details
+                        @update:model-value="updateFormData">
                         <v-radio :value="true" color="primary">
                             <template #label>
-                                <span :class="formData.requires_approval ? 'text-primary font-semibold' : 'text-gray-600'">
+                                <span
+                                    :class="formData.requires_approval ? 'text-primary font-semibold' : 'text-gray-600'">
                                     نعم
                                 </span>
                             </template>
                         </v-radio>
                         <v-radio :value="false" color="primary">
                             <template #label>
-                                <span :class="!formData.requires_approval ? 'text-primary font-semibold' : 'text-gray-600'">
+                                <span
+                                    :class="!formData.requires_approval ? 'text-primary font-semibold' : 'text-gray-600'">
                                     لا
                                 </span>
                             </template>
@@ -116,7 +130,8 @@ const handleFileUpload = (event: any) => {
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-900 mb-2">قابلة للمقايضة</label>
-                    <v-radio-group v-model="formData.is_barter" inline hide-details @update:model-value="updateFormData">
+                    <v-radio-group v-model="formData.is_barter" inline hide-details
+                        @update:model-value="updateFormData">
                         <v-radio :value="true" color="primary">
                             <template #label>
                                 <span :class="formData.is_barter ? 'text-primary font-semibold' : 'text-gray-600'">
@@ -135,17 +150,20 @@ const handleFileUpload = (event: any) => {
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-900 mb-2">قابلة للتجزئة</label>
-                    <v-radio-group v-model="formData.is_partial_allowed" inline hide-details @update:model-value="updateFormData">
+                    <v-radio-group v-model="formData.is_partial_allowed" inline hide-details
+                        @update:model-value="updateFormData">
                         <v-radio :value="true" color="primary">
                             <template #label>
-                                <span :class="formData.is_partial_allowed ? 'text-primary font-semibold' : 'text-gray-600'">
+                                <span
+                                    :class="formData.is_partial_allowed ? 'text-primary font-semibold' : 'text-gray-600'">
                                     نعم
                                 </span>
                             </template>
                         </v-radio>
                         <v-radio :value="false" color="primary">
                             <template #label>
-                                <span :class="!formData.is_partial_allowed ? 'text-primary font-semibold' : 'text-gray-600'">
+                                <span
+                                    :class="!formData.is_partial_allowed ? 'text-primary font-semibold' : 'text-gray-600'">
                                     لا
                                 </span>
                             </template>
@@ -155,7 +173,8 @@ const handleFileUpload = (event: any) => {
 
                 <div>
                     <label class="block text-sm font-semibold text-gray-900 mb-2">متاحة للبيع</label>
-                    <v-radio-group v-model="formData.sales_enabled" inline hide-details @update:model-value="updateFormData">
+                    <v-radio-group v-model="formData.sales_enabled" inline hide-details
+                        @update:model-value="updateFormData">
                         <v-radio :value="true" color="primary">
                             <template #label>
                                 <span :class="formData.sales_enabled ? 'text-primary font-semibold' : 'text-gray-600'">
@@ -175,17 +194,20 @@ const handleFileUpload = (event: any) => {
 
                 <div>
                     <label class="block text-sm font-semibold text-gray-900 mb-2">متاحة للشراء</label>
-                    <v-radio-group v-model="formData.purchase_enabled" inline hide-details @update:model-value="updateFormData">
+                    <v-radio-group v-model="formData.purchase_enabled" inline hide-details
+                        @update:model-value="updateFormData">
                         <v-radio :value="true" color="primary">
                             <template #label>
-                                <span :class="formData.purchase_enabled ? 'text-primary font-semibold' : 'text-gray-600'">
+                                <span
+                                    :class="formData.purchase_enabled ? 'text-primary font-semibold' : 'text-gray-600'">
                                     نعم
                                 </span>
                             </template>
                         </v-radio>
                         <v-radio :value="false" color="primary">
                             <template #label>
-                                <span :class="!formData.purchase_enabled ? 'text-primary font-semibold' : 'text-gray-600'">
+                                <span
+                                    :class="!formData.purchase_enabled ? 'text-primary font-semibold' : 'text-gray-600'">
                                     لا
                                 </span>
                             </template>
@@ -194,17 +216,20 @@ const handleFileUpload = (event: any) => {
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-900 mb-2">متاحة للمشاريع</label>
-                    <v-radio-group v-model="formData.project_enabled" inline hide-details @update:model-value="updateFormData">
+                    <v-radio-group v-model="formData.project_enabled" inline hide-details
+                        @update:model-value="updateFormData">
                         <v-radio :value="true" color="primary">
                             <template #label>
-                                <span :class="formData.project_enabled ? 'text-primary font-semibold' : 'text-gray-600'">
+                                <span
+                                    :class="formData.project_enabled ? 'text-primary font-semibold' : 'text-gray-600'">
                                     نعم
                                 </span>
                             </template>
                         </v-radio>
                         <v-radio :value="false" color="primary">
                             <template #label>
-                                <span :class="!formData.project_enabled ? 'text-primary font-semibold' : 'text-gray-600'">
+                                <span
+                                    :class="!formData.project_enabled ? 'text-primary font-semibold' : 'text-gray-600'">
                                     لا
                                 </span>
                             </template>
@@ -223,7 +248,8 @@ const handleFileUpload = (event: any) => {
             <h3 class="text-lg font-bold text-gray-900 mb-4">بيانات إضافية</h3>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <TextareaInput v-model="formData.notes" label="ملاحظات" placeholder="ملاحظات" :rows="4" :hide-details="true" @update:model-value="updateFormData" />
+                <TextareaInput v-model="formData.notes" label="ملاحظات" placeholder="ملاحظات" :rows="4"
+                    :hide-details="true" @update:model-value="updateFormData" />
 
                 <!-- <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2">مستندات مرفقة</label>
@@ -249,12 +275,10 @@ const handleFileUpload = (event: any) => {
  -->
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2">تاريخ التفعيل</label>
-                    <DatePickerInput v-model="formData.activation_date" variant="outlined"
-                        density="comfortable" placeholder="2024-03-01" hide-details
-                        @update:model-value="updateFormData" />
+                    <DatePickerInput v-model="formData.activation_date" variant="outlined" density="comfortable"
+                        placeholder="2024-03-01" hide-details @update:model-value="updateFormData" />
                 </div>
             </div>
         </div>
     </div>
 </template>
-
