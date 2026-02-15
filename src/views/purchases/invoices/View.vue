@@ -9,16 +9,16 @@
                         <span v-html="homeIcon"></span>
                     </router-link>
                     <span class="text-lg text-gray-300">/</span>
-                    <router-link to="/sales" class="text-gray-600 hover:text-primary-600">
-                        المبيعات
+                    <router-link to="/purchases" class="text-gray-600 hover:text-primary-600">
+                        المشتريات
                     </router-link>
                     <span class="text-lg text-gray-300">/</span>
-                    <router-link to="/sales/invoices/material-product/list" class="text-gray-600 hover:text-primary-600">
-                        فواتير المبيعات
+                    <router-link to="/purchases/invoices/list" class="text-gray-600 hover:text-primary-600">
+                        فواتير المشتريات
                     </router-link>
                     <span class="text-lg text-gray-300">/</span>
                     <span class="text-primary-700 font-medium bg-primary-50 px-2 py-1 rounded-md">{{ invoiceCode
-                        }}</span>
+                    }}</span>
                 </div>
 
                 <!-- Page Header -->
@@ -44,28 +44,45 @@
 
                     <div class="flex flex-wrap gap-4">
                         <div class="info-item-bordered flex-1 px-6 py-4">
-                            <label class="font-semibold text-sm text-gray-500 mb-2 block">اسم العميل</label>
-                            <p class="text-base font-semibold text-gray-900">{{ invoiceData?.customer_name || '—' }}</p>
+                            <label class="font-semibold text-sm text-gray-500 mb-2 block">اسم المورد</label>
+                            <p class="text-base font-semibold text-gray-900">{{ invoiceData?.supplier?.name || '—' }}
+                            </p>
+                        </div>
+                        <v-divider vertical class="my-6"></v-divider>
+                        <div class="info-item-bordered flex-1 px-6 py-4">
+                            <label class="font-semibold text-sm text-gray-500 mb-2 block">نوع الطلبية</label>
+                            <p class="text-base font-semibold text-gray-900">{{ invoiceData?.category_label || '—'
+                                }}</p>
+                        </div>
+                        <v-divider vertical class="my-6"></v-divider>
+                        <div class="info-item-bordered flex-1 px-6 py-4">
+                            <label class="font-semibold text-sm text-gray-500 mb-2 block">كود طلبية المشتريات</label>
+                            <p class="text-base font-semibold text-gray-900">{{ invoiceData?.purchase_order_code || '—'
+                                }}</p>
                         </div>
                         <v-divider vertical class="my-6"></v-divider>
                         <div class="info-item-bordered flex-1 px-6 py-4">
                             <label class="font-semibold text-sm text-gray-500 mb-2 block">كود طلبية المبيعات</label>
-                            <p class="text-base font-semibold text-gray-900">{{ invoiceData?.sale_order_code || '—' }}</p>
+                            <p class="text-base font-semibold text-gray-900">{{ invoiceData?.sales_codes.join(',    ') || '—' }}
+                            </p>
                         </div>
                         <v-divider vertical class="my-6"></v-divider>
                         <div class="info-item-bordered flex-1 px-6 py-4">
                             <label class="font-semibold text-sm text-gray-500 mb-2 block">تاريخ إنشاء الفاتورة</label>
-                            <p class="text-base font-semibold text-gray-900">{{ invoiceData?.invoice_issues_datetime || '—' }}</p>
+                            <p class="text-base font-semibold text-gray-900">{{ invoiceData?.invoice_issues_datetime ||
+                                '—' }}</p>
                         </div>
                         <v-divider vertical class="my-6"></v-divider>
                         <div class="info-item-bordered flex-1 px-6 py-4">
                             <label class="font-semibold text-sm text-gray-500 mb-2 block">تاريخ إصدار الفاتورة</label>
-                            <p class="text-base font-semibold text-gray-900">{{ invoiceData?.invoice_due_datetime || '—' }}</p>
+                            <p class="text-base font-semibold text-gray-900">{{ invoiceData?.invoice_due_datetime || '—'
+                                }}</p>
                         </div>
                         <v-divider vertical class="my-6"></v-divider>
                         <div class="info-item-bordered flex-1 px-6 py-4">
                             <label class="font-semibold text-sm text-gray-500 mb-2 block">تاريخ إستحقاق الفاتورة</label>
-                            <p class="text-base font-semibold text-gray-900">{{ invoiceData?.invoice_due_datetime || '—' }}</p>
+                            <p class="text-base font-semibold text-gray-900">{{ invoiceData?.invoice_due_datetime || '—'
+                                }}</p>
                         </div>
                         <v-divider vertical class="my-6"></v-divider>
                         <div class="info-item-bordered flex-1 px-6 py-4">
@@ -128,7 +145,7 @@ const fetchInvoiceData = async () => {
 
     isLoading.value = true
     try {
-        const res = await api.get<any>(`/sales/invoices/building-materials/${routeId.value}`)
+        const res = await api.get<any>(`/purchases/invoices/${routeId.value}`)
         invoiceData.value = res.data
     } catch (e: any) {
         console.error('Error fetching invoice data:', e)
