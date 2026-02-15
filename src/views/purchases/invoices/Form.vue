@@ -71,8 +71,9 @@ interface ProductTableItem {
 // Form data with static values
 const getDefaultFormData = () => ({
     customer_id: null,
-    so_type: null,
+    category: null,
     sale_order_id: null,
+    getProducts: null,
     invoice_issues_datetime: null as string | null,
     invoice_due_datetime: null as string | null,
     invoice_creation_date: null as string | null,
@@ -185,7 +186,7 @@ const fetchOrdersByCustomerAndType = async (
     }
 
     try {
-        const params: Record<string, string | number> = { so_type: orderType };
+        const params: Record<string, string | number> = { category: orderType };
         if (customerId) params.customer_id = customerId;
         const res = await api.get<any>('/sales/orders/list', {
             params,
@@ -273,7 +274,7 @@ const fetchFormData = async () => {
             // Populate form data
             formData.value.customer_id = data.customer_id;
             formData.value.sale_order_id = data.sale_order_id;
-            formData.value.so_type = data.so_type
+            formData.value.category = data.category
             skipNextSaleOrderItemsFetch.value = true;
             formData.value.invoice_issues_datetime = normalizePoDateTime(data.invoice_issues_datetime) || '';
             formData.value.invoice_due_datetime = normalizePoDateTime(data.invoice_due_datetime) || '';
@@ -282,8 +283,8 @@ const fetchFormData = async () => {
             formData.value.notes = data.notes;
             InvoiceCode.value = data.code || ''
             fetchCustomerDetails(data.customer_id);
-            if (data.customer_id && data.so_type) {
-                await fetchOrdersByCustomerAndType(data.customer_id, data.so_type);
+            if (data.customer_id && data.category) {
+                await fetchOrdersByCustomerAndType(data.customer_id, data.category);
                 if (data.sale_order_id) {
                     const exists = ordersItems.value.some(order => order.value === data.sale_order_id);
                     if (!exists) {
@@ -324,7 +325,7 @@ const buildFormData = (): FormData => {
     fd.append('invoice_issues_datetime', String(formData.value.invoice_issues_datetime || ''));
     fd.append('invoice_due_datetime', String(formData.value.invoice_due_datetime || 1));
     fd.append('sale_order_id', String(formData.value.sale_order_id || ''));
-    fd.append('so_type', String(formData.value.so_type || ''));
+    fd.append('category', String(formData.value.category || ''));
     fd.append('notes', formData.value.notes || '');
 
     // Items (products)
@@ -531,11 +532,11 @@ const summaryTotalTaxable = computed(() =>
     0
 );
 const summaryTotalTax = computed(() =>
-    Number(summaryData.value?.total_taxes).toFixed(2) ??
+    summaryData.value?.total_taxes.toFixed(2) ??
     0
 );
 const summaryTotalDue = computed(() =>
-  Number(summaryData.value?.final_total).toFixed(2) ??
+    summaryData.value?.final_total.toFixed(2) ??
     0
 );
 
@@ -547,7 +548,7 @@ watch(
 );
 
 watch(
-    [() => formData.value.customer_id, () => formData.value.so_type],
+    [() => formData.value.customer_id, () => formData.value.category],
     ([customerId, orderType]) => {
         if (!isPopulatingForm.value) {
             formData.value.sale_order_id = null;
@@ -592,8 +593,8 @@ onMounted(async () => {
 <template>
     <default-layout>
         <div class="-mx-6 bg-qallab-dashboard-bg space-y-4">
-            <TopHeader :icon="fileCheckIcon" title-key="pages.SalesInvoices.FormTitle"
-                description-key="pages.SalesInvoices.FormDescription" :code="InvoiceCode" code-label="كود الفاتورة"
+            <TopHeader :icon="fileCheckIcon" title-key="pages.PurchaseInvoices.FormTitle"
+                description-key="pages.PurchaseInvoices.FormDescription" :code="InvoiceCode" code-label="كود الفاتورة"
                 :show-action="false" />
 
             <!-- Request Information Section -->
@@ -606,18 +607,51 @@ onMounted(async () => {
                 <v-form ref="formRef" v-model="isFormValid" @submit.prevent>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 gap-y-6">
                         <div>
-                            <SelectInput v-model="formData.so_type" :items="orderTypes" placeholder="اختر"
+                            <SelectInput v-model="formData.category" :items="orderTypes" placeholder="اختر"
                                 label="نوع الطلبية" density="comfortable" :rules="[required()]"
-                                :error-messages="formErrors['so_type']"
-                                @update:model-value="clearFieldError('so_type')" clearable />
+                                :error-messages="formErrors['category']" @update:model-value="clearFieldError('category')"
+                                clearable />
                         </div>
 
                         <!-- Purchase Request Code -->
                         <div>
                             <SelectInput v-model="formData.sale_order_id" placeholder="اختر الطلبية"
-                                label="كود طلبية المبيعات" :items="ordersItems" density="comfortable"
-                                :rules="[required()]" :error-messages="formErrors['sale_order_id']" 
-                                @update:model-value="clearFieldError('sale_order_id')" clearable :disabled="!formData.so_type" />
+                                label="كود طلبية المشتريات" :items="ordersItems" density="comfortable"
+                                :rules="[required()]" :error-messages="formErrors['sale_order_id']"
+                                @update:model-value="clearFieldError('sale_order_id')" clearable
+                                :disabled="!formData.category" />
+                        </div>
+
+                        <div class="col-span-2">
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">سحب المنتجات</label>
+                            <div class="flex items-center gap-3 mt-1">
+                                <v-radio-group v-model="formData.getProducts" inline hide-details>
+                                    <v-radio :value="'w'" color="primary">
+                                        <template #label>
+                                            <span
+                                                :class="formData.getProducts == 'w' ? 'text-primary font-semibold' : 'text-gray-600'">
+                                                فاتورة مبيعات
+                                            </span>
+                                        </template>
+                                    </v-radio>
+                                    <v-radio :value="'r'" color="primary">
+                                        <template #label>
+                                            <span
+                                                :class="formData.getProducts == 'r' ? 'text-primary font-semibold' : 'text-gray-600'">
+                                                طلبية مشتريات
+                                            </span>
+                                        </template>
+                                    </v-radio>
+                                    <v-radio :value="'e'" color="primary">
+                                        <template #label>
+                                            <span
+                                                :class="formData.getProducts == 'e' ? 'text-primary font-semibold' : 'text-gray-600'">
+                                                أخرى
+                                            </span>
+                                        </template>
+                                    </v-radio>
+                                </v-radio-group>
+                            </div>
                         </div>
 
                         <!-- Invoice Creation Date -->
@@ -681,7 +715,7 @@ onMounted(async () => {
                 <div class="p-6">
                     <div class="flex items-center gap-2 text-primary-600">
                         <span class="w-4" v-html="fileCheckIcon"></span>
-                        <h2 class="text-base font-bold ">جدول عناصر فاتورة المبيعات</h2>
+                        <h2 class="text-base font-bold ">جدول عناصر فاتورة المشتريات</h2>
                     </div>
                 </div>
 

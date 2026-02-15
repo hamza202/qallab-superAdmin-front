@@ -256,14 +256,14 @@ export const purchasesRoutes: RouteRecordRaw[] = [
     ],
   },
   {
-    path: "/purchases/purchase-invoices",
+    path: "/purchases/invoices",
     name: "PurchaseInvoices",
-    redirect: "/purchases/purchase-invoices/list",
+    redirect: "/purchases/invoices/list",
     children: [
       {
         path: "list",
         name: "PurchaseInvoicesList",
-        component: () => import("@/views/purchases/purchase-invoices/List.vue"),
+        component: () => import("@/views/purchases/invoices/List.vue"),
         meta: {
           title: "pages.PurchaseInvoices.title",
         },
@@ -271,7 +271,7 @@ export const purchasesRoutes: RouteRecordRaw[] = [
       {
         path: "create",
         name: "PurchaseInvoicesCreate",
-        component: () => import("@/views/purchases/purchase-invoices/Form.vue"),
+        component: () => import("@/views/purchases/invoices/Form.vue"),
         meta: {
           title: "pages.PurchaseInvoices.create",
         },
@@ -279,9 +279,25 @@ export const purchasesRoutes: RouteRecordRaw[] = [
       {
         path: "edit/:id",
         name: "PurchaseInvoicesEdit",
-        component: () => import("@/views/purchases/purchase-invoices/Form.vue"),
+        component: () => import("@/views/purchases/invoices/Form.vue"),
         meta: {
           title: "pages.PurchaseInvoices.edit",
+        },
+      },
+      {
+        path: "view/:id",
+        name: "PurchaseInvoicesView",
+        component: () => import("@/views/purchases/invoices/View.vue"),
+        meta: {
+          title: "pages.PurchaseInvoices.view",
+        },
+      },
+      {
+        path: "print/:id",
+        name: "PurchaseInvoicesPrint",
+        component: () => import("@/views/purchases/invoices/Print.vue"),
+        meta: {
+          title: "pages.PurchaseInvoices.print",
         },
       },
     ],
@@ -294,8 +310,7 @@ export const purchasesRoutes: RouteRecordRaw[] = [
       {
         path: "list",
         name: "QuotationsFuelsList",
-        component: () =>
-          import("@/views/purchases/quotations/fuels/List.vue"),
+        component: () => import("@/views/purchases/quotations/fuels/List.vue"),
         meta: {
           title: "pages.QuotationsFuels.title",
         },
@@ -303,8 +318,7 @@ export const purchasesRoutes: RouteRecordRaw[] = [
       {
         path: "view/:id",
         name: "QuotationsFuelsView",
-        component: () =>
-          import("@/views/purchases/quotations/fuels/View.vue"),
+        component: () => import("@/views/purchases/quotations/fuels/View.vue"),
         meta: {
           title: "pages.QuotationsFuels.view",
         },

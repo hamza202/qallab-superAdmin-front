@@ -538,8 +538,8 @@
               </h2>
               <ul class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
                 <li class="relative">
-                  <router-link to="/purchases/purchase-invoices/list" :class="[
-                    isMenuItemActive('/purchases/purchase-invoices')
+                  <router-link to="/purchases/invoices/list" :class="[
+                    isMenuItemActive('/purchases/invoices')
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
