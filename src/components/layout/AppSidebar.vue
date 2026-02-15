@@ -322,6 +322,14 @@
                     طلبيات بناء مواد اولية</router-link>
                 </li>
                 <li class="relative">
+                  <router-link to="/sales/orders/fuels/list" :class="[
+                    $route.path.includes('/sales/orders/fuels')
+                      ? 'font-bold text-qallab-yellow'
+                      : 'text-white hover:text-qallab-yellow',
+                  ]">
+                    طلبيات محروقات</router-link>
+                </li>
+                <li class="relative">
                   <router-link to="/sales/so-pickups/list" :class="[
                     $route.path.includes('/sales/so-pickups')
                       ? 'font-bold text-qallab-yellow'

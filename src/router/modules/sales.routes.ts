@@ -200,6 +200,50 @@ export const salesRoutes: RouteRecordRaw[] = [
       },
     ],
   },
+  // Sales Orders Fuels
+  {
+    path: "/sales/orders/fuels",
+    name: "SalesOrdersFuels",
+    redirect: "/sales/orders/fuels/list",
+    children: [
+      {
+        path: "list",
+        name: "SalesOrdersFuelsList",
+        component: () =>
+          import("@/views/sales/orders/fuels/List.vue"),
+        meta: {
+          title: "pages.SalesOrdersFuels.title",
+        },
+      },
+      {
+        path: "create",
+        name: "SalesOrdersFuelsCreate",
+        component: () =>
+          import("@/views/sales/orders/fuels/Form.vue"),
+        meta: {
+          title: "pages.SalesOrdersFuels.title",
+        },
+      },
+      {
+        path: "edit/:id",
+        name: "SalesOrdersFuelsEdit",
+        component: () =>
+          import("@/views/sales/orders/fuels/Form.vue"),
+        meta: {
+          title: "pages.SalesOrdersFuels.edit",
+        },
+      },
+      {
+        path: "view/:id",
+        name: "SalesOrdersFuelsView",
+        component: () =>
+          import("@/views/sales/orders/fuels/View.vue"),
+        meta: {
+          title: "pages.SalesOrdersFuels.view",
+        },
+      },
+    ],
+  },
   {
     path: "/sales/trips",
     name: "SalesTrips",

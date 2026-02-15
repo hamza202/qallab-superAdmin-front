@@ -8,7 +8,7 @@ import { useTableColumns } from '@/composables/useTableColumns';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog.vue';
 import DatePickerInput from '@/components/common/forms/DatePickerInput.vue';
 import { GridIcon, trash_1_icon, trash_2_icon, importIcon, columnIcon, exportIcon, plusIcon, searchIcon } from '@/components/icons/globalIcons';
-import { switchHorisinralIcon, refreshIcon } from '@/components/icons/priceOffersIcons';
+import { switchHorisinralIcon } from '@/components/icons/priceOffersIcons';
 import StatusChangeFeature from '@/components/common/StatusChangeFeature.vue';
 
 const { t } = useI18n();
@@ -16,7 +16,7 @@ const router = useRouter();
 const api = useApi();
 const { success, error } = useNotification();
 
-const TABLE_NAME = 'admin_sales_fuels';
+const TABLE_NAME = 'admin_purchases_fuels';
 const {
   allHeaders,
   shownHeaders,
@@ -32,14 +32,13 @@ interface ItemActions {
   can_update: boolean;
   can_delete: boolean;
   can_change_status: boolean;
-  can_create_quotation: boolean;
 }
 
-interface FuelRequest {
+interface BuildingMaterialRequest {
   uuid: string;
   id?: string | number;
   doc_id?: string | number;
-  customer_name: string;
+  supplier_name: string;
   request_type: string;
   code: string;
   target_location: string;
@@ -59,7 +58,7 @@ interface TableHeader {
 }
 
 interface ListResponse {
-  data: FuelRequest[];
+  data: BuildingMaterialRequest[];
   pagination: { next_cursor: string | null; previous_cursor: string | null; per_page: number };
   header_table: string;
   headers: TableHeader[];
@@ -68,7 +67,7 @@ interface ListResponse {
 }
 
 // API state
-const tableItems = ref<FuelRequest[]>([]);
+const tableItems = ref<BuildingMaterialRequest[]>([]);
 const canCreate = ref(false);
 const canBulkDelete = ref(false);
 const loading = ref(false);
@@ -98,12 +97,12 @@ const filterStartDateMax = ref('');
 // Delete dialog (single shared dialog for both single and bulk)
 const showDeleteDialog = ref(false);
 const showBulkDeleteDialog = ref(false);
-const itemToDelete = ref<FuelRequest | null>(null);
+const itemToDelete = ref<BuildingMaterialRequest | null>(null);
 const deleteLoading = ref(false);
 
 // Status change dialog
 const showChangeStatusDialog = ref(false);
-const itemToChangeStatus = ref<FuelRequest | null>(null);
+const itemToChangeStatus = ref<BuildingMaterialRequest | null>(null);
 
 const isDeleteDialogOpen = computed({
   get: () => showDeleteDialog.value || showBulkDeleteDialog.value,
@@ -150,13 +149,13 @@ const fetchList = async () => {
   try {
     const params = new URLSearchParams();
     if (filterRequestNumber.value) params.append('code', filterRequestNumber.value);
-    if (filterNameEnglish.value) params.append('customer_name', filterNameEnglish.value);
+    if (filterNameEnglish.value) params.append('supplier_name', filterNameEnglish.value);
     if (filterStartDateMin.value) params.append('request_datetime_from', filterStartDateMin.value);
     if (filterStartDateMax.value) params.append('request_datetime_to', filterStartDateMax.value);
 
     const url = params.toString()
-      ? `/sales/fuels?${params.toString()}`
-      : '/sales/fuels';
+      ? `/sales/orders/fuels?${params.toString()}`
+      : '/sales/orders/fuels';
     const res = await api.get<ListResponse>(url);
 
     tableItems.value = res.data || [];
@@ -164,7 +163,7 @@ const fetchList = async () => {
     canBulkDelete.value = res.actions?.can_bulk_delete ?? false;
     initHeaders(res.headers || [], res.shownHeaders || []);
   } catch (err: any) {
-    console.error('Error fetching sales fuels list:', err);
+    console.error('Error fetching building materials list:', err);
     error(err?.response?.data?.message || 'فشل تحميل قائمة الطلبات');
   } finally {
     loading.value = false;
@@ -182,13 +181,13 @@ const handleToggleHeader = async (headerKey: string) => {
 const handleEdit = (item: { id?: string | number; uuid?: string }) => {
   const id = item.uuid ?? String(item.id);
   router.push({
-    name: 'SalesRequestsFuelsEdit',
+    name: 'SalesOrdersFuelsEdit',
     params: { id },
   });
 };
 
-const handleDelete = (item: { uuid?: string; id?: string | number } & Partial<FuelRequest>) => {
-  itemToDelete.value = item as FuelRequest;
+const handleDelete = (item: { uuid?: string; id?: string | number } & Partial<BuildingMaterialRequest>) => {
+  itemToDelete.value = item as BuildingMaterialRequest;
   showDeleteDialog.value = true;
 };
 
@@ -199,7 +198,7 @@ const confirmDelete = async () => {
   itemToDelete.value = null;
   try {
     deleteLoading.value = true;
-    await api.delete(`/sales/fuels/${uuid}`);
+    await api.delete(`/sales/orders/fuels/${uuid}`);
     success('تم حذف الطلب بنجاح');
     await fetchList();
   } catch (err: any) {
@@ -260,33 +259,18 @@ const getStatusStyle = (item: Record<string, unknown>): Record<string, string> |
 };
 
 const openCreateRequest = () => {
-  router.push({ name: 'SalesRequestsFuelsCreate' });
+  router.push({ name: 'SalesOrdersFuelsCreate' });
 };
 
 const handleView = (item: any) => {
-    router.push({ name: "SalesRequestsFuelsView", params: { id: item.uuid } });
+    router.push({ name: "SalesOrdersFuelsView", params: { id: item.uuid } });
 };
 
 
 
-const openChangeStatusDialog = (item: FuelRequest | Record<string, unknown>) => {
-  itemToChangeStatus.value = item as FuelRequest;
+const openChangeStatusDialog = (item: BuildingMaterialRequest | Record<string, unknown>) => {
+  itemToChangeStatus.value = item as BuildingMaterialRequest;
   showChangeStatusDialog.value = true;
-};
-
-const handleCreateQuotation = (item: unknown) => {
-  const tableItem = item as FuelRequest & { id: string | number };
-  const originalItem = tableItems.value.find((r) => r.uuid === tableItem.uuid);
-  const numericId = originalItem ? (originalItem as any).id : undefined;
-
-  router.push({
-    name: 'SalesQuotationsFuelsCreate',
-    query: {
-      from_request: tableItem.uuid,
-      request_code: tableItem.code,
-      sale_requests_id: numericId ? String(numericId) : undefined
-    }
-  });
 };
 
 const handleBulkDelete = () => {
@@ -297,7 +281,7 @@ const handleBulkDelete = () => {
 const confirmBulkDelete = async () => {
   try {
     deleteLoading.value = true;
-    await api.post('/sales/fuels/bulk-delete', {
+    await api.post('/sales/orders/fuels/bulk-delete', {
       ids: selectedRequests.value,
     });
     success(`تم حذف ${selectedRequests.value.length} طلب بنجاح`);
@@ -322,8 +306,8 @@ onMounted(() => {
     <div class="pricesOffers-page">
       <PageHeader
         :icon="GridIcon"
-        title-key="pages.SalesRequestsFuels.title"
-        description-key="pages.SalesRequestsFuels.description"
+        title-key="pages.SalesOrdersFuels.title"
+        description-key="pages.SalesOrdersFuels.description"
       />
 
       <div
@@ -458,7 +442,7 @@ onMounted(() => {
               density="comfortable"
               variant="outlined"
               hide-details
-              placeholder="اسم العميل"
+              placeholder="اسم المورد"
               class="w-full sm:w-40 bg-white"
             />
             <TextInput
@@ -536,16 +520,7 @@ onMounted(() => {
             </span>
           </template>
           <template #item.actions="{ item }">
-            <div class="flex items-center gap-1">
-              <v-btn
-                v-if="item.actions?.can_create_quotation"
-                icon
-                variant="text"
-                size="x-small"
-                @click="handleCreateQuotation(item)"
-              >
-                <span v-html="refreshIcon"></span>
-              </v-btn>
+            <div class="flex items-center">
               <v-btn
                 v-if="item.actions?.can_change_status"
                 icon
@@ -575,7 +550,7 @@ onMounted(() => {
     <StatusChangeFeature
       v-model="showChangeStatusDialog"
       :item="itemToChangeStatus"
-      :change-status-url="`/sales/fuels/${itemToChangeStatus?.uuid}/change-status`"
+      :change-status-url="`/sales/orders/fuels/${itemToChangeStatus?.uuid}/change-status`"
       @success="fetchList"
     />
   </default-layout>
