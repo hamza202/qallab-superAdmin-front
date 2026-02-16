@@ -30,8 +30,6 @@ const supplierData = ref<any>(null);
 const supplierName = computed(() => supplierData.value?.full_name || supplierData.value?.name || '—');
 const supplierTaxNo = computed(() => supplierData.value?.taxno || '—');
 const supplierAddress = computed(() => supplierData.value?.address || {});
-const unitItems = ref<any[]>([]);
-const discountTypeItems = ref<any[]>([]);
 const summaryData = ref<any>(null);
 const isPopulatingForm = ref(false);
 const skipNextSaleOrderItemsFetch = ref(false);
@@ -74,11 +72,13 @@ interface ProductTableItem {
 }
 
 // Form data with static values
+const DEFAULT_FETCH_ITEM = 'from_sales_invoice';
+
 const getDefaultFormData = () => ({
     supplier_id: null as number | string | null,
     category: null as string | null,
     purchase_order_id: null as number | string | null,
-    fetch_item: null as string | null,
+    fetch_item: DEFAULT_FETCH_ITEM as string | null,
     sales_ids: [] as (number | string)[],
     invoice_issues_datetime: null as string | null,
     invoice_due_datetime: null as string | null,
@@ -176,29 +176,20 @@ const fetchConstants = async () => {
         }
 
         if (Array.isArray(data.purchase_invoice_fetch_items) && data.purchase_invoice_fetch_items.length) {
-            fetchItemOptions.value = data.purchase_invoice_fetch_items.map((i: any) => ({ label: i.label, value: i.key }));
+            const filtered = data.purchase_invoice_fetch_items.filter((i: any) => i.key === DEFAULT_FETCH_ITEM);
+            fetchItemOptions.value = filtered.map((i: any) => ({ label: i.label, value: i.key }));
         }
 
-        if (data.discount_types?.length) {
-            discountTypeItems.value = data.discount_types.map((i: any) => ({ title: i.label, value: i.key }));
+        if (!fetchItemOptions.value.length) {
+            fetchItemOptions.value = [{ label: 'من فاتورة مبيعات', value: DEFAULT_FETCH_ITEM }];
+        }
+
+        if (!formData.value.fetch_item) {
+            formData.value.fetch_item = DEFAULT_FETCH_ITEM;
         }
 
     } catch (e) {
         console.error('Error fetching constants:', e);
-    }
-};
-
-const fetchUnits = async () => {
-    try {
-        const res = await api.get<any>("/units/list");
-        if (Array.isArray(res.data)) {
-            unitItems.value = res.data.map((i: any) => ({
-                title: i.name,
-                value: i.id,
-            }));
-        }
-    } catch (e) {
-        console.error("Error fetching units:", e);
     }
 };
 
@@ -374,7 +365,7 @@ const fetchFormData = async () => {
             formData.value.supplier_id = data.supplier_id;
             formData.value.purchase_order_id = data.purchase_order_id;
             formData.value.category = data.category;
-            formData.value.fetch_item = data.fetch_item;
+            formData.value.fetch_item = data.fetch_item || DEFAULT_FETCH_ITEM;
             skipNextSaleOrderItemsFetch.value = true;
             skipNextSalesInvoicesFetch.value = true;
             formData.value.invoice_issues_datetime = normalizePoDateTime(data.invoice_issues_datetime) || '';
@@ -526,85 +517,6 @@ const handleSubmit = async (type: any) => {
     }
 };
 
-
-const showAddProductDialog = ref(false);
-const editingProduct = ref<ProductTableItem | null>(null);
-
-// Convert editingProduct to the dialog's expected type
-const editProductForDialog = computed<any>(() => {
-    const p = editingProduct.value;
-    if (!p) return null;
-    return {
-        item_id: p.item_id,
-        item_name: p.item_name,
-        unit_id: p.unit_id,
-        unit_name: p.unit_name,
-        quantity: p.quantity,
-        price_per_unit: p.price_per_unit,
-        discount_val: p.discount_val,
-        discount_type: p.discount_type,
-        total_tax: p.total_tax,
-        taxable_amount: p.taxable_amount,
-        total_out_taxes: p.total_out_taxes,
-        isAdded: p.isAdded,
-        id: p.id,
-    };
-});
-
-
-const handleEditProduct = (item: any) => {
-    const productToEdit = productTableItems.value.find(p => p.item_id === item.item_id);
-    if (productToEdit) {
-        editingProduct.value = { ...productToEdit, isAdded: true };
-        showAddProductDialog.value = true;
-    }
-};
-
-const handleProductUpdated = (updatedProduct: any) => {
-    const index = productTableItems.value.findIndex(p => p.item_id === updatedProduct.item_id);
-    if (index !== -1) {
-        const existing = productTableItems.value[index];
-        productTableItems.value[index] = {
-            ...existing,
-            unit_id: updatedProduct.unit_id,
-            unit_name: updatedProduct.unit_name,
-            quantity: updatedProduct.quantity,
-            price_per_unit: updatedProduct.price_per_unit ?? null,
-            discount_val: updatedProduct.discount_val ?? null,
-            discount_type: updatedProduct.discount_type ?? 2,
-            total_tax: updatedProduct.total_tax ?? null,
-            taxable_amount: updatedProduct.taxable_amount ?? null,
-            total_out_taxes: updatedProduct.total_out_taxes ?? (updatedProduct.taxable_amount != null ? updatedProduct.taxable_amount : null),
-            subtotal_after_tax: updatedProduct.taxable_amount != null && updatedProduct.total_tax != null
-                ? +(Number(updatedProduct.taxable_amount) + Number(updatedProduct.total_tax)).toFixed(2)
-                : null,
-            isAdded: updatedProduct.isAdded,
-            id: updatedProduct.id,
-        };
-    }
-    editingProduct.value = null;
-};
-
-// Convert existing products to the dialog's expected type
-const existingProductsForDialog = computed<any[]>(() =>
-    productTableItems.value.map(p => ({
-        item_id: p.item_id,
-        item_name: p.item_name,
-        unit_id: p.unit_id,
-        unit_name: p.unit_name,
-        quantity: p.quantity,
-        price_per_unit: p.price_per_unit,
-        discount_val: p.discount_val,
-        discount_type: p.discount_type,
-        total_tax: p.total_tax,
-        taxable_amount: p.taxable_amount,
-        total_out_taxes: p.total_out_taxes,
-        isAdded: p.isAdded,
-        id: p.id,
-    }))
-);
-
-
 const headers = [
     { title: 'اسم المنتج', key: 'name' },
     { title: 'الوحدة', key: 'unit' },
@@ -737,7 +649,6 @@ onMounted(async () => {
     pageLoading.value = true
     await Promise.all([
         fetchConstants(),
-        fetchUnits(),
         fetchSuppliers()
     ]);
 
@@ -884,7 +795,7 @@ onMounted(async () => {
                 </div>
 
                 <!-- Products Table -->
-                <DataTable :headers="headers" @edit="handleEditProduct" :items="tableItems" />
+                <DataTable :headers="headers" :items="tableItems" />
             </div>
 
             <!-- Summary Table Section -->
@@ -1001,10 +912,6 @@ onMounted(async () => {
             </div>
         </div>
 
-        <!-- Add Product Dialog -->
-        <!-- <EditProductDialogInvoices v-model="showAddProductDialog" variant="sales" :unit-items="unitItems"
-            :discount-type-options="discountTypeItems" :edit-product="editProductForDialog"
-            :existing-products="existingProductsForDialog" @product-updated="handleProductUpdated" /> -->
         <!-- Loading Overlay -->
         <v-overlay :model-value="pageLoading" contained class="align-center justify-center">
             <v-progress-circular indeterminate color="primary" size="64" />
