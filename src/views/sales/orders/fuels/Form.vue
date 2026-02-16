@@ -821,7 +821,7 @@ const summaryTotals = computed(() => {
                     <table class="w-full">
                         <thead>
                             <tr class="bg-primary-400">
-                                <th class="text-white font-semibold text-base py-3 px-4 text-center border-l !border-gray-200">نوع الخصم</th>
+                                <th class="text-white font-semibold text-base py-3 px-4 text-center border-l !border-gray-200">العنصر</th>
                                 <th class="text-white font-semibold text-base py-3 px-4 text-center">المبلغ</th>
                             </tr>
                         </thead>

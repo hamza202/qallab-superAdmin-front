@@ -38,6 +38,7 @@ const routeId = computed(() => route.params.id as string);
 const pickupId = computed(() => route.params.pickupId as string)
 const isLoading = ref(false);
 const isSubmitting = ref(false);
+const saleOrderId = computed(() => route.query.sale_order_id as string | undefined);
 
 const tripCode = ref("");
 
@@ -315,6 +316,10 @@ const handleSubmit = async (option: SubmitOption) => {
         notes: item.notes
       })),
     };
+    if (saleOrderId.value) {
+      payload.sale_order_id = saleOrderId.value
+    }
+
 
     if (isEditMode.value) {
       await api.put(`/sales/trips/${routeId.value}`, payload);
