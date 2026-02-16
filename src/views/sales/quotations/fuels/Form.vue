@@ -852,7 +852,7 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
                         <thead>
                             <tr class="bg-primary-400">
                                 <th class="text-white font-semibold text-base py-3 px-4 text-center border-l !border-gray-200">
-                                    نوع الخصم
+                                    العنصر
                                 </th>
                                 <th class="text-white font-semibold text-base py-3 px-4 text-center">
                                     المبلغ
