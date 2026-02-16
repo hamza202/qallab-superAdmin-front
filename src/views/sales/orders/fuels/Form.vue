@@ -253,10 +253,6 @@ const showAddProductDialog = ref(false);
 const editingProduct = ref<ProductTableItem | null>(null);
 
 const handleAddProduct = () => {
-    if (!formData.value.customer_id) {
-        warning('يجب عليك اختيار اسم العميل أولاً');
-        return;
-    }
     editingProduct.value = null;
     showAddProductDialog.value = true;
 };
@@ -323,7 +319,7 @@ const handleDeleteProduct = (item: any) => {
 
 import { useForm } from '@/composables/useForm';
 
-const { formRef, isFormValid, validate } = useForm();
+const { isFormValid, validate } = useForm();
 
 const formatDateYmd = (date: string | Date): string => {
     if (!date) return '';
@@ -332,16 +328,6 @@ const formatDateYmd = (date: string | Date): string => {
     const month = String(d.getMonth() + 1).padStart(2, '0');
     const year = d.getFullYear();
     return `${year}-${month}-${day}`;
-};
-
-const formatDateTimeDmy = (date: Date): string => {
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = date.getFullYear();
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    const seconds = String(date.getSeconds()).padStart(2, '0');
-    return `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
 };
 
 // Build FormData for submission
