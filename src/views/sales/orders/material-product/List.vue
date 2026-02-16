@@ -35,6 +35,7 @@ interface ItemActions {
   can_change_status: boolean;
   can_receive_doc: boolean;
   can_create_pickup: boolean;
+  can_create_trip: boolean;
 }
 
 interface OrderItem {
@@ -294,6 +295,18 @@ const handleCreatePickup = (item: unknown) => {
   });
 };
 
+
+const handleCreateTrip = (item: unknown) => {
+  const tableItem = item as OrderItem & { id: string | number };
+  
+  router.push({ 
+    name: 'SalesTripsCreate',
+    query: { 
+      sale_order_id: tableItem.id,
+    }
+  });
+};
+
 onMounted(() => {
   fetchList();
   nextTick(() => setupInfiniteScroll());
@@ -511,6 +524,12 @@ onBeforeUnmount(() => {
           </template>
           <template #item.actions="{ item }">
             <div class="flex items-center gap-1">
+                            <v-btn v-if="item.actions?.can_create_trip" icon variant="text" size="small"
+                @click="handleCreateTrip(item)">
+                <!-- <span v-html="refreshIcon"></span> -->
+                  <v-icon size="25">mdi-airplane</v-icon>
+              </v-btn>
+
               <v-btn
                 v-if="item.actions?.can_create_pickup"
                 icon
