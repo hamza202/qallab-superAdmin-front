@@ -51,11 +51,20 @@ const internalValue = computed({
         if (!val || val.trim() === "") {
             emit("update:modelValue", null);
         } else {
-            const cleanedValue = val.trim();
+            // Remove non-numeric characters and limit to 9 digits
+            const cleanedValue = val.replace(/\D/g, '').slice(0, 9);
             emit("update:modelValue", `+966${cleanedValue}`);
         }
     },
 });
+
+const isNumber = (evt: KeyboardEvent) => {
+    const keysAllowed: string[] = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+    const keyPressed: string = evt.key;
+    if (!keysAllowed.includes(keyPressed)) {
+        evt.preventDefault();
+    }
+};
 </script>
 
 <template>
@@ -64,10 +73,11 @@ const internalValue = computed({
             {{ label }}
         </label>
 
-        <v-text-field v-model="internalValue" inputmode="numeric" pattern="[0-9]*" type="tel" :placeholder="placeholder"
-            variant="outlined" :color="color" :density="density" :disabled="disabled" :readonly="readonly"
-            :rules="rules" :dir="dir" :clearable="clearable" :error-messages="errorMessages" :hide-details="false"
-            :hint="hint" :persistent-hint="persistentHint" v-bind="inputProps">
+        <v-text-field v-model="internalValue" inputmode="numeric" pattern="[0-9]*" type="tel" :maxlength="9"
+            @keypress="isNumber" :placeholder="placeholder" variant="outlined" :color="color" :density="density"
+            :disabled="disabled" :readonly="readonly" :rules="rules" :dir="dir" :clearable="clearable"
+            :error-messages="errorMessages" :hide-details="false" :hint="hint" :persistent-hint="persistentHint"
+            v-bind="inputProps">
             <template #append-inner>
                 <slot name="append-inner"></slot>
                 <span class="text-gray-500 font-semibold me-2 block text-sm dir-ltr">+966</span>
