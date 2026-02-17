@@ -189,8 +189,9 @@ const fetchSaleOrderData = async () => {
   }
 };
 
-const getTransportTypeName = (typeValue: string | number): string => {
-  const found = transportTypeItems.value.find(t => t.value === typeValue);
+const getTransportTypeName = (typeValue: string | number | null): string => {
+  if (typeValue === null || typeValue === undefined) return '';
+  const found = transportTypeItems.value.find(t => t.value == typeValue);
   return found ? found.title : '';
 };
 
@@ -435,13 +436,15 @@ const headers = [
   { title: 'ملاحظات', key: 'notes' },
 ];
 
-const handleProductSaved = (products: ProductTableItem[]) => {
+const handleProductSaved = (products: any[]) => {
   const newItems: ProductTableItem[] = products.map(p => {
     const existing = productTableItems.value.find(existing => existing.item_id === p.item_id);
     return {
       ...p,
+      transport_type: p.transport_type ?? null,
+      transport_type_name: getTransportTypeName(p.transport_type ?? null),
       notes: existing?.notes || p.notes || ''
-    };
+    } as ProductTableItem;
   });
   productTableItems.value = newItems;
 };
@@ -465,14 +468,16 @@ const handleEditProduct = (item: any) => {
   }
 };
 
-const handleProductUpdated = (updatedProduct: ProductTableItem) => {
+const handleProductUpdated = (updatedProduct: any) => {
   const index = productTableItems.value.findIndex(p => p.item_id === updatedProduct.item_id);
   if (index !== -1) {
     const existingNotes = productTableItems.value[index].notes;
     productTableItems.value[index] = {
       ...updatedProduct,
+      transport_type: updatedProduct.transport_type ?? null,
+      transport_type_name: getTransportTypeName(updatedProduct.transport_type ?? null),
       notes: existingNotes || updatedProduct.notes || ''
-    };
+    } as ProductTableItem;
   }
   editingProduct.value = null;
 };
