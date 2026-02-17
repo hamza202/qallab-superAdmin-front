@@ -16,11 +16,11 @@ import {
   filePlusIcon,
   listIcon,
   CoinHandIcon,
-  fileQuestionIcon,
 } from '@/components/icons/priceOffersIcons';
 import {
   returnIcon,
   saveIcon,
+  HelpCircleIcon,
 } from '@/components/icons/globalIcons';
 
 useI18n()
@@ -102,6 +102,7 @@ const fetchFormData = async () => {
             formData.value.code = data.code || '';
             formData.value.customer_id = data.customer_id;
             formData.value.project_name = data.project_name || '';
+            formData.value.po_reference = data.po_reference || '';
             formData.value.invoice_interval = data.invoice_interval ?? null;
             formData.value.payment_term_no = data.payment_term_no ?? null;
 
@@ -238,6 +239,7 @@ const formData = ref({
     paymentMethod: null,
     advancePayment: null,
     project_name: '',
+    po_reference: '',
     textNote: '',
 });
 
@@ -349,6 +351,7 @@ const buildFormData = (): FormData => {
     fd.append('target_latitude', String(formData.value.target_latitude ?? ''));
     fd.append('target_longitude', String(formData.value.target_longitude ?? ''));
     fd.append('project_name', formData.value.project_name || '');
+    fd.append('po_reference', formData.value.po_reference || '');
     fd.append('payment_method', formData.value.paymentMethod || '');
     fd.append('upfront_payment', String(formData.value.advancePayment ?? ''));
     fd.append('invoice_interval', String(formData.value.invoice_interval ?? ''));
@@ -419,6 +422,7 @@ const resetForm = () => {
         paymentMethod: null,
         advancePayment: null,
         project_name: '',
+        po_reference: '',
         textNote: '',
     };
     productTableItems.value = [];
@@ -695,6 +699,32 @@ const summaryTotals = computed(() => {
                             <SelectInput v-model="formData.deliveryMethod" :items="deliveryMethodItems"
                                 label="طريقة التسليم" density="comfortable" placeholder="اختر"
                                 item-title="title" item-value="value" />
+                        </div>
+                        <!-- الرقم المرجعي -->
+                        <div>
+                            <TextInput
+                              v-model="formData.po_reference"
+                              label="الرقم المرجعي"
+                              density="comfortable"
+                              placeholder="أدخل الرقم المرجعي"
+                              :hide-details="true"
+                            >
+                              <template #append-inner>
+                                <v-tooltip location="top" content-class="custom-tooltip">
+                                  <template #activator="{ props: tooltipProps }">
+                                    <ButtonWithIcon
+                                      variant="text"
+                                      size="small"
+                                      density="compact"
+                                      custom-class="!min-w-0 p-0"
+                                      :prepend-icon="HelpCircleIcon"
+                                      v-bind="tooltipProps"
+                                    />
+                                  </template>
+                                  <div>الرقم المرجعي</div>
+                                </v-tooltip>
+                              </template>
+                            </TextInput>
                         </div>
                     </div>
                 </v-form>
