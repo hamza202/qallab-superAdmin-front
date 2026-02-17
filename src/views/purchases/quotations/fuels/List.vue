@@ -7,7 +7,7 @@ import { useNotification } from '@/composables/useNotification';
 import { useTableColumns } from '@/composables/useTableColumns';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog.vue';
 import { GridIcon, trash_1_icon, trash_2_icon, importIcon, columnIcon, exportIcon, searchIcon } from "@/components/icons/globalIcons";
-import { switchHorisinralIcon } from '@/components/icons/priceOffersIcons';
+import { switchHorisinralIcon, refreshIcon } from '@/components/icons/priceOffersIcons';
 import StatusChangeFeature from '@/components/common/StatusChangeFeature.vue';
 
 const { t } = useI18n();
@@ -31,9 +31,11 @@ interface ItemActions {
   can_delete: boolean;
   can_view: boolean;
   can_change_status: boolean;
+  can_create_order: boolean;
 }
 
 interface QuotationItem {
+  id: number;
   uuid: string;
   customer_name: string;
   quotation_name: string;
@@ -240,6 +242,22 @@ const getStatusClass = (status: string) => {
   }
 };
 
+const handleCreateOrder = (item: unknown) => {
+  const tableItem = item as QuotationItem & { id: string | number };
+  // Find original item from tableItems to get the numeric id
+  const originalItem = tableItems.value.find((q) => q.uuid === tableItem.uuid);
+  const numericId = originalItem?.id;
+  
+  router.push({ 
+    name: 'OrdersFuelsCreate',
+    query: { 
+      from_quotation: tableItem.uuid,
+      quotation_code: tableItem.code,
+      purchase_quotation_id: numericId ? String(numericId) : undefined
+    }
+  });
+};
+
 const openChangeStatusDialog = (item: QuotationItem | Record<string, unknown>) => {
   itemToChangeStatus.value = item as QuotationItem;
   showChangeStatusDialog.value = true;
@@ -372,6 +390,10 @@ onBeforeUnmount(() => {
           </template>
           <template #item.actions="{ item }">
             <div class="flex items-center gap-1">
+              <v-btn v-if="item.actions?.can_create_order" icon variant="text" size="small"
+                @click="handleCreateOrder(item)">
+                <span v-html="refreshIcon"></span>
+              </v-btn>
               <v-btn v-if="item.actions?.can_change_status" icon variant="text" size="small" color="warning-600"
                 @click="openChangeStatusDialog(item)">
                 <span v-html="switchHorisinralIcon"></span>
