@@ -44,6 +44,7 @@ const tripCode = ref("");
 
 const formData = ref({
   so_pickup_id: null as number | null,
+  sale_order_id: null as number | null,
   supplier_logistic_id: null as number | null,
   planned_arrival_loading: "",
   planned_arrival_downloading: "",
@@ -154,6 +155,40 @@ const fetchSoPickupData = async () => {
   }
 };
 
+const fetchSaleOrderData = async () => {
+  if (!saleOrderId.value) return;
+
+  isLoading.value = true;
+  try {
+    const res = await api.get<any>(`/sales/orders/building-materials/${saleOrderId.value}`);
+    const data = res?.data != null ? res.data : res;
+
+    if (!data) return;
+
+    formData.value.sale_order_id = data.id || null;
+    // Populate products from sale order items
+    if (data.items && Array.isArray(data.items)) {
+      productTableItems.value = data.items.map((item: any) => ({
+        item_id: item.item_id,
+        item_name: item.item_name || '',
+        unit_id: item.unit_id,
+        unit_name: item.unit_name || '',
+        quantity: item.quantity || null,
+        transport_type: null,
+        transport_no: '',
+        transport_type_name: '',
+        notes: '',
+        isAdded: true
+      }));
+    }
+  } catch (err: any) {
+    console.error('Error fetching sale order data:', err);
+    error(err?.response?.data?.message || 'فشل تحميل بيانات الطلبية');
+  } finally {
+    isLoading.value = false;
+  }
+};
+
 const getTransportTypeName = (typeValue: string | number): string => {
   const found = transportTypeItems.value.find(t => t.value === typeValue);
   return found ? found.title : '';
@@ -216,6 +251,7 @@ const fetchFormData = async () => {
     if (!data) return;
     tripCode.value = data.code || "";
     formData.value = {
+      sale_order_id: data.sale_order_id || null,
       so_pickup_id: data.so_pickup_id || null,
       supplier_logistic_id: data.supplier_logistic_id || null,
       planned_arrival_loading: normalizePoDateTime(String(data.planned_arrival_loading)) || "",
@@ -315,7 +351,6 @@ const handleSubmit = async (option: SubmitOption) => {
         transport_type: item.transport_type,
         notes: item.notes
       })),
-      ...(saleOrderId.value ? { sale_order_id: Number(saleOrderId.value) } : {}),
     };
 
 
@@ -334,6 +369,7 @@ const handleSubmit = async (option: SubmitOption) => {
     } else {
       // Reset form for new entry
       formData.value = {
+        sale_order_id: null,
         so_pickup_id: null,
         supplier_logistic_id: null,
         planned_arrival_loading: "",
@@ -457,6 +493,9 @@ onMounted(async () => {
   } else if (pickupId.value) {
     // If pickupId exists, fetch SO pickup data to populate items
     await fetchSoPickupData();
+  } else if (saleOrderId.value) {
+    // If sale_order_id exists in query, fetch sale order data to populate items
+    await fetchSaleOrderData();
   }
 });
 </script>
