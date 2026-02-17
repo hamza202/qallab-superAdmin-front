@@ -258,7 +258,7 @@ export const salesRoutes: RouteRecordRaw[] = [
         },
       },
       {
-        path: "create/:pickupId",
+        path: "create/:pickupId?",
         name: "SalesTripsCreate",
         component: () => import("@/views/sales/trips/Form.vue"),
         meta: {

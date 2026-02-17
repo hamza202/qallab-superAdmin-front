@@ -315,10 +315,8 @@ const handleSubmit = async (option: SubmitOption) => {
         transport_type: item.transport_type,
         notes: item.notes
       })),
+      ...(saleOrderId.value ? { sale_order_id: Number(saleOrderId.value) } : {}),
     };
-    if (saleOrderId.value) {
-      payload.sale_order_id = saleOrderId.value
-    }
 
 
     if (isEditMode.value) {
