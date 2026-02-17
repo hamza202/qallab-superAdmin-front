@@ -18,73 +18,70 @@
             <div class="section-card">
                 <!-- Header with wave decoration -->
                 <div class="invoice-header">
-                    <div class="header-content">
-                        <div class="title-block">
-                            <h1 class="title-en">Tax Invoice</h1>
-                            <h2 class="title-ar">فاتورة مبيعات ضريبية</h2>
-                        </div>
-                        <img :src="logoImg" alt="Qallab" class="header-logo" />
-                    </div>
-                </div>
-
-                <!-- Three info blocks -->
-                <div class="info-blocks">
-                    <!-- Invoice Details -->
-                    <div class="info-block">
+                    <div>
                         <h3 class="info-title">Invoice Details:</h3>
                         <div class="info-row">
                             <span class="info-label">Invoice number (رقم الفاتورة):</span>
                             <span class="info-value">N°: {{ invoiceData.code }}</span>
                         </div>
                         <div class="info-row">
-                            <span class="info-label">Issued (تاريخ الفاتورة):</span>
+                            <span class="info-label">Invoice date (تاريخ الفاتورة):</span>
+                            <span class="info-value">{{ formatDate(invoiceData.invoice_due_datetime) }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Issued(تاريخ الإصدار):</span>
                             <span class="info-value">{{ formatDate(invoiceData.invoice_issues_datetime) }}</span>
                         </div>
-                        <div class="info-row">
-                            <span class="info-label">Pay type:</span>
-                            <span class="info-value">{{ payTypeLabel }}</span>
+                    </div>
+                    <div class="header-content">
+                        <img :src="logoImg" alt="Qallab" class="header-logo" />
+                        <div class="title-block">
+                            <h1 class="title-en">Purchase Invoice</h1>
+                            <h2 class="title-ar">فاتورة المشتريات</h2>
                         </div>
                     </div>
 
-                    <!-- Qallab Company -->
-                    <div class="info-block">
-                        <h3 class="info-title info-title--blue">Qallab Company</h3>
-                        <div class="info-row">
-                            <span class="info-label">VAT No. (الرقم الضريبي):</span>
-                            <span class="info-value">{{ supplier?.tax_no ?? '—' }}</span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">Address (العنوان):</span>
-                            <span class="info-value">{{ supplier?.address ?? '—' }}</span>
-                        </div>
-                    </div>
-
-                    <!-- Invoice To (accent card) -->
-                    <div class="info-block info-block--accent">
-                        <h3 class="info-title info-title--blue">Invoice To:</h3>
-                        <p class="recipient-name">{{ customer?.name ?? invoiceData.customer_name ?? '—' }}</p>
-                        <div class="info-row">
-                            <span class="info-label">Address (العنوان):</span>
-                            <span class="info-value">{{ customer?.address ?? '—' }}</span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">VAT No. (الرقم الضريبي):</span>
-                            <span class="info-value">{{ customer?.tax_no ?? '—' }}</span>
-                        </div>
-                    </div>
                 </div>
             </div>
+            <!-- Supplier and Customer Info Cards -->
+            <div class="info-cards-container">
+                <!-- Supplier Card -->
+                <div class="info-card">
+                    <h3 class="info-card-title">{{ supplierName }}</h3>
+                    <p class="info-card-subtitle">{{supplierName}}</p>
+                    <div class="info-card-row">
+                        <span class="info-card-value">{{ supplierPhone }}</span>
+                    </div>
+                    <div class="info-card-row">
+                        <span class="info-card-value">{{ supplierAddress }}</span>
+                    </div>
+                    <div class="info-card-row">
+                        <span class="info-card-label">CR No. (السجل التجاري):</span>
+                        <span class="info-card-value">{{ supplierBusinessNo }}</span>
+                    </div>
+                    <div class="info-card-row">
+                        <span class="info-card-label">VAT No. (السجل الضريبي):</span>
+                        <span class="info-card-value">{{ supplierVATNo }}</span>
+                    </div>
+                </div>
 
-            <!-- ===== Project & Note Section ===== -->
-            <div class="project-section">
-                <p>
-                    <span class="project-value">{{ invoiceData.project_name ?? '—' }}</span>
-                    <span class="project-label">: (اسم المشروع) Project Name</span>
-                </p>
-                <p>
-                    <span class="note-value">{{ invoiceData.notes ?? '—' }}</span>
-                    <span class="note-label">: (البيان) Note</span>
-                </p>
+                <!-- Customer Card -->
+                <div class="info-card">
+                    <h3 class="info-card-title">Client: {{ customerName }}</h3>
+                    <p class="info-card-subtitle">العميل: {{ customerName }}</p>
+                    <div class="info-card-row">
+                        <span class="info-card-value">{{ customerPhone }}</span>
+                    </div>
+                    <div class="info-card-row">
+                        <span class="info-card-value">{{ customerAddress }}</span>
+                    </div>
+                    <div class="info-card-row">
+                        <span class="info-card-value">{{ customerBusinessNo }}</span>
+                    </div>
+                    <div class="info-card-row">
+                        <span class="info-card-value">{{ customerTaxsNo }}</span>
+                    </div>
+                </div>
             </div>
 
             <!-- ===== Items Table ===== -->
@@ -93,8 +90,8 @@
                     <thead>
                         <tr>
                             <th class="th-first">
-                                <span class="th-en">Nature of goods or services</span>
-                                <span class="th-ar">تفاصيل السلع والخدمات</span>
+                                <span class="th-en">Product Name</span>
+                                <span class="th-ar">اسم المنتج</span>
                             </th>
                             <th>
                                 <span class="th-en">Unit Price</span>
@@ -105,16 +102,24 @@
                                 <span class="th-ar">الكمية</span>
                             </th>
                             <th>
-                                <span class="th-en">Taxable Amount</span>
-                                <span class="th-ar">المبلغ الخاضع للضريبة</span>
+                                <span class="th-en">Discount</span>
+                                <span class="th-ar">الخصم</span>
                             </th>
                             <th>
-                                <span class="th-en">Tax Amount</span>
-                                <span class="th-ar">مبلغ الضريبة</span>
+                                <span class="th-en">VAT Total Before</span>
+                                <span class="th-ar">المجموع قبل الضريبة</span>
+                            </th>
+                            <th>
+                                <span class="th-en">VAT</span>
+                                <span class="th-ar">الضريبة</span>
+                            </th>
+                            <th>
+                                <span class="th-en">VAT Value</span>
+                                <span class="th-ar">قيمة الضريبة</span>
                             </th>
                             <th class="th-last">
-                                <span class="th-en">Subtotal</span>
-                                <span class="th-ar">المجموع الكلي</span>
+                                <span class="th-en">Total after Vat</span>
+                                <span class="th-ar">المجموع بعد الضريبة</span>
                             </th>
                         </tr>
                     </thead>
@@ -123,7 +128,9 @@
                             <td class="td-name">{{ item.item_name }}</td>
                             <td>{{ formatNumber(item.price_per_unit) }}</td>
                             <td>{{ formatNumber(item.quantity) }}</td>
+                            <td>{{ formatNumber(item.discount_val) }}</td>
                             <td>{{ formatNumber(item.taxable_amount) }}</td>
+                            <td>15%</td>
                             <td>{{ formatNumber(item.total_tax) }}</td>
                             <td class="td-subtotal">{{ formatNumber(item.subtotal_after_tax) }}</td>
                         </tr>
@@ -135,62 +142,58 @@
             <div class="totals-qr-section">
                 <!-- QR Code Area -->
                 <div class="qr-area">
-                    <img
-                        v-if="invoiceData.qr_code"
-                        :src="invoiceData.qr_code"
-                        alt="QR Code"
-                        class="qr-image"
-                    />
+                    <img v-if="invoiceData.qr_code" :src="invoiceData.qr_code" alt="QR Code" class="qr-image" />
                     <div v-else class="qr-placeholder"></div>
                 </div>
 
                 <!-- Totals -->
                 <div class="totals-area">
-                    <!-- Total QTY -->
+                    <!-- Sub-Total -->
                     <div class="total-row">
                         <div class="total-labels">
-                            <span class="total-label-en">Total QTY</span>
-                            <span class="total-label-ar">إجمالي الكميات</span>
+                            <span class="total-label-en">Sub-Total</span>
+                            <span class="total-label-ar">المجموع الفرعي</span>
                         </div>
-                        <span class="total-val">{{ formatCurrency(invoiceData.total_quantity) }}</span>
+                        <span class="total-val">{{ formatCurrency(invoiceData.total_subtotal_before_discount_out_tax)
+                        }}</span>
                     </div>
-                    <!-- Total (Excluding VAT) -->
+                    <!-- Total Taxable Amount -->
                     <div class="total-row">
                         <div class="total-labels">
-                            <span class="total-label-en">Total (Excluding VAT)</span>
-                            <span class="total-label-ar">الإجمالي غير شامل الضريبة</span>
-                        </div>
-                        <span class="total-val">{{ formatCurrency(totalExcludingVat) }}</span>
-                    </div>
-                    <!-- Total Discount -->
-                    <div class="total-row">
-                        <div class="total-labels">
-                            <span class="total-label-en">Total Discount</span>
-                            <span class="total-label-ar">مجموع الخصومات</span>
-                        </div>
-                        <span class="total-val">{{ formatCurrency(invoiceData.total_discount) }}</span>
-                    </div>
-                    <!-- Total Taxable Amount (Excluding VAT) -->
-                    <div class="total-row">
-                        <div class="total-labels">
-                            <span class="total-label-en">Total Taxable Amount (Excluding VAT)</span>
-                            <span class="total-label-ar">الإجمالي الخاضع للضريبة غير شامل ضريبة القيمة المضافة</span>
+                            <span class="total-label-en">Total Taxable Amount</span>
+                            <span class="total-label-ar">الإجمالي الخاضع للضريبة</span>
                         </div>
                         <span class="total-val">{{ formatCurrency(totalTaxableAmount) }}</span>
                     </div>
-                    <!-- Total VAT -->
+                    <!-- Grand Total -->
                     <div class="total-row">
                         <div class="total-labels">
-                            <span class="total-label-en">Total VAT</span>
-                            <span class="total-label-ar">مجموع ضريبة القيمة المضافة</span>
+                            <span class="total-label-en">Grand Total</span>
+                            <span class="total-label-ar">الإجمالي النهائي</span>
                         </div>
-                        <span class="total-val">{{ formatCurrency(invoiceData.total_taxes) }}</span>
+                        <span class="total-val">{{ formatCurrency(invoiceData.final_total) }}</span>
+                    </div>
+                    <!-- Paid Amount -->
+                    <div class="total-row">
+                        <div class="total-labels">
+                            <span class="total-label-en">Paid Amount</span>
+                            <span class="total-label-ar">المبلغ المدفوع</span>
+                        </div>
+                        <span class="total-val">{{ formatCurrency(0) }}</span>
+                    </div>
+                    <!-- Remaining Due -->
+                    <div class="total-row">
+                        <div class="total-labels">
+                            <span class="total-label-en">Remaining Due</span>
+                            <span class="total-label-ar">المبلغ المستحق</span>
+                        </div>
+                        <span class="total-val">{{ formatCurrency(invoiceData.final_total) }}</span>
                     </div>
                     <!-- Total Amount Due -->
                     <div class="total-due-box">
                         <div class="total-due-labels">
-                            <span class="total-due-en">Total Amount Due</span>
-                            <span class="total-due-ar">الإجمالي المستحق</span>
+                            <span class="total-due-en">Payments</span>
+                            <span class="total-due-ar">المدفوعات</span>
                         </div>
                         <span class="total-due-val">{{ formatCurrency(invoiceData.final_total) }}</span>
                     </div>
@@ -203,7 +206,7 @@
                     <div class="footer-info">
                         <span class="footer-company">Qallab Company</span>
                         <span class="footer-sep">|</span>
-                        <span>Phone No: +966 599 1454323  ·  Email: Info@qallab.sa</span>
+                        <span>Phone No: +966 599 1454323 · Email: Info@qallab.sa</span>
                         <span class="footer-sep">|</span>
                         <span>الرقم الضريبي: {{ supplier?.tax_no || 'N/A' }}</span>
                         <span class="footer-sep">|</span>
@@ -247,6 +250,20 @@ const routeId = computed(() => route.params.id as string)
 const supplier = computed(() => invoiceData.value?.supplier ?? null)
 const customer = computed(() => invoiceData.value?.customer ?? null)
 
+// Supplier info
+const supplierName = computed(() => supplier.value?.name || '—')
+const supplierPhone = computed(() => supplier.value?.phone || '—')
+const supplierAddress = computed(() => supplier.value?.address || '—')
+const supplierBusinessNo = computed(() => supplier.value?.business_no || '—')
+const supplierVATNo = computed(() => supplier.value?.tax_no || '—')
+
+// Customer info
+const customerName = computed(() => customer.value?.name || '—')
+const customerPhone = computed(() => customer.value?.phone || '—')
+const customerBusinessNo = computed(() => customer.value?.business_no || '—')
+const customerTaxsNo = computed(() => customer.value?.tax_no || '—')
+const customerAddress = computed(() => customer.value?.address || '—')
+
 const payTypeLabel = computed(() => {
     const so = invoiceData.value?.so_type
     if (!so) return '—'
@@ -287,7 +304,7 @@ const fetchInvoiceData = async () => {
     if (!routeId.value) return
     isLoading.value = true
     try {
-        const res = await api.get<any>(`/sales/invoices/building-materials/${routeId.value}`)
+        const res = await api.get<any>(`/purchases/invoices/${routeId.value}`)
         invoiceData.value = res.data
         await nextTick()
         await waitForImages()
@@ -408,15 +425,14 @@ onMounted(() => {
 /* ---- Header with Wave ---- */
 .invoice-header {
     position: relative;
-    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     overflow: hidden;
 }
 
 .header-content {
     position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
     direction: ltr;
     padding: 24px 0 12px;
     z-index: 1;
@@ -474,6 +490,7 @@ onMounted(() => {
     font-size: 10px;
     font-weight: 700;
     color: #101828;
+    direction: ltr;
 }
 
 .info-title--blue {
@@ -481,9 +498,13 @@ onMounted(() => {
 }
 
 .info-row {
-    margin-bottom: 8px;
+    margin-bottom: 5px;
     font-size: 0.85rem;
     line-height: 1.5;
+    display: flex;
+    align-items: center;
+    direction: ltr;
+    gap: 5px
 }
 
 .info-label {
@@ -510,49 +531,54 @@ onMounted(() => {
     line-height: 1.4;
 }
 
-/* ============================================
-   PROJECT & NOTE SECTION
-   ============================================ */
-.project-section {
-    border: 1px solid rgba(246, 248, 252, 1);
-    border-radius: 16px;
-    border-image: none;
-    padding: 13px 36px;
+/* ---- Info Cards Container ---- */
+.info-cards-container {
+    display: flex;
+    gap: 20px;
     margin: 0 36px;
-    background: unset;
+    direction: ltr;
+}
+
+.info-card {
+    flex: 1;
+    padding: 20px;
     background-color: rgba(248, 250, 252, 1);
-    color: rgba(248, 250, 252, 1);
+    border-radius: 16px;
 }
 
-.project-section p {
-    margin: 6px 0;
-    font-size: 0.9rem;
-    line-height: 1.6;
-    text-align: left;
-}
-
-.project-label {
-    font-weight: 600;
-    font-size: 12px;
-    color: rgba(93, 100, 129, 1);
-}
-
-.project-value {
+.info-card-title {
+    margin: 0 0 4px;
+    font-size: 14px;
     font-weight: 700;
-    font-size: 12px;
-    color: rgba(25, 33, 61, 1);
+    color: rgba(16, 24, 40, 1);
+    line-height: 1.4;
 }
 
-.note-label {
+.info-card-subtitle {
+    margin: 0 0 12px;
+    font-size: 12px;
+    font-weight: 400;
+    color: rgba(102, 112, 133, 1);
+    line-height: 1.5;
+}
+
+.info-card-row {
+    margin-bottom: 6px;
+    font-size: 11px;
+    line-height: 1.5;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.info-card-label {
+    color: rgba(102, 112, 133, 1);
+    font-weight: 400;
+}
+
+.info-card-value {
+    color: rgba(25, 33, 61, 1);
     font-weight: 600;
-    font-size: 12px;
-    color: rgba(93, 100, 129, 1);
-}
-
-.note-value {
-    font-weight: 700;
-    font-size: 12px;
-    color: rgba(25, 33, 61, 1);
 }
 
 /* ============================================
@@ -560,7 +586,7 @@ onMounted(() => {
    ============================================ */
 .table-wrapper {
     margin: 10px 0 0;
-    padding: 0 36px;
+    /* padding: 0 36px; */
 }
 
 .items-table {
@@ -582,7 +608,7 @@ onMounted(() => {
 
 .items-table th {
     color: #fff;
-    padding: 4px 12px;
+    padding: 10px 12px;
     text-align: center;
     font-size: 0.78rem;
     font-weight: 600;
@@ -608,15 +634,19 @@ onMounted(() => {
 .items-table th.th-first {
     text-align: left;
     white-space: normal;
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
     padding-left: 36px;
 }
 
 .items-table th.th-last {
     padding-right: 36px;
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
 }
 
 .items-table tbody td {
-    padding: 4px 12px;
+    padding: 10px 12px;
     border-bottom: 1px solid #F6F8FC;
     font-size: 0.875rem;
     color: #344054;
@@ -649,6 +679,7 @@ onMounted(() => {
     gap: 32px;
     padding: 0 36px 15px;
     align-items: flex-start;
+    margin-top: 20px;
 }
 
 .qr-area {
@@ -717,7 +748,7 @@ onMounted(() => {
 .total-val {
     font-size: 0.9rem;
     font-weight: 600;
-    color: #101828;
+    color: #868DA6;
     min-width: 110px;
     text-align: right;
     white-space: nowrap;
@@ -828,6 +859,7 @@ onMounted(() => {
    PRINT STYLES
    ============================================ */
 @media print {
+
     .no-print,
     .print-actions {
         display: none !important;
@@ -856,7 +888,7 @@ onMounted(() => {
     .footer-gradient,
     .info-block--accent,
     .section-card,
-    .project-section {
+    .info-cards-container {
         print-color-adjust: exact;
         -webkit-print-color-adjust: exact;
     }
@@ -868,7 +900,7 @@ onMounted(() => {
 
     .table-wrapper {
         margin: 10px 0 0;
-        padding: 0 28px;
+        padding: 0 15px;
     }
 
     .items-table th.th-first {
@@ -900,9 +932,8 @@ onMounted(() => {
         margin-right: -46px;
     }
 
-    .project-section {
+    .info-cards-container {
         margin: 0 28px;
-        padding: 4px 28px;
     }
 
     .footer-inner {

@@ -53,7 +53,7 @@
                         </div>
                         <v-divider vertical class="my-6"></v-divider>
                         <div class="info-item-bordered flex-1 px-6 py-4">
-                            <label class="font-semibold text-sm text-gray-500 mb-2 block">تاريخ إنشاء الطلبية</label>
+                            <label class="font-semibold text-sm text-gray-500 mb-2 block">تاريخ الطلبية</label>
                             <p class="text-base font-semibold text-gray-900">{{ orderDateTime }}</p>
                         </div>
                         <v-divider vertical class="my-6"></v-divider>
@@ -210,8 +210,8 @@ const orderCode = computed(() => orderData.value?.code || '')
 const projectName = computed(() => orderData.value?.project_name || '—')
 const orderType = computed(() => {
     const type = orderData.value?.po_type
-    if (type === 'po_without_logistics') return 'شراء مع نقل'
-    if (type === 'po_with_logistics') return 'شراء مع نقل'
+    if (type === 'po_without_logistics') return 'طلبية شراء بدون خدمة نقل'
+    if (type === 'po_with_logistics') return 'طلبية شراء مع خدمة نقل'
     return type || '—'
 })
 const supplierName = computed(() => orderData.value?.supplier_name || '—')
