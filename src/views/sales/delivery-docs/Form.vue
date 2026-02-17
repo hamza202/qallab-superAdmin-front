@@ -367,7 +367,7 @@ const handleSubmitToOrdersList = async () => {
                             <template #item.quantity_from_supplier="{ item }">
                                 <PriceInput
                                     v-model="receiptItems[getItemIndex(item)].quantity_from_supplier"
-                                    placeholder="من المورد" density="comfortable" disabled
+                                    placeholder="من المورد" density="comfortable"
                                     class="w-32" :input-props="{ class: '!text-center' }"
                                     :rules="[required()]" />
                             </template>
@@ -385,7 +385,7 @@ const handleSubmitToOrdersList = async () => {
                             <template #item.quantity_from_customer="{ item }">
                                 <PriceInput
                                     v-model="receiptItems[getItemIndex(item)].quantity_from_customer"
-                                    placeholder="من العميل" density="comfortable"
+                                    placeholder="من العميل" density="comfortable" disabled
                                     class="w-32" :input-props="{ class: '!text-center' }"
                                     :rules="[required()]" />
                             </template>
