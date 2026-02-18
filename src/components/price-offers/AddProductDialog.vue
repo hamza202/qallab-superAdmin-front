@@ -451,7 +451,7 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
           </div>
 
           <!-- Delivery Count (trip_no) - purchases فقط بدون سعر/خصم -->
-          <div v-if="!showPricingFields && requestType == 'raw_materials'">
+          <div v-if="!showPricingFields && requestType == 'raw_materials'|| requestType == 'logistics'">
             <TextInput 
               v-model="editProductData.trip_no" 
               type="number" 
@@ -462,7 +462,7 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
           </div>
 
           <!-- Package Type (transport_type) - purchases فقط بدون سعر/خصم -->
-          <div v-if="!showPricingFields && requestType == 'raw_materials' || requestType == 'trips'">
+          <div v-if="!showPricingFields && requestType == 'raw_materials' || requestType == 'trips' || requestType == 'logistics'">
             <SelectInput 
               v-model="editProductData.transport_type" 
               :items="packageTypeItemsList" 
@@ -607,7 +607,7 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
               </div>
 
               <!-- Discount (sales أو purchases مع showUnitPriceAndDiscount) -->
-              <div v-if="showPricingFields">
+              <div v-if="showPricingFields && !requestType == 'logistics'">
                 <PriceInput 
                   v-model="product.discount" 
                   placeholder="الخصم" 
@@ -617,7 +617,7 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
               </div>
 
               <!-- Delivery Count (trip_no) - purchases فقط بدون سعر/خصم -->
-              <div v-if="!showPricingFields && requestType == 'raw_materials'">
+              <div v-if="!showPricingFields && requestType == 'raw_materials' || requestType == 'logistics'">
                 <PriceInput 
                   v-model="product.trip_no" 
                   placeholder="عدد الرحلات" 
@@ -627,7 +627,7 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
               </div>
 
               <!-- Package Type (transport_type) - purchases فقط بدون سعر/خصم -->
-              <div v-if="!showPricingFields && requestType == 'raw_materials' || !showPricingFields && requestType == 'trips'">
+              <div v-if="!showPricingFields && requestType == 'raw_materials' || !showPricingFields && requestType == 'trips' || requestType == 'logistics'">
                 <SelectInput 
                   v-model="product.transport_type" 
                   :items="packageTypeItemsList" 

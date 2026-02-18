@@ -451,4 +451,86 @@ export const salesRoutes: RouteRecordRaw[] = [
     ],
   },
 
+
+    // Sales Requests Logistics
+  {
+    path: "/sales/requests/logistics",
+    name: "SalesRequestsLogistics",
+    redirect: "/sales/requests/logistics/list",
+    children: [
+      {
+        path: "list",
+        name: "SalesRequestsLogisticsList",
+        component: () => import("@/views/sales/requests/logistics/List.vue"),
+        meta: {
+          title: "pages.SalesRequestsLogistics.title",
+        },
+      },
+      {
+        path: "create",
+        name: "SalesRequestsLogisticsCreate",
+        component: () => import("@/views/sales/requests/logistics/Form.vue"),
+        meta: {
+          title: "pages.SalesRequestsLogistics.FormTitle",
+        },
+      },
+      {
+        path: "edit/:id",
+        name: "SalesRequestsLogisticsEdit",
+        component: () => import("@/views/sales/requests/logistics/Form.vue"),
+        meta: {
+          title: "pages.SalesRequestsLogistics.FormTitle",
+        },
+      },
+      {
+        path: "view/:id",
+        name: "SalesRequestsLogisticsView",
+        component: () => import("@/views/sales/requests/logistics/View.vue"),
+        meta: {
+          title: "pages.SalesRequestsLogistics.title",
+        },
+      },
+    ],
+  },
+  // Sales Quotations Logistics
+  {
+    path: "/sales/quotations/logistics",
+    name: "SalesQuotationsLogistics",
+    redirect: "/sales/quotations/logistics/list",
+    children: [
+      {
+        path: "list",
+        name: "SalesQuotationsLogisticsList",
+        component: () => import("@/views/sales/quotations/logistics/List.vue"),
+        meta: {
+          title: "pages.SalesQuotationsLogistics.title",
+        },
+      },
+      {
+        path: "create",
+        name: "SalesQuotationsLogisticsCreate",
+        component: () => import("@/views/sales/quotations/logistics/Form.vue"),
+        meta: {
+          title: "pages.SalesQuotationsLogistics.FormTitle",
+        },
+      },
+      {
+        path: "edit/:id",
+        name: "SalesQuotationsLogisticsEdit",
+        component: () => import("@/views/sales/quotations/logistics/Form.vue"),
+        meta: {
+          title: "pages.SalesQuotationsLogistics.FormTitle",
+        },
+      },
+      {
+        path: "view/:id",
+        name: "SalesQuotationsLogisticsView",
+        component: () => import("@/views/sales/quotations/logistics/View.vue"),
+        meta: {
+          title: "pages.SalesQuotationsLogistics.title",
+        },
+      },
+    ],
+  },
+
 ];

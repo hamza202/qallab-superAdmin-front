@@ -224,8 +224,7 @@ export const purchasesRoutes: RouteRecordRaw[] = [
       {
         path: "list",
         name: "OrdersFuelsList",
-        component: () =>
-          import("@/views/purchases/orders/fuels/List.vue"),
+        component: () => import("@/views/purchases/orders/fuels/List.vue"),
         meta: {
           title: "pages.OrdersFuels.title",
         },
@@ -233,8 +232,7 @@ export const purchasesRoutes: RouteRecordRaw[] = [
       {
         path: "create",
         name: "OrdersFuelsCreate",
-        component: () =>
-          import("@/views/purchases/orders/fuels/Form.vue"),
+        component: () => import("@/views/purchases/orders/fuels/Form.vue"),
         meta: {
           title: "pages.OrdersFuels.title",
         },
@@ -242,8 +240,7 @@ export const purchasesRoutes: RouteRecordRaw[] = [
       {
         path: "edit/:id",
         name: "OrdersFuelsEdit",
-        component: () =>
-          import("@/views/purchases/orders/fuels/Form.vue"),
+        component: () => import("@/views/purchases/orders/fuels/Form.vue"),
         meta: {
           title: "pages.OrdersFuels.edit",
         },
@@ -251,8 +248,7 @@ export const purchasesRoutes: RouteRecordRaw[] = [
       {
         path: "view/:id",
         name: "OrdersFuelsView",
-        component: () =>
-          import("@/views/purchases/orders/fuels/View.vue"),
+        component: () => import("@/views/purchases/orders/fuels/View.vue"),
         meta: {
           title: "pages.OrdersFuels.view",
         },
@@ -407,6 +403,31 @@ export const purchasesRoutes: RouteRecordRaw[] = [
           import("@/views/purchases/requests/logistics/View.vue"),
         meta: {
           title: "pages.purchasesLogistics.view",
+        },
+      },
+    ],
+  },
+  {
+    path: "/purchases/quotations/logistics",
+    name: "QuotationsLogistics",
+    redirect: "/purchases/quotations/logistics/list",
+    children: [
+      {
+        path: "list",
+        name: "QuotationsLogisticsList",
+        component: () =>
+          import("@/views/purchases/quotations/logistics/List.vue"),
+        meta: {
+          title: "pages.QuotationsLogistics.title",
+        },
+      },
+      {
+        path: "view/:id",
+        name: "QuotationsLogisticsView",
+        component: () =>
+          import("@/views/purchases/quotations/logistics/View.vue"),
+        meta: {
+          title: "pages.QuotationsLogistics.view",
         },
       },
     ],
