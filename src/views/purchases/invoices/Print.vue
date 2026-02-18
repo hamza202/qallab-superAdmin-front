@@ -195,7 +195,7 @@
                             <span class="total-due-en">Payments</span>
                             <span class="total-due-ar">المدفوعات</span>
                         </div>
-                        <span class="total-due-val">{{ formatCurrency(invoiceData.final_total) }}</span>
+                        <span class="total-due-val">{{formatCurrency(0) }}</span>
                     </div>
                 </div>
             </div>
@@ -900,7 +900,7 @@ onMounted(() => {
 
     .table-wrapper {
         margin: 10px 0 0;
-        padding: 0 15px;
+        padding: 0 28px;
     }
 
     .items-table th.th-first {

@@ -77,25 +77,39 @@ const transportTypesList = computed(() => props.transportTypes || []);
 const amPmIntervalList = computed(() => props.amPmIntervalOptions || []);
 const categoriesList = computed(() => props.categoriesItems || []);
 
-// Watch for edit mode to populate form
+const populateFormFromEditDetail = () => {
+  if (!props.editDetail) return;
+  form.material_type = props.editDetail.material_type || [];
+  form.trip_no = props.editDetail.trip_no;
+  form.actual_execution_interval = props.editDetail.actual_execution_interval;
+  form.am_pm_interval = props.editDetail.am_pm_interval || "";
+  form.from_date = props.editDetail.from_date || "";
+  form.to_date = props.editDetail.to_date || "";
+  form.transport_type = props.editDetail.transport_type || [];
+  form.transport_no = props.editDetail.transport_no;
+  form.loading_responsible_party = props.editDetail.loading_responsible_party || "";
+  form.downloading_responsible_party = props.editDetail.downloading_responsible_party || "";
+  form.target_location = props.editDetail.target_location || "";
+  form.target_latitude = props.editDetail.target_latitude || "";
+  form.target_longitude = props.editDetail.target_longitude || "";
+  form.source_location = props.editDetail.source_location || "";
+  form.source_latitude = props.editDetail.source_latitude || "";
+  form.source_longitude = props.editDetail.source_longitude || "";
+};
+
+// Watch dialog open/close
 watch(() => props.modelValue, (newVal) => {
-  if (newVal && props.editDetail) {
-    form.material_type = props.editDetail.material_type || [];
-    form.trip_no = props.editDetail.trip_no;
-    form.actual_execution_interval = props.editDetail.actual_execution_interval;
-    form.am_pm_interval = props.editDetail.am_pm_interval || "";
-    form.from_date = props.editDetail.from_date || "";
-    form.to_date = props.editDetail.to_date || "";
-    form.transport_type = props.editDetail.transport_type || [];
-    form.transport_no = props.editDetail.transport_no;
-    form.loading_responsible_party = props.editDetail.loading_responsible_party || "";
-    form.downloading_responsible_party = props.editDetail.downloading_responsible_party || "";
-    form.target_location = props.editDetail.target_location || "";
-    form.target_latitude = props.editDetail.target_latitude || "";
-    form.target_longitude = props.editDetail.target_longitude || "";
-    form.source_location = props.editDetail.source_location || "";
-    form.source_latitude = props.editDetail.source_latitude || "";
-    form.source_longitude = props.editDetail.source_longitude || "";
+  if (newVal) {
+    if (props.editDetail) {
+      populateFormFromEditDetail();
+    } else {
+      resetForm();
+    }
+  } else {
+    resetForm();
+    if (formRef.value?.resetValidation) {
+      formRef.value.resetValidation();
+    }
   }
 });
 
@@ -121,6 +135,9 @@ const resetForm = () => {
 const closeDialog = () => {
   internalOpen.value = false;
   resetForm();
+  if (formRef.value?.resetValidation) {
+    formRef.value.resetValidation();
+  }
 };
 
 const handleSave = async () => {
