@@ -365,8 +365,11 @@ onBeforeUnmount(() => {
         <DataTable :headers="tableHeaders" :items="tableItemsWithId" :loading="loading" :show-checkbox="canBulkDelete"
           show-actions @edit="handleEdit" @delete="confirmDelete" @view="handleView" @select="handleSelectRequest"
           @selectAll="handleSelectAllRequests">
+          <template #item.transport_start_date="{ item }">
+            {{ item.transport_start_date ? new Date(item.transport_start_date).toLocaleDateString('en-US') : '—' }}
+          </template>
           <template #item.quotations_datetime="{ item }">
-            {{ item.quotations_datetime ? new Date(item.quotations_datetime).toLocaleDateString('ar-SA') : '—' }}
+            {{ item.quotations_datetime || '—' }}
           </template>
           <template #item.final_total="{ item }">
             {{ item.final_total ?? '—' }}
