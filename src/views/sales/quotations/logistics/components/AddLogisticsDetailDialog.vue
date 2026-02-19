@@ -26,6 +26,7 @@ export interface LogisticsDetail {
   source_location: string;
   source_latitude: string | number;
   source_longitude: string | number;
+  transport_amount: string | number;
 }
 
 const props = defineProps<{
@@ -71,6 +72,7 @@ const form = reactive({
   source_location: "",
   source_latitude: "" as string | number,
   source_longitude: "" as string | number,
+  transport_amount: "" as string | number,
 });
 
 const transportTypesList = computed(() => props.transportTypes || []);
@@ -95,6 +97,8 @@ const populateFormFromEditDetail = () => {
   form.source_location = props.editDetail.source_location || "";
   form.source_latitude = props.editDetail.source_latitude || "";
   form.source_longitude = props.editDetail.source_longitude || "";
+  form.transport_amount = props.editDetail.transport_amount;
+
 };
 
 // Watch dialog open/close
@@ -130,6 +134,7 @@ const resetForm = () => {
   form.source_location = "";
   form.source_latitude = "";
   form.source_longitude = "";
+  form.transport_amount = "";
 };
 
 const closeDialog = () => {
@@ -164,6 +169,7 @@ const handleSave = async () => {
     source_location: form.source_location,
     source_latitude: form.source_latitude,
     source_longitude: form.source_longitude,
+    transport_amount: form.transport_amount
   };
 
   if (isEditMode.value) {
@@ -228,7 +234,10 @@ onMounted(() => {
 
           <TextInput label="مسؤول التفريغ" v-model="form.downloading_responsible_party"
             placeholder="أدخل اسم مسؤول التفريغ" density="comfortable" :rules="[required()]" />
-        </div>
+                    <PriceInput label="مبلغ النقل" show-rial-icon class="col-span-2" v-model="form.transport_amount" placeholder="أدخل مبلغ النقل" density="comfortable"
+            :rules="[required()]" />
+
+          </div>
       </div>
     </v-form>
 

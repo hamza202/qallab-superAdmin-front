@@ -298,17 +298,9 @@ onMounted(() => {
               custom-class="px-7 font-semibold text-base text-white border !border-primary-200"
               :prepend-icon="searchIcon" :label="t('common.advancedSearch')" @click="toggleAdvancedFilters" />
 
-            <ButtonWithIcon
-              v-if="canCreate"
-              variant="flat"
-              color="primary-100"
-              height="40"
-              rounded="4"
+            <ButtonWithIcon v-if="canCreate" variant="flat" color="primary-100" height="40" rounded="4"
               custom-class="px-7 font-semibold text-base !text-primary-800 border !border-primary-200"
-              :prepend-icon="plusIcon"
-              label="أضف عرض سعر"
-              @click="openCreateQuotation"
-            />
+              :prepend-icon="plusIcon" label="أضف عرض سعر" @click="openCreateQuotation" />
           </div>
         </div>
 
@@ -321,26 +313,29 @@ onMounted(() => {
               placeholder="اسم العميل" class="w-full sm:w-40 bg-white" />
             <TextInput v-model="filterNameArabic" density="comfortable" variant="outlined" hide-details
               placeholder="السعر" class="w-full sm:w-40 bg-white" />
-            <DatePickerInput v-model="filterStartDateMin" density="comfortable" hide-details
-              placeholder="تاريخ العرض" class="w-full sm:w-40 bg-white" />
+            <DatePickerInput v-model="filterStartDateMin" density="comfortable" hide-details placeholder="تاريخ العرض"
+              class="w-full sm:w-40 bg-white" />
           </div>
           <div class="flex gap-2 items-center">
             <ButtonWithIcon variant="flat" color="primary-500" rounded="4" height="40"
-              custom-class="px-5 font-semibold !text-white text-sm sm:text-base"
-              :prepend-icon="searchIcon" label="ابحث" @click="applyFilters" />
+              custom-class="px-5 font-semibold !text-white text-sm sm:text-base" :prepend-icon="searchIcon" label="ابحث"
+              @click="applyFilters" />
             <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4" border="sm"
               custom-class="px-5 font-semibold text-sm sm:text-base !text-primary-800 !border-primary-200"
               prepend-icon="mdi-refresh" label="إعادة تعيين" @click="resetFilters" />
           </div>
         </div>
 
-        <DataTable :headers="tableHeaders" :items="tableItemsWithId" :loading="loading"
-          :show-checkbox="canBulkDelete" show-actions
-          @edit="handleEdit" @delete="handleDelete" @view="handleView"
-          @select="handleSelectRequest" @selectAll="handleSelectAllRequests">
-          <template #item.quotations_datetime="{ item }">
-            {{ item.quotations_datetime ? new Date(item.quotations_datetime).toLocaleDateString('ar-SA') : '—' }}
+        <DataTable :headers="tableHeaders" :items="tableItemsWithId" :loading="loading" :show-checkbox="canBulkDelete"
+          show-actions @edit="handleEdit" @delete="handleDelete" @view="handleView" @select="handleSelectRequest"
+          @selectAll="handleSelectAllRequests">
+          <template #item.transport_start_date="{ item }">
+            {{ item.transport_start_date ? new Date(item.transport_start_date).toLocaleDateString('en-US') : '—' }}
           </template>
+          <template #item.quotations_datetime="{ item }">
+            {{ item.quotations_datetime || '—' }}
+          </template>
+
           <template #item.final_total="{ item }">
             {{ item.final_total ?? '—' }}
           </template>
@@ -363,12 +358,9 @@ onMounted(() => {
     </div>
 
     <!-- Status Change Dialog -->
-    <StatusChangeFeature
-      v-model="showChangeStatusDialog"
-      :item="itemToChangeStatus"
+    <StatusChangeFeature v-model="showChangeStatusDialog" :item="itemToChangeStatus"
       :change-status-url="`/sales/quotations/logistics/${itemToChangeStatus?.uuid}/change-status`"
-      @success="fetchList"
-    />
+      @success="fetchList" />
 
     <DeleteConfirmDialog v-model="showDeleteDialog" :loading="deleteLoading" title="حذف عرض السعر"
       message="هل أنت متأكد من حذف هذا العرض؟" @confirm="confirmDelete" />

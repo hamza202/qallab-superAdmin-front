@@ -316,9 +316,6 @@ onMounted(async () => {
 onBeforeUnmount(() => {
   cleanupInfiniteScroll();
 });
-onMounted(() => {
-  fetchList();
-});
 </script>
 
 <template>

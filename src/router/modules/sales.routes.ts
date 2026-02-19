@@ -209,8 +209,7 @@ export const salesRoutes: RouteRecordRaw[] = [
       {
         path: "list",
         name: "SalesOrdersFuelsList",
-        component: () =>
-          import("@/views/sales/orders/fuels/List.vue"),
+        component: () => import("@/views/sales/orders/fuels/List.vue"),
         meta: {
           title: "pages.SalesOrdersFuels.title",
         },
@@ -218,8 +217,7 @@ export const salesRoutes: RouteRecordRaw[] = [
       {
         path: "create",
         name: "SalesOrdersFuelsCreate",
-        component: () =>
-          import("@/views/sales/orders/fuels/Form.vue"),
+        component: () => import("@/views/sales/orders/fuels/Form.vue"),
         meta: {
           title: "pages.SalesOrdersFuels.title",
         },
@@ -227,8 +225,7 @@ export const salesRoutes: RouteRecordRaw[] = [
       {
         path: "edit/:id",
         name: "SalesOrdersFuelsEdit",
-        component: () =>
-          import("@/views/sales/orders/fuels/Form.vue"),
+        component: () => import("@/views/sales/orders/fuels/Form.vue"),
         meta: {
           title: "pages.SalesOrdersFuels.edit",
         },
@@ -236,8 +233,7 @@ export const salesRoutes: RouteRecordRaw[] = [
       {
         path: "view/:id",
         name: "SalesOrdersFuelsView",
-        component: () =>
-          import("@/views/sales/orders/fuels/View.vue"),
+        component: () => import("@/views/sales/orders/fuels/View.vue"),
         meta: {
           title: "pages.SalesOrdersFuels.view",
         },
@@ -411,7 +407,7 @@ export const salesRoutes: RouteRecordRaw[] = [
       },
     ],
   },
-    {
+  {
     path: "/sales/delivery-docs",
     name: "DeliveryDocs",
     redirect: "/sales/delivery-docs/list",
@@ -451,8 +447,7 @@ export const salesRoutes: RouteRecordRaw[] = [
     ],
   },
 
-
-    // Sales Requests Logistics
+  // Sales Requests Logistics
   {
     path: "/sales/requests/logistics",
     name: "SalesRequestsLogistics",
@@ -532,5 +527,4 @@ export const salesRoutes: RouteRecordRaw[] = [
       },
     ],
   },
-
 ];

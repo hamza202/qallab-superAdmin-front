@@ -46,7 +46,7 @@ const fetchCategories = async () => {
 
 const fetchConstants = async () => {
     try {
-        const res = await api.get<any>('/purchases/constants');
+        const res = await api.get<any>('/sales/constants');
         const data = res.data;
         if (data) {
             requestTypeItems.value = data.request_types?.map((i: any) => ({ title: i.label, value: i.key })) || [];
@@ -111,14 +111,13 @@ const fetchFormData = async () => {
 
     isLoading.value = true;
     try {
-        const res = await api.get<any>(`/purchases/logistics/${routeId.value}`);
+        const res = await api.get<any>(`/sales/logistics/${routeId.value}`);
         const data = res.data;
 
         if (data) {
             // Populate form data
             formData.value.responsible_person = data.responsible_person || '';
             formData.value.responsible_phone = data.responsible_phone || '';
-            formData.value.supplier_id = data.supplier_id;
             formData.value.issueDate = data.request_datetime ? data.request_datetime.split(' ')[0] : '';
             formData.value.request_datetime = data.request_datetime ? String(data.request_datetime) : '';
             formData.value.project_name = data.project_name || '';
@@ -228,7 +227,6 @@ const formData = ref({
     requestNumber: '#12520226',
     responsible_person: '',
     responsible_phone: '',
-    supplier_id: null,
     project_name: '',
     target_location: null as string | null,
     target_latitude: null as string | null,
@@ -386,7 +384,6 @@ const resetForm = () => {
         requestNumber: '#12520226',
         responsible_person: '',
         responsible_phone: '',
-        supplier_id: null,
         project_name: '',
         target_location: null,
         target_latitude: null,
@@ -466,7 +463,6 @@ const buildFormData = (): FormData => {
     fd.append('responsible_person', formData.value.responsible_person || '');
     fd.append('responsible_phone', formData.value.responsible_phone || '');
     fd.append('request_datetime', isEditMode.value ? formatDateTime(formData.value.request_datetime || new Date()) : getCurrentDateTimeFormatted());
-    fd.append('supplier_id', String(formData.value.supplier_id || ''));
     fd.append('project_name', formData.value.project_name || '');
     fd.append('upfront_payment', String(formData.value.advancePayment || ''));
     fd.append('payment_method', formData.value.paymentMethod || '');
@@ -554,14 +550,14 @@ const handleSubmit = async (type: any) => {
         let response;
         if (isEditMode.value && routeId.value) {
             // Edit mode - POST with _method: PUT and UUID in URL
-            response = await api.post(`/purchases/logistics/${routeId.value}`, fd, {
+            response = await api.post(`/sales/logistics/${routeId.value}`, fd, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
             });
         } else {
             // Create mode - POST request
-            response = await api.post('/purchases/logistics', fd, {
+            response = await api.post('/sales/logistics', fd, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
@@ -572,7 +568,7 @@ const handleSubmit = async (type: any) => {
 
         // Navigate back to list or reset form based on type
         if (type === 'return_to_list') {
-            router.push({ name: 'PurchasesLogisticsList' });
+            router.push({ name: 'SalesRequestsLogisticsList' });
         } else if (type === 'create_new') {
             resetForm();
         }
@@ -624,7 +620,7 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
 
 
 const handleNewRequest = () => {
-    router.push({ name: 'PurchasesLogisticsCreate' });
+    router.push({ name: 'SalesRequestsLogisticsCreate' });
 };
 
 onMounted(async () => {
@@ -644,8 +640,8 @@ onMounted(async () => {
     <default-layout>
         <div class="request-material-product-page  -mx-6 bg-qallab-dashboard-bg space-y-4">
             <!-- Page Header -->
-            <TopHeader :icon="fileQuestionIcon" title-key="pages.purchasesLogistics.create"
-                description-key="pages.purchasesLogistics.createDescription" :show-action="false"
+            <TopHeader :icon="fileQuestionIcon" title-key="pages.SalesRequestsLogistics.FormTitle"
+                description-key="pages.SalesRequestsLogistics.edit" :show-action="false"
                 :code="isEditMode ? (formData.code || '') : ''" :code-icon="fileIcon" @action="handleNewRequest" />
 
             <!-- Request Information Section -->
@@ -661,13 +657,6 @@ onMounted(async () => {
                         <div>
                             <TextInput v-model="formData.responsible_person" label="اسم المسؤول"
                                 placeholder="أدخل اسم المسؤول" :rules="[required()]" density="comfortable" />
-                        </div>
-
-                        <!-- Transport Company -->
-                        <div>
-                            <SelectInput v-model="formData.supplier_id" label="شركة النقل" :items="supplierItems"
-                                item-title="title" :rules="[required()]" item-value="value" density="comfortable"
-                                placeholder="اختر" />
                         </div>
 
                         <!-- Request Date -->
@@ -914,7 +903,7 @@ onMounted(async () => {
             @location-selected="handleLocationSelected" />
 
         <!-- Add Product Dialog -->
-        <AddProductDialog v-model="showAddProductDialog" request-type="logistics" :unit-items="unitItems"
+        <AddProductDialog v-model="showAddProductDialog" :unit-items="unitItems"
             :edit-product="editingProduct" :existing-products="productTableItems" @saved="handleProductSaved"
             @product-updated="handleProductUpdated" />
 
