@@ -16,11 +16,11 @@ import {
   filePlusIcon,
   listIcon,
   CoinHandIcon,
-  fileQuestionIcon,
 } from '@/components/icons/priceOffersIcons';
 import {
   returnIcon,
   saveIcon,
+  HelpCircleIcon,
 } from '@/components/icons/globalIcons';
 
 useI18n()
@@ -31,66 +31,41 @@ const router = useRouter();
 // Check if we're in edit mode
 const isEditMode = computed(() => !!route.params.id);
 const routeId = computed(() => route.params.id as string);
-// Check if creating order from quotation
-const fromQuotationId = computed(() => route.query.from_quotation as string | undefined);
-const fromQuotationCode = computed(() => route.query.quotation_code as string | undefined);
-const purchaseQuotationId = computed(() => route.query.purchase_quotation_id as string | undefined);
-// Track if data is loaded from quotation (to disable supplier select)
-const isFromQuotation = ref(false);
 const isLoading = ref(false);
 const isSubmitting = ref(false);
 
-const requestTypeItems = ref<any[]>([]);
 const paymentMethodItems = ref<any[]>([]);
-const transportTypeItems = ref<any[]>([]);
-const amPmIntervalItems = ref<any[]>([]);
 const feeTypeItems = ref<any[]>([]);
 const unitItems = ref<any[]>([]);
+const customerItems = ref<any[]>([]);
 const deliveryMethodItems = ref<any[]>([]);
 const supplyTypeItems = ref<any[]>([]);
-const fillingsItems = ref<any[]>([]);
-const supplierItems = ref<any[]>([]);
-
-const fetchSuppliers = async () => {
-    try {
-        const res = await api.get<any>('/suppliers/list');
-        if (Array.isArray(res.data)) {
-            supplierItems.value = res.data.map((i: any) => ({ title: i.full_name, value: i.id }));
-        }
-    } catch (e) {
-        console.error('Error fetching suppliers:', e);
-    }
-};
+const transportTypeItems = ref<any[]>([]);
 
 const fetchConstants = async () => {
     try {
-        const res = await api.get<any>('/purchases/constants');
+        const res = await api.get<any>('/sales/quotations/constants');
         const data = res.data;
         if (data) {
-             requestTypeItems.value = data.request_types?.map((i: any) => ({ title: i.label, value: i.key })) || [];
-             paymentMethodItems.value = data.payment_methods?.map((i: any) => ({ title: i.label, value: i.key })) || [];
-             transportTypeItems.value = data.transport_types?.map((i: any) => ({ title: i.label, value: i.key })) || [];
-             amPmIntervalItems.value = data.am_pm_interval?.map((i: any) => ({ title: i.label, value: i.key })) || [];
-             const deliveryMethods = data.delivered_methods ?? data.delivery_methods;
-             if (deliveryMethods?.length) deliveryMethodItems.value = deliveryMethods.map((i: any) => ({ title: i.label, value: i.key }));
-             if (data.supply_types?.length) supplyTypeItems.value = data.supply_types.map((i: any) => ({ title: i.label, value: i.key }));
-             if (data.fillings?.length) fillingsItems.value = data.fillings.map((i: any) => ({ title: i.label, value: i.key }));
+            paymentMethodItems.value = data.payment_methods?.map((i: any) => ({ title: i.label, value: i.key })) || [];
+            feeTypeItems.value = data.fee_types?.map((i: any) => ({ title: i.label, value: i.key })) || [];
+            if (data.delivered_methods?.length) deliveryMethodItems.value = data.delivered_methods.map((i: any) => ({ title: i.label, value: i.key }));
+            if (data.supply_types?.length) supplyTypeItems.value = data.supply_types.map((i: any) => ({ title: i.label, value: i.key }));
+            if (data.transport_types?.length) transportTypeItems.value = data.transport_types.map((i: any) => ({ title: i.label, value: i.key }));
         }
-    } catch(e) {
+    } catch (e) {
         console.error('Error fetching constants:', e);
     }
 }
 
-/** /purchases/orders/constants – fee_types */
-const fetchOrdersConstants = async () => {
+const fetchCustomers = async () => {
     try {
-        const res = await api.get<any>('/purchases/orders/constants');
-        const data = res.data;
-        if (data) {
-            feeTypeItems.value = data.fee_types?.map((i: any) => ({ title: i.label, value: i.key })) || [];
+        const res = await api.get<any>('/customers/list');
+        if (Array.isArray(res.data)) {
+            customerItems.value = res.data.map((i: any) => ({ title: i.full_name, value: i.id }));
         }
-    } catch(e) {
-        console.error('Error fetching orders constants:', e);
+    } catch (e) {
+        console.error('Error fetching customers:', e);
     }
 };
 
@@ -119,20 +94,19 @@ const fetchFormData = async () => {
     
     isLoading.value = true;
     try {
-        const res = await api.get<any>(`/purchases/orders/fuels/${routeId.value}`);
+        const res = await api.get<any>(`/sales/orders/fuels/${routeId.value}`);
         const data = res.data;
         
         if (data) {
             // Populate form data
             formData.value.code = data.code || '';
-            formData.value.supplier_id = data.supplier_id;
+            formData.value.customer_id = data.customer_id;
             formData.value.project_name = data.project_name || '';
+            formData.value.po_reference = data.po_reference || '';
             formData.value.invoice_interval = data.invoice_interval ?? null;
             formData.value.payment_term_no = data.payment_term_no ?? null;
 
-            formData.value.po_datetime = normalizePoDateTime(
-                data.po_datetime || data.request_datetime || ''
-            );
+            formData.value.so_datetime = data.so_datetime;
             formData.value.paymentMethod = data.payment_method;
             formData.value.advancePayment = data.upfront_payment;
             formData.value.target_location = data.target_location;
@@ -149,7 +123,7 @@ const fetchFormData = async () => {
             formData.value.responsibleName = data.responsible_person || '';
             formData.value.responsiblePhone = data.responsible_phone || '';
 
-            const attached = data.po_attached_logistics_detail || data.logistics_detail || null;
+            const attached = data.so_attached_logistics_detail || data.logistics_detail || null;
             if (attached) {
                 formData.value.transport_start_date = attached.from_date || '';
                 formData.value.transport_end_date = attached.to_date || '';
@@ -194,121 +168,16 @@ const fetchFormData = async () => {
     }
 }
 
-// Helper function to get unit name from id
-const getUnitName = (unitId: number | null): string => {
-  if (unitId == null) return '';
-  const unit = unitItems.value.find((u: any) => u.value === unitId || u.value === Number(unitId));
-  return unit?.title || '';
-};
-
-// Fetch quotation data and pre-fill form when creating order from quotation
-const fetchQuotationForOrder = async () => {
-  if (!fromQuotationId.value) return;
-
-  // Set quotation code from query param
-  if (fromQuotationCode.value) {
-    formData.value.purchase_quotation_code = fromQuotationCode.value as any;
-  }
-
-  isLoading.value = true;
-  try {
-    const res = await api.get<any>(`/purchases/quotations/fuels/${fromQuotationId.value}`);
-    const data = res.data;
-
-    if (data) {
-      // Mark as loaded from quotation to disable supplier select
-      isFromQuotation.value = true;
-      
-      // Set quotation code from API response if not already set from query param
-      if (data.code && !fromQuotationCode.value) {
-        formData.value.purchase_quotation_code = data.code;
-      }
-      
-      // Map quotation fields to order form fields
-      formData.value.supplier_id = data.supplier?.id != null 
-        ? Number(data.supplier.id) 
-        : (data.supplier_id != null ? Number(data.supplier_id) : null);
-      formData.value.project_name = data.project_name || '';
-      formData.value.target_location = data.target_location || null;
-      formData.value.target_latitude = data.target_latitude || null;
-      formData.value.target_longitude = data.target_longitude || null;
-      formData.value.source_location = data.source_location || null;
-      formData.value.source_latitude = data.source_latitude || null;
-      formData.value.source_longitude = data.source_longitude || null;
-      formData.value.paymentMethod = data.payment_method || null;
-      formData.value.advancePayment = data.upfront_payment || null;
-      formData.value.invoice_interval = data.invoice_interval != null ? Number(data.invoice_interval) : null;
-      formData.value.payment_term_no = data.payment_term_no != null ? Number(data.payment_term_no) : null;
-      formData.value.late_fee_type = data.late_fee_type || null;
-      formData.value.late_fee = data.late_fee != null ? Number(data.late_fee) : null;
-      formData.value.cancel_fee_type = data.cancel_fee_type || null;
-      formData.value.cancel_fee = data.cancel_fee != null ? Number(data.cancel_fee) : null;
-      formData.value.textNote = data.notes || '';
-      formData.value.responsibleName = data.responsible_person || '';
-      formData.value.responsiblePhone = data.responsible_phone || null;
-      
-      // Map logistics detail
-      const attached = data.po_attached_logistics_detail || data.logistics_detail || null;
-      if (attached) {
-        formData.value.transport_start_date = attached.from_date || '';
-        formData.value.transport_end_date = attached.to_date || '';
-        formData.value.supplyType = attached.supply_type || null;
-        formData.value.supplyDuration = attached.supply_interval ?? null;
-        formData.value.deliveryDuration = attached.delivered_interval ?? null;
-        formData.value.deliveryMethod = attached.delivered_method ?? null;
-      }
-
-      // Map products (items) from quotation to order
-      if (data.items && Array.isArray(data.items)) {
-        productTableItems.value = data.items.map((item: any) => {
-          const itemId = Number(item.item?.id || item.item_id);
-          const unitId = item.unit?.id || item.unit_id;
-          const unitName = item.unit?.name || item.unit_name || getUnitName(unitId);
-
-          return {
-            item_id: itemId,
-            item_name: item.item?.name || item.item_name || item.name || '',
-            unit_id: unitId ?? null,
-            unit_name: unitName,
-            quantity: item.quantity ?? null,
-            transport_type: item.transport_type ?? null,
-            transport_type_name: getTransportTypeName(item.transport_type),
-            trip_no: item.trip_no ?? null,
-            notes: item.note || item.notes || '',
-            price_per_unit: item.price_per_unit ?? null,
-            unit_price: item.price_per_unit ?? null,
-            discount: item.discount_val ?? null,
-            discount_type: item.discount_type ?? null,
-            discount_val: item.discount_val ?? null,
-            total_tax: null,
-            subtotal_before_discount: null,
-            subtotal_after_discount: null,
-            isAdded: true,
-          };
-        });
-      }
-    }
-  } catch (e) {
-    console.error('Error fetching quotation data:', e);
-  } finally {
-    isLoading.value = false;
-  }
-};
-
 onMounted(async () => {
     await Promise.all([
         fetchConstants(),
-        fetchOrdersConstants(),
         fetchUnits(),
-        fetchSuppliers()
+        fetchCustomers()
     ]);
     
     // Fetch form data if in edit mode
     if (isEditMode.value) {
         await fetchFormData();
-    } else if (fromQuotationId.value) {
-        // Fetch quotation data if creating order from quotation
-        await fetchQuotationForOrder();
     }
 });
 
@@ -341,16 +210,14 @@ const logisticsDetailId = ref<number | null>(null);
 // Form data (matching JSON payload)
 const formData = ref({
     code: '',
-    purchase_quotation_code: null as string | null,
     source_location: null as string | null,
     source_latitude: null as string | null,
     source_longitude: null as string | null,
     target_location: null as string | null,
     target_latitude: null as string | null,
     target_longitude: null as string | null,
-    supplier_id: null as number | null,
-    supplier_name: null,
-    po_datetime: '',
+    customer_id: null as number | null,
+    so_datetime: '',
     responsibleName: '' as string,
     responsiblePhone: null as string | null,
 
@@ -372,6 +239,7 @@ const formData = ref({
     paymentMethod: null,
     advancePayment: null,
     project_name: '',
+    po_reference: '',
     textNote: '',
 });
 
@@ -387,10 +255,6 @@ const showAddProductDialog = ref(false);
 const editingProduct = ref<ProductTableItem | null>(null);
 
 const handleAddProduct = () => {
-    if (!formData.value.supplier_id) {
-        warning('يجب عليك اختيار اسم المورد أولاً');
-        return;
-    }
     editingProduct.value = null;
     showAddProductDialog.value = true;
 };
@@ -457,63 +321,26 @@ const handleDeleteProduct = (item: any) => {
 
 import { useForm } from '@/composables/useForm';
 
-const { formRef, isFormValid, validate } = useForm();
+const { isFormValid, validate } = useForm();
 
-const formatDate = (date: string | Date): string => {
+const formatDateYmd = (date: string | Date): string => {
     if (!date) return '';
     const d = new Date(date);
     const day = String(d.getDate()).padStart(2, '0');
     const month = String(d.getMonth() + 1).padStart(2, '0');
     const year = d.getFullYear();
-    return `${day}-${month}-${year}`;
-};
-
-const formatDateTimeDmy = (date: Date): string => {
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = date.getFullYear();
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    const seconds = String(date.getSeconds()).padStart(2, '0');
-    return `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
-};
-
-const normalizePoDateTime = (value: string): string => {
-    if (!value) return '';
-    const trimmed = value.trim();
-    if (/^\d{2}-\d{2}-\d{4}\s+\d{2}:\d{2}:\d{2}$/.test(trimmed)) {
-        return trimmed;
-    }
-    if (/^\d{4}-\d{2}-\d{2}/.test(trimmed)) {
-        const [datePart, timePart] = trimmed.split(' ');
-        const [year, month, day] = datePart.split('-').map(Number);
-        const [hours, minutes, seconds] = (timePart || '00:00:00').split(':').map(Number);
-        if (year && month && day) {
-            const d = new Date(year, month - 1, day, hours || 0, minutes || 0, seconds || 0);
-            return formatDateTimeDmy(d);
-        }
-    }
-    const parsed = new Date(trimmed);
-    if (!Number.isNaN(parsed.getTime())) {
-        return formatDateTimeDmy(parsed);
-    }
-    return trimmed;
+    return `${year}-${month}-${day}`;
 };
 
 // Build FormData for submission
 const buildFormData = (): FormData => {
     const fd = new FormData();
 
-    // Include purchase_quotation_id if creating order from quotation
-    if (purchaseQuotationId.value) {
-        fd.append('purchase_quotation_id', purchaseQuotationId.value);
-    }
-
-    fd.append('po_datetime', normalizePoDateTime(formData.value.po_datetime || ''));
+    fd.append('so_datetime', formData.value.so_datetime || '');
     if (isEditMode.value) {
         fd.append('_method', 'PUT');
     }
-    fd.append('supplier_id', String(formData.value.supplier_id || ''));
+    fd.append('customer_id', String(formData.value.customer_id || ''));
     fd.append('responsible_person', formData.value.responsibleName || '');
     if (formData.value.responsiblePhone) fd.append('responsible_phone', formData.value.responsiblePhone);
     
@@ -524,6 +351,7 @@ const buildFormData = (): FormData => {
     fd.append('target_latitude', String(formData.value.target_latitude ?? ''));
     fd.append('target_longitude', String(formData.value.target_longitude ?? ''));
     fd.append('project_name', formData.value.project_name || '');
+    fd.append('po_reference', formData.value.po_reference || '');
     fd.append('payment_method', formData.value.paymentMethod || '');
     fd.append('upfront_payment', String(formData.value.advancePayment ?? ''));
     fd.append('invoice_interval', String(formData.value.invoice_interval ?? ''));
@@ -534,15 +362,15 @@ const buildFormData = (): FormData => {
     fd.append('cancel_fee', String(formData.value.cancel_fee ?? ''));
     fd.append('notes', formData.value.textNote || '');
 
-    // po_attached_logistics_detail
+    // so_attached_logistics_detail
     if (isEditMode.value && logisticsDetailId.value) {
-        fd.append('po_attached_logistics_detail[id]', String(logisticsDetailId.value));
+        fd.append('so_attached_logistics_detail[id]', String(logisticsDetailId.value));
     }
-    fd.append('po_attached_logistics_detail[from_date]', formatDate(formData.value.transport_start_date));
-    fd.append('po_attached_logistics_detail[supply_type]', formData.value.supplyType || '');
-    fd.append('po_attached_logistics_detail[supply_interval]', String(formData.value.supplyDuration ?? ''));
-    fd.append('po_attached_logistics_detail[delivered_interval]', String(formData.value.deliveryDuration ?? ''));
-    fd.append('po_attached_logistics_detail[delivered_method]', formData.value.deliveryMethod || '');
+    fd.append('so_attached_logistics_detail[from_date]', formatDateYmd(formData.value.transport_start_date));
+    fd.append('so_attached_logistics_detail[supply_type]', formData.value.supplyType || '');
+    fd.append('so_attached_logistics_detail[supply_interval]', String(formData.value.supplyDuration ?? ''));
+    fd.append('so_attached_logistics_detail[delivered_interval]', String(formData.value.deliveryDuration ?? ''));
+    fd.append('so_attached_logistics_detail[delivered_method]', formData.value.deliveryMethod || '');
 
     // Items
     productTableItems.value.forEach((item, index) => {
@@ -569,16 +397,14 @@ const buildFormData = (): FormData => {
 const resetForm = () => {
     formData.value = {
         code: '',
-        purchase_quotation_code: null,
         source_location: null,
         source_latitude: null,
         source_longitude: null,
         target_location: null,
         target_latitude: null,
         target_longitude: null,
-        supplier_id: null,
-        supplier_name: null,
-        po_datetime: '',
+        customer_id: null,
+        so_datetime: '',
         responsibleName: '',
         responsiblePhone: null,
         transport_start_date: '',
@@ -596,6 +422,7 @@ const resetForm = () => {
         paymentMethod: null,
         advancePayment: null,
         project_name: '',
+        po_reference: '',
         textNote: '',
     };
     productTableItems.value = [];
@@ -618,11 +445,11 @@ const handleSubmit = async (options?: { redirectToList?: boolean }) => {
         const fd = buildFormData();
 
         if (isEditMode.value && routeId.value) {
-            await api.post(`/purchases/orders/fuels/${routeId.value}`, fd, {
+            await api.post(`/sales/orders/fuels/${routeId.value}`, fd, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
         } else {
-            await api.post('/purchases/orders/fuels', fd, {
+            await api.post('/sales/orders/fuels', fd, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
         }
@@ -630,11 +457,11 @@ const handleSubmit = async (options?: { redirectToList?: boolean }) => {
         success(isEditMode.value ? 'تم تحديث الطلب بنجاح' : 'تم إنشاء الطلب بنجاح');
         
         if (options?.redirectToList) {
-            router.push({ name: 'OrdersFuelsList' });
+            router.push({ name: 'SalesOrdersFuelsList' });
         } else {
             resetForm();
             if (isEditMode.value) {
-                router.push({ name: 'OrdersFuelsCreate' });
+                router.push({ name: 'SalesOrdersFuelsCreate' });
             }
         }
 
@@ -744,8 +571,8 @@ const summaryTotals = computed(() => {
             <!-- Page Header -->
             <TopHeader
                 :icon="filePlusIcon"
-                title-key="pages.OrdersFuels.FormTitle"
-                :description-key="isEditMode ? 'pages.OrdersFuels.FormDescriptionEdit' : 'pages.OrdersFuels.FormDescriptionCreate'"
+                title-key="pages.SalesOrdersFuels.FormTitle"
+                :description-key="isEditMode ? 'pages.SalesOrdersFuels.FormDescriptionEdit' : 'pages.SalesOrdersFuels.FormDescriptionCreate'"
                 :show-action="false"
                 :code="isEditMode ? (formData.code ? '#' + formData.code : '') : ''"
                 :code-icon="fileIcon"
@@ -763,20 +590,20 @@ const summaryTotals = computed(() => {
                         <!-- تاريخ الطلبية -->
                         <div>
                             <DateTimePickerInput
-                                v-model="formData.po_datetime"
+                                v-model="formData.so_datetime"
                                 density="comfortable"
                                 placeholder="اختر التاريخ والوقت"
                                 label="تاريخ الطلبية"
                             />
                         </div>
 
-                        <!-- اسم المورد -->
+                        <!-- اسم العميل -->
                         <div>
                             <SelectInput
-                                v-model="formData.supplier_id"
-                                :items="supplierItems"
-                                placeholder="اختر المورد"
-                                label="اسم المورد"
+                                v-model="formData.customer_id"
+                                :items="customerItems"
+                                placeholder="حدد العميل"
+                                label="اسم العميل"
                                 :rules="[required()]"
                                 density="comfortable"
                                 item-title="title"
@@ -873,6 +700,32 @@ const summaryTotals = computed(() => {
                                 label="طريقة التسليم" density="comfortable" placeholder="اختر"
                                 item-title="title" item-value="value" />
                         </div>
+                        <!-- الرقم المرجعي -->
+                        <div>
+                            <TextInput
+                              v-model="formData.po_reference"
+                              label="الرقم المرجعي"
+                              density="comfortable"
+                              placeholder="أدخل الرقم المرجعي"
+                              :hide-details="true"
+                            >
+                              <template #append-inner>
+                                <v-tooltip location="top" content-class="custom-tooltip">
+                                  <template #activator="{ props: tooltipProps }">
+                                    <ButtonWithIcon
+                                      variant="text"
+                                      size="small"
+                                      density="compact"
+                                      custom-class="!min-w-0 p-0"
+                                      :prepend-icon="HelpCircleIcon"
+                                      v-bind="tooltipProps"
+                                    />
+                                  </template>
+                                  <div>الرقم المرجعي</div>
+                                </v-tooltip>
+                              </template>
+                            </TextInput>
+                        </div>
                     </div>
                 </v-form>
             </div>
@@ -941,8 +794,8 @@ const summaryTotals = computed(() => {
                                 placeholder="أدخل قيمة الدفعة"
                             />
 
-                            <TextInput
-                                label="مدة رفع المستخلص"
+                            <PriceInput
+                                label="مدة رفع الفاتورة"
                                 v-model="formData.invoice_interval"
                                 placeholder="أدخل المدة بالأيام"
                                 :rules="[required(), numeric()]"
@@ -951,8 +804,8 @@ const summaryTotals = computed(() => {
                                 <template #append-inner>
                                     <span class="text-gray-500 text-sm"> يوم </span>
                                 </template>
-                            </TextInput>
-                            <TextInput
+                            </PriceInput>
+                            <PriceInput
                                 label="مدة السداد"
                                 v-model="formData.payment_term_no"
                                 placeholder="أدخل المدة بالأيام"
@@ -962,7 +815,7 @@ const summaryTotals = computed(() => {
                                 <template #append-inner>
                                     <span class="text-gray-500 text-sm"> يوم </span>
                                 </template>
-                            </TextInput>
+                            </PriceInput>
 
                             <!-- غرامة التأخير -->
                             <TextInputWithSelect
@@ -1080,7 +933,6 @@ const summaryTotals = computed(() => {
             show-unit-price-and-discount
             :transport-types="transportTypeItems"
             :unit-items="unitItems"
-            :supplier-id="formData.supplier_id"
             :edit-product="editingProduct"
             :existing-products="productTableItems"
             @saved="handleProductSaved"

@@ -307,6 +307,17 @@
                   ]">
                     عروض أسعار المحروقات</router-link>
                 </li>
+                <li class="relative">
+                  <router-link to="/sales/requests/logistics/list"
+                    :class="[isMenuItemActive('/sales/requests/logistics') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                    طلب عرض سعر خدمة نقل</router-link>
+                </li>
+                <li class="relative">
+                  <router-link to="/sales/quotations/logistics/list"
+                    :class="[isMenuItemActive('/sales/quotations/logistics') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
+                    عروض أسعار خدمة نقل</router-link>
+                </li>
+
               </ul>
 
               <h2 class="text-sm font-medium leading-5 my-2">
@@ -320,6 +331,14 @@
                       : 'text-white hover:text-qallab-yellow',
                   ]">
                     طلبيات بناء مواد اولية</router-link>
+                </li>
+                <li class="relative">
+                  <router-link to="/sales/orders/fuels/list" :class="[
+                    $route.path.includes('/sales/orders/fuels')
+                      ? 'font-bold text-qallab-yellow'
+                      : 'text-white hover:text-qallab-yellow',
+                  ]">
+                    طلبيات محروقات</router-link>
                 </li>
                 <li class="relative">
                   <router-link to="/sales/so-pickups/list" :class="[
@@ -494,6 +513,14 @@
                     :class="[isMenuItemActive('/purchases/requests/logistics') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                     طلب عرض سعر خدمة نقل</router-link>
                 </li>
+                <li class="relative">
+                  <router-link to="/purchases/quotations/logistics/list" :class="[
+                    isMenuItemActive('/purchases/quotations/logistics')
+                      ? 'font-bold text-qallab-yellow'
+                      : 'text-white hover:text-qallab-yellow',
+                  ]">
+                    عروض اسعار خدمة نقل</router-link>
+                </li>
 
                 <li class="relative">
                   <router-link to="/purchases/requests/fuels/list" :class="[
@@ -537,7 +564,7 @@
                 وثائق الأستلام
               </h2>
               <ul class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
-                  <li class="relative">
+                <li class="relative">
                   <router-link to="/purchases/receiving-docs/list" :class="[
                     isMenuItemActive('/purchases/receiving-docs')
                       ? 'font-bold text-qallab-yellow'

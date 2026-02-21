@@ -22,6 +22,10 @@ const routeId = computed(() => route.params.id as string);
 const isLoading = ref(false);
 const isSubmitting = ref(false);
 
+// Query params for creating quotation from request
+const fromRequestId = computed(() => route.query.from_request as string | undefined);
+const saleRequestsId = computed(() => route.query.sale_requests_id as string | undefined);
+
 const paymentMethodItems = ref<any[]>([]);
 const feeTypeItems = ref<any[]>([]);
 const unitItems = ref<any[]>([]);
@@ -139,6 +143,68 @@ const fetchFormData = async () => {
     }
 }
 
+// Fetch request data and pre-fill form when creating quotation from request
+const fetchRequestForQuotation = async () => {
+    if (!fromRequestId.value) return;
+
+    isLoading.value = true;
+    try {
+        const res = await api.get<any>(`/sales/fuels/${fromRequestId.value}`);
+        const data = res.data;
+
+        if (data) {
+            // Map request fields to quotation form fields (matching respons.json)
+            formData.value.customer_id = data.customer_id != null ? Number(data.customer_id) : null;
+            formData.value.responsible_person = data.responsible_person || '';
+            formData.value.responsible_phone = data.responsible_phone || null;
+            formData.value.target_location = data.target_location || null;
+            formData.value.target_latitude = data.target_latitude || null;
+            formData.value.target_longitude = data.target_longitude || null;
+            formData.value.project_name = data.project_name || '';
+            formData.value.payment_method = data.payment_method || null;
+            formData.value.upfront_payment = data.upfront_payment || null;
+            formData.value.invoice_interval = data.invoice_interval != null ? Number(data.invoice_interval) : null;
+            formData.value.payment_term_no = data.payment_term_no != null ? Number(data.payment_term_no) : null;
+            formData.value.late_fee_type = data.late_fee_type || null;
+            formData.value.late_fee = data.late_fee != null ? Number(data.late_fee) : null;
+            formData.value.cancel_fee_type = data.cancel_fee_type || null;
+            formData.value.cancel_fee = data.cancel_fee != null ? Number(data.cancel_fee) : null;
+
+            // Map logistics_detail fields
+            if (data.logistics_detail) {
+                formData.value.quotation_from_date = data.logistics_detail.from_date || '';
+                formData.value.supply_type = data.logistics_detail.supply_type || null;
+                formData.value.supply_interval = data.logistics_detail.supply_interval != null ? Number(data.logistics_detail.supply_interval) : null;
+                formData.value.delivered_interval = data.logistics_detail.delivered_interval != null ? Number(data.logistics_detail.delivered_interval) : null;
+                formData.value.delivered_method = data.logistics_detail.delivered_method || null;
+            }
+
+            // Map products (items) from request to quotation
+            if (data.items && Array.isArray(data.items)) {
+                productTableItems.value = data.items.map((item: any) => ({
+                    item_id: Number(item.item_id),
+                    item_name: item.item_name || item.item?.name || '',
+                    unit_id: item.unit_id ?? null,
+                    unit_name: item.unit_name || '',
+                    quantity: item.quantity ?? null,
+                    item_using: item.item_using ?? null,
+                    item_using_name: getItemUsingName(item.item_using ?? null),
+                    unit_price: item.price_per_unit ?? null,
+                    discount: item.discount_val ?? null,
+                    discount_type: item.discount_type ?? 2,
+                    tax_amount: item.total_tax ?? null,
+                    notes: item.note || item.notes || '',
+                    id: item.id,
+                }));
+            }
+        }
+    } catch (e) {
+        console.error('Error fetching request data:', e);
+    } finally {
+        isLoading.value = false;
+    }
+};
+
 onMounted(async () => {
     await Promise.all([
         fetchConstants(),
@@ -148,6 +214,8 @@ onMounted(async () => {
 
     if (isEditMode.value) {
         await fetchFormData();
+    } else if (fromRequestId.value) {
+        await fetchRequestForQuotation();
     }
 });
 
@@ -348,6 +416,11 @@ const buildFormData = (): FormData => {
 
     if (isEditMode.value) {
         fd.append('_method', 'PUT');
+    }
+
+    // Include sale_requests_id if creating quotation from request
+    if (saleRequestsId.value) {
+        fd.append('sale_requests_id', saleRequestsId.value);
     }
 
     fd.append('customer_id', String(formData.value.customer_id || ''));
@@ -779,7 +852,7 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
                         <thead>
                             <tr class="bg-primary-400">
                                 <th class="text-white font-semibold text-base py-3 px-4 text-center border-l !border-gray-200">
-                                    نوع الخصم
+                                    العنصر
                                 </th>
                                 <th class="text-white font-semibold text-base py-3 px-4 text-center">
                                     المبلغ

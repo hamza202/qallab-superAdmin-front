@@ -1,24 +1,22 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, nextTick, onBeforeUnmount } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from 'vue-i18n';
 import { useApi } from '@/composables/useApi';
 import { useNotification } from '@/composables/useNotification';
 import { useTableColumns } from '@/composables/useTableColumns';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog.vue';
+import DatePickerInput from '@/components/common/forms/DatePickerInput.vue';
+import { GridIcon, trash_1_icon, trash_2_icon, importIcon, columnIcon, exportIcon, plusIcon, searchIcon } from "@/components/icons/globalIcons";
+import { switchHorisinralIcon } from '@/components/icons/priceOffersIcons';
 import StatusChangeFeature from '@/components/common/StatusChangeFeature.vue';
-import { switcStatusIcon } from '@/components/icons/priceOffersIcons';
-import { useAppStore } from "@/stores/app";
-import { columnIcon, exportIcon, GridIcon, importIcon, plusIcon, searchIcon, trash_1_icon, trash_2_icon } from "@/components/icons/globalIcons";
-
-const appStore = useAppStore();
 
 const { t } = useI18n();
 const router = useRouter();
 const api = useApi();
 const { success, error } = useNotification();
 
-const TABLE_NAME = 'admin_purchases_logistics';
+const TABLE_NAME = 'admin_sale_logistic_quotations';
 const {
   allHeaders,
   shownHeaders,
@@ -29,23 +27,24 @@ const {
   toggleHeader,
 } = useTableColumns(TABLE_NAME);
 
-// Types
 interface ItemActions {
   can_update: boolean;
   can_delete: boolean;
+  can_view: boolean;
   can_change_status: boolean;
 }
 
-interface LogisticsRequest {
+interface QuotationItem {
   uuid: string;
-  supplier_name: string;
-  request_type: string;
+  customer_name: string;
+  quotation_name: string;
   code: string;
+  quotations_datetime: string;
   target_location: string;
-  request_datetime: string;
-  payment_method: string;
-  upfront_payment: number;
   status: string;
+  quotation_validity_no: number;
+  payment_method: string;
+  final_total: string;
   status_id: number;
   actions: ItemActions;
 }
@@ -56,7 +55,7 @@ interface TableHeader {
 }
 
 interface ListResponse {
-  data: LogisticsRequest[];
+  data: QuotationItem[];
   pagination: { next_cursor: string | null; previous_cursor: string | null; per_page: number };
   header_table: string;
   headers: TableHeader[];
@@ -64,135 +63,113 @@ interface ListResponse {
   actions: { can_create: boolean; can_bulk_delete: boolean };
 }
 
-// API state
-const tableItems = ref<LogisticsRequest[]>([]);
+const tableItems = ref<QuotationItem[]>([]);
 const canCreate = ref(false);
 const canBulkDelete = ref(false);
 const loading = ref(false);
-const loadingMore = ref(false);
 
-// Cursor pagination
-const nextCursor = ref<string | null>(null);
-const previousCursor = ref<string | null>(null);
-const perPage = ref(15);
-const hasMoreData = computed(() => nextCursor.value !== null);
-
-// Table headers for DataTable (from shownHeaders)
 const tableHeaders = computed(() =>
   shownHeaders.value.map((h) => ({ key: h.key, title: h.title, width: '140px' }))
 );
-const refreshIcon = `<svg width="17" height="19" viewBox="0 0 17 19" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M10.1667 17.6667C10.1667 17.6667 10.8744 17.5656 13.8033 14.6366C16.7322 11.7077 16.7322 6.95897 13.8033 4.03003C12.7656 2.9923 11.4994 2.32224 10.1667 2.01986M10.1667 17.6667H15.1667M10.1667 17.6667L10.1667 12.6667M6.83333 1.00016C6.83333 1.00016 6.12563 1.10126 3.1967 4.0302C0.267767 6.95913 0.267767 11.7079 3.1967 14.6368C4.23443 15.6745 5.5006 16.3446 6.83333 16.647M6.83333 1.00016L1.83333 1M6.83333 1.00016L6.83333 6" stroke="#175CD3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>`;
-// Selection (we use uuid as id for rows)
-const selectedRequests = ref<string[]>([]);
-const hasSelectedRequests = computed(() => selectedRequests.value.length > 0);
 
-// Items with id for DataTable (id = uuid for selection)
 const tableItemsWithId = computed(() =>
   tableItems.value.map((item) => ({ ...item, id: item.uuid }))
 );
 
-// Filters
-const showAdvancedFilters = ref(false);
-const filterRequestNumber = ref('');
-const filterNameArabic = ref<string | null>(null);
-const filterNameEnglish = ref('');
-const filterStartDateMin = ref('');
-const filterStartDateMax = ref('');
+const selectedRequests = ref<string[]>([]);
+const hasSelectedRequests = computed(() => selectedRequests.value.length > 0);
 
-// Delete dialogs
+const showAdvancedFilters = ref(false);
+const filterRequestNumber = ref("");
+const filterNameArabic = ref<string | null>(null);
+const filterNameEnglish = ref("");
+const filterStartDateMin = ref("");
+const filterStartDateMax = ref("");
+
 const showBulkDeleteDialog = ref(false);
+const showDeleteDialog = ref(false);
+const itemToDelete = ref<QuotationItem | null>(null);
 const deleteLoading = ref(false);
+
+const showChangeStatusDialog = ref(false);
+const itemToChangeStatus = ref<QuotationItem | null>(null);
 
 const toggleAdvancedFilters = () => {
   showAdvancedFilters.value = !showAdvancedFilters.value;
 };
 
 const resetFilters = () => {
-  filterRequestNumber.value = '';
+  filterRequestNumber.value = "";
   filterNameArabic.value = null;
-  filterNameEnglish.value = '';
-  filterStartDateMin.value = '';
-  filterStartDateMax.value = '';
+  filterNameEnglish.value = "";
+  filterStartDateMin.value = "";
+  filterStartDateMax.value = "";
 };
 
 const applyFilters = () => {
   fetchList();
 };
 
-// API: fetch list
-const fetchList = async (cursor?: string | null, append = false) => {
+const fetchList = async () => {
+  loading.value = true;
   try {
-    if (append) {
-      loadingMore.value = true;
-    } else {
-      loading.value = true;
-    }
-
     const params = new URLSearchParams();
-    params.append('per_page', String(perPage.value));
-    if (cursor) params.append('cursor', cursor);
     if (filterRequestNumber.value) params.append('code', filterRequestNumber.value);
-    if (filterNameEnglish.value) params.append('supplier_name', filterNameEnglish.value);
-    if (filterStartDateMin.value) params.append('request_datetime_from', filterStartDateMin.value);
-    if (filterStartDateMax.value) params.append('request_datetime_to', filterStartDateMax.value);
+    if (filterNameEnglish.value) params.append('customer_name', filterNameEnglish.value);
+    if (filterStartDateMin.value) params.append('quotations_datetime_from', filterStartDateMin.value);
+    if (filterStartDateMax.value) params.append('quotations_datetime_to', filterStartDateMax.value);
 
-    const url = `/purchases/logistics?${params.toString()}`;
-    const res = await api.get<ListResponse>(url);
+    const url = params.toString()
+      ? `/sales/quotations/logistics?${params.toString()}`
+      : '/sales/quotations/logistics';
+    const body = (await api.get(url)) as unknown as ListResponse;
 
-    if (append) {
-      tableItems.value = [...tableItems.value, ...res.data];
-    } else {
-      tableItems.value = res.data || [];
-      canCreate.value = res.actions?.can_create ?? false;
-      canBulkDelete.value = res.actions?.can_bulk_delete ?? false;
-      initHeaders(res.headers || [], res.shownHeaders || []);
-    }
-
-    nextCursor.value = res.pagination?.next_cursor || null;
-    previousCursor.value = res.pagination?.previous_cursor || null;
-    perPage.value = res.pagination?.per_page || 15;
+    tableItems.value = Array.isArray(body?.data) ? body.data : [];
+    canCreate.value = body?.actions?.can_create ?? false;
+    canBulkDelete.value = body?.actions?.can_bulk_delete ?? false;
+    initHeaders(body?.headers ?? [], body?.shownHeaders ?? []);
   } catch (err: any) {
-    console.error('Error fetching logistics list:', err);
-    error(err?.response?.data?.message || 'فشل تحميل قائمة الطلبات');
+    console.error('Error fetching quotations list:', err);
+    error(err?.response?.data?.message || 'فشل تحميل قائمة عروض السعر');
   } finally {
     loading.value = false;
-    loadingMore.value = false;
   }
 };
 
-const loadMore = () => {
-  if (hasMoreData.value && !loadingMore.value) {
-    fetchList(nextCursor.value, true);
-  }
-};
-
-// Toggle column and persist
 const handleToggleHeader = async (headerKey: string) => {
   await toggleHeader(headerKey).catch((err: any) => {
     error(err?.response?.data?.message || 'فشل تحديث الأعمدة');
   });
 };
 
-// Handlers
-const handleEdit = (item: { id?: string | number; uuid?: string }) => {
-  const id = item.uuid ?? String(item.id);
-  router.push({
-    name: 'PurchasesLogisticsEdit',
-    params: { id },
-  });
+const handleView = (item: { id?: string | number; uuid?: string }) => {
+  const uuid = item.uuid ?? String(item.id);
+  router.push({ name: 'SalesQuotationsLogisticsView', params: { id: uuid } });
 };
 
-const confirmDelete = async (item: { id?: string | number }) => {
+const handleEdit = (item: { id?: string | number; uuid?: string }) => {
+  const uuid = item.uuid ?? String(item.id);
+  router.push({ name: 'SalesQuotationsLogisticsEdit', params: { id: uuid } });
+};
+
+const handleDelete = (item: { uuid?: string; id?: string | number } & Partial<QuotationItem>) => {
+  itemToDelete.value = item as QuotationItem;
+  showDeleteDialog.value = true;
+};
+
+const confirmDelete = async () => {
+  if (!itemToDelete.value) return;
+  const uuid = itemToDelete.value.uuid;
   try {
     deleteLoading.value = true;
-    await api.delete(`/purchases/logistics/${String(item.id)}`);
-    success('تم حذف الطلب بنجاح');
+    await api.delete(`/sales/quotations/logistics/${uuid}`);
+    success('تم حذف عرض السعر بنجاح');
+    showDeleteDialog.value = false;
+    itemToDelete.value = null;
     await fetchList();
   } catch (err: any) {
-    console.error('Error deleting request:', err);
-    error(err?.response?.data?.message || 'فشل حذف الطلب');
+    console.error('Error deleting quotation:', err);
+    error(err?.response?.data?.message || 'فشل حذف عرض السعر');
   } finally {
     deleteLoading.value = false;
   }
@@ -232,8 +209,13 @@ const getStatusClass = (status: string) => {
   }
 };
 
-const openCreateRequest = () => {
-  router.push({ name: 'PurchasesLogisticsCreate' });
+const openChangeStatusDialog = (item: QuotationItem | Record<string, unknown>) => {
+  itemToChangeStatus.value = item as QuotationItem;
+  showChangeStatusDialog.value = true;
+};
+
+const openCreateQuotation = () => {
+  router.push({ name: 'SalesQuotationsLogisticsCreate' });
 };
 
 const handleBulkDelete = () => {
@@ -244,10 +226,10 @@ const handleBulkDelete = () => {
 const confirmBulkDelete = async () => {
   try {
     deleteLoading.value = true;
-    await api.post('/purchases/logistics/bulk-delete', {
+    await api.post('/sales/quotations/logistics/bulk-delete', {
       ids: selectedRequests.value,
     });
-    success(`تم حذف ${selectedRequests.value.length} طلب بنجاح`);
+    success(`تم حذف ${selectedRequests.value.length} عرض بنجاح`);
     selectedRequests.value = [];
     await fetchList();
   } catch (err: any) {
@@ -259,70 +241,16 @@ const confirmBulkDelete = async () => {
   }
 };
 
-// Status change (can_change_status)
-const showChangeStatusDialog = ref(false);
-const itemToChangeStatus = ref<LogisticsRequest | null>(null);
-
-const openChangeStatusDialog = (item: LogisticsRequest | Record<string, unknown>) => {
-  itemToChangeStatus.value = item as LogisticsRequest;
-  showChangeStatusDialog.value = true;
-};
-
-
-const handleView = (item: any) => {
-  router.push({ name: "PurchasesLogisticsView", params: { id: item.uuid } });
-};
-
-// Infinite scroll setup
-const loadMoreTrigger = ref<HTMLElement | null>(null);
-const observer = ref<IntersectionObserver | null>(null);
-
-const setupInfiniteScroll = () => {
-  if (!loadMoreTrigger.value) return;
-
-  observer.value = new IntersectionObserver(
-    (entries) => {
-      const entry = entries[0];
-      if (entry.isIntersecting && hasMoreData.value && !loadingMore.value && !loading.value) {
-        loadMore();
-      }
-    },
-    {
-      root: null,
-      rootMargin: '100px',
-      threshold: 0.1,
-    }
-  );
-
-  observer.value.observe(loadMoreTrigger.value);
-};
-
-const cleanupInfiniteScroll = () => {
-  if (observer.value && loadMoreTrigger.value) {
-    observer.value.unobserve(loadMoreTrigger.value);
-    observer.value.disconnect();
-  }
-};
-
-
-
-onMounted(async () => {
-  await fetchList();
-  nextTick(() => {
-    setupInfiniteScroll();
-  });
-});
-
-onBeforeUnmount(() => {
-  cleanupInfiniteScroll();
+onMounted(() => {
+  fetchList();
 });
 </script>
 
 <template>
   <default-layout>
     <div class="pricesOffers-page">
-      <PageHeader :icon="GridIcon" title-key="pages.purchasesLogistics.title"
-        description-key="pages.purchasesLogistics.description" />
+      <PageHeader :icon="GridIcon" title-key="pages.SalesQuotationsLogistics.title"
+        description-key="pages.SalesQuotationsLogistics.description" />
 
       <div
         class="flex justify-end items-stretch rounded border border-gray-300 w-fit ms-auto mb-4 overflow-hidden bg-white text-sm">
@@ -337,7 +265,6 @@ onBeforeUnmount(() => {
       <div class="bg-gray-50 rounded-md -mx-6">
         <div :class="hasSelectedRequests ? 'justify-between' : 'justify-end'"
           class="flex flex-wrap items-center gap-3 border-y border-y-slate-300 px-4 sm:px-6 py-3">
-          <!-- Actions when rows are selected (only if can_bulk_delete) -->
           <div v-if="canBulkDelete && hasSelectedRequests"
             class="flex flex-wrap items-stretch rounded overflow-hidden border border-gray-200 bg-white text-sm">
             <ButtonWithIcon variant="flat" height="40" rounded="0"
@@ -349,7 +276,6 @@ onBeforeUnmount(() => {
               :prepend-icon="trash_2_icon" color="white" :label="t('common.deleteAll')" @click="handleBulkDelete" />
           </div>
 
-          <!-- Main header controls -->
           <div class="flex flex-wrap gap-3">
             <v-menu v-model="showHeadersMenu" :close-on-content-click="false">
               <template #activator="{ props: menuProps }">
@@ -374,23 +300,20 @@ onBeforeUnmount(() => {
 
             <ButtonWithIcon v-if="canCreate" variant="flat" color="primary-100" height="40" rounded="4"
               custom-class="px-7 font-semibold text-base !text-primary-800 border !border-primary-200"
-              :prepend-icon="plusIcon" label="أضف طلب" @click="openCreateRequest" />
+              :prepend-icon="plusIcon" label="أضف عرض سعر" @click="openCreateQuotation" />
           </div>
         </div>
 
-        <!-- Advanced filters row -->
         <div v-if="showAdvancedFilters"
           class="border-y border-y-primary-100 bg-primary-50 px-4 sm:px-6 py-3 gap-3 flex justify-between flex-wrap">
           <div class="flex flex-wrap gap-3 items-end">
             <TextInput v-model="filterRequestNumber" density="comfortable" variant="outlined" hide-details
-              placeholder="كود الطلب" class="w-full sm:w-40 bg-white" />
+              placeholder="كود العرض" class="w-full sm:w-40 bg-white" />
             <TextInput v-model="filterNameEnglish" density="comfortable" variant="outlined" hide-details
-              placeholder="اسم المورد" class="w-full sm:w-40 bg-white" />
+              placeholder="اسم العميل" class="w-full sm:w-40 bg-white" />
             <TextInput v-model="filterNameArabic" density="comfortable" variant="outlined" hide-details
-              placeholder="دفعة مقدمة" class="w-full sm:w-40 bg-white" />
-            <SelectInput :items="['الموقع', 'الموقع']" v-model="filterNameArabic" density="comfortable"
-              variant="outlined" hide-details placeholder="موقع المشروع" class="w-full sm:w-40 bg-white" />
-            <DatePickerInput v-model="filterStartDateMin" density="comfortable" hide-details placeholder="تاريخ الطلب"
+              placeholder="السعر" class="w-full sm:w-40 bg-white" />
+            <DatePickerInput v-model="filterStartDateMin" density="comfortable" hide-details placeholder="تاريخ العرض"
               class="w-full sm:w-40 bg-white" />
           </div>
           <div class="flex gap-2 items-center">
@@ -403,70 +326,46 @@ onBeforeUnmount(() => {
           </div>
         </div>
 
-        <!-- Table -->
         <DataTable :headers="tableHeaders" :items="tableItemsWithId" :loading="loading" :show-checkbox="canBulkDelete"
-          show-actions @view="handleView" @edit="handleEdit" @delete="confirmDelete" @select="handleSelectRequest"
+          show-actions @edit="handleEdit" @delete="handleDelete" @view="handleView" @select="handleSelectRequest"
           @selectAll="handleSelectAllRequests">
-          <template #item.am_pm_intervals="{ item }">
-            <span class="text-sm text-gray-600">{{ item.am_pm_intervals.join(',') }}</span>
+          <template #item.transport_start_date="{ item }">
+            {{ item.transport_start_date ? new Date(item.transport_start_date).toLocaleDateString('en-US') : '—' }}
           </template>
-          <template #item.from_dates="{ item }">
-            <span class="text-sm text-gray-600">
-              {{
-                appStore.formatDate(item.from_dates, {
-                  format:
-                    'short'
-                }) }}
-            </span>
+          <template #item.quotations_datetime="{ item }">
+            {{ item.quotations_datetime || '—' }}
           </template>
-          <template #item.source_locations="{ item }">
-            <span class="text-sm text-gray-600">{{ item.source_locations.join(',') }}</span>
-          </template>
-          <template #item.target_locations="{ item }">
-            <span class="text-sm text-gray-600">{{ item.target_locations.join(',') }}</span>
-          </template>
-          <template #item.to_dates="{ item }">
 
-            <span class="text-sm text-gray-600">
-              {{ appStore.formatDate(item.to_dates, {
-                format:
-                  'short'
-              }) }}
-            </span>
+          <template #item.final_total="{ item }">
+            {{ item.final_total ?? '—' }}
           </template>
           <template #item.status="{ item }">
-            <span :class="[
-              'inline-block px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap',
-              getStatusClass(item.status),
-            ]">
+            <span
+              :class="['inline-block px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap', getStatusClass(item.status)]">
               {{ item.status }}
             </span>
           </template>
           <template #item.actions="{ item }">
-            <div class="flex items-center">
-              <v-btn v-if="item.actions?.can_change_status" icon variant="text" size="small"
+            <div class="flex items-center gap-1">
+              <v-btn v-if="item.actions?.can_change_status" icon variant="text" size="small" color="warning-600"
                 @click="openChangeStatusDialog(item)">
-                <span v-html="switcStatusIcon"></span>
+                <span v-html="switchHorisinralIcon"></span>
               </v-btn>
             </div>
           </template>
         </DataTable>
-
-        <!-- Infinite Scroll Trigger -->
-        <div ref="loadMoreTrigger" class="h-10 flex items-center justify-center">
-          <v-progress-circular v-if="loadingMore" indeterminate color="primary" size="32" />
-        </div>
       </div>
     </div>
 
-    <!-- Bulk Delete Confirmation Dialog -->
-    <DeleteConfirmDialog v-model="showBulkDeleteDialog" :loading="deleteLoading" title="حذف الطلبات"
-      :message="`هل أنت متأكد من حذف ${selectedRequests.length} طلب؟`" @confirm="confirmBulkDelete" />
-
+    <!-- Status Change Dialog -->
     <StatusChangeFeature v-model="showChangeStatusDialog" :item="itemToChangeStatus"
-      :change-status-url="`/purchases/logistics/${itemToChangeStatus?.uuid}/change-status`" title="تغيير الحالة"
-      message="تغيير الحالة:" @success="fetchList" />
+      :change-status-url="`/sales/quotations/logistics/${itemToChangeStatus?.uuid}/change-status`"
+      @success="fetchList" />
+
+    <DeleteConfirmDialog v-model="showDeleteDialog" :loading="deleteLoading" title="حذف عرض السعر"
+      message="هل أنت متأكد من حذف هذا العرض؟" @confirm="confirmDelete" />
+
+    <DeleteConfirmDialog v-model="showBulkDeleteDialog" :loading="deleteLoading" title="حذف عروض السعر"
+      :message="`هل أنت متأكد من حذف ${selectedRequests.length} عرض؟`" @confirm="confirmBulkDelete" />
   </default-layout>
 </template>
-
-<style scoped></style>

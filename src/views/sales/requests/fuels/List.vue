@@ -8,7 +8,7 @@ import { useTableColumns } from '@/composables/useTableColumns';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog.vue';
 import DatePickerInput from '@/components/common/forms/DatePickerInput.vue';
 import { GridIcon, trash_1_icon, trash_2_icon, importIcon, columnIcon, exportIcon, plusIcon, searchIcon } from '@/components/icons/globalIcons';
-import { switchHorisinralIcon } from '@/components/icons/priceOffersIcons';
+import { switchHorisinralIcon, refreshIcon } from '@/components/icons/priceOffersIcons';
 import StatusChangeFeature from '@/components/common/StatusChangeFeature.vue';
 
 const { t } = useI18n();
@@ -32,6 +32,7 @@ interface ItemActions {
   can_update: boolean;
   can_delete: boolean;
   can_change_status: boolean;
+  can_create_quotation: boolean;
 }
 
 interface FuelRequest {
@@ -271,6 +272,21 @@ const handleView = (item: any) => {
 const openChangeStatusDialog = (item: FuelRequest | Record<string, unknown>) => {
   itemToChangeStatus.value = item as FuelRequest;
   showChangeStatusDialog.value = true;
+};
+
+const handleCreateQuotation = (item: unknown) => {
+  const tableItem = item as FuelRequest & { id: string | number };
+  const originalItem = tableItems.value.find((r) => r.uuid === tableItem.uuid);
+  const numericId = originalItem ? (originalItem as any).id : undefined;
+
+  router.push({
+    name: 'SalesQuotationsFuelsCreate',
+    query: {
+      from_request: tableItem.uuid,
+      request_code: tableItem.code,
+      sale_requests_id: numericId ? String(numericId) : undefined
+    }
+  });
 };
 
 const handleBulkDelete = () => {
@@ -520,7 +536,16 @@ onMounted(() => {
             </span>
           </template>
           <template #item.actions="{ item }">
-            <div class="flex items-center">
+            <div class="flex items-center gap-1">
+              <v-btn
+                v-if="item.actions?.can_create_quotation"
+                icon
+                variant="text"
+                size="x-small"
+                @click="handleCreateQuotation(item)"
+              >
+                <span v-html="refreshIcon"></span>
+              </v-btn>
               <v-btn
                 v-if="item.actions?.can_change_status"
                 icon

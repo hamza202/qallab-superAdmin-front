@@ -8,7 +8,7 @@ import { useForm } from '@/composables/useForm';
 import { useNotification as useNotify } from '@/composables/useNotification';
 
 const { formRef, isFormValid, validate } = useForm();
-const { success, error, warning } = useNotify();
+const { success, warning, apiError } = useNotify();
 
 const api = useApi();
 const route = useRoute();
@@ -22,6 +22,7 @@ const pageLoading = ref(false);
 const isSubmitting = ref(false);
 const orderTypes = ref<any[]>([]);
 const ordersItems = ref<any[]>([]);
+const customerItems = ref<any[]>([]);
 const InvoiceCode = ref('')
 const customerData = ref<any>(null);
 const customerName = computed(() => customerData.value?.full_name || customerData.value?.name || '—');
@@ -158,6 +159,20 @@ const fetchConstants = async () => {
     } catch (e) {
         console.error('Error fetching order types:', e);
         orderTypes.value = [];
+    }
+};
+
+const fetchCustomers = async () => {
+    try {
+        const res = await api.get<any>('/customers/list');
+        if (Array.isArray(res.data)) {
+            customerItems.value = res.data.map((i: any) => ({
+                title: i.full_name,
+                value: i.id,
+            }));
+        }
+    } catch (e) {
+        console.error('Error fetching customers:', e);
     }
 };
 
@@ -398,13 +413,7 @@ const handleSubmit = async (type: any) => {
 
     } catch (e: any) {
         console.error('Error submitting form:', e);
-        if (e?.response?.data?.errors) {
-            const apiErrors = e.response.data.errors;
-            Object.keys(apiErrors).forEach((key) => {
-                formErrors[key] = Array.isArray(apiErrors[key]) ? apiErrors[key][0] : apiErrors[key];
-            });
-        }
-        error(e?.response?.data?.message || 'حدث خطأ أثناء حفظ الفاتورة');
+        apiError(e, 'حدث خطأ أثناء حفظ الفاتورة');
     } finally {
         isSubmitting.value = false;
     }
@@ -577,7 +586,8 @@ onMounted(async () => {
     pageLoading.value = true
     await Promise.all([
         fetchConstants(),
-        fetchUnits()
+        fetchUnits(),
+        fetchCustomers()
     ]);
 
     // Fetch form data if in edit mode
@@ -605,6 +615,13 @@ onMounted(async () => {
 
                 <v-form ref="formRef" v-model="isFormValid" @submit.prevent>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 gap-y-6">
+                        <!-- اسم العميل -->
+                        <div>
+                            <SelectInput v-model="formData.customer_id" :items="customerItems" placeholder="اختر العميل"
+                                label="اسم العميل" density="comfortable" :rules="[required()]"
+                                item-title="title" item-value="value" />
+                        </div>
+
                         <div>
                             <SelectInput v-model="formData.so_type" :items="orderTypes" placeholder="اختر"
                                 label="نوع الطلبية" density="comfortable" :rules="[required()]"

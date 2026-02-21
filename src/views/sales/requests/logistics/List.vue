@@ -18,7 +18,7 @@ const router = useRouter();
 const api = useApi();
 const { success, error } = useNotification();
 
-const TABLE_NAME = 'admin_purchases_logistics';
+const TABLE_NAME = 'admin_sr_logistics';
 const {
   allHeaders,
   shownHeaders,
@@ -34,6 +34,7 @@ interface ItemActions {
   can_update: boolean;
   can_delete: boolean;
   can_change_status: boolean;
+  can_create_quotation: boolean;
 }
 
 interface LogisticsRequest {
@@ -138,7 +139,7 @@ const fetchList = async (cursor?: string | null, append = false) => {
     if (filterStartDateMin.value) params.append('request_datetime_from', filterStartDateMin.value);
     if (filterStartDateMax.value) params.append('request_datetime_to', filterStartDateMax.value);
 
-    const url = `/purchases/logistics?${params.toString()}`;
+    const url = `/sales/logistics?${params.toString()}`;
     const res = await api.get<ListResponse>(url);
 
     if (append) {
@@ -176,10 +177,26 @@ const handleToggleHeader = async (headerKey: string) => {
 };
 
 // Handlers
+const handleCreateQuotation = (item: unknown) => {
+  const tableItem = item as LogisticsRequest & { id: string | number };
+  // Find original item from tableItems to get the numeric id
+  const originalItem = tableItems.value.find((r) => r.uuid === tableItem.uuid);
+  const numericId = originalItem ? (originalItem as any).id : undefined;
+
+  router.push({
+    name: 'SalesQuotationsLogisticsCreate',
+    query: {
+      from_request: tableItem.uuid,
+      request_code: tableItem.code,
+      sale_requests_id: numericId ? String(numericId) : undefined
+    }
+  });
+};
+
 const handleEdit = (item: { id?: string | number; uuid?: string }) => {
   const id = item.uuid ?? String(item.id);
   router.push({
-    name: 'PurchasesLogisticsEdit',
+    name: 'SalesRequestsLogisticsEdit',
     params: { id },
   });
 };
@@ -187,7 +204,7 @@ const handleEdit = (item: { id?: string | number; uuid?: string }) => {
 const confirmDelete = async (item: { id?: string | number }) => {
   try {
     deleteLoading.value = true;
-    await api.delete(`/purchases/logistics/${String(item.id)}`);
+    await api.delete(`/sales/logistics/${String(item.id)}`);
     success('تم حذف الطلب بنجاح');
     await fetchList();
   } catch (err: any) {
@@ -233,7 +250,7 @@ const getStatusClass = (status: string) => {
 };
 
 const openCreateRequest = () => {
-  router.push({ name: 'PurchasesLogisticsCreate' });
+  router.push({ name: 'SalesRequestsLogisticsCreate' });
 };
 
 const handleBulkDelete = () => {
@@ -244,7 +261,7 @@ const handleBulkDelete = () => {
 const confirmBulkDelete = async () => {
   try {
     deleteLoading.value = true;
-    await api.post('/purchases/logistics/bulk-delete', {
+    await api.post('/sales/logistics/bulk-delete', {
       ids: selectedRequests.value,
     });
     success(`تم حذف ${selectedRequests.value.length} طلب بنجاح`);
@@ -270,7 +287,7 @@ const openChangeStatusDialog = (item: LogisticsRequest | Record<string, unknown>
 
 
 const handleView = (item: any) => {
-  router.push({ name: "PurchasesLogisticsView", params: { id: item.uuid } });
+  router.push({ name: "SalesRequestsLogisticsView", params: { id: item.uuid } });
 };
 
 // Infinite scroll setup
@@ -321,8 +338,8 @@ onBeforeUnmount(() => {
 <template>
   <default-layout>
     <div class="pricesOffers-page">
-      <PageHeader :icon="GridIcon" title-key="pages.purchasesLogistics.title"
-        description-key="pages.purchasesLogistics.description" />
+      <PageHeader :icon="GridIcon" title-key="pages.SalesRequestsLogistics.title"
+        description-key="pages.SalesRequestsLogistics.description" />
 
       <div
         class="flex justify-end items-stretch rounded border border-gray-300 w-fit ms-auto mb-4 overflow-hidden bg-white text-sm">
@@ -444,6 +461,11 @@ onBeforeUnmount(() => {
           </template>
           <template #item.actions="{ item }">
             <div class="flex items-center">
+              <v-btn v-if="item.actions?.can_create_quotation" icon variant="text" size="small"
+                @click="handleCreateQuotation(item)">
+                <span v-html="refreshIcon"></span>
+              </v-btn>
+
               <v-btn v-if="item.actions?.can_change_status" icon variant="text" size="small"
                 @click="openChangeStatusDialog(item)">
                 <span v-html="switcStatusIcon"></span>
@@ -464,7 +486,7 @@ onBeforeUnmount(() => {
       :message="`هل أنت متأكد من حذف ${selectedRequests.length} طلب؟`" @confirm="confirmBulkDelete" />
 
     <StatusChangeFeature v-model="showChangeStatusDialog" :item="itemToChangeStatus"
-      :change-status-url="`/purchases/logistics/${itemToChangeStatus?.uuid}/change-status`" title="تغيير الحالة"
+      :change-status-url="`/sales/logistics/${itemToChangeStatus?.uuid}/change-status`" title="تغيير الحالة"
       message="تغيير الحالة:" @success="fetchList" />
   </default-layout>
 </template>

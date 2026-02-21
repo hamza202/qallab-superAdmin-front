@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, nextTick, onBeforeUnmount } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from 'vue-i18n';
 import { useApi } from '@/composables/useApi';
@@ -7,8 +7,8 @@ import { useNotification } from '@/composables/useNotification';
 import { useTableColumns } from '@/composables/useTableColumns';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog.vue';
 import DatePickerInput from '@/components/common/forms/DatePickerInput.vue';
-import { GridIcon, fileCheckIcon, trash_1_icon, trash_2_icon, importIcon, columnIcon, exportIcon, plusIcon, searchIcon } from "@/components/icons/globalIcons";
-import { switcStatusIcon, truckIcon } from '@/components/icons/priceOffersIcons';
+import { GridIcon, trash_1_icon, trash_2_icon, importIcon, columnIcon, exportIcon, plusIcon, searchIcon } from '@/components/icons/globalIcons';
+import { switchHorisinralIcon } from '@/components/icons/priceOffersIcons';
 import StatusChangeFeature from '@/components/common/StatusChangeFeature.vue';
 
 const { t } = useI18n();
@@ -16,7 +16,7 @@ const router = useRouter();
 const api = useApi();
 const { success, error } = useNotification();
 
-const TABLE_NAME = 'admin_sales_building_materials_orders';
+const TABLE_NAME = 'admin_purchases_fuels';
 const {
   allHeaders,
   shownHeaders,
@@ -27,30 +27,28 @@ const {
   toggleHeader,
 } = useTableColumns(TABLE_NAME);
 
-// Types (from API response)
+// Types
 interface ItemActions {
   can_update: boolean;
   can_delete: boolean;
-  can_view: boolean;
   can_change_status: boolean;
-  can_receive_doc: boolean;
-  can_create_pickup: boolean;
-  can_create_trip: boolean;
 }
 
-interface OrderItem {
-  id: number;
+interface BuildingMaterialRequest {
   uuid: string;
-  code: string;
+  id?: string | number;
+  doc_id?: string | number;
   supplier_name: string;
-  target_location: string | null;
-  actual_execution_duration: number | null;
-  transport_start_date: string | null;
-  po_datetime: string;
-  final_total: string;
+  request_type: string;
+  code: string;
+  target_location: string;
+  request_datetime: string;
   payment_method: string;
+  upfront_payment: number;
   status: string;
   status_id: number;
+  status_background_color?: string;
+  status_text_color?: string;
   actions: ItemActions;
 }
 
@@ -60,7 +58,7 @@ interface TableHeader {
 }
 
 interface ListResponse {
-  data: OrderItem[];
+  data: BuildingMaterialRequest[];
   pagination: { next_cursor: string | null; previous_cursor: string | null; per_page: number };
   header_table: string;
   headers: TableHeader[];
@@ -69,107 +67,110 @@ interface ListResponse {
 }
 
 // API state
-const tableItems = ref<OrderItem[]>([]);
+const tableItems = ref<BuildingMaterialRequest[]>([]);
 const canCreate = ref(false);
 const canBulkDelete = ref(false);
 const loading = ref(false);
-const loadingMore = ref(false);
-const nextCursor = ref<string | null>(null);
-const perPage = ref(15);
-const hasMoreData = computed(() => nextCursor.value !== null);
-const loadMoreTrigger = ref<HTMLElement | null>(null);
-const observer = ref<IntersectionObserver | null>(null);
 
+// Table headers for DataTable (from shownHeaders)
 const tableHeaders = computed(() =>
   shownHeaders.value.map((h) => ({ key: h.key, title: h.title, width: '140px' }))
 );
 
-// Selection (uuid as id)
+// Selection (we use uuid as id for rows)
 const selectedRequests = ref<string[]>([]);
 const hasSelectedRequests = computed(() => selectedRequests.value.length > 0);
 
+// Items with id for DataTable (id = uuid for selection)
 const tableItemsWithId = computed(() =>
-  tableItems.value.map((item) => ({ ...item, originalId: item.id, id: item.uuid }))
+  tableItems.value.map((item) => ({ ...item, id: item.uuid }))
 );
 
 // Filters
 const showAdvancedFilters = ref(false);
-const filterRequestNumber = ref("");
-const filterSupplierName = ref("");
-const filterStartDateMin = ref("");
-const filterStartDateMax = ref("");
+const filterRequestNumber = ref('');
+const filterNameArabic = ref<string | null>(null);
+const filterNameEnglish = ref('');
+const filterStartDateMin = ref('');
+const filterStartDateMax = ref('');
+
+// Delete dialog (single shared dialog for both single and bulk)
+const showDeleteDialog = ref(false);
+const showBulkDeleteDialog = ref(false);
+const itemToDelete = ref<BuildingMaterialRequest | null>(null);
+const deleteLoading = ref(false);
+
+// Status change dialog
+const showChangeStatusDialog = ref(false);
+const itemToChangeStatus = ref<BuildingMaterialRequest | null>(null);
+
+const isDeleteDialogOpen = computed({
+  get: () => showDeleteDialog.value || showBulkDeleteDialog.value,
+  set: (v: boolean) => {
+    if (!v) {
+      showDeleteDialog.value = false;
+      showBulkDeleteDialog.value = false;
+      itemToDelete.value = null;
+    }
+  },
+});
+const deleteDialogTitle = computed(() =>
+  showBulkDeleteDialog.value ? 'حذف الطلبات' : 'حذف الطلب'
+);
+const deleteDialogMessage = computed(() =>
+  showBulkDeleteDialog.value
+    ? `هل أنت متأكد من حذف ${selectedRequests.value.length} طلب؟`
+    : 'هل أنت متأكد من حذف هذا الطلب؟'
+);
+const onDeleteConfirm = () => {
+  if (showBulkDeleteDialog.value) confirmBulkDelete();
+  else confirmDelete();
+};
 
 const toggleAdvancedFilters = () => {
   showAdvancedFilters.value = !showAdvancedFilters.value;
 };
 
 const resetFilters = () => {
-  filterRequestNumber.value = "";
-  filterSupplierName.value = "";
-  filterStartDateMin.value = "";
-  filterStartDateMax.value = "";
+  filterRequestNumber.value = '';
+  filterNameArabic.value = null;
+  filterNameEnglish.value = '';
+  filterStartDateMin.value = '';
+  filterStartDateMax.value = '';
 };
 
 const applyFilters = () => {
   fetchList();
 };
 
-// API: fetch list (append = true for infinite scroll)
-const fetchList = async (append = false) => {
-  if (append) loadingMore.value = true;
-  else loading.value = true;
+// API: fetch list
+const fetchList = async () => {
+  loading.value = true;
   try {
     const params = new URLSearchParams();
-    params.append('per_page', String(perPage.value));
-    if (append && nextCursor.value) params.append('cursor', nextCursor.value);
     if (filterRequestNumber.value) params.append('code', filterRequestNumber.value);
-    if (filterSupplierName.value) params.append('supplier_name', filterSupplierName.value);
-    if (filterStartDateMin.value) params.append('po_datetime_from', filterStartDateMin.value);
-    if (filterStartDateMax.value) params.append('po_datetime_to', filterStartDateMax.value);
+    if (filterNameEnglish.value) params.append('supplier_name', filterNameEnglish.value);
+    if (filterStartDateMin.value) params.append('request_datetime_from', filterStartDateMin.value);
+    if (filterStartDateMax.value) params.append('request_datetime_to', filterStartDateMax.value);
 
-    const url = `/sales/orders/building-materials?${params.toString()}`;
+    const url = params.toString()
+      ? `/sales/orders/fuels?${params.toString()}`
+      : '/sales/orders/fuels';
     const res = await api.get<ListResponse>(url);
 
-    const data = res.data || [];
-    if (append) {
-      tableItems.value = [...tableItems.value, ...data];
-    } else {
-      tableItems.value = data;
-      canCreate.value = res.actions?.can_create ?? false;
-      canBulkDelete.value = res.actions?.can_bulk_delete ?? false;
-      initHeaders(res.headers || [], res.shownHeaders || []);
-    }
-    nextCursor.value = res.pagination?.next_cursor ?? null;
+    tableItems.value = res.data || [];
+    canCreate.value = res.actions?.can_create ?? false;
+    canBulkDelete.value = res.actions?.can_bulk_delete ?? false;
+    initHeaders(res.headers || [], res.shownHeaders || []);
   } catch (err: any) {
-    console.error('Error fetching orders list:', err);
-    error(err?.response?.data?.message || 'فشل تحميل قائمة الطلبيات');
+    console.error('Error fetching building materials list:', err);
+    error(err?.response?.data?.message || 'فشل تحميل قائمة الطلبات');
   } finally {
     loading.value = false;
-    loadingMore.value = false;
   }
 };
 
-const setupInfiniteScroll = () => {
-  if (!loadMoreTrigger.value) return;
-  observer.value = new IntersectionObserver(
-    (entries) => {
-      const entry = entries[0];
-      if (entry?.isIntersecting && hasMoreData.value && !loadingMore.value && !loading.value) {
-        fetchList(true);
-      }
-    },
-    { root: null, rootMargin: '100px', threshold: 0.1 }
-  );
-  observer.value.observe(loadMoreTrigger.value);
-};
-
-const cleanupInfiniteScroll = () => {
-  if (observer.value && loadMoreTrigger.value) {
-    observer.value.unobserve(loadMoreTrigger.value);
-    observer.value.disconnect();
-  }
-};
-
+// Toggle column and persist
 const handleToggleHeader = async (headerKey: string) => {
   await toggleHeader(headerKey).catch((err: any) => {
     error(err?.response?.data?.message || 'فشل تحديث الأعمدة');
@@ -179,34 +180,30 @@ const handleToggleHeader = async (headerKey: string) => {
 // Handlers
 const handleEdit = (item: { id?: string | number; uuid?: string }) => {
   const id = item.uuid ?? String(item.id);
-  router.push({ name: "SalesOrdersMaterialProductEdit", params: { id } });
-};
-const handleView = (item: { id?: string | number; uuid?: string }) => {
-  const id = item.uuid ?? String(item.id);
-  router.push({ name: "SalesOrdersMaterialProductView", params: { id } });
+  router.push({
+    name: 'SalesOrdersFuelsEdit',
+    params: { id },
+  });
 };
 
-const showDeleteDialog = ref(false);
-const itemToDelete = ref<{ id: string } | null>(null);
-const deleteLoading = ref(false);
-
-const handleDelete = (item: { id?: string | number }) => {
-  itemToDelete.value = { id: String(item.id) };
+const handleDelete = (item: { uuid?: string; id?: string | number } & Partial<BuildingMaterialRequest>) => {
+  itemToDelete.value = item as BuildingMaterialRequest;
   showDeleteDialog.value = true;
 };
 
 const confirmDelete = async () => {
   if (!itemToDelete.value) return;
+  const uuid = itemToDelete.value.uuid;
+  showDeleteDialog.value = false;
+  itemToDelete.value = null;
   try {
     deleteLoading.value = true;
-    await api.delete(`/sales/orders/building-materials/${itemToDelete.value.id}`);
-    success('تم حذف الطلبية بنجاح');
+    await api.delete(`/sales/orders/fuels/${uuid}`);
+    success('تم حذف الطلب بنجاح');
     await fetchList();
-    showDeleteDialog.value = false;
-    itemToDelete.value = null;
   } catch (err: any) {
-    console.error('Error deleting order:', err);
-    error(err?.response?.data?.message || 'فشل حذف الطلبية');
+    console.error('Error deleting request:', err);
+    error(err?.response?.data?.message || 'فشل حذف الطلب');
   } finally {
     deleteLoading.value = false;
   }
@@ -229,29 +226,52 @@ const handleSelectAllRequests = (checked: boolean) => {
   }
 };
 
+/** Fallback status classes when API does not return status colors */
 const getStatusClass = (status: string) => {
   switch (status) {
     case 'مكتمل':
       return 'bg-[#ECFDF3] text-[#027A48]';
+    case 'تأكيد':
+      return 'bg-[#D1FAE5] text-[#059669]';
     case 'قيد المراجعة':
       return 'bg-[#FEF0C7] text-[#DC6803]';
-    case 'تأكيد':
-      return 'bg-[#F2F4F7] text-[#344054]';
-    case 'الغاء':
-      return 'bg-[#FEE4E2] text-[#D92D20]';
     case 'مسودة':
       return 'bg-[#F2F4F7] text-[#344054]';
+    case 'الغاء':
+    case 'مرفوض':
+      return 'bg-[#FEE4E2] text-[#D92D20]';
     default:
       return 'bg-[#F2F4F7] text-[#344054]';
   }
 };
 
-const openCreateRequest = () => {
-  router.push({ name: "SalesOrdersMaterialProductCreate" });
+/** Use status color from list API when present */
+const getStatusStyle = (item: Record<string, unknown>): Record<string, string> | null => {
+  const bg = item.status_background_color as string | undefined;
+  const fg = item.status_text_color as string | undefined;
+  if (bg || fg) {
+    return {
+      ...(bg && { backgroundColor: bg }),
+      ...(fg && { color: fg }),
+    };
+  }
+  return null;
 };
 
-// Bulk delete
-const showBulkDeleteDialog = ref(false);
+const openCreateRequest = () => {
+  router.push({ name: 'SalesOrdersFuelsCreate' });
+};
+
+const handleView = (item: any) => {
+    router.push({ name: "SalesOrdersFuelsView", params: { id: item.uuid } });
+};
+
+
+
+const openChangeStatusDialog = (item: BuildingMaterialRequest | Record<string, unknown>) => {
+  itemToChangeStatus.value = item as BuildingMaterialRequest;
+  showChangeStatusDialog.value = true;
+};
 
 const handleBulkDelete = () => {
   if (selectedRequests.value.length === 0) return;
@@ -261,59 +281,23 @@ const handleBulkDelete = () => {
 const confirmBulkDelete = async () => {
   try {
     deleteLoading.value = true;
-    await api.post('/sales/orders/building-materials/bulk-delete', {
+    await api.post('/sales/orders/fuels/bulk-delete', {
       ids: selectedRequests.value,
     });
-    success(`تم حذف ${selectedRequests.value.length} طلبية بنجاح`);
+    success(`تم حذف ${selectedRequests.value.length} طلب بنجاح`);
     selectedRequests.value = [];
     await fetchList();
   } catch (err: any) {
     console.error('Error bulk deleting:', err);
     error(err?.response?.data?.message || 'فشل الحذف الجماعي');
   } finally {
-    deleteLoading.value = false; 
+    deleteLoading.value = false;
     showBulkDeleteDialog.value = false;
   }
 };
 
-// Status change (can_change_status)
-const showChangeStatusDialog = ref(false);
-const itemToChangeStatus = ref<OrderItem | null>(null);
-
-const openChangeStatusDialog = (item: OrderItem | Record<string, unknown>) => {
-  itemToChangeStatus.value = item as OrderItem;
-  showChangeStatusDialog.value = true;
-};
-
-const handleCreatePickup = (item: unknown) => {
-  const tableItem = item as OrderItem & { originalId: number };
-  // Use originalId (numeric id) for navigation to pickup form
-  const orderId = String(tableItem.originalId);
-  router.push({ 
-    name: 'SalesSoPickupsPickup',
-    params: { orderId }
-  });
-};
-
-
-const handleCreateTrip = (item: unknown) => {
-  const tableItem = item as OrderItem & { id: string | number };
-  
-  router.push({ 
-    name: 'SalesTripsCreate',
-    query: { 
-      sale_order_id: tableItem.id,
-    }
-  });
-};
-
 onMounted(() => {
   fetchList();
-  nextTick(() => setupInfiniteScroll());
-});
-
-onBeforeUnmount(() => {
-  cleanupInfiniteScroll();
 });
 </script>
 
@@ -322,8 +306,8 @@ onBeforeUnmount(() => {
     <div class="pricesOffers-page">
       <PageHeader
         :icon="GridIcon"
-        title-key="pages.SalesRequests.title"
-        description-key="pages.SalesRequests.description"
+        title-key="pages.SalesOrdersFuels.title"
+        description-key="pages.SalesOrdersFuels.description"
       />
 
       <div
@@ -352,6 +336,7 @@ onBeforeUnmount(() => {
           :class="hasSelectedRequests ? 'justify-between' : 'justify-end'"
           class="flex flex-wrap items-center gap-3 border-y border-y-slate-300 px-4 sm:px-6 py-3"
         >
+          <!-- Actions when rows are selected (only if can_bulk_delete) -->
           <div
             v-if="canBulkDelete && hasSelectedRequests"
             class="flex flex-wrap items-stretch rounded overflow-hidden border border-gray-200 bg-white text-sm"
@@ -379,6 +364,7 @@ onBeforeUnmount(() => {
             />
           </div>
 
+          <!-- Main header controls -->
           <div class="flex flex-wrap gap-3">
             <v-menu v-model="showHeadersMenu" :close-on-content-click="false">
               <template #activator="{ props: menuProps }">
@@ -431,13 +417,13 @@ onBeforeUnmount(() => {
               rounded="4"
               custom-class="px-7 font-semibold text-base !text-primary-800 border !border-primary-200"
               :prepend-icon="plusIcon"
-              label="أضف طلبية"
+              label="أضف طلب"
               @click="openCreateRequest"
             />
           </div>
         </div>
 
-        <!-- Advanced filters -->
+        <!-- Advanced filters row -->
         <div
           v-if="showAdvancedFilters"
           class="border-y border-y-primary-100 bg-primary-50 px-4 sm:px-6 py-3 gap-3 flex justify-between flex-wrap"
@@ -448,29 +434,39 @@ onBeforeUnmount(() => {
               density="comfortable"
               variant="outlined"
               hide-details
-              placeholder="كود الطلبية"
+              placeholder="كود الطلب"
               class="w-full sm:w-40 bg-white"
             />
             <TextInput
-              v-model="filterSupplierName"
+              v-model="filterNameEnglish"
               density="comfortable"
               variant="outlined"
               hide-details
               placeholder="اسم المورد"
               class="w-full sm:w-40 bg-white"
             />
+            <TextInput
+              v-model="filterNameArabic"
+              density="comfortable"
+              variant="outlined"
+              hide-details
+              placeholder="دفعة مقدمة"
+              class="w-full sm:w-40 bg-white"
+            />
+            <SelectInput
+              :items="['الموقع', 'الموقع']"
+              v-model="filterNameArabic"
+              density="comfortable"
+              variant="outlined"
+              hide-details
+              placeholder="موقع المشروع"
+              class="w-full sm:w-40 bg-white"
+            />
             <DatePickerInput
               v-model="filterStartDateMin"
               density="comfortable"
               hide-details
-              placeholder="تاريخ الطلبية من"
-              class="w-full sm:w-40 bg-white"
-            />
-            <DatePickerInput
-              v-model="filterStartDateMax"
-              density="comfortable"
-              hide-details
-              placeholder="تاريخ الطلبية إلى"
+              placeholder="تاريخ الطلب"
               class="w-full sm:w-40 bg-white"
             />
           </div>
@@ -499,13 +495,13 @@ onBeforeUnmount(() => {
           </div>
         </div>
 
+        <!-- Table -->
         <DataTable
           :headers="tableHeaders"
           :items="tableItemsWithId"
           :loading="loading"
           :show-checkbox="canBulkDelete"
           show-actions
-          smallButtons
           @edit="handleEdit"
           @view="handleView"
           @delete="handleDelete"
@@ -516,30 +512,15 @@ onBeforeUnmount(() => {
             <span
               :class="[
                 'inline-block px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap',
-                getStatusClass(item.status),
+                !getStatusStyle(item) ? getStatusClass(item.status) : '',
               ]"
+              :style="getStatusStyle(item) ?? undefined"
             >
               {{ item.status }}
             </span>
           </template>
           <template #item.actions="{ item }">
-            <div class="flex items-center gap-1">
-                            <v-btn v-if="item.actions?.can_create_trip" icon variant="text" size="small"
-                @click="handleCreateTrip(item)">
-                <!-- <span v-html="refreshIcon"></span> -->
-                  <v-icon size="25">mdi-airplane</v-icon>
-              </v-btn>
-
-              <v-btn
-                v-if="item.actions?.can_create_pickup"
-                icon
-                variant="text"
-                size="x-small"
-                color="primary-600"
-                @click="handleCreatePickup(item)"
-              >
-                <span v-html="truckIcon"></span>
-              </v-btn>
+            <div class="flex items-center">
               <v-btn
                 v-if="item.actions?.can_change_status"
                 icon
@@ -548,53 +529,28 @@ onBeforeUnmount(() => {
                 color="warning-600"
                 @click="openChangeStatusDialog(item)"
               >
-                <span v-html="switcStatusIcon"></span>
-              </v-btn>
-              <v-btn
-                v-if="item.actions?.can_receive_doc"
-                icon
-                variant="text"
-                size="x-small"
-                color="success-700"
-              >
-                <span class="w-4 font-bold" v-html="fileCheckIcon"></span>
+                <span v-html="switchHorisinralIcon"></span>
               </v-btn>
             </div>
           </template>
         </DataTable>
-
-        <div ref="loadMoreTrigger" class="h-4"></div>
-        <div v-if="loadingMore" class="flex justify-center items-center py-4">
-          <v-progress-circular indeterminate color="primary" size="32" />
-          <span class="mr-2 text-gray-600">جاري تحميل المزيد...</span>
-        </div>
       </div>
     </div>
 
-    <!-- Single delete -->
+    <!-- Single shared delete confirmation (single item or bulk) -->
     <DeleteConfirmDialog
-      v-model="showDeleteDialog"
+      v-model="isDeleteDialogOpen"
       :loading="deleteLoading"
-      title="حذف الطلبية"
-      message="هل أنت متأكد من حذف هذه الطلبية؟"
-      @confirm="confirmDelete"
+      :title="deleteDialogTitle"
+      :message="deleteDialogMessage"
+      @confirm="onDeleteConfirm"
     />
 
-    <!-- Bulk delete -->
-    <DeleteConfirmDialog
-      v-model="showBulkDeleteDialog"
-      :loading="deleteLoading"
-      title="حذف الطلبيات"
-      :message="`هل أنت متأكد من حذف ${selectedRequests.length} طلبية؟`"
-      @confirm="confirmBulkDelete"
-    />
-
+    <!-- Status Change Dialog -->
     <StatusChangeFeature
       v-model="showChangeStatusDialog"
       :item="itemToChangeStatus"
-      :change-status-url="`/sales/orders/building-materials/${itemToChangeStatus?.uuid}/change-status`"
-      title="تغيير الحالة"
-      message="تغيير الحالة:"
+      :change-status-url="`/sales/orders/fuels/${itemToChangeStatus?.uuid}/change-status`"
       @success="fetchList"
     />
   </default-layout>

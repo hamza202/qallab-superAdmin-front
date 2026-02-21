@@ -2,7 +2,7 @@
 import { computed, ref, watch } from "vue";
 import { useApi } from '@/composables/useApi';
 
-type RequestType = 'raw_materials' | 'fuel' | 'transfer_service' | 'trips' | 'logistics';
+type RequestType = 'raw_materials' | 'fuel' | 'transfer_service' | 'trips' | 'logistics' | 'logistics-trips';
 
 interface Category {
   id: number;
@@ -22,10 +22,14 @@ export interface ProductToAdd {
   unit_id: number | null;
   unit_name: string;
   quantity: number | null;
-  transport_type?: number | null | undefined;
+  transport_type?: number | null | number[] | undefined;
   transport_no?: number | null | undefined;
   transport_type_name?: string;
+  transport_type_names?: string;
   trip_no?: number | null | undefined;
+  from_date?: string | null;
+  trip_date?: string | null;
+  trip_price?: number | null;
   notes: string;
   isAdded?: boolean;
   id?: number;
@@ -52,7 +56,10 @@ const props = defineProps<{
 
 const variant = computed(() => props.variant || 'purchases');
 const isSalesMode = computed(() => variant.value === 'sales');
-const showPricingFields = computed(() => isSalesMode.value || !!props.showUnitPriceAndDiscount);
+const showPricingFields = computed(() => {
+  if (props.showUnitPriceAndDiscount === false) return false;
+  return isSalesMode.value || !!props.showUnitPriceAndDiscount;
+});
 const entityId = computed(() => isSalesMode.value ? props.customerId : props.supplierId);
 
 const emit = defineEmits<{
@@ -185,10 +192,14 @@ const fetchItems = async () => {
           unit_id: null,
           unit_name: '',
           quantity: null,
-          transport_type: null,
+          transport_type: props.requestType === 'logistics-trips' ? [] : null,
           transport_no: null,
           transport_type_name: '',
+          transport_type_names: '',
           trip_no: null,
+          from_date: null,
+          trip_date: null,
+          trip_price: null,
           notes: '',
           isAdded: false,
         };
@@ -248,9 +259,17 @@ const toggleProduct = (product: ProductToAdd) => {
       const unit = unitItemsList.value.find((u: any) => u.value === product.unit_id);
       product.unit_name = unit?.title || '';
       
-      // Get transport type name
-      const transport = packageTypeItemsList.value.find((t: any) => t.value === product.transport_type);
-      product.transport_type_name = transport?.title || '';
+      // Get transport type name(s)
+      if (Array.isArray(product.transport_type)) {
+        const transportNames = product.transport_type.map(typeId => {
+          const transport = packageTypeItemsList.value.find((t: any) => t.value === typeId);
+          return transport?.title || '';
+        }).filter(Boolean).join(', ');
+        product.transport_type_names = transportNames;
+      } else {
+        const transport = packageTypeItemsList.value.find((t: any) => t.value === product.transport_type);
+        product.transport_type_name = transport?.title || '';
+      }
       
       product.isAdded = true;
       // Remove from manually unchecked list
@@ -451,7 +470,7 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
           </div>
 
           <!-- Delivery Count (trip_no) - purchases فقط بدون سعر/خصم -->
-          <div v-if="!showPricingFields && requestType == 'raw_materials'">
+          <div v-if="!showPricingFields && requestType == 'raw_materials'|| requestType == 'logistics'">
             <TextInput 
               v-model="editProductData.trip_no" 
               type="number" 
@@ -461,8 +480,18 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
             />
           </div>
 
+          <!-- From Date (logistics only) -->
+          <div v-if="requestType === 'logistics'">
+            <DatePickerInput
+              v-model="editProductData.from_date"
+              placeholder="تاريخ بداية النقل"
+              density="compact"
+              class="min-w-[170px]"
+            />
+          </div>
+
           <!-- Package Type (transport_type) - purchases فقط بدون سعر/خصم -->
-          <div v-if="!showPricingFields && requestType == 'raw_materials' || requestType == 'trips'">
+          <div v-if="!showPricingFields && requestType == 'raw_materials' || requestType == 'trips' || requestType == 'logistics'">
             <SelectInput 
               v-model="editProductData.transport_type" 
               :items="packageTypeItemsList" 
@@ -482,6 +511,41 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
               placeholder="عدد الناقلات"
               density="compact" 
               class="min-w-[170px]" 
+            />
+          </div>
+
+          <!-- Trip Date (logistics-trips only) -->
+          <div v-if="requestType === 'logistics-trips'">
+            <DatePickerInput 
+              v-model="editProductData.trip_date" 
+              placeholder="تاريخ الرحلة" 
+              density="compact"
+              class="min-w-[170px]" 
+            />
+          </div>
+
+          <!-- Trip Price (logistics-trips only) -->
+          <div v-if="requestType === 'logistics-trips'">
+            <PriceInput 
+              v-model="editProductData.trip_price" 
+              showRialIcon
+              placeholder="سعر الرحلة" 
+              density="compact"
+              class="min-w-[170px]" 
+            />
+          </div>
+
+            <!-- Package Type (transport_type) - multi-select for logistics-trips -->
+          <div v-if="requestType === 'logistics-trips'" class="md:col-span-2">
+            <SelectInput 
+              v-model="editProductData.transport_type" 
+              :items="packageTypeItemsList" 
+              placeholder="نوع المركبات"
+              density="compact" 
+              class="min-w-[170px]" 
+              item-title="title" 
+              item-value="value"
+              multiple
             />
           </div>
 
@@ -617,7 +681,7 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
               </div>
 
               <!-- Delivery Count (trip_no) - purchases فقط بدون سعر/خصم -->
-              <div v-if="!showPricingFields && requestType == 'raw_materials'">
+              <div v-if="!showPricingFields && requestType == 'raw_materials' || requestType == 'logistics'">
                 <PriceInput 
                   v-model="product.trip_no" 
                   placeholder="عدد الرحلات" 
@@ -626,8 +690,39 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
                 />
               </div>
 
-              <!-- Package Type (transport_type) - purchases فقط بدون سعر/خصم -->
-              <div v-if="!showPricingFields && requestType == 'raw_materials' || !showPricingFields && requestType == 'trips'">
+              <!-- From Date (logistics only) -->
+              <div v-if="requestType === 'logistics'">
+                <DatePickerInput 
+                  v-model="product.from_date" 
+                  placeholder="تاريخ بداية النقل" 
+                  density="compact"
+                  class="min-w-[170px]" 
+                />
+              </div>
+
+              <!-- Trip Date (logistics-trips only) -->
+              <div v-if="requestType === 'logistics-trips'">
+                <DatePickerInput 
+                  v-model="product.trip_date" 
+                  placeholder="تاريخ الرحلة" 
+                  density="compact"
+                  class="min-w-[170px]" 
+                />
+              </div>
+
+              <!-- Trip Price (logistics-trips only) -->
+              <div v-if="requestType === 'logistics-trips'">
+                <PriceInput 
+                  v-model="product.trip_price" 
+                  showRialIcon
+                  placeholder="سعر الرحلة" 
+                  density="compact"
+                  class="min-w-[170px]" 
+                />
+              </div>
+
+              <!-- Package Type (transport_type) - single select for logistics -->
+              <div v-if="!showPricingFields && requestType == 'raw_materials' || !showPricingFields && requestType == 'trips' || requestType == 'logistics'">
                 <SelectInput 
                   v-model="product.transport_type" 
                   :items="packageTypeItemsList" 
@@ -636,6 +731,20 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
                   class="min-w-[170px]" 
                   item-title="title" 
                   item-value="value" 
+                />
+              </div>
+
+              <!-- Package Type (transport_type) - multi-select for logistics-trips -->
+              <div v-if="requestType === 'logistics-trips'" class="md:col-span-2">
+                <SelectInput 
+                  v-model="product.transport_type" 
+                  :items="packageTypeItemsList" 
+                  placeholder="نوع المركبات"
+                  density="compact" 
+                  class="min-w-[170px]" 
+                  item-title="title" 
+                  item-value="value"
+                  multiple
                 />
               </div>
 
