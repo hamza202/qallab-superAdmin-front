@@ -240,6 +240,46 @@ export const salesRoutes: RouteRecordRaw[] = [
       },
     ],
   },
+  // Sales Orders Logistics (طلبيات خدمة نقل)
+  {
+    path: "/sales/orders/logistics",
+    name: "SalesOrdersLogistics",
+    redirect: "/sales/orders/logistics/list",
+    children: [
+      {
+        path: "list",
+        name: "SalesOrdersLogisticsList",
+        component: () => import("@/views/sales/orders/logistics/List.vue"),
+        meta: {
+          title: "pages.SalesOrdersLogistics.title",
+        },
+      },
+      {
+        path: "create",
+        name: "SalesOrdersLogisticsCreate",
+        component: () => import("@/views/sales/orders/logistics/Form.vue"),
+        meta: {
+          title: "pages.SalesOrdersLogistics.title",
+        },
+      },
+      {
+        path: "edit/:id",
+        name: "SalesOrdersLogisticsEdit",
+        component: () => import("@/views/sales/orders/logistics/Form.vue"),
+        meta: {
+          title: "pages.SalesOrdersLogistics.edit",
+        },
+      },
+      {
+        path: "view/:id",
+        name: "SalesOrdersLogisticsView",
+        component: () => import("@/views/sales/orders/logistics/View.vue"),
+        meta: {
+          title: "pages.SalesOrdersLogistics.view",
+        },
+      },
+    ],
+  },
   {
     path: "/sales/trips",
     name: "SalesTrips",
