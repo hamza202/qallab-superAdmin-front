@@ -341,6 +341,14 @@
                     طلبيات محروقات</router-link>
                 </li>
                 <li class="relative">
+                  <router-link to="/sales/orders/logistics/list" :class="[
+                    $route.path.includes('/sales/orders/logistics')
+                      ? 'font-bold text-qallab-yellow'
+                      : 'text-white hover:text-qallab-yellow',
+                  ]">
+                    طلبيات خدمة نقل</router-link>
+                </li>
+                <li class="relative">
                   <router-link to="/sales/so-pickups/list" :class="[
                     $route.path.includes('/sales/so-pickups')
                       ? 'font-bold text-qallab-yellow'
