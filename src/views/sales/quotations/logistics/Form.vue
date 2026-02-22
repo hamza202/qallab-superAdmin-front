@@ -333,6 +333,14 @@ const fetchRequestForQuotation = async () => {
     }
 };
 
+const formatCurrency = (value: number): string => {
+    if (!Number.isFinite(value)) return '0.00';
+    return value.toLocaleString('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+    });
+};
+
 // Interface for logistics quotation products (matching API structure)
 interface LogisticsQuotationProductToAdd {
     item_id: number;
@@ -426,12 +434,24 @@ const productTableItems = ref<ProductTableItem[]>([]);
 // Trip details table items
 const tripTableItems = ref<TripTableItem[]>([]);
 
-// Summary data
-const summaryData = computed(() => ({
-    productsCount: productTableItems.value.length,
-    payment_method: paymentMethodItems.value.find((i: any) => i.value === formData.value.payment_method)?.title || '',
-    upfront_payment: formData.value.upfront_payment ?? 'لا يوجد'
-}));
+
+const summaryTotals = computed(() => {
+    const transportValue = logisticsDetails.value.reduce((total, detail) => {
+        const amount = detail.transport_amount != null ? Number(detail.transport_amount) : 0;
+        return total + (isNaN(amount) ? 0 : amount);
+    }, 0);
+
+    const taxRatePercent = 15;
+    const taxAmount = transportValue * (taxRatePercent / 100);
+    const finalTotal = transportValue + taxAmount;
+
+    return {
+        transportValue,
+        taxRatePercent,
+        taxAmount,
+        finalTotal,
+    };
+});
 
 const showAddProductDialog = ref(false);
 const editingProduct = ref<ProductToAdd | null>(null);
@@ -1312,7 +1332,7 @@ onMounted(async () => {
                     </div>
                 </div>
 
-                <div class="bg-white rounded-2xl overflow-hidden border !border-gray-200">
+                <div class="bg-primary-25 rounded-2xl overflow-hidden border !border-gray-200">
                     <table class="w-full">
                         <thead>
                             <tr class="bg-primary-400">
@@ -1328,28 +1348,10 @@ onMounted(async () => {
                         <tbody class="text-sm bg-primary-25">
                             <tr class="border-b !border-gray-200">
                                 <td class="py-5 px-4 text-center font-bold text-gray-900 border-l !border-gray-200">
-                                    المجموع قبل الخصم
+                                    قيمة النقل
                                 </td>
                                 <td class="py-5 px-4 text-center text-gray-600">
-                                    <!-- {{ summaryTotals.subtotalBeforeDiscount }} -->
-                                </td>
-                            </tr>
-
-                            <tr class="border-b !border-gray-200">
-                                <td class="py-5 px-4 text-center font-bold text-gray-900 border-l !border-gray-200">
-                                    الخصم
-                                </td>
-                                <td class="py-5 px-4 text-center text-gray-600">
-                                    <!-- {{ summaryTotals.totalDiscount }} -->
-                                </td>
-                            </tr>
-
-                            <tr class="border-b !border-gray-200">
-                                <td class="py-5 px-4 text-center font-bold text-gray-900 border-l !border-gray-200">
-                                    المجموع بعد الخصم
-                                </td>
-                                <td class="py-5 px-4 text-center text-gray-600">
-                                    <!-- {{ summaryTotals.subtotalAfterDiscount }} -->
+                                    <span class="font-semibold text-gray-900">{{ formatCurrency(summaryTotals.transportValue) }}</span>
                                 </td>
                             </tr>
 
@@ -1358,7 +1360,7 @@ onMounted(async () => {
                                     الضريبة
                                 </td>
                                 <td class="py-5 px-4 text-center text-gray-600">
-                                    15%
+                                    {{ summaryTotals.taxRatePercent }}%
                                 </td>
                             </tr>
 
@@ -1367,16 +1369,16 @@ onMounted(async () => {
                                     اجمالي الضريبة
                                 </td>
                                 <td class="py-5 px-4 text-center text-gray-600">
-                                    <!-- {{ summaryTotals.totalTaxAmount }} -->
+                                    <span class="font-semibold text-gray-900">{{ formatCurrency(summaryTotals.taxAmount) }}</span>
                                 </td>
                             </tr>
 
-                            <tr>
+                            <tr class="border-b !border-gray-200">
                                 <td class="py-5 px-4 text-center font-bold text-gray-900 border-l !border-gray-200">
                                     الإجمالي النهائي
                                 </td>
                                 <td class="py-5 px-4 font-bold text-center text-gray-900">
-                                    <!-- {{ summaryTotals.finalTotal }} -->
+                                    <span class="font-semibold text-gray-900">{{ formatCurrency(summaryTotals.finalTotal) }}</span>
                                 </td>
                             </tr>
                         </tbody>
