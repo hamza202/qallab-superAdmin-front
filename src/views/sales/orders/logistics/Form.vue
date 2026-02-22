@@ -209,7 +209,7 @@ const getCategoriesNames = (categories: number[]): string => {
   return categories
     .map((categoryId) => {
       const item = categoriesItems.value.find((i: any) => i.value === categoryId);
-      return item?.title || "";
+  return item?.title || "";
     })
     .filter(Boolean)
     .join(", ");
@@ -221,7 +221,7 @@ const getTransportTypeNames = (transportTypes: number[]): string => {
   return transportTypes
     .map((typeId) => {
       const item = transportTypeItems.value.find((i: any) => i.value === typeId);
-      return item?.title || "";
+  return item?.title || "";
     })
     .filter(Boolean)
     .join(", ");
@@ -266,7 +266,7 @@ const fetchFormData = async () => {
 
     if (!data) return;
 
-    // Populate form data
+      // Populate form data
     formData.value.code = data.code ? String(data.code) : "";
     formData.value.customer_id = data.customer_id ?? null;
     formData.value.so_datetime = data.so_datetime ? String(data.so_datetime) : "";
@@ -276,19 +276,19 @@ const fetchFormData = async () => {
     formData.value.target_location = data.target_location ?? null;
     formData.value.target_latitude = data.target_latitude ?? null;
     formData.value.target_longitude = data.target_longitude ?? null;
-    formData.value.source_location = data.source_location ?? null;
-    formData.value.source_latitude = data.source_latitude ?? null;
-    formData.value.source_longitude = data.source_longitude ?? null;
+      formData.value.source_location = data.source_location ?? null;
+      formData.value.source_latitude = data.source_latitude ?? null;
+      formData.value.source_longitude = data.source_longitude ?? null;
     formData.value.project_name = data.project_name ?? "";
     formData.value.po_reference = data.po_reference ?? null;
     formData.value.payment_method = data.payment_method ?? null;
     formData.value.upfront_payment = data.upfront_payment ?? null;
     formData.value.invoice_interval = data.invoice_interval ?? null;
     formData.value.payment_term_no = data.payment_term_no ?? null;
-    formData.value.late_fee_type = data.late_fee_type ?? null;
-    formData.value.late_fee = data.late_fee ?? null;
-    formData.value.cancel_fee_type = data.cancel_fee_type ?? null;
-    formData.value.cancel_fee = data.cancel_fee ?? null;
+      formData.value.late_fee_type = data.late_fee_type ?? null;
+      formData.value.late_fee = data.late_fee ?? null;
+      formData.value.cancel_fee_type = data.cancel_fee_type ?? null;
+      formData.value.cancel_fee = data.cancel_fee ?? null;
     formData.value.sale_quotation_code = data.sale_quotation_code ?? null;
 
     // Populate logistics details (so_logistics_details)
@@ -348,20 +348,20 @@ const fetchFormData = async () => {
           ? item.transport_type.map((type: any) => Number(type))
           : [];
 
-        return {
-          id: item.id,
+          return {
+            id: item.id,
           item_id: Number(item.item_id),
           item_name: item.item_name ?? "",
-          unit_id: item.unit_id ?? null,
+            unit_id: item.unit_id ?? null,
           unit_name: item.unit_name ?? "",
-          quantity: item.quantity ?? null,
+            quantity: item.quantity ?? null,
           trip_date: item.trip_date ?? null,
           trip_price: item.trip_price != null ? Number(item.trip_price) : null,
           transport_type: transportTypes,
           transport_type_names: getTransportTypeNames(transportTypes),
         } as TripTableItem;
       });
-    } else {
+          } else {
       tripTableItems.value = [];
     }
   } catch (e) {
@@ -390,7 +390,7 @@ const fetchQuotationForOrder = async () => {
       if (data.code && !fromQuotationCode.value) {
         formData.value.sale_quotation_code = data.code;
       }
-
+      
       // Map quotation fields to order form fields
       formData.value.customer_id = data.customer_id != null ? Number(data.customer_id) : null;
       formData.value.responsible_person = data.responsible_person || "";
@@ -407,7 +407,7 @@ const fetchQuotationForOrder = async () => {
       formData.value.late_fee = data.late_fee != null ? Number(data.late_fee) : null;
       formData.value.cancel_fee_type = data.cancel_fee_type || null;
       formData.value.cancel_fee = data.cancel_fee != null ? Number(data.cancel_fee) : null;
-
+      
       // Map quotation_type to so_type if available
       if (data.quotation_type) {
         formData.value.so_type = data.quotation_type;
@@ -613,7 +613,7 @@ const getInitialFormData = () => ({
   source_location: null as string | null,
   source_latitude: null as string | null,
   source_longitude: null as string | null,
-  project_name: "",
+    project_name: "",
   po_reference: null as string | null,
   payment_method: null as string | null,
   upfront_payment: null as number | string | null,
@@ -689,10 +689,10 @@ const handleSubmit = async (afterSuccess?: "reset" | "navigate") => {
       : "/sales/orders/logistics";
 
     await api.post(url, fd, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
     success(isEditMode.value ? "تم تحديث الطلب بنجاح" : "تم إنشاء الطلب بنجاح");
 
@@ -1012,8 +1012,8 @@ const tripHeaders = [
 
 const tripItems = computed(() =>
   tripTableItems.value.map((item) => ({
-    id: item.item_id,
-    item_id: item.item_id,
+      id: item.item_id,
+      item_id: item.item_id,
     name: item.item_name,
     unit: item.unit_name,
     quantity: item.quantity,
@@ -1167,7 +1167,7 @@ onMounted(async () => {
                 </div>
               </div>
               <p v-if="targetLocationError" class="text-error-600 text-xs mt-1">{{ targetLocationError }}</p>
-            </div>
+            </div>            
 
             <!-- Project Name -->
             <div>
@@ -1293,14 +1293,14 @@ onMounted(async () => {
                 </div>
               </div>
 
-              <ButtonWithIcon
+                    <ButtonWithIcon
                 :icon="binIcon"
                 icon-only
                 @click="handleEditLogisticsDetail(detail)"
                 size="x-small"
                 rounded="lg"
               />
-            </div>
+          </div>
 
             <!-- Location Buttons -->
             <div class="flex justify-end gap-2">
