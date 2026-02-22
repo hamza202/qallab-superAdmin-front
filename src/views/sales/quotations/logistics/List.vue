@@ -8,7 +8,7 @@ import { useTableColumns } from '@/composables/useTableColumns';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog.vue';
 import DatePickerInput from '@/components/common/forms/DatePickerInput.vue';
 import { GridIcon, trash_1_icon, trash_2_icon, importIcon, columnIcon, exportIcon, plusIcon, searchIcon } from "@/components/icons/globalIcons";
-import { switchHorisinralIcon } from '@/components/icons/priceOffersIcons';
+import { switchHorisinralIcon, refreshIcon } from '@/components/icons/priceOffersIcons';
 import StatusChangeFeature from '@/components/common/StatusChangeFeature.vue';
 
 const { t } = useI18n();
@@ -32,9 +32,11 @@ interface ItemActions {
   can_delete: boolean;
   can_view: boolean;
   can_change_status: boolean;
+  can_create_order: boolean;
 }
 
 interface QuotationItem {
+  id: number;
   uuid: string;
   customer_name: string;
   quotation_name: string;
@@ -152,7 +154,7 @@ const handleEdit = (item: { id?: string | number; uuid?: string }) => {
   router.push({ name: 'SalesQuotationsLogisticsEdit', params: { id: uuid } });
 };
 
-const handleDelete = (item: { uuid?: string; id?: string | number } & Partial<QuotationItem>) => {
+const handleDelete = (item: any) => {
   itemToDelete.value = item as QuotationItem;
   showDeleteDialog.value = true;
 };
@@ -216,6 +218,22 @@ const openChangeStatusDialog = (item: QuotationItem | Record<string, unknown>) =
 
 const openCreateQuotation = () => {
   router.push({ name: 'SalesQuotationsLogisticsCreate' });
+};
+
+const handleCreateOrder = (item: unknown) => {
+  const tableItem = item as QuotationItem & { id: string | number };
+  // Find original item from tableItems to get the numeric id
+  const originalItem = tableItems.value.find((q) => q.uuid === tableItem.uuid);
+  const numericId = originalItem?.id;
+  
+  router.push({ 
+    name: 'SalesOrdersLogisticsCreate',
+    query: { 
+      from_quotation: tableItem.uuid,
+      quotation_code: tableItem.code,
+      sale_quotation_id: numericId ? String(numericId) : undefined
+    }
+  });
 };
 
 const handleBulkDelete = () => {
@@ -347,6 +365,10 @@ onMounted(() => {
           </template>
           <template #item.actions="{ item }">
             <div class="flex items-center gap-1">
+              <v-btn v-if="item.actions?.can_create_order" icon variant="text" size="small"
+                @click="handleCreateOrder(item)">
+                <span v-html="refreshIcon"></span>
+              </v-btn>
               <v-btn v-if="item.actions?.can_change_status" icon variant="text" size="small" color="warning-600"
                 @click="openChangeStatusDialog(item)">
                 <span v-html="switchHorisinralIcon"></span>

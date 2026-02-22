@@ -413,37 +413,44 @@ const fetchQuotationForOrder = async () => {
         formData.value.so_type = data.quotation_type;
       }
 
-      // Map logistics details (quotation_logistics_details -> logisticsDetails)
-      if (Array.isArray(data.quotation_logistics_details) && data.quotation_logistics_details.length > 0) {
-        logisticsDetails.value = data.quotation_logistics_details.map((detail: any) => ({
-          id: undefined,
-          material_type: Array.isArray(detail.material_type)
-            ? detail.material_type.map((type: any) => Number(type))
-            : [],
-          trip_no: detail.trip_no != null ? Number(detail.trip_no) : null,
-          actual_execution_interval: detail.actual_execution_interval != null ? Number(detail.actual_execution_interval) : null,
-          am_pm_interval: detail.am_pm_interval ?? null,
-          from_date: detail.from_date ?? "",
-          to_date: detail.to_date ?? "",
-          transport_type: Array.isArray(detail.transport_type)
+      // Map logistics product details (logistics_product_details -> productTableItems with logistics info)
+      // Based on respons.json structure: logistics_product_details contains item logistics info
+      const logisticsProductDetails = data.logistics_product_details ?? data.quotation_logistics_details;
+      if (Array.isArray(logisticsProductDetails) && logisticsProductDetails.length > 0) {
+        // Create logistics details from logistics_product_details
+        logisticsDetails.value = logisticsProductDetails.map((detail: any) => {
+          const transportTypes = Array.isArray(detail.transport_type)
             ? detail.transport_type.map((type: any) => Number(type))
-            : [],
-          transport_no: detail.transport_no != null ? Number(detail.transport_no) : null,
-          loading_responsible_party: detail.loading_responsible_party ?? "",
-          downloading_responsible_party: detail.downloading_responsible_party ?? "",
-          target_location: detail.target_location ?? "",
-          target_latitude: detail.target_latitude ?? "",
-          target_longitude: detail.target_longitude ?? "",
-          source_location: detail.source_location ?? "",
-          source_latitude: detail.source_latitude ?? "",
-          source_longitude: detail.source_longitude ?? "",
-          transport_amount: detail.transport_amount != null ? detail.transport_amount : "",
-        }));
+            : [];
+          
+          return {
+            id: undefined,
+            material_type: detail.item_id ? [Number(detail.item_id)] : [],
+            trip_no: detail.number_of_trips != null ? Number(detail.number_of_trips) : null,
+            actual_execution_interval: detail.actual_execution_interval != null ? Number(detail.actual_execution_interval) : null,
+            am_pm_interval: detail.am_pm_interval ?? null,
+            from_date: detail.trip_start ?? detail.from_date ?? "",
+            to_date: detail.to_date ?? "",
+            transport_type: transportTypes,
+            transport_no: detail.transport_no != null ? Number(detail.transport_no) : null,
+            loading_responsible_party: detail.loading_responsible_party ?? "",
+            downloading_responsible_party: detail.downloading_responsible_party ?? "",
+            target_location: detail.target_location ?? "",
+            target_latitude: detail.target_latitude ?? "",
+            target_longitude: detail.target_longitude ?? "",
+            source_location: detail.source_location ?? "",
+            source_latitude: detail.source_latitude ?? "",
+            source_longitude: detail.source_longitude ?? "",
+            transport_amount: detail.transport_amount != null ? detail.transport_amount : "",
+          };
+        });
       }
 
-      // Map products (quotation_product_details -> productTableItems)
-      if (Array.isArray(data.quotation_product_details) && data.quotation_product_details.length > 0) {
-        productTableItems.value = data.quotation_product_details.map((item: any) => ({
+      // Map products (items -> productTableItems)
+      // Based on respons.json structure: items contains product details
+      const productItems = data.items ?? data.quotation_product_details;
+      if (Array.isArray(productItems) && productItems.length > 0) {
+        productTableItems.value = productItems.map((item: any) => ({
           id: undefined,
           item_id: Number(item.item_id),
           item_name: item.item_name ?? "",
@@ -459,8 +466,9 @@ const fetchQuotationForOrder = async () => {
       }
 
       // Map trip details (quotation_trip_details -> tripTableItems)
-      if (Array.isArray(data.quotation_trip_details) && data.quotation_trip_details.length > 0) {
-        tripTableItems.value = data.quotation_trip_details.map((item: any) => {
+      const tripDetails = data.quotation_trip_details;
+      if (Array.isArray(tripDetails) && tripDetails.length > 0) {
+        tripTableItems.value = tripDetails.map((item: any) => {
           const transportTypes = Array.isArray(item.transport_type)
             ? item.transport_type.map((type: any) => Number(type))
             : [];

@@ -298,10 +298,11 @@ const fetchRequestForQuotation = async () => {
                 tripTableItems.value = [];
             }
 
-            // Map logistics details if provided
-            if (Array.isArray(data.quotation_logistics_details) && data.quotation_logistics_details.length > 0) {
-                logisticsDetails.value = data.quotation_logistics_details.map((detail: any) => ({
-                    id: detail.id,
+            // Map logistics details from request (logistics_detail) to quotation form
+            const logisticsDetailSource = data.logistics_detail ?? data.quotation_logistics_details;
+            if (Array.isArray(logisticsDetailSource) && logisticsDetailSource.length > 0) {
+                logisticsDetails.value = logisticsDetailSource.map((detail: any) => ({
+                    id: undefined, // Don't copy ID when creating from request
                     material_type: Array.isArray(detail.material_type)
                         ? detail.material_type.map((type: any) => Number(type))
                         : [],
