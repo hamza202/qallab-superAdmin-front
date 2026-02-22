@@ -31,6 +31,9 @@ const router = useRouter();
 // Check if we're in edit mode
 const isEditMode = computed(() => !!route.params.id);
 const routeId = computed(() => route.params.id as string);
+const fromQuotationId = computed(() => route.query.from_quotation as string | undefined);
+const fromQuotationCode = computed(() => route.query.quotation_code as string | undefined);
+const saleQuotationId = computed(() => route.query.sale_quotation_id as string | undefined);
 const isLoading = ref(false);
 const isSubmitting = ref(false);
 
@@ -168,6 +171,84 @@ const fetchFormData = async () => {
     }
 }
 
+const fetchQuotationForOrder = async () => {
+    if (!fromQuotationId.value) return;
+
+    if (fromQuotationCode.value) {
+        formData.value.sale_quotation_code = fromQuotationCode.value;
+    }
+
+    isLoading.value = true;
+    try {
+        const res = await api.get<any>(`/sales/quotations/fuels/${fromQuotationId.value}`);
+        const data = res.data;
+
+        if (data) {
+            if (data.code && !fromQuotationCode.value) {
+                formData.value.sale_quotation_code = data.code;
+            }
+
+            formData.value.customer_id = data.customer_id != null ? Number(data.customer_id) : null;
+            formData.value.project_name = data.project_name || '';
+            formData.value.target_location = data.target_location || null;
+            formData.value.target_latitude = data.target_latitude || null;
+            formData.value.target_longitude = data.target_longitude || null;
+            formData.value.source_location = data.source_location || null;
+            formData.value.source_latitude = data.source_latitude || null;
+            formData.value.source_longitude = data.source_longitude || null;
+            formData.value.paymentMethod = data.payment_method || null;
+            formData.value.advancePayment = data.upfront_payment || null;
+            formData.value.invoice_interval = data.invoice_interval != null ? Number(data.invoice_interval) : null;
+            formData.value.payment_term_no = data.payment_term_no != null ? Number(data.payment_term_no) : null;
+            formData.value.late_fee_type = data.late_fee_type || null;
+            formData.value.late_fee = data.late_fee != null ? Number(data.late_fee) : null;
+            formData.value.cancel_fee_type = data.cancel_fee_type || null;
+            formData.value.cancel_fee = data.cancel_fee != null ? Number(data.cancel_fee) : null;
+            formData.value.textNote = data.notes || '';
+            formData.value.po_reference = data.po_reference || '';
+
+            const attached = data.logistics_detail || null;
+            if (attached) {
+                formData.value.transport_start_date = attached.from_date || '';
+                formData.value.transport_end_date = attached.to_date || '';
+                formData.value.supplyType = attached.supply_type || null;
+                formData.value.supplyDuration = attached.supply_interval ?? null;
+                formData.value.deliveryDuration = attached.delivered_interval ?? null;
+                formData.value.deliveryMethod = attached.delivered_method ?? null;
+            }
+
+            if (data.items && Array.isArray(data.items)) {
+                productTableItems.value = data.items.map((item: any) => {
+                    return {
+                        item_id: Number(item.item_id),
+                        item_name: item.item_name || item.item?.name || '',
+                        unit_id: item.unit_id ?? null,
+                        unit_name: item.unit_name || item.unit?.name || '',
+                        quantity: item.quantity ?? null,
+                        transport_type: item.transport_type ?? null,
+                        transport_type_name: getTransportTypeName(item.transport_type),
+                        trip_no: item.trip_no ?? null,
+                        notes: item.note || item.notes || '',
+                        price_per_unit: item.price_per_unit ?? null,
+                        unit_price: item.price_per_unit ?? null,
+                        discount: item.discount_val ?? null,
+                        discount_type: item.discount_type ?? null,
+                        discount_val: item.discount_val ?? null,
+                        total_tax: item.total_tax ?? null,
+                        subtotal_before_discount: item.subtotal_before_discount ?? null,
+                        subtotal_after_discount: item.subtotal_after_tax ?? item.subtotal_after_discount ?? null,
+                        isAdded: true,
+                    };
+                });
+            }
+        }
+    } catch (e) {
+        console.error('Error fetching quotation data:', e);
+    } finally {
+        isLoading.value = false;
+    }
+};
+
 onMounted(async () => {
     await Promise.all([
         fetchConstants(),
@@ -175,9 +256,10 @@ onMounted(async () => {
         fetchCustomers()
     ]);
     
-    // Fetch form data if in edit mode
     if (isEditMode.value) {
         await fetchFormData();
+    } else if (fromQuotationId.value) {
+        await fetchQuotationForOrder();
     }
 });
 
@@ -210,6 +292,7 @@ const logisticsDetailId = ref<number | null>(null);
 // Form data (matching JSON payload)
 const formData = ref({
     code: '',
+    sale_quotation_code: null as string | null,
     source_location: null as string | null,
     source_latitude: null as string | null,
     source_longitude: null as string | null,
@@ -321,7 +404,7 @@ const handleDeleteProduct = (item: any) => {
 
 import { useForm } from '@/composables/useForm';
 
-const { isFormValid, validate } = useForm();
+const { formRef, isFormValid, validate } = useForm();
 
 const formatDateYmd = (date: string | Date): string => {
     if (!date) return '';
@@ -335,6 +418,10 @@ const formatDateYmd = (date: string | Date): string => {
 // Build FormData for submission
 const buildFormData = (): FormData => {
     const fd = new FormData();
+
+    if (saleQuotationId.value) {
+        fd.append('sale_quotation_id', saleQuotationId.value);
+    }
 
     fd.append('so_datetime', formData.value.so_datetime || '');
     if (isEditMode.value) {
@@ -397,6 +484,7 @@ const buildFormData = (): FormData => {
 const resetForm = () => {
     formData.value = {
         code: '',
+        sale_quotation_code: null,
         source_location: null,
         source_latitude: null,
         source_longitude: null,
@@ -699,6 +787,31 @@ const summaryTotals = computed(() => {
                             <SelectInput v-model="formData.deliveryMethod" :items="deliveryMethodItems"
                                 label="طريقة التسليم" density="comfortable" placeholder="اختر"
                                 item-title="title" item-value="value" />
+                        </div>
+                        <div v-if="formData.sale_quotation_code">
+                            <TextInput
+                              v-model="formData.sale_quotation_code"
+                              readonly
+                              label="كود عرض السعر"
+                              density="comfortable"
+                              :hide-details="true"
+                            >
+                              <template #append-inner>
+                                <v-tooltip location="top" content-class="custom-tooltip">
+                                  <template #activator="{ props: tooltipProps }">
+                                    <ButtonWithIcon
+                                      variant="text"
+                                      size="small"
+                                      density="compact"
+                                      custom-class="!min-w-0 p-0"
+                                      :prepend-icon="HelpCircleIcon"
+                                      v-bind="tooltipProps"
+                                    />
+                                  </template>
+                                  <div>كود عرض السعر</div>
+                                </v-tooltip>
+                              </template>
+                            </TextInput>
                         </div>
                         <!-- الرقم المرجعي -->
                         <div>
