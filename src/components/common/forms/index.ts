@@ -5,6 +5,7 @@ export { default as CheckboxInput } from "./checkboxInput.vue";
 export { default as TextareaInput } from "./TextareaInput.vue";
 export { default as FileUploadInput } from "./FileUploadInput.vue";
 export { default as PriceInput } from "./PriceInput.vue";
+export { default as DateTimePickerInput } from "./DateTimePickerInput.vue";
 export { default as SelectWithIconInput } from "./SelectWithIconInput.vue";
 export { default as RichTextEditor } from "./RichTextEditor.vue";
 export { default as LanguageTabs } from "./LanguageTabs.vue";

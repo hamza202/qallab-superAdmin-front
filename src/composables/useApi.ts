@@ -1,5 +1,4 @@
 import axios, { type AxiosRequestConfig, type AxiosResponse } from 'axios';
-import { useAuthStore } from '@/stores/auth';
 
 // Create axios instance with base configuration
 const api = axios.create({
@@ -14,7 +13,8 @@ const api = axios.create({
 
 // Request interceptor - add auth token
 api.interceptors.request.use(
-  (config) => {
+  async (config) => {
+    const { useAuthStore } = await import('@/stores/auth');
     const authStore = useAuthStore();
     if (authStore.token) {
       config.headers.Authorization = `Bearer ${authStore.token}`;
@@ -33,7 +33,7 @@ api.interceptors.request.use(
 // Response interceptor - handle errors
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error) => {
     // Handle 401 Unauthorized
     if (error.response?.status === 401) {
       // Get the current path to avoid redirect loop on login page
@@ -42,6 +42,7 @@ api.interceptors.response.use(
 
       if (!isLoginPage) {
         // Clear all auth data using the store's method
+        const { useAuthStore } = await import('@/stores/auth');
         const authStore = useAuthStore();
         authStore.clearAuthData();
 

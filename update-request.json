@@ -1,0 +1,73 @@
+{
+    "customer_id": 2,
+    "so_datetime": "2026-02-20 10:00:00",
+    "responsible_person": "Wael",
+    "responsible_phone": "+966512345678",
+    "target_location": "Riyadh Warehouse",
+    "target_latitude": 24.7136,
+    "target_longitude": 46.6753,
+    "source_location": "Jeddah Port",
+    "source_latitude": 21.4858,
+    "source_longitude": 39.1925,
+    "project_name": "Logistics Project A",
+    "currency_code": "SAR",
+    "so_type": "so_with_logistics",
+    "payment_method": "cash",
+    "upfront_payment": 1000,
+    "invoice_interval": 30,
+    "payment_term_no": 1,
+    "late_fee_type": "percentage",
+    "late_fee": 5,
+    "cancel_fee_type": "fixed",
+    "cancel_fee": 500,
+    "po_reference": null,
+    "sale_quotation_id": null,
+  
+    "so_logistics_details": [
+      {
+        "id": 1,
+        "material_type": [1],
+        "trip_no": 2,
+        "actual_execution_interval": 3,
+        "am_pm_interval": "am",
+        "from_date": "2026-02-20",
+        "to_date": "2026-02-25",
+        "transport_type": [1],
+        "transport_no": 2,
+        "loading_responsible_party": "supplier",
+        "downloading_responsible_party": "admin",
+        "target_location": "Riyadh Warehouse",
+        "target_latitude": 24.7136,
+        "target_longitude": 46.6753,
+        "source_location": "Jeddah Port",
+        "source_latitude": 21.4858,
+        "source_longitude": 39.1925,
+        "transport_amount": 1500
+      }
+    ],
+  
+    "so_product_details": [
+      {
+        "id": 1,
+        "item_id": 1,
+        "unit_id": 1,
+        "quantity": 100,
+        "from_date": "2026-02-20",
+        "trip_no": 2,
+        "transport_type": 1
+      }
+    ],
+  
+    "so_trip_details": [
+      {
+        "id": 1,
+        "item_id": 1,
+        "unit_id": 1,
+        "quantity": 50,
+        "trip_date": "2026-02-21",
+        "trip_price": 750,
+        "transport_type": [1]
+      }
+    ]
+  }
+  

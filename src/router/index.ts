@@ -9,14 +9,14 @@ import {
 import { dashboardRoutes } from "./modules/dashboard.routes";
 import { productsRoutes } from "./modules/products.routes";
 import { settingsRoutes } from "./modules/settings.routes";
-import { suppliersRoutes } from "./modules/suppliers.routes";
-import { customersRoutes } from "./modules/customers.routes";
+import { salesRoutes } from "./modules/sales.routes";
 import { projectsRoutes } from "./modules/projects.routes";
 import { authRoutes } from "./modules/auth.routes";
 import { errorRoutes } from "./modules/errors.routes";
 import { servicesRoutes } from "./modules/services.routes";
 import { usersRoutes } from "./modules/users.routes";
 import { financeRoutes } from "./modules/finance.routes";
+import { purchasesRoutes } from "./modules/purchases.routes";
 import { usePermissions } from "@/composables/usePermissions";
 
 // Auth check helper
@@ -32,13 +32,13 @@ const routes: RouteRecordRaw[] = [
   ...authRoutes,
   ...productsRoutes,
   ...settingsRoutes,
-  ...suppliersRoutes,
-  ...customersRoutes,
+  ...salesRoutes,
   ...projectsRoutes,
   ...usersRoutes,
   ...errorRoutes,
   ...servicesRoutes,
   ...financeRoutes,
+  ...purchasesRoutes,
   {
     path: "/form-and-validation",
     name: "FormAndValidation",

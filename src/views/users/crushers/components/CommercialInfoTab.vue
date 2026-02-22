@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { reactive, watch, ref } from 'vue';
 import MapDialog from '@/components/common/MapDialog.vue';
-
+import Map from '@/components/common/Map.vue';
 interface Props {
   licenseNumber: string;
   licenseIssueDate: string;
@@ -81,9 +81,14 @@ const openMapDialog = () => {
   showMapDialog.value = true;
 };
 
-const handleLocationSelected = (location: { latitude: string; longitude: string }) => {
+const handleLocationSelected = (location: { latitude: string; longitude: string; address: string }) => {
   formData.latitude = location.latitude;
   formData.longitude = location.longitude;
+  // formData.address = location.address;
+  console.log('latitude : ', location.latitude);
+  console.log('longitude : ',location.longitude);
+  console.log('address : ',location.address);
+
   emitUpdate();
 };
 
@@ -180,7 +185,10 @@ const datepickerInput = `<svg width="17" height="19" viewBox="0 0 17 19" fill="n
     </div>
 
     <!-- Map Dialog -->
-    <MapDialog v-model="showMapDialog" :latitude="formData.latitude" :longitude="formData.longitude"
+    <!-- <MapDialog v-model="showMapDialog" :latitude="formData.latitude" :longitude="formData.longitude"
+      @location-selected="handleLocationSelected" /> -->
+
+    <Map v-model="showMapDialog" :latitude="formData.latitude" :longitude="formData.longitude"
       @location-selected="handleLocationSelected" />
   </div>
 </template>

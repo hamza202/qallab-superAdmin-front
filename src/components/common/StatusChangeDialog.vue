@@ -1,5 +1,11 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
+
+interface SelectItem {
+  title: string;
+  value: any;
+  disabled?: boolean;
+}
 
 interface Props {
   modelValue: boolean;
@@ -8,6 +14,12 @@ interface Props {
   currentStatus?: boolean;
   title?: string;
   message?: string;
+  showSelect?: boolean;
+  selectItems?: SelectItem[];
+  selectValue?: any;
+  selectLabel?: string;
+  selectPlaceholder?: string;
+  dialogIcon?: string;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -16,11 +28,18 @@ const props = withDefaults(defineProps<Props>(), {
   currentStatus: false,
   title: 'تغيير الحالة',
   message: 'هل تريد بالتأكيد تغيير الحالة ؟',
+  showSelect: false,
+  selectItems: () => [],
+  selectValue: null,
+  selectLabel: '',
+  selectPlaceholder: 'اختر الحالة',
+  dialogIcon: '',
 });
 
 const emit = defineEmits<{
   'update:modelValue': [value: boolean];
-  confirm: [];
+  'update:selectValue': [value: any];
+  confirm: [selectedValue?: any];
   cancel: [];
   close: [];
 }>();
@@ -30,8 +49,17 @@ const internalOpen = computed({
   set: (value) => emit('update:modelValue', value),
 });
 
+const internalSelectValue = computed({
+  get: () => props.selectValue,
+  set: (value) => emit('update:selectValue', value),
+});
+
 const handleConfirm = () => {
-  emit('confirm');
+  if (props.showSelect) {
+    emit('confirm', internalSelectValue.value);
+  } else {
+    emit('confirm');
+  }
 };
 
 const handleCancel = () => {
@@ -65,7 +93,7 @@ const infoIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none" xm
 
     <div>
       <div class="flex justify-center mb-3">
-        <div class="w-16 h-16 rounded-full bg-warning-50 flex items-center justify-center" v-html="icon">
+        <div class="w-16 h-16 rounded-full bg-warning-50 flex items-center justify-center" v-html="dialogIcon || icon">
         </div>
       </div>
 
@@ -73,13 +101,25 @@ const infoIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none" xm
         <div class="text-center">
           <p class="text-gray-700 mb-4">
             {{ message }}
-            <!-- <strong v-if="itemName" class="text-primary-700">{{ itemName }}</strong>
-            ؟ -->
           </p>
-          <!-- <div class="flex items-center justify-center gap-3">
-            <span class="text-sm text-gray-600">الحالة:</span>
-            <v-switch :model-value="newStatus" hide-details inset density="compact" color="primary" readonly />
-          </div> -->
+          
+          <!-- Select Dropdown -->
+          <div v-if="showSelect" class="mt-4 w-75 mx-auto mb-4">
+            <label v-if="selectLabel" class="block text-sm font-semibold text-gray-900 mb-2 text-right">
+              {{ selectLabel }}
+            </label>
+            <SelectInput
+              v-model="internalSelectValue"
+              :items="selectItems"
+              :placeholder="selectPlaceholder"
+              variant="outlined"
+              density="comfortable"
+              item-title="title"
+              item-value="value"
+              :item-props="(item: SelectItem) => ({ disabled: item.disabled })"
+              hide-details
+            />
+          </div>
         </div>
       </slot>
     </div>
