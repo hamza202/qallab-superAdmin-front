@@ -914,7 +914,7 @@ onMounted(async () => {
             @location-selected="handleLocationSelected" />
 
         <!-- Add Product Dialog -->
-        <AddProductDialog v-model="showAddProductDialog" request-type="logistics" :unit-items="unitItems"
+        <AddProductDialog v-model="showAddProductDialog" :unit-items="unitItems"
             :edit-product="editingProduct" :existing-products="productTableItems" @saved="handleProductSaved"
             @product-updated="handleProductUpdated" />
 
