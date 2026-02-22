@@ -34,7 +34,7 @@
       </div>
 
       <!-- 1. البيانات الأساسية -->
-      <div class="p-6 bg-white rounded-3xl border !border-gray-100 mb-6">
+      <div class="p-6 bg-white rounded-3xl border !border-gray-100 mb-6 mt-3">
         <div class="flex items-center mb-6 gap-2 text-primary-600">
           <span v-html="fileCheckIcon"></span>
           <h2 class="text-base font-bold">البيانات الأساسية</h2>
