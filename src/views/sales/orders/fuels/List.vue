@@ -8,7 +8,7 @@ import { useTableColumns } from '@/composables/useTableColumns';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog.vue';
 import DatePickerInput from '@/components/common/forms/DatePickerInput.vue';
 import { GridIcon, trash_1_icon, trash_2_icon, importIcon, columnIcon, exportIcon, plusIcon, searchIcon } from '@/components/icons/globalIcons';
-import { switchHorisinralIcon } from '@/components/icons/priceOffersIcons';
+import { switchHorisinralIcon, truckIcon } from '@/components/icons/priceOffersIcons';
 import StatusChangeFeature from '@/components/common/StatusChangeFeature.vue';
 
 const { t } = useI18n();
@@ -32,6 +32,7 @@ interface ItemActions {
   can_update: boolean;
   can_delete: boolean;
   can_change_status: boolean;
+  can_create_pickup: boolean;
 }
 
 interface BuildingMaterialRequest {
@@ -83,7 +84,7 @@ const hasSelectedRequests = computed(() => selectedRequests.value.length > 0);
 
 // Items with id for DataTable (id = uuid for selection)
 const tableItemsWithId = computed(() =>
-  tableItems.value.map((item) => ({ ...item, id: item.uuid }))
+  tableItems.value.map((item) => ({ ...item, originalId: item.id, id: item.uuid }))
 );
 
 // Filters
@@ -271,6 +272,15 @@ const handleView = (item: any) => {
 const openChangeStatusDialog = (item: BuildingMaterialRequest | Record<string, unknown>) => {
   itemToChangeStatus.value = item as BuildingMaterialRequest;
   showChangeStatusDialog.value = true;
+};
+
+const handleCreatePickup = (item: unknown) => {
+  const tableItem = item as BuildingMaterialRequest & { originalId: string | number };
+  const orderId = String(tableItem.originalId);
+  router.push({ 
+    name: 'SalesSoPickupsPickup',
+    params: { orderId }
+  });
 };
 
 const handleBulkDelete = () => {
@@ -520,7 +530,17 @@ onMounted(() => {
             </span>
           </template>
           <template #item.actions="{ item }">
-            <div class="flex items-center">
+            <div class="flex items-center gap-1">
+              <v-btn
+                v-if="item.actions?.can_create_pickup"
+                icon
+                variant="text"
+                size="x-small"
+                color="primary-600"
+                @click="handleCreatePickup(item)"
+              >
+                <span v-html="truckIcon"></span>
+              </v-btn>
               <v-btn
                 v-if="item.actions?.can_change_status"
                 icon
