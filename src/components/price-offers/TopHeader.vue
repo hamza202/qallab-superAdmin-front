@@ -17,7 +17,7 @@
         <slot name="code">
             <div class="flex items-center lg:gap-3 gap-2" v-if="code">
                 <!-- Label -->
-                <span class="text-sm font-semibold text-white">{{ codeLabel }}</span>
+                <span class="text-sm font-semibold text-white">{{ codeLabelKey ? t(codeLabelKey) : codeLabel }}</span>
                 <!-- Code Badge -->
                 <div
                     class="flex items-center gap-2 px-2.5 py-1.5 bg-primary-100 border border-primary-300 rounded shadow-xs">
@@ -51,6 +51,7 @@ interface Props {
     actionLabel?: string;
     actionIcon?: string;
     codeLabel?: string;
+    codeLabelKey?: string;
     codeIcon?: string;
     code?: string;
     showAction?: boolean;

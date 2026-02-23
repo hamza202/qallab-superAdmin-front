@@ -327,7 +327,7 @@ const handleSubmit = async (option: SubmitOption) => {
         title-key="pages.SalesOrdersMaterialProduct.pickupTitle"
         description-key="pages.SalesOrdersMaterialProduct.pickupDescr"
         :show-action="false"
-        code-label="كود العرض"
+        code-label="كود الحجز"
         :code="offerCode"
       />
 

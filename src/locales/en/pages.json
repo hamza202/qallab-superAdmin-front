@@ -167,7 +167,8 @@
       "title": "Receiving Documents Table",
       "description": "Enables you to manage purchase orders",
       "edit": "Edit Receiving Document",
-      "view": "View Receiving Document"
+      "view": "View Receiving Document",
+      "docCode": "Document Code"
     },
     "SalesTrips": {
       "title": "Trips",
