@@ -224,7 +224,7 @@ interface LogisticsDetail {
 
 // Form data with static values
 const formData = ref({
-    requestNumber: '#12520226',
+    requestNumber: '',
     responsible_person: '',
     responsible_phone: '',
     project_name: '',
@@ -381,7 +381,7 @@ const handleLogisticsLocationSelected = (location: { latitude: string; longitude
 const resetForm = () => {
     // Reset main form data
     formData.value = {
-        requestNumber: '#12520226',
+        requestNumber: '',
         responsible_person: '',
         responsible_phone: '',
         project_name: '',
