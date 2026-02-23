@@ -195,7 +195,7 @@ interface TransportService {
 
 // Form data with static values
 const formData = ref({
-    requestNumber: '#12520226',
+    requestNumber: '',
     requestType: null,
     customer_id: null,
     target_location: null as string | null,
