@@ -607,7 +607,7 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
             <!-- Request Information Section -->
             <div class="p-6">
                 <div class="flex items-center justify-between mb-6">
-                    <h2 class="text-lg font-bold text-primary-900">معلومات الطلب : {{ formData.requestNumber }}</h2>
+                    <h2 class="text-lg font-bold text-primary-900">معلومات الطلب :</h2>
                 </div>
 
                 <v-form ref="formRef" v-model="isFormValid" @submit.prevent>
