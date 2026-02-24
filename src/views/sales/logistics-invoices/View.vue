@@ -13,8 +13,8 @@
                         المبيعات
                     </router-link>
                     <span class="text-lg text-gray-300">/</span>
-                    <router-link to="/sales/invoices/material-product/list" class="text-gray-600 hover:text-primary-600">
-                        فواتير المبيعات
+                    <router-link to="/sales/logistics-invoices/list" class="text-gray-600 hover:text-primary-600">
+                        فواتير مبيعات خدمة نقل
                     </router-link>
                     <span class="text-lg text-gray-300">/</span>
                     <span class="text-primary-700 font-medium bg-primary-50 px-2 py-1 rounded-md">{{ invoiceCode
@@ -109,8 +109,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useApi } from '@/composables/useApi'
 import { useNotification } from '@/composables/useNotification'
-import { rialIcon, archiveIcon, homeIcon, fileCheckIcon } from '@/components/icons/globalIcons'
-import { truckIcon, packageIcon } from '@/components/icons/priceOffersIcons'
+import { archiveIcon, homeIcon, fileCheckIcon } from '@/components/icons/globalIcons'
 
 const route = useRoute()
 const api = useApi()
@@ -128,7 +127,7 @@ const fetchInvoiceData = async () => {
 
     isLoading.value = true
     try {
-        const res = await api.get<any>(`/sales/invoices/${routeId.value}`)
+        const res = await api.get<any>(`/sales/invoices/logistics/${routeId.value}`)
         invoiceData.value = res.data
     } catch (e: any) {
         console.error('Error fetching invoice data:', e)

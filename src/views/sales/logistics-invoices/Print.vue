@@ -248,8 +248,11 @@ const supplier = computed(() => invoiceData.value?.supplier ?? null)
 const customer = computed(() => invoiceData.value?.customer ?? null)
 
 const payTypeLabel = computed(() => {
-    const so = invoiceData.value?.payment_method_label
-    return so ||  '—'
+    const so = invoiceData.value?.so_type
+    if (!so) return '—'
+    if (so === 'so_without_logistics') return 'آجل'
+    if (so === 'so_with_logistics') return 'آجل'
+    return so
 })
 
 const totalTaxableAmount = computed(() => {
@@ -284,7 +287,7 @@ const fetchInvoiceData = async () => {
     if (!routeId.value) return
     isLoading.value = true
     try {
-        const res = await api.get<any>(`/sales/invoices/${routeId.value}`)
+        const res = await api.get<any>(`/sales/invoices/logistics/${routeId.value}`)
         invoiceData.value = res.data
         await nextTick()
         await waitForImages()

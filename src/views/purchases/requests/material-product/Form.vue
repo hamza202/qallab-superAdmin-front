@@ -31,12 +31,12 @@ const fetchConstants = async () => {
         const res = await api.get<any>('/purchases/constants');
         const data = res.data;
         if (data) {
-             requestTypeItems.value = data.request_types?.map((i: any) => ({ title: i.label, value: i.key })) || [];
-             paymentMethodItems.value = data.payment_methods?.map((i: any) => ({ title: i.label, value: i.key })) || [];
-             transportTypeItems.value = data.transport_types?.map((i: any) => ({ title: i.label, value: i.key })) || [];
-             amPmIntervalItems.value = data.am_pm_interval?.map((i: any) => ({ title: i.label, value: i.key })) || [];
+            requestTypeItems.value = data.request_types?.map((i: any) => ({ title: i.label, value: i.key })) || [];
+            paymentMethodItems.value = data.payment_methods?.map((i: any) => ({ title: i.label, value: i.key })) || [];
+            transportTypeItems.value = data.transport_types?.map((i: any) => ({ title: i.label, value: i.key })) || [];
+            amPmIntervalItems.value = data.am_pm_interval?.map((i: any) => ({ title: i.label, value: i.key })) || [];
         }
-    } catch(e) {
+    } catch (e) {
         console.error('Error fetching constants:', e);
     }
 }
@@ -47,7 +47,7 @@ const fetchSuppliers = async () => {
         if (Array.isArray(res.data)) {
             supplierItems.value = res.data.map((i: any) => ({ title: i.full_name, value: i.id }));
         }
-    } catch(e) {
+    } catch (e) {
         console.error('Error fetching suppliers:', e);
     }
 }
@@ -58,7 +58,7 @@ const fetchUnits = async () => {
         if (Array.isArray(res.data)) {
             unitItems.value = res.data.map((i: any) => ({ title: i.name, value: i.id }));
         }
-    } catch(e) {
+    } catch (e) {
         console.error('Error fetching units:', e);
     }
 }
@@ -81,12 +81,12 @@ const getAmPmIntervalLabel = (interval: string | null): string => {
 // Fetch form data for edit mode
 const fetchFormData = async () => {
     if (!isEditMode.value || !routeId.value) return;
-    
+
     isLoading.value = true;
     try {
         const res = await api.get<any>(`/purchases/building-materials/${routeId.value}`);
         const data = res.data;
-        
+
         if (data) {
             // Populate form data
             formData.value.requestType = data.request_type;
@@ -100,7 +100,7 @@ const fetchFormData = async () => {
             formData.value.target_longitude = data.target_longitude;
             formData.value.textNote = data.notes || '';
             formData.value.code = data.code ? String(data.code) : '';
-            
+
             // Populate products (items)
             if (data.items && Array.isArray(data.items)) {
                 productTableItems.value = data.items.map((item: any) => ({
@@ -116,7 +116,7 @@ const fetchFormData = async () => {
                     notes: item.notes || ''
                 }));
             }
-            
+
             // Populate transport service (logistics_detail)
             if (data.logistics_detail && (data.logistics_detail.from_date || data.logistics_detail.to_date)) {
                 // Convert transport_type strings to numbers
@@ -128,13 +128,13 @@ const fetchFormData = async () => {
                         vehicleTypes = [Number(data.logistics_detail.transport_type)];
                     }
                 }
-                
+
                 // Get labels for vehicle types
                 const vehicleTypesLabels = vehicleTypes
                     .map(id => getTransportTypeName(id))
                     .filter(Boolean)
                     .join(', ');
-                
+
                 transportService.value = {
                     id: data.logistics_detail.id,
                     from_date: data.logistics_detail.from_date || '',
@@ -147,7 +147,7 @@ const fetchFormData = async () => {
                 };
             }
         }
-    } catch(e) {
+    } catch (e) {
         console.error('Error fetching form data:', e);
     } finally {
         isLoading.value = false;
@@ -160,7 +160,7 @@ onMounted(async () => {
         fetchUnits(),
         fetchSuppliers()
     ]);
-    
+
     // Fetch form data if in edit mode
     if (isEditMode.value) {
         await fetchFormData();
@@ -195,7 +195,7 @@ interface TransportService {
 
 // Form data with static values
 const formData = ref({
-    requestNumber: '#12520226',
+    requestNumber: '',
     requestType: null,
     supplier_id: null,
     target_location: null as string | null,
@@ -248,11 +248,11 @@ const handleAddProduct = () => {
 const handleProductSaved = (products: any[]) => {
     // Merge new products while preserving existing notes
     const newItems: ProductTableItem[] = [];
-    
+
     products.forEach(p => {
         // Find if this product already exists in the table
         const existing = productTableItems.value.find(existing => existing.item_id === p.item_id);
-        
+
         newItems.push({
             item_id: p.item_id,
             item_name: p.item_name,
@@ -267,7 +267,7 @@ const handleProductSaved = (products: any[]) => {
             isAdded: p.isAdded
         });
     });
-    
+
     productTableItems.value = newItems;
 };
 
@@ -348,13 +348,41 @@ const { formRef, isFormValid, validate } = useForm();
 // Format date to DD-MM-YYYY HH:mm:ss
 const formatDateTime = (date: string | Date): string => {
     if (!date) return '';
-    const d = new Date(date);
-    const day = String(d.getDate()).padStart(2, '0');
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const year = d.getFullYear();
-    const hours = String(d.getHours()).padStart(2, '0');
-    const minutes = String(d.getMinutes()).padStart(2, '0');
-    const seconds = String(d.getSeconds()).padStart(2, '0');
+
+    const ensureDate = (value: string | Date): Date | null => {
+        const nativeDate = new Date(value);
+        if (!Number.isNaN(nativeDate.getTime())) {
+            return nativeDate;
+        }
+
+        const str = String(value).trim();
+        const match = str.match(/^(\d{2})-(\d{2})-(\d{4})(?:\s+(\d{2}):(\d{2})(?::(\d{2}))?)?/);
+        if (match) {
+            const [, day, month, year, h = '00', m = '00', s = '00'] = match;
+            const parsed = new Date(
+                Number(year),
+                Number(month) - 1,
+                Number(day),
+                Number(h),
+                Number(m),
+                Number(s)
+            );
+            if (!Number.isNaN(parsed.getTime())) {
+                return parsed;
+            }
+        }
+        return null;
+    };
+
+    const parsedDate = ensureDate(date);
+    if (!parsedDate) return '';
+
+    const day = String(parsedDate.getDate()).padStart(2, '0');
+    const month = String(parsedDate.getMonth() + 1).padStart(2, '0');
+    const year = parsedDate.getFullYear();
+    const hours = String(parsedDate.getHours()).padStart(2, '0');
+    const minutes = String(parsedDate.getMinutes()).padStart(2, '0');
+    const seconds = String(parsedDate.getSeconds()).padStart(2, '0');
     return `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
 }
 
@@ -382,15 +410,18 @@ const formatDate = (date: string | Date): string => {
 // Build FormData for submission
 const buildFormData = (): FormData => {
     const fd = new FormData();
-    
+
     // Add _method: PUT for edit mode
     if (isEditMode.value) {
         fd.append('_method', 'PUT');
     }
-    
+
     // Basic fields
     fd.append('request_type', formData.value.requestType || '');
-    fd.append('request_datetime', isEditMode.value ? formatDateTime(formData.value.request_datetime || new Date()) : getCurrentDateTimeFormatted());
+    fd.append('request_datetime',
+        formData.value.request_datetime
+            ? formatDateTime(formData.value.request_datetime)
+            : getCurrentDateTimeFormatted());
     fd.append('supplier_id', String(formData.value.supplier_id || ''));
     fd.append('upfront_payment', String(formData.value.advancePayment || ''));
     fd.append('payment_method', formData.value.paymentMethod || '');
@@ -398,23 +429,23 @@ const buildFormData = (): FormData => {
     fd.append('target_latitude', formData.value.target_latitude || '');
     fd.append('target_longitude', formData.value.target_longitude || '');
     fd.append('notes', formData.value.textNote || '');
-    
+
     // Logistics detail (transport service)
     if (transportService.value) {
         fd.append('logistics_detail[from_date]', formatDate(transportService.value.from_date));
         fd.append('logistics_detail[to_date]', formatDate(transportService.value.to_date));
-        
+
         // Transport types array
         if (transportService.value.vehicle_types && transportService.value.vehicle_types.length > 0) {
             transportService.value.vehicle_types.forEach((type, index) => {
                 fd.append(`logistics_detail[transport_type][${index}]`, String(type));
             });
         }
-        
+
         fd.append('logistics_detail[am_pm_interval]', transportService.value.am_pm_interval || '');
         fd.append('logistics_detail[notes]', transportService.value.notes || '');
     }
-    
+
     // Items (products)
     productTableItems.value.forEach((item, index) => {
         // Only include id in edit mode
@@ -428,32 +459,32 @@ const buildFormData = (): FormData => {
         fd.append(`items[${index}][trip_no]`, String(item.trip_no || ''));
         fd.append(`items[${index}][notes]`, item.notes || '');
     });
-    
+
     // File attachments
     if (formData.value.image) {
         fd.append('image', formData.value.image);
     }
-    
+
     // if (formData.value.voice_attachment) {
     //     fd.append('voice_attachment', formData.value.voice_attachment);
     // }
-    
+
     return fd;
 }
 
 const handleSubmit = async () => {
     if (!await validate()) return;
-    
+
     if (productTableItems.value.length === 0) {
         warning('يجب إضافة منتج واحد على الأقل');
         return;
     }
-    
+
     isSubmitting.value = true;
-    
+
     try {
         const fd = buildFormData();
-        
+
         if (isEditMode.value && routeId.value) {
             // Edit mode - POST with _method: PUT and UUID in URL
             await api.post(`/purchases/building-materials/${routeId.value}`, fd, {
@@ -469,11 +500,11 @@ const handleSubmit = async () => {
                 }
             });
         }
-        
+
         success(isEditMode.value ? 'تم تحديث الطلب بنجاح' : 'تم إنشاء الطلب بنجاح');
-        
+
         router.push({ name: 'RequestForQuotationMaterialProductList' });
-        
+
     } catch (e: any) {
         console.error('Error submitting form:', e);
         apiError(e);
@@ -488,7 +519,7 @@ const handleLocationSelected = (location: { latitude: string; longitude: string;
     formData.value.target_latitude = location.latitude;
     formData.value.target_longitude = location.longitude;
     formData.value.target_location = location.address;
-    
+
     console.log('Location updated:', location);
 };
 
@@ -603,11 +634,11 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
             <TopHeader :icon="formIcon" title-key="pages.PurchasesRequestsMaterialProduct.FormTitle"
                 description-key="pages.requestForQuotationMaterialProduct.FormDescription" :show-action="false"
                 :code="isEditMode ? (formData.code || '') : ''" :code-icon="fileIcon" @action="handleNewRequest" />
-            
+
             <!-- Request Information Section -->
             <div class="p-6">
                 <div class="flex items-center justify-between mb-6">
-                    <h2 class="text-lg font-bold text-primary-900">معلومات الطلب : {{ formData.requestNumber }}</h2>
+                    <h2 class="text-lg font-bold text-primary-900">معلومات الطلب :</h2>
                 </div>
 
                 <v-form ref="formRef" v-model="isFormValid" @submit.prevent>
@@ -615,19 +646,17 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
                         <!-- Request Type -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">نوع الطلب</label>
-                            <SelectInput v-model="formData.requestType"
-                                :items="requestTypeItems" placeholder="حدد نوع الطلب"
-                                :rules="[required()]"
-                                item-title="title" item-value="value" density="comfortable" />
+                            <SelectInput v-model="formData.requestType" :items="requestTypeItems"
+                                placeholder="حدد نوع الطلب" :rules="[required()]" item-title="title" item-value="value"
+                                density="comfortable" />
                         </div>
 
                         <!-- Supplier Name -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">اسم المورد</label>
-                            <SelectInput v-model="formData.supplier_id"
-                                :items="supplierItems" item-title="title"
-                                :rules="[required()]"
-                                item-value="value" density="comfortable" placeholder="حدد المورد" />
+                            <SelectInput v-model="formData.supplier_id" :items="supplierItems" item-title="title"
+                                :rules="[required()]" item-value="value" density="comfortable"
+                                placeholder="حدد المورد" />
                         </div>
 
                         <!-- تاريخ إصدار الطلب: يظهر في التعديل فقط (عرض فقط)، ويُرسل تلقائياً عند الحفظ -->
@@ -639,14 +668,15 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
                                     <span class="text-gray-500" v-html="dateIconSvg"></span>
                                 </template>
                             </TextInput>
-                        </div>                        
+                        </div>
 
                         <!-- Project Location -->
                         <div class="relative">
                             <label class="text-sm font-medium text-gray-700 mb-2 block">موقع المشروع</label>
                             <div @click="openMapDialog"
                                 class="flex items-center justify-between px-4 py-2 min-h-[48px] border !border-blue-400 rounded-lg cursor-pointer hover:bg-blue-100 transition-colors">
-                                <span class="text-base font-medium text-blue-900 whitespace-nowrap overflow-hidden text-ellipsis ">
+                                <span
+                                    class="text-base font-medium text-blue-900 whitespace-nowrap overflow-hidden text-ellipsis ">
                                     {{ formData.target_location || 'حدد الموقع' }}
                                 </span>
                                 <div class="flex items-center gap-2">
@@ -658,10 +688,9 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
                         <!-- Payment Method -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">طريقة الدفع</label>
-                            <SelectInput v-model="formData.paymentMethod"
-                                :items="paymentMethodItems" item-title="title" placeholder="حدد طريقة الدفع"
-                                :rules="[required()]"
-                                item-value="value" density="comfortable" />
+                            <SelectInput v-model="formData.paymentMethod" :items="paymentMethodItems" item-title="title"
+                                placeholder="حدد طريقة الدفع" :rules="[required()]" item-value="value"
+                                density="comfortable" />
                         </div>
 
                         <!-- Advance Payment -->
@@ -692,8 +721,7 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
                 <!-- Products Table -->
                 <div class="mb-4">
                     <DataTable :headers="headers" :items="tableItems" show-actions force-show-edit force-show-delete
-                        @edit="handleEditProduct"
-                        @delete="handleDeleteProduct">
+                        @edit="handleEditProduct" @delete="handleDeleteProduct">
                         <template #item.notes="{ item }">
                             <v-menu attach="request-material-product-page" location="bottom" offset="8"
                                 :close-on-content-click="false" transition="slide-y-transition">
@@ -709,9 +737,10 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
                                     class="pa-4 shadow-[rgba(149,157,165,0.2)_0px_8px_24px] overflow-hidden px-3 py-3"
                                     color="white" rounded="lg" width="300">
                                     <div class="!flex flex-nowrap items-center gap-3">
-                                        <TextInput v-model="productTableItems[productTableItems.findIndex(p => p.item_id === item.item_id)].notes" 
-                                            placeholder="أضف ملاحظة" variant="outlined"
-                                            density="comfortable" hide-details autofocus class="flex-1" />
+                                        <TextInput
+                                            v-model="productTableItems[productTableItems.findIndex(p => p.item_id === item.item_id)].notes"
+                                            placeholder="أضف ملاحظة" variant="outlined" density="comfortable"
+                                            hide-details autofocus class="flex-1" />
                                         <ButtonWithIcon :icon="messagePlusIcon" color="primary" icon-only
                                             size="x-small" />
 
@@ -747,9 +776,7 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
                 <!-- Transport Services Table -->
                 <div class="mb-4">
                     <DataTable :headers="ServicesHeaders" :items="serviceTableItems" show-actions force-show-edit
-                        force-show-delete
-                        @edit="handleEditTransportService"
-                        @delete="handleDeleteTransportService" />
+                        force-show-delete @edit="handleEditTransportService" @delete="handleDeleteTransportService" />
                 </div>
 
                 <!-- Add Transport Service Button (only show when no service exists) -->
@@ -828,33 +855,22 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
             </div>
         </div>
 
-        <Map v-model="showMapDialog" 
-            :latitude="formData.target_latitude"
-            :longitude="formData.target_longitude"
-            :address="formData.target_location"
-            @location-selected="handleLocationSelected" />
+        <Map v-model="showMapDialog" :latitude="formData.target_latitude" :longitude="formData.target_longitude"
+            :address="formData.target_location" @location-selected="handleLocationSelected" />
 
         <!-- Add Product Dialog -->
-        <AddProductDialog v-model="showAddProductDialog" request-type="raw_materials" 
-            :transport-types="transportTypeItems"
-            :unit-items="unitItems"
-            :supplier-id="formData.supplier_id"
-            :edit-product="editingProduct"
-            :existing-products="productTableItems"
-            :items-query-params="{ material_type: 1 }"
-            @saved="handleProductSaved"
+        <AddProductDialog v-model="showAddProductDialog" request-type="raw_materials"
+            :transport-types="transportTypeItems" :unit-items="unitItems" :supplier-id="formData.supplier_id"
+            :edit-product="editingProduct" :existing-products="productTableItems"
+            :items-query-params="{ material_type: 1 }" @saved="handleProductSaved"
             @product-updated="handleProductUpdated" />
 
         <!-- Add Transport Service Dialog -->
-        <AddTransportServiceDialog v-model="showAddTransportServiceDialog" 
-            :transport-types="transportTypeItems"
-            :am-pm-interval-options="amPmIntervalItems"
-            :edit-service="editingTransportService"
-            @saved="handleTransportServiceSaved"
-            @updated="handleTransportServiceUpdated" />
+        <AddTransportServiceDialog v-model="showAddTransportServiceDialog" :transport-types="transportTypeItems"
+            :am-pm-interval-options="amPmIntervalItems" :edit-service="editingTransportService"
+            @saved="handleTransportServiceSaved" @updated="handleTransportServiceUpdated" />
 
     </default-layout>
 </template>
 
-<style scoped>
-</style>
+<style scoped></style>

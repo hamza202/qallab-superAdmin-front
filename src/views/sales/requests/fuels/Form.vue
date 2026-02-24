@@ -170,7 +170,7 @@ interface ProductTableItem {
 
 // Form data (request date, delivery start, responsible, phone, delivery method, supply type, location, durations)
 const formData = ref({
-    requestNumber: '#12520226',
+    requestNumber: '',
     requestType: null as string | null,
     deliveryStartDate: '' as string,
     request_datetime: '' as string,

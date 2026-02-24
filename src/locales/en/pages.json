@@ -167,7 +167,8 @@
       "title": "Receiving Documents Table",
       "description": "Enables you to manage purchase orders",
       "edit": "Edit Receiving Document",
-      "view": "View Receiving Document"
+      "view": "View Receiving Document",
+      "docCode": "Document Code"
     },
     "SalesTrips": {
       "title": "Trips",
@@ -204,6 +205,23 @@
       "FormDescription": "Add purchase request for material product quotations",
       "edit": "Edit purchase request for material product quotations",
       "view": "View purchase request for material product quotations"
+    },
+    "SalesLogisticsInvoices": {
+      "title": "Logistics Service Sales Invoices",
+      "description": "Manage logistics service sales invoices",
+      "FormTitle": "Issue Logistics Service Sales Invoice",
+      "FormDescription": "Issue logistics sales invoice",
+      "FormTitleEdit": "Edit Logistics Service Sales Invoice",
+      "FormDescriptionEdit": "Edit logistics sales invoice",
+      "print": "Print Invoice"
+    },
+    "OrdersLogistics": {
+      "title": "Logistics Orders",
+      "description": "View and manage logistics orders",
+      "FormTitle": "Logistics Order",
+      "FormDescription": "Create a logistics order",
+      "edit": "Edit Logistics Order",
+      "view": "View Logistics Order"
     }
   }
 }

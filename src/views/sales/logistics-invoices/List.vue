@@ -8,7 +8,7 @@ import { useTableColumns } from '@/composables/useTableColumns';
 import DatePickerInput from '@/components/common/forms/DatePickerInput.vue';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog.vue';
 import StatusChangeFeature from '@/components/common/StatusChangeFeature.vue';
-import { GridIcon, refreshIcon, trash_1_icon, trash_2_icon, importIcon, columnIcon, exportIcon, plusIcon, searchIcon, printerIcon } from "@/components/icons/globalIcons";
+import { GridIcon, trash_1_icon, trash_2_icon, importIcon, columnIcon, exportIcon, plusIcon, searchIcon, printerIcon } from "@/components/icons/globalIcons";
 import { switcStatusIcon } from '@/components/icons/priceOffersIcons';
 
 const { t } = useI18n();
@@ -95,8 +95,7 @@ const filterTotalQuantity = ref("");
 const filterTotalTax = ref("");
 
 const showBulkDeleteDialog = ref(false);
-const showDeleteDialog = ref(false);
-const itemToDelete = ref<InvoiceItem | null>(null);
+
 const deleteLoading = ref(false);
 
 const showChangeStatusDialog = ref(false);
@@ -147,7 +146,7 @@ const fetchList = async (cursor?: string | null, append = false) => {
         if (filterTotalQuantity.value) params.append('total_quantity', filterTotalQuantity.value);
         if (filterTotalTax.value) params.append('total_tax', filterTotalTax.value);
 
-        const url = `/sales/invoices?${params.toString()}`;
+        const url = `/sales/invoices/logistics/?${params.toString()}`;
         const body = (await api.get(url)) as unknown as ListResponse;
 
         if (append) {
@@ -185,17 +184,17 @@ const handleToggleHeader = async (headerKey: string) => {
 
 const handleView = (item: { id?: string | number; uuid?: string }) => {
     const uuid = item.uuid ?? String(item.id);
-    router.push({ name: 'SalesInvoicesView', params: { id: uuid } });
+    router.push({ name: 'SalesLogisticsInvoicesView', params: { id: uuid } });
 };
 
 const handleEdit = (item: { id?: string | number; uuid?: string }) => {
     const uuid = item.uuid ?? String(item.id);
-    router.push({ name: 'SalesInvoicesEdit', params: { id: uuid } });
+    router.push({ name: 'SalesLogisticsInvoicesEdit', params: { id: uuid } });
 };
 
 const handlePrint = (item: { id?: string | number; uuid?: string }) => {
     const uuid = item.uuid ?? String(item.id);
-    const route = router.resolve({ name: 'SalesInvoicesPrint', params: { id: uuid } });
+    const route = router.resolve({ name: 'SalesLogisticsInvoicesPrint', params: { id: uuid } });
     const printUrl = route.href.startsWith('/') ? `${window.location.origin}${route.href}` : route.href;
 
     const iframe = document.createElement('iframe');
@@ -218,7 +217,7 @@ const handlePrint = (item: { id?: string | number; uuid?: string }) => {
 const confirmDelete = async (item: { uuid?: string; id?: string | number } & Partial<InvoiceItem>) => {
     const uuid = item.uuid;
     try {
-        await api.delete(`/sales/invoices/${uuid}`);
+        await api.delete(`/sales/invoices/logistics/${uuid}`);
         success('تم حذف الفاتورة بنجاح');
         await fetchList();
     } catch (err: any) {
@@ -253,7 +252,7 @@ const handleBulkDelete = () => {
 const confirmBulkDelete = async () => {
     try {
         deleteLoading.value = true;
-        await api.post('/sales/invoices/bulk-delete', {
+        await api.post('/sales/invoices/logistics/bulk-delete', {
             ids: selectedInvoices.value,
         });
         success(`تم حذف ${selectedInvoices.value.length} فاتورة بنجاح`);
@@ -284,7 +283,7 @@ const getStatusClass = (status: string) => {
 };
 
 const openCreateInvoice = () => {
-    router.push({ name: 'SalesInvoicesCreate' });
+    router.push({ name: 'SalesLogisticsInvoicesCreate' });
 };
 
 // Infinite scroll setup
@@ -334,8 +333,8 @@ onBeforeUnmount(() => {
 <template>
     <default-layout>
         <div class="purchase-invoices-page">
-            <PageHeader :icon="GridIcon" title-key="pages.SalesInvoices.title"
-                description-key="pages.SalesInvoices.description" />
+            <PageHeader :icon="GridIcon" title-key="pages.SalesLogisticsInvoices.title"
+                description-key="pages.SalesLogisticsInvoices.description" />
 
             <div
                 class="flex justify-end items-stretch rounded border border-gray-300 w-fit ms-auto mb-4 overflow-hidden bg-white text-sm">
@@ -465,7 +464,7 @@ onBeforeUnmount(() => {
 
         <!-- Status Change Dialog -->
         <StatusChangeFeature v-model="showChangeStatusDialog" :item="itemToChangeStatus"
-            :change-status-url="`/sales/invoices/${itemToChangeStatus?.uuid}/change-status`"
+            :change-status-url="`/sales/invoices/logistics/${itemToChangeStatus?.uuid}/change-status`"
             title="تغيير الحالة" message="تغيير الحالة:" @success="fetchList" />
     </default-layout>
 </template>

@@ -307,7 +307,7 @@ interface Supply {
 
 // Form data – أسماء المفاتيح مطابقة لـ request-body.json
 const formData = ref({
-    requestNumber: '#12520226',
+    requestNumber: '',
     customer_id: null as number | null,
     quotations_datetime: '' as string,
     quotation_name: '',
@@ -421,17 +421,44 @@ const { success, apiError } = useNotify();
 // Format date to DD-MM-YYYY HH:mm:ss
 const formatDateTime = (date: string | Date): string => {
     if (!date) return '';
-    const d = new Date(date);
-    const day = String(d.getDate()).padStart(2, '0');
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const year = d.getFullYear();
-    const hours = String(d.getHours()).padStart(2, '0');
-    const minutes = String(d.getMinutes()).padStart(2, '0');
-    const seconds = String(d.getSeconds()).padStart(2, '0');
+
+    const ensureDate = (value: string | Date): Date | null => {
+        const nativeDate = new Date(value);
+        if (!Number.isNaN(nativeDate.getTime())) {
+            return nativeDate;
+        }
+
+        const str = String(value).trim();
+        const match = str.match(/^(\d{2})-(\d{2})-(\d{4})(?:\s+(\d{2}):(\d{2})(?::(\d{2}))?)?/);
+        if (match) {
+            const [, day, month, year, h = '00', m = '00', s = '00'] = match;
+            const parsed = new Date(
+                Number(year),
+                Number(month) - 1,
+                Number(day),
+                Number(h),
+                Number(m),
+                Number(s)
+            );
+            if (!Number.isNaN(parsed.getTime())) {
+                return parsed;
+            }
+        }
+        return null;
+    };
+
+    const parsedDate = ensureDate(date);
+    if (!parsedDate) return '';
+
+    const day = String(parsedDate.getDate()).padStart(2, '0');
+    const month = String(parsedDate.getMonth() + 1).padStart(2, '0');
+    const year = parsedDate.getFullYear();
+    const hours = String(parsedDate.getHours()).padStart(2, '0');
+    const minutes = String(parsedDate.getMinutes()).padStart(2, '0');
+    const seconds = String(parsedDate.getSeconds()).padStart(2, '0');
     return `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
 }
 
-/** تاريخ ووقت الإرسال الحالي بصيغة DD-MM-YYYY HH:mm:ss (يُستخدم تلقائياً في وضع الإضافة) */
 const getCurrentDateTimeFormatted = (): string => {
     const d = new Date();
     const day = String(d.getDate()).padStart(2, '0');
@@ -471,7 +498,9 @@ const buildFormData = (): FormData => {
 
     // Basic fields (request-body.json)
     fd.append('customer_id', String(formData.value.customer_id || ''));
-    fd.append('quotations_datetime', isEditMode.value ? formatDateTime(formData.value.quotations_datetime || new Date()) : getCurrentDateTimeFormatted());
+    fd.append('quotations_datetime', formData.value.quotations_datetime
+        ? formatDateTime(formData.value.quotations_datetime)
+        : getCurrentDateTimeFormatted());
     fd.append('quotation_name', formData.value.quotation_name || '');
     fd.append('quotation_validity_no', String(formData.value.quotation_validity_no ?? '1'));
     fd.append('target_location', formData.value.target_location || '');
@@ -527,7 +556,7 @@ const buildFormData = (): FormData => {
 }
 
 const getInitialFormData = () => ({
-    requestNumber: '#12520226',
+    requestNumber: '',
     customer_id: null as number | null,
     quotations_datetime: '' as string,
     quotation_name: '',
@@ -1075,7 +1104,7 @@ const serviceTableItems = computed(() =>
 
         <!-- Add Product Dialog -->
         <AddProductDialog v-model="showAddProductDialog" request-type="raw_materials"
-            variant="sales"
+            variant="sales" :showUnitPriceAndDiscount="true"
             :items-query-params="{ material_type: 1 }"
             :transport-types="transportTypeItems" :unit-items="unitItems" :customer-id="formData.customer_id"
             :edit-product="editingProduct" :existing-products="productTableItems" @saved="handleProductSaved"

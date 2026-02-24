@@ -242,10 +242,10 @@ const handleCreateOrder = (item: unknown) => {
   // Find original item from tableItems to get the numeric id
   const originalItem = tableItems.value.find((q) => q.uuid === tableItem.uuid);
   const numericId = originalItem?.id;
-
-  router.push({
-    name: 'OrdersMaterialProductCreate',
-    query: {
+  
+  router.push({ 
+    name: 'OrdersLogisticsCreate',
+    query: { 
       from_quotation: tableItem.uuid,
       quotation_code: tableItem.code,
       purchase_quotation_id: numericId ? String(numericId) : undefined

@@ -458,7 +458,7 @@ const buildFormData = (): FormData => {
         fd.append(`items[${index}][item_id]`, String(item.item_id));
         fd.append(`items[${index}][unit_id]`, String(item.unit_id || ''));
         fd.append(`items[${index}][quantity]`, String(item.quantity || ''));
-        fd.append(`items[${index}][item_using]`, String(item.item_using || 'heavy_equipment'));
+        fd.append(`items[${index}][item_using]`, String(item.item_using || ''));
         fd.append(`items[${index}][price_per_unit]`, String(item.unit_price ?? ''));
         fd.append(`items[${index}][discount_type]`, String(item.discount_type ?? 2));
         fd.append(`items[${index}][discount_val]`, String(item.discount ?? ''));

@@ -172,14 +172,13 @@ const plusIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
           <!-- Trip Time -->
           <div>
             <label class="text-sm font-semibold text-gray-700 mb-2 block">
-              توقيت النقل <span class="text-red-500">*</span>
+              توقيت النقل
             </label>
             <div class="flex items-center gap-4">
               <v-radio-group 
                 v-model="form.am_pm_interval" 
                 inline 
                 hide-details
-                :rules="[required()]"
               >
                 <v-radio 
                   v-for="option in tripTimeOptionsList" 

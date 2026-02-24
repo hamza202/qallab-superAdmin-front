@@ -277,7 +277,7 @@ const handleSubmitToOrdersList = async () => {
             <!-- Page Header -->
             <TopHeader :icon="fileCheckIcon" title-key="pages.ReceivingDocs.title"
                 description-key="pages.ReceivingDocs.description" :show-action="false"
-                :code="isEditMode ? formData.code : ''" />
+                :code="isEditMode ? formData.code : ''" code-label-key="pages.ReceivingDocs.docCode" />
 
             <!-- Loading State -->
             <div v-if="isLoading" class="flex justify-center py-10">
