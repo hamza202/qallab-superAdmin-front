@@ -356,7 +356,7 @@ const plusIconDisabled = `<svg width="16" height="16" viewBox="0 0 16 16" fill="
               <TextInput :model-value="calculateTotal(editProductData)" type="number" placeholder="الإجمالي" density="compact" disabled />
             </div>
             <div>
-              <SelectInput v-model="editProductData.item_using" :items="itemUsingOptionsList" placeholder="الاستخدام" density="compact" item-title="title" item-value="value" />
+              <SelectInput v-model="editProductData.item_using" :items="itemUsingOptionsList" placeholder="الاستخدام" clearable density="compact" item-title="title" item-value="value" />
             </div>
           </div>
         </div>

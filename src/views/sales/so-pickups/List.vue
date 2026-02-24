@@ -33,6 +33,7 @@ interface ItemActions {
     can_delete: boolean;
     can_view: boolean;
     can_change_status: boolean;
+    can_create_trip: boolean;
 }
 
 interface PickupItem {
@@ -379,7 +380,7 @@ onBeforeUnmount(() => {
                     </template>
                     <template #item.actions="{ item }">
                         <div class="flex items-center">
-                            <v-btn icon variant="text" size="x-small"
+                            <v-btn v-if="item.actions?.can_create_trip" icon variant="text" size="x-small"
                                 color="success" @click="openCreateTrip(item)">
                                 <span v-html="truckIcon"></span>
                             </v-btn>

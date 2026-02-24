@@ -248,11 +248,8 @@ const supplier = computed(() => invoiceData.value?.supplier ?? null)
 const customer = computed(() => invoiceData.value?.customer ?? null)
 
 const payTypeLabel = computed(() => {
-    const so = invoiceData.value?.so_type
-    if (!so) return '—'
-    if (so === 'so_without_logistics') return 'آجل'
-    if (so === 'so_with_logistics') return 'آجل'
-    return so
+    const so = invoiceData.value?.payment_method_label
+    return so ||  '—'
 })
 
 const totalTaxableAmount = computed(() => {
