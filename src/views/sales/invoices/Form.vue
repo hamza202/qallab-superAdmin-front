@@ -281,7 +281,7 @@ const fetchFormData = async () => {
     isLoading.value = true;
     isPopulatingForm.value = true;
     try {
-        const res = await api.get<any>(`/sales/invoices/building-materials/${routeId.value}`);
+        const res = await api.get<any>(`/sales/invoices/${routeId.value}`);
         const data = res.data;
 
         if (data) {
@@ -396,10 +396,10 @@ const handleSubmit = async (type: any) => {
         let response;
         if (isEditMode.value) {
             // Edit mode - PUT request
-            response = await api.put(`/sales/invoices/building-materials/${routeId.value}`, fd);
+            response = await api.put(`/sales/invoices/${routeId.value}`, fd);
         } else {
             // Create mode - POST request
-            response = await api.post('/sales/invoices/building-materials', fd);
+            response = await api.post('/sales/invoices', fd);
         }
 
         success(isEditMode.value ? 'تم تحديث الفاتورة بنجاح' : 'تم إنشاء الفاتورة بنجاح');
