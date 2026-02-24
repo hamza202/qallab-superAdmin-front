@@ -128,7 +128,7 @@ const fetchInvoiceData = async () => {
 
     isLoading.value = true
     try {
-        const res = await api.get<any>(`/sales/invoices/building-materials/${routeId.value}`)
+        const res = await api.get<any>(`/sales/invoices/${routeId.value}`)
         invoiceData.value = res.data
     } catch (e: any) {
         console.error('Error fetching invoice data:', e)

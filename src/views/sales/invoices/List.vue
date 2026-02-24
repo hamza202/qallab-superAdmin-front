@@ -147,7 +147,7 @@ const fetchList = async (cursor?: string | null, append = false) => {
         if (filterTotalQuantity.value) params.append('total_quantity', filterTotalQuantity.value);
         if (filterTotalTax.value) params.append('total_tax', filterTotalTax.value);
 
-        const url = `/sales/invoices/building-materials?${params.toString()}`;
+        const url = `/sales/invoices?${params.toString()}`;
         const body = (await api.get(url)) as unknown as ListResponse;
 
         if (append) {
@@ -218,7 +218,7 @@ const handlePrint = (item: { id?: string | number; uuid?: string }) => {
 const confirmDelete = async (item: { uuid?: string; id?: string | number } & Partial<InvoiceItem>) => {
     const uuid = item.uuid;
     try {
-        await api.delete(`/sales/invoices/building-materials/${uuid}`);
+        await api.delete(`/sales/invoices/${uuid}`);
         success('تم حذف الفاتورة بنجاح');
         await fetchList();
     } catch (err: any) {
@@ -253,7 +253,7 @@ const handleBulkDelete = () => {
 const confirmBulkDelete = async () => {
     try {
         deleteLoading.value = true;
-        await api.post('/sales/invoices/building-materials/bulk-delete', {
+        await api.post('/sales/invoices/bulk-delete', {
             ids: selectedInvoices.value,
         });
         success(`تم حذف ${selectedInvoices.value.length} فاتورة بنجاح`);
@@ -465,7 +465,7 @@ onBeforeUnmount(() => {
 
         <!-- Status Change Dialog -->
         <StatusChangeFeature v-model="showChangeStatusDialog" :item="itemToChangeStatus"
-            :change-status-url="`/sales/invoices/building-materials/${itemToChangeStatus?.uuid}/change-status`"
+            :change-status-url="`/sales/invoices/${itemToChangeStatus?.uuid}/change-status`"
             title="تغيير الحالة" message="تغيير الحالة:" @success="fetchList" />
     </default-layout>
 </template>
