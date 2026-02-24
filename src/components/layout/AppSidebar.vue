@@ -560,6 +560,11 @@
                     طلبيات مواد بناء اولية</router-link>
                 </li>
                 <li class="relative">
+                  <router-link to="/purchases/orders/logistics/list"
+                    :class="isMenuItemActive('/purchases/orders/logistics') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow'">
+                    طلبيات خدمة النقل</router-link>
+                </li>
+                <li class="relative">
                   <router-link to="/purchases/orders/fuels/list" :class="[
                     isMenuItemActive('/purchases/orders/fuels')
                       ? 'font-bold text-qallab-yellow'

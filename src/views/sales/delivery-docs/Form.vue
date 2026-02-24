@@ -49,8 +49,9 @@ const formData = ref({
 
 // Receipt items table
 const receiptItems = ref<ReceiptItem[]>([]);
+const isFuelCategory = ref(false);
 
-const headers: Array<{
+const baseHeaders: Array<{
     key: string;
     title: string;
     align?: "start" | "center" | "end";
@@ -58,21 +59,24 @@ const headers: Array<{
     width?: string;
 }> = [
     { title: 'اسم المنتج', key: 'item_name', width: '200px' },
-    { title: 'موقع المشروع', key: 'target_location', width: '150px' },
-    { title: 'مصدر المواد', key: 'source_location', width: '150px' },
     { title: 'الكمية الأساسية', key: 'base_quantity', width: '150px' },
     { title: 'الكمية الفعلية من المورد', key: 'quantity_from_supplier', width: '180px' },
     { title: 'الكمية الفعلية من شركة النقل', key: 'quantity_from_transport', width: '180px' },
     { title: 'الكمية الفعلية من العميل', key: 'quantity_from_customer', width: '180px' },
-]
+];
+
+const headers = computed(() => {
+    if (isFuelCategory.value) {
+        return baseHeaders.filter(header => header.key !== 'quantity_from_transport');
+    }
+    return baseHeaders;
+});
 
 // Computed items for the DataTable
 const tableItems = computed(() => receiptItems.value.map((item, index) => ({
     id: index,
     item_id: item.item_id,
     item_name: item.item_name,
-    target_location: item.target_location || '-',
-    source_location: item.source_location || '-',
     base_quantity: item.base_quantity,
     quantity_from_supplier: item.quantity_from_supplier,
     quantity_from_transport: item.quantity_from_transport,
@@ -99,6 +103,7 @@ const fetchFormData = async () => {
             formData.value.code = data.code || '';
             formData.value.receiving_date = data.receiving_date || '';
             formData.value.created_at = data.created_at || '';
+            isFuelCategory.value = data.sale_order_category === 'fuel';
 
             if (data.items && Array.isArray(data.items)) {
                 receiptItems.value = data.items.map((item: any) => ({
@@ -339,20 +344,6 @@ const handleSubmitToOrdersList = async () => {
                                 </div>
                             </template>
 
-                            <!-- Target Location -->
-                            <template #item.target_location="{ item }">
-                                <div class="text-gray-700 text-center">
-                                    {{ item.target_location }}
-                                </div>
-                            </template>
-
-                            <!-- Source Location -->
-                            <template #item.source_location="{ item }">
-                                <div class="text-gray-700 text-center">
-                                    {{ item.source_location }}
-                                </div>
-                            </template>
-
                             <!-- Base Quantity - Input -->
                             <template #item.base_quantity="{ item }">
                                 <PriceInput
@@ -373,7 +364,7 @@ const handleSubmitToOrdersList = async () => {
                             </template>
 
                             <!-- Quantity from Transport -->
-                            <template #item.quantity_from_transport="{ item }">
+                            <template v-if="!isFuelCategory" #item.quantity_from_transport="{ item }">
                                 <PriceInput
                                     v-model="receiptItems[getItemIndex(item)].quantity_from_transport"
                                     placeholder="من شركة النقل" density="comfortable" disabled
