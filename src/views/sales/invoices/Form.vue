@@ -146,12 +146,12 @@ const fetchOrderItems = async (saleOrderId: number | string | null) => {
 
 const fetchConstants = async () => {
     try {
-        const res = await api.get<any>('/sales/orders/constants');
+        const res = await api.get<any>('/sales/invoices/constants');
         const data = res.data;
 
-        if (data.so_types?.length) {
-            orderTypes.value = Array.isArray(data.so_types)
-                ? data.so_types.map((type: any) => ({ title: type.label, value: type.key }))
+        if (data.request_categories?.length) {
+            orderTypes.value = Array.isArray(data.request_categories)
+                ? data.request_categories.map((type: any) => ({ title: type.label, value: type.key }))
                 : [];
         }
         if (data.discount_types?.length) discountTypeItems.value = data.discount_types.map((i: any) => ({ title: i.label, value: i.key }));
