@@ -2,7 +2,7 @@ name: Deploy Admin Dev Frontend
 
 on:
   push:
-    branches: [ dev ]
+    branches: [ dev ,main]
 
 jobs:
   deploy:
@@ -27,25 +27,26 @@ jobs:
             VITE_PORT: 3000
   
             # API Settings
-            VITE_API_BASE_URL: https://api-dev.qallab.sa/api/admin
+            VITE_API_BASE_URL: ${{ github.ref_name == 'main' && 'https://api.qallab.sa/api/admin' || 'https://api-dev.qallab.sa/api/admin' }}
   
             # Localization
             VITE_DEFAULT_LOCALE: ar
             VITE_FALLBACK_LOCALE: en
         run: npm run build
 
-      - name: Add SSH key
+      - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-      
-      - name: Add server to known_hosts
-        run: |
           ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
-      
-      - name: Deploy via rsync
+          ssh-keyscan -H ${{ secrets.SERVER_HOST_PROD }} >> ~/.ssh/known_hosts
+
+
+      - name: Deploy
         run: |
+          SERVER_HOST=$([[ "${{ github.ref_name }}" == "main" ]] && echo "${{ secrets.SERVER_HOST_PROD }}" || echo "${{ secrets.SERVER_HOST }}")
+
           rsync -avz --delete dist/ \
-          ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/var/www/frontend/admin-dev.qallab.sa/dist
+          ${{ secrets.SERVER_USER }}@$SERVER_HOST:/var/www/frontend/admin-dev.qallab.sa/dist
 
