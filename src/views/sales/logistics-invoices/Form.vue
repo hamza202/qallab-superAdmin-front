@@ -20,7 +20,7 @@ const routeId = computed(() => route.params.id as string);
 const isLoading = ref(false);
 const pageLoading = ref(false);
 const isSubmitting = ref(false);
-const orderTypes = ref<any[]>([]);
+
 const ordersItems = ref<any[]>([]);
 const customerItems = ref<any[]>([]);
 const InvoiceCode = ref('')
@@ -53,26 +53,24 @@ const clearFieldError = (field: string) => {
 
 // Interface for product items in the table
 interface ProductTableItem {
-    item_id: number;
-    item_name: string;
-    unit_id: number | null;
-    unit_name: string;
-    quantity: number | null;
-    price_per_unit: number | null;
-    discount_type: number | string | null;
-    discount_val: number | null;
-    total_tax: number | null;
-    taxable_amount: number | null;
-    total_out_taxes: number | null;
-    subtotal_after_tax: number | null;
     id?: number; // For edit mode
+    trip_id?: number | string;
+    trip_code?: string;
+    date?: string;
+    loading_location?: string;
+    unloading_location?: string;
+    quantity?: number | null;
+    price?: number | null;
+    discount?: number | null;
+    taxable_amount?: number | null;
+    tax_amount?: number | null;
+    total_amount?: number | null;
     isAdded?: boolean; // For dialog state
 }
 
 // Form data with static values
 const getDefaultFormData = () => ({
-    customer_id: null,
-    so_type: null,
+    customer_id: null as number | string | null,
     sale_order_id: null,
     invoice_issues_datetime: null as string | null,
     invoice_due_datetime: null as string | null,
@@ -87,60 +85,51 @@ const formData = ref(getDefaultFormData());
 const productTableItems = ref<ProductTableItem[]>([]);
 
 
-const mapOrderItemsToProducts = (items: any[] = []) => {
-    return items.map((item: any) => ({
-        id: item.id,
-        item_id: item.item_id,
-        item_name: item.item_name || item.name || '',
-        unit_id: item.unit_id,
-        unit_name: item.unit_name || item.unit?.name || '',
-        quantity: item.quantity_from_customer ?? item.quantity,
-        price_per_unit: item.price_per_unit || 0,
-        discount_type: item.discount_type,
-        discount_val: item.discount_val,
-        total_tax: item.total_tax,
-        taxable_amount: item.total_applied_taxes,
-        total_out_taxes: item.total_out_taxes ?? item.taxable_amount ?? (item.subtotal_after_tax != null && item.total_tax != null ? Number(item.subtotal_after_tax) - Number(item.total_tax) : null),
-        subtotal_after_tax: item.subtotal_after_tax ?? item.subtotal_after_discount,
-    }));
-};
-
-const fetchOrderItems = async (saleOrderId: number | string | null) => {
+const fetchTripsBySaleOrder = async (saleOrderId: number | string | null) => {
     if (!saleOrderId) {
         productTableItems.value = [];
         return;
     }
 
     try {
-        const res = await api.get<any>('/sales/orders/list-with-receiving-docs-items', {
+        const res = await api.get<any>('/sales/trips/by-sale-order', {
             params: {
-                sale_order_id: saleOrderId,
-                with_items: true,
+                so_reference: saleOrderId,
             },
         });
 
-        const orders = Array.isArray(res.data) ? res.data : res.data?.data;
-        const firstOrder = Array.isArray(orders) ? orders[0] : null;
-        const items = firstOrder?.items || [];
-        if (items.length <= 0) {
-            warning('يجب أن تحتوي الطلبية على منتج واحد على الأقل لإتمام الفاتورة')
-        } else {
-            if (firstOrder?.customer_id != null) {
-                formData.value.customer_id = firstOrder.customer_id;
-                fetchCustomerDetails(firstOrder.customer_id);
-            }
-            productTableItems.value = mapOrderItemsToProducts(items);
-            summaryData.value = {
-                total_quantity: firstOrder.total_quantity,
-                total_discount: firstOrder.total_discount,
-                total_out_taxes: firstOrder.total_out_taxes,
-                total_applied_taxes: firstOrder.total_applied_taxes,
-                total_taxes: firstOrder.total_taxes,
-                final_total: firstOrder.final_total,
-            };
+        const trips = Array.isArray(res.data) ? res.data : res.data?.data || [];
+        
+        if (trips.length <= 0) {
+            warning('لا توجد رحلات لهذه الطلبية لإتمام الفاتورة')
         }
+        
+        productTableItems.value = trips.map((trip: any) => ({
+            id: trip.id,
+            trip_id: trip.id,
+            trip_code: trip.code || '-',
+            date: trip.date || trip.created_at || '-',
+            loading_location: trip.loading_location_name || trip.pickup_location?.name || trip.loading_location?.name || '-',
+            unloading_location: trip.unloading_location_name || trip.dropoff_location?.name || trip.unloading_location?.name || '-',
+            quantity: trip.quantity_from_customer ?? trip.quantity ?? 1,
+            price: trip.trip_price ?? trip.price ?? trip.price_per_unit ?? 0,
+            discount: trip.discount_val ?? trip.discount ?? 0,
+            taxable_amount: trip.taxable_amount ?? trip.total_applied_taxes ?? 0,
+            tax_amount: trip.total_tax ?? trip.tax_amount ?? 0,
+            total_amount: trip.total_out_taxes ?? trip.final_total ?? trip.total_amount ?? 0,
+        }));
+
+        summaryData.value = {
+            total_quantity: productTableItems.value.reduce((sum, trip) => sum + Number(trip.quantity || 0), 0),
+            total_discount: productTableItems.value.reduce((sum, trip) => sum + Number(trip.discount || 0), 0),
+            total_applied_taxes: productTableItems.value.reduce((sum, trip) => sum + Number(trip.taxable_amount || 0), 0),
+            total_taxes: productTableItems.value.reduce((sum, trip) => sum + Number(trip.tax_amount || 0), 0),
+            final_total: productTableItems.value.reduce((sum, trip) => sum + Number(trip.total_amount || 0), 0),
+            total_out_taxes: productTableItems.value.reduce((sum, trip) => sum + Number(trip.total_amount || 0), 0),
+        };
+        
     } catch (e) {
-        console.error('Error fetching sale order items:', e);
+        console.error('Error fetching trips:', e);
     }
 };
 
@@ -149,16 +138,10 @@ const fetchConstants = async () => {
         const res = await api.get<any>('/sales/invoices/logistics/constants');
         const data = res.data;
 
-        if (data.request_categories?.length) {
-            orderTypes.value = Array.isArray(data.request_categories)
-                ? data.request_categories.map((type: any) => ({ title: type.label, value: type.key }))
-                : [];
-        }
         if (data.discount_types?.length) discountTypeItems.value = data.discount_types.map((i: any) => ({ title: i.label, value: i.key }));
 
     } catch (e) {
-        console.error('Error fetching order types:', e);
-        orderTypes.value = [];
+        console.error('Error fetching constants:', e);
     }
 };
 
@@ -190,18 +173,16 @@ const fetchUnits = async () => {
     }
 };
 
-const fetchOrdersByCustomerAndType = async (
-    customerId: number | string | null,
-    orderType: number | string | null
+const fetchOrdersByCustomer = async (
+    customerId: number | string | null
 ) => {
-    if (!orderType) {
+    if (!customerId) {
         ordersItems.value = [];
         return;
     }
 
     try {
-        const params: Record<string, string | number> = { category: orderType };
-        if (customerId) params.customer_id = customerId;
+        const params: Record<string, string | number> = { category: 'logistics', customer_id: customerId };
         const res = await api.get<any>('/sales/orders/list', {
             params,
         });
@@ -288,7 +269,6 @@ const fetchFormData = async () => {
             // Populate form data
             formData.value.customer_id = data.customer_id;
             formData.value.sale_order_id = data.sale_order_id;
-            formData.value.so_type = data.so_type
             skipNextSaleOrderItemsFetch.value = true;
             formData.value.invoice_issues_datetime = normalizePoDateTime(data.invoice_issues_datetime) || '';
             formData.value.invoice_due_datetime = normalizePoDateTime(data.invoice_due_datetime) || '';
@@ -297,8 +277,8 @@ const fetchFormData = async () => {
             formData.value.notes = data.notes;
             InvoiceCode.value = data.code || ''
             fetchCustomerDetails(data.customer_id);
-            if (data.customer_id && data.so_type) {
-                await fetchOrdersByCustomerAndType(data.customer_id, data.so_type);
+            if (data.customer_id) {
+                await fetchOrdersByCustomer(data.customer_id);
                 if (data.sale_order_id) {
                     const exists = ordersItems.value.some(order => order.value === data.sale_order_id);
                     if (!exists) {
@@ -309,8 +289,22 @@ const fetchFormData = async () => {
                     }
                 }
             }
+            // For saved invoices, map saved terms to display logic:
             if (data.items && Array.isArray(data.items)) {
-                productTableItems.value = mapOrderItemsToProducts(data.items);
+                productTableItems.value = data.items.map((trip: any) => ({
+                    id: trip.id,
+                    trip_id: trip.trip_id || trip.item_id || trip.id,
+                    trip_code: trip.code || trip.trip_code || '-',
+                    date: trip.date || trip.created_at || '-',
+                    loading_location: trip.loading_location_name || trip.pickup_location?.name || trip.loading_location?.name || '-',
+                    unloading_location: trip.unloading_location_name || trip.dropoff_location?.name || trip.unloading_location?.name || '-',
+                    quantity: trip.quantity_from_customer ?? trip.quantity ?? 1,
+                    price: trip.trip_price ?? trip.price ?? trip.price_per_unit ?? 0,
+                    discount: trip.discount_val ?? trip.discount ?? 0,
+                    taxable_amount: trip.taxable_amount ?? trip.total_applied_taxes ?? 0,
+                    tax_amount: trip.total_tax ?? trip.tax_amount ?? 0,
+                    total_amount: trip.total_out_taxes ?? trip.final_total ?? trip.total_amount ?? 0,
+                }));
             }
             summaryData.value = {
                 total_quantity: data.total_quantity,
@@ -334,12 +328,11 @@ const buildFormData = (): FormData => {
     const fd = new FormData();
 
     // Basic fields
-    fd.append('customer_id', formData.value.customer_id || '');
+    fd.append('customer_id', String(formData.value.customer_id || ''));
     fd.append('project_name', formData.value.project_name || '');
     fd.append('invoice_issues_datetime', String(formData.value.invoice_issues_datetime || ''));
     fd.append('invoice_due_datetime', String(formData.value.invoice_due_datetime || 1));
     fd.append('sale_order_id', String(formData.value.sale_order_id || ''));
-    fd.append('so_type', String(formData.value.so_type || ''));
     fd.append('notes', formData.value.notes || '');
 
     // Items (products)
@@ -348,13 +341,13 @@ const buildFormData = (): FormData => {
         if (isEditMode.value && item.id) {
             fd.append(`items[${index}][id]`, String(item.id));
         }
-        fd.append(`items[${index}][item_id]`, String(item.item_id));
-        fd.append(`items[${index}][unit_id]`, String(item.unit_id || ''));
+        fd.append(`items[${index}][item_id]`, String(item.trip_id || item.id));
+        fd.append(`items[${index}][trip_id]`, String(item.trip_id || item.id));
         fd.append(`items[${index}][quantity]`, String(item.quantity || ''));
-        fd.append(`items[${index}][price_per_unit]`, String(item.price_per_unit || ''));
-        fd.append(`items[${index}][discount_type]`, String(item.discount_type || ''));
-        fd.append(`items[${index}][discount_val]`, String(item.discount_val || ''));
-        fd.append(`items[${index}][total_tax]`, String(item.total_tax || ''));
+        fd.append(`items[${index}][price_per_unit]`, String(item.price || ''));
+        fd.append(`items[${index}][price]`, String(item.price || ''));
+        fd.append(`items[${index}][discount_val]`, String(item.discount || ''));
+        fd.append(`items[${index}][total_tax]`, String(item.tax_amount || ''));
         fd.append(`items[${index}][taxable_amount]`, String(item.taxable_amount || ''));
     });
 
@@ -418,47 +411,33 @@ const handleSubmit = async (type: any) => {
     }
 };
 
-
-const showAddProductDialog = ref(false);
-const editingProduct = ref<ProductTableItem | null>(null);
-
-const handleEditProduct = (item: any) => {
-    const productToEdit = productTableItems.value.find(p => p.item_id === item.item_id);
-    if (productToEdit) {
-        editingProduct.value = { ...productToEdit, isAdded: true };
-        showAddProductDialog.value = true;
-    }
-};
-
 const headers = [
-    { title: 'اسم المنتج', key: 'name' },
-    { title: 'الوحدة', key: 'unit' },
-    { title: 'الكمية', key: 'quantity' },
-    { title: 'سعر الوحدة', key: 'price_per_unit' },
-    { title: 'الخصم', key: 'discount_val' },
+    { title: 'كود الرحلة', key: 'trip_code' },
+    { title: 'موقع الإستلام', key: 'loading_location' },
+    { title: 'موقع التسليم', key: 'unloading_location' },
+    { title: 'العدد', key: 'quantity' },
+    { title: 'سعر الرحلة', key: 'price' },
+    { title: 'خصم', key: 'discount' },
     { title: 'المبلغ الخاضع للضريبة', key: 'taxable_amount' },
-    { title: 'مبلغ الضريبة', key: 'total_tax' },
-    { title: 'إجمالي المبلغ', key: 'total_out_taxes' },
+    { title: 'مبلغ الضريبة', key: 'tax_amount' },
+    { title: 'إجمالي المبلغ', key: 'total_amount' },
 ]
 
 // Computed items for the DataTable (mapped from productTableItems)
-const tableItems = computed(() => productTableItems.value.map(item => ({
-    id: item.item_id, // Required for DataTable
-    item_id: item.item_id,
-    name: item.item_name,
-    unit: item.unit_name,
+const tableItems = computed(() => productTableItems.value.map((item, index) => ({
+    id: item.trip_id || item.id || index, // Required for DataTable
+    trip_code: `${item.trip_code}\n${item.date}`,
+    loading_location: item.loading_location,
+    unloading_location: item.unloading_location,
     quantity: item.quantity,
-    price_per_unit: item.price_per_unit,
-    discount_val: item.discount_val,
+    price: item.price,
+    discount: item.discount,
     taxable_amount: item.taxable_amount,
-    total_tax: item.total_tax,
-    total_out_taxes: item.total_out_taxes,
+    tax_amount: item.tax_amount,
+    total_amount: item.total_amount,
 })));
 
-const summaryTotalQuantities = computed(() =>
-    summaryData.value?.total_quantity ??
-    0
-);
+
 const summaryTotalExcludingTax = computed(() =>
     summaryData.value?.total_out_taxes ??
     0
@@ -471,33 +450,23 @@ const summaryTotalTaxable = computed(() =>
     summaryData.value?.total_applied_taxes ??
     0
 );
-const summaryTotalTax = computed(() =>
-    Number(summaryData.value?.total_taxes).toFixed(2) ??
-    0
-);
-const summaryTotalDue = computed(() =>
-  Number(summaryData.value?.final_total).toFixed(2) ??
-    0
-);
+const summaryTotalTax = computed(() => {
+    const val = summaryData.value?.total_taxes;
+    return val != null ? Number(val).toFixed(2) : 0;
+});
+const summaryTotalDue = computed(() => {
+    const val = summaryData.value?.final_total;
+    return val != null ? Number(val).toFixed(2) : 0;
+});
 
 watch(
     () => formData.value.customer_id,
-    (newVal) => {
-        fetchCustomerDetails(newVal);
-    }
-);
-
-watch(
-    [() => formData.value.customer_id, () => formData.value.so_type],
-    ([customerId, orderType]) => {
+    (customerId) => {
+        fetchCustomerDetails(customerId);
         if (!isPopulatingForm.value) {
             formData.value.sale_order_id = null;
         }
-        if (!orderType) {
-            ordersItems.value = [];
-            return;
-        }
-        fetchOrdersByCustomerAndType(customerId, orderType);
+        fetchOrdersByCustomer(customerId);
     }
 );
 
@@ -509,7 +478,7 @@ watch(
             skipNextSaleOrderItemsFetch.value = false;
             return;
         }
-        fetchOrderItems(saleOrderId);
+        fetchTripsBySaleOrder(saleOrderId);
     }
 );
 
@@ -554,19 +523,12 @@ onMounted(async () => {
                                 item-title="title" item-value="value" />
                         </div>
 
-                        <div>
-                            <SelectInput v-model="formData.so_type" :items="orderTypes" placeholder="اختر"
-                                label="نوع الطلبية" density="comfortable" :rules="[required()]"
-                                :error-messages="formErrors['so_type']"
-                                @update:model-value="clearFieldError('so_type')" clearable />
-                        </div>
-
                         <!-- Purchase Request Code -->
                         <div>
                             <SelectInput v-model="formData.sale_order_id" placeholder="اختر الطلبية"
                                 label="كود طلبية المبيعات" :items="ordersItems" density="comfortable"
                                 :rules="[required()]" :error-messages="formErrors['sale_order_id']" 
-                                @update:model-value="clearFieldError('sale_order_id')" clearable :disabled="!formData.so_type" />
+                                @update:model-value="clearFieldError('sale_order_id')" clearable />
                         </div>
 
                         <!-- Invoice Creation Date -->
@@ -635,7 +597,11 @@ onMounted(async () => {
                 </div>
 
                 <!-- Products Table -->
-                <DataTable :headers="headers" @edit="handleEditProduct" :items="tableItems" />
+                <DataTable :headers="headers" :items="tableItems">
+                    <template #item.trip_code="{ item }">
+                        <div class="whitespace-pre-line">{{ item.trip_code }}</div>
+                    </template>
+                </DataTable>
             </div>
 
             <!-- Summary Table Section -->
@@ -656,13 +622,13 @@ onMounted(async () => {
                         </thead>
                         <!-- Table Body -->
                         <tbody class="text-sm bg-primary-25">
-                            <!-- Total Quantities -->
+                            <!-- Total Trips -->
                             <tr class="border-b !border-gray-200">
                                 <td class="py-4 px-4 text-center font-bold text-gray-900 border-l !border-gray-200">
-                                    إجمالي الكميات
+                                    إجمالي الرحلات
                                 </td>
                                 <td class="py-4 px-4 text-center text-gray-600">
-                                    {{ summaryTotalQuantities }}
+                                    {{ productTableItems.length }}
                                 </td>
                             </tr>
 
@@ -686,23 +652,13 @@ onMounted(async () => {
                                 </td>
                             </tr>
 
-                            <!-- Total Tax Amount -->
+                            <!-- Total Taxable Amount -->
                             <tr class="border-b !border-gray-200">
                                 <td class="py-4 px-4 text-center font-bold text-gray-900 border-l !border-gray-200">
                                     الإجمالي الخاضع للضريبة
                                 </td>
                                 <td class="py-4 px-4 text-center text-gray-600">
                                     {{ summaryTotalTaxable }}
-                                </td>
-                            </tr>
-
-                            <!-- Tax Total -->
-                            <tr class="border-b !border-gray-200">
-                                <td class="py-4 px-4 text-center font-bold text-gray-900 border-l !border-gray-200">
-                                    الضريبة
-                                </td>
-                                <td class="py-4 px-4 text-center text-gray-600">
-                                    15%
                                 </td>
                             </tr>
 
@@ -721,7 +677,7 @@ onMounted(async () => {
                                 <td class="py-4 px-4 text-center font-bold text-gray-900 border-l !border-gray-200">
                                     إجمالي المبلغ المستحق
                                 </td>
-                                <td class="py-4 px-4 text-center text-gray-600">
+                                <td class="py-4 px-4 text-center text-gray-900 font-bold">
                                     {{ summaryTotalDue }}
                                 </td>
                             </tr>

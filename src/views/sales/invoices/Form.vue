@@ -393,13 +393,12 @@ const handleSubmit = async (type: any) => {
     isSubmitting.value = true;
     try {
         const fd = buildFormData();
-        let response;
         if (isEditMode.value) {
             // Edit mode - PUT request
-            response = await api.put(`/sales/invoices/${routeId.value}`, fd);
+            await api.put(`/sales/invoices/${routeId.value}`, fd);
         } else {
             // Create mode - POST request
-            response = await api.post('/sales/invoices', fd);
+            await api.post('/sales/invoices', fd);
         }
 
         success(isEditMode.value ? 'تم تحديث الفاتورة بنجاح' : 'تم إنشاء الفاتورة بنجاح');
@@ -472,14 +471,14 @@ const summaryTotalTaxable = computed(() =>
     summaryData.value?.total_applied_taxes ??
     0
 );
-const summaryTotalTax = computed(() =>
-    Number(summaryData.value?.total_taxes).toFixed(2) ??
-    0
-);
-const summaryTotalDue = computed(() =>
-  Number(summaryData.value?.final_total).toFixed(2) ??
-    0
-);
+const summaryTotalTax = computed(() => {
+    const val = summaryData.value?.total_taxes;
+    return val != null ? Number(val).toFixed(2) : 0;
+});
+const summaryTotalDue = computed(() => {
+    const val = summaryData.value?.final_total;
+    return val != null ? Number(val).toFixed(2) : 0;
+});
 
 watch(
     () => formData.value.customer_id,
@@ -722,7 +721,7 @@ onMounted(async () => {
                                 <td class="py-4 px-4 text-center font-bold text-gray-900 border-l !border-gray-200">
                                     إجمالي المبلغ المستحق
                                 </td>
-                                <td class="py-4 px-4 text-center text-gray-600">
+                                <td class="py-4 px-4 text-center text-gray-900 font-bold">
                                     {{ summaryTotalDue }}
                                 </td>
                             </tr>
