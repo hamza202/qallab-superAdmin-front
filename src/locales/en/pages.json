@@ -205,6 +205,15 @@
       "FormDescription": "Add purchase request for material product quotations",
       "edit": "Edit purchase request for material product quotations",
       "view": "View purchase request for material product quotations"
+    },
+    "SalesLogisticsInvoices": {
+      "title": "Logistics Service Sales Invoices",
+      "description": "Manage logistics service sales invoices",
+      "FormTitle": "Issue Logistics Service Sales Invoice",
+      "FormDescription": "Issue logistics sales invoice",
+      "FormTitleEdit": "Edit Logistics Service Sales Invoice",
+      "FormDescriptionEdit": "Edit logistics sales invoice",
+      "print": "Print Invoice"
     }
   }
 }

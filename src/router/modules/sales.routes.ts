@@ -447,6 +447,54 @@ export const salesRoutes: RouteRecordRaw[] = [
       },
     ],
   },
+  // Sales Logistics Invoices (فواتير مبيعات خدمة نقل)
+  {
+    path: "/sales/logistics-invoices",
+    name: "SalesLogisticsInvoices",
+    redirect: "/sales/logistics-invoices/list",
+    children: [
+      {
+        path: "list",
+        name: "SalesLogisticsInvoicesList",
+        component: () => import("@/views/sales/logistics-invoices/List.vue"),
+        meta: {
+          title: "pages.SalesLogisticsInvoices.title",
+        },
+      },
+      {
+        path: "create",
+        name: "SalesLogisticsInvoicesCreate",
+        component: () => import("@/views/sales/logistics-invoices/Form.vue"),
+        meta: {
+          title: "pages.SalesLogisticsInvoices.FormTitle",
+        },
+      },
+      {
+        path: "edit/:id",
+        name: "SalesLogisticsInvoicesEdit",
+        component: () => import("@/views/sales/logistics-invoices/Form.vue"),
+        meta: {
+          title: "pages.SalesLogisticsInvoices.FormTitleEdit",
+        },
+      },
+      {
+        path: "view/:id",
+        name: "SalesLogisticsInvoicesView",
+        component: () => import("@/views/sales/logistics-invoices/View.vue"),
+        meta: {
+          title: "pages.SalesLogisticsInvoices.title",
+        },
+      },
+      {
+        path: "print/:id",
+        name: "SalesLogisticsInvoicesPrint",
+        component: () => import("@/views/sales/logistics-invoices/Print.vue"),
+        meta: {
+          title: "pages.SalesLogisticsInvoices.print",
+        },
+      },
+    ],
+  },
   {
     path: "/sales/delivery-docs",
     name: "DeliveryDocs",

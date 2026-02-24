@@ -387,6 +387,14 @@
                   ]">
                     فواتير المبيعات</router-link>
                 </li>
+                <li class="relative">
+                  <router-link to="/sales/logistics-invoices/list" :class="[
+                    isMenuItemActive('/sales/logistics-invoices')
+                      ? 'font-bold text-qallab-yellow'
+                      : 'text-white hover:text-qallab-yellow',
+                  ]">
+                    فواتير مبيعات خدمة نقل</router-link>
+                </li>
               </ul>
             </div>
           </v-list-group>

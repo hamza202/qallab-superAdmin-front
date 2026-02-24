@@ -146,7 +146,7 @@ const fetchOrderItems = async (saleOrderId: number | string | null) => {
 
 const fetchConstants = async () => {
     try {
-        const res = await api.get<any>('/sales/invoices/constants');
+        const res = await api.get<any>('/sales/invoices/logistics/constants');
         const data = res.data;
 
         if (data.request_categories?.length) {
@@ -281,7 +281,7 @@ const fetchFormData = async () => {
     isLoading.value = true;
     isPopulatingForm.value = true;
     try {
-        const res = await api.get<any>(`/sales/invoices/${routeId.value}`);
+        const res = await api.get<any>(`/sales/invoices/logistics/${routeId.value}`);
         const data = res.data;
 
         if (data) {
@@ -393,13 +393,12 @@ const handleSubmit = async (type: any) => {
     isSubmitting.value = true;
     try {
         const fd = buildFormData();
-        let response;
         if (isEditMode.value) {
             // Edit mode - PUT request
-            response = await api.put(`/sales/invoices/${routeId.value}`, fd);
+            await api.put(`/sales/invoices/logistics/${routeId.value}`, fd);
         } else {
             // Create mode - POST request
-            response = await api.post('/sales/invoices', fd);
+            await api.post('/sales/invoices/logistics/', fd);
         }
 
         success(isEditMode.value ? 'تم تحديث الفاتورة بنجاح' : 'تم إنشاء الفاتورة بنجاح');
@@ -408,7 +407,7 @@ const handleSubmit = async (type: any) => {
         if (type === 'createNew') {
             await resetFormState();
         } else if (type === 'backToList') {
-            router.push({ name: 'SalesInvoicesList' });
+            router.push({ name: 'SalesLogisticsInvoicesList' });
         }
 
     } catch (e: any) {
@@ -535,8 +534,8 @@ onMounted(async () => {
 <template>
     <default-layout>
         <div class="-mx-6 bg-qallab-dashboard-bg space-y-4">
-            <TopHeader :icon="fileCheckIcon" title-key="pages.SalesInvoices.FormTitle"
-                description-key="pages.SalesInvoices.FormDescription" :code="InvoiceCode" code-label="كود الفاتورة"
+            <TopHeader :icon="fileCheckIcon" :title-key="isEditMode ? 'pages.SalesLogisticsInvoices.FormTitleEdit' : 'pages.SalesLogisticsInvoices.FormTitle'"
+                :description-key="isEditMode ? 'pages.SalesLogisticsInvoices.FormDescriptionEdit' : 'pages.SalesLogisticsInvoices.FormDescription'" :code="InvoiceCode" code-label="كود الفاتورة"
                 :show-action="false" />
 
             <!-- Request Information Section -->
