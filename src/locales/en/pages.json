@@ -214,6 +214,14 @@
       "FormTitleEdit": "Edit Logistics Service Sales Invoice",
       "FormDescriptionEdit": "Edit logistics sales invoice",
       "print": "Print Invoice"
+    },
+    "OrdersLogistics": {
+      "title": "Logistics Orders",
+      "description": "View and manage logistics orders",
+      "FormTitle": "Logistics Order",
+      "FormDescription": "Create a logistics order",
+      "edit": "Edit Logistics Order",
+      "view": "View Logistics Order"
     }
   }
 }
