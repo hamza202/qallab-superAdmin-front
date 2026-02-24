@@ -423,28 +423,6 @@ const handleSubmit = async (type: any) => {
 const showAddProductDialog = ref(false);
 const editingProduct = ref<ProductTableItem | null>(null);
 
-// Convert editingProduct to the dialog's expected type
-const editProductForDialog = computed<any>(() => {
-    const p = editingProduct.value;
-    if (!p) return null;
-    return {
-        item_id: p.item_id,
-        item_name: p.item_name,
-        unit_id: p.unit_id,
-        unit_name: p.unit_name,
-        quantity: p.quantity,
-        price_per_unit: p.price_per_unit,
-        discount_val: p.discount_val,
-        discount_type: p.discount_type,
-        total_tax: p.total_tax,
-        taxable_amount: p.taxable_amount,
-        total_out_taxes: p.total_out_taxes,
-        isAdded: p.isAdded,
-        id: p.id,
-    };
-});
-
-
 const handleEditProduct = (item: any) => {
     const productToEdit = productTableItems.value.find(p => p.item_id === item.item_id);
     if (productToEdit) {
@@ -452,51 +430,6 @@ const handleEditProduct = (item: any) => {
         showAddProductDialog.value = true;
     }
 };
-
-const handleProductUpdated = (updatedProduct: any) => {
-    const index = productTableItems.value.findIndex(p => p.item_id === updatedProduct.item_id);
-    if (index !== -1) {
-        const existing = productTableItems.value[index];
-        productTableItems.value[index] = {
-            ...existing,
-            unit_id: updatedProduct.unit_id,
-            unit_name: updatedProduct.unit_name,
-            quantity: updatedProduct.quantity,
-            price_per_unit: updatedProduct.price_per_unit ?? null,
-            discount_val: updatedProduct.discount_val ?? null,
-            discount_type: updatedProduct.discount_type ?? 2,
-            total_tax: updatedProduct.total_tax ?? null,
-            taxable_amount: updatedProduct.taxable_amount ?? null,
-            total_out_taxes: updatedProduct.total_out_taxes ?? (updatedProduct.taxable_amount != null ? updatedProduct.taxable_amount : null),
-            subtotal_after_tax: updatedProduct.taxable_amount != null && updatedProduct.total_tax != null
-                ? +(Number(updatedProduct.taxable_amount) + Number(updatedProduct.total_tax)).toFixed(2)
-                : null,
-            isAdded: updatedProduct.isAdded,
-            id: updatedProduct.id,
-        };
-    }
-    editingProduct.value = null;
-};
-
-// Convert existing products to the dialog's expected type
-const existingProductsForDialog = computed<any[]>(() =>
-    productTableItems.value.map(p => ({
-        item_id: p.item_id,
-        item_name: p.item_name,
-        unit_id: p.unit_id,
-        unit_name: p.unit_name,
-        quantity: p.quantity,
-        price_per_unit: p.price_per_unit,
-        discount_val: p.discount_val,
-        discount_type: p.discount_type,
-        total_tax: p.total_tax,
-        taxable_amount: p.taxable_amount,
-        total_out_taxes: p.total_out_taxes,
-        isAdded: p.isAdded,
-        id: p.id,
-    }))
-);
-
 
 const headers = [
     { title: 'اسم المنتج', key: 'name' },
