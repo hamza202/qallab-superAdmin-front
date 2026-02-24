@@ -423,10 +423,14 @@ const fetchQuotationForOrder = async () => {
             ? detail.transport_type.map((type: any) => Number(type))
             : [];
           
+                      const materialTypes = Array.isArray(detail.material_type)
+            ? detail.material_type.map((type: any) => Number(type))
+            : [];
+
           return {
             id: undefined,
-            material_type: detail.item_id ? [Number(detail.item_id)] : [],
-            trip_no: detail.number_of_trips != null ? Number(detail.number_of_trips) : null,
+            material_type: materialTypes,
+            trip_no: detail.trip_no != null ? Number(detail.trip_no) : null,
             actual_execution_interval: detail.actual_execution_interval != null ? Number(detail.actual_execution_interval) : null,
             am_pm_interval: detail.am_pm_interval ?? null,
             from_date: detail.trip_start ?? detail.from_date ?? "",
