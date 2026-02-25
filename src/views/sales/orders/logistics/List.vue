@@ -33,6 +33,7 @@ interface ItemActions {
   can_delete: boolean;
   can_view: boolean;
   can_change_status: boolean;
+  can_create_trip?: boolean;
 }
 
 interface OrderItem {
@@ -282,6 +283,18 @@ const openChangeStatusDialog = (item: OrderItem | Record<string, unknown>) => {
   showChangeStatusDialog.value = true;
 };
 
+const handleCreateTrip = (item: unknown) => {
+  const tableItem = item as OrderItem & { id: string | number };
+  
+  router.push({ 
+    name: 'SalesTripsCreate',
+    query: { 
+      sale_order_id: tableItem.id,
+      from: 'logistics'
+    }
+  });
+};
+
 onMounted(() => {
   fetchList();
   nextTick(() => setupInfiniteScroll());
@@ -499,6 +512,11 @@ onBeforeUnmount(() => {
           </template>
           <template #item.actions="{ item }">
             <div class="flex items-center gap-1">
+              <v-btn v-if="item.actions?.can_create_trip" icon variant="text" size="small"
+                @click="handleCreateTrip(item)">
+                  <v-icon size="25">mdi-airplane</v-icon>
+              </v-btn>
+
               <v-btn
                 v-if="item.actions?.can_change_status"
                 icon
