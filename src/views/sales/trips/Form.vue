@@ -39,6 +39,7 @@ const pickupId = computed(() => route.params.pickupId as string)
 const isLoading = ref(false);
 const isSubmitting = ref(false);
 const saleOrderId = computed(() => route.query.sale_order_id as string | undefined);
+const routeFrom = computed(() => route.query.from as string | undefined);
 
 const tripCode = ref("");
 
@@ -160,7 +161,10 @@ const fetchSaleOrderData = async () => {
 
   isLoading.value = true;
   try {
-    const res = await api.get<any>(`/sales/orders/building-materials/${saleOrderId.value}`);
+    const endpointUrl = routeFrom.value === 'logistics' 
+      ? `/sales/orders/logistics/${saleOrderId.value}` 
+      : `/sales/orders/building-materials/${saleOrderId.value}`;
+    const res = await api.get<any>(endpointUrl);
     const data = res?.data != null ? res.data : res;
 
     if (!data) return;
