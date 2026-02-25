@@ -6,6 +6,7 @@
 
 import { toast } from "vue3-toastify";
 import { useApi } from "@/composables/useApi";
+import { useForm } from "@/composables/useForm";
 import { useRoute, useRouter } from "vue-router";
 import { onMounted, watch } from "vue";
 import TestFormDialog from "@/views/products/simple-products/components/TestFormDialog.vue";
@@ -35,9 +36,8 @@ const isStep1Completed = ref(false);
 const loading = ref(false);
 const savingLoading = ref(false);
 
-// Form ref
-const formRef = ref<any>(null);
-const isFormValid = ref(false);
+// Form ref and validation using custom composable
+const { formRef, isFormValid, validate } = useForm();
 
 // Form data
 const productCode = ref("");
@@ -934,7 +934,7 @@ const resetFormFields = () => {
 };
 
 const handleSaveAndReturn = async () => {
-  const { valid } = await formRef.value?.validate();
+  const valid = await validate();
   if (valid) {
     try {
       savingLoading.value = true;
@@ -966,7 +966,7 @@ const handleSaveAndReturn = async () => {
 };
 
 const handleSaveAndCreate = async () => {
-  const { valid } = await formRef.value?.validate();
+  const valid = await validate();
   if (valid) {
     try {
       savingLoading.value = true;
@@ -990,7 +990,7 @@ const handleSaveAndCreate = async () => {
 };
 
 const handleSaveAndContinue = async () => {
-  const { valid } = await formRef.value?.validate();
+  const valid = await validate();
   if (valid) {
     try {
       savingLoading.value = true;
@@ -1642,7 +1642,7 @@ const trashIcon = `<svg width="17" height="19" viewBox="0 0 17 19" fill="none" x
                       </div>
 
                       <div>
-                        <TextInput type="number" :rules="[required(),numeric(), positive()]" v-model="minQuantity" label="حد أدنى للكمية"
+                        <PriceInput :rules="[required(),numeric(), positive()]" v-model="minQuantity" label="حد أدنى للكمية"
                           placeholder="أدخل الحد الأدنى" :hide-details="false" />
                       </div>
 
@@ -1731,18 +1731,16 @@ const trashIcon = `<svg width="17" height="19" viewBox="0 0 17 19" fill="none" x
                         <td class="px-6 py-4 text-right text-sm font-medium text-gray-600">{{ item.name }}</td>
                         <td class="px-6 py-4 text-center text-sm font-medium text-gray-600">{{ item.sku }}</td>
                         <td class="px-2 py-4 text-center">
-                          <input
+                          <PriceInput
                             v-model="item.salePrice"
-                            type="number"
-                            class="w-[110px] px-3 py-2 text-center text-sm border-2 border-solid bg-white border-primary-400 rounded-lg focus:outline-none focus:border-primary-500"
+                            class="w-[110px] mx-auto"
                             placeholder="0"
                           />
                         </td>
                         <td class="px-2 py-4 text-center">
-                          <input
+                          <PriceInput
                             v-model="item.purchasePrice"
-                            type="number"
-                            class="w-[110px] px-3 py-2 text-center text-sm border-2 border-solid bg-white border-primary-400 rounded-lg focus:outline-none focus:border-primary-500"
+                            class="w-[110px] mx-auto"
                             placeholder="0"
                           />
                         </td>

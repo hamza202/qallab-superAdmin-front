@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, provide } from "vue";
+import { ref, watch, provide, onMounted, onBeforeUnmount } from "vue";
 
 export interface Language {
   code: string;
@@ -29,12 +29,14 @@ const emit = defineEmits<{
 }>();
 
 const activeTab = ref(props.languages[0]?.code || "en");
-
 const validationState = ref<Record<string, boolean>>({});
+const tabsContainer = ref<HTMLElement | null>(null);
 
 const setValidation = (langCode: string, isValid: boolean) => {
-  validationState.value[langCode] = isValid;
-  emit("update:modelValue", { ...validationState.value });
+  if (validationState.value[langCode] !== isValid) {
+    validationState.value[langCode] = isValid;
+    emit("update:modelValue", { ...validationState.value });
+  }
 };
 
 provide("languageTabsValidation", {
@@ -50,7 +52,7 @@ const getTabClasses = (lang: Language) => {
     "flex items-center gap-2 px-4 py-[10px] text-xs font-semibold cursor-pointer transition-all duration-150",
     "border-l first:border-l-0 border-gray-300",
     isActive ? "bg-white text-gray-700" : "bg-gray-50 text-gray-800",
-    hasError ? "border-t-2 border-t-red-500" : "",
+    hasError ? "border-t-2 border-t-red-500 !text-red-500" : "",
   ];
 };
 
@@ -61,6 +63,41 @@ const getContentClasses = (langCode: string) => {
     hasError ? "border-red-500" : "",
   ];
 };
+
+// Check for validation errors in child inputs by inspecting the DOM
+const checkValidation = () => {
+  if (!tabsContainer.value) return;
+  props.languages.forEach((lang) => {
+    const tabDiv = tabsContainer.value?.querySelector(`.lang-tab-content-${lang.code}`);
+    if (tabDiv) {
+      const hasError = !!tabDiv.querySelector('.v-input--error');
+      setValidation(lang.code, !hasError);
+    }
+  });
+};
+
+let observer: MutationObserver | null = null;
+
+onMounted(() => {
+  if (tabsContainer.value) {
+    // Initial check
+    setTimeout(() => checkValidation(), 100);
+    
+    // Watch for Vuetify adding/removing the 'v-input--error' class
+    observer = new MutationObserver(() => {
+      checkValidation();
+    });
+    observer.observe(tabsContainer.value, {
+      attributes: true,
+      subtree: true,
+      attributeFilter: ['class'],
+    });
+  }
+});
+
+onBeforeUnmount(() => {
+  if (observer) observer.disconnect();
+});
 
 watch(
   () => props.languages,
@@ -98,12 +135,13 @@ watch(
     </div>
 
     <!-- Tab Content -->
-    <div :class="getContentClasses(activeTab)">
+    <div :class="getContentClasses(activeTab)" ref="tabsContainer">
       <template v-for="lang in languages" :key="lang.code">
         <div
           v-show="activeTab === lang.code"
           :dir="lang.dir || 'ltr'"
           class="tab-content"
+          :class="`lang-tab-content-${lang.code}`"
         >
           <slot :name="lang.code" :lang="lang" :isActive="activeTab === lang.code"></slot>
         </div>

@@ -6,8 +6,23 @@ export function useForm() {
 
   const scrollToFirstError = async () => {
     await nextTick();
-    const firstError = document.querySelector('.v-input--error');
-    if (firstError) {
+    
+    // Find all errors in the form
+    const errors = document.querySelectorAll('.v-input--error');
+    if (errors.length > 0) {
+      const firstError = errors[0] as HTMLElement;
+      
+      // If the element is hidden (e.g. inside a hidden tab), scroll to its closest visible container
+      // such as .language-tabs-wrapper, so the user knows where the error is
+      if (firstError.offsetParent === null) {
+        let wrapper = firstError.closest('.language-tabs-wrapper') as HTMLElement;
+        if (wrapper) {
+           wrapper.scrollIntoView({ behavior: 'smooth', block: 'center' });
+           return;
+        }
+      }
+      
+      // Fallback: normal scroll
       firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
   };

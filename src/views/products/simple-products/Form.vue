@@ -6,8 +6,9 @@
 
 import { toast } from "vue3-toastify";
 import { useApi } from "@/composables/useApi";
+import { useForm } from "@/composables/useForm";
 import { useRoute, useRouter } from "vue-router";
-import { onMounted, watch } from "vue";
+import { onMounted, watch, reactive, ref, computed } from "vue";
 import TestFormDialog from "@/views/products/simple-products/components/TestFormDialog.vue";
 import {
   packageIcon as gridIcon,
@@ -36,8 +37,7 @@ const loading = ref(false);
 const savingLoading = ref(false);
 
 // Form ref
-const formRef = ref<any>(null);
-const isFormValid = ref(false);
+const { formRef, isFormValid, validate } = useForm();
 
 // Form data
 const productCode = ref("");
@@ -749,7 +749,7 @@ const resetFormFields = () => {
 };
 
 const handleSaveAndReturn = async () => {
-  const { valid } = await formRef.value?.validate();
+  const valid = await validate();
   if (valid) {
     try {
       savingLoading.value = true;
@@ -781,7 +781,7 @@ const handleSaveAndReturn = async () => {
 };
 
 const handleSaveAndCreate = async () => {
-  const { valid } = await formRef.value?.validate();
+  const valid = await validate();
   if (valid) {
     try {
       savingLoading.value = true;
@@ -805,7 +805,7 @@ const handleSaveAndCreate = async () => {
 };
 
 const handleSaveAndContinue = async () => {
-  const { valid } = await formRef.value?.validate();
+  const valid = await validate();
   if (valid) {
     try {
       savingLoading.value = true;
