@@ -142,14 +142,15 @@ import { ref, onMounted, computed, reactive } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useApi } from '@/composables/useApi'
+import { useForm } from '@/composables/useForm'
+import { toast } from 'vue3-toastify'
 
 const route = useRoute()
 const router = useRouter()
 const { t } = useI18n()
 const api = useApi()
 
-const formRef = ref<any>(null)
-const isFormValid = ref(false)
+const { formRef, isFormValid, validate } = useForm()
 const loading = ref(false)
 const formErrors = reactive<Record<string, string>>({})
 const pageLoading = ref(false)
@@ -266,12 +267,10 @@ const handleSaveAndReturn = async () => {
     Object.keys(formErrors).forEach(key => delete formErrors[key])
 
     // Validate form
-    if (formRef.value && typeof formRef.value.validate === 'function') {
-      const { valid } = await formRef.value.validate()
-      if (!valid) {
-        toast.error('يرجى تصحيح الأخطاء في النموذج')
-        return
-      }
+    const valid = await validate()
+    if (!valid) {
+      toast.error('يرجى تصحيح الأخطاء في النموذج')
+      return
     }
 
     loading.value = true
