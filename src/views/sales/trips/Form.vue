@@ -51,6 +51,7 @@ const formData = ref({
   planned_arrival_downloading: "",
   total_quantity_ton: null as number | null,
   total_quantity_m3: null as number | null,
+  total_quantities: null as number | null,
   tracking_no_point: null as number | null,
   bill_of_lading: null as number | null,
   am_pm_interval: "" as string,
@@ -263,6 +264,7 @@ const fetchFormData = async () => {
       planned_arrival_downloading: normalizePoDateTime(String(data.planned_arrival_downloading)) || "",
       total_quantity_ton: data.total_quantity_ton || null,
       total_quantity_m3: data.total_quantity_m3 || null,
+      total_quantities: data.total_quantities || null,
       tracking_no_point: data.tracking_no_point || null,
       bill_of_lading: data.bill_of_lading || null,
       am_pm_interval: data.am_pm_interval || "",
@@ -381,6 +383,7 @@ const handleSubmit = async (option: SubmitOption) => {
         planned_arrival_downloading: "",
         total_quantity_ton: null,
         total_quantity_m3: null,
+        total_quantities: null,
         tracking_no_point: null,
         bill_of_lading: null,
         am_pm_interval: "",
@@ -604,6 +607,10 @@ onMounted(async () => {
             <div>
               <PriceInput v-model="formData.total_quantity_m3" label="الكمية الكلية / م^3" density="comfortable"
                 placeholder="أدخل الكمية بالمتر المكعب" />
+            </div>
+            <div>
+              <PriceInput v-model="formData.total_quantities" label="عدد الرحلات" density="comfortable"
+                placeholder="أدخل عدد الرحلات" />
             </div>
             <div>
               <PriceInput v-model="formData.trip_value" show-rial-icon label="مبلغ الرحلة" density="comfortable"
