@@ -693,7 +693,7 @@ const buildFormData = (): FormData => {
 
   // Include purchase_quotation_id if creating order from quotation
   if (purchaseQuotationId.value) {
-    fd.append("purchase_quotation_id", purchaseQuotationId.value);
+    fd.append("sale_quotation_id", purchaseQuotationId.value);
   }
 
   // Basic fields (مطابقة request-body: po_type, po_datetime, supplier_id, ...)
