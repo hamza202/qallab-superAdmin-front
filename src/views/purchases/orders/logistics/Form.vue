@@ -713,7 +713,7 @@ const buildPayload = () => {
 
   // Include purchase_quotation_id if creating order from quotation
   if (purchaseQuotationId.value) {
-    payload.purchase_quotation_id = Number(purchaseQuotationId.value);
+    payload.sale_quotation_id = Number(purchaseQuotationId.value);
   }
 
   payload.po_logistics_details = logisticsDetails.value.map(d => ({
