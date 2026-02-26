@@ -29,7 +29,7 @@ const api = useApi();
 const route = useRoute();
 const router = useRouter();
 const { success, error, warning, apiError } = useNotification();
-const { isFormValid, validate } = useForm();
+const { formRef, isFormValid, validate } = useForm();
 
 const isEditMode = computed(() => !!route.params.id);
 const routeId = computed(() => route.params.id as string);
