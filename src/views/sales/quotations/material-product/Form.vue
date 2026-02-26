@@ -74,7 +74,7 @@ const getTransportTypeName = (transportTypeId: number | string | null): string =
 };
 
 // Helper function to get am/pm interval label
-const getAmPmIntervalLabel = (interval: string | null): string => {
+const getAmPmIntervalLabel = (interval: any): string => { // Changed type to any for flexibility
     if (!interval) return '';
     const item = amPmIntervalItems.value.find((i: any) => i.value === interval);
     return item?.title || '';
@@ -338,15 +338,7 @@ const productTableItems = ref<ProductTableItem[]>([]);
 // Transport service (single item - dynamically populated from dialog)
 const Supply = ref<Supply | null>(null);
 
-// Computed: check if transport service exists
-const hasSupply = computed(() => Supply.value !== null);
 
-// Summary data
-const summaryData = computed(() => ({
-    productsCount: productTableItems.value.length,
-    payment_method: paymentMethodItems.value.find((i: any) => i.value === formData.value.payment_method)?.title || '',
-    upfront_payment: formData.value.upfront_payment ?? 'لا يوجد'
-}));
 
 import { useNotification } from '@/composables/useNotification';
 import { required } from '@/utils/validators';
@@ -361,7 +353,7 @@ const handleAddProduct = () => {
     showAddProductDialog.value = true;
 };
 
-const handleProductSaved = (products: ProductTableItem[]) => {
+const handleProductSaved = (products: any[]) => {
     // Merge new products while preserving existing notes
     const newItems: ProductTableItem[] = [];
 
@@ -387,7 +379,7 @@ const handleEditProduct = (item: any) => {
     }
 };
 
-const handleProductUpdated = (updatedProduct: ProductTableItem) => {
+const handleProductUpdated = (updatedProduct: any) => {
     const index = productTableItems.value.findIndex(p => p.item_id === updatedProduct.item_id);
     if (index !== -1) {
         // Preserve the notes from the table
@@ -624,9 +616,7 @@ const handleSubmit = async (afterSuccess?: 'reset' | 'navigate') => {
     }
 };
 
-const handleConvertToPrice = () => {
-    console.log('Convert to price offer');
-};
+
 
 const handleLocationSelected = (location: { latitude: string; longitude: string; address: string }) => {
     formData.value.target_latitude = location.latitude;
@@ -664,15 +654,24 @@ const handleAddSupply = () => {
     showAddSupplyDialog.value = true;
 };
 
-const handleSupplyDetailsSaved = (rows: { item_id: number; transport_start_date: string; trip_no: number | null; vehicle_types: (string | number)[] }[]) => {
+const handleSupplyDetailsSaved = (rows: {
+    item_id: number;
+    transport_start_date?: string;
+    trip_date?: string | null;
+    transport_type?: (string | number)[];
+    trip_no?: number | null;
+    vehicle_types?: (string | number)[];
+    trip_capacity?: number | null;
+    am_pm_interval?: string | null;
+}[]) => {
     rows.forEach((row) => {
         const product = productTableItems.value.find((p) => p.item_id === row.item_id);
         if (product) {
-            product.transport_start_date = row.transport_start_date || null;
+            product.transport_start_date = row.transport_start_date || row.trip_date || null;
             product.trip_no = row.trip_no;
-            product.vehicle_types = row.vehicle_types;
-            product.transport_type_name = getTransportTypeNameFromIds(row.vehicle_types);
-            if (row.vehicle_types?.length) product.transport_type = Number(row.vehicle_types[0]);
+            product.vehicle_types = row.vehicle_types || row.transport_type || [];
+            product.transport_type_name = getTransportTypeNameFromIds(product.vehicle_types);
+            if (product.vehicle_types?.length) product.transport_type = Number(product.vehicle_types[0]);
         }
     });
     showAddSupplyDialog.value = false;

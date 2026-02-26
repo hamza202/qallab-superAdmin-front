@@ -23,7 +23,7 @@ import {
   HelpCircleIcon,
 } from "@/components/icons/globalIcons";
 
-const { t } = useI18n();
+
 const api = useApi();
 const route = useRoute();
 const router = useRouter();
@@ -633,7 +633,7 @@ const handleNewRequest = () => {
 
 import { useForm } from "@/composables/useForm";
 
-const { formRef, isFormValid, validate } = useForm();
+const { isFormValid, validate } = useForm();
 const { success, error, warning, apiError } = useNotification();
 
 // Format date to DD-MM-YYYY
@@ -904,9 +904,8 @@ const handleSubmit = async (options?: { redirectToList?: boolean }) => {
   try {
     const fd = buildFormData();
 
-    let response;
     if (isEditMode.value) {
-      response = await api.post(
+      await api.post(
         `/purchases/orders/building-materials/${routeId.value}`,
         fd,
         {
@@ -916,7 +915,7 @@ const handleSubmit = async (options?: { redirectToList?: boolean }) => {
         },
       );
     } else {
-      response = await api.post("/purchases/orders/building-materials", fd, {
+      await api.post("/purchases/orders/building-materials", fd, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -939,9 +938,7 @@ const handleSubmit = async (options?: { redirectToList?: boolean }) => {
   }
 };
 
-const handleConvertToPrice = () => {
-  console.log("Convert to price offer");
-};
+
 
 const handleLocationSelected = (location: {
   latitude: string;
@@ -1002,9 +999,11 @@ const handleAddSupply = () => {
 const handleSupplyDetailsSaved = (
   rows: {
     item_id: number;
-    transport_start_date: string;
-    trip_no: number | null;
-    vehicle_types: (string | number)[];
+    transport_start_date?: string;
+    trip_date?: string | null;
+    transport_type?: (string | number)[];
+    trip_no?: number | null;
+    vehicle_types?: (string | number)[];
     trip_capacity?: number | null;
     am_pm_interval?: string | null;
   }[]
@@ -1014,15 +1013,15 @@ const handleSupplyDetailsSaved = (
       (p) => p.item_id === row.item_id
     );
     if (product) {
-      product.trip_start = row.transport_start_date || null;
+      product.trip_start = row.transport_start_date || row.trip_date || null;
       product.number_of_trips = row.trip_no;
-      product.trip_no = row.trip_no;
-      product.vehicle_types = (row.vehicle_types || []).map((v) => Number(v));
+      product.trip_no = row.trip_no ?? null;
+      product.vehicle_types = (row.vehicle_types || row.transport_type || []).map((v) => Number(v));
       product.transport_type_name =
-        getTransportTypeNameFromIds(row.vehicle_types);
-      if (row.vehicle_types?.length)
-        product.transport_type = Number(row.vehicle_types[0]);
-      product.trip_capacity = row.trip_capacity ?? null;
+        getTransportTypeNameFromIds(row.vehicle_types || row.transport_type || []);
+      if ((row.vehicle_types || row.transport_type)?.length)
+        product.transport_type = Number((row.vehicle_types || row.transport_type)![0]);
+      product.trip_capacity = Number(row.trip_capacity) ?? null;
       product.am_pm_interval = row.am_pm_interval ?? null;
     }
   });
@@ -1041,18 +1040,7 @@ const handleEditSupply = (row: { item_id?: number; id?: string | number }) => {
   }
 };
 
-const handleDeleteSupply = () => {
-  Supply.value = null;
-};
 
-const handleSupplySaved = (service: Supply) => {
-  Supply.value = service;
-};
-
-const handleSupplyUpdated = (service: Supply) => {
-  Supply.value = service;
-  editingSupply.value = null;
-};
 
 const showMapDialog = ref(false);
 /** 'target' = موقع المشروع (target_*), 'source' = موقع مصدر المواد (source_*) */

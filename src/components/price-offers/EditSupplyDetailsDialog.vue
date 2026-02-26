@@ -14,13 +14,26 @@ export interface SupplyDetailRow {
   quantity: number | null;
   unit_name: string;
   transport_start_date: string;
-  trip_no: number | null;
-  vehicle_types: (string | number)[];
+  trip_no?: number | null;
+  vehicle_types?: (string | number)[];
   /** سعة الرحلة (اختياري - يُعرض في طلبات المشتريات) */
   trip_capacity?: number | null;
   /** توقيت الرحلة (اختياري - يُعرض في طلبات المشتريات) */
   am_pm_interval?: string | null;
+  trip_date?: string | null;
+  trip_price?: number | null;
+  transport_type?: (string | number)[];
 }
+
+type SupplyDetailRowInternal = Required<SupplyDetailRow> & {
+  trip_no: number | null;
+  vehicle_types: (string | number)[];
+  trip_capacity: number | null;
+  am_pm_interval: string | null;
+  trip_date: string | null;
+  trip_price: number | null;
+  transport_type: (string | number)[];
+};
 
 const props = defineProps<{
   modelValue: boolean;
@@ -32,6 +45,7 @@ const props = defineProps<{
   showTripCapacity?: boolean;
   /** عناصر توقيت الرحلة - إذا أُرسلت يظهر الحقل (صباحاً/مساءً/كلاهما) */
   amPmIntervalItems?: { title: string; value: string }[];
+  requestType?: 'logistics-trips' | 'other';
 }>();
 
 const emit = defineEmits<{
@@ -46,7 +60,7 @@ const internalOpen = computed({
 
 const vehicleOptions = computed(() => props.transportTypeItems || []);
 
-const rows = ref<SupplyDetailRow[]>([]);
+const rows = ref<SupplyDetailRowInternal[]>([]);
 
 const getQuantityDisplay = (row: SupplyDetailRow) => {
   const q = row.quantity != null ? String(row.quantity) : '';
@@ -67,11 +81,14 @@ watch(
         quantity: p.quantity,
         unit_name: p.unit_name,
         transport_start_date: p.transport_start_date || '',
-        trip_no: p.trip_no,
+        trip_no: p.trip_no ?? null,
         vehicle_types: Array.isArray(p.vehicle_types) ? [...p.vehicle_types] : (p.vehicle_types != null ? [p.vehicle_types] : []),
         trip_capacity: p.trip_capacity ?? null,
         am_pm_interval: p.am_pm_interval ?? null,
-      }));
+        trip_date: p.trip_date ?? null,
+        trip_price: p.trip_price ?? null,
+        transport_type: Array.isArray(p.transport_type) ? [...p.transport_type] : (p.transport_type != null ? [p.transport_type] : []),
+      } as SupplyDetailRowInternal));
     }
   },
   { immediate: true }
@@ -121,9 +138,18 @@ const truckIcon = `<svg width="22" height="20" viewBox="0 0 22 20" fill="none" x
           />
         </div>
 
-        <!-- 2. تاريخ بداية النقل -->
+        <!-- 2. تاريخ بداية النقل أو تاريخ الرحلة -->
         <div class="min-w-[160px] shrink-0">
           <DatePickerInput
+            v-if="requestType === 'logistics-trips'"
+            v-model="rows[index].trip_date"
+            placeholder="تاريخ الرحلة"
+            density="compact"
+            class="w-full"
+            hide-details
+          />
+          <DatePickerInput
+            v-else
             v-model="rows[index].transport_start_date"
             placeholder="تاريخ بداية النقل"
             density="compact"
@@ -132,9 +158,19 @@ const truckIcon = `<svg width="22" height="20" viewBox="0 0 22 20" fill="none" x
           />
         </div>
 
-        <!-- 3. عدد الرحلات -->
+        <!-- 3. عدد الرحلات أو سعر الرحلة -->
         <div class="min-w-[120px] shrink-0">
+          <PriceInput
+            v-if="requestType === 'logistics-trips'"
+            v-model="rows[index].trip_price"
+            showRialIcon
+            placeholder="سعر الرحلة"
+            density="compact"
+            class="w-full"
+            hide-details
+          />
           <TextInput
+            v-else
             v-model="rows[index].trip_no"
             type="number"
             placeholder="عدد الرحلات"
@@ -147,6 +183,18 @@ const truckIcon = `<svg width="22" height="20" viewBox="0 0 22 20" fill="none" x
         <!-- 4. نوع المركبات -->
         <div class="min-w-[200px] flex-1 shrink-0">
           <MultipleSelectInput
+            v-if="requestType === 'logistics-trips'"
+            v-model="rows[index].transport_type"
+            :items="vehicleOptions"
+            placeholder="نوع المركبات"
+            density="compact"
+            item-title="title"
+            item-value="value"
+            class="w-full"
+            hide-details
+          />
+          <MultipleSelectInput
+            v-else
             v-model="rows[index].vehicle_types"
             :items="vehicleOptions"
             placeholder="نوع المركبات"

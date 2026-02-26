@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
-import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
 import AddProductDialog, { type ProductToAdd } from "@/components/price-offers/AddProductDialog.vue";
 import TopHeader from "@/components/price-offers/TopHeader.vue";
@@ -11,7 +10,6 @@ import {
   messagePlusIcon,
   filePlusIcon,
   busIcon,
-  listIcon,
   CoinHandIcon,
   fileCheckIcon,
   globeIcon,
@@ -33,7 +31,6 @@ const { warning } = useNotification();
 const { formRef, isFormValid, validate } = useForm();
 const { success, apiError } = useNotify();
 
-const { t } = useI18n();
 const api = useApi();
 const route = useRoute();
 const router = useRouter();
@@ -110,7 +107,7 @@ interface TripTableItem {
   trip_price: number | null;
   transport_type: number[];
   transport_type_names?: string;
-  notes?: string;
+  notes: string;
   isAdded?: boolean;
 }
 
@@ -362,7 +359,18 @@ const fetchFormData = async () => {
         } as TripTableItem;
       });
           } else {
-      tripTableItems.value = [];
+      tripTableItems.value = productTableItems.value.map(p => ({
+        item_id: p.item_id,
+        item_name: p.item_name,
+        unit_id: p.unit_id,
+        unit_name: p.unit_name,
+        quantity: p.quantity,
+        trip_date: p.from_date ?? null,
+        trip_price: null,
+        transport_type: p.transport_type != null ? [p.transport_type] : [],
+        transport_type_names: p.transport_type_name ?? '',
+        notes: '',
+      }));
     }
   } catch (e) {
     console.error("Error fetching form data:", e);
@@ -491,6 +499,19 @@ const fetchQuotationForOrder = async () => {
             notes: item.notes ?? "",
           } as TripTableItem;
         });
+      } else {
+        tripTableItems.value = productTableItems.value.map(p => ({
+            item_id: p.item_id,
+            item_name: p.item_name,
+            unit_id: p.unit_id,
+            unit_name: p.unit_name,
+            quantity: p.quantity,
+            trip_date: p.from_date ?? null,
+            trip_price: null,
+            transport_type: p.transport_type != null ? [p.transport_type] : [],
+            transport_type_names: p.transport_type_name ?? '',
+            notes: '',
+        }));
       }
     }
   } catch (e) {
@@ -861,12 +882,6 @@ const handleAddProduct = () => {
   showAddProductDialog.value = true;
 };
 
-const handleAddTrip = () => {
-  editingProduct.value = null;
-  productDialogMode.value = "logistics-trips";
-  showAddProductDialog.value = true;
-};
-
 const handleProductSaved = (products: any[]) => {
   if (productDialogMode.value === "logistics-trips") {
     // Handle trip details
@@ -882,6 +897,7 @@ const handleProductSaved = (products: any[]) => {
         trip_price: p.trip_price ?? null,
         transport_type: p.transport_type ?? [],
         transport_type_names: p.transport_type_names ?? "",
+        notes: p.notes || "",
         isAdded: p.isAdded,
         id: p.id,
       });
@@ -890,6 +906,7 @@ const handleProductSaved = (products: any[]) => {
   } else {
     // Handle logistics products
     const newItems: ProductTableItem[] = [];
+    const newTripItems: TripTableItem[] = [];
     products.forEach((p) => {
       const existing = productTableItems.value.find((existing) => existing.item_id === p.item_id);
       newItems.push({
@@ -904,10 +921,35 @@ const handleProductSaved = (products: any[]) => {
         transport_type_name: p.transport_type_name ?? "",
         notes: existing?.notes || p.notes || "",
         isAdded: p.isAdded,
-        id: p.id,
+        id: existing?.id || p.id,
       });
+
+      const existingTrip = tripTableItems.value.find(existing => existing.item_id === p.item_id);
+      if (existingTrip) {
+          newTripItems.push({
+              ...existingTrip,
+              item_name: p.item_name,
+              unit_id: p.unit_id,
+              unit_name: p.unit_name,
+              quantity: p.quantity,
+          });
+      } else {
+          newTripItems.push({
+             item_id: p.item_id,
+             item_name: p.item_name,
+             unit_id: p.unit_id,
+             unit_name: p.unit_name,
+             quantity: p.quantity,
+             trip_date: p.from_date ?? null,
+             trip_price: null,
+             transport_type: p.transport_type != null ? [p.transport_type] : [],
+             transport_type_names: getTransportTypeNames(p.transport_type != null ? [p.transport_type] : []),
+             notes: '',
+          });
+      }
     });
     productTableItems.value = newItems;
+    tripTableItems.value = newTripItems;
   }
 };
 
@@ -944,9 +986,17 @@ const handleProductUpdated = (updatedProduct: any) => {
         trip_price: updatedProduct.trip_price ?? null,
         transport_type: updatedProduct.transport_type ?? [],
         transport_type_names: updatedProduct.transport_type_names ?? "",
+        notes: updatedProduct.notes || "",
         isAdded: updatedProduct.isAdded,
         id: updatedProduct.id,
       };
+
+      const productIndex = productTableItems.value.findIndex(p => p.item_id === updatedProduct.item_id);
+      if (productIndex !== -1) {
+          productTableItems.value[productIndex].quantity = updatedProduct.quantity;
+          productTableItems.value[productIndex].unit_id = updatedProduct.unit_id;
+          productTableItems.value[productIndex].unit_name = updatedProduct.unit_name;
+      }
     }
   } else {
     // Handle logistics product update
@@ -965,8 +1015,15 @@ const handleProductUpdated = (updatedProduct: any) => {
         transport_type_name: updatedProduct.transport_type_name ?? "",
         notes: existingNotes || updatedProduct.notes || "",
         isAdded: updatedProduct.isAdded,
-        id: updatedProduct.id,
+        id: productTableItems.value[index].id || updatedProduct.id,
       };
+
+      const tripIndex = tripTableItems.value.findIndex(p => p.item_id === updatedProduct.item_id);
+      if (tripIndex !== -1) {
+          tripTableItems.value[tripIndex].quantity = updatedProduct.quantity;
+          tripTableItems.value[tripIndex].unit_id = updatedProduct.unit_id;
+          tripTableItems.value[tripIndex].unit_name = updatedProduct.unit_name;
+      }
     }
   }
   editingProduct.value = null;
@@ -977,12 +1034,9 @@ const handleDeleteProduct = (item: any) => {
   if (index !== -1) {
     productTableItems.value.splice(index, 1);
   }
-};
-
-const handleDeleteTrip = (item: any) => {
-  const index = tripTableItems.value.findIndex((p) => p.item_id === item.item_id);
-  if (index !== -1) {
-    tripTableItems.value.splice(index, 1);
+  const tripIndex = tripTableItems.value.findIndex(p => p.item_id === item.item_id);
+  if (tripIndex !== -1) {
+      tripTableItems.value.splice(tripIndex, 1);
   }
 };
 
@@ -1432,22 +1486,8 @@ onMounted(async () => {
           :items="tripItems"
           show-actions
           force-show-edit
-          force-show-delete
           @edit="handleEditTrip"
-          @delete="handleDeleteTrip"
         />
-
-        <!-- Add Trip Button -->
-        <div class="flex justify-center my-6">
-          <ButtonWithIcon
-            color="primary-100"
-            variant="flat"
-            class="!text-primary-900 font-bold w-75"
-            @click="handleAddTrip"
-          >
-            + إضافة تفاصيل رحلة
-          </ButtonWithIcon>
-        </div>
       </div>
 
       <!-- Payment and Summary Section -->

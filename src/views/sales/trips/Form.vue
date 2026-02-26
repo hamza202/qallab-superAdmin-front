@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
-import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router';
 import { useApi } from '@/composables/useApi';
 import { useNotification } from '@/composables/useNotification';
@@ -9,7 +8,7 @@ import TopHeader from '@/components/price-offers/TopHeader.vue';
 import AddProductDialog from '@/components/price-offers/AddProductDialog.vue';
 import Map from '@/components/common/Map.vue';
 import { returnIcon, saveIcon, fileCheckIcon, fileIcon } from '@/components/icons/globalIcons';
-import { listIcon, mapMarkerIcon, packageIcon, downloadIcon, messagePlusIcon } from '@/components/icons/priceOffersIcons';
+import { mapMarkerIcon, packageIcon, downloadIcon, messagePlusIcon } from '@/components/icons/priceOffersIcons';
 
 // Interface for product items in the table
 interface ProductTableItem {
@@ -29,9 +28,8 @@ interface ProductTableItem {
 const api = useApi();
 const route = useRoute();
 const router = useRouter();
-const { t } = useI18n();
 const { success, error, warning, apiError } = useNotification();
-const { formRef, isFormValid, validate } = useForm();
+const { isFormValid, validate } = useForm();
 
 const isEditMode = computed(() => !!route.params.id);
 const routeId = computed(() => route.params.id as string);
@@ -51,6 +49,7 @@ const formData = ref({
   planned_arrival_downloading: "",
   total_quantity_ton: null as number | null,
   total_quantity_m3: null as number | null,
+  total_quantities: null as number | null,
   tracking_no_point: null as number | null,
   bill_of_lading: null as number | null,
   am_pm_interval: "" as string,
@@ -66,7 +65,6 @@ const formData = ref({
   notes: "",
 });
 
-const statusItems = ref<any[]>([]);
 const unitItems = ref<any[]>([]);
 const transportTypeItems = ref<any[]>([]);
 const supplierItems = ref<any[]>([]);
@@ -170,6 +168,16 @@ const fetchSaleOrderData = async () => {
     if (!data) return;
 
     formData.value.sale_order_id = data.id || null;
+
+    if (routeFrom.value !== 'logistics') {
+      formData.value.source_location = data.source_location || "";
+      formData.value.source_latitude = data.source_latitude ? parseFloat(data.source_latitude) : null;
+      formData.value.source_longitude = data.source_longitude ? parseFloat(data.source_longitude) : null;
+      formData.value.target_location = data.target_location || "";
+      formData.value.target_latitude = data.target_latitude ? parseFloat(data.target_latitude) : null;
+      formData.value.target_longitude = data.target_longitude ? parseFloat(data.target_longitude) : null;
+    }
+
     // Populate products from sale order items
     if (data.items && Array.isArray(data.items)) {
       productTableItems.value = data.items.map((item: any) => ({
@@ -263,6 +271,7 @@ const fetchFormData = async () => {
       planned_arrival_downloading: normalizePoDateTime(String(data.planned_arrival_downloading)) || "",
       total_quantity_ton: data.total_quantity_ton || null,
       total_quantity_m3: data.total_quantity_m3 || null,
+      total_quantities: data.total_quantities || null,
       tracking_no_point: data.tracking_no_point || null,
       bill_of_lading: data.bill_of_lading || null,
       am_pm_interval: data.am_pm_interval || "",
@@ -381,6 +390,7 @@ const handleSubmit = async (option: SubmitOption) => {
         planned_arrival_downloading: "",
         total_quantity_ton: null,
         total_quantity_m3: null,
+        total_quantities: null,
         tracking_no_point: null,
         bill_of_lading: null,
         am_pm_interval: "",
@@ -604,6 +614,10 @@ onMounted(async () => {
             <div>
               <PriceInput v-model="formData.total_quantity_m3" label="الكمية الكلية / م^3" density="comfortable"
                 placeholder="أدخل الكمية بالمتر المكعب" />
+            </div>
+            <div>
+              <PriceInput v-model="formData.total_quantities" label="عدد الرحلات" density="comfortable"
+                placeholder="أدخل عدد الرحلات" />
             </div>
             <div>
               <PriceInput v-model="formData.trip_value" show-rial-icon label="مبلغ الرحلة" density="comfortable"
