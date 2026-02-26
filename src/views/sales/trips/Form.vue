@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
-import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router';
 import { useApi } from '@/composables/useApi';
 import { useNotification } from '@/composables/useNotification';
@@ -9,7 +8,7 @@ import TopHeader from '@/components/price-offers/TopHeader.vue';
 import AddProductDialog from '@/components/price-offers/AddProductDialog.vue';
 import Map from '@/components/common/Map.vue';
 import { returnIcon, saveIcon, fileCheckIcon, fileIcon } from '@/components/icons/globalIcons';
-import { listIcon, mapMarkerIcon, packageIcon, downloadIcon, messagePlusIcon } from '@/components/icons/priceOffersIcons';
+import { mapMarkerIcon, packageIcon, downloadIcon, messagePlusIcon } from '@/components/icons/priceOffersIcons';
 
 // Interface for product items in the table
 interface ProductTableItem {
@@ -29,9 +28,8 @@ interface ProductTableItem {
 const api = useApi();
 const route = useRoute();
 const router = useRouter();
-const { t } = useI18n();
 const { success, error, warning, apiError } = useNotification();
-const { formRef, isFormValid, validate } = useForm();
+const { isFormValid, validate } = useForm();
 
 const isEditMode = computed(() => !!route.params.id);
 const routeId = computed(() => route.params.id as string);
@@ -67,7 +65,6 @@ const formData = ref({
   notes: "",
 });
 
-const statusItems = ref<any[]>([]);
 const unitItems = ref<any[]>([]);
 const transportTypeItems = ref<any[]>([]);
 const supplierItems = ref<any[]>([]);
@@ -171,6 +168,16 @@ const fetchSaleOrderData = async () => {
     if (!data) return;
 
     formData.value.sale_order_id = data.id || null;
+
+    if (routeFrom.value !== 'logistics') {
+      formData.value.source_location = data.source_location || "";
+      formData.value.source_latitude = data.source_latitude ? parseFloat(data.source_latitude) : null;
+      formData.value.source_longitude = data.source_longitude ? parseFloat(data.source_longitude) : null;
+      formData.value.target_location = data.target_location || "";
+      formData.value.target_latitude = data.target_latitude ? parseFloat(data.target_latitude) : null;
+      formData.value.target_longitude = data.target_longitude ? parseFloat(data.target_longitude) : null;
+    }
+
     // Populate products from sale order items
     if (data.items && Array.isArray(data.items)) {
       productTableItems.value = data.items.map((item: any) => ({

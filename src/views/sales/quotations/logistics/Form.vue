@@ -5,7 +5,7 @@ import { useRoute, useRouter } from 'vue-router';
 import AddProductDialog, { type ProductToAdd } from '@/components/price-offers/AddProductDialog.vue';
 import TopHeader from '@/components/price-offers/TopHeader.vue';
 import { useApi } from '@/composables/useApi';
-import { fileIcon, mapMarkerIcon, messagePlusIcon, filePlusIcon, listIcon, CoinHandIcon, fileCheckIcon, busIcon, globeIcon } from '@/components/icons/priceOffersIcons';
+import { fileIcon, mapMarkerIcon, messagePlusIcon, filePlusIcon, CoinHandIcon, fileCheckIcon, busIcon, globeIcon } from '@/components/icons/priceOffersIcons';
 import { returnIcon, saveIcon, binIcon, rialIcon, packageIcon } from '@/components/icons/globalIcons';
 import { useForm } from '@/composables/useForm';
 import { useNotification as useNotify } from '@/composables/useNotification';
@@ -188,7 +188,18 @@ const fetchFormData = async () => {
                 } as TripTableItem;
             });
         } else {
-            tripTableItems.value = [];
+            tripTableItems.value = productTableItems.value.map(p => ({
+                item_id: p.item_id,
+                item_name: p.item_name,
+                unit_id: p.unit_id,
+                unit_name: p.unit_name,
+                quantity: p.quantity,
+                trip_date: p.from_date ?? null,
+                trip_price: null,
+                transport_type: p.transport_type != null ? [p.transport_type] : [],
+                transport_type_names: p.transport_type_name ?? '',
+                notes: '',
+            }));
         }
 
         // Populate logistics details (quotation_logistics_details)
@@ -295,7 +306,18 @@ const fetchRequestForQuotation = async () => {
                     } as TripTableItem;
                 });
             } else {
-                tripTableItems.value = [];
+                tripTableItems.value = productTableItems.value.map(p => ({
+                    item_id: p.item_id,
+                    item_name: p.item_name,
+                    unit_id: p.unit_id,
+                    unit_name: p.unit_name,
+                    quantity: p.quantity,
+                    trip_date: p.from_date ?? null,
+                    trip_price: null,
+                    transport_type: p.transport_type != null ? [p.transport_type] : [],
+                    transport_type_names: p.transport_type_name ?? '',
+                    notes: '',
+                }));
             }
 
             // Map logistics details from request (logistics_detail) to quotation form
@@ -464,13 +486,7 @@ const handleAddProduct = () => {
     showAddProductDialog.value = true;
 };
 
-const handleAddTrip = () => {
-    editingProduct.value = null;
-    productDialogMode.value = 'logistics-trips';
-    showAddProductDialog.value = true;
-};
-
-const handleProductSaved = (products: LogisticsQuotationProductToAdd[] | TripDetail[]) => {
+const handleProductSaved = (products: any[]) => {
     if (productDialogMode.value === 'logistics-trips') {
         // Handle trip details
         const newTripItems: TripTableItem[] = [];
@@ -493,6 +509,7 @@ const handleProductSaved = (products: LogisticsQuotationProductToAdd[] | TripDet
     } else {
         // Handle logistics products
         const newItems: ProductTableItem[] = [];
+        const newTripItems: TripTableItem[] = [];
         (products as LogisticsQuotationProductToAdd[]).forEach(p => {
             const existing = productTableItems.value.find(existing => existing.item_id === p.item_id);
             newItems.push({
@@ -507,10 +524,35 @@ const handleProductSaved = (products: LogisticsQuotationProductToAdd[] | TripDet
                 transport_type_name: p.transport_type_name ?? '',
                 notes: existing?.notes || p.notes || '',
                 isAdded: p.isAdded,
-                id: p.id,
+                id: existing?.id || p.id,
             });
+
+            const existingTrip = tripTableItems.value.find(existing => existing.item_id === p.item_id);
+            if (existingTrip) {
+                newTripItems.push({
+                    ...existingTrip,
+                    item_name: p.item_name,
+                    unit_id: p.unit_id,
+                    unit_name: p.unit_name,
+                    quantity: p.quantity,
+                });
+            } else {
+                newTripItems.push({
+                   item_id: p.item_id,
+                   item_name: p.item_name,
+                   unit_id: p.unit_id,
+                   unit_name: p.unit_name,
+                   quantity: p.quantity,
+                   trip_date: p.from_date ?? null,
+                   trip_price: null,
+                   transport_type: p.transport_type != null ? [p.transport_type] : [],
+                   transport_type_names: getTransportTypeNames(p.transport_type != null ? [p.transport_type] : []),
+                   notes: p.notes ?? '',
+                });
+            }
         });
         productTableItems.value = newItems;
+        tripTableItems.value = newTripItems;
     }
 };
 
@@ -532,7 +574,7 @@ const handleEditTrip = (item: any) => {
     }
 };
 
-const handleProductUpdated = (updatedProduct: LogisticsQuotationProductToAdd | TripDetail) => {
+const handleProductUpdated = (updatedProduct: any) => {
     if (productDialogMode.value === 'logistics-trips') {
         // Handle trip update
         const tripProduct = updatedProduct as TripDetail;
@@ -551,6 +593,13 @@ const handleProductUpdated = (updatedProduct: LogisticsQuotationProductToAdd | T
                 isAdded: tripProduct.isAdded,
                 id: tripProduct.id,
             };
+
+            const productIndex = productTableItems.value.findIndex(p => p.item_id === tripProduct.item_id);
+            if (productIndex !== -1) {
+                productTableItems.value[productIndex].quantity = tripProduct.quantity;
+                productTableItems.value[productIndex].unit_id = tripProduct.unit_id;
+                productTableItems.value[productIndex].unit_name = tripProduct.unit_name;
+            }
         }
     } else {
         // Handle logistics product update
@@ -570,8 +619,15 @@ const handleProductUpdated = (updatedProduct: LogisticsQuotationProductToAdd | T
                 transport_type_name: logisticsProduct.transport_type_name ?? '',
                 notes: existingNotes || logisticsProduct.notes || '',
                 isAdded: logisticsProduct.isAdded,
-                id: logisticsProduct.id,
+                id: productTableItems.value[index].id || logisticsProduct.id,
             };
+
+            const tripIndex = tripTableItems.value.findIndex(p => p.item_id === logisticsProduct.item_id);
+            if (tripIndex !== -1) {
+                tripTableItems.value[tripIndex].quantity = logisticsProduct.quantity;
+                tripTableItems.value[tripIndex].unit_id = logisticsProduct.unit_id;
+                tripTableItems.value[tripIndex].unit_name = logisticsProduct.unit_name;
+            }
         }
     }
     editingProduct.value = null;
@@ -582,12 +638,9 @@ const handleDeleteProduct = (item: any) => {
     if (index !== -1) {
         productTableItems.value.splice(index, 1);
     }
-};
-
-const handleDeleteTrip = (item: any) => {
-    const index = tripTableItems.value.findIndex(p => p.item_id === item.item_id);
-    if (index !== -1) {
-        tripTableItems.value.splice(index, 1);
+    const tripIndex = tripTableItems.value.findIndex(p => p.item_id === item.item_id);
+    if (tripIndex !== -1) {
+        tripTableItems.value.splice(tripIndex, 1);
     }
 };
 
@@ -608,11 +661,11 @@ const handleAddLogisticsDetail = () => {
     showAddLogisticsDialog.value = true;
 };
 
-const handleLogisticsDetailSaved = (detail: LogisticsDetail) => {
+const handleLogisticsDetailSaved = (detail: any) => {
     logisticsDetails.value.push(detail);
 };
 
-const handleLogisticsDetailUpdated = (detail: LogisticsDetail) => {
+const handleLogisticsDetailUpdated = (detail: any) => {
     if (editingLogisticsIndex.value !== -1) {
         logisticsDetails.value[editingLogisticsIndex.value] = detail;
     }
@@ -620,7 +673,7 @@ const handleLogisticsDetailUpdated = (detail: LogisticsDetail) => {
     editingLogisticsIndex.value = -1;
 };
 
-const handleEditLogisticsDetail = (detail: LogisticsDetail) => {
+const handleEditLogisticsDetail = (detail: any) => {
     const index = logisticsDetails.value.findIndex(d => d === detail);
     if (index !== -1) {
         editingLogisticsDetail.value = { ...detail };
@@ -1274,17 +1327,9 @@ onMounted(async () => {
                 </div>
 
                 <!-- Trip Details Table -->
-                <DataTable :headers="tripHeaders" :items="tripItems" show-actions force-show-edit force-show-delete
-                    @edit="handleEditTrip" @delete="handleDeleteTrip">
+                <DataTable :headers="tripHeaders" :items="tripItems" show-actions force-show-edit
+                    @edit="handleEditTrip">
                 </DataTable>
-
-                <!-- Add Trip Button -->
-                <div class="flex justify-center my-6">
-                    <ButtonWithIcon color="primary-100" variant="flat" class="!text-primary-900 font-bold w-75"
-                        @click="handleAddTrip">
-                        + إضافة تفاصيل رحلة
-                    </ButtonWithIcon>
-                </div>
             </div>
 
             <!-- Payment and Summary Section -->
@@ -1414,8 +1459,8 @@ onMounted(async () => {
         <!-- Add Product Dialog -->
         <AddProductDialog v-model="showAddProductDialog" :request-type="productDialogMode" variant="sales"
             :showUnitPriceAndDiscount="false" :transport-types="transportTypeItems" :unit-items="unitItems"
-            :customer-id="formData.customer_id" :edit-product="editingProduct"
-            :existing-products="productDialogMode === 'logistics' ? productTableItems : tripTableItems"
+            :customer-id="formData.customer_id" :edit-product="(editingProduct as any)"
+            :existing-products="(productDialogMode === 'logistics' ? productTableItems : tripTableItems) as any[]"
             @saved="handleProductSaved" @product-updated="handleProductUpdated" />
 
         <v-overlay :model-value="pageLoading" contained class="align-center justify-center">
