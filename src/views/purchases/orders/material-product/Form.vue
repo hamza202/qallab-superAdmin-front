@@ -633,7 +633,7 @@ const handleNewRequest = () => {
 
 import { useForm } from "@/composables/useForm";
 
-const { isFormValid, validate } = useForm();
+const { formRef, isFormValid, validate } = useForm();
 const { success, error, warning, apiError } = useNotification();
 
 // Format date to DD-MM-YYYY
