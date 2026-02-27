@@ -184,7 +184,7 @@ const markIcon = `<svg width="18" height="22" viewBox="0 0 18 22" fill="none" xm
           <span v-html="markIcon"></span>
         </template>
       </TextInput>
-      <div>
+      <!-- <div>
         <span class="text-gray-700 text-sm font-semibold mb-2 block">حالة المقاول ؟</span>
         <div class="flex gap-4">
           <v-radio-group v-model="formData.isActive" @update:model-value="emitUpdate" inline hide-details>
@@ -204,7 +204,7 @@ const markIcon = `<svg width="18" height="22" viewBox="0 0 18 22" fill="none" xm
             </v-radio>
           </v-radio-group>
         </div>
-      </div>
+      </div> -->
 
     </div>
   </div>
