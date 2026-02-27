@@ -34,8 +34,6 @@ interface ReceiptItem {
     quantity_from_supplier: number | null;
     quantity_from_transport: number | null;
     quantity_from_customer: number | null;
-    target_location: string | null;
-    source_location: string | null;
 }
 
 // Form data
@@ -58,8 +56,6 @@ const headers: Array<{
     width?: string;
 }> = [
     { title: 'اسم المنتج', key: 'item_name', width: '200px' },
-    { title: 'موقع المشروع', key: 'target_location', width: '150px' },
-    { title: 'مصدر المواد', key: 'source_location', width: '150px' },
     { title: 'الكمية الأساسية', key: 'base_quantity', width: '150px' },
     { title: 'الكمية الفعلية من المورد', key: 'quantity_from_supplier', width: '180px' },
     { title: 'الكمية الفعلية من شركة النقل', key: 'quantity_from_transport', width: '180px' },
@@ -71,8 +67,6 @@ const tableItems = computed(() => receiptItems.value.map((item, index) => ({
     id: index,
     item_id: item.item_id,
     item_name: item.item_name,
-    target_location: item.target_location || '-',
-    source_location: item.source_location || '-',
     base_quantity: item.base_quantity,
     quantity_from_supplier: item.quantity_from_supplier,
     quantity_from_transport: item.quantity_from_transport,
@@ -109,8 +103,6 @@ const fetchFormData = async () => {
                     quantity_from_supplier: item.quantity_from_supplier,
                     quantity_from_transport: item.quantity_from_transport,
                     quantity_from_customer: item.quantity_from_customer,
-                    target_location: item.target_location,
-                    source_location: item.source_location,
                 }));
             }
         }
@@ -336,20 +328,6 @@ const handleSubmitToOrdersList = async () => {
                             <template #item.item_name="{ item }">
                                 <div class="font-medium text-gray-900">
                                     {{ item.item_name }}
-                                </div>
-                            </template>
-
-                            <!-- Target Location -->
-                            <template #item.target_location="{ item }">
-                                <div class="text-gray-700 text-center">
-                                    {{ item.target_location }}
-                                </div>
-                            </template>
-
-                            <!-- Source Location -->
-                            <template #item.source_location="{ item }">
-                                <div class="text-gray-700 text-center">
-                                    {{ item.source_location }}
                                 </div>
                             </template>
 
