@@ -35,6 +35,7 @@ export interface ProductToAdd {
   id?: number;
   unit_price?: number | null;
   discount?: number | null;
+  discount_type?: number | null;
   [key: string]: unknown; // allow extra fields (e.g. total_amount, tax_amount from sales)
 }
 
@@ -52,6 +53,8 @@ const props = defineProps<{
   itemsQueryParams?: Record<string, string | number>;
   editProduct?: ProductToAdd | null;
   existingProducts?: ProductToAdd[];
+  /** Options for discount type dropdown */
+  discountTypeItems?: any[];
 }>();
 
 const variant = computed(() => props.variant || 'purchases');
@@ -61,6 +64,16 @@ const showPricingFields = computed(() => {
   return isSalesMode.value || !!props.showUnitPriceAndDiscount;
 });
 const entityId = computed(() => isSalesMode.value ? props.customerId : props.supplierId);
+
+const discountTypeOptionsList = computed(() => {
+  if (props.discountTypeItems && props.discountTypeItems.length > 0) {
+    return props.discountTypeItems;
+  }
+  return [
+    { title: '%', value: 1 },
+    { title: 'ريال', value: 2 },
+  ];
+});
 
 const emit = defineEmits<{
   "update:modelValue": [value: boolean];
@@ -460,11 +473,15 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
 
           <!-- Discount (sales أو purchases مع showUnitPriceAndDiscount) -->
           <div v-if="showPricingFields">
-            <TextInput 
+            <TextInputWithSelect 
               v-model="editProductData.discount" 
+              v-model:selectValue="editProductData.discount_type"
               type="number" 
               placeholder="الخصم" 
               density="compact"
+              select-width="75px"
+              :select-items="discountTypeOptionsList"
+              select-placeholder="اختر"
               class="min-w-[170px]" 
             />
           </div>
@@ -672,10 +689,15 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
 
               <!-- Discount (sales أو purchases مع showUnitPriceAndDiscount) -->
               <div v-if="showPricingFields">
-                <PriceInput 
+                <TextInputWithSelect 
                   v-model="product.discount" 
+                  v-model:selectValue="product.discount_type"
+                  type="number" 
                   placeholder="الخصم" 
                   density="compact"
+                  select-width="75px"
+                  :select-items="discountTypeOptionsList"
+                  select-placeholder="اختر"
                   class="min-w-[170px]" 
                 />
               </div>
