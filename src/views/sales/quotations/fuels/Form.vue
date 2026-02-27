@@ -8,6 +8,7 @@ import DatePickerInput from '@/components/common/forms/DatePickerInput.vue';
 import DateTimePickerInput from '@/components/common/forms/DateTimePickerInput.vue';
 import TelInput from '@/components/common/forms/TelInput.vue';
 import { useApi } from '@/composables/useApi';
+import { useCalculations } from "@/composables/useCalculations";
 import { fileIcon, mapMarkerIcon, messagePlusIcon, filePlusIcon, listIcon, CoinHandIcon, fileCheckIcon } from '@/components/icons/priceOffersIcons';
 import { returnIcon, saveIcon } from '@/components/icons/globalIcons';
 
@@ -136,6 +137,10 @@ const fetchFormData = async () => {
                 notes: item.note ?? item.notes ?? '',
             }));
         }
+
+        if (productTableItems.value.length > 0) {
+            await fetchCalculations();
+        }
     } catch (e) {
         console.error('Error fetching form data:', e);
     } finally {
@@ -198,6 +203,10 @@ const fetchRequestForQuotation = async () => {
                 }));
             }
         }
+
+        if (productTableItems.value.length > 0) {
+            await fetchCalculations();
+        }
     } catch (e) {
         console.error('Error fetching request data:', e);
     } finally {
@@ -235,6 +244,13 @@ interface ProductTableItem {
     discount: number | null;
     discount_type: number | string | null; // 1 = percentage, 2 = fixed
     tax_amount: number | null;
+    subtotal_before_discount?: number | null;
+    discount_amount?: number | null;
+    subtotal_after_discount?: number | null;
+    total_tax?: number | null;
+    item_final?: number | null;
+    price_per_unit?: number | null;
+    discount_val?: number | null;
 }
 
 // Form data
@@ -267,6 +283,29 @@ const formData = ref({
 
 // Products table items
 const productTableItems = ref<ProductTableItem[]>([]);
+
+// API-driven calculations via composable
+const { vatRate, fetchCalculations: _fetchCalc, summaryTotals } = useCalculations(productTableItems as any);
+
+const fetchCalculations = async () => {
+  const calcItems = await _fetchCalc();
+  if (calcItems) {
+    productTableItems.value = productTableItems.value.map((item) => {
+      const calc = calcItems[String(item.item_id)];
+      if (calc) {
+        return {
+          ...item,
+          subtotal_before_discount: calc.subtotal_before_discount,
+          discount_amount: calc.discount_amount,
+          subtotal_after_discount: calc.subtotal_after_discount,
+          total_tax: calc.total_tax,
+          item_final: calc.final,
+        };
+      }
+      return item;
+    });
+  }
+};
 
 // Summary data
 const summaryData = computed(() => ({
@@ -330,7 +369,7 @@ const handleAddProduct = () => {
     showAddProductDialog.value = true;
 };
 
-const handleProductSaved = (products: FuelQuotationProductToAdd[]) => {
+const handleProductSaved = async (products: FuelQuotationProductToAdd[]) => {
     const newItems: ProductTableItem[] = [];
     products.forEach(p => {
         const existing = productTableItems.value.find(existing => existing.item_id === p.item_id);
@@ -352,44 +391,42 @@ const handleProductSaved = (products: FuelQuotationProductToAdd[]) => {
         });
     });
     productTableItems.value = newItems;
+    await fetchCalculations();
 };
 
 const handleEditProduct = (item: any) => {
     const productToEdit = productTableItems.value.find(p => p.item_id === item.item_id);
     if (productToEdit) {
-        editingProduct.value = { ...productToEdit, isAdded: true };
+        editingProduct.value = {
+            ...productToEdit,
+            unit_price: productToEdit.price_per_unit ?? productToEdit.unit_price ?? null,
+            discount: productToEdit.discount_val ?? productToEdit.discount ?? null,
+            isAdded: true,
+        } as any;
         showAddProductDialog.value = true;
     }
 };
 
-const handleProductUpdated = (updatedProduct: FuelQuotationProductToAdd) => {
+const handleProductUpdated = async (updatedProduct: FuelQuotationProductToAdd) => {
     const index = productTableItems.value.findIndex(p => p.item_id === updatedProduct.item_id);
     if (index !== -1) {
         const existingNotes = productTableItems.value[index].notes;
         productTableItems.value[index] = {
-            item_id: updatedProduct.item_id,
-            item_name: updatedProduct.item_name,
-            unit_id: updatedProduct.unit_id,
-            unit_name: updatedProduct.unit_name,
-            quantity: updatedProduct.quantity,
-            item_using: updatedProduct.item_using,
-            item_using_name: updatedProduct.item_using_name,
-            unit_price: updatedProduct.unit_price ?? null,
-            discount: updatedProduct.discount ?? null,
-            discount_type: updatedProduct.discount_type ?? 2, // 1 = percentage, 2 = fixed
-            tax_amount: updatedProduct.tax_amount ?? null,
-            notes: existingNotes || updatedProduct.notes || '',
-            isAdded: updatedProduct.isAdded,
-            id: updatedProduct.id,
-        };
+            ...updatedProduct,
+            price_per_unit: updatedProduct.unit_price ?? (updatedProduct as any).price_per_unit ?? null,
+            discount_val: updatedProduct.discount ?? (updatedProduct as any).discount_val ?? null,
+            notes: existingNotes || updatedProduct.notes || "",
+        } as ProductTableItem;
     }
     editingProduct.value = null;
+    await fetchCalculations();
 };
 
-const handleDeleteProduct = (item: any) => {
+const handleDeleteProduct = async (item: any) => {
     const index = productTableItems.value.findIndex(p => p.item_id === item.item_id);
     if (index !== -1) {
         productTableItems.value.splice(index, 1);
+        await fetchCalculations();
     }
 };
 
@@ -572,46 +609,6 @@ const headers = [
     { title: 'ملاحظات', key: 'notes' },
 ]
 
-// Tax calculation (15%)
-const TAX_RATE = 0.15;
-
-const getSubtotalBeforeTax = (item: ProductTableItem): number => {
-    const qty = Number(item.quantity) || 0;
-    const price = Number(item.unit_price) || 0;
-    const disc = Number(item.discount) || 0;
-    return qty * price - disc;
-};
-
-const getTaxAmount = (item: ProductTableItem): number => {
-    const subtotal = getSubtotalBeforeTax(item);
-    return Math.round(subtotal * TAX_RATE * 100) / 100;
-};
-
-const getTotalAmount = (item: ProductTableItem): number => {
-    const subtotal = getSubtotalBeforeTax(item);
-    const tax = Math.round(subtotal * TAX_RATE * 100) / 100;
-    return Math.round((subtotal + tax) * 100) / 100;
-};
-
-const summaryTotals = computed(() => {
-    const items = productTableItems.value;
-    const subtotalBeforeDiscount = items.reduce((sum, item) => {
-        const qty = Number(item.quantity) || 0;
-        const price = Number(item.unit_price) || 0;
-        return sum + qty * price;
-    }, 0);
-    const totalDiscount = items.reduce((sum, item) => sum + (Number(item.discount) || 0), 0);
-    const subtotalAfterDiscount = Math.round((subtotalBeforeDiscount - totalDiscount) * 100) / 100;
-    const totalTaxAmount = items.reduce((sum, item) => sum + (item.tax_amount ?? getTaxAmount(item)), 0);
-    const finalTotal = Math.round((subtotalAfterDiscount + totalTaxAmount) * 100) / 100;
-    return {
-        subtotalBeforeDiscount: Math.round(subtotalBeforeDiscount * 100) / 100,
-        totalDiscount: Math.round(totalDiscount * 100) / 100,
-        subtotalAfterDiscount,
-        totalTaxAmount: Math.round(totalTaxAmount * 100) / 100,
-        finalTotal
-    };
-});
 
 // Computed items for the DataTable
 const tableItems = computed(() => productTableItems.value.map(item => ({
@@ -623,8 +620,8 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
     item_using_name: item.item_using_name || getItemUsingName(item.item_using ?? null) || '—',
     unit_price: item.unit_price ?? 0,
     discount: item.discount ?? 0,
-    tax_amount: item.tax_amount ?? getTaxAmount(item),
-    total_amount: getTotalAmount(item),
+    tax_amount: item.total_tax ?? 0,
+    total_amount: item.item_final ?? item.subtotal_after_discount ?? 0,
     notes: item.notes,
 })));
 
@@ -892,7 +889,7 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
                                     الضريبة
                                 </td>
                                 <td class="py-5 px-4 text-center text-gray-600">
-                                    15%
+                                    {{ vatRate != null ? `${vatRate * 100}%` : '—' }}
                                 </td>
                             </tr>
 

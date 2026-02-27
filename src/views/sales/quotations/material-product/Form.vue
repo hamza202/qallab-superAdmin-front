@@ -5,6 +5,7 @@ import AddProductDialog from '@/components/price-offers/AddProductDialog.vue';
 import EditSupplyDetailsDialog from '@/components/price-offers/EditSupplyDetailsDialog.vue';
 import TopHeader from '@/components/price-offers/TopHeader.vue';
 import { useApi } from '@/composables/useApi';
+import { useCalculations } from "@/composables/useCalculations";
 import { fileIcon, mapMarkerIcon, messagePlusIcon, filePlusIcon, busIcon, listIcon, CoinHandIcon, fileCheckIcon } from '@/components/icons/priceOffersIcons';
 import { returnIcon, saveIcon } from '@/components/icons/globalIcons';
 const api = useApi();
@@ -163,6 +164,10 @@ const fetchFormData = async () => {
                     logistics_detail_id: log?.id ?? null,
                 };
             });
+
+            if (productTableItems.value.length > 0) {
+                await fetchCalculations();
+            }
         }
     } catch (e) {
         console.error('Error fetching form data:', e);
@@ -246,6 +251,10 @@ const fetchRequestForQuotation = async () => {
                         vehicle_types: vehicleTypes,
                     };
                 });
+
+                if (productTableItems.value.length > 0) {
+                    await fetchCalculations();
+                }
             }
         }
     } catch (e) {
@@ -289,9 +298,16 @@ interface ProductTableItem {
     logistics_detail_id?: number | null;
     isAdded?: boolean;
     unit_price?: number | null;
+    price_per_unit?: number | null;
     discount?: number | null;
+    discount_val?: number | null;
     tax_amount?: number | null;
     total_amount?: number | null;
+    subtotal_before_discount?: number | null;
+    discount_amount?: number | null;
+    subtotal_after_discount?: number | null;
+    total_tax?: number | null;
+    item_final?: number | null;
 }
 
 interface Supply {
@@ -335,6 +351,29 @@ const formData = ref({
 // Products table items (dynamically populated from dialog)
 const productTableItems = ref<ProductTableItem[]>([]);
 
+// API-driven calculations via composable
+const { vatRate, fetchCalculations: _fetchCalc, summaryTotals } = useCalculations(productTableItems);
+
+const fetchCalculations = async () => {
+  const calcItems = await _fetchCalc();
+  if (calcItems) {
+    productTableItems.value = productTableItems.value.map((item) => {
+      const calc = calcItems[String(item.item_id)];
+      if (calc) {
+        return {
+          ...item,
+          subtotal_before_discount: calc.subtotal_before_discount,
+          discount_amount: calc.discount_amount,
+          subtotal_after_discount: calc.subtotal_after_discount,
+          total_tax: calc.total_tax,
+          item_final: calc.final,
+        };
+      }
+      return item;
+    });
+  }
+};
+
 // Transport service (single item - dynamically populated from dialog)
 const Supply = ref<Supply | null>(null);
 
@@ -353,7 +392,7 @@ const handleAddProduct = () => {
     showAddProductDialog.value = true;
 };
 
-const handleProductSaved = (products: any[]) => {
+const handleProductSaved = async (products: any[]) => {
     // Merge new products while preserving existing notes
     const newItems: ProductTableItem[] = [];
 
@@ -368,34 +407,44 @@ const handleProductSaved = (products: any[]) => {
     });
 
     productTableItems.value = newItems;
+    await fetchCalculations();
 };
 
 const handleEditProduct = (item: any) => {
     // Find the full product data
     const productToEdit = productTableItems.value.find(p => p.item_id === item.item_id);
     if (productToEdit) {
-        editingProduct.value = { ...productToEdit, isAdded: true };
+        editingProduct.value = {
+            ...productToEdit,
+            unit_price: productToEdit.price_per_unit ?? productToEdit.unit_price ?? null,
+            discount: productToEdit.discount_val ?? productToEdit.discount ?? null,
+            isAdded: true,
+        } as any;
         showAddProductDialog.value = true;
     }
 };
 
-const handleProductUpdated = (updatedProduct: any) => {
+const handleProductUpdated = async (updatedProduct: any) => {
     const index = productTableItems.value.findIndex(p => p.item_id === updatedProduct.item_id);
     if (index !== -1) {
         // Preserve the notes from the table
         const existingNotes = productTableItems.value[index].notes;
         productTableItems.value[index] = {
             ...updatedProduct,
-            notes: existingNotes || updatedProduct.notes || ''
-        };
+            price_per_unit: updatedProduct.unit_price ?? updatedProduct.price_per_unit ?? null,
+            discount_val: updatedProduct.discount ?? updatedProduct.discount_val ?? null,
+            notes: existingNotes || updatedProduct.notes || '',
+        } as ProductTableItem;
     }
     editingProduct.value = null;
+    await fetchCalculations();
 };
 
-const handleDeleteProduct = (item: any) => {
+const handleDeleteProduct = async (item: any) => {
     const index = productTableItems.value.findIndex(p => p.item_id === item.item_id);
     if (index !== -1) {
         productTableItems.value.splice(index, 1);
+        await fetchCalculations();
     }
 };
 
@@ -515,14 +564,19 @@ const buildFormData = (): FormData => {
         if (isEditMode.value && item.id != null) {
             fd.append(`items[${index}][id]`, String(item.id));
         }
+        const subtotalBefore = item.subtotal_before_discount ?? 0;
+        const taxAmount = item.total_tax ?? 0;
+        const subtotalAfter = item.item_final ?? item.subtotal_after_discount ?? 0;
         fd.append(`items[${index}][item_id]`, String(item.item_id));
         fd.append(`items[${index}][unit_id]`, String(item.unit_id || ''));
         fd.append(`items[${index}][quantity]`, String(item.quantity || ''));
         fd.append(`items[${index}][item_using]`, 'heavy_equipment');
-        fd.append(`items[${index}][price_per_unit]`, String(item.unit_price ?? ''));
+        fd.append(`items[${index}][price_per_unit]`, String(item.price_per_unit ?? item.unit_price ?? ''));
         fd.append(`items[${index}][discount_type]`, '1');
-        fd.append(`items[${index}][discount_val]`, String(item.discount ?? ''));
-        fd.append(`items[${index}][total_tax]`, String(item.tax_amount ?? ''));
+        fd.append(`items[${index}][discount_val]`, String(item.discount_val ?? item.discount ?? ''));
+        fd.append(`items[${index}][total_tax]`, String(taxAmount));
+        fd.append(`items[${index}][subtotal_before_discount]`, String(subtotalBefore));
+        fd.append(`items[${index}][subtotal_after_discount]`, String(subtotalAfter));
         fd.append(`items[${index}][note]`, item.notes || '');
     });
 
@@ -704,51 +758,7 @@ const headers = [
     { title: 'ملاحظات', key: 'notes' },
 ]
 
-// Helper: compute tax and total for a product row (sales)
-// الضريبة ثابتة 15%
-const TAX_RATE = 0.15;
 
-// المبلغ قبل الضريبة = الكمية * سعر الوحدة - الخصم
-const getSubtotalBeforeTax = (item: ProductTableItem): number => {
-    const qty = Number(item.quantity) || 0;
-    const price = Number(item.unit_price) || 0;
-    const disc = Number(item.discount) || 0;
-    return qty * price - disc;
-};
-
-// مبلغ الضريبة = 15% من (الكمية * سعر الوحدة - الخصم)
-const getTaxAmount = (item: ProductTableItem): number => {
-    const subtotal = getSubtotalBeforeTax(item);
-    return Math.round(subtotal * TAX_RATE * 100) / 100;
-};
-
-// إجمالي المبلغ = (الكمية * سعر الوحدة - الخصم) + 15%
-const getTotalAmount = (item: ProductTableItem): number => {
-    const subtotal = getSubtotalBeforeTax(item);
-    const tax = Math.round(subtotal * TAX_RATE * 100) / 100;
-    return Math.round((subtotal + tax) * 100) / 100;
-};
-
-// ملخص المبالغ من جدول المنتجات (للجدول الجانبي)
-const summaryTotals = computed(() => {
-    const items = productTableItems.value;
-    const subtotalBeforeDiscount = items.reduce((sum, item) => {
-        const qty = Number(item.quantity) || 0;
-        const price = Number(item.unit_price) || 0;
-        return sum + qty * price;
-    }, 0);
-    const totalDiscount = items.reduce((sum, item) => sum + (Number(item.discount) || 0), 0);
-    const subtotalAfterDiscount = Math.round((subtotalBeforeDiscount - totalDiscount) * 100) / 100;
-    const totalTaxAmount = items.reduce((sum, item) => sum + (item.tax_amount ?? getTaxAmount(item)), 0);
-    const finalTotal = Math.round((subtotalAfterDiscount + totalTaxAmount) * 100) / 100;
-    return {
-        subtotalBeforeDiscount: Math.round(subtotalBeforeDiscount * 100) / 100,
-        totalDiscount: Math.round(totalDiscount * 100) / 100,
-        subtotalAfterDiscount,
-        totalTaxAmount: Math.round(totalTaxAmount * 100) / 100,
-        finalTotal
-    };
-});
 
 // Computed items for the DataTable (mapped from productTableItems)
 const tableItems = computed(() => productTableItems.value.map(item => ({
@@ -759,8 +769,8 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
     quantity: item.quantity,
     unit_price: item.unit_price ?? 0,
     discount: item.discount ?? 0,
-    tax_amount: item.tax_amount ?? getTaxAmount(item),
-    total_amount: item.total_amount ?? getTotalAmount(item),
+    tax_amount: item.total_tax ?? 0,
+    total_amount: item.item_final ?? item.subtotal_after_discount ?? 0,
     notes: item.notes,
 })));
 
@@ -1052,7 +1062,7 @@ const serviceTableItems = computed(() =>
                                     الضريبة
                                 </td>
                                 <td class="py-5 px-4 text-center text-gray-600">
-                                    15%
+                                    {{ vatRate != null ? `${vatRate * 100}%` : '—' }}
                                 </td>
                             </tr>
 
