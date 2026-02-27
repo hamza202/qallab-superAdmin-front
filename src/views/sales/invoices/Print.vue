@@ -152,7 +152,7 @@
                             <span class="total-label-en">Total QTY</span>
                             <span class="total-label-ar">إجمالي الكميات</span>
                         </div>
-                        <span class="total-val">{{ formatCurrency(invoiceData.total_quantity) }}</span>
+                        <span class="total-val">{{ formatCurrency(invoiceData.total_quantity) }} <span v-html="rialIcon" class="sar-icon"></span></span>
                     </div>
                     <!-- Total (Excluding VAT) -->
                     <div class="total-row">
@@ -160,7 +160,7 @@
                             <span class="total-label-en">Total (Excluding VAT)</span>
                             <span class="total-label-ar">الإجمالي غير شامل الضريبة</span>
                         </div>
-                        <span class="total-val">{{ formatCurrency(totalExcludingVat) }}</span>
+                        <span class="total-val">{{ formatCurrency(totalExcludingVat) }} <span v-html="rialIcon" class="sar-icon"></span></span>
                     </div>
                     <!-- Total Discount -->
                     <div class="total-row">
@@ -168,7 +168,7 @@
                             <span class="total-label-en">Total Discount</span>
                             <span class="total-label-ar">مجموع الخصومات</span>
                         </div>
-                        <span class="total-val">{{ formatCurrency(invoiceData.total_discount) }}</span>
+                        <span class="total-val">{{ formatCurrency(invoiceData.total_discount) }} <span v-html="rialIcon" class="sar-icon"></span></span>
                     </div>
                     <!-- Total Taxable Amount (Excluding VAT) -->
                     <div class="total-row">
@@ -176,7 +176,7 @@
                             <span class="total-label-en">Total Taxable Amount (Excluding VAT)</span>
                             <span class="total-label-ar">الإجمالي الخاضع للضريبة غير شامل ضريبة القيمة المضافة</span>
                         </div>
-                        <span class="total-val">{{ formatCurrency(totalTaxableAmount) }}</span>
+                        <span class="total-val">{{ formatCurrency(totalTaxableAmount) }} <span v-html="rialIcon" class="sar-icon"></span></span>
                     </div>
                     <!-- Total VAT -->
                     <div class="total-row">
@@ -184,7 +184,7 @@
                             <span class="total-label-en">Total VAT</span>
                             <span class="total-label-ar">مجموع ضريبة القيمة المضافة</span>
                         </div>
-                        <span class="total-val">{{ formatCurrency(invoiceData.total_taxes) }}</span>
+                        <span class="total-val">{{ formatCurrency(invoiceData.total_taxes) }} <span v-html="rialIcon" class="sar-icon"></span></span>
                     </div>
                     <!-- Total Amount Due -->
                     <div class="total-due-box">
@@ -192,7 +192,7 @@
                             <span class="total-due-en">Total Amount Due</span>
                             <span class="total-due-ar">الإجمالي المستحق</span>
                         </div>
-                        <span class="total-due-val">{{ formatCurrency(invoiceData.final_total) }}</span>
+                        <span class="total-due-val">{{ formatCurrency(invoiceData.final_total) }} <span v-html="rialIcon" class="sar-icon sar-icon--white"></span></span>
                     </div>
                 </div>
             </div>
@@ -224,6 +224,7 @@ import { ref, computed, onMounted, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import { useApi } from '@/composables/useApi'
 import { useNotification } from '@/composables/useNotification'
+import { rialIcon } from '@/components/icons/globalIcons'
 import logoSvgRaw from '@/assets/logo.svg?raw'
 import logoLightSvgRaw from '@/assets/logo-light.svg?raw'
 
@@ -317,7 +318,7 @@ const formatNumber = (value: number | string | null) => {
 
 const formatCurrency = (value: number | string | null) => {
     if (value == null) return '—'
-    return `$ ${formatNumber(value)}`
+    return formatNumber(value)
 }
 
 const handlePrint = () => {
@@ -719,6 +720,17 @@ onMounted(() => {
     text-align: right;
     white-space: nowrap;
     padding-top: 2px;
+}
+
+/* ====== SAR Icon ====== */
+.sar-icon {
+    display: inline-block;
+    vertical-align: middle;
+    margin-inline-start: 4px;
+}
+
+.sar-icon--white :deep(svg path) {
+    fill: #fff;
 }
 
 /* ---- Total Amount Due Box ---- */
