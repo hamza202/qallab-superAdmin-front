@@ -51,9 +51,7 @@ const handleForgotPassword = () => {
   router.push('/forgot-password');
 };
 
-const registerUrl = import.meta.env.DEV
-  ? 'https://dev-site.qallab.sa/register'
-  : 'https://qallab.sa/register';
+const registerUrl = import.meta.env.VITE_REGISTER_URL || 'https://qallab.sa/register';
 
 // Handle create account
 const handleCreateAccount = () => {
