@@ -2,9 +2,9 @@ import type { RouteRecordRaw } from 'vue-router'
 
 export const financeRoutes: RouteRecordRaw[] = [
   {
-    path: '/vouchers',
+    path: '/finance/vouchers',
     name: 'Vouchers',
-    redirect: '/vouchers/list',
+    redirect: '/finance/vouchers/list',
     children: [
       {
         path: 'list',
