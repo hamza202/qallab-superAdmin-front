@@ -45,6 +45,7 @@ const formData = ref({
     code: '',
     receiving_date: '',
     created_at: '',
+    approved_quantity: null as number | null,
 });
 
 // Receipt items table
@@ -103,6 +104,7 @@ const fetchFormData = async () => {
             formData.value.code = data.code || '';
             formData.value.receiving_date = data.receiving_date || '';
             formData.value.created_at = data.created_at || '';
+            formData.value.approved_quantity = data.approved_quantity ?? null;
             isFuelCategory.value = data.sale_order_category === 'fuel';
 
             if (data.items && Array.isArray(data.items)) {
@@ -159,6 +161,7 @@ const buildFormData = (): FormData => {
 
     fd.append('purchase_order_id', String(formData.value.purchase_order_id || ''));
     fd.append('receiving_date', formatDate(formData.value.receiving_date));
+    fd.append('approved_quantity', String(formData.value.approved_quantity ?? ''));
 
     // Items
     receiptItems.value.forEach((item, index) => {
@@ -315,6 +318,12 @@ const handleSubmitToOrdersList = async () => {
                             <div>
                                 <DatePickerInput v-model="formData.receiving_date" type="date" density="comfortable"
                                     placeholder="اختر" label="تاريخ التسليم" :rules="[required()]" />
+                            </div>
+
+                            <!-- Approved Quantity -->
+                            <div>
+                                <PriceInput v-model="formData.approved_quantity" placeholder="الكميات المعتمدة من قلاب"
+                                    label="الكميات المعتمدة من قلاب" density="comfortable" />
                             </div>
 
                             <!-- Created At (display only) -->
