@@ -53,7 +53,7 @@ const supplierItems = ref<any[]>([]);
 
 const fetchSuppliers = async () => {
     try {
-        const res = await api.get<any>('/suppliers/list');
+        const res = await api.get<any>('/suppliers/list', { params: { business_type: 'material_merchant' } });
         if (Array.isArray(res.data)) {
             supplierItems.value = res.data.map((i: any) => ({ title: i.full_name, value: i.id }));
         }
