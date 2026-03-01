@@ -109,14 +109,14 @@ const fetchTripsBySaleOrder = async (saleOrderId: number | string | null) => {
             trip_id: trip.id,
             trip_code: trip.code || '-',
             date: trip.date || trip.created_at || '-',
-            loading_location: trip.loading_location_name || trip.pickup_location?.name || trip.loading_location?.name || '-',
-            unloading_location: trip.unloading_location_name || trip.dropoff_location?.name || trip.unloading_location?.name || '-',
-            quantity: trip.quantity_from_customer ?? trip.quantity ?? 1,
-            price: trip.trip_price ?? trip.price ?? trip.price_per_unit ?? 0,
+            loading_location: trip.source_location || trip.loading_location_name || trip.loading_location?.name || '-',
+            unloading_location: trip.target_location || trip.unloading_location_name || trip.unloading_location?.name || '-',
+            quantity: trip.total_quantities ?? trip.quantity_from_customer ?? trip.quantity ?? 1,
+            price: trip.trip_value ?? trip.trip_price ?? trip.price ?? 0,
             discount: trip.discount_val ?? trip.discount ?? 0,
-            taxable_amount: trip.taxable_amount ?? trip.total_applied_taxes ?? 0,
+            taxable_amount: trip.taxable_amount ?? 0,
             tax_amount: trip.total_tax ?? trip.tax_amount ?? 0,
-            total_amount: trip.total_out_taxes ?? trip.final_total ?? trip.total_amount ?? 0,
+            total_amount: trip.final_total ?? trip.total_out_taxes ?? trip.total_amount ?? 0,
         }));
 
         summaryData.value = {
@@ -600,6 +600,9 @@ onMounted(async () => {
                 <DataTable :headers="headers" :items="tableItems">
                     <template #item.trip_code="{ item }">
                         <div class="whitespace-pre-line">{{ item.trip_code }}</div>
+                    </template>
+                    <template #item.discount="{ item }">
+                        {{ item.discount != null ? item.discount : 0 }}
                     </template>
                 </DataTable>
             </div>
