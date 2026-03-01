@@ -169,29 +169,88 @@ const fetchSaleOrderData = async () => {
 
     formData.value.sale_order_id = data.id || null;
 
-    if (routeFrom.value !== 'logistics') {
+    if (routeFrom.value === 'logistics') {
+      // Handle logistics order response
       formData.value.source_location = data.source_location || "";
       formData.value.source_latitude = data.source_latitude ? parseFloat(data.source_latitude) : null;
       formData.value.source_longitude = data.source_longitude ? parseFloat(data.source_longitude) : null;
       formData.value.target_location = data.target_location || "";
       formData.value.target_latitude = data.target_latitude ? parseFloat(data.target_latitude) : null;
       formData.value.target_longitude = data.target_longitude ? parseFloat(data.target_longitude) : null;
-    }
 
-    // Populate products from sale order items
-    if (data.items && Array.isArray(data.items)) {
-      productTableItems.value = data.items.map((item: any) => ({
-        item_id: item.item_id,
-        item_name: item.item_name || '',
-        unit_id: item.unit_id,
-        unit_name: item.unit_name || '',
-        quantity: item.quantity || null,
-        transport_type: null,
-        transport_no: '',
-        transport_type_name: '',
-        notes: '',
-        isAdded: true
-      }));
+      // Populate products from so_product_details and so_trip_details
+      const productItems: ProductTableItem[] = [];
+
+      // Add items from so_product_details
+      if (data.so_product_details && Array.isArray(data.so_product_details)) {
+        data.so_product_details.forEach((item: any) => {
+          productItems.push({
+            item_id: item.item_id,
+            item_name: item.item_name || '',
+            unit_id: item.unit_id,
+            unit_name: item.unit_name || '',
+            quantity: item.quantity || null,
+            transport_type: item.transport_type ?? null,
+            transport_no: item.trip_no || null,
+            transport_type_name: getTransportTypeName(item.transport_type ?? null),
+            notes: '',
+            isAdded: true
+          });
+        });
+      }
+
+      // Add items from so_trip_details
+      if (data.so_trip_details && Array.isArray(data.so_trip_details)) {
+        data.so_trip_details.forEach((item: any) => {
+          // Check if item already exists in productItems
+          const existingIndex = productItems.findIndex(p => p.item_id === item.item_id);
+          if (existingIndex === -1) {
+            // Add new item
+            productItems.push({
+              item_id: item.item_id,
+              item_name: item.item_name || '',
+              unit_id: item.unit_id,
+              unit_name: item.unit_name || '',
+              quantity: item.quantity || null,
+              transport_type: Array.isArray(item.transport_type) && item.transport_type.length > 0 
+                ? parseInt(item.transport_type[0]) 
+                : null,
+              transport_no: null,
+              transport_type_name: Array.isArray(item.transport_type) && item.transport_type.length > 0 
+                ? getTransportTypeName(parseInt(item.transport_type[0])) 
+                : '',
+              notes: '',
+              isAdded: true
+            });
+          }
+        });
+      }
+
+      productTableItems.value = productItems;
+    } else {
+      // Handle building materials order response
+      formData.value.source_location = data.source_location || "";
+      formData.value.source_latitude = data.source_latitude ? parseFloat(data.source_latitude) : null;
+      formData.value.source_longitude = data.source_longitude ? parseFloat(data.source_longitude) : null;
+      formData.value.target_location = data.target_location || "";
+      formData.value.target_latitude = data.target_latitude ? parseFloat(data.target_latitude) : null;
+      formData.value.target_longitude = data.target_longitude ? parseFloat(data.target_longitude) : null;
+
+      // Populate products from sale order items
+      if (data.items && Array.isArray(data.items)) {
+        productTableItems.value = data.items.map((item: any) => ({
+          item_id: item.item_id,
+          item_name: item.item_name || '',
+          unit_id: item.unit_id,
+          unit_name: item.unit_name || '',
+          quantity: item.quantity || null,
+          transport_type: null,
+          transport_no: '',
+          transport_type_name: '',
+          notes: '',
+          isAdded: true
+        }));
+      }
     }
   } catch (err: any) {
     console.error('Error fetching sale order data:', err);

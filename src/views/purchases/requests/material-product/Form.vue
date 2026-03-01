@@ -206,9 +206,16 @@ const formData = ref({
     paymentMethod: null,
     advancePayment: null,
     textNote: '',
-    image: null,
-    voice_attachment: null,
+    image: null as File | null,
+    voice_attachment: null as File | Blob | null,
     code: '' as string
+});
+
+const imageFiles = computed({
+    get: () => formData.value.image ? [formData.value.image] as File[] : null,
+    set: (val: File[] | null) => {
+        formData.value.image = val && val.length > 0 ? val[0] : null;
+    }
 });
 
 // Products table items (dynamically populated from dialog)
@@ -465,9 +472,9 @@ const buildFormData = (): FormData => {
         fd.append('image', formData.value.image);
     }
 
-    // if (formData.value.voice_attachment) {
-    //     fd.append('voice_attachment', formData.value.voice_attachment);
-    // }
+    if (formData.value.voice_attachment) {
+        fd.append('voice_attachment', formData.value.voice_attachment);
+    }
 
     return fd;
 }
@@ -812,8 +819,8 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
                                 placeholder="هل تود إرفاق بعض الملاحظات، قم بكتابتها هنا من فضلك وسيتم إرفاقها مع طلب عرض السعر المرسل" />
                         </div>
 
-                        <FileUploadInput v-model="formData.image" class="!mb-0 h-full"
-                            hint="PNG, JPG or GIF (max. 400x400px)" :max-files="1" />
+                        <FileUploadInput v-model="imageFiles" class="!mb-0 h-full"
+                            hint="PNG, JPG or GIF (max. 400x400px)" :max-files="1" :multiple="false" />
                     </div>
                 </div>
 

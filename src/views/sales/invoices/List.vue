@@ -8,7 +8,7 @@ import { useTableColumns } from '@/composables/useTableColumns';
 import DatePickerInput from '@/components/common/forms/DatePickerInput.vue';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog.vue';
 import StatusChangeFeature from '@/components/common/StatusChangeFeature.vue';
-import { GridIcon, refreshIcon, trash_1_icon, trash_2_icon, importIcon, columnIcon, exportIcon, plusIcon, searchIcon, printerIcon } from "@/components/icons/globalIcons";
+import { GridIcon, refreshIcon, trash_1_icon, trash_2_icon, importIcon, columnIcon, exportIcon, plusIcon, searchIcon, printerIcon, whatsappIcon } from "@/components/icons/globalIcons";
 import { switcStatusIcon } from '@/components/icons/priceOffersIcons';
 
 const { t } = useI18n();
@@ -213,6 +213,14 @@ const handlePrint = (item: { id?: string | number; uuid?: string }) => {
     };
     window.addEventListener('message', handleMessage);
     iframe.src = printUrl;
+};
+
+const handleShareOnWhatsApp = (item: { id?: string | number; uuid?: string }) => {
+    const uuid = item.uuid ?? String(item.id);
+    const route = router.resolve({ name: 'SalesInvoicesView', params: { id: uuid } });
+    const viewUrl = route.href.startsWith('/') ? `${window.location.origin}${route.href}` : route.href;
+    const message = encodeURIComponent(`رابط عرض الفاتورة: ${viewUrl}`);
+    window.open(`https://wa.me/?text=${message}`, '_blank', 'noopener,noreferrer');
 };
 
 const confirmDelete = async (item: { uuid?: string; id?: string | number } & Partial<InvoiceItem>) => {
@@ -439,6 +447,11 @@ onBeforeUnmount(() => {
                     </template>
                     <template #item.actions="{ item }">
                         <div class="flex items-center">
+                            <v-btn v-if="item.actions?.can_view" icon variant="text" color="success-700" size="x-small"
+                                @click="handleShareOnWhatsApp(item)">
+                                <span class="w-5" v-html="whatsappIcon"></span>
+                            </v-btn>
+
                             <v-btn v-if="item.actions?.can_print" icon variant="text" color="success-700" size="x-small"
                                 @click="handlePrint(item)">
                                 <span class="w-5" v-html="printerIcon"></span>
