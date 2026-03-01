@@ -611,7 +611,7 @@
           </v-list-group>
 
           <!-- المالية -->
-          <!-- <v-list-group v-if="hasAnyFinancePermission" value="finance" class="mt-1">
+          <v-list-group v-if="hasAnyFinancePermission" value="finance" class="mt-1">
             <template #activator="{ props, isOpen }">
               <v-list-item v-bind="props" :class="[
                 { '!mx-1 gap-5': !isSidebarExpanded },
@@ -641,17 +641,17 @@
             <div class="relative mt-1 ps-10 pe-4 text-sm pb-2">
               <ul class="space-y-2 text-slate-100">
                 <li v-if="canViewFinancialDashboard" class="relative">
-                  <router-link to="/vouchers/list" :class="[
-                    isMenuItemActive('/vouchers/list')
+                  <router-link to="/finance/vouchers/list" :class="[
+                    isMenuItemActive('/finance/vouchers/list')
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
                     لوحة التحكم المالية
                   </router-link>
                 </li>
-                <li v-if="canViewPaymentVouchers" class="relative">
+                <!-- <li v-if="canViewPaymentVouchers" class="relative">
                   <router-link to="/finance/payment-vouchers" :class="[
-                    isMenuItemActive('/finance/payment-vouchers')
+                    isMenuItemActive('/finance/paّyment-vouchers')
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">إدارة سندات الصرف</router-link>
@@ -662,10 +662,10 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">إدارة سندات القبض</router-link>
-                </li>
+                </li> -->
               </ul>
             </div>
-          </v-list-group> -->
+          </v-list-group>
 
           <!-- المستخدمين -->
           <v-list-group v-if="hasAnyUsersPermission" value="users" class="mt-1">
