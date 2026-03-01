@@ -289,23 +289,24 @@ const fetchFormData = async () => {
                     }
                 }
             }
-            // For saved invoices, map saved terms to display logic:
+            // Populate table from invoice items
             if (data.items && Array.isArray(data.items)) {
-                productTableItems.value = data.items.map((trip: any) => ({
-                    id: trip.id,
-                    trip_id: trip.trip_id || trip.item_id || trip.id,
-                    trip_code: trip.code || trip.trip_code || '-',
-                    date: trip.date || trip.created_at || '-',
-                    loading_location: trip.loading_location_name || trip.pickup_location?.name || trip.loading_location?.name || '-',
-                    unloading_location: trip.unloading_location_name || trip.dropoff_location?.name || trip.unloading_location?.name || '-',
-                    quantity: trip.quantity_from_customer ?? trip.quantity ?? 1,
-                    price: trip.trip_price ?? trip.price ?? trip.price_per_unit ?? 0,
-                    discount: trip.discount_val ?? trip.discount ?? 0,
-                    taxable_amount: trip.taxable_amount ?? trip.total_applied_taxes ?? 0,
-                    tax_amount: trip.total_tax ?? trip.tax_amount ?? 0,
-                    total_amount: trip.total_out_taxes ?? trip.final_total ?? trip.total_amount ?? 0,
+                productTableItems.value = data.items.map((item: any) => ({
+                    id: item.id,
+                    trip_id: item.trip_management_id,
+                    trip_code: item.code || '-',
+                    date: '-',
+                    loading_location: item.source_location || '-',
+                    unloading_location: item.target_location || '-',
+                    quantity: item.total_quantities ?? item.quantity ?? 1,
+                    price: item.trip_value ?? item.price_per_unit ?? 0,
+                    discount: item.discount_val ?? 0,
+                    taxable_amount: item.taxable_amount ?? 0,
+                    tax_amount: item.total_tax ?? 0,
+                    total_amount: item.subtotal_after_tax ?? item.total_out_taxes ?? 0,
                 }));
             }
+
             summaryData.value = {
                 total_quantity: data.total_quantity,
                 total_discount: data.total_discount,
@@ -327,33 +328,23 @@ const fetchFormData = async () => {
 const buildFormData = (): FormData => {
     const fd = new FormData();
 
-    // Basic fields
+    if (isEditMode.value) {
+        fd.append('_method', 'PUT');
+    }
+
     fd.append('customer_id', String(formData.value.customer_id || ''));
     fd.append('project_name', formData.value.project_name || '');
     fd.append('invoice_issues_datetime', String(formData.value.invoice_issues_datetime || ''));
-    fd.append('invoice_due_datetime', String(formData.value.invoice_due_datetime || 1));
+    fd.append('invoice_due_datetime', String(formData.value.invoice_due_datetime || ''));
     fd.append('sale_order_id', String(formData.value.sale_order_id || ''));
     fd.append('notes', formData.value.notes || '');
 
-    // Items (products)
     productTableItems.value.forEach((item, index) => {
-        // Only include id in edit mode
         if (isEditMode.value && item.id) {
             fd.append(`items[${index}][id]`, String(item.id));
         }
-        fd.append(`items[${index}][item_id]`, String(item.trip_id || item.id));
-        fd.append(`items[${index}][trip_id]`, String(item.trip_id || item.id));
-        fd.append(`items[${index}][quantity]`, String(item.quantity || ''));
-        fd.append(`items[${index}][price_per_unit]`, String(item.price || ''));
-        fd.append(`items[${index}][price]`, String(item.price || ''));
-        fd.append(`items[${index}][discount_val]`, String(item.discount || ''));
-        fd.append(`items[${index}][total_tax]`, String(item.tax_amount || ''));
-        fd.append(`items[${index}][taxable_amount]`, String(item.taxable_amount || ''));
+        fd.append(`items[${index}][trip_management_id]`, String(item.trip_id || item.id));
     });
-
-    // if (formData.value.voice_attachment) {
-    //     fd.append('voice_attachment', formData.value.voice_attachment);
-    // }
 
     return fd;
 }
@@ -387,11 +378,13 @@ const handleSubmit = async (type: any) => {
     try {
         const fd = buildFormData();
         if (isEditMode.value) {
-            // Edit mode - PUT request
-            await api.put(`/sales/invoices/logistics/${routeId.value}`, fd);
+            await api.post(`/sales/invoices/logistics/${routeId.value}`, fd, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+            });
         } else {
-            // Create mode - POST request
-            await api.post('/sales/invoices/logistics/', fd);
+            await api.post('/sales/invoices/logistics/', fd, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+            });
         }
 
         success(isEditMode.value ? 'تم تحديث الفاتورة بنجاح' : 'تم إنشاء الفاتورة بنجاح');
