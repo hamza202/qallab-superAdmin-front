@@ -25,6 +25,48 @@ const recordingTimer = ref('00:00');
 let timerInterval: any = null;
 let recordingSeconds = 0;
 
+const convertToWav = async (blob: Blob): Promise<Blob> => {
+    const audioCtx = new AudioContext();
+    const arrayBuffer = await blob.arrayBuffer();
+    const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+
+    const numChannels = audioBuffer.numberOfChannels;
+    const sampleRate = audioBuffer.sampleRate;
+    const length = audioBuffer.length * numChannels * 2 + 44;
+    const buffer = new ArrayBuffer(length);
+    const view = new DataView(buffer);
+
+    const writeString = (offset: number, str: string) => {
+        for (let i = 0; i < str.length; i++) view.setUint8(offset + i, str.charCodeAt(i));
+    };
+
+    writeString(0, 'RIFF');
+    view.setUint32(4, length - 8, true);
+    writeString(8, 'WAVE');
+    writeString(12, 'fmt ');
+    view.setUint32(16, 16, true);
+    view.setUint16(20, 1, true);
+    view.setUint16(22, numChannels, true);
+    view.setUint32(24, sampleRate, true);
+    view.setUint32(28, sampleRate * numChannels * 2, true);
+    view.setUint16(32, numChannels * 2, true);
+    view.setUint16(34, 16, true);
+    writeString(36, 'data');
+    view.setUint32(40, length - 44, true);
+
+    let offset = 44;
+    for (let i = 0; i < audioBuffer.length; i++) {
+        for (let ch = 0; ch < numChannels; ch++) {
+            const sample = Math.max(-1, Math.min(1, audioBuffer.getChannelData(ch)[i]));
+            view.setInt16(offset, sample < 0 ? sample * 0x8000 : sample * 0x7FFF, true);
+            offset += 2;
+        }
+    }
+
+    await audioCtx.close();
+    return new Blob([buffer], { type: 'audio/wav' });
+};
+
 // Initialize Recorder (Hidden)
 const initRecorder = async () => {
     // Destroy existing instance if any
@@ -44,12 +86,12 @@ const initRecorder = async () => {
         waveColor: 'transparent',
     });
 
-    // Register Record Plugin
     record.value = wavesurfer.value.registerPlugin(RecordPlugin.create());
 
-    // Handle recording end
-    record.value.on('record-end', (blob: Blob) => {
-        const file = new File([blob], 'voice-recording.webm', { type: 'audio/webm' });
+    // Handle recording end — convert to WAV before emitting
+    record.value.on('record-end', async (blob: Blob) => {
+        const wavBlob = await convertToWav(blob);
+        const file = new File([wavBlob], 'voice-recording.wav', { type: 'audio/wav' });
         emit('update:modelValue', file);
         
         // Clean up recorder instance
@@ -61,9 +103,9 @@ const initRecorder = async () => {
             hiddenContainer.parentNode.removeChild(hiddenContainer);
         }
 
-        // Initialize Player with the recorded blob next tick (once UI calls v-else)
+        // Initialize Player with the WAV blob
         setTimeout(() => {
-            initPlayer(blob);
+            initPlayer(wavBlob);
         }, 100);
     });
 };
