@@ -33,7 +33,7 @@ const selectedCustomerId = ref<number | null>(null);
 const selectedSalesCode = ref<string | null>(null);
 const categoryLabel = ref("");
 
-const customerItems = ref<{ title: string; value: number }[]>([]);
+const customerItems = ref<{ title: string; value: number; type: string }[]>([]);
 const salesCodeItems = ref<{ title: string; value: string }[]>([]);
 const quotationDetails = ref<any>(null);
 
@@ -74,6 +74,7 @@ const fetchCustomers = async () => {
       customerItems.value = res.data.map((c: any) => ({
         title: c.full_name,
         value: c.id,
+        type: c.type ?? "",
       }));
     }
   } catch (e) {
@@ -144,7 +145,7 @@ const handleAdd = async () => {
         uuid: salesUuid,
         code: quotationDetails.value.code,
         customer_name: selectedCustomer?.title ?? "",
-        customer_type: "",
+        customer_type: selectedCustomer?.type ?? "",
         quotations_datetime: quotationDetails.value.quotations_datetime,
         purchase_code: sall_quotations_code_from_index.value ?? "",
       });
