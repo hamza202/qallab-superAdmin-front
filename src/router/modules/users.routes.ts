@@ -90,6 +90,29 @@ export const usersRoutes: RouteRecordRaw[] = [
     ],
   },
   {
+    path: "/material-merchants",
+    name: "MaterialMerchants",
+    redirect: "/material-merchants/list",
+    children: [
+      {
+        path: "list",
+        name: "MaterialMerchantsList",
+        component: () => import("@/views/users/material-merchants/List.vue"),
+        meta: {
+          title: "pages.materialMerchants.title",
+        },
+      },
+      {
+        path: "edit/:id",
+        name: "MaterialMerchantsEdit",
+        component: () => import("@/views/users/material-merchants/Form.vue"),
+        meta: {
+          title: "pages.materialMerchants.edit",
+        },
+      },
+    ],
+  },
+  {
     path: "/users",
     name: "Users",
     redirect: "/users/list",

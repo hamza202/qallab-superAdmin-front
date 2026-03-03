@@ -224,9 +224,7 @@ const fetchCrushers = async (cursor?: string | null, append = false) => {
             header_table.value = response.header_table
         }
 
-        nextCursor.value = response.pagination.next_cursor;
-        previousCursor.value = response.pagination.previous_cursor;
-        perPage.value = response.pagination.per_page;
+        nextCursor.value = response.pagination.next_cursor ?? null;
     } catch (err: any) {
         console.error('Error fetching crushers:', err);
         toast.error(err?.response?.data?.message || 'Failed to fetch crushers');
@@ -236,11 +234,6 @@ const fetchCrushers = async (cursor?: string | null, append = false) => {
     }
 };
 
-const loadMore = () => {
-    if (hasMoreData.value && !loadingMore.value) {
-        fetchCrushers(nextCursor.value, true);
-    }
-};
 
 const applyFilters = () => {
     fetchCrushers();
@@ -417,21 +410,15 @@ const observer = ref<IntersectionObserver | null>(null);
 
 const setupInfiniteScroll = () => {
     if (!loadMoreTrigger.value) return;
-
     observer.value = new IntersectionObserver(
         (entries) => {
             const entry = entries[0];
-            if (entry.isIntersecting && hasMoreData.value && !loadingMore.value && !loading.value) {
-                loadMore();
+            if (entry?.isIntersecting && hasMoreData.value && !loadingMore.value && !loading.value) {
+                fetchCrushers(nextCursor.value, true);
             }
         },
-        {
-            root: null,
-            rootMargin: '100px',
-            threshold: 0.1,
-        }
+        { root: null, rootMargin: '100px', threshold: 0.1 }
     );
-
     observer.value.observe(loadMoreTrigger.value);
 };
 
@@ -591,9 +578,10 @@ onBeforeUnmount(() => {
                     </template>
                 </DataTable>
 
-                <!-- Infinite Scroll Trigger & Loading Indicator -->
-                <div ref="loadMoreTrigger" class="flex justify-center py-4">
-                    <v-progress-circular v-if="loadingMore" indeterminate color="primary" size="32" />
+                <div ref="loadMoreTrigger" class="h-4"></div>
+                <div v-if="loadingMore" class="flex justify-center items-center py-4">
+                    <v-progress-circular indeterminate color="primary" size="32" />
+                    <span class="mr-2 text-gray-600">جاري تحميل المزيد...</span>
                 </div>
             </div>
         </div>

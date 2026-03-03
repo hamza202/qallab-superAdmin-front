@@ -139,35 +139,28 @@ const showStatusChangeDialog = ref(false);
 const statusChangeLoading = ref(false);
 const itemToChangeStatus = ref<Contractor | null>(null);
 
-const observerTarget = ref<HTMLElement | null>(null);
-let observer: IntersectionObserver | null = null;
+const loadMoreTrigger = ref<HTMLElement | null>(null);
+const observer = ref<IntersectionObserver | null>(null);
 
-const fetchContractors = async (cursor: string | null = null, append: boolean = false) => {
+const fetchContractors = async (append = false) => {
+  if (append) loadingMore.value = true;
+  else loading.value = true;
   try {
-    if (append) {
-      loadingMore.value = true;
-    } else {
-      loading.value = true;
-    }
+    const params = new URLSearchParams();
+    params.append('per_page', String(perPage.value));
+    if (append && nextCursor.value) params.append('cursor', nextCursor.value);
 
-    const params: any = {
-      per_page: perPage.value,
-    };
+    if (filterTradeName.value) params.append('trade_name', filterTradeName.value);
+    if (filterCommercialRegister.value) params.append('commercial_register', filterCommercialRegister.value);
+    if (filterTaxRegister.value) params.append('tax_register', filterTaxRegister.value);
+    if (filterLicenseNumber.value) params.append('municipal_license_number', filterLicenseNumber.value);
+    if (filterContractorGrade.value) params.append('classification_grade', filterContractorGrade.value);
+    if (filterClassification.value) params.append('contractor_classification', filterClassification.value);
+    if (filterScopeOfWork.value) params.append('scope_of_work_id', filterScopeOfWork.value);
+    if (filterStatus.value !== null) params.append('status', String(filterStatus.value));
 
-    if (cursor) {
-      params.cursor = cursor;
-    }
-
-    if (filterTradeName.value) params.trade_name = filterTradeName.value;
-    if (filterCommercialRegister.value) params.commercial_register = filterCommercialRegister.value;
-    if (filterTaxRegister.value) params.tax_register = filterTaxRegister.value;
-    if (filterLicenseNumber.value) params.municipal_license_number = filterLicenseNumber.value;
-    if (filterContractorGrade.value) params.classification_grade = filterContractorGrade.value;
-    if (filterClassification.value) params.contractor_classification = filterClassification.value;
-    if (filterScopeOfWork.value) params.scope_of_work_id = filterScopeOfWork.value;
-    if (filterStatus.value !== null) params.status = filterStatus.value;
-
-    const response = await api.get('/contractors', { params });
+    const url = `/contractors?${params.toString()}`;
+    const response = await api.get(url);
 
     if (append) {
       tableItems.value = [...tableItems.value, ...response.data];
@@ -180,8 +173,7 @@ const fetchContractors = async (cursor: string | null = null, append: boolean = 
       header_table.value = response.header_table
     }
 
-    nextCursor.value = response.pagination?.next_cursor || null;
-    previousCursor.value = response.pagination?.previous_cursor || null;
+    nextCursor.value = response.pagination?.next_cursor ?? null;
 
   } catch (err: any) {
     console.error('Error fetching contractors:', err);
@@ -375,38 +367,35 @@ const resetFilters = () => {
   fetchContractors();
 };
 
-const loadMore = () => {
-  if (hasMoreData.value && !loadingMore.value) {
-    fetchContractors(nextCursor.value, true);
-  }
+const setupInfiniteScroll = () => {
+  if (!loadMoreTrigger.value) return;
+  observer.value = new IntersectionObserver(
+    (entries) => {
+      const entry = entries[0];
+      if (entry?.isIntersecting && hasMoreData.value && !loadingMore.value && !loading.value) {
+        fetchContractors(true);
+      }
+    },
+    { root: null, rootMargin: '100px', threshold: 0.1 }
+  );
+  observer.value.observe(loadMoreTrigger.value);
 };
 
-const setupInfiniteScroll = () => {
-  nextTick(() => {
-    if (observerTarget.value) {
-      observer = new IntersectionObserver(
-        (entries) => {
-          if (entries[0].isIntersecting && hasMoreData.value && !loadingMore.value) {
-            loadMore();
-          }
-        },
-        { threshold: 0.1 }
-      );
-      observer.observe(observerTarget.value);
-    }
-  });
+const cleanupInfiniteScroll = () => {
+  if (observer.value && loadMoreTrigger.value) {
+    observer.value.unobserve(loadMoreTrigger.value);
+    observer.value.disconnect();
+  }
 };
 
 onMounted(() => {
   fetchContractors();
-  fetchConstants()
-  setupInfiniteScroll();
+  fetchConstants();
+  nextTick(() => setupInfiniteScroll());
 });
 
 onBeforeUnmount(() => {
-  if (observer && observerTarget.value) {
-    observer.unobserve(observerTarget.value);
-  }
+  cleanupInfiniteScroll();
 });
 
 const toggleAdvancedFilters = () => {
@@ -527,9 +516,10 @@ const toggleAdvancedFilters = () => {
 
         </DataTable>
 
-        <!-- Infinite Scroll Trigger & Loading Indicator -->
-        <div ref="observerTarget" class="flex justify-center py-4">
-          <v-progress-circular v-if="loading && tableItems.length > 0" indeterminate color="primary" size="32" />
+        <div ref="loadMoreTrigger" class="h-4"></div>
+        <div v-if="loadingMore" class="flex justify-center items-center py-4">
+          <v-progress-circular indeterminate color="primary" size="32" />
+          <span class="mr-2 text-gray-600">جاري تحميل المزيد...</span>
         </div>
       </div>
 

@@ -322,6 +322,33 @@ export function useValidators() {
     };
   };
 
+    /**
+   * Unified login ID: optional; when provided must start with 700 and be exactly 10 digits
+   */
+  const unifiedLoginId = (message?: string): ValidationRule => {
+    return (value: any) => {
+      if (value === null || value === undefined || value === '') return true;
+      const str = String(value).trim();
+      if (!str) return true;
+      const pattern = /^700\d{7}$/;
+      return pattern.test(str) || message || msg('unifiedLoginId');
+    };
+  };
+
+    /**
+   * Tax number (الرقم الضريبي): optional; when provided must be 15 digits, start with 3 and end with 3
+   */
+  const taxNo = (message?: string): ValidationRule => {
+    return (value: any) => {
+      if (value === null || value === undefined || value === '') return true;
+      const str = String(value).trim();
+      if (!str) return true;
+      const pattern = /^3\d{13}3$/;
+      return pattern.test(str) || message || msg('taxNo');
+    };
+  };
+
+
   return {
     required,
     minLength,
@@ -336,6 +363,8 @@ export function useValidators() {
     email,
     phone,
     saudiPhone,
+    unifiedLoginId,
+    taxNo,
     arabicOnly,
     englishOnly,
     noSpecialChars,
@@ -375,6 +404,8 @@ export const saudiPhone = (message?: string) => getValidators().saudiPhone(messa
 export const arabicOnly = (message?: string) => getValidators().arabicOnly(message);
 export const englishOnly = (message?: string) => getValidators().englishOnly(message);
 export const noSpecialChars = (message?: string) => getValidators().noSpecialChars(message);
+export const taxNo = (message?: string) => getValidators().taxNo(message);
+export const unifiedLoginId = (message?: string) => getValidators().unifiedLoginId(message);
 export const url = (message?: string) => getValidators().url(message);
 export const strongPassword = (message?: string) => getValidators().strongPassword(message);
 export const confirmPassword = (password: string, message?: string) => getValidators().confirmPassword(password, message);
