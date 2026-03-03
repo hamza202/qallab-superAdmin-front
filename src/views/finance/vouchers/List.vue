@@ -211,7 +211,7 @@ const fetchVouchers = async (cursor?: string | null, append = false) => {
         });
 
         const queryString = params.toString();
-        const url = queryString ? `/admin/api/vouchers?${queryString}` : '/admin/api/vouchers';
+        const url = queryString ? `/receipts-payments-transactions?${queryString}` : '/receipts-payments-transactions';
 
         const response = await api.get<VouchersResponse>(url);
 
@@ -309,7 +309,7 @@ const confirmDelete = async () => {
 
     try {
         deleteLoading.value = true;
-        await api.delete(`/admin/api/vouchers/${itemToDelete.value.id}`);
+        await api.delete(`/receipts-payments-transactions/${itemToDelete.value.id}`);
         success('تم حذف السند بنجاح');
         await fetchVouchers();
         itemToDelete.value = null;
@@ -330,7 +330,7 @@ const handleBulkDelete = () => {
 const confirmBulkDelete = async () => {
     try {
         deleteLoading.value = true;
-        await api.post('/admin/api/vouchers/bulk-delete', { ids: selectedVouchers.value });
+        await api.post('/receipts-payments-transactions/bulk-delete', { ids: selectedVouchers.value });
         success(`تم حذف ${selectedVouchers.value.length} سند بنجاح`);
         selectedVouchers.value = [];
         await fetchVouchers();

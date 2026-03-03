@@ -223,6 +223,25 @@ export const purchasesRoutes: RouteRecordRaw[] = [
           title: "pages.OrdersMaterialProduct.view",
         },
       },
+      {
+        path: "link/:id",
+        name: "OrdersMaterialProductLinkForm",
+        component: () =>
+          import("@/views/purchases/orders/material-product/link/Form.vue"),
+        meta: {
+          title: "pages.OrdersMaterialProduct.link",
+        },
+      },
+      {
+        path: "link/view",
+        name: "OrdersMaterialProductLinkView",
+        component: () =>
+          import("@/views/purchases/orders/material-product/link/View.vue"),
+        meta: {
+          title: "pages.OrdersMaterialProduct.linkView",
+        },
+      },
+
     ],
   },
   {

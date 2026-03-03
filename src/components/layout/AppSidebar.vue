@@ -731,6 +731,15 @@
                     {{ t("pages.logistics.sidebarTitle") }}
                   </router-link>
                 </li>
+                <li v-if="canViewLogistics" class="relative">
+                  <router-link to="/material-merchants/list" :class="[
+                    isMenuItemActive('/material-merchants/list')
+                      ? 'font-bold text-qallab-yellow'
+                      : 'text-white hover:text-qallab-yellow',
+                  ]">
+                    {{ t("pages.materialMerchants.sidebarTitle") }}
+                  </router-link>
+                </li>
               </ul>
             </div>
           </v-list-group>
