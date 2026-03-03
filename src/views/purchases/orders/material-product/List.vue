@@ -7,7 +7,7 @@ import { useNotification } from '@/composables/useNotification';
 import { useTableColumns } from '@/composables/useTableColumns';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog.vue';
 import DatePickerInput from '@/components/common/forms/DatePickerInput.vue';
-import { GridIcon, fileCheckIcon, trash_1_icon, trash_2_icon, importIcon, columnIcon, exportIcon, plusIcon, searchIcon } from "@/components/icons/globalIcons";
+import { GridIcon, fileCheckIcon, trash_1_icon, trash_2_icon, importIcon, columnIcon, exportIcon, plusIcon, searchIcon, linkIcon } from "@/components/icons/globalIcons";
 import { switcStatusIcon } from '@/components/icons/priceOffersIcons';
 import StatusChangeFeature from '@/components/common/StatusChangeFeature.vue';
 
@@ -33,10 +33,12 @@ interface ItemActions {
   can_delete: boolean;
   can_view: boolean;
   can_change_status: boolean;
+  can_link: boolean;
   can_receive_doc: boolean;
 }
 
 interface OrderItem {
+  id: number;
   uuid: string;
   code: string;
   supplier_name: string;
@@ -44,6 +46,7 @@ interface OrderItem {
   actual_execution_duration: number | null;
   transport_start_date: string | null;
   po_datetime: string;
+  category: string;
   final_total: string;
   payment_method: string;
   status: string;
@@ -225,9 +228,22 @@ const handleSelectAllRequests = (checked: boolean) => {
   }
 };
 
+const handleLink = (item: unknown) => {
+  const tableItem = item as OrderItem & { id: string | number };
+  router.push({
+    name: 'OrdersMaterialProductLinkForm',
+    params: { id: tableItem.uuid },
+    query: {
+      sall_orders_code_from_index: tableItem.code,
+      category: tableItem.category ?? undefined,
+      po_datetime: tableItem.po_datetime ?? undefined,
+    },
+  });
+};
+
 const handleView = (item: { id?: string | number; uuid?: string }) => {
-    const uuid = item.uuid ?? String(item.id);
-    router.push({ name: 'OrdersMaterialProductView', params: { id: uuid } });
+  const uuid = item.uuid ?? String(item.id);
+  router.push({ name: 'OrdersMaterialProductView', params: { id: uuid } });
 };
 
 const getStatusClass = (status: string) => {
@@ -272,7 +288,7 @@ const confirmBulkDelete = async () => {
     console.error('Error bulk deleting:', err);
     error(err?.response?.data?.message || 'فشل الحذف الجماعي');
   } finally {
-    deleteLoading.value = false; 
+    deleteLoading.value = false;
     showBulkDeleteDialog.value = false;
   }
 };
@@ -299,229 +315,108 @@ onBeforeUnmount(() => {
 <template>
   <default-layout>
     <div class="pricesOffers-page">
-      <PageHeader
-        :icon="GridIcon"
-        title-key="pages.OrdersMaterialProduct.title"
-        description-key="pages.OrdersMaterialProduct.description"
-      />
+      <PageHeader :icon="GridIcon" title-key="pages.OrdersMaterialProduct.title"
+        description-key="pages.OrdersMaterialProduct.description" />
 
       <div
-        class="flex justify-end items-stretch rounded border border-gray-300 w-fit ms-auto mb-4 overflow-hidden bg-white text-sm"
-      >
-        <ButtonWithIcon
-          variant="flat"
-          height="40"
-          rounded="0"
+        class="flex justify-end items-stretch rounded border border-gray-300 w-fit ms-auto mb-4 overflow-hidden bg-white text-sm">
+        <ButtonWithIcon variant="flat" height="40" rounded="0"
           custom-class="font-semibold text-base border-gray-300 bg-primary-100 !text-primary-900"
-          :prepend-icon="importIcon"
-          :label="t('common.import')"
-        />
-        <ButtonWithIcon
-          variant="flat"
-          height="40"
-          rounded="0"
+          :prepend-icon="importIcon" :label="t('common.import')" />
+        <ButtonWithIcon variant="flat" height="40" rounded="0"
           custom-class="font-semibold text-base border-gray-300 bg-primary-50 !text-primary-900"
-          :prepend-icon="exportIcon"
-          :label="t('common.export')"
-        />
+          :prepend-icon="exportIcon" :label="t('common.export')" />
       </div>
 
       <div class="bg-gray-50 rounded-md -mx-6">
-        <div
-          :class="hasSelectedRequests ? 'justify-between' : 'justify-end'"
-          class="flex flex-wrap items-center gap-3 border-y border-y-slate-300 px-4 sm:px-6 py-3"
-        >
-          <div
-            v-if="canBulkDelete && hasSelectedRequests"
-            class="flex flex-wrap items-stretch rounded overflow-hidden border border-gray-200 bg-white text-sm"
-          >
-            <ButtonWithIcon
-              variant="flat"
-              height="40"
-              rounded="0"
+        <div :class="hasSelectedRequests ? 'justify-between' : 'justify-end'"
+          class="flex flex-wrap items-center gap-3 border-y border-y-slate-300 px-4 sm:px-6 py-3">
+          <div v-if="canBulkDelete && hasSelectedRequests"
+            class="flex flex-wrap items-stretch rounded overflow-hidden border border-gray-200 bg-white text-sm">
+            <ButtonWithIcon variant="flat" height="40" rounded="0"
               custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-              :prepend-icon="trash_1_icon"
-              color="white"
-              :label="t('common.delete')"
-              @click="handleBulkDelete"
-            />
+              :prepend-icon="trash_1_icon" color="white" :label="t('common.delete')" @click="handleBulkDelete" />
             <div class="w-px bg-gray-200"></div>
-            <ButtonWithIcon
-              variant="flat"
-              height="40"
-              rounded="0"
+            <ButtonWithIcon variant="flat" height="40" rounded="0"
               custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-              :prepend-icon="trash_2_icon"
-              color="white"
-              :label="t('common.deleteAll')"
-              @click="handleBulkDelete"
-            />
+              :prepend-icon="trash_2_icon" color="white" :label="t('common.deleteAll')" @click="handleBulkDelete" />
           </div>
 
           <div class="flex flex-wrap gap-3">
             <v-menu v-model="showHeadersMenu" :close-on-content-click="false">
               <template #activator="{ props: menuProps }">
-                <ButtonWithIcon
-                  v-bind="menuProps"
-                  variant="outlined"
-                  append-icon="mdi-chevron-down"
-                  rounded="4"
-                  color="gray-500"
-                  height="40"
-                  custom-class="font-semibold text-base border-gray-400"
-                  :prepend-icon="columnIcon"
-                  :label="t('common.columns')"
-                />
+                <ButtonWithIcon v-bind="menuProps" variant="outlined" append-icon="mdi-chevron-down" rounded="4"
+                  color="gray-500" height="40" custom-class="font-semibold text-base border-gray-400"
+                  :prepend-icon="columnIcon" :label="t('common.columns')" />
               </template>
               <v-list>
-                <v-list-item
-                  v-for="header in allHeaders"
-                  :key="header.key"
-                  @click="handleToggleHeader(header.key)"
-                >
+                <v-list-item v-for="header in allHeaders" :key="header.key" @click="handleToggleHeader(header.key)">
                   <template #prepend>
-                    <v-checkbox-btn
-                      :model-value="headerCheckStates[header.key]"
-                      :disabled="updatingHeaders"
-                      @click.stop="handleToggleHeader(header.key)"
-                    />
+                    <v-checkbox-btn :model-value="headerCheckStates[header.key]" :disabled="updatingHeaders"
+                      @click.stop="handleToggleHeader(header.key)" />
                   </template>
                   <v-list-item-title>{{ header.title }}</v-list-item-title>
                 </v-list-item>
               </v-list>
             </v-menu>
 
-            <ButtonWithIcon
-              variant="flat"
-              color="primary-500"
-              height="40"
-              rounded="4"
+            <ButtonWithIcon variant="flat" color="primary-500" height="40" rounded="4"
               custom-class="px-7 font-semibold text-base text-white border !border-primary-200"
-              :prepend-icon="searchIcon"
-              :label="t('common.advancedSearch')"
-              @click="toggleAdvancedFilters"
-            />
+              :prepend-icon="searchIcon" :label="t('common.advancedSearch')" @click="toggleAdvancedFilters" />
 
-            <ButtonWithIcon
-              v-if="canCreate"
-              variant="flat"
-              color="primary-100"
-              height="40"
-              rounded="4"
+            <ButtonWithIcon v-if="canCreate" variant="flat" color="primary-100" height="40" rounded="4"
               custom-class="px-7 font-semibold text-base !text-primary-800 border !border-primary-200"
-              :prepend-icon="plusIcon"
-              label="أضف طلبية"
-              @click="openCreateRequest"
-            />
+              :prepend-icon="plusIcon" label="أضف طلبية" @click="openCreateRequest" />
           </div>
         </div>
 
         <!-- Advanced filters -->
-        <div
-          v-if="showAdvancedFilters"
-          class="border-y border-y-primary-100 bg-primary-50 px-4 sm:px-6 py-3 gap-3 flex justify-between flex-wrap"
-        >
+        <div v-if="showAdvancedFilters"
+          class="border-y border-y-primary-100 bg-primary-50 px-4 sm:px-6 py-3 gap-3 flex justify-between flex-wrap">
           <div class="flex flex-wrap gap-3 items-end">
-            <TextInput
-              v-model="filterRequestNumber"
-              density="comfortable"
-              variant="outlined"
-              hide-details
-              placeholder="كود الطلبية"
-              class="w-full sm:w-40 bg-white"
-            />
-            <TextInput
-              v-model="filterSupplierName"
-              density="comfortable"
-              variant="outlined"
-              hide-details
-              placeholder="اسم المورد"
-              class="w-full sm:w-40 bg-white"
-            />
-            <DatePickerInput
-              v-model="filterStartDateMin"
-              density="comfortable"
-              hide-details
-              placeholder="تاريخ الطلبية من"
-              class="w-full sm:w-40 bg-white"
-            />
-            <DatePickerInput
-              v-model="filterStartDateMax"
-              density="comfortable"
-              hide-details
-              placeholder="تاريخ الطلبية إلى"
-              class="w-full sm:w-40 bg-white"
-            />
+            <TextInput v-model="filterRequestNumber" density="comfortable" variant="outlined" hide-details
+              placeholder="كود الطلبية" class="w-full sm:w-40 bg-white" />
+            <TextInput v-model="filterSupplierName" density="comfortable" variant="outlined" hide-details
+              placeholder="اسم المورد" class="w-full sm:w-40 bg-white" />
+            <DatePickerInput v-model="filterStartDateMin" density="comfortable" hide-details
+              placeholder="تاريخ الطلبية من" class="w-full sm:w-40 bg-white" />
+            <DatePickerInput v-model="filterStartDateMax" density="comfortable" hide-details
+              placeholder="تاريخ الطلبية إلى" class="w-full sm:w-40 bg-white" />
           </div>
           <div class="flex gap-2 items-center">
-            <ButtonWithIcon
-              variant="flat"
-              color="primary-500"
-              rounded="4"
-              height="40"
-              custom-class="px-5 font-semibold !text-white text-sm sm:text-base"
-              :prepend-icon="searchIcon"
-              label="ابحث"
-              @click="applyFilters"
-            />
-            <ButtonWithIcon
-              variant="flat"
-              color="primary-100"
-              height="40"
-              rounded="4"
-              border="sm"
+            <ButtonWithIcon variant="flat" color="primary-500" rounded="4" height="40"
+              custom-class="px-5 font-semibold !text-white text-sm sm:text-base" :prepend-icon="searchIcon" label="ابحث"
+              @click="applyFilters" />
+            <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4" border="sm"
               custom-class="px-5 font-semibold text-sm sm:text-base !text-primary-800 !border-primary-200"
-              prepend-icon="mdi-refresh"
-              label="إعادة تعيين"
-              @click="resetFilters"
-            />
+              prepend-icon="mdi-refresh" label="إعادة تعيين" @click="resetFilters" />
           </div>
         </div>
 
-        <DataTable
-          :headers="tableHeaders"
-          :items="tableItemsWithId"
-          :loading="loading"
-          :show-checkbox="canBulkDelete"
-          show-actions
-          smallButtons
-          @view="handleView"
-          @edit="handleEdit"
-          @delete="handleDelete"
-          @select="handleSelectRequest"
-          @selectAll="handleSelectAllRequests"
-        >
+        <DataTable :headers="tableHeaders" :items="tableItemsWithId" :loading="loading" :show-checkbox="canBulkDelete"
+          show-actions smallButtons @view="handleView" @edit="handleEdit" @delete="handleDelete"
+          @select="handleSelectRequest" @selectAll="handleSelectAllRequests">
           <template #item.status="{ item }">
-            <span
-              :class="[
-                'inline-block px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap',
-                getStatusClass(item.status),
-              ]"
-            >
+            <span :class="[
+              'inline-block px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap',
+              getStatusClass(item.status),
+            ]">
               {{ item.status }}
             </span>
           </template>
           <template #item.actions="{ item }">
             <div class="flex items-center gap-1">
-              <v-btn
-                v-if="item.actions?.can_change_status"
-                icon
-                variant="text"
-                size="x-small"
-                color="warning-600"
-                @click="openChangeStatusDialog(item)"
-              >
+              <v-btn v-if="item.actions?.can_change_status" icon variant="text" size="x-small" color="warning-600"
+                @click="openChangeStatusDialog(item)">
                 <span v-html="switcStatusIcon"></span>
               </v-btn>
-              <v-btn
-                v-if="item.actions?.can_receive_doc"
-                icon
-                variant="text"
-                size="x-small"
-                color="success-700"
-              >
+              <v-btn v-if="item.actions?.can_receive_doc" icon variant="text" size="x-small" color="success-700">
                 <span class="w-4 font-bold" v-html="fileCheckIcon"></span>
               </v-btn>
+              <v-btn v-if="item.actions?.can_link" icon variant="text" size="small" @click="handleLink(item)">
+                <span v-html="linkIcon" style="display:inline-flex;width:22px;height:22px;color:#F79009;"></span>
+              </v-btn>
+
             </div>
           </template>
         </DataTable>
@@ -535,31 +430,16 @@ onBeforeUnmount(() => {
     </div>
 
     <!-- Single delete -->
-    <DeleteConfirmDialog
-      v-model="showDeleteDialog"
-      :loading="deleteLoading"
-      title="حذف الطلبية"
-      message="هل أنت متأكد من حذف هذه الطلبية؟"
-      @confirm="confirmDelete"
-    />
+    <DeleteConfirmDialog v-model="showDeleteDialog" :loading="deleteLoading" title="حذف الطلبية"
+      message="هل أنت متأكد من حذف هذه الطلبية؟" @confirm="confirmDelete" />
 
     <!-- Bulk delete -->
-    <DeleteConfirmDialog
-      v-model="showBulkDeleteDialog"
-      :loading="deleteLoading"
-      title="حذف الطلبيات"
-      :message="`هل أنت متأكد من حذف ${selectedRequests.length} طلبية؟`"
-      @confirm="confirmBulkDelete"
-    />
+    <DeleteConfirmDialog v-model="showBulkDeleteDialog" :loading="deleteLoading" title="حذف الطلبيات"
+      :message="`هل أنت متأكد من حذف ${selectedRequests.length} طلبية؟`" @confirm="confirmBulkDelete" />
 
-    <StatusChangeFeature
-      v-model="showChangeStatusDialog"
-      :item="itemToChangeStatus"
+    <StatusChangeFeature v-model="showChangeStatusDialog" :item="itemToChangeStatus"
       :change-status-url="`/purchases/orders/building-materials/${itemToChangeStatus?.uuid}/change-status`"
-      title="تغيير الحالة"
-      message="تغيير الحالة:"
-      @success="fetchList"
-    />
+      title="تغيير الحالة" message="تغيير الحالة:" @success="fetchList" />
   </default-layout>
 </template>
 
