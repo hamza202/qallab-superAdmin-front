@@ -95,7 +95,7 @@ const fetchSalesCodes = async () => {
   loadingSalesCodes.value = true;
   try {
     const res = await api.get<any>(
-      `/purchases/quotations/building-materials/link?category=${categoryKey.value}&customer_id=${selectedCustomerId.value}`
+      `/purchases/quotations/fuels/link?category=${categoryKey.value}&customer_id=${selectedCustomerId.value}`
     );
     if (Array.isArray(res?.data)) {
       salesCodeItems.value = res.data.map((item: any) => ({
@@ -119,7 +119,7 @@ const fetchQuotationDetails = async () => {
   quotationDetails.value = null;
   try {
     const res = await api.get<any>(
-      `/purchases/quotations/building-materials/link?category=${categoryKey.value}&customer_id=${selectedCustomerId.value}&with_items=true&with_status=true&code=${selectedSalesCode.value}`
+      `/purchases/quotations/fuels/link?category=${categoryKey.value}&customer_id=${selectedCustomerId.value}&with_items=true&with_status=true&code=${selectedSalesCode.value}`
     );
     if (Array.isArray(res?.data) && res.data.length > 0) {
       quotationDetails.value = res.data[0];
@@ -154,7 +154,7 @@ const handleAdd = async () => {
     // PUT uuids to current purchase quotation
     const uuids = linkedItems.value.map((li) => li.uuid);
     await api.put(
-      `/purchases/quotations/building-materials/link/${purchaseUuid.value}`,
+      `/purchases/quotations/fuels/link/${purchaseUuid.value}`,
       { uuids }
     );
     // Re-fetch to get accurate customer.type from the server
@@ -173,7 +173,7 @@ const removeLinkedItem = async (uuid: string) => {
   try {
     const uuids = linkedItems.value.map((li) => li.uuid);
     await api.put(
-      `/purchases/quotations/building-materials/link/${purchaseUuid.value}`,
+      `/purchases/quotations/fuels/link/${purchaseUuid.value}`,
       { uuids }
     );
     success("تم الحذف بنجاح");
@@ -191,7 +191,7 @@ watch(selectedSalesCode, () => fetchQuotationDetails());
 const fetchLinkedItems = async () => {
   try {
     const res = await api.get<any>(
-      `/purchases/quotations/building-materials/link/${purchaseUuid.value}`
+      `/purchases/quotations/fuels/link/${purchaseUuid.value}`
     );
     const data: any[] = Array.isArray(res?.data) ? res.data : [];
     linkedItems.value = data.map((item: any) => ({
@@ -258,7 +258,7 @@ const handleViewLinked = (row: {
   customer_type: string;
 }) => {
   router.push({
-    name: "QuotationsMaterialProductLinkView",
+    name: "QuotationsFuelsLinkView",
     query: {
       purchase_code: row.purchase_code,
       sales_code: row.sales_code,
