@@ -89,6 +89,15 @@ export const purchasesRoutes: RouteRecordRaw[] = [
           title: "pages.QuotationsMaterialProduct.view",
         },
       },
+      {
+        path: "link/:id",
+        name: "QuotationsMaterialProductLinkForm",
+        component: () =>
+          import("@/views/purchases/quotations/material-product/link/Form.vue"),
+        meta: {
+          title: "pages.QuotationsMaterialProduct.link",
+        },
+      },
     ],
   },
   {
