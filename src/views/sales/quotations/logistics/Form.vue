@@ -35,6 +35,8 @@ interface LogisticsDetail {
     source_latitude: string | number;
     source_longitude: string | number;
     transport_amount: string | number;
+    discount_val: number | string | null;
+    discount_type: number | string | null;
 }
 
 useI18n()
@@ -69,7 +71,7 @@ const fetchConstants = async () => {
         const res = await api.get<any>('/sales/quotations/constants');
         const data = res.data;
         if (data) {
-            transportTypeItems.value = data.transport_types?.map((i: any) => ({ title: i.label, value: i.key })) || [];
+            transportTypeItems.value = data.transport_types?.map((i: any) => ({ title: i.label, value: Number(i.key) })) || [];
             amPmIntervalItems.value = data.am_pm_interval?.map((i: any) => ({ title: i.label, value: i.key })) || [];
             paymentMethodItems.value = data.payment_methods?.map((i: any) => ({ title: i.label, value: i.key })) || [];
             feeTypeItems.value = data.fee_types?.map((i: any) => ({ title: i.label, value: i.key })) || [];
@@ -182,7 +184,9 @@ const fetchFormData = async () => {
                     unit_name: item.unit_name ?? '',
                     quantity: item.quantity ?? null,
                     trip_date: item.trip_date ?? null,
+                    trip_no: item.trip_no != null ? Number(item.trip_no) : null,
                     trip_price: item.trip_price != null ? Number(item.trip_price) : null,
+                    sub_total: item.sub_total != null ? Number(item.sub_total) : null,
                     transport_type: transportTypes,
                     transport_type_names: getTransportTypeNames(transportTypes),
                 } as TripTableItem;
@@ -227,6 +231,8 @@ const fetchFormData = async () => {
                 source_latitude: detail.source_latitude ?? '',
                 source_longitude: detail.source_longitude ?? '',
                 transport_amount: detail.transport_amount != null ? detail.transport_amount : '',
+                discount_val: detail.discount_val ?? null,
+                discount_type: detail.discount_type ?? null,
             }));
         } else {
             logisticsDetails.value = [];
@@ -346,6 +352,8 @@ const fetchRequestForQuotation = async () => {
                     source_latitude: detail.source_latitude ?? '',
                     source_longitude: detail.source_longitude ?? '',
                     transport_amount: detail.transport_amount != null ? detail.transport_amount : '',
+                    discount_val: detail.discount_val ?? null,
+                    discount_type: detail.discount_type ?? null,
                 }));
             }
         }
@@ -407,6 +415,8 @@ interface TripDetail {
     trip_price: number | null;
     transport_type: number[];
     transport_type_names?: string;
+    trip_no?: number | null;
+    sub_total?: number | null;
     notes?: string;
     id?: number;
     isAdded?: boolean;
@@ -423,6 +433,8 @@ interface TripTableItem {
     trip_price: number | null;
     transport_type: number[];
     transport_type_names?: string;
+    trip_no?: number | null;
+    sub_total?: number | null;
     notes?: string;
     id?: number;
     isAdded?: boolean;
@@ -535,6 +547,7 @@ const handleProductSaved = (products: any[]) => {
                     unit_id: p.unit_id,
                     unit_name: p.unit_name,
                     quantity: p.quantity,
+                    trip_no: p.trip_no ?? existingTrip.trip_no,
                 });
             } else {
                 newTripItems.push({
@@ -543,6 +556,7 @@ const handleProductSaved = (products: any[]) => {
                    unit_id: p.unit_id,
                    unit_name: p.unit_name,
                    quantity: p.quantity,
+                   trip_no: p.trip_no ?? null,
                    trip_date: p.from_date ?? null,
                    trip_price: null,
                    transport_type: p.transport_type != null ? [p.transport_type] : [],
@@ -559,7 +573,7 @@ const handleProductSaved = (products: any[]) => {
 const handleEditProduct = (item: any) => {
     const productToEdit = productTableItems.value.find(p => p.item_id === item.item_id);
     if (productToEdit) {
-        editingProduct.value = { ...productToEdit, isAdded: true };
+        editingProduct.value = { ...productToEdit, isAdded: true } as any;
         productDialogMode.value = 'logistics';
         showAddProductDialog.value = true;
     }
@@ -568,7 +582,15 @@ const handleEditProduct = (item: any) => {
 const handleEditTrip = (item: any) => {
     const tripToEdit = tripTableItems.value.find(p => p.item_id === item.item_id);
     if (tripToEdit) {
-        editingProduct.value = { ...tripToEdit, isAdded: true } as any;
+        editingProduct.value = { 
+            ...tripToEdit, 
+            isAdded: true,
+            id: tripToEdit.id || null,
+            unit_price: tripToEdit.trip_price || null,
+            discount: null,
+            discount_type: null,
+            transport_no: null,
+        } as unknown as ProductToAdd;
         productDialogMode.value = 'logistics-trips';
         showAddProductDialog.value = true;
     }
@@ -587,6 +609,7 @@ const handleProductUpdated = (updatedProduct: any) => {
                 unit_name: tripProduct.unit_name,
                 quantity: tripProduct.quantity,
                 trip_date: tripProduct.trip_date ?? null,
+                trip_no: tripProduct.trip_no ?? null,
                 trip_price: tripProduct.trip_price ?? null,
                 transport_type: tripProduct.transport_type ?? [],
                 transport_type_names: tripProduct.transport_type_names ?? '',
@@ -599,6 +622,7 @@ const handleProductUpdated = (updatedProduct: any) => {
                 productTableItems.value[productIndex].quantity = tripProduct.quantity;
                 productTableItems.value[productIndex].unit_id = tripProduct.unit_id;
                 productTableItems.value[productIndex].unit_name = tripProduct.unit_name;
+                productTableItems.value[productIndex].trip_no = tripProduct.trip_no ?? null;
             }
         }
     } else {
@@ -625,6 +649,7 @@ const handleProductUpdated = (updatedProduct: any) => {
             const tripIndex = tripTableItems.value.findIndex(p => p.item_id === logisticsProduct.item_id);
             if (tripIndex !== -1) {
                 tripTableItems.value[tripIndex].quantity = logisticsProduct.quantity;
+                tripTableItems.value[tripIndex].trip_no = logisticsProduct.trip_no ?? null;
                 tripTableItems.value[tripIndex].unit_id = logisticsProduct.unit_id;
                 tripTableItems.value[tripIndex].unit_name = logisticsProduct.unit_name;
             }
@@ -825,7 +850,6 @@ const buildFormData = (): FormData => {
             fd.append(`quotation_product_details[${index}][from_date]`, formatDateDdMmYyyy(item.from_date));
         }
         fd.append(`quotation_product_details[${index}][trip_no]`, String(item.trip_no ?? ''));
-        fd.append(`quotation_product_details[${index}][transport_type]`, String(item.transport_type ?? ''));
     });
 
     // Quotation trip details
@@ -840,6 +864,15 @@ const buildFormData = (): FormData => {
             fd.append(`quotation_trip_details[${index}][trip_date]`, formatDateDdMmYyyy(item.trip_date));
         }
         fd.append(`quotation_trip_details[${index}][trip_price]`, String(item.trip_price ?? ''));
+        fd.append(`quotation_trip_details[${index}][trip_no]`, String(item.trip_no ?? ''));
+        
+        let subTotal = 0;
+        if (item.trip_no && item.trip_price) {
+             subTotal = Number(item.trip_no) * Number(item.trip_price);
+        }
+        fd.append(`quotation_trip_details[${index}][sub_total]`, String(subTotal));
+        fd.append(`quotation_trip_details[${index}][quotation_logistics_detail_id]`, '-1');
+
         // Transport types array
         if (item.transport_type && item.transport_type.length > 0) {
             item.transport_type.forEach((type, typeIndex) => {
@@ -884,6 +917,12 @@ const buildFormData = (): FormData => {
         fd.append(`quotation_logistics_details[${index}][source_latitude]`, String(detail.source_latitude || ''));
         fd.append(`quotation_logistics_details[${index}][source_longitude]`, String(detail.source_longitude || ''));
         fd.append(`quotation_logistics_details[${index}][transport_amount]`, String(detail.transport_amount || ''));
+        if (detail.discount_val != null && detail.discount_val !== '') {
+            fd.append(`quotation_logistics_details[${index}][discount_val]`, String(detail.discount_val));
+        }
+        if (detail.discount_type != null && detail.discount_type !== '') {
+            fd.append(`quotation_logistics_details[${index}][discount_type]`, String(detail.discount_type));
+        }
     });
 
 
@@ -991,11 +1030,10 @@ const handleSubmit = async (afterSuccess?: 'reset' | 'navigate') => {
 
 const headers = [
     { title: 'اسم المنتج', key: 'name' },
-    { title: 'الوحدة', key: 'unit' },
     { title: 'الكمية', key: 'quantity' },
+    { title: 'الوحدة', key: 'unit' },
     { title: 'تاريخ بدء النقل', key: 'from_date' },
     { title: 'عدد الرحلات', key: 'trip_no' },
-    { title: 'نوع الناقلة', key: 'transport_type_name' },
     { title: 'ملاحظات', key: 'notes' },
 ]
 
@@ -1004,11 +1042,10 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
     id: item.item_id,
     item_id: item.item_id,
     name: item.item_name,
-    unit: item.unit_name,
     quantity: item.quantity,
+    unit: item.unit_name,
     from_date: item.from_date ? formatDateDdMmYyyy(item.from_date) : '—',
     trip_no: item.trip_no ?? '—',
-    transport_type_name: item.transport_type_name || getTransportTypeNames(item.transport_type ? [item.transport_type] : []) || '—',
     notes: item.notes,
 })));
 
@@ -1018,20 +1055,30 @@ const tripHeaders = [
     { title: 'الوحدة', key: 'unit' },
     { title: 'الكمية', key: 'quantity' },
     { title: 'تاريخ الرحلة', key: 'trip_date' },
-    { title: 'سعر الرحلة', key: 'trip_price' },
     { title: 'نوع المركبات', key: 'transport_type_names' },
+    { title: 'عدد الرحلات', key: 'trip_no' },
+    { title: 'سعر الرحلة', key: 'trip_price' },
+    { title: 'السعر الإجمالي', key: 'sub_total' },
 ]
 
-const tripItems = computed(() => tripTableItems.value.map(item => ({
-    id: item.item_id,
-    item_id: item.item_id,
-    name: item.item_name,
-    unit: item.unit_name,
-    quantity: item.quantity,
-    trip_date: item.trip_date ? formatDateDdMmYyyy(item.trip_date) : '—',
-    trip_price: item.trip_price ?? '—',
-    transport_type_names: item.transport_type_names || getTransportTypeNames(item.transport_type) || '—',
-})));
+const tripItems = computed(() => tripTableItems.value.map(item => {
+    let subTotal: number | string = '—';
+    if (item.trip_no && item.trip_price) {
+        subTotal = Number(item.trip_no) * Number(item.trip_price);
+    }
+    return {
+        id: item.item_id,
+        item_id: item.item_id,
+        name: item.item_name,
+        unit: item.unit_name,
+        quantity: item.quantity,
+        trip_no: item.trip_no ?? '—',
+        trip_date: item.trip_date ? formatDateDdMmYyyy(item.trip_date) : '—',
+        trip_price: item.trip_price ?? '—',
+        sub_total: subTotal,
+        transport_type_names: item.transport_type_names || getTransportTypeNames(item.transport_type) || '—',
+    };
+}));
 
 // Page loading
 const pageLoading = ref(false);
@@ -1228,6 +1275,11 @@ onMounted(async () => {
                                         النقل</label>
                                     <p class="text-base font-semibold text-gray-900 flex items-center gap-2">{{
                                         detail.transport_amount }} <span v-html="rialIcon"> </span></p>
+                                </div>
+                                <v-divider vertical class="my-6" v-if="detail.discount_val"></v-divider>
+                                <div class="info-item-bordered px-4 py-2" v-if="detail.discount_val">
+                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">الخصم</label>
+                                    <p class="text-base font-semibold text-gray-900 flex items-center gap-1">{{ detail.discount_val }} <span v-if="detail.discount_type == 1">%</span><span v-else v-html="rialIcon"></span></p>
                                 </div>
                                 <v-divider vertical class="my-6"></v-divider>
                                 <div class="info-item-bordered px-4 py-2" v-if="detail.target_location">
