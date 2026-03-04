@@ -564,6 +564,21 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
             />
           </div>
 
+          <!-- Discount (logistics-trips only) -->
+          <div v-if="requestType === 'logistics-trips'">
+            <TextInputWithSelect 
+              v-model="editProductData.discount" 
+              v-model:selectValue="editProductData.discount_type"
+              type="number" 
+              placeholder="الخصم" 
+              density="compact"
+              select-width="75px"
+              :select-items="discountTypeOptionsList"
+              select-placeholder="اختر"
+              class="min-w-[170px]" 
+            />
+          </div>
+
         </div>
       </div>
     </div>

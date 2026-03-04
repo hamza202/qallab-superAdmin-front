@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router';
 import AddProductDialog, { type ProductToAdd } from '@/components/price-offers/AddProductDialog.vue';
 import TopHeader from '@/components/price-offers/TopHeader.vue';
 import { useApi } from '@/composables/useApi';
 import { fileIcon, mapMarkerIcon, messagePlusIcon, filePlusIcon, CoinHandIcon, fileCheckIcon, busIcon, globeIcon } from '@/components/icons/priceOffersIcons';
+import { useCalculations, type CalculationItem } from '@/composables/useCalculations';
 import { returnIcon, saveIcon, binIcon, rialIcon, packageIcon } from '@/components/icons/globalIcons';
 import { useForm } from '@/composables/useForm';
 import { useNotification as useNotify } from '@/composables/useNotification';
@@ -62,6 +63,7 @@ const transportTypeItems = ref<any[]>([]);
 const categoriesItems = ref<any[]>([]);
 const amPmIntervalItems = ref<any[]>([]);
 const actualExecutionIntervalItems = ref<any[]>([]);
+const approvedAmountItems = ref<any[]>([]);
 
 // Logistics details (array - dynamically populated from dialog)
 const logisticsDetails = ref<LogisticsDetail[]>([]);
@@ -79,6 +81,11 @@ const fetchConstants = async () => {
             // Actual execution interval - use from API or fallback
             if (data.actual_execution_interval && Array.isArray(data.actual_execution_interval)) {
                 actualExecutionIntervalItems.value = data.actual_execution_interval.map((i: any) => ({ title: i.label, value: i.key }));
+            }
+
+            // Approved amounts for radio buttons
+            if (data.approved_amounts && Array.isArray(data.approved_amounts)) {
+                approvedAmountItems.value = data.approved_amounts.map((i: any) => ({ title: i.label, value: i.key }));
             }
         }
     } catch (e) {
@@ -149,6 +156,15 @@ const fetchFormData = async () => {
         formData.value.cancel_fee_type = data.cancel_fee_type ?? null;
         formData.value.cancel_fee = data.cancel_fee ?? null;
         formData.value.code = data.code ? String(data.code) : '';
+        formData.value.approved_amount = data.approved_amount ?? null;
+
+        // Populate totals from API (will be overridden by computed if data changes)
+        if (data.final_logistics_service_amount != null) {
+            formData.value.final_logistics_service_amount = Number(data.final_logistics_service_amount);
+        }
+        if (data.final_logistics_trip != null) {
+            formData.value.final_logistics_trip = Number(data.final_logistics_trip);
+        }
 
         // Populate products (quotation_product_details for logistics)
         if (Array.isArray(data.quotation_product_details) && data.quotation_product_details.length > 0) {
@@ -187,6 +203,9 @@ const fetchFormData = async () => {
                     trip_no: item.trip_no != null ? Number(item.trip_no) : null,
                     trip_price: item.trip_price != null ? Number(item.trip_price) : null,
                     sub_total: item.sub_total != null ? Number(item.sub_total) : null,
+                    discount_val: item.discount_val != null ? Number(item.discount_val) : null,
+                    discount_type: item.discount_type != null ? Number(item.discount_type) : null,
+                    quotation_logistics_detail_id: item.quotation_logistics_detail_id != null ? Number(item.quotation_logistics_detail_id) : null,
                     transport_type: transportTypes,
                     transport_type_names: getTransportTypeNames(transportTypes),
                 } as TripTableItem;
@@ -417,6 +436,9 @@ interface TripDetail {
     transport_type_names?: string;
     trip_no?: number | null;
     sub_total?: number | null;
+    discount_val?: number | null;
+    discount_type?: number | null;
+    quotation_logistics_detail_id?: number | null;
     notes?: string;
     id?: number;
     isAdded?: boolean;
@@ -435,6 +457,9 @@ interface TripTableItem {
     transport_type_names?: string;
     trip_no?: number | null;
     sub_total?: number | null;
+    discount_val?: number | null;
+    discount_type?: number | null;
+    quotation_logistics_detail_id?: number | null;
     notes?: string;
     id?: number;
     isAdded?: boolean;
@@ -460,7 +485,10 @@ const formData = ref({
     late_fee: null as number | string | null,
     cancel_fee_type: null as string | null,
     cancel_fee: null as number | string | null,
-    code: '' as string
+    code: '' as string,
+    approved_amount: null as string | null,
+    final_logistics_service_amount: null as number | null,
+    final_logistics_trip: null as number | null
 });
 
 // Products table items
@@ -487,6 +515,31 @@ const summaryTotals = computed(() => {
         finalTotal,
     };
 });
+
+// Computed totals for logistics service and trips
+const computedFinalLogisticsServiceAmount = computed(() => {
+    return logisticsDetails.value.reduce((total, detail) => {
+        const amount = detail.transport_amount != null ? Number(detail.transport_amount) : 0;
+        return total + (isNaN(amount) ? 0 : amount);
+    }, 0);
+});
+
+const computedFinalLogisticsTrip = computed(() => {
+    return tripTableItems.value.reduce((total, item) => {
+        const subTotal = item.sub_total != null ? Number(item.sub_total) : 0;
+        return total + (isNaN(subTotal) ? 0 : subTotal);
+    }, 0);
+});
+
+// Watch for changes and update formData
+
+watch(computedFinalLogisticsServiceAmount, (newVal) => {
+    formData.value.final_logistics_service_amount = newVal;
+}, { immediate: true });
+
+watch(computedFinalLogisticsTrip, (newVal) => {
+    formData.value.final_logistics_trip = newVal;
+}, { immediate: true });
 
 const showAddProductDialog = ref(false);
 const editingProduct = ref<ProductToAdd | null>(null);
@@ -587,8 +640,8 @@ const handleEditTrip = (item: any) => {
             isAdded: true,
             id: tripToEdit.id || null,
             unit_price: tripToEdit.trip_price || null,
-            discount: null,
-            discount_type: null,
+            discount: tripToEdit.discount_val ?? null,
+            discount_type: tripToEdit.discount_type ?? null,
             transport_no: null,
         } as unknown as ProductToAdd;
         productDialogMode.value = 'logistics-trips';
@@ -596,7 +649,29 @@ const handleEditTrip = (item: any) => {
     }
 };
 
-const handleProductUpdated = (updatedProduct: any) => {
+// Calculate sub_total for a single trip item using the calculations API
+const calculateTripItemSubTotal = async (tripItem: TripTableItem) => {
+    const calcItems = ref<CalculationItem[]>([{
+        item_id: tripItem.item_id,
+        quantity: 1,
+        price_per_unit: tripItem.trip_price ? Number(tripItem.trip_price) : 0,
+        discount_type: tripItem.discount_type ?? 1,
+        discount_val: tripItem.discount_val ? Number(tripItem.discount_val) : 0,
+    }]);
+
+    const { fetchCalculations } = useCalculations(calcItems);
+    const results = await fetchCalculations();
+    if (results) {
+        const itemResult = Object.values(results)[0];
+        if (itemResult) {
+            return itemResult.final;
+        }
+    }
+    // Fallback: manual calculation
+    return (Number(tripItem.trip_no ?? 0) * Number(tripItem.trip_price ?? 0));
+};
+
+const handleProductUpdated = async (updatedProduct: any) => {
     if (productDialogMode.value === 'logistics-trips') {
         // Handle trip update
         const tripProduct = updatedProduct as TripDetail;
@@ -613,9 +688,15 @@ const handleProductUpdated = (updatedProduct: any) => {
                 trip_price: tripProduct.trip_price ?? null,
                 transport_type: tripProduct.transport_type ?? [],
                 transport_type_names: tripProduct.transport_type_names ?? '',
+                discount_val: updatedProduct.discount ?? null,
+                discount_type: updatedProduct.discount_type ?? null,
                 isAdded: tripProduct.isAdded,
                 id: tripProduct.id,
             };
+
+            // Calculate sub_total using useCalculations API
+            const subTotal = await calculateTripItemSubTotal(tripTableItems.value[index]);
+            tripTableItems.value[index].sub_total = subTotal;
 
             const productIndex = productTableItems.value.findIndex(p => p.item_id === tripProduct.item_id);
             if (productIndex !== -1) {
@@ -837,6 +918,9 @@ const buildFormData = (): FormData => {
     fd.append('late_fee', String(formData.value.late_fee ?? ''));
     fd.append('cancel_fee_type', formData.value.cancel_fee_type || '');
     fd.append('cancel_fee', String(formData.value.cancel_fee ?? ''));
+    if (formData.value.approved_amount) {
+        fd.append('approved_amount', formData.value.approved_amount);
+    }
 
     // Quotation product details (logistics format)
     productTableItems.value.forEach((item, index) => {
@@ -865,13 +949,20 @@ const buildFormData = (): FormData => {
         }
         fd.append(`quotation_trip_details[${index}][trip_price]`, String(item.trip_price ?? ''));
         fd.append(`quotation_trip_details[${index}][trip_no]`, String(item.trip_no ?? ''));
-        
-        let subTotal = 0;
-        if (item.trip_no && item.trip_price) {
-             subTotal = Number(item.trip_no) * Number(item.trip_price);
+        fd.append(`quotation_trip_details[${index}][sub_total]`, String(item.sub_total ?? 0));
+        // In edit mode, use the stored value from API; in create mode, send -1
+        const logisticsDetailId = isEditMode.value && item.quotation_logistics_detail_id != null
+            ? String(item.quotation_logistics_detail_id)
+            : '-1';
+        fd.append(`quotation_trip_details[${index}][quotation_logistics_detail_id]`, logisticsDetailId);
+
+        // Discount fields
+        if (item.discount_val != null) {
+            fd.append(`quotation_trip_details[${index}][discount_val]`, String(item.discount_val));
         }
-        fd.append(`quotation_trip_details[${index}][sub_total]`, String(subTotal));
-        fd.append(`quotation_trip_details[${index}][quotation_logistics_detail_id]`, '-1');
+        if (item.discount_type != null) {
+            fd.append(`quotation_trip_details[${index}][discount_type]`, String(item.discount_type));
+        }
 
         // Transport types array
         if (item.transport_type && item.transport_type.length > 0) {
@@ -948,7 +1039,10 @@ const getInitialFormData = () => ({
     late_fee: null as number | string | null,
     cancel_fee_type: null as string | null,
     cancel_fee: null as number | string | null,
-    code: '' as string
+    code: '' as string,
+    approved_amount: null as string | null,
+    final_logistics_service_amount: null as number | null,
+    final_logistics_trip: null as number | null
 });
 
 const resetForm = () => {
@@ -1058,14 +1152,11 @@ const tripHeaders = [
     { title: 'نوع المركبات', key: 'transport_type_names' },
     { title: 'عدد الرحلات', key: 'trip_no' },
     { title: 'سعر الرحلة', key: 'trip_price' },
+    { title: 'الخصم', key: 'discount_display' },
     { title: 'السعر الإجمالي', key: 'sub_total' },
 ]
 
 const tripItems = computed(() => tripTableItems.value.map(item => {
-    let subTotal: number | string = '—';
-    if (item.trip_no && item.trip_price) {
-        subTotal = Number(item.trip_no) * Number(item.trip_price);
-    }
     return {
         id: item.item_id,
         item_id: item.item_id,
@@ -1075,7 +1166,10 @@ const tripItems = computed(() => tripTableItems.value.map(item => {
         trip_no: item.trip_no ?? '—',
         trip_date: item.trip_date ? formatDateDdMmYyyy(item.trip_date) : '—',
         trip_price: item.trip_price ?? '—',
-        sub_total: subTotal,
+        discount_val: item.discount_val ?? null,
+        discount_type: item.discount_type ?? null,
+        discount_display: '—',
+        sub_total: item.sub_total ?? '—',
         transport_type_names: item.transport_type_names || getTransportTypeNames(item.transport_type) || '—',
     };
 }));
@@ -1381,6 +1475,14 @@ onMounted(async () => {
                 <!-- Trip Details Table -->
                 <DataTable :headers="tripHeaders" :items="tripItems" show-actions force-show-edit
                     @edit="handleEditTrip">
+                    <template #item.discount_display="{ item }">
+                        <span v-if="item.discount_val != null && Number(item.discount_val) > 0" class="flex items-center gap-1">
+                            {{ item.discount_val }}
+                            <span v-if="item.discount_type == 1">%</span>
+                            <span v-else v-html="rialIcon"></span>
+                        </span>
+                        <span v-else>—</span>
+                    </template>
                 </DataTable>
             </div>
 
@@ -1393,6 +1495,28 @@ onMounted(async () => {
                     </div>
                     <div class="p-6">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- Final Logistics Service Amount -->
+                            <PriceInput showRialIcon v-model="formData.final_logistics_service_amount" density="comfortable"
+                                label="القيمة الإجمالية لمبلغ خدمات النقل" placeholder="0" disabled />
+
+                            <!-- Final Logistics Trip Amount -->
+                            <PriceInput showRialIcon v-model="formData.final_logistics_trip" density="comfortable"
+                                label="القيمة الإجمالية لمبلغ الرحلات" placeholder="0" disabled />
+
+                            <!-- Approved Amount Radio -->
+                            <div class="md:col-span-1" v-if="approvedAmountItems.length > 0">
+                                <label class="font-semibold text-sm text-gray-700 mb-2 block">المبلغ الإجمالي المعتمد في العرض</label>
+                                <v-radio-group v-model="formData.approved_amount" inline density="comfortable" hide-details>
+                                    <v-radio
+                                        v-for="item in approvedAmountItems"
+                                        :key="item.value"
+                                        :label="item.title"
+                                        :value="item.value"
+                                        color="primary"
+                                    />
+                                </v-radio-group>
+                            </div>
+
                             <!-- Payment Method -->
                             <SelectInput v-model="formData.payment_method" :items="paymentMethodItems"
                                 density="comfortable" placeholder="حدد طريقة الدفع" label="طريقة الدفع" />

@@ -4,6 +4,7 @@ import { useRoute, useRouter } from "vue-router";
 import AddProductDialog, { type ProductToAdd } from "@/components/price-offers/AddProductDialog.vue";
 import TopHeader from "@/components/price-offers/TopHeader.vue";
 import { useApi } from "@/composables/useApi";
+import { useCalculations, type CalculationItem } from '@/composables/useCalculations';
 import {
   fileIcon,
   mapMarkerIcon,
@@ -107,6 +108,11 @@ interface TripTableItem {
   trip_price: number | null;
   transport_type: number[];
   transport_type_names?: string;
+  trip_no?: number | null;
+  sub_total?: number | null;
+  discount_val?: number | null;
+  discount_type?: number | null;
+  quotation_logistics_detail_id?: number | null;
   notes: string;
   isAdded?: boolean;
 }
@@ -353,7 +359,12 @@ const fetchFormData = async () => {
           unit_name: item.unit_name ?? "",
             quantity: item.quantity ?? null,
           trip_date: item.trip_date ?? null,
+          trip_no: item.trip_no != null ? Number(item.trip_no) : null,
           trip_price: item.trip_price != null ? Number(item.trip_price) : null,
+          sub_total: item.sub_total != null ? Number(item.sub_total) : null,
+          discount_val: item.discount_val != null ? Number(item.discount_val) : null,
+          discount_type: item.discount_type != null ? Number(item.discount_type) : null,
+          quotation_logistics_detail_id: item.quotation_logistics_detail_id != null ? Number(item.quotation_logistics_detail_id) : null,
           transport_type: transportTypes,
           transport_type_names: getTransportTypeNames(transportTypes),
         } as TripTableItem;
@@ -493,7 +504,11 @@ const fetchQuotationForOrder = async () => {
             unit_name: item.unit_name ?? "",
             quantity: item.quantity ?? null,
             trip_date: item.trip_date ?? null,
+            trip_no: item.trip_no != null ? Number(item.trip_no) : null,
             trip_price: item.trip_price != null ? Number(item.trip_price) : null,
+            sub_total: item.sub_total != null ? Number(item.sub_total) : null,
+            discount_val: item.discount_val != null ? Number(item.discount_val) : null,
+            discount_type: item.discount_type != null ? Number(item.discount_type) : null,
             transport_type: transportTypes,
             transport_type_names: getTransportTypeNames(transportTypes),
             notes: item.notes ?? "",
@@ -622,6 +637,22 @@ const buildFormData = (): FormData => {
       fd.append(`so_trip_details[${index}][trip_date]`, formatDateDdMmYyyy(item.trip_date));
     }
     fd.append(`so_trip_details[${index}][trip_price]`, String(item.trip_price ?? ""));
+    fd.append(`so_trip_details[${index}][trip_no]`, String(item.trip_no ?? ""));
+    fd.append(`so_trip_details[${index}][sub_total]`, String(item.sub_total ?? 0));
+    // In edit mode, use the stored value from API; in create mode, send -1
+    const logisticsDetailId = isEditMode.value && item.quotation_logistics_detail_id != null
+        ? String(item.quotation_logistics_detail_id)
+        : '-1';
+    fd.append(`so_trip_details[${index}][quotation_logistics_detail_id]`, logisticsDetailId);
+
+    // Discount fields
+    if (item.discount_val != null) {
+        fd.append(`so_trip_details[${index}][discount_val]`, String(item.discount_val));
+    }
+    if (item.discount_type != null) {
+        fd.append(`so_trip_details[${index}][discount_type]`, String(item.discount_type));
+    }
+
     // Transport types array
     if (item.transport_type && item.transport_type.length > 0) {
       item.transport_type.forEach((type, typeIndex) => {
@@ -965,13 +996,40 @@ const handleEditProduct = (item: any) => {
 const handleEditTrip = (item: any) => {
   const tripToEdit = tripTableItems.value.find((p) => p.item_id === item.item_id);
   if (tripToEdit) {
-    editingProduct.value = { ...tripToEdit, isAdded: true } as any;
+    editingProduct.value = {
+        ...tripToEdit,
+        isAdded: true,
+        discount: tripToEdit.discount_val ?? null,
+        discount_type: tripToEdit.discount_type ?? null,
+    } as unknown as ProductToAdd;
     productDialogMode.value = "logistics-trips";
     showAddProductDialog.value = true;
   }
 };
 
-const handleProductUpdated = (updatedProduct: any) => {
+// Calculate sub_total for a single trip item using the calculations API
+const calculateTripItemSubTotal = async (tripItem: TripTableItem) => {
+    const calcItems = ref<CalculationItem[]>([{
+        item_id: tripItem.item_id,
+        quantity: 1,
+        price_per_unit: tripItem.trip_price ? Number(tripItem.trip_price) : 0,
+        discount_type: tripItem.discount_type ?? 1,
+        discount_val: tripItem.discount_val ? Number(tripItem.discount_val) : 0,
+    }]);
+
+    const { fetchCalculations } = useCalculations(calcItems);
+    const results = await fetchCalculations();
+    if (results) {
+        const itemResult = Object.values(results)[0];
+        if (itemResult) {
+            return itemResult.final;
+        }
+    }
+    // Fallback: manual calculation
+    return (Number(tripItem.trip_no ?? 0) * Number(tripItem.trip_price ?? 0));
+};
+
+const handleProductUpdated = async (updatedProduct: any) => {
   if (productDialogMode.value === "logistics-trips") {
     // Handle trip update
     const index = tripTableItems.value.findIndex((p) => p.item_id === updatedProduct.item_id);
@@ -983,19 +1041,27 @@ const handleProductUpdated = (updatedProduct: any) => {
         unit_name: updatedProduct.unit_name,
         quantity: updatedProduct.quantity,
         trip_date: updatedProduct.trip_date ?? null,
+        trip_no: updatedProduct.trip_no ?? null,
         trip_price: updatedProduct.trip_price ?? null,
         transport_type: updatedProduct.transport_type ?? [],
         transport_type_names: updatedProduct.transport_type_names ?? "",
+        discount_val: updatedProduct.discount ?? null,
+        discount_type: updatedProduct.discount_type ?? null,
         notes: updatedProduct.notes || "",
         isAdded: updatedProduct.isAdded,
         id: updatedProduct.id,
       };
+
+      // Calculate sub_total using useCalculations API
+      const subTotal = await calculateTripItemSubTotal(tripTableItems.value[index]);
+      tripTableItems.value[index].sub_total = subTotal;
 
       const productIndex = productTableItems.value.findIndex(p => p.item_id === updatedProduct.item_id);
       if (productIndex !== -1) {
           productTableItems.value[productIndex].quantity = updatedProduct.quantity;
           productTableItems.value[productIndex].unit_id = updatedProduct.unit_id;
           productTableItems.value[productIndex].unit_name = updatedProduct.unit_name;
+          productTableItems.value[productIndex].trip_no = updatedProduct.trip_no ?? null;
       }
     }
   } else {
@@ -1072,8 +1138,11 @@ const tripHeaders = [
   { title: "الوحدة", key: "unit" },
   { title: "الكمية", key: "quantity" },
   { title: "تاريخ الرحلة", key: "trip_date" },
-  { title: "سعر الرحلة", key: "trip_price" },
   { title: "نوع المركبات", key: "transport_type_names" },
+  { title: "عدد الرحلات", key: "trip_no" },
+  { title: "سعر الرحلة", key: "trip_price" },
+  { title: "الخصم", key: "discount_display" },
+  { title: "السعر الإجمالي", key: "sub_total" },
 ];
 
 const tripItems = computed(() =>
@@ -1083,8 +1152,13 @@ const tripItems = computed(() =>
     name: item.item_name,
     unit: item.unit_name,
     quantity: item.quantity,
+    trip_no: item.trip_no ?? '—',
     trip_date: item.trip_date ? formatDateDdMmYyyy(item.trip_date) : "—",
     trip_price: item.trip_price ?? "—",
+    discount_val: item.discount_val ?? null,
+    discount_type: item.discount_type ?? null,
+    discount_display: '—',
+    sub_total: item.sub_total ?? '—',
     transport_type_names: item.transport_type_names || getTransportTypeNames(item.transport_type) || "—",
   }))
 );
@@ -1487,7 +1561,16 @@ onMounted(async () => {
           show-actions
           force-show-edit
           @edit="handleEditTrip"
-        />
+        >
+            <template #item.discount_display="{ item }">
+                <span v-if="item.discount_val != null && Number(item.discount_val) > 0" class="flex items-center gap-1">
+                    {{ item.discount_val }}
+                    <span v-if="item.discount_type == 1">%</span>
+                    <span v-else v-html="rialIcon"></span>
+                </span>
+                <span v-else>—</span>
+            </template>
+        </DataTable>
       </div>
 
       <!-- Payment and Summary Section -->
