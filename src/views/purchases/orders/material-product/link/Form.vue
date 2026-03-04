@@ -53,6 +53,13 @@ const loadingSalesCodes = ref(false);
 const loadingDetails = ref(false);
 const submitting = ref(false);
 
+const resetFormSelections = () => {
+  selectedCustomerId.value = null;
+  selectedSalesCode.value = null;
+  salesCodeItems.value = [];
+  orderDetails.value = null;
+};
+
 // ── API ─────────────────────────────────────────────────────────
 const fetchConstants = async () => {
   try {
@@ -158,6 +165,7 @@ const handleAdd = async () => {
       { uuids }
     );
     success("تم الربط بنجاح");
+    resetFormSelections();
   } catch (e: any) {
     console.error("handleAdd error:", e);
     error(e?.response?.data?.message ?? "فشل الربط");
