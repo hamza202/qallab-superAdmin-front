@@ -6,7 +6,7 @@ import { useApi } from '@/composables/useApi';
 import { useNotification } from '@/composables/useNotification';
 import { useTableColumns } from '@/composables/useTableColumns';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog.vue';
-import { GridIcon, trash_1_icon, trash_2_icon, importIcon, columnIcon, exportIcon, searchIcon } from "@/components/icons/globalIcons";
+import { GridIcon, trash_1_icon, trash_2_icon, importIcon, columnIcon, exportIcon, searchIcon, linkIcon } from "@/components/icons/globalIcons";
 import { switchHorisinralIcon, refreshIcon } from '@/components/icons/priceOffersIcons';
 import StatusChangeFeature from '@/components/common/StatusChangeFeature.vue';
 
@@ -32,6 +32,7 @@ interface ItemActions {
   can_view: boolean;
   can_change_status: boolean;
   can_create_order: boolean;
+  can_link: boolean;
 }
 
 interface QuotationItem {
@@ -40,6 +41,7 @@ interface QuotationItem {
   customer_name: string;
   quotation_name: string;
   code: string;
+  category: string;
   quotations_datetime: string;
   target_location: string;
   status: string;
@@ -258,6 +260,19 @@ const handleCreateOrder = (item: unknown) => {
   });
 };
 
+const handleLink = (item: unknown) => {
+  const tableItem = item as QuotationItem & { id: string | number };
+  router.push({
+    name: 'QuotationsFuelsLinkForm',
+    params: { id: tableItem.uuid },
+    query: {
+      sall_quotations_code_from_index: tableItem.code,
+      category: tableItem.category ?? undefined,
+      quotations_datetime: tableItem.quotations_datetime ?? undefined,
+    },
+  });
+};
+
 const openChangeStatusDialog = (item: QuotationItem | Record<string, unknown>) => {
   itemToChangeStatus.value = item as QuotationItem;
   showChangeStatusDialog.value = true;
@@ -397,6 +412,10 @@ onBeforeUnmount(() => {
               <v-btn v-if="item.actions?.can_change_status" icon variant="text" size="small" color="warning-600"
                 @click="openChangeStatusDialog(item)">
                 <span v-html="switchHorisinralIcon"></span>
+              </v-btn>
+              <v-btn v-if="item.actions?.can_link" icon variant="text" size="small"
+                @click="handleLink(item)">
+                <span v-html="linkIcon" style="display:inline-flex;width:22px;height:22px;color:#F79009;"></span>
               </v-btn>
             </div>
           </template>

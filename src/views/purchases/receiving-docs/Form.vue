@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, toRaw } from "vue";
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router';
 import TopHeader from '@/components/price-offers/TopHeader.vue';
@@ -8,6 +8,7 @@ import { returnIcon, saveIcon, fileCheckIcon, fileIcon_2 } from '@/components/ic
 import { useForm } from '@/composables/useForm';
 import { useNotification } from '@/composables/useNotification';
 import { required } from '@/utils/validators';
+import DocumentUploadInput from '@/components/common/forms/DocumentUploadInput.vue';
 
 const { t } = useI18n()
 const api = useApi();
@@ -45,6 +46,8 @@ const formData = ref({
     created_at: '',
     approved_quantity: null as number | null,
 });
+
+const attachments = ref<(File | string)[]>([]);
 
 // Receipt items table
 const receiptItems = ref<ReceiptItem[]>([]);
@@ -107,6 +110,9 @@ const fetchFormData = async () => {
                     quantity_from_customer: item.quantity_from_customer,
                 }));
             }
+            if (data.attachment_file && Array.isArray(data.attachment_file)) {
+                attachments.value = [...data.attachment_file];
+            }
         }
     } catch (e) {
         console.error('Error fetching form data:', e);
@@ -140,12 +146,7 @@ const formatDate = (date: string | Date): string => {
 // Build FormData for submission
 const buildFormData = (): FormData => {
     const fd = new FormData();
-
-    // Add _method: PUT for edit mode
-    if (isEditMode.value) {
-        fd.append('_method', 'PUT');
-    }
-
+    fd.append('_method', 'PUT');
     fd.append('purchase_order_id', String(formData.value.purchase_order_id || ''));
     fd.append('receiving_date', formatDate(formData.value.receiving_date));
     fd.append('approved_quantity', String(formData.value.approved_quantity ?? ''));
@@ -161,6 +162,20 @@ const buildFormData = (): FormData => {
         fd.append(`items[${index}][quantity_from_transport]`, String(item.quantity_from_transport || ''));
         fd.append(`items[${index}][quantity_from_customer]`, String(item.quantity_from_customer || ''));
     });
+
+    // Attachments
+    if (attachments.value && attachments.value.length > 0) {
+        attachments.value.forEach((fileProxy, index) => {
+            const rawFile = toRaw(fileProxy);
+            if (typeof rawFile === 'string') {
+                // Old attachment URL - send as string
+                fd.append(`attachment_file[${index}]`, rawFile);
+            } else {
+                // New file - send as binary
+                fd.append(`attachment_file[${index}]`, rawFile);
+            }
+        });
+    }
 
     return fd;
 }
@@ -318,6 +333,15 @@ const handleSubmitToOrdersList = async () => {
                                 <TextInput v-model="formData.created_at" label="تاريخ الإنشاء"
                                     density="comfortable" disabled />
                             </div>
+                        </div>
+
+                        <!-- Attachments Row -->
+                        <div class="mt-6">
+                            <h3 class="text-sm font-semibold text-gray-700 mb-3 tracking-wide">المرفقات</h3>
+                            <DocumentUploadInput v-model="attachments" 
+                                hint="PNG, JPG , PDF, XLS" 
+                                :max-files="5" 
+                                :multiple="true" />
                         </div>
                     </v-form>
                 </div>

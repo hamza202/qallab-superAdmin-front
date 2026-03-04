@@ -3,122 +3,37 @@
     "code": 0,
     "locale": "ar",
     "message": "OK",
-    "data": {
-        "payment_methods": [
-            {
-                "key": "cash",
-                "label": "دفع نقدي"
-            },
-            {
-                "key": "deferred",
-                "label": "دفع آجل"
-            }
-        ],
-        "request_categories": [
-            {
-                "key": "building_material",
-                "label": "مواد بناء"
-            },
-            {
-                "key": "logistics",
-                "label": "خدمات لوجستية"
-            },
-            {
-                "key": "fuel",
-                "label": "وقود"
-            }
-        ],
-        "request_types": [
-            {
-                "key": "purchase_request_with_logistics",
-                "label": "طلب شراء مع خدمات لوجستية"
-            },
-            {
-                "key": "request_without_logistics",
-                "label": "طلب بدون خدمات لوجستية"
-            },
-            {
-                "key": "others",
-                "label": "أخرى"
-            }
-        ],
-        "supply_types": [
-            {
-                "key": "immediate",
-                "label": "توريد فوري"
-            },
-            {
-                "key": "recurring",
-                "label": "توريد متكرر"
-            }
-        ],
-        "delivered_methods": [
-            {
-                "key": "single_compartment_fuel_tanker",
-                "label": "صهريج وقود أحادي المقصورة"
-            },
-            {
-                "key": "multi_compartment_fuel_tanker",
-                "label": "صهريج وقود متعدد المقصورات"
-            },
-            {
-                "key": "aviation_fuel_tanker",
-                "label": "صهريج وقود للطيران"
-            },
-            {
-                "key": "bitumen_tanker",
-                "label": "صهريج أسفلت / بيتومين"
-            },
-            {
-                "key": "mini_fuel_tanker",
-                "label": "صهريج وقود صغير"
-            },
-            {
-                "key": "fuel_tank_trailer",
-                "label": "مقطورة صهريج وقود"
-            },
-            {
-                "key": "fuel_tanker_with_pump",
-                "label": "صهريج وقود مع مضخة"
-            }
-        ],
-        "fillings": [
-            {
-                "key": "construction_equipment",
-                "label": "معدات البناء"
-            },
-            {
-                "key": "commercial_vehicles",
-                "label": "المركبات التجارية"
-            }
-        ],
-        "am_pm_interval": [
-            {
-                "key": "am",
-                "label": "صباحًا"
-            },
-            {
-                "key": "pm",
-                "label": "مساءً"
-            },
-            {
-                "key": "both",
-                "label": "كلاهما"
-            }
-        ],
-        "transport_types": [
-            {
-                "key": 1,
-                "label": "قلاب"
-            },
-            {
-                "key": 2,
-                "label": "قلاب شاحنة كبيرة"
-            },
-            {
-                "key": 3,
-                "label": "قلاب نصف مقطورة"
-            }
-        ]
-    }
+    "data": [
+        {
+            "uuid": "34cd2154-c0cc-40bc-bd00-57a550c40b03",
+            "code": "SALES-QUOTATION-00278",
+            "status_name": "مكتمل",
+            "target_location": "Al Uaroba Road, Ar Rahmaniyah District, Al Maathar Municipality, Riyadh, Riyadh governorate, Riyadh Region, 12281, Saudi Arabia",
+            "quotations_datetime": "2026-03-02T00:00:00.000000Z",
+            "product_building_no": "1",
+            "product_fuel_no": null,
+            "items": [
+                {
+                    "id": 478,
+                    "item": {
+                        "id": 165,
+                        "name": "test"
+                    },
+                    "unit": {
+                        "id": 3,
+                        "name": "wqr"
+                    },
+                    "quantity": 1,
+                    "price_per_unit": 100,
+                    "discount_type": 1,
+                    "discount_type_label": null,
+                    "discount_val": 50,
+                    "subtotal_before_discount": 100,
+                    "subtotal_after_discount": 100,
+                    "total_tax": 15,
+                    "subtotal_after_tax": 115
+                }
+            ]
+        }
+    ]
 }

@@ -89,6 +89,24 @@ export const purchasesRoutes: RouteRecordRaw[] = [
           title: "pages.QuotationsMaterialProduct.view",
         },
       },
+      {
+        path: "link/:id",
+        name: "QuotationsMaterialProductLinkForm",
+        component: () =>
+          import("@/views/purchases/quotations/material-product/link/Form.vue"),
+        meta: {
+          title: "pages.QuotationsMaterialProduct.link",
+        },
+      },
+      {
+        path: "link/view",
+        name: "QuotationsMaterialProductLinkView",
+        component: () =>
+          import("@/views/purchases/quotations/material-product/link/View.vue"),
+        meta: {
+          title: "pages.QuotationsMaterialProduct.linkView",
+        },
+      },
     ],
   },
   {
@@ -214,6 +232,25 @@ export const purchasesRoutes: RouteRecordRaw[] = [
           title: "pages.OrdersMaterialProduct.view",
         },
       },
+      {
+        path: "link/:id",
+        name: "OrdersMaterialProductLinkForm",
+        component: () =>
+          import("@/views/purchases/orders/material-product/link/Form.vue"),
+        meta: {
+          title: "pages.OrdersMaterialProduct.link",
+        },
+      },
+      {
+        path: "link/view",
+        name: "OrdersMaterialProductLinkView",
+        component: () =>
+          import("@/views/purchases/orders/material-product/link/View.vue"),
+        meta: {
+          title: "pages.OrdersMaterialProduct.linkView",
+        },
+      },
+
     ],
   },
   {
@@ -360,6 +397,24 @@ export const purchasesRoutes: RouteRecordRaw[] = [
         component: () => import("@/views/purchases/quotations/fuels/View.vue"),
         meta: {
           title: "pages.QuotationsFuels.view",
+        },
+      },
+      {
+        path: "link/:id",
+        name: "QuotationsFuelsLinkForm",
+        component: () =>
+          import("@/views/purchases/quotations/fuels/link/Form.vue"),
+        meta: {
+          title: "pages.QuotationsFuels.link",
+        },
+      },
+      {
+        path: "link/view",
+        name: "QuotationsFuelsLinkView",
+        component: () =>
+          import("@/views/purchases/quotations/fuels/link/View.vue"),
+        meta: {
+          title: "pages.QuotationsFuels.linkView",
         },
       },
     ],

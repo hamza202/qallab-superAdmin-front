@@ -22,6 +22,7 @@ declare module 'vue' {
     DateTimePickerInput: typeof import('./components/common/forms/DateTimePickerInput.vue')['default']
     DefaultLayout: typeof import('./layouts/DefaultLayout.vue')['default']
     DeleteConfirmDialog: typeof import('./components/common/DeleteConfirmDialog.vue')['default']
+    DocumentUploadInput: typeof import('./components/common/forms/DocumentUploadInput.vue')['default']
     EditableDataTable: typeof import('./components/common/tables/EditableDataTable.vue')['default']
     FileUploadInput: typeof import('./components/common/forms/FileUploadInput.vue')['default']
     GroupedDataTable: typeof import('./components/common/tables/GroupedDataTable.vue')['default']

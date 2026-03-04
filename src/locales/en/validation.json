@@ -30,6 +30,8 @@
     "futureDate": "Date must be in the future",
     "pastDate": "Date must be in the past",
     "pattern": "Invalid value",
-    "select": "Please select a value"
+    "select": "Please select a value",
+    "taxNo": "Tax number must be 15 digits, starting with 3 and ending with 3",
+    "unifiedLoginId": "Unified login ID must be 10 digits starting with 700"
   }
 }
