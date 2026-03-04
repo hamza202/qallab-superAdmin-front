@@ -202,7 +202,7 @@
           </v-list-group>
 
           <!-- المبيعات -->
-          <v-list-group v-if="hasAnySalesPermission" value="sales" class="mt-1">
+          <v-list-group value="sales" class="mt-1">
             <template #activator="{ props, isOpen }">
               <v-list-item v-bind="props" :class="[
                 { '!mx-1 gap-5': !isSidebarExpanded },
@@ -232,7 +232,7 @@
             <div class="relative mt-1 ps-10 pe-4 text-sm">
               <h2 class="text-sm font-medium leading-5 mb-2">إدارة العملاء</h2>
               <ul class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
-                <li v-if="canViewCustomers" class="relative">
+                <li class="relative">
                   <router-link to="/customers/list" :class="[
                     isMenuItemActive('/customers/list')
                       ? 'font-bold text-qallab-yellow'
@@ -450,7 +450,7 @@
           </v-list-group> -->
 
           <!-- المشتريات -->
-          <v-list-group v-if="hasAnyPurchasesPermission" value="purchases" class="mt-1">
+          <v-list-group value="purchases" class="mt-1">
             <template #activator="{ props, isOpen }">
               <v-list-item v-bind="props" :class="[
                 { '!mx-1 gap-5': !isSidebarExpanded },
@@ -480,7 +480,7 @@
             <div class="relative mt-1 ps-10 pe-4 text-sm">
               <h2 class="text-sm font-medium leading-5 mb-2">إدارة الموردين</h2>
               <ul class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
-                <li v-if="canViewSuppliers" class="relative">
+                <li class="relative">
                   <router-link to="/suppliers/list" :class="[
                     isMenuItemActive('/suppliers/list')
                       ? 'font-bold text-qallab-yellow'
@@ -508,7 +508,7 @@
                                         :class="[isMenuItemActive('/purchases/requests/request-for-quotation') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         طلب عروض الأسعار</router-link>
                                 </li> -->
-                <li class="relative" v-if="canViewBuildingMaterialPriceRequests">
+                <li class="relative">
                   <router-link to="/purchases/requests/material-product/list" :class="[
                     isMenuItemActive('/purchases/requests/material-product')
                       ? 'font-bold text-qallab-yellow'
