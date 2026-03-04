@@ -94,8 +94,7 @@ const triggerFileInput = () => {
     }
 };
 
-const formatSize = (bytes: number | string | undefined) => {
-    if (bytes === undefined || typeof bytes === 'string') return ''; // Strings don't have local size
+const formatSize = (bytes: number) => {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
@@ -103,15 +102,15 @@ const formatSize = (bytes: number | string | undefined) => {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 };
 
-const getFileName = (file: File | string) => {
+const getFileName = (file: File | string): string => {
     if (typeof file === 'string') {
         return file.split('/').pop() || 'ملف مرفق';
     }
     return file.name;
 };
 
-const getFileIcon = (fileName: File | string) => {
-    const ext = getFileName(fileName).split('.').pop()?.toLowerCase() || '';
+const getFileIcon = (file: File | string) => {
+    const ext = getFileName(file).split('.').pop()?.toLowerCase() || '';
     if (['pdf'].includes(ext)) return pdfIcon;
     if (['doc', 'docx'].includes(ext)) return wordIcon;
     if (['xls', 'xlsx'].includes(ext)) return excelIcon;

@@ -167,16 +167,12 @@ const buildFormData = (): FormData => {
     if (attachments.value && attachments.value.length > 0) {
         attachments.value.forEach((fileProxy, index) => {
             const rawFile = toRaw(fileProxy);
-            // If it's a string, it means it's an already uploaded url, send it back as string
             if (typeof rawFile === 'string') {
+                // Old attachment URL - send as string
                 fd.append(`attachment_file[${index}]`, rawFile);
             } else {
-                // It's a binary file
-                const binaryFile = rawFile instanceof File || rawFile instanceof Blob 
-                    ? rawFile 
-                    : ((rawFile as any).file || rawFile);
-                
-                fd.append(`attachment_file[${index}]`, binaryFile);
+                // New file - send as binary
+                fd.append(`attachment_file[${index}]`, rawFile);
             }
         });
     }
