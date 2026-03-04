@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useApi } from "@/composables/useApi";
 import { useNotification } from "@/composables/useNotification";
 import DatePickerInput from '@/components/common/forms/DatePickerInput.vue';
+import { fileIcon_2 } from "@/components/icons/globalIcons";
 
 const route = useRoute();
 const router = useRouter();
@@ -13,8 +14,10 @@ const { success, error } = useNotification();
 // TypeScript Interfaces
 interface VoucherFormData {
     name: { en: string; ar: string };
+    class: 'received' | 'payment';
     type: 'customer' | 'supplier';
-    type_id: number | null;
+    customer_id: number | null;
+    supplier_id: number | null;
     expenses_date: string;
     amount: number | string;
     notes: string;
@@ -32,26 +35,30 @@ const availableLanguages = ref([
 // Check if editing
 const isEditing = computed(() => !!route.params.id);
 
-// Voucher type from route (payment-voucher or receipt-voucher)
-const voucherType = computed(() => route.params.type as string);
-const isPaymentVoucher = computed(() => voucherType.value === 'payment-voucher');
-const isReceiptVoucher = computed(() => voucherType.value === 'receipt-voucher');
+// Voucher class from route params or query (payment or received)
+const voucherClass = computed(() => (route.query.type as 'payment' | 'received') || (route.params.type as 'payment' | 'received'));
+const isPaymentVoucher = computed(() => voucherClass.value === 'payment');
+const isReceiptVoucher = computed(() => voucherClass.value === 'received');
 
 const entityLabel = computed(() => formData.value.type === 'customer' ? 'عميل' : 'مورد');
 
 // Loading states
 const loading = ref(false);
 const saving = ref(false);
+const voucherCode = ref<string>("");
 
 // Form ref
 const formRef = ref<any>(null);
 const isFormValid = ref(false);
+const formErrors = ref<Record<string, string[]>>({});
 
 // Form data
 const formData = ref<VoucherFormData>({
     name: { en: "", ar: "" },
+    class: voucherClass.value || 'received',
     type: 'customer',
-    type_id: null,
+    customer_id: null,
+    supplier_id: null,
     expenses_date: "",
     amount: "",
     notes: "",
@@ -63,11 +70,73 @@ const formData = ref<VoucherFormData>({
 // Dropdown options
 const paymentMethodItems = ref<Array<{ title: string; value: number }>>([]);
 const bankItems = ref<Array<{ title: string; value: number }>>([]);
+const isLoadingBankItems = ref(false);
+const suppressMethodWatcher = ref(false);
 const customerItems = ref<Array<{ title: string; value: number }>>([]);
 const supplierItems = ref<Array<{ title: string; value: number }>>([]);
+const suppressTypeWatcher = ref(false);
 
 const clientItems = computed(() => {
     return formData.value.type === 'customer' ? customerItems.value : supplierItems.value;
+});
+
+// Computed property for type_id based on selected type
+const typeId = computed({
+    get: () => formData.value.type === 'customer' ? formData.value.customer_id : formData.value.supplier_id,
+    set: (value: number | null) => {
+        if (formData.value.type === 'customer') {
+            formData.value.customer_id = value;
+        } else {
+            formData.value.supplier_id = value;
+        }
+    }
+});
+
+// Fetch constants (payment methods, banks, etc.)
+const fetchConstants = async () => {
+    try {
+        const res = await api.get<any>("/receipts-payments-transactions/constants");
+        const data = res.data;
+        if (data) {
+            paymentMethodItems.value = data.payment_methods?.map((i: any) => ({ title: i.label, value: i.key })) || [];
+        }
+    } catch (e) {
+        console.error("Error fetching constants:", e);
+    }
+};
+
+// Fetch bank/account options based on selected payment method
+const fetchMethodTypeOptions = async (methodType: number) => {
+    isLoadingBankItems.value = true;
+    try {
+        const res = await api.get<any>(`/receipts-payments-transactions/change-method-type?method_type=${methodType}`);
+        const data = res.data;
+        if (data && Array.isArray(data.method_type_options)) {
+            bankItems.value = data.method_type_options.map((i: any) => ({ title: i.name, value: i.id }));
+        } else {
+            bankItems.value = [];
+        }
+    } catch (e) {
+        console.error("Error fetching method type options:", e);
+        bankItems.value = [];
+    } finally {
+        isLoadingBankItems.value = false;
+    }
+};
+
+// Watch payment method changes
+watch(() => formData.value.method_type, (newMethodType) => {
+    if (suppressMethodWatcher.value) return;
+    // Clear the method_type_id when payment method changes
+    formData.value.method_type_id = null;
+
+    // Fetch new options if a method is selected
+    if (newMethodType) {
+        fetchMethodTypeOptions(newMethodType);
+    } else {
+        bankItems.value = [];
+        isLoadingBankItems.value = false;
+    }
 });
 
 // Fetch customers
@@ -107,17 +176,30 @@ const fetchVoucher = async () => {
         const response = await api.get(`/receipts-payments-transactions/${route.params.id}`);
 
         if (response.data) {
+            suppressMethodWatcher.value = true;
+            suppressTypeWatcher.value = true;
+            const returnedType = response.data.type.toLowerCase();
             formData.value = {
                 name: response.data.name || { en: "", ar: "" },
-                type: response.data.type || 'customer',
-                type_id: response.data.type_id || null,
+                class: response.data.class || voucherClass.value || 'received',
+                type: returnedType || 'customer',
+                customer_id: returnedType === 'customer' ? response.data.type_id : null,
+                supplier_id: returnedType === 'supplier' ? response.data.type_id : null,
                 expenses_date: response.data.expenses_date || "",
                 amount: response.data.amount || "",
                 notes: response.data.notes || "",
                 attachment: null,
-                method_type: response.data.method_type || null,
+                method_type: response.data.payment_method || null,
                 method_type_id: response.data.method_type_id || null,
             };
+            voucherCode.value = response.data.code || "";
+            if (formData.value.method_type) {
+                await fetchMethodTypeOptions(formData.value.method_type);
+            } else {
+                bankItems.value = [];
+            }
+            suppressMethodWatcher.value = false;
+            suppressTypeWatcher.value = false;
         }
     } catch (err: any) {
         console.error('Error fetching voucher:', err);
@@ -135,8 +217,10 @@ const handleSave = async () => {
         const formDataToSend = new FormData();
         formDataToSend.append('name[en]', formData.value.name.en);
         formDataToSend.append('name[ar]', formData.value.name.ar);
+        formDataToSend.append('class', formData.value.class);
         formDataToSend.append('type', formData.value.type);
-        if (formData.value.type_id) formDataToSend.append('type_id', String(formData.value.type_id));
+        const currentTypeId = formData.value.type === 'customer' ? formData.value.customer_id : formData.value.supplier_id;
+        if (currentTypeId) formDataToSend.append('type_id', String(currentTypeId));
         formDataToSend.append('expenses_date', formData.value.expenses_date);
         formDataToSend.append('amount', String(formData.value.amount));
         formDataToSend.append('notes', formData.value.notes);
@@ -147,6 +231,7 @@ const handleSave = async () => {
         if (formData.value.method_type_id) formDataToSend.append('method_type_id', String(formData.value.method_type_id));
 
         if (isEditing.value) {
+            formDataToSend.append('_method', 'PUT');
             await api.post(`/receipts-payments-transactions/${route.params.id}`, formDataToSend, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
@@ -161,6 +246,9 @@ const handleSave = async () => {
         router.push({ name: 'VouchersList' });
     } catch (err: any) {
         console.error('Error saving voucher:', err);
+        if (err?.response?.data?.errors) {
+            formErrors.value = err.response.data.errors;
+        }
         error(err?.response?.data?.message || 'فشل في حفظ السند');
     } finally {
         saving.value = false;
@@ -171,13 +259,16 @@ const handleSave = async () => {
 const handleCancel = () => {
     router.push({ name: 'VouchersList' });
 };
+const pageLoading = ref(false);
 
 // Lifecycle
 onMounted(async () => {
-    await Promise.all([fetchCustomers(), fetchSuppliers()]);
+    pageLoading.value = true
+    await Promise.all([fetchCustomers(), fetchSuppliers(), fetchConstants()]);
     if (isEditing.value) {
         await fetchVoucher();
     }
+    pageLoading.value = false
 });
 
 // Vouchers icon
@@ -206,183 +297,205 @@ const saveIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xm
 </script>
 <template>
     <default-layout>
-        <div class="voucher-form-page">
-            <PageHeader :icon="isReceiptVoucher ? ReceiptVoucherIcon : PaymentVoucherIcon"
-                :title-key="isReceiptVoucher ? 'pages.vouchers_form.receiptVoucherTitle' : 'pages.vouchers_form.paymentVoucherTitle'"
-                description-key="pages.vouchers_form.description" />
+        <div class="voucher-form-page -mx-6 bg-qallab-dashboard-bg space-y-4">
+            <div class="p-6 bg-white rounded-3xl border !border-slate-300 -mt-6">
+                <PageHeader :icon="isReceiptVoucher ? ReceiptVoucherIcon : PaymentVoucherIcon"
+                    :title-key="isReceiptVoucher ? 'pages.vouchers_form.receiptVoucherTitle' : 'pages.vouchers_form.paymentVoucherTitle'"
+                    description-key="pages.vouchers_form.description" />
 
-            <!-- Entity Type Toggle Buttons -->
-            <div class="flex gap-2 mb-6 border-y border-gray-200 -mx-6 px-6 py-3">
-                <ButtonWithIcon variant="flat" :color="formData.type === 'customer' ? 'primary-500' : 'white'"
-                    height="50"
-                    :custom-class="`px-5 font-semibold text-base ${formData.type === 'customer' ? '!text-white' : '!text-gray-400'}`"
-                    :prepend-icon="customerIcon" label="عميل" @click="formData.type = 'customer'" />
+                <!-- Entity Type Toggle Buttons -->
+                <div class="flex gap-2 mb-6 border-y border-gray-200 -mx-6 px-6 py-3">
+                    <ButtonWithIcon variant="flat" :color="formData.type === 'customer' ? 'primary-500' : 'white'"
+                        height="50"
+                        :custom-class="`px-5 font-semibold text-base ${formData.type === 'customer' ? '!text-white' : '!text-gray-400'}`"
+                        :prepend-icon="customerIcon" label="عميل" @click="formData.type = 'customer'" />
 
-                <ButtonWithIcon variant="flat" :color="formData.type === 'supplier' ? 'primary-500' : 'white'"
-                    height="50"
-                    :custom-class="`px-5 font-semibold text-base ${formData.type === 'supplier' ? '!text-white' : '!text-gray-400'}`"
-                    :prepend-icon="supplierIcon" label="مورد" @click="formData.type = 'supplier'" />
+                    <ButtonWithIcon variant="flat" :color="formData.type === 'supplier' ? 'primary-500' : 'white'"
+                        height="50"
+                        :custom-class="`px-5 font-semibold text-base ${formData.type === 'supplier' ? '!text-white' : '!text-gray-400'}`"
+                        :prepend-icon="supplierIcon" label="مورد" @click="formData.type = 'supplier'" />
+                </div>
+
+
+                <!-- Form Content -->
+                <v-form ref="formRef" v-model="isFormValid">
+                    <!-- Section 1: Basic Information -->
+                    <div>
+                        <div class="flex items-center mb-6 gap-2 text-primary-600">
+                            <span class="w-4" v-html="fileIcon_2"></span>
+                            <h2 class="text-base font-bold">البيانات الأساسية للسند</h2>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 gap-y-6">
+                            <!-- Client/Supplier Name -->
+                            <SelectWithIconInput show-add-button v-model="typeId"
+                                :label="`اسم ال${entityLabel} *`" :placeholder="`اختر ال${entityLabel}`"
+                                :rules="[required()]" clearable :items="clientItems" :hide-details="false"
+                                :error-messages="formErrors['type_id']"
+                                @update:model-value="delete formErrors['type_id']" />
+
+                            <!-- Voucher Date -->
+                            <DatePickerInput v-model="formData.expenses_date" label="تاريخ السند"
+                                :rules="[required()]" placeholder="اختر التاريخ" :hide-details="false"
+                                :error-messages="formErrors['expenses_date']"
+                                @update:model-value="delete formErrors['expenses_date']" />
+
+                            <!-- Amount -->
+                            <PriceInput showRialIcon v-model="formData.amount" label="المبلغ"
+                                placeholder="ادخل المبلغ مثل: 5000.00" :rules="[required(), positive()]"
+                                :hide-details="false" type="number"
+                                :error-messages="formErrors['amount']"
+                                @update:model-value="delete formErrors['amount']" />
+
+                            <!-- Voucher Title (Bilingual) -->
+                            <LanguageTabs :languages="availableLanguages" label="عنوان السند">
+                                <template #en>
+                                    <TextInput v-model="formData.name.en" placeholder="Enter voucher title in English"
+                                        :rules="[required()]" :hide-details="false"
+                                        :error-messages="formErrors['name.en']"
+                                        @input="delete formErrors['name.en']" />
+                                </template>
+                                <template #ar>
+                                    <TextInput v-model="formData.name.ar" placeholder="أدخل عنوان السند بالعربية"
+                                        :rules="[required()]" :hide-details="false"
+                                        :error-messages="formErrors['name.ar']"
+                                        @input="delete formErrors['name.ar']" />
+                                </template>
+                            </LanguageTabs>
+
+                            <!-- Notes (Single field) -->
+                            <TextInput v-model="formData.notes" label="وصف السند" placeholder="أدخل وصف السند"
+                                class="md:col-span-2" :hide-details="false"
+                                :error-messages="formErrors['notes']"
+                                @input="delete formErrors['notes']" />
+
+                            <!-- Attachment (Single file) -->
+                            <FileUploadInput v-model="formData.attachment" label="المرفقات"
+                                accept="image/png, image/jpeg, image/jpg, application/pdf" :multiple="false"
+                                :max-files="1" :max-size="10" hint="PNG, JPG, PDF (max. 10MB)" />
+                        </div>
+                    </div>
+                </v-form>
             </div>
 
+            <!-- Section 2: Payment & Accounting -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="col-span-2 bg-white rounded-xl p-6">
+                    <h3 class="text-lg font-bold text-primary-900 mb-6">طريقة الدفع والحسابات</h3>
+                    <!-- Left Column -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <!-- Payment Method -->
+                        <SelectInput v-model="formData.method_type" clearable label="طريقة الدفع *"
+                            :items="paymentMethodItems" placeholder="اختر" :hide-details="false"
+                            :error-messages="formErrors['method_type']"
+                            @update:model-value="delete formErrors['method_type']" />
 
-            <!-- Form Content -->
-            <v-form ref="formRef" v-model="isFormValid">
-                <!-- Section 1: Basic Information -->
-                <div class="bg-gray-50 rounded-lg p-6 mb-6">
-                    <h3 class="text-lg font-bold text-primary-900 mb-5">البيانات الأساسية للسند</h3>
-
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 gap-y-6">
-                        <!-- Client/Supplier Name -->
-                        <SelectWithIconInput show-add-button v-model="formData.type_id"
-                            :label="`اسم ال${entityLabel} *`" :placeholder="`اختر ال${entityLabel}`"
-                            :rules="[required()]" :items="clientItems" :hide-details="false" />
-
-                        <!-- Voucher Date -->
-                        <DatePickerInput v-model="formData.expenses_date" label="تاريخ السند *" :rules="[required()]"
-                            placeholder="اختر التاريخ" hide-details="auto" />
-
-                        <!-- Amount -->
-                        <PriceInput showRialIcon v-model="formData.amount" label="المبلغ *"
-                            placeholder="ادخل المبلغ مثل: 5000.00" :rules="[required(), positive()]" hide-details="auto"
-                            type="number" />
-
-                        <!-- Voucher Title (Bilingual) -->
-                        <LanguageTabs :languages="availableLanguages" label="عنوان السند *">
-                            <template #en>
-                                <TextInput v-model="formData.name.en" placeholder="Enter voucher title in English"
-                                    :rules="[required()]" hide-details="auto" />
-                            </template>
-                            <template #ar>
-                                <TextInput v-model="formData.name.ar" placeholder="أدخل عنوان السند بالعربية"
-                                    :rules="[required()]" hide-details="auto" />
-                            </template>
-                        </LanguageTabs>
-
-                        <!-- Notes (Single field) -->
-                        <TextInput v-model="formData.notes" label="وصف السند" placeholder="أدخل وصف السند"
-                            class="md:col-span-2" />
-
-                        <!-- Attachment (Single file) -->
-                        <FileUploadInput v-model="formData.attachment" label="المرفقات"
-                            accept="image/png, image/jpeg, image/jpg, application/pdf" :multiple="false" :max-files="1"
-                            :max-size="10" hint="PNG, JPG, PDF (max. 10MB)" />
+                        <!-- Bank Name -->
+                        <SelectWithIconInput show-add-button v-model="formData.method_type_id" label="اسم البنك"
+                            :items="bankItems" placeholder="اختر" :hide-details="false" :loading="isLoadingBankItems"
+                            :disabled="isLoadingBankItems"
+                            :error-messages="formErrors['method_type_id']"
+                            @update:model-value="delete formErrors['method_type_id']" />
                     </div>
                 </div>
 
-                <!-- Section 2: Payment & Accounting -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="col-span-2 bg-gray-50 rounded-lg p-6">
-                        <h3 class="text-lg font-bold text-primary-900 mb-6">طريقة الدفع والحسابات</h3>
-                        <!-- Left Column -->
-                        <div class="grid grid-cols-2 gap-4">
-                            <!-- Payment Method -->
-                            <SelectInput v-model="formData.method_type" label="طريقة الدفع *"
-                                :items="paymentMethodItems" placeholder="اختر" hide-details="auto" />
+                <!-- Right Column - Summary Table -->
+                <div class="bg-white rounded-lg overflow-hidden border !border-gray-200">
+                    <table class="w-full">
+                        <!-- Table Header -->
+                        <thead>
+                            <tr class="bg-primary-400">
+                                <th
+                                    class="text-white font-semibold text-base py-3 px-4 text-center border-l border-gray-200">
+                                    العنصر
+                                </th>
+                                <th class="text-white font-semibold text-base py-3 px-4 text-center">
+                                    القيمة
+                                </th>
+                            </tr>
+                        </thead>
+                        <!-- Table Body -->
+                        <tbody class="text-sm bg-primary-50/80">
+                            <!-- Received from / Destination -->
+                            <tr class="border-b !border-gray-200">
+                                <td class="py-4 px-4 text-center font-bold text-gray-900 border-l border-gray-200">
+                                    يستلم من / الجهة
+                                </td>
+                                <td class="py-4 px-4 text-center text-gray-600">
+                                    {{ entityLabel }}
+                                </td>
+                            </tr>
 
-                            <!-- Bank Name -->
-                            <SelectWithIconInput show-add-button v-model="formData.method_type_id" label="اسم البنك"
-                                :items="bankItems" placeholder="اختر" hide-details="auto" />
-                        </div>
-                    </div>
+                            <!-- Voucher Number -->
+                            <tr v-if="isEditing" class="border-b !border-gray-200">
+                                <td class="py-4 px-4 text-center font-bold text-gray-900 border-l border-gray-200">
+                                    رقم السند
+                                </td>
+                                <td class="py-4 px-4 text-center text-gray-600">
+                                    {{ voucherCode || '—' }}
+                                </td>
+                            </tr>
 
-                    <!-- Right Column - Summary Table -->
-                    <div class="bg-white rounded-lg overflow-hidden border border-gray-200">
-                        <table class="w-full">
-                            <!-- Table Header -->
-                            <thead>
-                                <tr class="bg-primary-400">
-                                    <th
-                                        class="text-white font-semibold text-base py-3 px-4 text-center border-l border-gray-200">
-                                        العنصر
-                                    </th>
-                                    <th class="text-white font-semibold text-base py-3 px-4 text-center">
-                                        القيمة
-                                    </th>
-                                </tr>
-                            </thead>
-                            <!-- Table Body -->
-                            <tbody class="text-sm bg-primary-50/80">
-                                <!-- Received from / Destination -->
-                                <tr class="border-b border-gray-200">
-                                    <td class="py-4 px-4 text-center font-bold text-gray-900 border-l border-gray-200">
-                                        يستلم من / الوجهة
-                                    </td>
-                                    <td class="py-4 px-4 text-center text-gray-600">
-                                        {{ entityLabel }}
-                                    </td>
-                                </tr>
+                            <!-- Classification -->
+                            <tr class="border-b !border-gray-200">
+                                <td class="py-4 px-4 text-center font-bold text-gray-900 border-l border-gray-200">
+                                    التصنيف
+                                </td>
+                                <td class="py-4 px-4 text-center">
+                                    <span
+                                        :class="isReceiptVoucher ? 'text-success-700 bg-success-50' : 'bg-error-50 text-error-700'"
+                                        class="font-semibold px-2 rounded-full">
+                                        {{ isReceiptVoucher ? 'قبض' : 'صرف' }}
+                                    </span>
+                                </td>
+                            </tr>
 
-                                <!-- Voucher Number -->
-                                <tr class="border-b border-gray-200">
-                                    <td class="py-4 px-4 text-center font-bold text-gray-900 border-l border-gray-200">
-                                        رقم السند
-                                    </td>
-                                    <td class="py-4 px-4 text-center text-gray-600">
-                                        GFR-2255
-                                    </td>
-                                </tr>
+                            <!-- Total Amount -->
+                            <tr>
+                                <td class="py-4 px-4 text-center font-bold text-gray-900 border-l border-gray-200">
+                                    إجمالي السند
+                                </td>
+                                <td class="py-4 px-4 text-center text-gray-600">
+                                    {{ formData.amount || '0' }} ريال
+                                </td>
+                            </tr>
 
-                                <!-- Classification -->
-                                <tr class="border-b border-gray-200">
-                                    <td class="py-4 px-4 text-center font-bold text-gray-900 border-l border-gray-200">
-                                        التصنيف
-                                    </td>
-                                    <td class="py-4 px-4 text-center">
-                                        <span
-                                            :class="isReceiptVoucher ? 'text-success-700 bg-success-50' : 'bg-error-50 text-error-700'"
-                                            class="font-semibold px-2 rounded-full">
-                                            {{ isReceiptVoucher ? 'قبض' : 'صرف' }}
-                                        </span>
-                                    </td>
-                                </tr>
-
-                                <!-- Total Amount -->
-                                <tr class="border-b border-gray-200">
-                                    <td class="py-4 px-4 text-center font-bold text-gray-900 border-l border-gray-200">
-                                        إجمالي السند
-                                    </td>
-                                    <td class="py-4 px-4 text-center text-gray-600">
-                                        {{ formData.amount || '0' }} ريال
-                                    </td>
-                                </tr>
-
-                                <!-- Current Balance -->
-                                <tr class="border-b border-gray-200">
+                            <!-- Current Balance -->
+                            <!-- <tr class="border-b border-gray-200">
                                     <td class="py-4 px-4 text-center font-bold text-gray-900 border-l border-gray-200">
                                         الرصيد الحالي لل{{ entityLabel }}
                                     </td>
                                     <td class="py-4 px-4 text-center text-gray-600">
                                         {{ formData.current_balance || '0' }} ريال
                                     </td>
-                                </tr>
+                                </tr> -->
 
-                                <!-- After Operation Balance -->
-                                <tr>
+                            <!-- After Operation Balance -->
+                            <!-- <tr>
                                     <td class="py-4 px-4 text-center font-bold text-gray-900 border-l border-gray-200">
                                         الرصيد بعد العملية
                                     </td>
                                     <td class="py-4 px-4 text-center text-gray-600">
                                         {{ formData.after_operation_balance || '0' }} ريال
                                     </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                                </tr> -->
+                        </tbody>
+                    </table>
                 </div>
-            </v-form>
-
+            </div>
             <!-- Action Buttons -->
             <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col">
                 <ButtonWithIcon variant="flat" color="primary" rounded="4" height="48" custom-class="min-w-56"
-                    :prepend-icon="saveIcon" label="حفظ" @click="handleSave" />
+                    :prepend-icon="saveIcon" label="حفظ" :loading="saving" @click="handleSave" />
 
-                <ButtonWithIcon prepend-icon="mdi-close" variant="flat" color="primary-50" rounded="4" height="48"
-                    custom-class="font-semibold text-base text-primary-700 px-6 min-w-56" label="إلغاء"
-                    @click="handleCancel" />
+                <ButtonWithIcon prepend-icon="mdi-close" variant="flat" color="primary-50" rounded="4"
+                    height="48" custom-class="font-semibold text-base text-primary-700 px-6 min-w-56" label="إلغاء"
+                    :loading="saving" @click="handleCancel" />
             </div>
-
-
         </div>
+        <v-overlay :model-value="pageLoading" contained class="align-center justify-center">
+            <v-progress-circular indeterminate color="primary" />
+        </v-overlay>
     </default-layout>
 </template>
 
