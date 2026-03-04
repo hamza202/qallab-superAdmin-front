@@ -219,17 +219,16 @@ const formatDate = (dateStr: string | null | undefined) => {
 
 // View linked orders handler
 const handleViewLinkedOrders = (row: any) => {
-  // Extract sales code and purchase code from the clicked row
+  // Extract sales code from the clicked row
   // Format: "CODE \\ DATE"
   const salesCode = row.sales_code_date.split(' \\ ')[0];
-  const purchaseCode = row.purchase_code_date.split(' \\ ')[0];
-  const codes = `${salesCode},${purchaseCode}`;
   
   router.push({
     name: 'OrdersMaterialProductLinkView',
     query: {
       category: categoryKey.value,
-      codes: codes
+      codes: salesCode,
+      purchase_uuid: purchaseUuid.value
     }
   });
 };
@@ -354,15 +353,15 @@ const linkedTableItems = computed(() =>
               <p class="text-xs font-semibold text-gray-600">حالة الطلبية:</p>
               <p class="text-sm font-bold text-gray-900 mt-0.5">{{ orderDetails.status_name || '—' }}</p>
             </div>
-            <!-- كود طلب مبيعات -->
+            <!-- كود عرض مبيعات -->
             <div>
-              <p class="text-xs font-semibold text-gray-600">كود طلب مبيعات :</p>
-              <p class="text-sm font-bold text-gray-900 mt-0.5">{{ orderDetails.code }}</p>
+              <p class="text-xs font-semibold text-gray-600">كود عرض مبيعات :</p>
+              <p class="text-sm font-bold text-gray-900 mt-0.5">{{ orderDetails.sq_code || '—' }}</p>
             </div>
-            <!-- كود طلب مشتريات -->
+            <!-- كود عرض مشتريات -->
             <div>
-              <p class="text-xs font-semibold text-gray-600">كود طلب مشتريات :</p>
-              <p class="text-sm font-bold text-gray-900 mt-0.5">{{ sall_orders_code_from_index || '—' }}</p>
+              <p class="text-xs font-semibold text-gray-600">كود عرض مشتريات :</p>
+              <p class="text-sm font-bold text-gray-900 mt-0.5">{{ orderDetails.pq_code || '—' }}</p>
             </div>
             <!-- تاريخ الطلبية -->
             <div>
@@ -459,7 +458,7 @@ const linkedTableItems = computed(() =>
                 <!-- rightmost → leftmost -->
                 <th class="px-6 py-3 text-xs font-bold text-gray-500 whitespace-nowrap text-right">الرقم</th>
                 <th class="px-6 py-3 text-xs font-bold text-gray-500 whitespace-nowrap text-center">العميل / نوع العميل</th>
-                <th class="px-6 py-3 text-xs font-bold text-gray-500 whitespace-nowrap text-center">كود طلبية مبيعات العميل / التاريخ</th>
+                <th class="px-6 py-3 text-xs font-bold text-gray-500 whitespace-nowrap text-center">كود طلب مبيعات العميل / التاريخ</th>
                 <th class="px-6 py-3 text-xs font-bold text-gray-500 whitespace-nowrap text-center">كود طلبية مشتريات قلاب / التاريخ</th>
                 <th class="px-6 py-3 text-xs font-bold text-gray-500 whitespace-nowrap text-center">الإجراءات</th>
               </tr>
