@@ -228,6 +228,8 @@ const handleViewLinkedOrders = (row: any) => {
     query: {
       category: categoryKey.value,
       codes: salesCode,
+      sall_orders_code_from_index: sall_orders_code_from_index.value,
+      po_datetime: routeOrderDatetime.value,
       purchase_uuid: purchaseUuid.value
     }
   });
@@ -371,7 +373,7 @@ const linkedTableItems = computed(() =>
             <!-- موقع المشروع -->
             <div>
               <p class="text-xs font-semibold text-gray-600">موقع المشروع :</p>
-              <p class="text-sm font-medium text-gray-900 mt-0.5 max-w-[200px] truncate" :title="orderDetails.target_location">
+              <p class="text-sm font-medium text-gray-900 mt-0.5 md:max-w-[400px] max-w-[200px]" :title="orderDetails.target_location">
                 {{ orderDetails.target_location || '—' }}
               </p>
             </div>

@@ -13,13 +13,19 @@
                         المشتريات
                     </router-link>
                     <span class="text-lg text-gray-300">/</span>
-                    <router-link to="/purchases/orders/material-product/list"
+                    <router-link :to="`/purchases/orders/material-product/list`"
                         class="text-gray-600 hover:text-primary-600">
-                        طلبيات مواد أولية
+                        طلبيات مواد بناء أولية
                     </router-link>
                     <span class="text-lg text-gray-300">/</span>
-                    <span class="text-primary-700 font-medium bg-primary-50 px-2 py-1 rounded-md">#{{ orderNumber
-                    }}</span>
+                    <span @click="goBackToForm"
+                        class="text-gray-600 hover:text-primary-600 cursor-pointer">#{{ orderNumber
+                        }}</span>
+                    <span class="text-lg text-gray-300">/</span>
+                    <span class="text-primary-700 font-medium bg-primary-50 px-2 py-1 rounded-md">
+                        الربط مع طلبيات العملاء
+                    </span>
+
                 </div>
 
                 <!-- Page Header -->
@@ -124,6 +130,8 @@ const purchaseOrderData = ref<any>(null)
 const salesCode = computed(() => route.query.codes as string)
 const purchaseUuid = computed(() => route.query.purchase_uuid as string)
 const category = computed(() => route.query.category as string)
+const sall_orders_code_from_index = computed(() => route.query.sall_orders_code_from_index as string)
+const po_datetime = computed(() => route.query.po_datetime as string)
 const orderNumber = computed(() => salesCode.value || '')
 
 // Fetch sales order data
@@ -234,6 +242,24 @@ const productHeaders = [
     { title: 'الضريبة', key: 'tax' },
     { title: 'إجمالي المبلغ', key: 'subtotal' },
 ]
+
+// ── Navigation ───────────────────────────────────────────────────
+const goBackToForm = () => {
+    if (purchaseUuid.value) {
+        router.push({
+            name: "OrdersMaterialProductLinkForm",
+            params: { id: purchaseUuid.value },
+            query: {
+                sall_orders_code_from_index: sall_orders_code_from_index.value,
+                category: category.value ?? undefined,
+                po_datetime: po_datetime.value ?? undefined,
+            },
+        });
+    } else {
+        router.back();
+    }
+};
+
 </script>
 
 <style scoped>
