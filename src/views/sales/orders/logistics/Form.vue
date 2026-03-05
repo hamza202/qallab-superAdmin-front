@@ -813,7 +813,19 @@ const handleSubmit = async (afterSuccess?: "reset" | "navigate") => {
 const summaryTotals = computed(() => {
   const transportValue = logisticsDetails.value.reduce((total, detail) => {
     const amount = detail.transport_amount != null ? Number(detail.transport_amount) : 0;
-    return total + (isNaN(amount) ? 0 : amount);
+    let finalAmount = isNaN(amount) ? 0 : amount;
+    if (finalAmount > 0 && detail.discount_val) {
+        const discountVal = Number(detail.discount_val);
+        const discountType = Number(detail.discount_type || 2);
+        if (!isNaN(discountVal) && discountVal > 0) {
+            if (discountType === 1) { // percentage
+                finalAmount = finalAmount - (finalAmount * (discountVal / 100));
+            } else { // fixed
+                finalAmount = finalAmount - discountVal;
+            }
+        }
+    }
+    return total + Math.max(0, finalAmount);
   }, 0);
 
   const taxRatePercent = 15;
@@ -832,7 +844,19 @@ const summaryTotals = computed(() => {
 const computedFinalLogisticsServiceAmount = computed(() => {
     return logisticsDetails.value.reduce((total, detail) => {
         const amount = detail.transport_amount != null ? Number(detail.transport_amount) : 0;
-        return total + (isNaN(amount) ? 0 : amount);
+        let finalAmount = isNaN(amount) ? 0 : amount;
+        if (finalAmount > 0 && detail.discount_val) {
+            const discountVal = Number(detail.discount_val);
+            const discountType = Number(detail.discount_type || 2);
+            if (!isNaN(discountVal) && discountVal > 0) {
+                if (discountType === 1) { // percentage
+                    finalAmount = finalAmount - (finalAmount * (discountVal / 100));
+                } else { // fixed
+                    finalAmount = finalAmount - discountVal;
+                }
+            }
+        }
+        return total + Math.max(0, finalAmount);
     }, 0);
 });
 
@@ -1070,7 +1094,7 @@ const handleEditTrip = (item: any) => {
 const calculateTripItemSubTotal = async (tripItem: TripTableItem) => {
     const calcItems = ref<CalculationItem[]>([{
         item_id: tripItem.item_id,
-        quantity: 1,
+        quantity: tripItem.trip_no ? Number(tripItem.trip_no) : 0,
         price_per_unit: tripItem.trip_price ? Number(tripItem.trip_price) : 0,
         discount_type: tripItem.discount_type ?? 1,
         discount_val: tripItem.discount_val ? Number(tripItem.discount_val) : 0,
@@ -1081,7 +1105,7 @@ const calculateTripItemSubTotal = async (tripItem: TripTableItem) => {
     if (results) {
         const itemResult = Object.values(results)[0];
         if (itemResult) {
-            return itemResult.final;
+            return itemResult.subtotal_after_discount;
         }
     }
     // Fallback: manual calculation
