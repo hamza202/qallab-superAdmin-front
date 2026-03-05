@@ -964,10 +964,11 @@ onMounted(async () => {
             <template #item.vehicle_type_no="{ item }">
               <div class="flex gap-2 my-2">
                 <div v-for="(vehicle, index) in item.vehicle_type_no" :key="index" class="w-[180px]">
-                  <PriceInput 
-                    v-model="vehicle.transport_no" 
-                    density="compact" 
-                    hide-details 
+                  <PriceInput
+                    v-model="vehicle.transport_no"
+                    density="compact"
+                    hide-details
+                    placeholder=""
                     class="!rounded-lg"
                   >
                     <template #append-inner>
@@ -1008,9 +1009,9 @@ onMounted(async () => {
                 <div v-for="(vehicle, index) in item.vehicle_type_no" :key="index" class="w-[180px]">
                   <PriceInput 
                     v-model="vehicle.transport_no" 
-                    type="number" 
                     density="compact" 
                     hide-details 
+                    placeholder=""
                     class="!rounded-lg"
                   >
                     <template #append-inner>
