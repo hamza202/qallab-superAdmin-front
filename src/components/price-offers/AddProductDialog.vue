@@ -543,6 +543,16 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
             />
           </div>
 
+          <!-- From Date (logistics only) -->
+          <div v-if="requestType === 'logistics'">
+            <DatePickerInput 
+              v-model="editProductData.from_date" 
+              placeholder="تاريخ بداية النقل" 
+              density="compact"
+              class="min-w-[170px]" 
+            />
+          </div>
+
           <!-- Trip Date (logistics-trips only) -->
           <div v-if="requestType === 'logistics-trips'">
             <DatePickerInput 

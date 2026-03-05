@@ -1173,7 +1173,7 @@ const tripHeaders = [
     { title: 'اسم المنتج', key: 'name' },
     { title: 'الوحدة', key: 'unit' },
     { title: 'الكمية', key: 'quantity' },
-    { title: 'تاريخ الرحلة', key: 'trip_date' },
+    { title: 'تاريخ بدء النقل', key: 'trip_date' },
     { title: 'نوع المركبات', key: 'transport_type_names' },
     { title: 'عدد الرحلات', key: 'trip_no' },
     { title: 'سعر الرحلة', key: 'trip_price' },
