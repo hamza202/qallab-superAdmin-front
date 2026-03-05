@@ -368,11 +368,19 @@
               <ul class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
                 <li class="relative">
                   <router-link to="/sales/delivery-docs/list" :class="[
-                    $route.path.includes('/sales/delivery-docs')
+                    $route.path.includes('/sales/delivery-docs') && !$route.path.includes('/sales/delivery-docs-logistics')
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
                     وثائق التسليم</router-link>
+                </li>
+                <li class="relative">
+                  <router-link to="/sales/delivery-docs-logistics/list" :class="[
+                    $route.path.includes('/sales/delivery-docs-logistics')
+                      ? 'font-bold text-qallab-yellow'
+                      : 'text-white hover:text-qallab-yellow',
+                  ]">
+                    وثائق تسليم خدمات النقل</router-link>
                 </li>
               </ul>
               <h2 class="text-sm font-medium leading-5 my-2">
@@ -587,11 +595,19 @@
               <ul class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
                 <li class="relative">
                   <router-link to="/purchases/receiving-docs/list" :class="[
-                    isMenuItemActive('/purchases/receiving-docs')
+                    isMenuItemActive('/purchases/receiving-docs') && !$route.path.includes('/purchases/receiving-docs-logistics')
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
                     وثائق الأستلام</router-link>
+                </li>
+                <li class="relative">
+                  <router-link to="/purchases/receiving-docs-logistics/list" :class="[
+                    $route.path.includes('/purchases/receiving-docs-logistics')
+                      ? 'font-bold text-qallab-yellow'
+                      : 'text-white hover:text-qallab-yellow',
+                  ]">
+                    وثائق استلام خدمات النقل</router-link>
                 </li>
               </ul>
               <h2 class="text-sm font-medium leading-5 my-2">

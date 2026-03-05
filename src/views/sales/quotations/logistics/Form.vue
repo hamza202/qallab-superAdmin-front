@@ -1,16 +1,18 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router';
 import AddProductDialog, { type ProductToAdd } from '@/components/price-offers/AddProductDialog.vue';
 import TopHeader from '@/components/price-offers/TopHeader.vue';
 import { useApi } from '@/composables/useApi';
 import { fileIcon, mapMarkerIcon, messagePlusIcon, filePlusIcon, CoinHandIcon, fileCheckIcon, busIcon, globeIcon } from '@/components/icons/priceOffersIcons';
+import { useCalculations, type CalculationItem } from '@/composables/useCalculations';
 import { returnIcon, saveIcon, binIcon, rialIcon, packageIcon } from '@/components/icons/globalIcons';
 import { useForm } from '@/composables/useForm';
 import { useNotification as useNotify } from '@/composables/useNotification';
 import AddLogisticsDetailDialog from './components/AddLogisticsDetailDialog.vue';
 import { useNotification } from '@/composables/useNotification';
+import { tr } from "vuetify/locale";
 
 const { warning } = useNotification();
 const { formRef, isFormValid, validate } = useForm();
@@ -62,6 +64,7 @@ const transportTypeItems = ref<any[]>([]);
 const categoriesItems = ref<any[]>([]);
 const amPmIntervalItems = ref<any[]>([]);
 const actualExecutionIntervalItems = ref<any[]>([]);
+const approvedAmountItems = ref<any[]>([]);
 
 // Logistics details (array - dynamically populated from dialog)
 const logisticsDetails = ref<LogisticsDetail[]>([]);
@@ -79,6 +82,11 @@ const fetchConstants = async () => {
             // Actual execution interval - use from API or fallback
             if (data.actual_execution_interval && Array.isArray(data.actual_execution_interval)) {
                 actualExecutionIntervalItems.value = data.actual_execution_interval.map((i: any) => ({ title: i.label, value: i.key }));
+            }
+
+            // Approved amounts for radio buttons
+            if (data.approved_amounts && Array.isArray(data.approved_amounts)) {
+                approvedAmountItems.value = data.approved_amounts.map((i: any) => ({ title: i.label, value: i.key }));
             }
         }
     } catch (e) {
@@ -136,6 +144,9 @@ const fetchFormData = async () => {
         formData.value.quotation_validity_no = data.quotation_validity_no ?? null;
         formData.value.responsible_person = data.responsible_person ?? '';
         formData.value.responsible_phone = data.responsible_phone ?? null;
+        formData.value.source_location = data.source_location ?? null;
+        formData.value.source_latitude = data.source_latitude ?? null;
+        formData.value.source_longitude = data.source_longitude ?? null;
         formData.value.target_location = data.target_location ?? null;
         formData.value.target_latitude = data.target_latitude ?? null;
         formData.value.target_longitude = data.target_longitude ?? null;
@@ -149,6 +160,15 @@ const fetchFormData = async () => {
         formData.value.cancel_fee_type = data.cancel_fee_type ?? null;
         formData.value.cancel_fee = data.cancel_fee ?? null;
         formData.value.code = data.code ? String(data.code) : '';
+        formData.value.approved_amount = data.approved_amount ?? null;
+
+        // Populate totals from API (will be overridden by computed if data changes)
+        if (data.final_logistics_service_amount != null) {
+            formData.value.final_logistics_service_amount = Number(data.final_logistics_service_amount);
+        }
+        if (data.final_logistics_trip != null) {
+            formData.value.final_logistics_trip = Number(data.final_logistics_trip);
+        }
 
         // Populate products (quotation_product_details for logistics)
         if (Array.isArray(data.quotation_product_details) && data.quotation_product_details.length > 0) {
@@ -187,6 +207,9 @@ const fetchFormData = async () => {
                     trip_no: item.trip_no != null ? Number(item.trip_no) : null,
                     trip_price: item.trip_price != null ? Number(item.trip_price) : null,
                     sub_total: item.sub_total != null ? Number(item.sub_total) : null,
+                    discount_val: item.discount_val != null ? Number(item.discount_val) : null,
+                    discount_type: item.discount_type != null ? Number(item.discount_type) : null,
+                    quotation_logistics_detail_id: item.quotation_logistics_detail_id != null ? Number(item.quotation_logistics_detail_id) : null,
                     transport_type: transportTypes,
                     transport_type_names: getTransportTypeNames(transportTypes),
                 } as TripTableItem;
@@ -258,6 +281,9 @@ const fetchRequestForQuotation = async () => {
             formData.value.customer_id = data.customer_id != null ? Number(data.customer_id) : null;
             formData.value.responsible_person = data.responsible_person || '';
             formData.value.responsible_phone = data.responsible_phone || null;
+            formData.value.source_location = data.source_location || null;
+            formData.value.source_latitude = data.source_latitude || null;
+            formData.value.source_longitude = data.source_longitude || null;
             formData.value.target_location = data.target_location || null;
             formData.value.target_latitude = data.target_latitude || null;
             formData.value.target_longitude = data.target_longitude || null;
@@ -417,6 +443,9 @@ interface TripDetail {
     transport_type_names?: string;
     trip_no?: number | null;
     sub_total?: number | null;
+    discount_val?: number | null;
+    discount_type?: number | null;
+    quotation_logistics_detail_id?: number | null;
     notes?: string;
     id?: number;
     isAdded?: boolean;
@@ -435,6 +464,9 @@ interface TripTableItem {
     transport_type_names?: string;
     trip_no?: number | null;
     sub_total?: number | null;
+    discount_val?: number | null;
+    discount_type?: number | null;
+    quotation_logistics_detail_id?: number | null;
     notes?: string;
     id?: number;
     isAdded?: boolean;
@@ -448,6 +480,9 @@ const formData = ref({
     quotation_validity_no: null as number | string | null,
     responsible_person: '' as string,
     responsible_phone: null as string | null,
+    source_location: null as string | null,
+    source_latitude: null as string | null,
+    source_longitude: null as string | null,
     target_location: null as string | null,
     target_latitude: null as string | null,
     target_longitude: null as string | null,
@@ -460,7 +495,10 @@ const formData = ref({
     late_fee: null as number | string | null,
     cancel_fee_type: null as string | null,
     cancel_fee: null as number | string | null,
-    code: '' as string
+    code: '' as string,
+    approved_amount: null as string | null,
+    final_logistics_service_amount: null as number | null,
+    final_logistics_trip: null as number | null
 });
 
 // Products table items
@@ -473,7 +511,19 @@ const tripTableItems = ref<TripTableItem[]>([]);
 const summaryTotals = computed(() => {
     const transportValue = logisticsDetails.value.reduce((total, detail) => {
         const amount = detail.transport_amount != null ? Number(detail.transport_amount) : 0;
-        return total + (isNaN(amount) ? 0 : amount);
+        let finalAmount = isNaN(amount) ? 0 : amount;
+        if (finalAmount > 0 && detail.discount_val) {
+            const discountVal = Number(detail.discount_val);
+            const discountType = Number(detail.discount_type || 2);
+            if (!isNaN(discountVal) && discountVal > 0) {
+                if (discountType === 1) { // percentage
+                    finalAmount = finalAmount - (finalAmount * (discountVal / 100));
+                } else { // fixed
+                    finalAmount = finalAmount - discountVal;
+                }
+            }
+        }
+        return total + Math.max(0, finalAmount);
     }, 0);
 
     const taxRatePercent = 15;
@@ -487,6 +537,43 @@ const summaryTotals = computed(() => {
         finalTotal,
     };
 });
+
+// Computed totals for logistics service and trips
+const computedFinalLogisticsServiceAmount = computed(() => {
+    return logisticsDetails.value.reduce((total, detail) => {
+        const amount = detail.transport_amount != null ? Number(detail.transport_amount) : 0;
+        let finalAmount = isNaN(amount) ? 0 : amount;
+        if (finalAmount > 0 && detail.discount_val) {
+            const discountVal = Number(detail.discount_val);
+            const discountType = Number(detail.discount_type || 2);
+            if (!isNaN(discountVal) && discountVal > 0) {
+                if (discountType === 1) { // percentage
+                    finalAmount = finalAmount - (finalAmount * (discountVal / 100));
+                } else { // fixed
+                    finalAmount = finalAmount - discountVal;
+                }
+            }
+        }
+        return total + Math.max(0, finalAmount);
+    }, 0);
+});
+
+const computedFinalLogisticsTrip = computed(() => {
+    return tripTableItems.value.reduce((total, item) => {
+        const subTotal = item.sub_total != null ? Number(item.sub_total) : 0;
+        return total + (isNaN(subTotal) ? 0 : subTotal);
+    }, 0);
+});
+
+// Watch for changes and update formData
+
+watch(computedFinalLogisticsServiceAmount, (newVal) => {
+    formData.value.final_logistics_service_amount = newVal;
+}, { immediate: true });
+
+watch(computedFinalLogisticsTrip, (newVal) => {
+    formData.value.final_logistics_trip = newVal;
+}, { immediate: true });
 
 const showAddProductDialog = ref(false);
 const editingProduct = ref<ProductToAdd | null>(null);
@@ -551,17 +638,17 @@ const handleProductSaved = (products: any[]) => {
                 });
             } else {
                 newTripItems.push({
-                   item_id: p.item_id,
-                   item_name: p.item_name,
-                   unit_id: p.unit_id,
-                   unit_name: p.unit_name,
-                   quantity: p.quantity,
-                   trip_no: p.trip_no ?? null,
-                   trip_date: p.from_date ?? null,
-                   trip_price: null,
-                   transport_type: p.transport_type != null ? [p.transport_type] : [],
-                   transport_type_names: getTransportTypeNames(p.transport_type != null ? [p.transport_type] : []),
-                   notes: p.notes ?? '',
+                    item_id: p.item_id,
+                    item_name: p.item_name,
+                    unit_id: p.unit_id,
+                    unit_name: p.unit_name,
+                    quantity: p.quantity,
+                    trip_no: p.trip_no ?? null,
+                    trip_date: p.from_date ?? null,
+                    trip_price: null,
+                    transport_type: p.transport_type != null ? [p.transport_type] : [],
+                    transport_type_names: getTransportTypeNames(p.transport_type != null ? [p.transport_type] : []),
+                    notes: p.notes ?? '',
                 });
             }
         });
@@ -582,13 +669,13 @@ const handleEditProduct = (item: any) => {
 const handleEditTrip = (item: any) => {
     const tripToEdit = tripTableItems.value.find(p => p.item_id === item.item_id);
     if (tripToEdit) {
-        editingProduct.value = { 
-            ...tripToEdit, 
+        editingProduct.value = {
+            ...tripToEdit,
             isAdded: true,
             id: tripToEdit.id || null,
             unit_price: tripToEdit.trip_price || null,
-            discount: null,
-            discount_type: null,
+            discount: tripToEdit.discount_val ?? null,
+            discount_type: tripToEdit.discount_type ?? null,
             transport_no: null,
         } as unknown as ProductToAdd;
         productDialogMode.value = 'logistics-trips';
@@ -596,7 +683,29 @@ const handleEditTrip = (item: any) => {
     }
 };
 
-const handleProductUpdated = (updatedProduct: any) => {
+// Calculate sub_total for a single trip item using the calculations API
+const calculateTripItemSubTotal = async (tripItem: TripTableItem) => {
+    const calcItems = ref<CalculationItem[]>([{
+        item_id: tripItem.item_id,
+        quantity: tripItem.trip_no ? Number(tripItem.trip_no) : 0,
+        price_per_unit: tripItem.trip_price ? Number(tripItem.trip_price) : 0,
+        discount_type: tripItem.discount_type ?? 1,
+        discount_val: tripItem.discount_val ? Number(tripItem.discount_val) : 0,
+    }]);
+
+    const { fetchCalculations } = useCalculations(calcItems);
+    const results = await fetchCalculations();
+    if (results) {
+        const itemResult = Object.values(results)[0];
+        if (itemResult) {
+            return itemResult.subtotal_after_discount;
+        }
+    }
+    // Fallback: manual calculation
+    return (Number(tripItem.trip_no ?? 0) * Number(tripItem.trip_price ?? 0));
+};
+
+const handleProductUpdated = async (updatedProduct: any) => {
     if (productDialogMode.value === 'logistics-trips') {
         // Handle trip update
         const tripProduct = updatedProduct as TripDetail;
@@ -613,9 +722,15 @@ const handleProductUpdated = (updatedProduct: any) => {
                 trip_price: tripProduct.trip_price ?? null,
                 transport_type: tripProduct.transport_type ?? [],
                 transport_type_names: tripProduct.transport_type_names ?? '',
+                discount_val: updatedProduct.discount ?? null,
+                discount_type: updatedProduct.discount_type ?? null,
                 isAdded: tripProduct.isAdded,
                 id: tripProduct.id,
             };
+
+            // Calculate sub_total using useCalculations API
+            const subTotal = await calculateTripItemSubTotal(tripTableItems.value[index]);
+            tripTableItems.value[index].sub_total = subTotal;
 
             const productIndex = productTableItems.value.findIndex(p => p.item_id === tripProduct.item_id);
             if (productIndex !== -1) {
@@ -670,7 +785,7 @@ const handleDeleteProduct = (item: any) => {
 };
 
 // Unified location handling
-type LocationType = 'main' | 'logistics-source' | 'logistics-target';
+type LocationType = 'source' | 'main' | 'logistics-source' | 'logistics-target';
 const currentLocationType = ref<LocationType>('main');
 const currentLogisticsIndex = ref<number>(-1);
 const showMapDialog = ref(false);
@@ -716,7 +831,11 @@ const openMapDialog = (type: LocationType = 'main', logisticsIndex: number = -1)
 
 // Unified location selection handler
 const handleLocationSelected = (location: { latitude: string; longitude: string; address: string }) => {
-    if (currentLocationType.value === 'main') {
+    if (currentLocationType.value === 'source') {
+        formData.value.source_latitude = location.latitude;
+        formData.value.source_longitude = location.longitude;
+        formData.value.source_location = location.address;
+    } else if (currentLocationType.value === 'main') {
         formData.value.target_latitude = location.latitude;
         formData.value.target_longitude = location.longitude;
         formData.value.target_location = location.address;
@@ -736,7 +855,9 @@ const handleLocationSelected = (location: { latitude: string; longitude: string;
 
 // Computed properties for map dialog
 const mapLatitude = computed(() => {
-    if (currentLocationType.value === 'main') {
+    if (currentLocationType.value === 'source') {
+        return String(formData.value.source_latitude || '');
+    } else if (currentLocationType.value === 'main') {
         return String(formData.value.target_latitude || '');
     } else if (currentLogisticsIndex.value !== -1 && logisticsDetails.value[currentLogisticsIndex.value]) {
         const detail = logisticsDetails.value[currentLogisticsIndex.value];
@@ -746,7 +867,9 @@ const mapLatitude = computed(() => {
 });
 
 const mapLongitude = computed(() => {
-    if (currentLocationType.value === 'main') {
+    if (currentLocationType.value === 'source') {
+        return String(formData.value.source_longitude || '');
+    } else if (currentLocationType.value === 'main') {
         return String(formData.value.target_longitude || '');
     } else if (currentLogisticsIndex.value !== -1 && logisticsDetails.value[currentLogisticsIndex.value]) {
         const detail = logisticsDetails.value[currentLogisticsIndex.value];
@@ -756,7 +879,9 @@ const mapLongitude = computed(() => {
 });
 
 const mapAddress = computed(() => {
-    if (currentLocationType.value === 'main') {
+    if (currentLocationType.value === 'source') {
+        return String(formData.value.source_location || '');
+    } else if (currentLocationType.value === 'main') {
         return String(formData.value.target_location || '');
     } else if (currentLogisticsIndex.value !== -1 && logisticsDetails.value[currentLogisticsIndex.value]) {
         const detail = logisticsDetails.value[currentLogisticsIndex.value];
@@ -825,6 +950,9 @@ const buildFormData = (): FormData => {
     fd.append('quotations_datetime', formData.value.quotations_datetime || '');
     fd.append('quotation_name', formData.value.quotation_name || '');
     fd.append('quotation_validity_no', String(formData.value.quotation_validity_no ?? '1'));
+    fd.append('source_location', formData.value.source_location || '');
+    fd.append('source_latitude', String(formData.value.source_latitude || ''));
+    fd.append('source_longitude', String(formData.value.source_longitude || ''));
     fd.append('target_location', formData.value.target_location || '');
     fd.append('target_latitude', String(formData.value.target_latitude || ''));
     fd.append('target_longitude', String(formData.value.target_longitude || ''));
@@ -837,6 +965,9 @@ const buildFormData = (): FormData => {
     fd.append('late_fee', String(formData.value.late_fee ?? ''));
     fd.append('cancel_fee_type', formData.value.cancel_fee_type || '');
     fd.append('cancel_fee', String(formData.value.cancel_fee ?? ''));
+    if (formData.value.approved_amount) {
+        fd.append('approved_amount', formData.value.approved_amount);
+    }
 
     // Quotation product details (logistics format)
     productTableItems.value.forEach((item, index) => {
@@ -865,13 +996,20 @@ const buildFormData = (): FormData => {
         }
         fd.append(`quotation_trip_details[${index}][trip_price]`, String(item.trip_price ?? ''));
         fd.append(`quotation_trip_details[${index}][trip_no]`, String(item.trip_no ?? ''));
-        
-        let subTotal = 0;
-        if (item.trip_no && item.trip_price) {
-             subTotal = Number(item.trip_no) * Number(item.trip_price);
+        fd.append(`quotation_trip_details[${index}][sub_total]`, String(item.sub_total ?? 0));
+        // In edit mode, use the stored value from API; in create mode, send -1
+        const logisticsDetailId = isEditMode.value && item.quotation_logistics_detail_id != null
+            ? String(item.quotation_logistics_detail_id)
+            : '-1';
+        fd.append(`quotation_trip_details[${index}][quotation_logistics_detail_id]`, logisticsDetailId);
+
+        // Discount fields
+        if (item.discount_val != null) {
+            fd.append(`quotation_trip_details[${index}][discount_val]`, String(item.discount_val));
         }
-        fd.append(`quotation_trip_details[${index}][sub_total]`, String(subTotal));
-        fd.append(`quotation_trip_details[${index}][quotation_logistics_detail_id]`, '-1');
+        if (item.discount_type != null) {
+            fd.append(`quotation_trip_details[${index}][discount_type]`, String(item.discount_type));
+        }
 
         // Transport types array
         if (item.transport_type && item.transport_type.length > 0) {
@@ -939,6 +1077,9 @@ const getInitialFormData = () => ({
     target_location: null as string | null,
     target_latitude: null as string | null,
     target_longitude: null as string | null,
+    source_location: null as string | null,
+    source_latitude: null as string | null,
+    source_longitude: null as string | null,
     project_name: '',
     payment_method: null as string | null,
     upfront_payment: null as number | string | null,
@@ -948,7 +1089,10 @@ const getInitialFormData = () => ({
     late_fee: null as number | string | null,
     cancel_fee_type: null as string | null,
     cancel_fee: null as number | string | null,
-    code: '' as string
+    code: '' as string,
+    approved_amount: null as string | null,
+    final_logistics_service_amount: null as number | null,
+    final_logistics_trip: null as number | null
 });
 
 const resetForm = () => {
@@ -1054,18 +1198,15 @@ const tripHeaders = [
     { title: 'اسم المنتج', key: 'name' },
     { title: 'الوحدة', key: 'unit' },
     { title: 'الكمية', key: 'quantity' },
-    { title: 'تاريخ الرحلة', key: 'trip_date' },
+    { title: 'تاريخ بدء النقل', key: 'trip_date' },
     { title: 'نوع المركبات', key: 'transport_type_names' },
     { title: 'عدد الرحلات', key: 'trip_no' },
     { title: 'سعر الرحلة', key: 'trip_price' },
+    { title: 'الخصم', key: 'discount_display' },
     { title: 'السعر الإجمالي', key: 'sub_total' },
 ]
 
 const tripItems = computed(() => tripTableItems.value.map(item => {
-    let subTotal: number | string = '—';
-    if (item.trip_no && item.trip_price) {
-        subTotal = Number(item.trip_no) * Number(item.trip_price);
-    }
     return {
         id: item.item_id,
         item_id: item.item_id,
@@ -1075,7 +1216,10 @@ const tripItems = computed(() => tripTableItems.value.map(item => {
         trip_no: item.trip_no ?? '—',
         trip_date: item.trip_date ? formatDateDdMmYyyy(item.trip_date) : '—',
         trip_price: item.trip_price ?? '—',
-        sub_total: subTotal,
+        discount_val: item.discount_val ?? null,
+        discount_type: item.discount_type ?? null,
+        discount_display: '—',
+        sub_total: item.sub_total ?? '—',
         transport_type_names: item.transport_type_names || getTransportTypeNames(item.transport_type) || '—',
     };
 }));
@@ -1160,6 +1304,22 @@ onMounted(async () => {
                             </PriceInput>
                         </div>
 
+                        <!-- Source Material Location -->
+                        <div class="relative">
+                            <label class="text-sm font-medium text-gray-700 mb-2 block">موقع مصدر المواد <span
+                                    class="text-red-500">*</span></label>
+                            <div @click="openMapDialog('source')"
+                                class="flex items-center justify-between px-4 py-2 min-h-[48px] border !border-blue-400 rounded-lg cursor-pointer hover:bg-blue-100 transition-colors">
+                                <span
+                                    class="text-base font-medium text-blue-900 whitespace-nowrap overflow-hidden text-ellipsis ">
+                                    {{ formData.source_location || 'حدد الموقع' }}
+                                </span>
+                                <div class="flex items-center gap-2">
+                                    <span v-html="mapMarkerIcon"></span>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Project Location -->
                         <div class="relative">
                             <label class="text-sm font-medium text-gray-700 mb-2 block">موقع المشروع <span
@@ -1221,7 +1381,7 @@ onMounted(async () => {
                                 <div class="info-item-bordered  px-4 py-2">
                                     <label class="font-semibold text-sm text-gray-500 mb-2 block">مدة التنفيذ</label>
                                     <p class="text-base font-semibold text-gray-900">{{ detail.actual_execution_interval
-                                    }}
+                                        }}
                                     </p>
                                 </div>
                                 <v-divider vertical class="my-6"></v-divider>
@@ -1260,7 +1420,7 @@ onMounted(async () => {
                                     <label class="font-semibold text-sm text-gray-500 mb-2 block">مسؤول التفريغ
                                     </label>
                                     <p class="text-base font-semibold text-gray-900">{{ detail.loading_responsible_party
-                                    }} </p>
+                                        }} </p>
                                 </div>
                                 <v-divider vertical class="my-6"></v-divider>
                                 <div class="info-item-bordered px-4 py-2">
@@ -1279,7 +1439,10 @@ onMounted(async () => {
                                 <v-divider vertical class="my-6" v-if="detail.discount_val"></v-divider>
                                 <div class="info-item-bordered px-4 py-2" v-if="detail.discount_val">
                                     <label class="font-semibold text-sm text-gray-500 mb-2 block">الخصم</label>
-                                    <p class="text-base font-semibold text-gray-900 flex items-center gap-1">{{ detail.discount_val }} <span v-if="detail.discount_type == 1">%</span><span v-else v-html="rialIcon"></span></p>
+                                    <p class="text-base font-semibold text-gray-900 flex items-center gap-1">{{
+                                        detail.discount_val
+                                        }} <span v-if="detail.discount_type == 1">%</span><span v-else
+                                            v-html="rialIcon"></span></p>
                                 </div>
                                 <v-divider vertical class="my-6"></v-divider>
                                 <div class="info-item-bordered px-4 py-2" v-if="detail.target_location">
@@ -1381,6 +1544,15 @@ onMounted(async () => {
                 <!-- Trip Details Table -->
                 <DataTable :headers="tripHeaders" :items="tripItems" show-actions force-show-edit
                     @edit="handleEditTrip">
+                    <template #item.discount_display="{ item }">
+                        <span v-if="item.discount_val != null && Number(item.discount_val) > 0"
+                            class="flex items-center gap-1">
+                            {{ item.discount_val }}
+                            <span v-if="item.discount_type == 1">%</span>
+                            <span v-else v-html="rialIcon"></span>
+                        </span>
+                        <span v-else>—</span>
+                    </template>
                 </DataTable>
             </div>
 
@@ -1393,6 +1565,26 @@ onMounted(async () => {
                     </div>
                     <div class="p-6">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- Final Logistics Service Amount -->
+                            <PriceInput showRialIcon v-model="formData.final_logistics_service_amount"
+                                density="comfortable" label="القيمة الإجمالية لمبلغ خدمات النقل" placeholder="0"
+                                disabled />
+
+                            <!-- Final Logistics Trip Amount -->
+                            <PriceInput showRialIcon v-model="formData.final_logistics_trip" density="comfortable"
+                                label="القيمة الإجمالية لمبلغ الرحلات" placeholder="0" disabled />
+
+                            <!-- Approved Amount Radio -->
+                            <div class="md:col-span-1" v-if="approvedAmountItems.length > 0">
+                                <label class="font-semibold text-sm text-gray-700 mb-2 block">المبلغ الإجمالي المعتمد في
+                                    العرض</label>
+                                <v-radio-group v-model="formData.approved_amount" inline density="comfortable"
+                                    hide-details>
+                                    <v-radio v-for="item in approvedAmountItems" :key="item.value" :label="item.title"
+                                        :value="item.value" color="primary" />
+                                </v-radio-group>
+                            </div>
+
                             <!-- Payment Method -->
                             <SelectInput v-model="formData.payment_method" :items="paymentMethodItems"
                                 density="comfortable" placeholder="حدد طريقة الدفع" label="طريقة الدفع" />
@@ -1449,7 +1641,9 @@ onMounted(async () => {
                                     قيمة النقل
                                 </td>
                                 <td class="py-5 px-4 text-center text-gray-600">
-                                    <span class="font-semibold text-gray-900">{{ formatCurrency(summaryTotals.transportValue) }}</span>
+                                    <span class="font-semibold text-gray-900">{{
+                                        formatCurrency(summaryTotals.transportValue)
+                                        }}</span>
                                 </td>
                             </tr>
 
@@ -1467,7 +1661,8 @@ onMounted(async () => {
                                     اجمالي الضريبة
                                 </td>
                                 <td class="py-5 px-4 text-center text-gray-600">
-                                    <span class="font-semibold text-gray-900">{{ formatCurrency(summaryTotals.taxAmount) }}</span>
+                                    <span class="font-semibold text-gray-900">{{ formatCurrency(summaryTotals.taxAmount)
+                                        }}</span>
                                 </td>
                             </tr>
 
@@ -1476,7 +1671,8 @@ onMounted(async () => {
                                     الإجمالي النهائي
                                 </td>
                                 <td class="py-5 px-4 font-bold text-center text-gray-900">
-                                    <span class="font-semibold text-gray-900">{{ formatCurrency(summaryTotals.finalTotal) }}</span>
+                                    <span class="font-semibold text-gray-900">{{
+                                        formatCurrency(summaryTotals.finalTotal) }}</span>
                                 </td>
                             </tr>
                         </tbody>

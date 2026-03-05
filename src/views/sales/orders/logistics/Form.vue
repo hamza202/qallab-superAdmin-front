@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import AddProductDialog, { type ProductToAdd } from "@/components/price-offers/AddProductDialog.vue";
 import TopHeader from "@/components/price-offers/TopHeader.vue";
 import { useApi } from "@/composables/useApi";
+import { useCalculations, type CalculationItem } from '@/composables/useCalculations';
 import {
   fileIcon,
   mapMarkerIcon,
@@ -55,6 +56,7 @@ const transportTypeItems = ref<any[]>([]);
 const categoriesItems = ref<any[]>([]);
 const amPmIntervalItems = ref<any[]>([]);
 const actualExecutionIntervalItems = ref<any[]>([]);
+const approvedAmountItems = ref<any[]>([]);
 const requestTypeItems = ref<any[]>([]);
 
 // Interface for logistics details (matching request-body.json so_logistics_details)
@@ -77,6 +79,8 @@ interface LogisticsDetail {
   source_latitude: string | number;
   source_longitude: string | number;
   transport_amount: string | number;
+  discount_val: number | string | null;
+  discount_type: number | string | null;
 }
 
 // Interface for product items (matching request-body.json so_product_details)
@@ -107,6 +111,11 @@ interface TripTableItem {
   trip_price: number | null;
   transport_type: number[];
   transport_type_names?: string;
+  trip_no?: number | null;
+  sub_total?: number | null;
+  discount_val?: number | null;
+  discount_type?: number | null;
+  quotation_logistics_detail_id?: number | null;
   notes: string;
   isAdded?: boolean;
 }
@@ -145,6 +154,9 @@ const formData = ref({
   cancel_fee_type: null as string | null,
   cancel_fee: null as number | string | null,
   sale_quotation_code: null as string | null,
+  approved_amount: null as string | null,
+  final_logistics_service_amount: null as number | null,
+  final_logistics_trip: null as number | null,
 });
 
 // Fetch constants from API
@@ -160,6 +172,10 @@ const fetchConstants = async () => {
       requestTypeItems.value = data.so_types?.map((i: any) => ({ title: i.label, value: i.key })) || [];
       if (data.actual_execution_interval && Array.isArray(data.actual_execution_interval)) {
         actualExecutionIntervalItems.value = data.actual_execution_interval.map((i: any) => ({ title: i.label, value: i.key }));
+      }
+      // Approved amounts for radio buttons
+      if (data.approved_amounts && Array.isArray(data.approved_amounts)) {
+        approvedAmountItems.value = data.approved_amounts.map((i: any) => ({ title: i.label, value: i.key }));
       }
     }
   } catch (e) {
@@ -287,6 +303,15 @@ const fetchFormData = async () => {
       formData.value.cancel_fee_type = data.cancel_fee_type ?? null;
       formData.value.cancel_fee = data.cancel_fee ?? null;
     formData.value.sale_quotation_code = data.sale_quotation_code ?? null;
+    formData.value.approved_amount = data.approved_amount ?? null;
+
+    // Populate totals from API (will be overridden by computed if data changes)
+    if (data.final_logistics_service_amount != null) {
+        formData.value.final_logistics_service_amount = Number(data.final_logistics_service_amount);
+    }
+    if (data.final_logistics_trip != null) {
+        formData.value.final_logistics_trip = Number(data.final_logistics_trip);
+    }
 
     // Populate logistics details (so_logistics_details)
     if (Array.isArray(data.so_logistics_details) && data.so_logistics_details.length > 0) {
@@ -313,6 +338,8 @@ const fetchFormData = async () => {
         source_latitude: detail.source_latitude ?? "",
         source_longitude: detail.source_longitude ?? "",
         transport_amount: detail.transport_amount != null ? detail.transport_amount : "",
+        discount_val: detail.discount_val ?? null,
+        discount_type: detail.discount_type ?? null,
       }));
     } else {
       logisticsDetails.value = [];
@@ -353,7 +380,12 @@ const fetchFormData = async () => {
           unit_name: item.unit_name ?? "",
             quantity: item.quantity ?? null,
           trip_date: item.trip_date ?? null,
+          trip_no: item.trip_no != null ? Number(item.trip_no) : null,
           trip_price: item.trip_price != null ? Number(item.trip_price) : null,
+          sub_total: item.sub_total != null ? Number(item.sub_total) : null,
+          discount_val: item.discount_val != null ? Number(item.discount_val) : null,
+          discount_type: item.discount_type != null ? Number(item.discount_type) : null,
+          quotation_logistics_detail_id: item.quotation_logistics_detail_id != null ? Number(item.quotation_logistics_detail_id) : null,
           transport_type: transportTypes,
           transport_type_names: getTransportTypeNames(transportTypes),
         } as TripTableItem;
@@ -454,6 +486,8 @@ const fetchQuotationForOrder = async () => {
             source_latitude: detail.source_latitude ?? "",
             source_longitude: detail.source_longitude ?? "",
             transport_amount: detail.transport_amount != null ? detail.transport_amount : "",
+            discount_val: detail.discount_val ?? null,
+            discount_type: detail.discount_type ?? null,
           };
         });
       }
@@ -493,7 +527,11 @@ const fetchQuotationForOrder = async () => {
             unit_name: item.unit_name ?? "",
             quantity: item.quantity ?? null,
             trip_date: item.trip_date ?? null,
+            trip_no: item.trip_no != null ? Number(item.trip_no) : null,
             trip_price: item.trip_price != null ? Number(item.trip_price) : null,
+            sub_total: item.sub_total != null ? Number(item.sub_total) : null,
+            discount_val: item.discount_val != null ? Number(item.discount_val) : null,
+            discount_type: item.discount_type != null ? Number(item.discount_type) : null,
             transport_type: transportTypes,
             transport_type_names: getTransportTypeNames(transportTypes),
             notes: item.notes ?? "",
@@ -556,6 +594,9 @@ const buildFormData = (): FormData => {
   fd.append("late_fee", String(formData.value.late_fee ?? ""));
   fd.append("cancel_fee_type", formData.value.cancel_fee_type || "");
   fd.append("cancel_fee", String(formData.value.cancel_fee ?? ""));
+  if (formData.value.approved_amount) {
+    fd.append('approved_amount', formData.value.approved_amount);
+  }
 
   // so_logistics_details (array)
   logisticsDetails.value.forEach((detail, index) => {
@@ -593,6 +634,12 @@ const buildFormData = (): FormData => {
     fd.append(`so_logistics_details[${index}][source_latitude]`, String(detail.source_latitude || ""));
     fd.append(`so_logistics_details[${index}][source_longitude]`, String(detail.source_longitude || ""));
     fd.append(`so_logistics_details[${index}][transport_amount]`, String(detail.transport_amount || ""));
+    if (detail.discount_val != null && detail.discount_val !== '') {
+        fd.append(`so_logistics_details[${index}][discount_val]`, String(detail.discount_val));
+    }
+    if (detail.discount_type != null && detail.discount_type !== '') {
+        fd.append(`so_logistics_details[${index}][discount_type]`, String(detail.discount_type));
+    }
   });
 
   // so_product_details (array)
@@ -622,6 +669,22 @@ const buildFormData = (): FormData => {
       fd.append(`so_trip_details[${index}][trip_date]`, formatDateDdMmYyyy(item.trip_date));
     }
     fd.append(`so_trip_details[${index}][trip_price]`, String(item.trip_price ?? ""));
+    fd.append(`so_trip_details[${index}][trip_no]`, String(item.trip_no ?? ""));
+    fd.append(`so_trip_details[${index}][sub_total]`, String(item.sub_total ?? 0));
+    // In edit mode, use the stored value from API; in create mode, send -1
+    const logisticsDetailId = isEditMode.value && item.quotation_logistics_detail_id != null
+        ? String(item.quotation_logistics_detail_id)
+        : '-1';
+    fd.append(`so_trip_details[${index}][quotation_logistics_detail_id]`, logisticsDetailId);
+
+    // Discount fields
+    if (item.discount_val != null) {
+        fd.append(`so_trip_details[${index}][discount_val]`, String(item.discount_val));
+    }
+    if (item.discount_type != null) {
+        fd.append(`so_trip_details[${index}][discount_type]`, String(item.discount_type));
+    }
+
     // Transport types array
     if (item.transport_type && item.transport_type.length > 0) {
       item.transport_type.forEach((type, typeIndex) => {
@@ -657,6 +720,9 @@ const getInitialFormData = () => ({
   cancel_fee_type: null as string | null,
   cancel_fee: null as number | string | null,
   sale_quotation_code: null as string | null,
+  approved_amount: null as string | null,
+  final_logistics_service_amount: null as number | null,
+  final_logistics_trip: null as number | null,
 });
 
 const resetForm = () => {
@@ -747,7 +813,19 @@ const handleSubmit = async (afterSuccess?: "reset" | "navigate") => {
 const summaryTotals = computed(() => {
   const transportValue = logisticsDetails.value.reduce((total, detail) => {
     const amount = detail.transport_amount != null ? Number(detail.transport_amount) : 0;
-    return total + (isNaN(amount) ? 0 : amount);
+    let finalAmount = isNaN(amount) ? 0 : amount;
+    if (finalAmount > 0 && detail.discount_val) {
+        const discountVal = Number(detail.discount_val);
+        const discountType = Number(detail.discount_type || 2);
+        if (!isNaN(discountVal) && discountVal > 0) {
+            if (discountType === 1) { // percentage
+                finalAmount = finalAmount - (finalAmount * (discountVal / 100));
+            } else { // fixed
+                finalAmount = finalAmount - discountVal;
+            }
+        }
+    }
+    return total + Math.max(0, finalAmount);
   }, 0);
 
   const taxRatePercent = 15;
@@ -761,6 +839,42 @@ const summaryTotals = computed(() => {
     finalTotal,
   };
 });
+
+// Computed totals for logistics service and trips
+const computedFinalLogisticsServiceAmount = computed(() => {
+    return logisticsDetails.value.reduce((total, detail) => {
+        const amount = detail.transport_amount != null ? Number(detail.transport_amount) : 0;
+        let finalAmount = isNaN(amount) ? 0 : amount;
+        if (finalAmount > 0 && detail.discount_val) {
+            const discountVal = Number(detail.discount_val);
+            const discountType = Number(detail.discount_type || 2);
+            if (!isNaN(discountVal) && discountVal > 0) {
+                if (discountType === 1) { // percentage
+                    finalAmount = finalAmount - (finalAmount * (discountVal / 100));
+                } else { // fixed
+                    finalAmount = finalAmount - discountVal;
+                }
+            }
+        }
+        return total + Math.max(0, finalAmount);
+    }, 0);
+});
+
+const computedFinalLogisticsTrip = computed(() => {
+    return tripTableItems.value.reduce((total, item) => {
+        const subTotal = item.sub_total != null ? Number(item.sub_total) : 0;
+        return total + (isNaN(subTotal) ? 0 : subTotal);
+    }, 0);
+});
+
+// Watch for changes and update formData
+watch(computedFinalLogisticsServiceAmount, (newVal) => {
+    formData.value.final_logistics_service_amount = newVal;
+}, { immediate: true });
+
+watch(computedFinalLogisticsTrip, (newVal) => {
+    formData.value.final_logistics_trip = newVal;
+}, { immediate: true });
 
 // Unified location handling
 type LocationType = "source" | "target" | "logistics-source" | "logistics-target";
@@ -941,6 +1055,7 @@ const handleProductSaved = (products: any[]) => {
              unit_name: p.unit_name,
              quantity: p.quantity,
              trip_date: p.from_date ?? null,
+             trip_no: p.trip_no ?? null,
              trip_price: null,
              transport_type: p.transport_type != null ? [p.transport_type] : [],
              transport_type_names: getTransportTypeNames(p.transport_type != null ? [p.transport_type] : []),
@@ -965,13 +1080,40 @@ const handleEditProduct = (item: any) => {
 const handleEditTrip = (item: any) => {
   const tripToEdit = tripTableItems.value.find((p) => p.item_id === item.item_id);
   if (tripToEdit) {
-    editingProduct.value = { ...tripToEdit, isAdded: true } as any;
+    editingProduct.value = {
+        ...tripToEdit,
+        isAdded: true,
+        discount: tripToEdit.discount_val ?? null,
+        discount_type: tripToEdit.discount_type ?? null,
+    } as unknown as ProductToAdd;
     productDialogMode.value = "logistics-trips";
     showAddProductDialog.value = true;
   }
 };
 
-const handleProductUpdated = (updatedProduct: any) => {
+// Calculate sub_total for a single trip item using the calculations API
+const calculateTripItemSubTotal = async (tripItem: TripTableItem) => {
+    const calcItems = ref<CalculationItem[]>([{
+        item_id: tripItem.item_id,
+        quantity: tripItem.trip_no ? Number(tripItem.trip_no) : 0,
+        price_per_unit: tripItem.trip_price ? Number(tripItem.trip_price) : 0,
+        discount_type: tripItem.discount_type ?? 1,
+        discount_val: tripItem.discount_val ? Number(tripItem.discount_val) : 0,
+    }]);
+
+    const { fetchCalculations } = useCalculations(calcItems);
+    const results = await fetchCalculations();
+    if (results) {
+        const itemResult = Object.values(results)[0];
+        if (itemResult) {
+            return itemResult.subtotal_after_discount;
+        }
+    }
+    // Fallback: manual calculation
+    return (Number(tripItem.trip_no ?? 0) * Number(tripItem.trip_price ?? 0));
+};
+
+const handleProductUpdated = async (updatedProduct: any) => {
   if (productDialogMode.value === "logistics-trips") {
     // Handle trip update
     const index = tripTableItems.value.findIndex((p) => p.item_id === updatedProduct.item_id);
@@ -983,19 +1125,27 @@ const handleProductUpdated = (updatedProduct: any) => {
         unit_name: updatedProduct.unit_name,
         quantity: updatedProduct.quantity,
         trip_date: updatedProduct.trip_date ?? null,
+        trip_no: updatedProduct.trip_no ?? null,
         trip_price: updatedProduct.trip_price ?? null,
         transport_type: updatedProduct.transport_type ?? [],
         transport_type_names: updatedProduct.transport_type_names ?? "",
+        discount_val: updatedProduct.discount ?? null,
+        discount_type: updatedProduct.discount_type ?? null,
         notes: updatedProduct.notes || "",
         isAdded: updatedProduct.isAdded,
         id: updatedProduct.id,
       };
+
+      // Calculate sub_total using useCalculations API
+      const subTotal = await calculateTripItemSubTotal(tripTableItems.value[index]);
+      tripTableItems.value[index].sub_total = subTotal;
 
       const productIndex = productTableItems.value.findIndex(p => p.item_id === updatedProduct.item_id);
       if (productIndex !== -1) {
           productTableItems.value[productIndex].quantity = updatedProduct.quantity;
           productTableItems.value[productIndex].unit_id = updatedProduct.unit_id;
           productTableItems.value[productIndex].unit_name = updatedProduct.unit_name;
+          productTableItems.value[productIndex].trip_no = updatedProduct.trip_no ?? null;
       }
     }
   } else {
@@ -1047,7 +1197,6 @@ const headers = [
   { title: "الكمية", key: "quantity" },
   { title: "تاريخ بدء النقل", key: "from_date" },
   { title: "عدد الرحلات", key: "trip_no" },
-  { title: "نوع الناقلة", key: "transport_type_name" },
   { title: "ملاحظات", key: "notes" },
 ];
 
@@ -1061,7 +1210,6 @@ const tableItems = computed(() =>
     quantity: item.quantity,
     from_date: item.from_date ? formatDateDdMmYyyy(item.from_date) : "—",
     trip_no: item.trip_no ?? "—",
-    transport_type_name: item.transport_type_name || getTransportTypeNames(item.transport_type ? [item.transport_type] : []) || "—",
     notes: item.notes,
   }))
 );
@@ -1071,9 +1219,12 @@ const tripHeaders = [
   { title: "اسم المنتج", key: "name" },
   { title: "الوحدة", key: "unit" },
   { title: "الكمية", key: "quantity" },
-  { title: "تاريخ الرحلة", key: "trip_date" },
-  { title: "سعر الرحلة", key: "trip_price" },
+  { title: "تاريخ بدء النقل", key: "trip_date" },
   { title: "نوع المركبات", key: "transport_type_names" },
+  { title: "عدد الرحلات", key: "trip_no" },
+  { title: "سعر الرحلة", key: "trip_price" },
+  { title: "الخصم", key: "discount_display" },
+  { title: "السعر الإجمالي", key: "sub_total" },
 ];
 
 const tripItems = computed(() =>
@@ -1083,8 +1234,13 @@ const tripItems = computed(() =>
     name: item.item_name,
     unit: item.unit_name,
     quantity: item.quantity,
+    trip_no: item.trip_no ?? '—',
     trip_date: item.trip_date ? formatDateDdMmYyyy(item.trip_date) : "—",
     trip_price: item.trip_price ?? "—",
+    discount_val: item.discount_val ?? null,
+    discount_type: item.discount_type ?? null,
+    discount_display: '—',
+    sub_total: item.sub_total ?? '—',
     transport_type_names: item.transport_type_names || getTransportTypeNames(item.transport_type) || "—",
   }))
 );
@@ -1344,8 +1500,13 @@ onMounted(async () => {
                 <div class="info-item-bordered px-4 py-2">
                   <label class="font-semibold text-sm text-gray-500 mb-2 block">مبلغ النقل</label>
                   <p class="text-base font-semibold text-gray-900 flex items-center gap-2">
-                    {{ detail.transport_amount }} <span v-html="rialIcon"></span>
+                    {{ detail.transport_amount }} <span v-html="rialIcon"> </span>
                   </p>
+                </div>
+                <v-divider vertical class="my-6" v-if="detail.discount_val"></v-divider>
+                <div class="info-item-bordered px-4 py-2" v-if="detail.discount_val">
+                    <label class="font-semibold text-sm text-gray-500 mb-2 block">الخصم</label>
+                    <p class="text-base font-semibold text-gray-900 flex items-center gap-1">{{ detail.discount_val }} <span v-if="detail.discount_type == 1">%</span><span v-else v-html="rialIcon"></span></p>
                 </div>
                 <v-divider vertical class="my-6"></v-divider>
                 <div class="info-item-bordered px-4 py-2" v-if="detail.target_location">
@@ -1487,7 +1648,16 @@ onMounted(async () => {
           show-actions
           force-show-edit
           @edit="handleEditTrip"
-        />
+        >
+            <template #item.discount_display="{ item }">
+                <span v-if="item.discount_val != null && Number(item.discount_val) > 0" class="flex items-center gap-1">
+                    {{ item.discount_val }}
+                    <span v-if="item.discount_type == 1">%</span>
+                    <span v-else v-html="rialIcon"></span>
+                </span>
+                <span v-else>—</span>
+            </template>
+        </DataTable>
       </div>
 
       <!-- Payment and Summary Section -->
@@ -1499,69 +1669,61 @@ onMounted(async () => {
           </div>
           <div class="p-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <!-- Final Logistics Service Amount -->
+              <PriceInput showRialIcon v-model="formData.final_logistics_service_amount" density="comfortable"
+                  label="القيمة الإجمالية لمبلغ خدمات النقل" placeholder="0" disabled />
+
+              <!-- Final Logistics Trip Amount -->
+              <PriceInput showRialIcon v-model="formData.final_logistics_trip" density="comfortable"
+                  label="القيمة الإجمالية لمبلغ الرحلات" placeholder="0" disabled />
+
+              <!-- Approved Amount Radio -->
+              <div class="md:col-span-1" v-if="approvedAmountItems.length > 0">
+                  <label class="font-semibold text-sm text-gray-700 mb-2 block">المبلغ الإجمالي المعتمد في العرض</label>
+                  <v-radio-group v-model="formData.approved_amount" inline density="comfortable" hide-details>
+                      <v-radio
+                          v-for="item in approvedAmountItems"
+                          :key="item.value"
+                          :label="item.title"
+                          :value="item.value"
+                          color="primary"
+                      />
+                  </v-radio-group>
+              </div>
+
               <!-- Payment Method -->
-              <SelectInput
-                v-model="formData.payment_method"
-                :items="paymentMethodItems"
-                density="comfortable"
-                placeholder="حدد طريقة الدفع"
-                label="طريقة الدفع"
-              />
+              <SelectInput v-model="formData.payment_method" :items="paymentMethodItems"
+                  density="comfortable" placeholder="حدد طريقة الدفع" label="طريقة الدفع" />
               <!-- Upfront Payment -->
-              <PriceInput
-                showRialIcon
-                v-model="formData.upfront_payment"
-                density="comfortable"
-                label="دفعة مقدمة"
-                placeholder="أدخل قيمة الدفعة"
-              />
+              <PriceInput showRialIcon v-model="formData.upfront_payment" density="comfortable"
+                  label="دفعة مقدمة" placeholder="أدخل قيمة الدفعة" />
 
               <!-- Invoice Interval -->
-              <PriceInput
-                label="مدة رفع الفاتورة"
-                v-model="formData.invoice_interval"
-                placeholder="أدخل المدة بالأيام"
-                density="comfortable"
-              >
-                <template #append-inner>
-                  <span class="text-gray-500 text-sm">يوم</span>
-                </template>
+              <PriceInput label="مدة رفع الفاتورة" v-model="formData.invoice_interval"
+                  placeholder="أدخل المدة بالأيام" density="comfortable">
+                  <template #append-inner>
+                      <span class="text-gray-500 text-sm">يوم</span>
+                  </template>
               </PriceInput>
               <!-- Payment Term -->
-              <PriceInput
-                label="مدة السداد"
-                v-model="formData.payment_term_no"
-                placeholder="أدخل المدة بالأيام"
-                density="comfortable"
-              >
-                <template #append-inner>
-                  <span class="text-gray-500 text-sm">يوم</span>
-                </template>
+              <PriceInput label="مدة السداد" v-model="formData.payment_term_no"
+                  placeholder="أدخل المدة بالأيام" density="comfortable">
+                  <template #append-inner>
+                      <span class="text-gray-500 text-sm">يوم</span>
+                  </template>
               </PriceInput>
 
               <!-- Late Fee -->
-              <TextInputWithSelect
-                v-model="formData.late_fee"
-                v-model:selectValue="formData.late_fee_type"
-                label="غرامة التأخير"
-                placeholder="أدخل المبلغ"
-                type="number"
-                select-width="110px"
-                :select-items="feeTypeItems"
-                select-placeholder="اختر"
-              />
+              <TextInputWithSelect v-model="formData.late_fee"
+                  v-model:selectValue="formData.late_fee_type" label="غرامة التأخير"
+                  placeholder="أدخل المبلغ" type="number" select-width="110px"
+                  :select-items="feeTypeItems" select-placeholder="اختر" />
 
               <!-- Cancel Fee -->
-              <TextInputWithSelect
-                v-model="formData.cancel_fee"
-                v-model:selectValue="formData.cancel_fee_type"
-                label="غرامة الإلغاء"
-                placeholder="أدخل المبلغ"
-                type="number"
-                select-width="110px"
-                :select-items="feeTypeItems"
-                select-placeholder="اختر"
-              />
+              <TextInputWithSelect v-model="formData.cancel_fee"
+                  v-model:selectValue="formData.cancel_fee_type" label="غرامة الإلغاء"
+                  placeholder="أدخل المبلغ" type="number" select-width="110px"
+                  :select-items="feeTypeItems" select-placeholder="اختر" />
             </div>
           </div>
         </div>

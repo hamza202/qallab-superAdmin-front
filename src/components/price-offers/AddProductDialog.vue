@@ -495,7 +495,7 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
           </div>
 
           <!-- Package Type (transport_type) - purchases فقط بدون سعر/خصم -->
-          <div v-if="!showPricingFields && requestType == 'raw_materials' || requestType == 'trips'">
+          <div v-if="!showPricingFields && requestType == 'raw_materials'">
             <SelectInput 
               v-model="editProductData.transport_type" 
               :items="packageTypeItemsList" 
@@ -532,13 +532,14 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
             />
           </div>
 
-          <!-- Package Type (transport_no) - purchases فقط بدون سعر/خصم -->
-          <div v-if="!showPricingFields && requestType == 'trips'">
-            <TextInput 
-              v-model="editProductData.transport_no" 
-              type="number" 
-              placeholder="عدد الناقلات"
-              density="compact" 
+          <!-- Package Type (transport_no) - مخفي للرحلات -->
+
+          <!-- From Date (logistics only) -->
+          <div v-if="requestType === 'logistics'">
+            <DatePickerInput 
+              v-model="editProductData.from_date" 
+              placeholder="تاريخ بداية النقل" 
+              density="compact"
               class="min-w-[170px]" 
             />
           </div>
@@ -560,6 +561,21 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
               showRialIcon
               placeholder="سعر الرحلة" 
               density="compact"
+              class="min-w-[170px]" 
+            />
+          </div>
+
+          <!-- Discount (logistics-trips only) -->
+          <div v-if="requestType === 'logistics-trips'">
+            <TextInputWithSelect 
+              v-model="editProductData.discount" 
+              v-model:selectValue="editProductData.discount_type"
+              type="number" 
+              placeholder="الخصم" 
+              density="compact"
+              select-width="75px"
+              :select-items="discountTypeOptionsList"
+              select-placeholder="اختر"
               class="min-w-[170px]" 
             />
           </div>
@@ -701,7 +717,7 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
               </div>
 
               <!-- Package Type (transport_type) - single select for non-logistics -->
-              <div v-if="!showPricingFields && requestType == 'raw_materials' || !showPricingFields && requestType == 'trips'">
+              <div v-if="!showPricingFields && requestType == 'raw_materials'">
                 <SelectInput 
                   v-model="product.transport_type" 
                   :items="packageTypeItemsList" 
@@ -738,15 +754,7 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
                 />
               </div>
 
-              <!-- Package Type (transport_no) - purchases فقط بدون سعر/خصم -->
-              <div v-if="!showPricingFields && requestType == 'trips'">
-                <PriceInput 
-                  v-model="product.transport_no" 
-                  placeholder="عدد الناقلات"
-                  density="compact" 
-                  class="min-w-[170px]" 
-                />
-              </div>
+              <!-- Package Type (transport_no) - مخفي للرحلات -->
 
               <!-- From Date (logistics only) -->
               <div v-if="requestType === 'logistics'">
