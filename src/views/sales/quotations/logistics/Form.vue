@@ -144,6 +144,9 @@ const fetchFormData = async () => {
         formData.value.quotation_validity_no = data.quotation_validity_no ?? null;
         formData.value.responsible_person = data.responsible_person ?? '';
         formData.value.responsible_phone = data.responsible_phone ?? null;
+        formData.value.source_location = data.source_location ?? null;
+        formData.value.source_latitude = data.source_latitude ?? null;
+        formData.value.source_longitude = data.source_longitude ?? null;
         formData.value.target_location = data.target_location ?? null;
         formData.value.target_latitude = data.target_latitude ?? null;
         formData.value.target_longitude = data.target_longitude ?? null;
@@ -278,6 +281,9 @@ const fetchRequestForQuotation = async () => {
             formData.value.customer_id = data.customer_id != null ? Number(data.customer_id) : null;
             formData.value.responsible_person = data.responsible_person || '';
             formData.value.responsible_phone = data.responsible_phone || null;
+            formData.value.source_location = data.source_location || null;
+            formData.value.source_latitude = data.source_latitude || null;
+            formData.value.source_longitude = data.source_longitude || null;
             formData.value.target_location = data.target_location || null;
             formData.value.target_latitude = data.target_latitude || null;
             formData.value.target_longitude = data.target_longitude || null;
@@ -474,6 +480,9 @@ const formData = ref({
     quotation_validity_no: null as number | string | null,
     responsible_person: '' as string,
     responsible_phone: null as string | null,
+    source_location: null as string | null,
+    source_latitude: null as string | null,
+    source_longitude: null as string | null,
     target_location: null as string | null,
     target_latitude: null as string | null,
     target_longitude: null as string | null,
@@ -629,17 +638,17 @@ const handleProductSaved = (products: any[]) => {
                 });
             } else {
                 newTripItems.push({
-                   item_id: p.item_id,
-                   item_name: p.item_name,
-                   unit_id: p.unit_id,
-                   unit_name: p.unit_name,
-                   quantity: p.quantity,
-                   trip_no: p.trip_no ?? null,
-                   trip_date: p.from_date ?? null,
-                   trip_price: null,
-                   transport_type: p.transport_type != null ? [p.transport_type] : [],
-                   transport_type_names: getTransportTypeNames(p.transport_type != null ? [p.transport_type] : []),
-                   notes: p.notes ?? '',
+                    item_id: p.item_id,
+                    item_name: p.item_name,
+                    unit_id: p.unit_id,
+                    unit_name: p.unit_name,
+                    quantity: p.quantity,
+                    trip_no: p.trip_no ?? null,
+                    trip_date: p.from_date ?? null,
+                    trip_price: null,
+                    transport_type: p.transport_type != null ? [p.transport_type] : [],
+                    transport_type_names: getTransportTypeNames(p.transport_type != null ? [p.transport_type] : []),
+                    notes: p.notes ?? '',
                 });
             }
         });
@@ -660,8 +669,8 @@ const handleEditProduct = (item: any) => {
 const handleEditTrip = (item: any) => {
     const tripToEdit = tripTableItems.value.find(p => p.item_id === item.item_id);
     if (tripToEdit) {
-        editingProduct.value = { 
-            ...tripToEdit, 
+        editingProduct.value = {
+            ...tripToEdit,
             isAdded: true,
             id: tripToEdit.id || null,
             unit_price: tripToEdit.trip_price || null,
@@ -776,7 +785,7 @@ const handleDeleteProduct = (item: any) => {
 };
 
 // Unified location handling
-type LocationType = 'main' | 'logistics-source' | 'logistics-target';
+type LocationType = 'source' | 'main' | 'logistics-source' | 'logistics-target';
 const currentLocationType = ref<LocationType>('main');
 const currentLogisticsIndex = ref<number>(-1);
 const showMapDialog = ref(false);
@@ -822,7 +831,11 @@ const openMapDialog = (type: LocationType = 'main', logisticsIndex: number = -1)
 
 // Unified location selection handler
 const handleLocationSelected = (location: { latitude: string; longitude: string; address: string }) => {
-    if (currentLocationType.value === 'main') {
+    if (currentLocationType.value === 'source') {
+        formData.value.source_latitude = location.latitude;
+        formData.value.source_longitude = location.longitude;
+        formData.value.source_location = location.address;
+    } else if (currentLocationType.value === 'main') {
         formData.value.target_latitude = location.latitude;
         formData.value.target_longitude = location.longitude;
         formData.value.target_location = location.address;
@@ -842,7 +855,9 @@ const handleLocationSelected = (location: { latitude: string; longitude: string;
 
 // Computed properties for map dialog
 const mapLatitude = computed(() => {
-    if (currentLocationType.value === 'main') {
+    if (currentLocationType.value === 'source') {
+        return String(formData.value.source_latitude || '');
+    } else if (currentLocationType.value === 'main') {
         return String(formData.value.target_latitude || '');
     } else if (currentLogisticsIndex.value !== -1 && logisticsDetails.value[currentLogisticsIndex.value]) {
         const detail = logisticsDetails.value[currentLogisticsIndex.value];
@@ -852,7 +867,9 @@ const mapLatitude = computed(() => {
 });
 
 const mapLongitude = computed(() => {
-    if (currentLocationType.value === 'main') {
+    if (currentLocationType.value === 'source') {
+        return String(formData.value.source_longitude || '');
+    } else if (currentLocationType.value === 'main') {
         return String(formData.value.target_longitude || '');
     } else if (currentLogisticsIndex.value !== -1 && logisticsDetails.value[currentLogisticsIndex.value]) {
         const detail = logisticsDetails.value[currentLogisticsIndex.value];
@@ -862,7 +879,9 @@ const mapLongitude = computed(() => {
 });
 
 const mapAddress = computed(() => {
-    if (currentLocationType.value === 'main') {
+    if (currentLocationType.value === 'source') {
+        return String(formData.value.source_location || '');
+    } else if (currentLocationType.value === 'main') {
         return String(formData.value.target_location || '');
     } else if (currentLogisticsIndex.value !== -1 && logisticsDetails.value[currentLogisticsIndex.value]) {
         const detail = logisticsDetails.value[currentLogisticsIndex.value];
@@ -931,6 +950,9 @@ const buildFormData = (): FormData => {
     fd.append('quotations_datetime', formData.value.quotations_datetime || '');
     fd.append('quotation_name', formData.value.quotation_name || '');
     fd.append('quotation_validity_no', String(formData.value.quotation_validity_no ?? '1'));
+    fd.append('source_location', formData.value.source_location || '');
+    fd.append('source_latitude', String(formData.value.source_latitude || ''));
+    fd.append('source_longitude', String(formData.value.source_longitude || ''));
     fd.append('target_location', formData.value.target_location || '');
     fd.append('target_latitude', String(formData.value.target_latitude || ''));
     fd.append('target_longitude', String(formData.value.target_longitude || ''));
@@ -1055,6 +1077,9 @@ const getInitialFormData = () => ({
     target_location: null as string | null,
     target_latitude: null as string | null,
     target_longitude: null as string | null,
+    source_location: null as string | null,
+    source_latitude: null as string | null,
+    source_longitude: null as string | null,
     project_name: '',
     payment_method: null as string | null,
     upfront_payment: null as number | string | null,
@@ -1279,6 +1304,22 @@ onMounted(async () => {
                             </PriceInput>
                         </div>
 
+                        <!-- Source Material Location -->
+                        <div class="relative">
+                            <label class="text-sm font-medium text-gray-700 mb-2 block">موقع مصدر المواد <span
+                                    class="text-red-500">*</span></label>
+                            <div @click="openMapDialog('source')"
+                                class="flex items-center justify-between px-4 py-2 min-h-[48px] border !border-blue-400 rounded-lg cursor-pointer hover:bg-blue-100 transition-colors">
+                                <span
+                                    class="text-base font-medium text-blue-900 whitespace-nowrap overflow-hidden text-ellipsis ">
+                                    {{ formData.source_location || 'حدد الموقع' }}
+                                </span>
+                                <div class="flex items-center gap-2">
+                                    <span v-html="mapMarkerIcon"></span>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Project Location -->
                         <div class="relative">
                             <label class="text-sm font-medium text-gray-700 mb-2 block">موقع المشروع <span
@@ -1340,7 +1381,7 @@ onMounted(async () => {
                                 <div class="info-item-bordered  px-4 py-2">
                                     <label class="font-semibold text-sm text-gray-500 mb-2 block">مدة التنفيذ</label>
                                     <p class="text-base font-semibold text-gray-900">{{ detail.actual_execution_interval
-                                    }}
+                                        }}
                                     </p>
                                 </div>
                                 <v-divider vertical class="my-6"></v-divider>
@@ -1379,7 +1420,7 @@ onMounted(async () => {
                                     <label class="font-semibold text-sm text-gray-500 mb-2 block">مسؤول التفريغ
                                     </label>
                                     <p class="text-base font-semibold text-gray-900">{{ detail.loading_responsible_party
-                                    }} </p>
+                                        }} </p>
                                 </div>
                                 <v-divider vertical class="my-6"></v-divider>
                                 <div class="info-item-bordered px-4 py-2">
@@ -1398,7 +1439,10 @@ onMounted(async () => {
                                 <v-divider vertical class="my-6" v-if="detail.discount_val"></v-divider>
                                 <div class="info-item-bordered px-4 py-2" v-if="detail.discount_val">
                                     <label class="font-semibold text-sm text-gray-500 mb-2 block">الخصم</label>
-                                    <p class="text-base font-semibold text-gray-900 flex items-center gap-1">{{ detail.discount_val }} <span v-if="detail.discount_type == 1">%</span><span v-else v-html="rialIcon"></span></p>
+                                    <p class="text-base font-semibold text-gray-900 flex items-center gap-1">{{
+                                        detail.discount_val
+                                        }} <span v-if="detail.discount_type == 1">%</span><span v-else
+                                            v-html="rialIcon"></span></p>
                                 </div>
                                 <v-divider vertical class="my-6"></v-divider>
                                 <div class="info-item-bordered px-4 py-2" v-if="detail.target_location">
@@ -1501,7 +1545,8 @@ onMounted(async () => {
                 <DataTable :headers="tripHeaders" :items="tripItems" show-actions force-show-edit
                     @edit="handleEditTrip">
                     <template #item.discount_display="{ item }">
-                        <span v-if="item.discount_val != null && Number(item.discount_val) > 0" class="flex items-center gap-1">
+                        <span v-if="item.discount_val != null && Number(item.discount_val) > 0"
+                            class="flex items-center gap-1">
                             {{ item.discount_val }}
                             <span v-if="item.discount_type == 1">%</span>
                             <span v-else v-html="rialIcon"></span>
@@ -1521,8 +1566,9 @@ onMounted(async () => {
                     <div class="p-6">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <!-- Final Logistics Service Amount -->
-                            <PriceInput showRialIcon v-model="formData.final_logistics_service_amount" density="comfortable"
-                                label="القيمة الإجمالية لمبلغ خدمات النقل" placeholder="0" disabled />
+                            <PriceInput showRialIcon v-model="formData.final_logistics_service_amount"
+                                density="comfortable" label="القيمة الإجمالية لمبلغ خدمات النقل" placeholder="0"
+                                disabled />
 
                             <!-- Final Logistics Trip Amount -->
                             <PriceInput showRialIcon v-model="formData.final_logistics_trip" density="comfortable"
@@ -1530,15 +1576,12 @@ onMounted(async () => {
 
                             <!-- Approved Amount Radio -->
                             <div class="md:col-span-1" v-if="approvedAmountItems.length > 0">
-                                <label class="font-semibold text-sm text-gray-700 mb-2 block">المبلغ الإجمالي المعتمد في العرض</label>
-                                <v-radio-group v-model="formData.approved_amount" inline density="comfortable" hide-details>
-                                    <v-radio
-                                        v-for="item in approvedAmountItems"
-                                        :key="item.value"
-                                        :label="item.title"
-                                        :value="item.value"
-                                        color="primary"
-                                    />
+                                <label class="font-semibold text-sm text-gray-700 mb-2 block">المبلغ الإجمالي المعتمد في
+                                    العرض</label>
+                                <v-radio-group v-model="formData.approved_amount" inline density="comfortable"
+                                    hide-details>
+                                    <v-radio v-for="item in approvedAmountItems" :key="item.value" :label="item.title"
+                                        :value="item.value" color="primary" />
                                 </v-radio-group>
                             </div>
 
@@ -1598,7 +1641,9 @@ onMounted(async () => {
                                     قيمة النقل
                                 </td>
                                 <td class="py-5 px-4 text-center text-gray-600">
-                                    <span class="font-semibold text-gray-900">{{ formatCurrency(summaryTotals.transportValue) }}</span>
+                                    <span class="font-semibold text-gray-900">{{
+                                        formatCurrency(summaryTotals.transportValue)
+                                        }}</span>
                                 </td>
                             </tr>
 
@@ -1616,7 +1661,8 @@ onMounted(async () => {
                                     اجمالي الضريبة
                                 </td>
                                 <td class="py-5 px-4 text-center text-gray-600">
-                                    <span class="font-semibold text-gray-900">{{ formatCurrency(summaryTotals.taxAmount) }}</span>
+                                    <span class="font-semibold text-gray-900">{{ formatCurrency(summaryTotals.taxAmount)
+                                        }}</span>
                                 </td>
                             </tr>
 
@@ -1625,7 +1671,8 @@ onMounted(async () => {
                                     الإجمالي النهائي
                                 </td>
                                 <td class="py-5 px-4 font-bold text-center text-gray-900">
-                                    <span class="font-semibold text-gray-900">{{ formatCurrency(summaryTotals.finalTotal) }}</span>
+                                    <span class="font-semibold text-gray-900">{{
+                                        formatCurrency(summaryTotals.finalTotal) }}</span>
                                 </td>
                             </tr>
                         </tbody>

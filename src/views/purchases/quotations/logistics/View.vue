@@ -87,87 +87,110 @@
                             <h2 class="text-base font-bold">تفاصيل النقل</h2>
                         </div>
                     </div>
-                    <div class="p-6">
-                        <div class="flex flex-wrap gap-4">
-                            <div class="info-item-bordered flex-1 px-6 py-4 md:max-w-[400px]">
-                                <label class="font-semibold text-sm text-gray-500 mb-2 block">نوع المواد
-                                    المنقولة</label>
-                                <p class="text-base font-semibold text-gray-900">{{ transportDetails.material_type }}
-                                </p>
-                            </div>
-                            <v-divider vertical class="my-6"></v-divider>
-                            <div class="info-item-bordered flex-1 px-6 py-4 md:max-w-[400px]">
-                                <label class="font-semibold text-sm text-gray-500 mb-2 block">عدد الرحلات</label>
-                                <p class="text-base font-semibold text-gray-900">{{ transportDetails.trip_no }}</p>
-                            </div>
-                            <v-divider vertical class="my-6"></v-divider>
-                            <div class="info-item-bordered flex-1 px-6 py-4 md:max-w-[400px]">
-                                <label class="font-semibold text-sm text-gray-500 mb-2 block">مدة التنفيذ</label>
-                                <p class="text-base font-semibold text-gray-900">{{
-                                    transportDetails.actual_execution_interval }} يوم</p>
-                            </div>
-                            <v-divider vertical class="my-6"></v-divider>
-                            <div class="info-item-bordered flex-1 px-6 py-4 md:max-w-[400px]">
-                                <label class="font-semibold text-sm text-gray-500 mb-2 block">أوقات العمل</label>
-                                <p class="text-base font-semibold text-gray-900">{{ transportDetails.am_pm_interval }}
-                                </p>
-                            </div>
-                            <v-divider vertical class="my-6"></v-divider>
-                            <div class="info-item-bordered flex-1 px-6 py-4 md:max-w-[400px]">
-                                <label class="font-semibold text-sm text-gray-500 mb-2 block">تاريخ بدء النقل</label>
-                                <p class="text-base font-semibold text-gray-900">{{ transportDetails.from_date }}</p>
-                            </div>
-                            <v-divider vertical class="my-6"></v-divider>
-                            <div class="info-item-bordered flex-1 px-6 py-4 md:max-w-[400px]">
-                                <label class="font-semibold text-sm text-gray-500 mb-2 block">تاريخ انتهاء النقل</label>
-                                <p class="text-base font-semibold text-gray-900">{{ transportDetails.to_date }}</p>
-                            </div>
-                            <v-divider vertical class="my-6"></v-divider>
-                            <div class="info-item-bordered flex-1 px-6 py-4 md:max-w-[400px]">
-                                <label class="font-semibold text-sm text-gray-500 mb-2 block">مبلغ النقل</label>
-                                <p class="text-base font-semibold text-gray-900 flex items-center gap-1">
-                                    {{ transportDetails.transport_amount }}
+                    <div class="p-6 space-y-10 divide-y divide-gray-200">
+                        <div v-for="(detail, index) in transportDetailsList" :key="detail.id || index"
+                            class="space-y-4 py-4">
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-base font-bold text-primary-900">خدمة النقل #{{ index + 1 }}</h3>
+                                <p
+                                    class="text-base text-gray-700 flex items-center gap-1 bg-gray-100 px-2 py-1 rounded-lg">
+                                    {{ detail.transport_amount }}
                                     <SarIcon :width="13" :height="15" color="#697586" />
                                 </p>
                             </div>
-                            <v-divider vertical class="my-6"></v-divider>
-                            <div class="info-item-bordered flex-1 px-6 py-4 md:max-w-[400px]">
-                                <label class="font-semibold text-sm text-gray-500 mb-2 block">نوع مركبة النقل</label>
-                                <p class="text-base font-semibold text-gray-900">{{ transportDetails.transport_type }}
-                                </p>
+                            <div class="flex flex-wrap gap-4">
+                                <div class="info-item-bordered flex-1 px-6 py-4 md:max-w-[400px]">
+                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">نوع المواد
+                                        المنقولة</label>
+                                    <p class="text-base font-semibold text-gray-900">{{ detail.material_type }}
+                                    </p>
+                                </div>
+                                <v-divider vertical class="my-6"></v-divider>
+                                <div class="info-item-bordered flex-1 px-6 py-4 md:max-w-[400px]">
+                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">عدد الرحلات</label>
+                                    <p class="text-base font-semibold text-gray-900">{{ detail.trip_no }}</p>
+                                </div>
+                                <v-divider vertical class="my-6"></v-divider>
+                                <div class="info-item-bordered flex-1 px-6 py-4 md:max-w-[400px]">
+                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">مدة التنفيذ</label>
+                                    <p class="text-base font-semibold text-gray-900">{{
+                                        detail.actual_execution_interval }} يوم</p>
+                                </div>
+                                <v-divider vertical class="my-6"></v-divider>
+                                <div class="info-item-bordered flex-1 px-6 py-4 md:max-w-[400px]">
+                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">أوقات العمل</label>
+                                    <p class="text-base font-semibold text-gray-900">{{ detail.am_pm_interval }}
+                                    </p>
+                                </div>
+                                <v-divider vertical class="my-6"></v-divider>
+                                <div class="info-item-bordered flex-1 px-6 py-4 md:max-w-[400px]">
+                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">تاريخ بدء
+                                        النقل</label>
+                                    <p class="text-base font-semibold text-gray-900">{{ detail.from_date }}</p>
+                                </div>
+                                <v-divider vertical class="my-6"></v-divider>
+                                <div class="info-item-bordered flex-1 px-6 py-4 md:max-w-[400px]">
+                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">تاريخ انتهاء
+                                        النقل</label>
+                                    <p class="text-base font-semibold text-gray-900">{{ detail.to_date }}</p>
+                                </div>
+                                <v-divider vertical class="my-6"></v-divider>
+                                <div class="info-item-bordered flex-1 px-6 py-4 md:max-w-[400px]">
+                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">مبلغ النقل</label>
+                                    <p class="text-base font-semibold text-gray-900">{{ detail.transport_amount }}</p>
+                                </div>
+                                <v-divider vertical class="my-6"></v-divider>
+                                <div class="info-item-bordered flex-1 px-6 py-4 md:max-w-[400px]">
+                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">نوع مركبة
+                                        النقل</label>
+                                    <p class="text-base font-semibold text-gray-900">{{ detail.transport_type }}
+                                    </p>
+                                </div>
+                                <v-divider vertical class="my-6"></v-divider>
+                                <div class="info-item-bordered flex-1 px-6 py-4 md:max-w-[400px]">
+                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">عدد مركبات
+                                        النقل</label>
+                                    <p class="text-base font-semibold text-gray-900">{{ detail.transport_no }}
+                                        مركبة</p>
+                                </div>
+                                <v-divider vertical class="my-6"></v-divider>
+                                <div class="info-item-bordered flex-1 px-6 py-4 md:max-w-[400px]">
+                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">مسؤول التحميل</label>
+                                    <p class="text-base font-semibold text-gray-900">{{
+                                        detail.loading_responsible_party }}</p>
+                                </div>
+                                <v-divider vertical class="my-6"></v-divider>
+                                <div class="info-item-bordered flex-1 px-6 py-4 md:max-w-[400px]">
+                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">مسؤول التفريغ</label>
+                                    <p class="text-base font-semibold text-gray-900">{{
+                                        detail.downloading_responsible_party }}</p>
+                                </div>
+                                <v-divider vertical class="my-6"></v-divider>
+                                <div class="info-item-bordered flex-1 px-6 py-4 md:max-w-[400px]">
+                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">نوع الخصم</label>
+                                    <p class="text-base font-semibold text-gray-900">{{ detail.discount_type_label }}
+                                    </p>
+                                </div>
+                                <v-divider vertical class="my-6"></v-divider>
+                                <div class="info-item-bordered flex-1 px-6 py-4 md:max-w-[400px]">
+                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">قيمة الخصم</label>
+                                    <p class="text-base font-semibold text-gray-900">{{ detail.discount_val }}</p>
+                                </div>
                             </div>
-                            <v-divider vertical class="my-6"></v-divider>
-                            <div class="info-item-bordered flex-1 px-6 py-4 md:max-w-[400px]">
-                                <label class="font-semibold text-sm text-gray-500 mb-2 block">عدد مركبات النقل</label>
-                                <p class="text-base font-semibold text-gray-900">{{ transportDetails.transport_no }}
-                                    مركبة</p>
-                            </div>
-                            <v-divider vertical class="my-6"></v-divider>
-                            <div class="info-item-bordered flex-1 px-6 py-4 md:max-w-[400px]">
-                                <label class="font-semibold text-sm text-gray-500 mb-2 block">مسؤول التحميل</label>
-                                <p class="text-base font-semibold text-gray-900">{{
-                                    transportDetails.loading_responsible_party }}</p>
-                            </div>
-                            <v-divider vertical class="my-6"></v-divider>
-                            <div class="info-item-bordered flex-1 px-6 py-4 md:max-w-[400px]">
-                                <label class="font-semibold text-sm text-gray-500 mb-2 block">مسؤول التفريغ</label>
-                                <p class="text-base font-semibold text-gray-900">{{
-                                    transportDetails.downloading_responsible_party }}</p>
-                            </div>
-                        </div>
-                        <div class="flex flex-wrap gap-4 mt-4">
-                            <div class="info-item-bordered flex-1 px-6 py-4 md:max-w-[400px]">
-                                <label class="font-semibold text-sm text-gray-500 mb-2 block">موقع الاستلام</label>
-                                <p class="text-base font-semibold text-gray-900">{{ transportDetails.source_location
+                            <div class="flex flex-wrap gap-4 mt-4">
+                                <div class="info-item-bordered flex-1 px-6 py-4 md:max-w-[400px]">
+                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">موقع الاستلام</label>
+                                    <p class="text-base font-semibold text-gray-900">{{ detail.source_location
                                     }}
-                                </p>
-                            </div>
-                            <v-divider vertical class="my-6"></v-divider>
-                            <div class="info-item-bordered flex-1 px-6 py-4 md:max-w-[400px]">
-                                <label class="font-semibold text-sm text-gray-500 mb-2 block">موقع التسليم</label>
-                                <p class="text-base font-semibold text-gray-900">{{ transportDetails.target_location
+                                    </p>
+                                </div>
+                                <v-divider vertical class="my-6"></v-divider>
+                                <div class="info-item-bordered flex-1 px-6 py-4 md:max-w-[400px]">
+                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">موقع التسليم</label>
+                                    <p class="text-base font-semibold text-gray-900">{{ detail.target_location
                                     }}
-                                </p>
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -198,6 +221,65 @@
                         <DataTable :headers="tripHeaders" :items="tripItems" />
                     </div>
                 </div>
+
+                <!-- Summary Section (ملخص عرض السعر) -->
+                <div v-if="summaryData" class="mb-8">
+                    <div class="bg-primary-50 px-6 py-3">
+                        <div class="flex items-center gap-2 text-primary-600">
+                            <span class="w-4" v-html="fileIcon_2"></span>
+                            <h2 class="text-base font-bold">ملخص عرض السعر</h2>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex flex-wrap gap-4">
+                            <div class="info-item-bordered flex-1 px-6 py-4 md:max-w-[400px]">
+                                <label class="font-semibold text-sm text-gray-500 mb-2 block">الإجمالي قبل الخصم</label>
+                                <p class="text-base font-semibold text-gray-900 flex items-center gap-1">
+                                    {{ summaryData.total_before_discount }}
+                                    <SarIcon :width="13" :height="15" color="#697586" />
+                                </p>
+                            </div>
+                            <v-divider vertical class="my-6"></v-divider>
+                            <div class="info-item-bordered flex-1 px-6 py-4 md:max-w-[400px]">
+                                <label class="font-semibold text-sm text-gray-500 mb-2 block">مجموع الخصم</label>
+                                <p class="text-base font-semibold text-gray-900 flex items-center gap-1">
+                                    {{ summaryData.total_discount }}
+                                    <SarIcon :width="13" :height="15" color="#697586" />
+                                </p>
+                            </div>
+                            <v-divider vertical class="my-6"></v-divider>
+                            <div class="info-item-bordered flex-1 px-6 py-4 md:max-w-[400px]">
+                                <label class="font-semibold text-sm text-gray-500 mb-2 block">الإجمالي بعد الخصم</label>
+                                <p class="text-base font-semibold text-gray-900 flex items-center gap-1">
+                                    {{ summaryData.total_after_discount }}
+                                    <SarIcon :width="13" :height="15" color="#697586" />
+                                </p>
+                            </div>
+                            <v-divider vertical class="my-6"></v-divider>
+                            <div class="info-item-bordered flex-1 px-6 py-4 md:max-w-[400px]">
+                                <label class="font-semibold text-sm text-gray-500 mb-2 block">نسبة الضريبة</label>
+                                <p class="text-base font-semibold text-gray-900">{{ (summaryData.vat_rate * 100) }}%</p>
+                            </div>
+                            <v-divider vertical class="my-6"></v-divider>
+                            <div class="info-item-bordered flex-1 px-6 py-4 md:max-w-[400px]">
+                                <label class="font-semibold text-sm text-gray-500 mb-2 block">إجمالي الضريبة</label>
+                                <p class="text-base font-semibold text-gray-900 flex items-center gap-1">
+                                    {{ summaryData.total_vat }}
+                                    <SarIcon :width="13" :height="15" color="#697586" />
+                                </p>
+                            </div>
+                            <v-divider vertical class="my-6"></v-divider>
+                            <div class="info-item-bordered flex-1 px-6 py-4 md:max-w-[400px]">
+                                <label class="font-semibold text-sm text-gray-500 mb-2 block">الإجمالي النهائي</label>
+                                <p class="text-base font-semibold text-primary-600 flex items-center gap-1">
+                                    {{ summaryData.final_total }}
+                                    <SarIcon :width="13" :height="15" color="#2563EB" />
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
 
@@ -213,7 +295,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useApi } from '@/composables/useApi'
 import { useNotification } from '@/composables/useNotification'
-import { rialIcon, archiveIcon, homeIcon } from '@/components/icons/globalIcons'
+import { archiveIcon, fileIcon_2, homeIcon } from '@/components/icons/globalIcons'
 import { busIcon, truckIcon, packageIcon } from '@/components/icons/priceOffersIcons'
 import SarIcon from '@/components/icons/SarIcon.vue'
 const route = useRoute()
@@ -309,10 +391,10 @@ const hasTransportDetails = computed(() => {
         quotationData.value.quotation_logistics_details.length > 0
 })
 
-const transportDetails = computed(() => {
-    if (!hasTransportDetails.value) return {}
-    const details = quotationData.value.quotation_logistics_details[0]
-    return {
+const transportDetailsList = computed(() => {
+    if (!hasTransportDetails.value) return []
+    return quotationData.value.quotation_logistics_details.map((details: any) => ({
+        id: details.id,
         material_type: Array.isArray(details.material_type_label) ? details.material_type_label.join(', ') : '—',
         trip_no: details.trip_no || 0,
         actual_execution_interval: details.actual_execution_interval || 0,
@@ -326,8 +408,22 @@ const transportDetails = computed(() => {
         target_location: details.target_location || '—',
         source_location: details.source_location || '—',
         transport_amount: details.transport_amount || 0,
-        discount_type: details.discount_type === 1 ? 'نسبة مئوية' : 'قيمة ثابتة',
+        discount_type_label: details.discount_type === 1 ? 'نسبة مئوية' : 'قيمة ثابتة',
         discount_val: details.discount_val || 0,
+    }))
+})
+
+// Summary data
+const summaryData = computed(() => {
+    const summary = quotationData.value?.summery
+    if (!summary) return null
+    return {
+        total_before_discount: summary.total_before_discount ?? 0,
+        total_after_discount: summary.total_after_discount ?? 0,
+        total_discount: summary.total_discount ?? 0,
+        vat_rate: summary.vat_rate ?? 0,
+        total_vat: summary.total_vat ?? 0,
+        final_total: summary.final_total ?? 0,
     }
 })
 
