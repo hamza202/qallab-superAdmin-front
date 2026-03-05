@@ -1,0 +1,49 @@
+sale_order_id:2
+so_pickup_id:2
+supplier_logistic_id:2
+planned_arrival_loading:26-01-2027 10:20:00
+planned_arrival_downloading:26-01-2027 10:20:00
+planned_departure_loading:26-01-2027 10:20:00
+planned_departure_downloading:26-01-2027 10:20:00
+total_quantity_ton:2
+total_quantity_m3:2
+tracking_no_point:2
+bill_of_lading:2
+am_pm_interval:am
+loading_responsible_party:test
+downloading_responsible_party:test
+customer_total_trip_value:22
+logistic_company_total_trip_value:22
+trip_no:2
+target_location:test
+target_latitude:122.22
+target_longitude:122.22
+source_location:notes
+source_latitude:122.22
+source_longitude:122.22
+notes:notes
+//items[0][id]:
+items[0][item_id]:1
+items[0][unit_id]:1
+items[0][quantity]:3
+items[0][transport_type]:1
+items[0][transport_no]:1
+items[0][notes]:test
+//customer_trip_logistics_details[0][id]:
+customer_trip_logistics_details[0][item_id]:1
+customer_trip_logistics_details[0][unit_id]:1
+customer_trip_logistics_details[0][quantity]:2
+customer_trip_logistics_details[0][vehicle_type_no][0][transport_type]:1
+customer_trip_logistics_details[0][vehicle_type_no][0][transport_no]:1
+customer_trip_logistics_details[0][vehicle_type_no][1][transport_type]:2
+customer_trip_logistics_details[0][vehicle_type_no][1][transport_no]:2
+customer_trip_logistics_details[0][customer_price]:1
+//logistic_company_trip_logistics_details[0][id]:
+logistic_company_trip_logistics_details[0][item_id]:1
+logistic_company_trip_logistics_details[0][unit_id]:1
+logistic_company_trip_logistics_details[0][quantity]:2
+logistic_company_trip_logistics_details[0][vehicle_type_no][0][transport_no]:1
+logistic_company_trip_logistics_details[0][vehicle_type_no][0][transport_type]:1
+logistic_company_trip_logistics_details[0][vehicle_type_no][1][transport_type]:2
+logistic_company_trip_logistics_details[0][vehicle_type_no][1][transport_no]:2
+logistic_company_trip_logistics_details[0][logistics_company_price]:1

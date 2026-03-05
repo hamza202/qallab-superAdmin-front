@@ -7,8 +7,9 @@ import { useForm } from '@/composables/useForm';
 import TopHeader from '@/components/price-offers/TopHeader.vue';
 import AddProductDialog from '@/components/price-offers/AddProductDialog.vue';
 import Map from '@/components/common/Map.vue';
+import AddTripDetailsDialog, { TripLogisticsDetail } from '@/components/trips/AddTripDetailsDialog.vue';
 import { returnIcon, saveIcon, fileCheckIcon, fileIcon } from '@/components/icons/globalIcons';
-import { mapMarkerIcon, packageIcon, downloadIcon, messagePlusIcon } from '@/components/icons/priceOffersIcons';
+import { mapMarkerIcon, packageIcon, downloadIcon, messagePlusIcon, busIcon } from '@/components/icons/priceOffersIcons';
 
 // Interface for product items in the table
 interface ProductTableItem {
@@ -49,13 +50,14 @@ const formData = ref({
   planned_arrival_downloading: "",
   total_quantity_ton: null as number | null,
   total_quantity_m3: null as number | null,
-  total_quantities: null as number | null,
+  total_quantities: 1 as number | null,
   tracking_no_point: null as number | null,
   bill_of_lading: null as number | null,
   am_pm_interval: "" as string,
   loading_responsible_party: "",
   downloading_responsible_party: "",
-  trip_value: null as number | null,
+  customer_total_trip_value: null as number | null,
+  logistic_company_total_trip_value: null as number | null,
   target_location: "",
   target_latitude: null as number | null,
   target_longitude: null as number | null,
@@ -70,7 +72,15 @@ const transportTypeItems = ref<any[]>([]);
 const supplierItems = ref<any[]>([]);
 const productTableItems = ref<ProductTableItem[]>([]);
 const showAddProductDialog = ref(false);
-const editingProduct = ref<ProductTableItem | null>(null);
+const editingProduct = ref<any>(null);
+
+const customerTripDetails = ref<TripLogisticsDetail[]>([]);
+const logisticCompanyTripDetails = ref<TripLogisticsDetail[]>([]);
+const availableTripDetails = ref<TripLogisticsDetail[]>([]);
+const showCustomerDetailsDialog = ref(false);
+const showLogisticCompanyDetailsDialog = ref(false);
+const editingTripDetail = ref<TripLogisticsDetail | null>(null);
+
 const showMapDialog = ref(false);
 const amPmIntervalItems = ref<any[]>([]);
 const formErrors = ref<Record<string, string[]>>({});
@@ -201,7 +211,24 @@ const fetchSaleOrderData = async () => {
 
       // Add items from so_trip_details
       if (data.so_trip_details && Array.isArray(data.so_trip_details)) {
+        const availableDetails: TripLogisticsDetail[] = [];
+
         data.so_trip_details.forEach((item: any) => {
+          const vehicleTypes = Array.isArray(item.transport_type) 
+            ? item.transport_type.map((t: any) => ({ transport_type: parseInt(t), transport_no: null }))
+            : (item.transport_type != null ? [{ transport_type: parseInt(item.transport_type), transport_no: null }] : []);
+            
+          availableDetails.push({
+            item_id: item.item_id,
+            item_name: item.item_name || '',
+            unit_id: item.unit_id,
+            unit_name: item.unit_name || '',
+            quantity: item.quantity || null,
+            transport_type: [],
+            vehicle_type_no: vehicleTypes,
+            price: item.trip_price ? parseFloat(item.trip_price) : null
+          });
+
           // Check if item already exists in productItems
           const existingIndex = productItems.findIndex(p => p.item_id === item.item_id);
           if (existingIndex === -1) {
@@ -214,16 +241,23 @@ const fetchSaleOrderData = async () => {
               quantity: item.quantity || null,
               transport_type: Array.isArray(item.transport_type) && item.transport_type.length > 0 
                 ? parseInt(item.transport_type[0]) 
-                : null,
+                : (item.transport_type != null ? parseInt(item.transport_type) : null),
               transport_no: null,
               transport_type_name: Array.isArray(item.transport_type) && item.transport_type.length > 0 
                 ? getTransportTypeName(parseInt(item.transport_type[0])) 
-                : '',
+                : (item.transport_type != null ? getTransportTypeName(parseInt(item.transport_type)) : ''),
               notes: '',
               isAdded: true
             });
           }
         });
+
+        availableTripDetails.value = JSON.parse(JSON.stringify(availableDetails));
+        customerTripDetails.value = JSON.parse(JSON.stringify(availableDetails));
+        
+        const logistcDetails = JSON.parse(JSON.stringify(availableDetails));
+        logistcDetails.forEach((ld: any) => ld.price = null);
+        logisticCompanyTripDetails.value = logistcDetails;
       }
 
       productTableItems.value = productItems;
@@ -249,6 +283,18 @@ const fetchSaleOrderData = async () => {
           transport_type_name: '',
           notes: '',
           isAdded: true
+        }));
+        
+        // Populate available details too
+        availableTripDetails.value = data.items.map((item: any) => ({
+            item_id: item.item_id,
+            item_name: item.item_name || '',
+            unit_id: item.unit_id,
+            unit_name: item.unit_name || '',
+            quantity: item.quantity || null,
+            transport_type: [],
+            vehicle_type_no: [],
+            price: null
         }));
       }
     }
@@ -330,13 +376,14 @@ const fetchFormData = async () => {
       planned_arrival_downloading: normalizePoDateTime(String(data.planned_arrival_downloading)) || "",
       total_quantity_ton: data.total_quantity_ton || null,
       total_quantity_m3: data.total_quantity_m3 || null,
-      total_quantities: data.total_quantities || null,
+      total_quantities: data.total_quantities || 1,
       tracking_no_point: data.tracking_no_point || null,
       bill_of_lading: data.bill_of_lading || null,
       am_pm_interval: data.am_pm_interval || "",
       loading_responsible_party: data.loading_responsible_party || "",
       downloading_responsible_party: data.downloading_responsible_party || "",
-      trip_value: data.trip_value || null,
+      customer_total_trip_value: data.customer_total_trip_value || null,
+      logistic_company_total_trip_value: data.logistic_company_total_trip_value || null,
       target_location: data.target_location || "",
       target_latitude: data.target_latitude || null,
       target_longitude: data.target_longitude || null,
@@ -424,6 +471,22 @@ const handleSubmit = async (option: SubmitOption) => {
         transport_type: item.transport_type,
         notes: item.notes
       })),
+      customer_trip_logistics_details: customerTripDetails.value.map(item => ({
+        id: isEditMode.value ? item.id : null,
+        item_id: item.item_id,
+        unit_id: item.unit_id,
+        quantity: item.quantity,
+        customer_price: item.price,
+        vehicle_type_no: item.vehicle_type_no
+      })),
+      logistic_company_trip_logistics_details: logisticCompanyTripDetails.value.map(item => ({
+        id: isEditMode.value ? item.id : null,
+        item_id: item.item_id,
+        unit_id: item.unit_id,
+        quantity: item.quantity,
+        logistics_company_price: item.price,
+        vehicle_type_no: item.vehicle_type_no
+      }))
     };
 
 
@@ -449,13 +512,14 @@ const handleSubmit = async (option: SubmitOption) => {
         planned_arrival_downloading: "",
         total_quantity_ton: null,
         total_quantity_m3: null,
-        total_quantities: null,
+        total_quantities: 1,
         tracking_no_point: null,
         bill_of_lading: null,
         am_pm_interval: "",
         loading_responsible_party: "",
         downloading_responsible_party: "",
-        trip_value: null,
+        customer_total_trip_value: null,
+        logistic_company_total_trip_value: null,
         target_location: "",
         target_latitude: null,
         target_longitude: null,
@@ -553,6 +617,88 @@ const handleProductUpdated = (updatedProduct: any) => {
     } as ProductTableItem;
   }
   editingProduct.value = null;
+};
+
+const tripDetailsHeaders = [
+  { title: "اسم المنتج", key: "item_name" },
+  { title: "الكمية", key: "quantity" },
+  { title: "الوحدة", key: "unit_name" },
+  { title: "المركبات", key: "vehicle_type_no" },
+  { title: "السعر", key: "price" }
+];
+
+// Customer Trip Details Handlers
+const addCustomerTripDetail = () => {
+  editingTripDetail.value = null;
+  showCustomerDetailsDialog.value = true;
+};
+
+const handleCustomerTripDetailSaved = (products: TripLogisticsDetail[]) => {
+  const newItems = products.map(p => ({
+    ...p,
+    unit_name: getUnitName(p.unit_id)
+  }));
+  customerTripDetails.value = newItems;
+};
+
+const handleEditCustomerTripDetail = (item: any) => {
+  const toEdit = customerTripDetails.value.find(p => p.item_id === item.item_id);
+  if (toEdit) {
+    editingTripDetail.value = { ...toEdit, isAdded: true };
+    showCustomerDetailsDialog.value = true;
+  }
+};
+
+const handleCustomerTripDetailUpdated = (updatedProduct: TripLogisticsDetail) => {
+  const index = customerTripDetails.value.findIndex(p => p.item_id === updatedProduct.item_id);
+  if (index !== -1) {
+    customerTripDetails.value[index] = { ...updatedProduct };
+  }
+  editingTripDetail.value = null;
+};
+
+const handleDeleteCustomerTripDetail = (item: any) => {
+  const index = customerTripDetails.value.findIndex(p => p.item_id === item.item_id);
+  if (index !== -1) {
+    customerTripDetails.value.splice(index, 1);
+  }
+};
+
+// Logistic Company Trip Details Handlers
+const addLogisticTripDetail = () => {
+  editingTripDetail.value = null;
+  showLogisticCompanyDetailsDialog.value = true;
+};
+
+const handleLogisticTripDetailSaved = (products: TripLogisticsDetail[]) => {
+  const newItems = products.map(p => ({
+    ...p,
+    unit_name: getUnitName(p.unit_id)
+  }));
+  logisticCompanyTripDetails.value = newItems;
+};
+
+const handleEditLogisticTripDetail = (item: any) => {
+  const toEdit = logisticCompanyTripDetails.value.find(p => p.item_id === item.item_id);
+  if (toEdit) {
+    editingTripDetail.value = { ...toEdit, isAdded: true };
+    showLogisticCompanyDetailsDialog.value = true;
+  }
+};
+
+const handleLogisticTripDetailUpdated = (updatedProduct: TripLogisticsDetail) => {
+  const index = logisticCompanyTripDetails.value.findIndex(p => p.item_id === updatedProduct.item_id);
+  if (index !== -1) {
+    logisticCompanyTripDetails.value[index] = { ...updatedProduct };
+  }
+  editingTripDetail.value = null;
+};
+
+const handleDeleteLogisticTripDetail = (item: any) => {
+  const index = logisticCompanyTripDetails.value.findIndex(p => p.item_id === item.item_id);
+  if (index !== -1) {
+    logisticCompanyTripDetails.value.splice(index, 1);
+  }
 };
 
 const handleDeleteProduct = (item: any) => {
@@ -674,13 +820,9 @@ onMounted(async () => {
               <PriceInput v-model="formData.total_quantity_m3" label="الكمية الكلية / م^3" density="comfortable"
                 placeholder="أدخل الكمية بالمتر المكعب" />
             </div>
-            <div>
+            <div v-show="false">
               <PriceInput v-model="formData.total_quantities" label="عدد الرحلات" density="comfortable"
                 placeholder="أدخل عدد الرحلات" />
-            </div>
-            <div>
-              <PriceInput v-model="formData.trip_value" show-rial-icon label="مبلغ الرحلة" density="comfortable"
-                placeholder="أدخل مبلغ الرحلة" />
             </div>
             <div>
               <label class="block text-sm font-semibold text-gray-900 mb-2">توقيت الرحلة</label>
@@ -702,7 +844,14 @@ onMounted(async () => {
                 </v-radio> -->
               </v-radio-group>
             </div>
-
+            <div>
+              <PriceInput v-model="formData.customer_total_trip_value" show-rial-icon label="مبلغ الرحلة للعميل" density="comfortable"
+                placeholder="أدخل مبلغ الرحلة" />
+            </div>
+            <div>
+              <PriceInput v-model="formData.logistic_company_total_trip_value" show-rial-icon label="مبلغ الرحلة لشركة النقل" density="comfortable"
+                placeholder="أدخل مبلغ الرحلة" />
+            </div>
             <div class="md:col-span-2">
               <TextareaInput v-model="formData.notes" label="الملاحظات" density="comfortable"
                 placeholder="ادخل الملاحظات هنا" />
@@ -759,6 +908,91 @@ onMounted(async () => {
           </ButtonWithIcon>
         </div>
 
+        <div class="flex flex-wrap gap-3 items-center justify-between bg-primary-50 px-6 py-3 mt-4">
+          <div class="flex items-center text-primary-700 gap-2">
+            <span v-html="busIcon"></span>
+            <h2 class="text-lg font-bold">تفاصيل الرحلة بين قلاب والعميل</h2>
+          </div>
+        </div>
+        <div class="mb-4">
+          <DataTable :headers="tripDetailsHeaders" :items="customerTripDetails" show-actions force-show-edit force-show-delete
+            @edit="handleEditCustomerTripDetail" @delete="handleDeleteCustomerTripDetail">
+            <template #item.vehicle_type_no="{ item }">
+              <div class="flex flex-col gap-2 my-2 justify-center items-center">
+                <div v-for="(vehicle, index) in item.vehicle_type_no" :key="index" class="w-[180px]">
+                  <TextInput 
+                    v-model="vehicle.transport_no" 
+                    type="number" 
+                    density="compact" 
+                    hide-details 
+                    class="!rounded-lg"
+                  >
+                    <template #append-inner>
+                      <div class="bg-gray-50 border-r border-gray-200 h-full flex items-center justify-center px-3" style="margin-left: -12px;">
+                        <span class="text-xs font-semibold text-gray-700 whitespace-nowrap">{{ getTransportTypeName(vehicle.transport_type) }}</span>
+                      </div>
+                    </template>
+                  </TextInput>
+                </div>
+              </div>
+            </template>
+            <template #item.price="{ item }">
+              <div class="flex justify-center min-w-[120px]">
+                <PriceInput v-model="item.price" density="compact" hide-details showRialIcon />
+              </div>
+            </template>
+          </DataTable>
+        </div>
+        <div class="flex justify-center my-6">
+          <ButtonWithIcon color="primary-100" variant="flat" class="!text-primary-900 font-bold w-75"
+            @click="addCustomerTripDetail">
+            + اضافة تفاصيل رحلة للعميل
+          </ButtonWithIcon>
+        </div>
+
+        <!-- Logistics Company Trip Details Table -->
+        <div class="flex flex-wrap gap-3 items-center justify-between bg-primary-50 px-6 py-3 mt-4">
+          <div class="flex items-center text-primary-600 gap-2">
+            <span v-html="busIcon"></span>
+            <h2 class="text-lg font-bold">تفاصيل الرحلة بين قلاب وشركة النقل</h2>
+          </div>  
+        </div>
+        <div class="mb-4">
+          <DataTable :headers="tripDetailsHeaders" :items="logisticCompanyTripDetails" show-actions force-show-edit force-show-delete
+            @edit="handleEditLogisticTripDetail" @delete="handleDeleteLogisticTripDetail">
+            <template #item.vehicle_type_no="{ item }">
+              <div class="flex flex-col gap-2 my-2 justify-center items-center">
+                <div v-for="(vehicle, index) in item.vehicle_type_no" :key="index" class="w-[180px]">
+                  <TextInput 
+                    v-model="vehicle.transport_no" 
+                    type="number" 
+                    density="compact" 
+                    hide-details 
+                    class="!rounded-lg"
+                  >
+                    <template #append-inner>
+                      <div class="bg-gray-50 border-r border-gray-200 h-full flex items-center justify-center px-3" style="margin-left: -12px;">
+                        <span class="text-xs font-semibold text-gray-700 whitespace-nowrap">{{ getTransportTypeName(vehicle.transport_type) }}</span>
+                      </div>
+                    </template>
+                  </TextInput>
+                </div>
+              </div>
+            </template>
+            <template #item.price="{ item }">
+              <div class="flex justify-center min-w-[120px]">
+                <PriceInput v-model="item.price" density="compact" hide-details showRialIcon />
+              </div>
+            </template>
+          </DataTable>
+        </div>
+        <div class="flex justify-center my-6">
+          <ButtonWithIcon color="primary-100" variant="flat" class="!text-primary-900 font-bold w-75"
+            @click="addLogisticTripDetail">
+            + اضافة تفاصيل رحلة لشركة النقل
+          </ButtonWithIcon>
+        </div>
+
       </div>
 
       <!-- Action Buttons -->
@@ -782,6 +1016,18 @@ onMounted(async () => {
     <AddProductDialog v-model="showAddProductDialog" request-type="trips" :transport-types="transportTypeItems"
       :unit-items="unitItems" :edit-product="editingProduct" :existing-products="productTableItems"
       @saved="handleProductSaved" @product-updated="handleProductUpdated" />
+
+    <!-- Customer Trip Details Dialog -->
+    <AddTripDetailsDialog v-model="showCustomerDetailsDialog" :transport-types="transportTypeItems"
+      :unit-items="unitItems" :edit-item="editingTripDetail" :available-items="availableTripDetails"
+      :existing-items="customerTripDetails"
+      @saved="handleCustomerTripDetailSaved" @product-updated="handleCustomerTripDetailUpdated" />
+
+    <!-- Logistic Company Trip Details Dialog -->
+    <AddTripDetailsDialog v-model="showLogisticCompanyDetailsDialog" :transport-types="transportTypeItems"
+      :unit-items="unitItems" :edit-item="editingTripDetail" :available-items="availableTripDetails"
+      :existing-items="logisticCompanyTripDetails"
+      @saved="handleLogisticTripDetailSaved" @product-updated="handleLogisticTripDetailUpdated" />
 
     <Map v-model="showMapDialog"
       :latitude="String(currentMapType === 'target' ? (formData.target_latitude || '') : (formData.source_latitude || ''))"
