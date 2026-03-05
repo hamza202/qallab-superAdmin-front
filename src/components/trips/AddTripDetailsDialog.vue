@@ -221,12 +221,15 @@ const handleDone = () => {
     handleEditSave();
   } else {
     const productsToSave = productsList.value.filter(p => p.isAdded).map(p => {
-      // Convert transport_type to vehicle_type_no
+      // Convert transport_type to vehicle_type_no, preserving existing transport_no values
       const pCopy = { ...p };
-      pCopy.vehicle_type_no = pCopy.transport_type.map(typeId => ({
-        transport_type: typeId,
-        transport_no: null
-      }));
+      pCopy.vehicle_type_no = pCopy.transport_type.map(typeId => {
+        const existing = (p.vehicle_type_no || []).find(v => v.transport_type === typeId);
+        return {
+          transport_type: typeId,
+          transport_no: existing ? existing.transport_no : null
+        };
+      });
       return pCopy;
     });
     emit('saved', productsToSave);
