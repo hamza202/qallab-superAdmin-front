@@ -332,6 +332,45 @@ export const purchasesRoutes: RouteRecordRaw[] = [
     ],
   },
   {
+    path: "/purchases/receiving-docs-logistics",
+    name: "ReceivingDocsLogistics",
+    redirect: "/purchases/receiving-docs-logistics/list",
+    children: [
+      {
+        path: "list",
+        name: "ReceivingDocsLogisticsList",
+        component: () => import("@/views/purchases/receiving-docs-logistics/List.vue"),
+        meta: {
+          title: "pages.ReceivingDocsLogistics.title",
+        },
+      },
+      {
+        path: "create",
+        name: "ReceivingDocsLogisticsCreate",
+        component: () => import("@/views/purchases/receiving-docs-logistics/Form.vue"),
+        meta: {
+          title: "pages.ReceivingDocsLogistics.title",
+        },
+      },
+      {
+        path: "edit/:id",
+        name: "ReceivingDocsLogisticsEdit",
+        component: () => import("@/views/purchases/receiving-docs-logistics/Form.vue"),
+        meta: {
+          title: "pages.ReceivingDocsLogistics.edit",
+        },
+      },
+      {
+        path: "view/:id",
+        name: "ReceivingDocsLogisticsView",
+        component: () => import("@/views/purchases/receiving-docs-logistics/View.vue"),
+        meta: {
+          title: "pages.ReceivingDocsLogistics.view",
+        },
+      },
+    ],
+  },
+  {
     path: "/purchases/invoices",
     name: "PurchaseInvoices",
     redirect: "/purchases/invoices/list",

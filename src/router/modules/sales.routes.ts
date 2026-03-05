@@ -534,6 +534,45 @@ export const salesRoutes: RouteRecordRaw[] = [
       },
     ],
   },
+  {
+    path: "/sales/delivery-docs-logistics",
+    name: "DeliveryDocsLogistics",
+    redirect: "/sales/delivery-docs-logistics/list",
+    children: [
+      {
+        path: "list",
+        name: "DeliveryDocsLogisticsList",
+        component: () => import("@/views/sales/delivery-docs-logistics/List.vue"),
+        meta: {
+          title: "pages.DeliveryDocsLogistics.title",
+        },
+      },
+      {
+        path: "create",
+        name: "DeliveryDocsLogisticsCreate",
+        component: () => import("@/views/sales/delivery-docs-logistics/Form.vue"),
+        meta: {
+          title: "pages.DeliveryDocsLogistics.title",
+        },
+      },
+      {
+        path: "edit/:id",
+        name: "DeliveryDocsLogisticsEdit",
+        component: () => import("@/views/sales/delivery-docs-logistics/Form.vue"),
+        meta: {
+          title: "pages.DeliveryDocsLogistics.edit",
+        },
+      },
+      {
+        path: "view/:id",
+        name: "DeliveryDocsLogisticsView",
+        component: () => import("@/views/sales/delivery-docs-logistics/View.vue"),
+        meta: {
+          title: "pages.DeliveryDocsLogistics.view",
+        },
+      },
+    ],
+  },
 
   // Sales Requests Logistics
   {
