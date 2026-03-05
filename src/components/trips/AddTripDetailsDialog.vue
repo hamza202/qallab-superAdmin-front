@@ -261,13 +261,16 @@ const editIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xm
 const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M13.5 1.5L16.5 4.5M1.5 16.5L2.25 13.5L12 3.75L14.25 6L4.5 15.75L1.5 16.5Z" stroke="#ccc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`;
+
+import { busIcon } from '@/components/icons/priceOffersIcons';
+
 </script>
 
 <template>
   <AppDialog v-model="internalOpen" :max-width="800" hide-actions>
     <template #title>
       <div class="text-base font-bold text-gray-900 flex items-center gap-2">
-        <v-icon>mdi-bus-multiple</v-icon>
+        <span v-html="busIcon"></span>
         {{ isEditMode ? 'تعديل تفاصيل رحلة' : 'تفاصيل الرحلات' }}
       </div>
     </template>

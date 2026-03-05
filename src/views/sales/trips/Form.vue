@@ -226,7 +226,7 @@ const fetchSaleOrderData = async () => {
             quantity: item.quantity || null,
             transport_type: [],
             vehicle_type_no: vehicleTypes,
-            price: item.trip_price ? parseFloat(item.trip_price) : null
+            price: null
           });
 
           // Check if item already exists in productItems
@@ -409,6 +409,52 @@ const fetchFormData = async () => {
         isAdded: true
       }));
     }
+
+    // Populate customer trip logistics details
+    if (data.customer_trip_logistics_details && Array.isArray(data.customer_trip_logistics_details)) {
+      customerTripDetails.value = data.customer_trip_logistics_details.map((item: any) => ({
+        id: item.id,
+        item_id: item.item_id,
+        item_name: item.item_name || '',
+        unit_id: item.unit_id,
+        unit_name: item.unit_name || '',
+        quantity: item.quantity,
+        transport_type: Array.isArray(item.vehicle_type_no)
+          ? item.vehicle_type_no.map((v: any) => v.transport_type)
+          : [],
+        vehicle_type_no: Array.isArray(item.vehicle_type_no)
+          ? item.vehicle_type_no.map((v: any) => ({
+              transport_type: v.transport_type,
+              transport_no: v.transport_no != null ? parseFloat(v.transport_no) : null
+            }))
+          : [],
+        price: item.customer_price != null ? parseFloat(item.customer_price) : null,
+        isAdded: true
+      }));
+    }
+
+    // Populate logistic company trip logistics details
+    if (data.logistic_company_trip_logistics_details && Array.isArray(data.logistic_company_trip_logistics_details)) {
+      logisticCompanyTripDetails.value = data.logistic_company_trip_logistics_details.map((item: any) => ({
+        id: item.id,
+        item_id: item.item_id,
+        item_name: item.item_name || '',
+        unit_id: item.unit_id,
+        unit_name: item.unit_name || '',
+        quantity: item.quantity,
+        transport_type: Array.isArray(item.vehicle_type_no)
+          ? item.vehicle_type_no.map((v: any) => v.transport_type)
+          : [],
+        vehicle_type_no: Array.isArray(item.vehicle_type_no)
+          ? item.vehicle_type_no.map((v: any) => ({
+              transport_type: v.transport_type,
+              transport_no: v.transport_no != null ? parseFloat(v.transport_no) : null
+            }))
+          : [],
+        price: item.logistics_company_price != null ? parseFloat(item.logistics_company_price) : null,
+        isAdded: true
+      }));
+    }
   } catch (err: any) {
     console.error('Error fetching trip data:', err);
     error(err?.response?.data?.message || 'فشل تحميل بيانات الرحلة');
@@ -568,8 +614,6 @@ const headers = [
   { title: 'اسم المنتج', key: 'name' },
   { title: 'الكمية', key: 'quantity' },
   { title: 'الوحدة', key: 'unit' },
-  { title: 'نوع الناقلة', key: 'transport_type' },
-  { title: 'عدد الناقلات', key: 'transport_no' },
   { title: 'ملاحظات', key: 'notes' },
 ];
 
@@ -918,11 +962,10 @@ onMounted(async () => {
           <DataTable :headers="tripDetailsHeaders" :items="customerTripDetails" show-actions force-show-edit force-show-delete
             @edit="handleEditCustomerTripDetail" @delete="handleDeleteCustomerTripDetail">
             <template #item.vehicle_type_no="{ item }">
-              <div class="flex flex-col gap-2 my-2 justify-center items-center">
+              <div class="flex gap-2 my-2">
                 <div v-for="(vehicle, index) in item.vehicle_type_no" :key="index" class="w-[180px]">
-                  <TextInput 
+                  <PriceInput 
                     v-model="vehicle.transport_no" 
-                    type="number" 
                     density="compact" 
                     hide-details 
                     class="!rounded-lg"
@@ -932,18 +975,18 @@ onMounted(async () => {
                         <span class="text-xs font-semibold text-gray-700 whitespace-nowrap">{{ getTransportTypeName(vehicle.transport_type) }}</span>
                       </div>
                     </template>
-                  </TextInput>
+                  </PriceInput>
                 </div>
               </div>
             </template>
             <template #item.price="{ item }">
-              <div class="flex justify-center min-w-[120px]">
+              <div class="flex">
                 <PriceInput v-model="item.price" density="compact" hide-details showRialIcon />
               </div>
             </template>
           </DataTable>
         </div>
-        <div class="flex justify-center my-6">
+        <div class="flex my-6 justify-center">
           <ButtonWithIcon color="primary-100" variant="flat" class="!text-primary-900 font-bold w-75"
             @click="addCustomerTripDetail">
             + اضافة تفاصيل رحلة للعميل
@@ -961,9 +1004,9 @@ onMounted(async () => {
           <DataTable :headers="tripDetailsHeaders" :items="logisticCompanyTripDetails" show-actions force-show-edit force-show-delete
             @edit="handleEditLogisticTripDetail" @delete="handleDeleteLogisticTripDetail">
             <template #item.vehicle_type_no="{ item }">
-              <div class="flex flex-col gap-2 my-2 justify-center items-center">
+              <div class="flex gap-2 my-2 items-center">
                 <div v-for="(vehicle, index) in item.vehicle_type_no" :key="index" class="w-[180px]">
-                  <TextInput 
+                  <PriceInput 
                     v-model="vehicle.transport_no" 
                     type="number" 
                     density="compact" 
@@ -975,12 +1018,12 @@ onMounted(async () => {
                         <span class="text-xs font-semibold text-gray-700 whitespace-nowrap">{{ getTransportTypeName(vehicle.transport_type) }}</span>
                       </div>
                     </template>
-                  </TextInput>
+                  </PriceInput>
                 </div>
               </div>
             </template>
             <template #item.price="{ item }">
-              <div class="flex justify-center min-w-[120px]">
+              <div class="flex">
                 <PriceInput v-model="item.price" density="compact" hide-details showRialIcon />
               </div>
             </template>

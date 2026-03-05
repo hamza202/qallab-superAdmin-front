@@ -495,7 +495,7 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
           </div>
 
           <!-- Package Type (transport_type) - purchases فقط بدون سعر/خصم -->
-          <div v-if="!showPricingFields && requestType == 'raw_materials' || requestType == 'trips'">
+          <div v-if="!showPricingFields && requestType == 'raw_materials'">
             <SelectInput 
               v-model="editProductData.transport_type" 
               :items="packageTypeItemsList" 
@@ -532,16 +532,7 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
             />
           </div>
 
-          <!-- Package Type (transport_no) - purchases فقط بدون سعر/خصم -->
-          <div v-if="!showPricingFields && requestType == 'trips'">
-            <TextInput 
-              v-model="editProductData.transport_no" 
-              type="number" 
-              placeholder="عدد الناقلات"
-              density="compact" 
-              class="min-w-[170px]" 
-            />
-          </div>
+          <!-- Package Type (transport_no) - مخفي للرحلات -->
 
           <!-- From Date (logistics only) -->
           <div v-if="requestType === 'logistics'">
@@ -726,7 +717,7 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
               </div>
 
               <!-- Package Type (transport_type) - single select for non-logistics -->
-              <div v-if="!showPricingFields && requestType == 'raw_materials' || !showPricingFields && requestType == 'trips'">
+              <div v-if="!showPricingFields && requestType == 'raw_materials'">
                 <SelectInput 
                   v-model="product.transport_type" 
                   :items="packageTypeItemsList" 
@@ -763,15 +754,7 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
                 />
               </div>
 
-              <!-- Package Type (transport_no) - purchases فقط بدون سعر/خصم -->
-              <div v-if="!showPricingFields && requestType == 'trips'">
-                <PriceInput 
-                  v-model="product.transport_no" 
-                  placeholder="عدد الناقلات"
-                  density="compact" 
-                  class="min-w-[170px]" 
-                />
-              </div>
+              <!-- Package Type (transport_no) - مخفي للرحلات -->
 
               <!-- From Date (logistics only) -->
               <div v-if="requestType === 'logistics'">
