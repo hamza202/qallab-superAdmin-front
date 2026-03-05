@@ -438,6 +438,9 @@ const fetchQuotationForOrder = async () => {
       formData.value.target_location = data.target_location || null;
       formData.value.target_latitude = data.target_latitude || null;
       formData.value.target_longitude = data.target_longitude || null;
+      formData.value.source_location = data.source_location || null;
+      formData.value.source_latitude = data.source_latitude || null;
+      formData.value.source_longitude = data.source_longitude || null;
       formData.value.project_name = data.project_name || "";
       formData.value.payment_method = data.payment_method || null;
       formData.value.upfront_payment = data.upfront_payment || null;
