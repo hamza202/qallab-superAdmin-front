@@ -550,7 +550,7 @@ onBeforeUnmount(() => {
     <StatusChangeFeature
       v-model="showChangeStatusDialog"
       :item="itemToChangeStatus"
-      :change-status-url="`/purchases/receiving-logistic-docs/${itemToChangeStatus?.uuid}/change-status`"
+      :change-status-url="`/purchases/receiving-docs/${itemToChangeStatus?.uuid}/change-status`"
       title="تغيير الحالة"
       message="تغيير الحالة:"
       @success="fetchList"
