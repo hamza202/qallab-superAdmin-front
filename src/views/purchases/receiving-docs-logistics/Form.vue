@@ -4,7 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router';
 import TopHeader from '@/components/price-offers/TopHeader.vue';
 import { useApi } from '@/composables/useApi';
-import { returnIcon, saveIcon, fileCheckIcon, fileIcon_2 } from '@/components/icons/globalIcons';
+import { returnIcon, saveIcon, fileCheckIcon, fileIcon_2, globeIcon } from '@/components/icons/globalIcons';
 import { useForm } from '@/composables/useForm';
 import { useNotification } from '@/composables/useNotification';
 import { required } from '@/utils/validators';
@@ -26,15 +26,22 @@ const routeId = computed(() => route.params.id as string);
 const isLoading = ref(false);
 const isSubmitting = ref(false);
 
+// Interface for vehicle type
+interface VehicleType {
+    transport_type: string;
+    transport_type_label: string;
+    transport_no: string;
+}
+
 // Interface for receipt items
 interface ReceiptItem {
     id?: number;
     item_id: number;
     item_name: string;
     base_quantity: number | null;
-    quantity_from_supplier: number | null;
-    quantity_from_transport: number | null;
-    quantity_from_customer: number | null;
+    received_quantity: number | null;
+    vehicle_type_no_from_transport_label: VehicleType[];
+    vehicle_type_no_from_customer_label: VehicleType[];
 }
 
 // Form data
@@ -44,7 +51,8 @@ const formData = ref({
     code: '',
     receiving_date: '',
     created_at: '',
-    approved_quantity: null as number | null,
+    target_location: "",
+    source_location: ""
 });
 
 const attachments = ref<(File | string)[]>([]);
@@ -59,12 +67,12 @@ const headers: Array<{
     sortable?: boolean;
     width?: string;
 }> = [
-    { title: 'اسم المنتج', key: 'item_name', width: '200px' },
-    { title: 'الكمية الأساسية', key: 'base_quantity', width: '150px' },
-    { title: 'الكمية الفعلية من المورد', key: 'quantity_from_supplier', width: '180px' },
-    { title: 'الكمية الفعلية من شركة النقل', key: 'quantity_from_transport', width: '180px' },
-    { title: 'الكمية الفعلية من العميل', key: 'quantity_from_customer', width: '180px' },
-]
+        { title: 'اسم المنتج', key: 'item_name', width: '200px', align: 'center' },
+        { title: 'الكمية الأساسية', key: 'base_quantity', width: '150px', align: 'center' },
+        { title: 'الكمية المستلمة', key: 'received_quantity', width: '180px', align: 'center' },
+        { title: 'المركبات الناقلة المرسلة', key: 'vehicle_type_no_from_transport_label', width: '400px', align: 'center' },
+        { title: 'المركبات الناقلة المستلمة', key: 'vehicle_type_no_from_customer_label', width: '400px', align: 'center' },
+    ]
 
 // Computed items for the DataTable
 const tableItems = computed(() => receiptItems.value.map((item, index) => ({
@@ -72,9 +80,9 @@ const tableItems = computed(() => receiptItems.value.map((item, index) => ({
     item_id: item.item_id,
     item_name: item.item_name,
     base_quantity: item.base_quantity,
-    quantity_from_supplier: item.quantity_from_supplier,
-    quantity_from_transport: item.quantity_from_transport,
-    quantity_from_customer: item.quantity_from_customer,
+    received_quantity: item.received_quantity,
+    vehicle_type_no_from_transport_label: item.vehicle_type_no_from_transport_label,
+    vehicle_type_no_from_customer_label: item.vehicle_type_no_from_customer_label,
 })));
 
 // Helper to get item index
@@ -88,7 +96,7 @@ const fetchFormData = async () => {
 
     isLoading.value = true;
     try {
-        const res = await api.get<any>(`/purchases/receiving-docs/${routeId.value}`);
+        const res = await api.get<any>(`/purchases/receiving-logistic-docs/${routeId.value}`);
         const data = res.data;
 
         if (data) {
@@ -97,17 +105,18 @@ const fetchFormData = async () => {
             formData.value.code = data.code || '';
             formData.value.receiving_date = data.receiving_date || '';
             formData.value.created_at = data.created_at || '';
-            formData.value.approved_quantity = data.approved_quantity ?? null;
+            formData.value.target_location = data.target_location || '';
+            formData.value.source_location = data.source_location || '';
 
-            if (data.items && Array.isArray(data.items)) {
-                receiptItems.value = data.items.map((item: any) => ({
+            if (data.logistic_items && Array.isArray(data.logistic_items)) {
+                receiptItems.value = data.logistic_items.map((item: any) => ({
                     id: item.id,
                     item_id: item.item_id,
                     item_name: item.item_name || '',
                     base_quantity: item.base_quantity,
-                    quantity_from_supplier: item.quantity_from_supplier,
-                    quantity_from_transport: item.quantity_from_transport,
-                    quantity_from_customer: item.quantity_from_customer,
+                    received_quantity: item.received_quantity,
+                    vehicle_type_no_from_transport_label: item.vehicle_type_no_from_transport_label || [],
+                    vehicle_type_no_from_customer_label: item.vehicle_type_no_from_customer_label || [],
                 }));
             }
             if (data.attachment_file && Array.isArray(data.attachment_file)) {
@@ -149,18 +158,31 @@ const buildFormData = (): FormData => {
     fd.append('_method', 'PUT');
     fd.append('purchase_order_id', String(formData.value.purchase_order_id || ''));
     fd.append('receiving_date', formatDate(formData.value.receiving_date));
-    fd.append('approved_quantity', String(formData.value.approved_quantity ?? ''));
 
     // Items
     receiptItems.value.forEach((item, index) => {
         if (isEditMode.value && item.id) {
-            fd.append(`items[${index}][id]`, String(item.id));
+            fd.append(`logistic_items[${index}][id]`, String(item.id));
         }
-        fd.append(`items[${index}][item_id]`, String(item.item_id));
-        fd.append(`items[${index}][base_quantity]`, String(item.base_quantity || ''));
-        fd.append(`items[${index}][quantity_from_supplier]`, String(item.quantity_from_supplier || ''));
-        fd.append(`items[${index}][quantity_from_transport]`, String(item.quantity_from_transport || ''));
-        fd.append(`items[${index}][quantity_from_customer]`, String(item.quantity_from_customer || ''));
+        fd.append(`logistic_items[${index}][item_id]`, String(item.item_id));
+        fd.append(`logistic_items[${index}][base_quantity]`, String(item.base_quantity || ''));
+        fd.append(`logistic_items[${index}][received_quantity]`, String(item.received_quantity || ''));
+        
+        // Vehicle type from transport
+        if (item.vehicle_type_no_from_transport_label && item.vehicle_type_no_from_transport_label.length > 0) {
+            item.vehicle_type_no_from_transport_label.forEach((vehicle, vIndex) => {
+                fd.append(`logistic_items[${index}][vehicle_type_no_from_transport][${vIndex}][transport_type]`, vehicle.transport_type);
+                fd.append(`logistic_items[${index}][vehicle_type_no_from_transport][${vIndex}][transport_no]`, vehicle.transport_no);
+            });
+        }
+        
+        // Vehicle type from customer
+        if (item.vehicle_type_no_from_customer_label && item.vehicle_type_no_from_customer_label.length > 0) {
+            item.vehicle_type_no_from_customer_label.forEach((vehicle, vIndex) => {
+                fd.append(`logistic_items[${index}][vehicle_type_no_from_customer][${vIndex}][transport_type]`, vehicle.transport_type);
+                fd.append(`logistic_items[${index}][vehicle_type_no_from_customer][${vIndex}][transport_no]`, vehicle.transport_no);
+            });
+        }
     });
 
     // Attachments
@@ -169,10 +191,10 @@ const buildFormData = (): FormData => {
             const rawFile = toRaw(fileProxy);
             if (typeof rawFile === 'string') {
                 // Old attachment URL - send as string
-                fd.append(`attachment_files[${index}]`, rawFile);
+                fd.append(`attachment_file[${index}]`, rawFile);
             } else {
                 // New file - send as binary
-                fd.append(`attachment_files[${index}]`, rawFile);
+                fd.append(`attachment_file[${index}]`, rawFile);
             }
         });
     }
@@ -184,20 +206,20 @@ const buildFormData = (): FormData => {
 const validateAllForms = async (): Promise<boolean> => {
     // Validate basic info form
     const basicFormValid = await validate();
-    
+
     // Validate table form
     let tableFormValid = true;
     if (tableFormRef.value) {
         const result = await tableFormRef.value.validate();
         tableFormValid = result.valid;
     }
-    
+
     // If any validation fails, scroll to first error
     if (!basicFormValid || !tableFormValid) {
         await scrollToFirstError();
         return false;
     }
-    
+
     return true;
 };
 
@@ -216,13 +238,13 @@ const handleSubmitToReceivingDocs = async () => {
         const fd = buildFormData();
 
         if (isEditMode.value) {
-            await api.post(`/purchases/receiving-docs/${routeId.value}`, fd, {
+            await api.post(`/purchases/receiving-logistic-docs/${routeId.value}`, fd, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
             });
         } else {
-            await api.post('/purchases/receiving-docs', fd, {
+            await api.post('/purchases/receiving-logistic-docs', fd, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
@@ -230,7 +252,7 @@ const handleSubmitToReceivingDocs = async () => {
         }
 
         success(isEditMode.value ? 'تم تحديث سند الاستلام بنجاح' : 'تم إنشاء سند الاستلام بنجاح');
-        router.push({ name: 'ReceivingDocsList' });
+        router.push({ name: 'ReceivingDocsLogisticsList' });
 
     } catch (e: any) {
         console.error('Error submitting form:', e);
@@ -255,13 +277,13 @@ const handleSubmitToOrdersList = async () => {
         const fd = buildFormData();
 
         if (isEditMode.value) {
-            await api.post(`/purchases/receiving-docs/${routeId.value}`, fd, {
+            await api.post(`/purchases/receiving-logistic-docs/${routeId.value}`, fd, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
             });
         } else {
-            await api.post('/purchases/receiving-docs', fd, {
+            await api.post('/purchases/receiving-logistic-docs', fd, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
@@ -285,9 +307,9 @@ const handleSubmitToOrdersList = async () => {
     <default-layout>
         <div class="receiving-docs-page -mx-6 bg-qallab-dashboard-bg space-y-4">
             <!-- Page Header -->
-            <TopHeader :icon="fileCheckIcon" title-key="pages.ReceivingDocs.title"
-                description-key="pages.ReceivingDocs.description" :show-action="false"
-                :code="isEditMode ? formData.code : ''" code-label-key="pages.ReceivingDocs.docCode" />
+            <TopHeader :icon="fileCheckIcon" title-key="pages.ReceivingDocsLogistics.title"
+                description-key="pages.ReceivingDocsLogistics.description" :show-action="false"
+                :code="isEditMode ? formData.code : ''" code-label-key="pages.ReceivingDocsLogistics.docCode" />
 
             <!-- Loading State -->
             <div v-if="isLoading" class="flex justify-center py-10">
@@ -296,7 +318,7 @@ const handleSubmitToOrdersList = async () => {
 
             <template v-else>
                 <!-- Basic Information Section -->
-                <div class="p-6 bg-white rounded-3xl border !border-gray-100 ">
+                <div class="p-6 bg-white rounded-3xl border !border-gray-100">
                     <div class="flex items-center mb-6 gap-2 text-primary-600">
                         <span class="w-4" v-html="fileIcon_2"></span>
                         <h2 class="text-base font-bold">البيانات الأساسية</h2>
@@ -312,8 +334,8 @@ const handleSubmitToOrdersList = async () => {
 
                             <!-- Receiving Doc Code -->
                             <div>
-                                <TextInput v-model="formData.code" placeholder="كود سند الاستلام" label="كود سند الاستلام"
-                                    density="comfortable" disabled />
+                                <TextInput v-model="formData.code" placeholder="كود سند الاستلام"
+                                    label="كود سند الاستلام" density="comfortable" disabled />
                             </div>
 
                             <!-- Receiving Date -->
@@ -322,30 +344,40 @@ const handleSubmitToOrdersList = async () => {
                                     placeholder="اختر" label="تاريخ الاستلام" :rules="[required()]" />
                             </div>
 
-                            <!-- Approved Quantity -->
-                            <div>
-                                <PriceInput v-model="formData.approved_quantity" placeholder="الكميات المعتمدة من قلاب"
-                                    label="الكميات المعتمدة من قلاب" density="comfortable" />
-                            </div>
-
                             <!-- Created At (display only) -->
                             <div v-if="isEditMode">
-                                <TextInput v-model="formData.created_at" label="تاريخ الإنشاء"
-                                    density="comfortable" disabled />
+                                <TextInput v-model="formData.created_at" label="تاريخ الإنشاء" density="comfortable"
+                                    disabled />
                             </div>
                         </div>
 
                         <!-- Attachments Row -->
                         <div class="mt-6">
                             <h3 class="text-sm font-semibold text-gray-700 mb-3 tracking-wide">المرفقات</h3>
-                            <DocumentUploadInput v-model="attachments" 
-                                hint="PNG, JPG , PDF, XLS" 
-                                :max-files="5" 
+                            <DocumentUploadInput v-model="attachments" hint="PNG, JPG , PDF, XLS" :max-files="5"
                                 :multiple="true" />
                         </div>
                     </v-form>
                 </div>
 
+                <div class="p-6 bg-white rounded-3xl border !border-gray-100 ">
+                    <div class="flex items-center gap-2 text-primary-600 mb-2">
+                        <span v-html="globeIcon"></span>
+                        <h2 class="text-base font-bold">موقع التسليم والإستلام</h2>
+                    </div>
+                    <div class="flex flex-wrap gap-4">
+                        <div class="info-item-bordered flex-1 px-6 py-4 md:max-w-[400px]">
+                            <label class="font-semibold text-sm  text-gray-900 mb-2 block">موقع التسليم</label>
+                            <p class="text-base font-semibold text-gray-500">{{ formData.target_location || '--' }}</p>
+                        </div>
+                        <v-divider vertical class="my-6"></v-divider>
+                        <div class="info-item-bordered flex-1 px-6 py-4 md:max-w-[400px]">
+                            <label class="font-semibold text-sm  text-gray-900 mb-2 block">موقع الإستلام</label>
+                            <p class="text-base font-semibold text-gray-500 ">{{ formData.source_location || '--'}}</p>
+                        </div>
+                    </div>
+
+                </div>
                 <!-- Receipt Items Table Section -->
                 <div class="bg-white rounded-3xl border !border-gray-100">
                     <div class="px-6 py-6">
@@ -354,50 +386,67 @@ const handleSubmitToOrdersList = async () => {
                             <h2 class="text-base font-bold">جدول عناصر سند الاستلام</h2>
                         </div>
                     </div>
-
                     <v-form ref="tableFormRef" @submit.prevent>
                         <DataTable :headers="headers" :items="tableItems" :showActions="false">
                             <!-- Item Name -->
                             <template #item.item_name="{ item }">
-                                <div class="font-medium text-gray-900">
+                                <div class="font-medium text-center text-gray-900">
                                     {{ item.item_name }}
                                 </div>
                             </template>
 
                             <!-- Base Quantity - Input -->
                             <template #item.base_quantity="{ item }">
-                                <PriceInput
-                                    v-model="receiptItems[getItemIndex(item)].base_quantity"
-                                    placeholder="الكمية الأساسية" density="comfortable"
-                                    class="w-32" :input-props="{ class: '!text-center' }"
-                                    :rules="[required()]" />
+                                <PriceInput v-model="receiptItems[getItemIndex(item)].base_quantity" disabled
+                                    placeholder="الكمية الأساسية" density="comfortable" class="w-32 text-center"
+                                    :input-props="{ class: 'text-center' }" :rules="[required()]" />
                             </template>
 
-                            <!-- Quantity from Supplier -->
-                            <template #item.quantity_from_supplier="{ item }">
-                                <PriceInput
-                                    v-model="receiptItems[getItemIndex(item)].quantity_from_supplier"
-                                    placeholder="من المورد" density="comfortable" disabled
-                                    class="w-32" :input-props="{ class: '!text-center' }"
-                                    :rules="[required()]" />
+                            <!-- Received Quantity -->
+                            <template #item.received_quantity="{ item }">
+                                <PriceInput v-model="receiptItems[getItemIndex(item)].received_quantity"
+                                    placeholder="الكمية المستلمة" density="comfortable" class="w-32 text-center"
+                                    :input-props="{ class: 'text-center' }" :rules="[required()]" />
                             </template>
 
-                            <!-- Quantity from Transport -->
-                            <template #item.quantity_from_transport="{ item }">
-                                <PriceInput
-                                    v-model="receiptItems[getItemIndex(item)].quantity_from_transport"
-                                    placeholder="من شركة النقل" density="comfortable" disabled
-                                    class="w-32" :input-props="{ class: '!text-center' }"
-                                    :rules="[required()]" />
+                            <!-- المركبات الناقلة المرسلة (Sent Transport Vehicles) -->
+                            <template #item.vehicle_type_no_from_transport_label="{ item }">
+                                <div class="grid grid-cols-2 gap-2 md:min-w-[300px]">
+                                    <div v-for="(vehicle, vIndex) in receiptItems[getItemIndex(item)].vehicle_type_no_from_transport_label"
+                                        :key="`transport-${vIndex}`"
+                                        class="border border-gray-200 rounded-lg overflow-hidden grid grid-cols-5 items-center">
+                                        <div
+                                            class="bg-gray-100 px-2 py-2 h-100 flex items-center justify-center col-span-2">
+                                            <span class="text-xs font-medium text-gray-900">{{
+                                                vehicle.transport_type_label }}</span>
+                                        </div>
+                                        <div class="bg-[#E2E7EF] col-span-3 h-full flex items-center">
+                                            <PriceInput v-model="vehicle.transport_no" placeholder="أدخل" disabled
+                                                density="comfortable" variant="solo" hide-details class="text-center"
+                                                :input-props="{ class: 'text-center shadow-none' }" />
+                                        </div>
+                                    </div>
+                                </div>
                             </template>
 
-                            <!-- Quantity from Customer -->
-                            <template #item.quantity_from_customer="{ item }">
-                                <PriceInput
-                                    v-model="receiptItems[getItemIndex(item)].quantity_from_customer"
-                                    placeholder="من العميل" density="comfortable"
-                                    class="w-32" :input-props="{ class: '!text-center' }"
-                                    :rules="[required()]" />
+                            <!-- المركبات الناقلة المستلمة (Received Transport Vehicles) -->
+                            <template #item.vehicle_type_no_from_customer_label="{ item }">
+                                <div class="grid grid-cols-2 gap-2 md:min-w-[300px]">
+                                    <div v-for="(vehicle, vIndex) in receiptItems[getItemIndex(item)].vehicle_type_no_from_customer_label"
+                                        :key="`customer-${vIndex}`"
+                                        class="border border-gray-200 rounded-lg overflow-hidden grid grid-cols-5 items-center">
+                                        <div
+                                            class="bg-gray-100 px-2 py-2 h-100 flex items-center justify-center col-span-2">
+                                            <span class="text-xs font-medium text-gray-900">{{
+                                                vehicle.transport_type_label }}</span>
+                                        </div>
+                                        <div class="bg-white col-span-3 h-full flex items-center">
+                                            <PriceInput v-model="vehicle.transport_no" placeholder="أدخل"
+                                                density="comfortable" variant="solo" hide-details class="text-center"
+                                                :input-props="{ class: 'text-center shadow-none' }" />
+                                        </div>
+                                    </div>
+                                </div>
                             </template>
                         </DataTable>
                     </v-form>
@@ -408,11 +457,13 @@ const handleSubmitToOrdersList = async () => {
                     <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col">
                         <ButtonWithIcon variant="flat" color="primary" height="48" rounded="4"
                             custom-class="font-semibold text-base px-6 md:!px-10" :prepend-icon="returnIcon"
-                            label="حفظ والعودة لقائمة سندات الاستلام" :loading="isSubmitting" @click="handleSubmitToReceivingDocs" />
+                            label="حفظ والعودة لقائمة سندات الاستلام" :loading="isSubmitting"
+                            @click="handleSubmitToReceivingDocs" />
 
                         <ButtonWithIcon variant="flat" color="primary-50" height="48" rounded="4"
-                            custom-class="font-semibold text-base text-primary-700 px-6 md:!px-10" :prepend-icon="saveIcon"
-                            label="حفظ والعودة لقائمة المشتريات" :loading="isSubmitting" @click="handleSubmitToOrdersList" />
+                            custom-class="font-semibold text-base text-primary-700 px-6 md:!px-10"
+                            :prepend-icon="saveIcon" label="حفظ والعودة لقائمة المشتريات" :loading="isSubmitting"
+                            @click="handleSubmitToOrdersList" />
                     </div>
                 </div>
             </template>
@@ -421,4 +472,8 @@ const handleSubmitToOrdersList = async () => {
     </default-layout>
 </template>
 
-<style scoped></style>
+<style scoped>
+.info-item-bordered {
+    min-width: 150px;
+}
+</style>

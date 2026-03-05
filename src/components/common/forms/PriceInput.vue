@@ -98,7 +98,7 @@ const rialIcon = `<svg width="13" height="15" viewBox="0 0 13 15" fill="none" xm
             {{ label }}
         </label>
 
-        <v-text-field v-model="internalValue" type="number" :placeholder="placeholder" variant="outlined" :color="color"
+        <v-text-field v-model="internalValue" type="number" :placeholder="placeholder" :variant="variant || 'outlined'" :color="color"
             :density="density" :disabled="disabled" :readonly="readonly" :clearable="clearable" :rules="rules"
             :hide-details="false" :hint="hint" :persistent-hint="persistentHint"
             :prefix="!keepCurrencyVisible && showCurrencyOnLeft ? currency : undefined"
@@ -127,8 +127,15 @@ const rialIcon = `<svg width="13" height="15" viewBox="0 0 13 15" fill="none" xm
     margin: 0;
 }
 
+.price-input.text-center :deep(input[type="number"]){
+ text-align: center !important;
+}
+
+.price-input.shadow-none :deep(.v-field){
+ box-shadow: none !important;
+}
+
 .price-input :deep(input[type="number"]) {
     -moz-appearance: textfield;
-
 }
 </style>
