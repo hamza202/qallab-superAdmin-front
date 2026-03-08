@@ -29,6 +29,20 @@ const sallQuotationsCode = computed(
 const quotationsDatetime = computed(
   () => route.query.quotations_datetime as string
 );
+const categorySlug = computed(() => {
+  const key = categoryKey.value;
+  if (key === "fuel") return "fuels";
+  if (key === "building_material") return "building-materials";
+  return key;
+});
+const categoryListPath = computed(() =>
+  categoryKey.value === "fuel"
+    ? "/purchases/quotations/fuels/list"
+    : "/purchases/quotations/material-product/list"
+);
+const categoryListLabel = computed(() =>
+  categoryKey.value === "fuel" ? "عروض أسعار المحروقات" : "عروض أسعار مواد أولية"
+);
 
 // ── State ────────────────────────────────────────────────────────
 const isLoading = ref(false);
@@ -41,7 +55,7 @@ const fetchData = async () => {
   try {
     const codes = `${purchaseCode.value},${salesCode.value}`;
     const res = await api.get<any>(
-      `/purchases/quotations/building-materials/link?category=${categoryKey.value}&codes=${codes}&with_items=true`
+      `/purchases/quotations/${categorySlug.value}/link?category=${categoryKey.value}&codes=${codes}&with_items=true`
     );
     if (Array.isArray(res?.data)) {
       quotations.value = res.data;
@@ -83,7 +97,7 @@ const salesItems = computed(() =>
 const goBackToForm = () => {
   if (purchaseUuid.value) {
     router.push({
-      name: "QuotationsMaterialProductLinkForm",
+      name: "QuotationsLinkForm",
       params: { id: purchaseUuid.value },
       query: {
         sall_quotations_code_from_index: sallQuotationsCode.value,
@@ -114,10 +128,10 @@ const goBackToForm = () => {
         </router-link>
         <span class="text-lg text-gray-300">/</span>
         <router-link
-          to="/purchases/quotations/material-product/list"
+          :to="categoryListPath"
           class="text-gray-600 hover:text-primary-600"
         >
-          عروض أسعار مواد أولية
+          {{ categoryListLabel }}
         </router-link>
         <span class="text-lg text-gray-300">/</span>
         <span

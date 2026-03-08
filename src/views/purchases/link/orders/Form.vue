@@ -9,6 +9,7 @@ import {
   fileCheckIcon,
   trashIcon,
   productIcon,
+  eyeIcon
 } from "@/components/icons/globalIcons";
 import SarIcon from "@/components/icons/SarIcon.vue";
 import TopHeader from "@/components/price-offers/TopHeader.vue";
@@ -20,29 +21,35 @@ const { success, error } = useNotification();
 
 // ── Route params ────────────────────────────────────────────────
 const purchaseUuid = computed(() => route.params.id as string);
-const sall_quotations_code_from_index = computed(
-  () => route.query.sall_quotations_code_from_index as string
+const sall_orders_code_from_index = computed(
+  () => route.query.sall_orders_code_from_index as string
 );
 const categoryKey = computed(() => route.query.category as string);
-const routeQuotationDatetime = computed(
-  () => route.query.quotations_datetime as string
+const routeOrderDatetime = computed(
+  () => route.query.po_datetime as string
 );
+const categorySlug = computed(() => {
+  const key = categoryKey.value;
+  if (key === "fuel") return "fuels";
+  if (key === "building_material") return "building-materials";
+  return key;
+});
 
 // ── State ───────────────────────────────────────────────────────
 const selectedCustomerId = ref<number | null>(null);
 const selectedSalesCode = ref<string | null>(null);
 const categoryLabel = ref("");
 
-const customerItems = ref<{ title: string; value: number; type: string }[]>([]);
+const customerItems = ref<{ title: string; value: number }[]>([]);
 const salesCodeItems = ref<{ title: string; value: string }[]>([]);
-const quotationDetails = ref<any>(null);
+const orderDetails = ref<any>(null);
 
 interface LinkedItem {
   uuid: string;
   code: string;
   customer_name: string;
   customer_type: string;
-  quotations_datetime: string;
+  so_datetime: string;
   purchase_code: string;
 }
 const linkedItems = ref<LinkedItem[]>([]);
@@ -51,6 +58,13 @@ const loadingCustomers = ref(false);
 const loadingSalesCodes = ref(false);
 const loadingDetails = ref(false);
 const submitting = ref(false);
+
+const resetFormSelections = () => {
+  selectedCustomerId.value = null;
+  selectedSalesCode.value = null;
+  salesCodeItems.value = [];
+  orderDetails.value = null;
+};
 
 // ── API ─────────────────────────────────────────────────────────
 const fetchConstants = async () => {
@@ -74,7 +88,6 @@ const fetchCustomers = async () => {
       customerItems.value = res.data.map((c: any) => ({
         title: c.full_name,
         value: c.id,
-        type: c.type ?? "",
       }));
     }
   } catch (e) {
@@ -91,11 +104,11 @@ const fetchSalesCodes = async () => {
   }
   salesCodeItems.value = [];
   selectedSalesCode.value = null;
-  quotationDetails.value = null;
+  orderDetails.value = null;
   loadingSalesCodes.value = true;
   try {
     const res = await api.get<any>(
-      `/purchases/quotations/building-materials/link?category=${categoryKey.value}&customer_id=${selectedCustomerId.value}`
+      `/purchases/orders/${categorySlug.value}/link?category=${categoryKey.value}&customer_id=${selectedCustomerId.value}`
     );
     if (Array.isArray(res?.data)) {
       salesCodeItems.value = res.data.map((item: any) => ({
@@ -110,30 +123,30 @@ const fetchSalesCodes = async () => {
   }
 };
 
-const fetchQuotationDetails = async () => {
+const fetchOrderDetails = async () => {
   if (!selectedSalesCode.value || !selectedCustomerId.value) {
-    quotationDetails.value = null;
+    orderDetails.value = null;
     return;
   }
   loadingDetails.value = true;
-  quotationDetails.value = null;
+  orderDetails.value = null;
   try {
     const res = await api.get<any>(
-      `/purchases/quotations/building-materials/link?category=${categoryKey.value}&customer_id=${selectedCustomerId.value}&with_items=true&with_status=true&code=${selectedSalesCode.value}`
+      `/purchases/orders/${categorySlug.value}/link?category=${categoryKey.value}&customer_id=${selectedCustomerId.value}&with_items=true&with_status=true&code=${selectedSalesCode.value}`
     );
     if (Array.isArray(res?.data) && res.data.length > 0) {
-      quotationDetails.value = res.data[0];
+      orderDetails.value = res.data[0];
     }
   } catch (e) {
-    console.error("fetchQuotationDetails error:", e);
+    console.error("fetchOrderDetails error:", e);
   } finally {
     loadingDetails.value = false;
   }
 };
 
 const handleAdd = async () => {
-  if (!quotationDetails.value) return;
-  const salesUuid = quotationDetails.value.uuid as string;
+  if (!orderDetails.value) return;
+  const salesUuid = orderDetails.value.uuid as string;
   submitting.value = true;
   try {
     // Add current selection if not already present
@@ -143,23 +156,22 @@ const handleAdd = async () => {
       );
       linkedItems.value.push({
         uuid: salesUuid,
-        code: quotationDetails.value.code,
+        code: orderDetails.value.code,
         customer_name: selectedCustomer?.title ?? "",
-        customer_type: selectedCustomer?.type ?? "",
-        quotations_datetime: quotationDetails.value.quotations_datetime,
-        purchase_code: sall_quotations_code_from_index.value ?? "",
+        customer_type: "",
+        so_datetime: orderDetails.value.so_datetime,
+        purchase_code: sall_orders_code_from_index.value ?? "",
       });
     }
 
-    // PUT uuids to current purchase quotation
+    // PUT uuids to current purchase order
     const uuids = linkedItems.value.map((li) => li.uuid);
     await api.put(
-      `/purchases/quotations/building-materials/link/${purchaseUuid.value}`,
+      `/purchases/orders/${categorySlug.value}/link/${purchaseUuid.value}`,
       { uuids }
     );
-    // Re-fetch to get accurate customer.type from the server
-    await fetchLinkedItems();
     success("تم الربط بنجاح");
+    resetFormSelections();
   } catch (e: any) {
     console.error("handleAdd error:", e);
     error(e?.response?.data?.message ?? "فشل الربط");
@@ -173,7 +185,7 @@ const removeLinkedItem = async (uuid: string) => {
   try {
     const uuids = linkedItems.value.map((li) => li.uuid);
     await api.put(
-      `/purchases/quotations/building-materials/link/${purchaseUuid.value}`,
+      `/purchases/orders/building-materials/link/${purchaseUuid.value}`,
       { uuids }
     );
     success("تم الحذف بنجاح");
@@ -185,13 +197,13 @@ const removeLinkedItem = async (uuid: string) => {
 
 // ── Watchers ────────────────────────────────────────────────────
 watch(selectedCustomerId, () => fetchSalesCodes());
-watch(selectedSalesCode, () => fetchQuotationDetails());
+watch(selectedSalesCode, () => fetchOrderDetails());
 
 // ── Lifecycle ───────────────────────────────────────────────────
 const fetchLinkedItems = async () => {
   try {
     const res = await api.get<any>(
-      `/purchases/quotations/building-materials/link/${purchaseUuid.value}`
+      `/purchases/orders/${categorySlug.value}/link/${purchaseUuid.value}`
     );
     const data: any[] = Array.isArray(res?.data) ? res.data : [];
     linkedItems.value = data.map((item: any) => ({
@@ -199,8 +211,8 @@ const fetchLinkedItems = async () => {
       code: item.code,
       customer_name: item.customer?.name ?? "",
       customer_type: item.customer?.type ?? "",
-      quotations_datetime: item.quotations_datetime,
-      purchase_code: sall_quotations_code_from_index.value ?? "",
+      so_datetime: item.so_datetime,
+      purchase_code: sall_orders_code_from_index.value ?? "",
     }));
   } catch (e) {
     console.error("fetchLinkedItems error:", e);
@@ -216,15 +228,33 @@ onMounted(() => {
 // ── Helpers ─────────────────────────────────────────────────────
 const formatDate = (dateStr: string | null | undefined) => {
   if (!dateStr) return "—";
-  return new Date(dateStr).toLocaleDateString("ar-SA");
+  return new Date(dateStr).toLocaleDateString("en-US");
+};
+
+// View linked orders handler
+const handleViewLinkedOrders = (row: any) => {
+  // Extract sales code from the clicked row
+  // Format: "CODE \\ DATE"
+  const salesCode = row.sales_code_date.split(' \\ ')[0];
+  
+  router.push({
+    name: 'OrdersLinkView',
+    query: {
+      category: categoryKey.value,
+      codes: salesCode,
+      sall_orders_code_from_index: sall_orders_code_from_index.value,
+      po_datetime: routeOrderDatetime.value,
+      purchase_uuid: purchaseUuid.value
+    }
+  });
 };
 
 // ── Tables ──────────────────────────────────────────────────────
 const productTableItems = computed(() => {
-  if (!quotationDetails.value?.items) return [];
-  return quotationDetails.value.items.map((item: any, i: number) => ({
+  if (!orderDetails.value?.items) return [];
+  return orderDetails.value.items.map((item: any, i: number) => ({
     id: item.id ?? i,
-    name: item.item?.name ?? "—",
+    name: item.item_name ?? "—",
     quantity: item.quantity ?? 0,
     price_per_unit: item.price_per_unit ?? 0,
     discount_val: item.discount_val ?? 0,
@@ -241,36 +271,10 @@ const linkedTableItems = computed(() =>
     customer: item.customer_type
       ? `${item.customer_name} \\ ${item.customer_type}`
       : item.customer_name,
-    sales_code_date: `${item.code} \\ ${formatDate(item.quotations_datetime)}`,
-    purchase_code_date: `${item.purchase_code} \\ ${formatDate(routeQuotationDatetime.value)}`,
-    // raw fields for navigation
-    purchase_code: item.purchase_code,
-    sales_code: item.code,
-    customer_name: item.customer_name,
-    customer_type: item.customer_type,
+    sales_code_date: `${item.code} \\ ${formatDate(item.so_datetime)}`,
+    purchase_code_date: `${item.purchase_code} \\ ${formatDate(routeOrderDatetime.value)}`,
   }))
 );
-
-const handleViewLinked = (row: {
-  purchase_code: string;
-  sales_code: string;
-  customer_name: string;
-  customer_type: string;
-}) => {
-  router.push({
-    name: "QuotationsMaterialProductLinkView",
-    query: {
-      purchase_code: row.purchase_code,
-      sales_code: row.sales_code,
-      category: categoryKey.value,
-      customer_name: row.customer_name,
-      customer_type: row.customer_type,
-      purchase_uuid: purchaseUuid.value,
-      sall_quotations_code_from_index: sall_quotations_code_from_index.value,
-      quotations_datetime: routeQuotationDatetime.value,
-    },
-  });
-};
 </script>
 
 <template>
@@ -280,18 +284,18 @@ const handleViewLinked = (row: {
       <!-- ── Page Header ─────────────────────────────────────────── -->
       <TopHeader
         :icon="linkIcon"
-        title-key="الربط مع عروض العملاء"
-        description-key="تساعدك في الربط بين منتجات عروض الاسعار بين البائع والمشتري"
-        :code="sall_quotations_code_from_index || ''"
-        code-label="كود العرض"
+        title-key="الربط مع طلبيات العملاء"
+        description-key="تساعدك في الربط بين طللبيات المنتجات بين البائع والمشتري"
+        :code="sall_orders_code_from_index || ''"
+        code-label="كود الطلبية"
         :show-action="false"
       />
 
-      <!-- ── Section 1: معلومات العرض ──────────────────────────── -->
+      <!-- ── Section 1: معلومات الطلبية ──────────────────────────── -->
       <div class="bg-white rounded-3xl border border-gray-100 mx-6 p-6">
         <div class="flex items-center gap-2 mb-6 text-primary-600">
           <span v-html="fileCheckIcon" style="width:24px;height:24px;display:inline-flex;"></span>
-          <h2 class="text-base font-bold">معلومات العرض</h2>
+          <h2 class="text-base font-bold">معلومات الطلبية</h2>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
@@ -309,9 +313,9 @@ const handleViewLinked = (row: {
             />
           </div>
 
-          <!-- نوع العرض (disabled) -->
+          <!-- نوع الطلبية (disabled) -->
           <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-2">نوع العرض</label>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">نوع الطلبية</label>
             <v-text-field
               :model-value="categoryLabel || categoryKey"
               density="comfortable"
@@ -323,12 +327,12 @@ const handleViewLinked = (row: {
             />
           </div>
 
-          <!-- كود عرض سعر المبيعات -->
+          <!-- كود طلبية المبيعات -->
           <div>
             <SelectInput
               v-model="selectedSalesCode"
               :items="salesCodeItems"
-              label="كود عرض سعر المبيعات"
+              label="كود طلبية المبيعات"
               item-title="title"
               item-value="value"
               density="comfortable"
@@ -340,15 +344,15 @@ const handleViewLinked = (row: {
         </div>
       </div>
 
-      <!-- ── Section 2: تفاصيل العرض ───────────────────────────── -->
-      <div v-if="quotationDetails || loadingDetails" class="bg-white rounded-3xl border border-gray-100 mx-6">
+      <!-- ── Section 2: تفاصيل الطلبية ───────────────────────────── -->
+      <div v-if="orderDetails || loadingDetails" class="bg-white rounded-3xl border border-gray-100 mx-6">
 
         <!-- Section header -->
         <div class="px-6 pt-6 pb-4 flex items-center gap-2">
           <span v-html="documentIcon" style="width:24px;height:24px;display:inline-flex;color:#1570ef;"></span>
           <h2 class="text-base font-bold text-primary-600">
-            تفاصيل العرض
-            <span v-if="quotationDetails" class="ms-1">{{ quotationDetails.code }}</span>
+            تفاصيل الطلبية
+            <span v-if="orderDetails" class="ms-1">{{ orderDetails.code }}</span>
           </h2>
         </div>
 
@@ -357,40 +361,40 @@ const handleViewLinked = (row: {
           <v-progress-circular indeterminate color="primary" />
         </div>
 
-        <template v-else-if="quotationDetails">
+        <template v-else-if="orderDetails">
           <!-- Info strip — RTL: first item in HTML = rightmost on screen -->
           <div class="border-y border-primary-100 px-6 py-4 flex flex-wrap gap-x-8 gap-y-3">
-            <!-- حالة العرض (rightmost) -->
+            <!-- حالة الطلبية (rightmost) -->
             <div>
-              <p class="text-xs font-semibold text-gray-600">حالة العرض:</p>
-              <p class="text-sm font-bold text-gray-900 mt-0.5">{{ quotationDetails.status_name || '—' }}</p>
+              <p class="text-xs font-semibold text-gray-600">حالة الطلبية:</p>
+              <p class="text-sm font-bold text-gray-900 mt-0.5">{{ orderDetails.status_name || '—' }}</p>
             </div>
-            <!-- كود طلب مبيعات -->
+            <!-- كود عرض مبيعات -->
             <div>
-              <p class="text-xs font-semibold text-gray-600">كود طلب مبيعات :</p>
-              <p class="text-sm font-bold text-gray-900 mt-0.5">{{ quotationDetails.code }}</p>
+              <p class="text-xs font-semibold text-gray-600">كود عرض مبيعات :</p>
+              <p class="text-sm font-bold text-gray-900 mt-0.5">{{ orderDetails.sq_code || '—' }}</p>
             </div>
-            <!-- كود طلب مشتريات -->
+            <!-- كود عرض مشتريات -->
             <div>
-              <p class="text-xs font-semibold text-gray-600">كود طلب مشتريات :</p>
-              <p class="text-sm font-bold text-gray-900 mt-0.5">{{ sall_quotations_code_from_index || '—' }}</p>
+              <p class="text-xs font-semibold text-gray-600">كود عرض مشتريات :</p>
+              <p class="text-sm font-bold text-gray-900 mt-0.5">{{ orderDetails.pq_code || '—' }}</p>
             </div>
-            <!-- تاريخ العرض -->
+            <!-- تاريخ الطلبية -->
             <div>
-              <p class="text-xs font-semibold text-gray-600">تاريخ العرض :</p>
-              <p class="text-sm font-medium text-gray-900 mt-0.5">{{ formatDate(quotationDetails.quotations_datetime) }}</p>
+              <p class="text-xs font-semibold text-gray-600">تاريخ الطلبية :</p>
+              <p class="text-sm font-medium text-gray-900 mt-0.5">{{ formatDate(orderDetails.so_datetime) }}</p>
             </div>
             <!-- موقع المشروع -->
             <div>
               <p class="text-xs font-semibold text-gray-600">موقع المشروع :</p>
-              <p class="text-sm font-medium text-gray-900 mt-0.5 max-w-[200px] truncate" :title="quotationDetails.target_location">
-                {{ quotationDetails.target_location || '—' }}
+              <p class="text-sm font-medium text-gray-900 mt-0.5 md:max-w-[400px] max-w-[200px]" :title="orderDetails.target_location">
+                {{ orderDetails.target_location || '—' }}
               </p>
             </div>
             <!-- عدد المنتجات (leftmost) -->
             <div>
               <p class="text-xs font-semibold text-gray-600">عدد المنتجات :</p>
-              <p class="text-sm font-medium text-gray-900 mt-0.5">{{ quotationDetails.items?.length ?? 0 }}</p>
+              <p class="text-sm font-medium text-gray-900 mt-0.5">{{ orderDetails.items?.length ?? 0 }}</p>
             </div>
           </div>
 
@@ -459,7 +463,7 @@ const handleViewLinked = (row: {
         <!-- Section header -->
         <div class="px-6 py-5 flex items-center gap-2">
           <span v-html="linkIcon" style="width:22px;height:22px;display:inline-flex;color:#1570ef;"></span>
-          <h2 class="text-base font-bold text-primary-600">قائمة العروض المرتبطة</h2>
+          <h2 class="text-base font-bold text-primary-600">قائمة الطلبيات المرتبطة</h2>
         </div>
 
         <!-- Table — columns ordered RTL (first in HTML = rightmost) -->
@@ -470,8 +474,8 @@ const handleViewLinked = (row: {
                 <!-- rightmost → leftmost -->
                 <th class="px-6 py-3 text-xs font-bold text-gray-500 whitespace-nowrap text-right">الرقم</th>
                 <th class="px-6 py-3 text-xs font-bold text-gray-500 whitespace-nowrap text-center">العميل / نوع العميل</th>
-                <th class="px-6 py-3 text-xs font-bold text-gray-500 whitespace-nowrap text-center">كود عرض مبيعات العميل / التاريخ</th>
-                <th class="px-6 py-3 text-xs font-bold text-gray-500 whitespace-nowrap text-center">كود عرض مشتريات قلاب / التاريخ</th>
+                <th class="px-6 py-3 text-xs font-bold text-gray-500 whitespace-nowrap text-center">كود طلب مبيعات العميل / التاريخ</th>
+                <th class="px-6 py-3 text-xs font-bold text-gray-500 whitespace-nowrap text-center">كود طلبية مشتريات قلاب / التاريخ</th>
                 <th class="px-6 py-3 text-xs font-bold text-gray-500 whitespace-nowrap text-center">الإجراءات</th>
               </tr>
             </thead>
@@ -490,8 +494,8 @@ const handleViewLinked = (row: {
                     <v-btn icon variant="text" size="small" @click="removeLinkedItem(row.uuid)">
                       <span v-html="trashIcon" style="width:18px;height:18px;display:inline-flex;color:#D92D20;"></span>
                     </v-btn>
-                    <v-btn icon variant="text" size="small" @click="handleViewLinked(row)">
-                      <v-icon size="20" color="#697586">mdi-eye-outline</v-icon>
+                    <v-btn icon variant="text" size="small" @click="handleViewLinkedOrders(row)">
+                      <span v-html="eyeIcon" style="width:20px;height:20px;margin-top:5px;display:inline-flex;color:#1570EF;"></span>
                     </v-btn>
                   </div>
                 </td>

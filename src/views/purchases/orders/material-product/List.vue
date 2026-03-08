@@ -231,7 +231,7 @@ const handleSelectAllRequests = (checked: boolean) => {
 const handleLink = (item: unknown) => {
   const tableItem = item as OrderItem & { id: string | number };
   router.push({
-    name: 'OrdersMaterialProductLinkForm',
+    name: 'OrdersLinkForm',
     params: { id: tableItem.uuid },
     query: {
       sall_orders_code_from_index: tableItem.code,

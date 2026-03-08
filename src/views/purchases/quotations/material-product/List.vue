@@ -268,7 +268,7 @@ const handleCreateOrder = (item: unknown) => {
 const handleLink = (item: unknown) => {
   const tableItem = item as QuotationItem & { id: string | number };
   router.push({
-    name: 'QuotationsMaterialProductLinkForm',
+    name: 'QuotationsLinkForm',
     params: { id: tableItem.uuid },
     query: {
       sall_quotations_code_from_index: tableItem.code,
