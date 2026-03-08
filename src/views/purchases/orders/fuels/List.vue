@@ -7,7 +7,7 @@ import { useNotification } from '@/composables/useNotification';
 import { useTableColumns } from '@/composables/useTableColumns';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog.vue';
 import DatePickerInput from '@/components/common/forms/DatePickerInput.vue';
-import { GridIcon, trash_1_icon, trash_2_icon, importIcon, columnIcon, exportIcon, plusIcon, searchIcon } from '@/components/icons/globalIcons';
+import { GridIcon, trash_1_icon, trash_2_icon, importIcon, columnIcon, exportIcon, plusIcon, searchIcon, linkIcon } from '@/components/icons/globalIcons';
 import { switchHorisinralIcon } from '@/components/icons/priceOffersIcons';
 import StatusChangeFeature from '@/components/common/StatusChangeFeature.vue';
 
@@ -32,6 +32,7 @@ interface ItemActions {
   can_update: boolean;
   can_delete: boolean;
   can_change_status: boolean;
+  can_link: boolean;
 }
 
 interface BuildingMaterialRequest {
@@ -44,6 +45,7 @@ interface BuildingMaterialRequest {
   target_location: string;
   request_datetime: string;
   payment_method: string;
+  category: string;
   upfront_payment: number;
   status: string;
   status_id: number;
@@ -216,6 +218,19 @@ const handleSelectRequest = (item: { id: string | number }, selected: boolean) =
   } else {
     selectedRequests.value = selectedRequests.value.filter((x) => x !== id);
   }
+};
+
+const handleLink = (item: unknown) => {
+  const tableItem = item as BuildingMaterialRequest & { id: string | number };
+  router.push({
+    name: 'OrdersLinkForm',
+    params: { id: tableItem.uuid },
+    query: {
+      sall_orders_code_from_index: tableItem.code,
+      category: tableItem.category ?? undefined,
+      po_datetime: tableItem.request_datetime ?? undefined,
+    },
+  });
 };
 
 const handleSelectAllRequests = (checked: boolean) => {
@@ -530,6 +545,9 @@ onMounted(() => {
                 @click="openChangeStatusDialog(item)"
               >
                 <span v-html="switchHorisinralIcon"></span>
+              </v-btn>
+              <v-btn v-if="item.actions?.can_link" icon variant="text" size="small" @click="handleLink(item)">
+                <span v-html="linkIcon" style="display:inline-flex;width:22px;height:22px;color:#F79009;"></span>
               </v-btn>
             </div>
           </template>

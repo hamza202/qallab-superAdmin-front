@@ -13,9 +13,9 @@
                         المشتريات
                     </router-link>
                     <span class="text-lg text-gray-300">/</span>
-                    <router-link :to="`/purchases/orders/material-product/list`"
+                    <router-link :to="listPath"
                         class="text-gray-600 hover:text-primary-600">
-                        طلبيات مواد بناء أولية
+                        {{ listLabel }}
                     </router-link>
                     <span class="text-lg text-gray-300">/</span>
                     <span @click="goBackToForm"
@@ -49,7 +49,7 @@
 
                 <!-- Main Content -->
                 <!-- Linked Orders Section -->
-                <div v-for="(linkedOrder, index) in linkedOrders" :key="linkedOrder.uuid" class="mb-6">
+                <div v-for="linkedOrder in linkedOrders" :key="linkedOrder.uuid" class="mb-6">
                     <!-- Order Header -->
                     <div class="px-6 py-3 mt-4">
                         <div>
@@ -130,6 +130,20 @@ const purchaseOrderData = ref<any>(null)
 const salesCode = computed(() => route.query.codes as string)
 const purchaseUuid = computed(() => route.query.purchase_uuid as string)
 const category = computed(() => route.query.category as string)
+const categorySlug = computed(() => {
+    const key = category.value
+    if (key === 'fuel') return 'fuels'
+    if (key === 'building_material') return 'building-materials'
+    return key
+})
+const listPath = computed(() =>
+    category.value === 'fuel'
+        ? '/purchases/orders/fuels/list'
+        : '/purchases/orders/material-product/list'
+)
+const listLabel = computed(() =>
+    category.value === 'fuel' ? 'طلبيات المحروقات' : 'طلبيات مواد بناء أولية'
+)
 const sall_orders_code_from_index = computed(() => route.query.sall_orders_code_from_index as string)
 const po_datetime = computed(() => route.query.po_datetime as string)
 const orderNumber = computed(() => salesCode.value || '')
@@ -140,7 +154,7 @@ const fetchSalesOrder = async () => {
 
     try {
         const res = await api.get<any>(
-            `/purchases/orders/building-materials/link?category=${category.value}&codes=${salesCode.value}&with_items=true`
+            `/purchases/orders/${categorySlug.value}/link?category=${category.value}&codes=${salesCode.value}&with_items=true`
         )
         salesOrderData.value = Array.isArray(res.data) && res.data.length > 0 ? res.data[0] : null
     } catch (e: any) {
@@ -155,7 +169,7 @@ const fetchPurchaseOrder = async () => {
 
     try {
         const res = await api.get<any>(
-            `/purchases/orders/building-materials/link/${purchaseUuid.value}/details?with_items=true`
+            `/purchases/orders/${categorySlug.value}/link/${purchaseUuid.value}/details?with_items=true`
         )
         purchaseOrderData.value = res.data || null
     } catch (e: any) {
@@ -247,7 +261,7 @@ const productHeaders = [
 const goBackToForm = () => {
     if (purchaseUuid.value) {
         router.push({
-            name: "OrdersMaterialProductLinkForm",
+            name: "OrdersLinkForm",
             params: { id: purchaseUuid.value },
             query: {
                 sall_orders_code_from_index: sall_orders_code_from_index.value,

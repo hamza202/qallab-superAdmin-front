@@ -1302,6 +1302,32 @@ const isMenuItemActive = (menuLinkPath) => {
   if (currentPath.startsWith(basePath + "/") || currentPath === basePath) {
     // Special handling for different types of routes
 
+    // 0. Handle shared link routes with category query parameter
+    // For purchases/sales quotations and orders link pages
+    if (currentPath.includes("/link/") || currentPath.includes("/link")) {
+      const category = route.query.category;
+      
+      // Check if menu link is for a specific category type AND matches the link type (quotations vs orders)
+      if (menuLinkPath.includes("/quotations/fuels")) {
+        return category === "fuel" && currentPath.includes("/quotations/link");
+      }
+      if (menuLinkPath.includes("/orders/fuels")) {
+        return category === "fuel" && currentPath.includes("/orders/link");
+      }
+      if (menuLinkPath.includes("/quotations/material-product")) {
+        return category === "building_material" && currentPath.includes("/quotations/link");
+      }
+      if (menuLinkPath.includes("/orders/material-product")) {
+        return category === "building_material" && currentPath.includes("/orders/link");
+      }
+      if (menuLinkPath.includes("/quotations/logistics")) {
+        return category === "logistics" && currentPath.includes("/quotations/link");
+      }
+      if (menuLinkPath.includes("/orders/logistics")) {
+        return category === "logistics" && currentPath.includes("/orders/link");
+      }
+    }
+
     // 1. For nested product/service price routes (e.g., /products/building-material-products-prices)
     if (pathParts.length > 1 && pathParts[1].includes("price")) {
       // Build the full nested path from menu link

@@ -89,24 +89,6 @@ export const purchasesRoutes: RouteRecordRaw[] = [
           title: "pages.QuotationsMaterialProduct.view",
         },
       },
-      {
-        path: "link/:id",
-        name: "QuotationsMaterialProductLinkForm",
-        component: () =>
-          import("@/views/purchases/quotations/material-product/link/Form.vue"),
-        meta: {
-          title: "pages.QuotationsMaterialProduct.link",
-        },
-      },
-      {
-        path: "link/view",
-        name: "QuotationsMaterialProductLinkView",
-        component: () =>
-          import("@/views/purchases/quotations/material-product/link/View.vue"),
-        meta: {
-          title: "pages.QuotationsMaterialProduct.linkView",
-        },
-      },
     ],
   },
   {
@@ -232,25 +214,57 @@ export const purchasesRoutes: RouteRecordRaw[] = [
           title: "pages.OrdersMaterialProduct.view",
         },
       },
+
+    ],
+  },
+  {
+    path: "/purchases/quotations/link",
+    name: "QuotationsLink",
+    redirect: "/purchases/quotations/link/view",
+    children: [
       {
-        path: "link/:id",
-        name: "OrdersMaterialProductLinkForm",
+        path: ":id",
+        name: "QuotationsLinkForm",
         component: () =>
-          import("@/views/purchases/orders/material-product/link/Form.vue"),
+          import("@/views/purchases/link/quotations/Form.vue"),
+        meta: {
+          title: "pages.QuotationsMaterialProduct.link",
+        },
+      },
+      {
+        path: "view",
+        name: "QuotationsLinkView",
+        component: () =>
+          import("@/views/purchases/link/quotations/View.vue"),
+        meta: {
+          title: "pages.QuotationsMaterialProduct.linkView",
+        },
+      },
+    ],
+  },
+  {
+    path: "/purchases/orders/link",
+    name: "OrdersLink",
+    redirect: "/purchases/orders/link/view",
+    children: [
+      {
+        path: ":id",
+        name: "OrdersLinkForm",
+        component: () =>
+          import("@/views/purchases/link/orders/Form.vue"),
         meta: {
           title: "pages.OrdersMaterialProduct.link",
         },
       },
       {
-        path: "link/view",
-        name: "OrdersMaterialProductLinkView",
+        path: "view",
+        name: "OrdersLinkView",
         component: () =>
-          import("@/views/purchases/orders/material-product/link/View.vue"),
+          import("@/views/purchases/link/orders/View.vue"),
         meta: {
           title: "pages.OrdersMaterialProduct.linkView",
         },
       },
-
     ],
   },
   {
@@ -436,24 +450,6 @@ export const purchasesRoutes: RouteRecordRaw[] = [
         component: () => import("@/views/purchases/quotations/fuels/View.vue"),
         meta: {
           title: "pages.QuotationsFuels.view",
-        },
-      },
-      {
-        path: "link/:id",
-        name: "QuotationsFuelsLinkForm",
-        component: () =>
-          import("@/views/purchases/quotations/fuels/link/Form.vue"),
-        meta: {
-          title: "pages.QuotationsFuels.link",
-        },
-      },
-      {
-        path: "link/view",
-        name: "QuotationsFuelsLinkView",
-        component: () =>
-          import("@/views/purchases/quotations/fuels/link/View.vue"),
-        meta: {
-          title: "pages.QuotationsFuels.linkView",
         },
       },
     ],
