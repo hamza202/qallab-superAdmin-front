@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { reactive, watch, ref } from 'vue';
+import { taxNo, unifiedLoginId, email } from '@/utils/validators';
 
 // Available languages
 const availableLanguages = ref([
@@ -15,6 +16,7 @@ interface Props {
   email: string;
   buisnessno: string;
   taxno: string;
+  unifiedLoginId: string;
   countryId: number | null;
   cityId: number | null;
   neighborhood: string;
@@ -53,6 +55,7 @@ const formData = reactive({
   email: props.email,
   buisnessno: props.buisnessno,
   taxno: props.taxno,
+  unifiedLoginId: props.unifiedLoginId,
   countryId: props.countryId,
   cityId: props.cityId,
   neighborhood: props.neighborhood,
@@ -73,6 +76,7 @@ watch(() => props, (newProps) => {
     email: newProps.email,
     buisnessno: newProps.buisnessno,
     taxno: newProps.taxno,
+    unifiedLoginId: newProps.unifiedLoginId,
     countryId: newProps.countryId,
     cityId: newProps.cityId,
     neighborhood: newProps.neighborhood,
@@ -132,12 +136,21 @@ const markIcon = `<svg width="18" height="22" viewBox="0 0 18 22" fill="none" xm
       <TextInput v-model="formData.ownerName" @blur="emitUpdate" label="اسم المالك / الشركة المالكة"
         placeholder="AL-ED" :hide-details="false" :error-messages="props.formErrors?.['owner_name']" 
         @update:model-value="clearError('owner_name')" required />
-      <TextInput v-model="formData.buisnessno" @input="emitUpdate" label="السجل التجاري" :hide-details="false"
-        placeholder="32655451" :error-messages="props.formErrors?.['buisnessno']"
-        @update:model-value="clearError('buisnessno')" type="text" />
-      <TextInput v-model="formData.taxno" :hide-details="false" @input="emitUpdate" label="الرقم الضريبي"
-        placeholder="216623263" :error-messages="props.formErrors?.['taxno']" @update:model-value="clearError('taxno')"
-        type="text" />
+      <TextInput v-model="formData.buisnessno" @input="() => handleInputUpdate('buisnessno')" label="السجل التجاري" :hide-details="false"
+        placeholder="32655451" :rules="[required()]"
+        :error-messages="props.formErrors?.['buisnessno']"
+        @update:model-value="clearError('buisnessno')" type="text" required />
+
+      <TextInput v-model="formData.taxno" :hide-details="false" @input="() => handleInputUpdate('taxno')" label="الرقم الضريبي"
+        placeholder="أدخل الرقم الضريبي" :rules="[taxNo()]"
+        :error-messages="props.formErrors?.['taxno']" @update:model-value="clearError('taxno')"
+        type="text" required />
+
+      <TextInput v-model="formData.unifiedLoginId" @input="() => handleInputUpdate('unified_login_id')"
+        label="معرف الدخول الموحد" placeholder="أدخل معرف الدخول الموحد" :hide-details="false"
+        :rules="[unifiedLoginId()]"
+        :error-messages="props.formErrors?.['unified_login_id']"
+        @update:model-value="clearError('unified_login_id')" type="text" />
 
             <TelInput v-model="formData.mobile" label="الهاتف المحمول" :rules="[required(), saudiPhone()]"
         :error-messages="props.formErrors?.['mobile']" @input="() => handleInputUpdate('mobile')" />

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { taxNo, unifiedLoginId, email } from '@/utils/validators';
+
 // Available languages
 const availableLanguages = ref([
   { code: "en", name: "En", flag: "/img/en.svg", dir: "ltr" as const },
@@ -11,6 +13,7 @@ interface Props {
   ownerName: string;
   commercialRegister: string;
   taxRegister: string;
+  unifiedLoginId: string;
   entityType: string | null;
   isActive: boolean;
   languageId: number | null;
@@ -55,6 +58,7 @@ const formData = reactive({
   ownerName: props.ownerName,
   commercialRegister: props.commercialRegister,
   taxRegister: props.taxRegister,
+  unifiedLoginId: props.unifiedLoginId,
   entityType: props.entityType,
   isActive: props.isActive,
   languageId: props.languageId,
@@ -77,6 +81,7 @@ watch(() => props, (newProps) => {
     ownerName: newProps.ownerName,
     commercialRegister: newProps.commercialRegister,
     taxRegister: newProps.taxRegister,
+    unifiedLoginId: newProps.unifiedLoginId,
     entityType: newProps.entityType,
     isActive: newProps.isActive,
     languageId: newProps.languageId,
@@ -146,9 +151,15 @@ const markIcon = `<svg width="18" height="22" viewBox="0 0 18 22" fill="none" xm
         :error-messages="props.formErrors?.['commercial_register']" required />
 
 
-      <TextInput v-model="formData.taxRegister" @input="() => handleInputUpdate('tax_register')" label="الرقم الضريبي"
-        placeholder="216623263" :hide-details="false" :rules="[required()]"
-        :error-messages="props.formErrors?.['tax_register']" />
+      <TextInput v-model="formData.taxRegister" :hide-details="false" @input="() => handleInputUpdate('tax_register')" label="الرقم الضريبي"
+        placeholder="أدخل الرقم الضريبي" :rules="[taxNo()]"
+        :error-messages="props.formErrors?.['tax_register']" @update:model-value="clearError('tax_register')" type="text" required />
+
+      <TextInput v-model="formData.unifiedLoginId" @input="() => handleInputUpdate('unified_login_id')"
+        label="معرف الدخول الموحد" placeholder="أدخل معرف الدخول الموحد" :hide-details="false"
+        :rules="[unifiedLoginId()]"
+        :error-messages="props.formErrors?.['unified_login_id']"
+        @update:model-value="clearError('unified_login_id')" type="text" />
       <SelectWithIconInput clearable v-model="formData.entityType" @update:model-value="emitUpdate" label="نوع الكيان"
         placeholder="شركة مساهمة" :items="entityTypeItems" />
 
