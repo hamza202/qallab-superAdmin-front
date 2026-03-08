@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import { useRoute, useRouter } from 'vue-router';
 import { useApi } from '@/composables/useApi';
 import { useNotification } from '@/composables/useNotification';
@@ -41,6 +41,14 @@ const saleOrderId = computed(() => route.query.sale_order_id as string | undefin
 const routeFrom = computed(() => route.query.from as string | undefined);
 
 const tripCode = ref("");
+
+// Check if coming from material-product page (has sale_order_id but not from=logistics)
+const isFromMaterialProduct = computed(() => !!saleOrderId.value && routeFrom.value !== 'logistics');
+
+// Logistics orders list for material-product flow
+const soLogisticItems = ref<{ title: string; value: number; code: string }[]>([]);
+const selectedSoLogisticId = ref<number | null>(null);
+const loadingSoLogistics = ref(false);
 
 const formData = ref({
   so_pickup_id: null as number | null,
@@ -124,6 +132,119 @@ const fetchUnits = async () => {
     }
   } catch (e) {
     console.error('Error fetching units:', e);
+  }
+};
+
+const getTransportTypeName = (typeValue: string | number | null): string => {
+  if (typeValue === null || typeValue === undefined) return '';
+  const found = transportTypeItems.value.find(t => t.value == typeValue);
+  return found ? found.title : '';
+};
+
+// Fetch logistics orders list for material-product flow
+const fetchSoLogisticsList = async () => {
+  if (!isFromMaterialProduct.value || !formData.value.supplier_logistic_id) return;
+  
+  loadingSoLogistics.value = true;
+  try {
+    const res = await api.get<any>('/sales/orders/list', {
+      params: {
+        supplier_id: formData.value.supplier_logistic_id,
+        category: 'logistics'
+      }
+    });
+    if (Array.isArray(res.data)) {
+      soLogisticItems.value = res.data.map((item: any) => ({
+        title: item.code,
+        value: item.id,
+        code: item.code
+      }));
+    }
+  } catch (e) {
+    console.error('Error fetching logistics orders:', e);
+  } finally {
+    loadingSoLogistics.value = false;
+  }
+};
+
+// Fetch logistics order details when selected
+const fetchSoLogisticDetails = async () => {
+  if (!selectedSoLogisticId.value || !formData.value.supplier_logistic_id) return;
+  
+  const selectedItem = soLogisticItems.value.find(item => item.value === selectedSoLogisticId.value);
+  if (!selectedItem) return;
+  
+  isLoading.value = true;
+  try {
+    const res = await api.get<any>('/sales/orders/list', {
+      params: {
+        supplier_id: formData.value.supplier_logistic_id,
+        category: 'logistics',
+        with_so_trip_details: true,
+        code: selectedItem.code
+      }
+    });
+    
+    const data = Array.isArray(res.data) && res.data.length > 0 ? res.data[0] : null;
+    if (!data) return;
+    
+    // Process so_trip_details
+    if (data.so_trip_details && Array.isArray(data.so_trip_details)) {
+      const availableDetails: TripLogisticsDetail[] = [];
+      const productItems: ProductTableItem[] = [];
+
+      data.so_trip_details.forEach((item: any) => {
+        const vehicleTypes = Array.isArray(item.transport_type) 
+          ? item.transport_type.map((t: any) => ({ transport_type: parseInt(t), transport_no: null }))
+          : (item.transport_type != null ? [{ transport_type: parseInt(item.transport_type), transport_no: null }] : []);
+          
+        availableDetails.push({
+          item_id: item.item_id,
+          item_name: item.item_name || '',
+          unit_id: item.unit_id,
+          unit_name: item.unit_name || '',
+          quantity: item.quantity || null,
+          transport_type: [],
+          vehicle_type_no: vehicleTypes,
+          price: null
+        });
+
+        // Check if item already exists in productItems
+        const existingIndex = productItems.findIndex(p => p.item_id === item.item_id);
+        if (existingIndex === -1) {
+          productItems.push({
+            item_id: item.item_id,
+            item_name: item.item_name || '',
+            unit_id: item.unit_id,
+            unit_name: item.unit_name || '',
+            quantity: item.quantity || null,
+            transport_type: Array.isArray(item.transport_type) && item.transport_type.length > 0 
+              ? parseInt(item.transport_type[0]) 
+              : (item.transport_type != null ? parseInt(item.transport_type) : null),
+            transport_no: null,
+            transport_type_name: Array.isArray(item.transport_type) && item.transport_type.length > 0 
+              ? getTransportTypeName(parseInt(item.transport_type[0])) 
+              : (item.transport_type != null ? getTransportTypeName(parseInt(item.transport_type)) : ''),
+            notes: '',
+            isAdded: true
+          });
+        }
+      });
+
+      availableTripDetails.value = JSON.parse(JSON.stringify(availableDetails));
+      customerTripDetails.value = JSON.parse(JSON.stringify(availableDetails));
+      
+      const logistcDetails = JSON.parse(JSON.stringify(availableDetails));
+      logistcDetails.forEach((ld: any) => ld.price = null);
+      logisticCompanyTripDetails.value = logistcDetails;
+      
+      productTableItems.value = productItems;
+    }
+  } catch (err: any) {
+    console.error('Error fetching logistics order details:', err);
+    error(err?.response?.data?.message || 'فشل تحميل تفاصيل طلبية النقل');
+  } finally {
+    isLoading.value = false;
   }
 };
 
@@ -304,12 +425,6 @@ const fetchSaleOrderData = async () => {
   } finally {
     isLoading.value = false;
   }
-};
-
-const getTransportTypeName = (typeValue: string | number | null): string => {
-  if (typeValue === null || typeValue === undefined) return '';
-  const found = transportTypeItems.value.find(t => t.value == typeValue);
-  return found ? found.title : '';
 };
 
 const getUnitName = (unit_id: any): string => {
@@ -506,7 +621,7 @@ const handleSubmit = async (option: SubmitOption) => {
 
   isSubmitting.value = true;
   try {
-    const payload = {
+    const payload: Record<string, any> = {
       ...formData.value,
       items: productTableItems.value.map(item => ({
         id: isEditMode.value ? item.id : null,
@@ -534,6 +649,11 @@ const handleSubmit = async (option: SubmitOption) => {
         vehicle_type_no: item.vehicle_type_no
       }))
     };
+    
+    // Add so_logistic_id only when coming from material-product page
+    if (isFromMaterialProduct.value && selectedSoLogisticId.value) {
+      payload.so_logistic_id = selectedSoLogisticId.value;
+    }
 
 
     if (isEditMode.value) {
@@ -752,6 +872,29 @@ const handleDeleteProduct = (item: any) => {
   }
 };
 
+// Watch for supplier_logistic_id changes to fetch logistics orders list (only for material-product flow)
+watch(() => formData.value.supplier_logistic_id, (newVal) => {
+  if (isFromMaterialProduct.value && newVal) {
+    // Reset selected logistics order when supplier changes
+    selectedSoLogisticId.value = null;
+    soLogisticItems.value = [];
+    // Clear trip details
+    availableTripDetails.value = [];
+    customerTripDetails.value = [];
+    logisticCompanyTripDetails.value = [];
+    productTableItems.value = [];
+    // Fetch new logistics orders list
+    fetchSoLogisticsList();
+  }
+});
+
+// Watch for selectedSoLogisticId changes to fetch logistics order details
+watch(selectedSoLogisticId, (newVal) => {
+  if (isFromMaterialProduct.value && newVal) {
+    fetchSoLogisticDetails();
+  }
+});
+
 onMounted(async () => {
   fetchUnits();
   fetchConstants();
@@ -761,8 +904,9 @@ onMounted(async () => {
   } else if (pickupId.value) {
     // If pickupId exists, fetch SO pickup data to populate items
     await fetchSoPickupData();
-  } else if (saleOrderId.value) {
-    // If sale_order_id exists in query, fetch sale order data to populate items
+  } else if (saleOrderId.value && !isFromMaterialProduct.value) {
+    // If sale_order_id exists in query and NOT from material-product, fetch sale order data
+    // For material-product flow, we wait for user to select logistics order
     await fetchSaleOrderData();
   }
 });
@@ -791,6 +935,19 @@ onMounted(async () => {
                 density="comfortable" placeholder="اختر" :hide-details="false" :rules="[required()]"
                 :error-messages="formErrors['supplier_logistic_id']"
                 @update:model-value="delete formErrors['supplier_logistic_id']" />
+            </div>
+            <!-- Logistics Order Select - Only shown when coming from material-product page -->
+            <div v-if="isFromMaterialProduct">
+              <selectInput 
+                :items="soLogisticItems" 
+                v-model="selectedSoLogisticId" 
+                label="طلبية مبيعات خدمة النقل"
+                density="comfortable" 
+                placeholder="اختر طلبية النقل" 
+                :hide-details="false"
+                :disabled="!formData.supplier_logistic_id"
+                :loading="loadingSoLogistics"
+              />
             </div>
             <div class="relative">
               <label class="text-sm font-medium text-gray-700 mb-2 block">موقع التحميل</label>
