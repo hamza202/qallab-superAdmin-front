@@ -228,7 +228,7 @@ const handleLink = (item: unknown) => {
     query: {
       sall_orders_code_from_index: tableItem.code,
       category: tableItem.category ?? undefined,
-      po_datetime: tableItem.request_datetime ?? undefined,
+      po_datetime: tableItem.po_datetime ?? undefined,
     },
   });
 };

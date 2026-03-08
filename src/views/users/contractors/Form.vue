@@ -70,6 +70,7 @@ const languageId = ref<number | null>(null);
 const phone = ref("");
 const email = ref("");
 const mobile = ref("");
+const unifiedLoginId = ref("");
 const countryId = ref<number | null>(null);
 const cityId = ref<number | null>(null);
 const neighborhood = ref("");
@@ -189,6 +190,7 @@ const handleSave = async () => {
       if (phone.value) payload.phone = phone.value;
       if (email.value) payload.email = email.value;
       if (mobile.value) payload.mobile = mobile.value;
+      if (unifiedLoginId.value) payload.unified_login_id = unifiedLoginId.value;
       if (countryId.value) payload.country_id = countryId.value;
       if (cityId.value) payload.city_id = cityId.value;
       if (neighborhood.value) payload.neighborhood = neighborhood.value;
@@ -355,6 +357,7 @@ const handleBasicInfoUpdate = (data: any) => {
   if (data.phone !== undefined) phone.value = data.phone;
   if (data.email !== undefined) email.value = data.email;
   if (data.mobile !== undefined) mobile.value = data.mobile;
+  if (data.unifiedLoginId !== undefined) unifiedLoginId.value = data.unifiedLoginId;
   if (data.countryId !== undefined) countryId.value = data.countryId;
   if (data.cityId !== undefined) cityId.value = data.cityId;
   if (data.neighborhood !== undefined) neighborhood.value = data.neighborhood;
@@ -500,6 +503,7 @@ const fetchContractorData = async () => {
     phone.value = data.phone || "";
     email.value = data.email || "";
     mobile.value = data.mobile || "";
+    unifiedLoginId.value = data.unified_login_id || "";
     countryId.value = data.country_id;
     cityId.value = data.city_id;
     neighborhood.value = data.neighborhood || "";
@@ -576,7 +580,7 @@ onMounted(async () => {
         <v-tabs-window-item :value="0">
           <BasicInfoTab :fullNameTranslations="fullNameTranslations" :tradeNameTranslations="tradeNameTranslations"
             :ownerName="ownerName" :commercialRegister="commercialRegister" :taxRegister="taxRegister"
-            :entityType="entityType" :isActive="isActive" :languageId="languageId" :phone="phone" :email="email"
+            :unifiedLoginId="unifiedLoginId" :entityType="entityType" :isActive="isActive" :languageId="languageId" :phone="phone" :email="email"
             :mobile="mobile" :countryId="countryId" :cityId="cityId" :neighborhood="neighborhood"
             :streetName="streetName" :buildingNumber="buildingNumber" :postalCode="postalCode" :address1="address1"
             :entityTypeItems="entityTypeItems" :languageItems="languageItems" :countryItems="countryItems"

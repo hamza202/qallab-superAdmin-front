@@ -73,6 +73,11 @@
                                 </div>
                                 <v-divider vertical class="my-6"></v-divider>
                                 <div class="info-item-bordered flex-1 px-6 py-4">
+                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">اسم العميل</label>
+                                    <p class="text-base font-semibold text-gray-900">{{ customerName }}</p>
+                                </div>
+                                <v-divider vertical class="my-6"></v-divider>
+                                <div class="info-item-bordered flex-1 px-6 py-4">
                                     <label class="font-semibold text-sm text-gray-500 mb-2 block">تاريخ اصدار
                                         الطلب</label>
                                     <p class="text-base font-semibold text-gray-900">{{ requestDateTime }}</p>
@@ -255,20 +260,21 @@ onMounted(() => {
 })
 
 // Computed properties for display
-const requestCode = computed(() => requestData.value?.code || '')
+const requestCode = computed(() => requestData.value?.code || '--')
 const requestType = computed(() => {
     const type = requestData.value?.request_type
-    if (type === 'purchase_request_without_logistics') return 'طلب بدون خدمة نقل'
-    if (type === 'purchase_request_with_logistics') return 'طلب مع خدمة نقل'
-    return type || ''
+    if (type === 'request_without_logistics') return 'طلب بدون خدمة نقل'
+    if (type === 'request_with_logistics') return 'طلب مع خدمة نقل'
+    return type || '--'
 })
-const supplierName = computed(() => requestData.value?.supplier_name || '')
+const supplierName = computed(() => requestData.value?.supplier_name || '--')
+const customerName = computed(() => requestData.value?.customer || '--')
 const requestDateTime = computed(() => {
     const dt = requestData.value?.request_datetime
-    return dt ? new Date(dt).toLocaleDateString('en-US') : ''
+    return dt ? new Date(dt).toLocaleDateString('en-US') : '--'
 })
 const statusText = computed(() => requestData.value?.status_name || '--')
-const targetLocation = computed(() => requestData.value?.target_location || '')
+const targetLocation = computed(() => requestData.value?.target_location || '--')
 const paymentMethod = computed(() => {
     const method = requestData.value?.payment_method
     if (method === 'cash') return 'كاش'
