@@ -50,6 +50,13 @@ const soLogisticItems = ref<{ title: string; value: number; code: string }[]>([]
 const selectedSoLogisticId = ref<number | null>(null);
 const loadingSoLogistics = ref(false);
 
+// Edit mode specific fields
+const customerItems = ref<{ title: string; value: number }[]>([]);
+const selectedCustomerId = ref<number | null>(null);
+const customerSaleOrderItems = ref<{ title: string; value: number }[]>([]);
+const selectedCustomerSaleOrderId = ref<number | null>(null);
+const loadingCustomerSaleOrders = ref(false);
+
 const formData = ref({
   so_pickup_id: null as number | null,
   sale_order_id: null as number | null,
@@ -121,6 +128,44 @@ const fetchSuppliers = async () => {
   }
 }
 
+// Fetch customers for edit mode
+const fetchCustomers = async () => {
+  try {
+    const res = await api.get<any>('/customers/list');
+    if (Array.isArray(res.data)) {
+      customerItems.value = res.data.map((i: any) => ({ title: i.full_name, value: i.id }));
+    }
+  } catch (e) {
+    console.error('Error fetching customers:', e);
+  }
+};
+
+// Fetch customer sale orders for edit mode
+const fetchCustomerSaleOrders = async () => {
+  if (!isEditMode.value || !selectedCustomerId.value) return;
+  
+  loadingCustomerSaleOrders.value = true;
+  try {
+    const res = await api.get<any>('/sales/orders/list', {
+      params: {
+        customer_id: selectedCustomerId.value,
+        so_type: 'so_with_logistics',
+        category: 'building_material'
+      }
+    });
+    if (Array.isArray(res.data)) {
+      customerSaleOrderItems.value = res.data.map((item: any) => ({
+        title: item.code,
+        value: item.id
+      }));
+    }
+  } catch (e) {
+    console.error('Error fetching customer sale orders:', e);
+  } finally {
+    loadingCustomerSaleOrders.value = false;
+  }
+}
+
 const fetchUnits = async () => {
   try {
     const res = await api.get<any>('/units/list');
@@ -144,6 +189,32 @@ const getTransportTypeName = (typeValue: string | number | null): string => {
 // Fetch logistics orders list for material-product flow
 const fetchSoLogisticsList = async () => {
   if (!isFromMaterialProduct.value || !formData.value.supplier_logistic_id) return;
+  
+  loadingSoLogistics.value = true;
+  try {
+    const res = await api.get<any>('/sales/orders/list', {
+      params: {
+        supplier_id: formData.value.supplier_logistic_id,
+        category: 'logistics'
+      }
+    });
+    if (Array.isArray(res.data)) {
+      soLogisticItems.value = res.data.map((item: any) => ({
+        title: item.code,
+        value: item.id,
+        code: item.code
+      }));
+    }
+  } catch (e) {
+    console.error('Error fetching logistics orders:', e);
+  } finally {
+    loadingSoLogistics.value = false;
+  }
+};
+
+// Fetch logistics orders list for edit mode (without isFromMaterialProduct check)
+const fetchSoLogisticsListForEdit = async () => {
+  if (!formData.value.supplier_logistic_id) return;
   
   loadingSoLogistics.value = true;
   try {
@@ -570,6 +641,25 @@ const fetchFormData = async () => {
         isAdded: true
       }));
     }
+    
+    // Populate edit mode specific fields
+    if (data.so_logistic_id) {
+      selectedSoLogisticId.value = data.so_logistic_id;
+      // Fetch logistics orders list to populate the select
+      if (formData.value.supplier_logistic_id) {
+        await fetchSoLogisticsListForEdit();
+      }
+    }
+    
+    if (data.customer_id) {
+      selectedCustomerId.value = data.customer_id;
+      // Fetch customer sale orders list after setting customer
+      await fetchCustomerSaleOrders();
+    }
+    
+    if (data.sale_order_id) {
+      selectedCustomerSaleOrderId.value = data.sale_order_id;
+    }
   } catch (err: any) {
     console.error('Error fetching trip data:', err);
     error(err?.response?.data?.message || 'فشل تحميل بيانات الرحلة');
@@ -650,11 +740,20 @@ const handleSubmit = async (option: SubmitOption) => {
       }))
     };
     
-    // Add so_logistic_id only when coming from material-product page
-    if (isFromMaterialProduct.value && selectedSoLogisticId.value) {
+    // Add so_logistic_id when coming from material-product page or in edit mode
+    if ((isFromMaterialProduct.value || isEditMode.value) && selectedSoLogisticId.value) {
       payload.so_logistic_id = selectedSoLogisticId.value;
     }
-
+    
+    // Add customer_id and sale_order_id in edit mode
+    if (isEditMode.value) {
+      if (selectedCustomerId.value) {
+        payload.customer_id = selectedCustomerId.value;
+      }
+      if (selectedCustomerSaleOrderId.value) {
+        payload.sale_order_id = selectedCustomerSaleOrderId.value;
+      }
+    }
 
     if (isEditMode.value) {
       await api.put(`/sales/trips/${routeId.value}`, payload);
@@ -872,8 +971,8 @@ const handleDeleteProduct = (item: any) => {
   }
 };
 
-// Watch for supplier_logistic_id changes to fetch logistics orders list (only for material-product flow)
-watch(() => formData.value.supplier_logistic_id, (newVal) => {
+// Watch for supplier_logistic_id changes to fetch logistics orders list (for material-product flow or edit mode)
+watch(() => formData.value.supplier_logistic_id, (newVal, oldVal) => {
   if (isFromMaterialProduct.value && newVal) {
     // Reset selected logistics order when supplier changes
     selectedSoLogisticId.value = null;
@@ -885,6 +984,11 @@ watch(() => formData.value.supplier_logistic_id, (newVal) => {
     productTableItems.value = [];
     // Fetch new logistics orders list
     fetchSoLogisticsList();
+  } else if (isEditMode.value && newVal && oldVal !== null) {
+    // In edit mode, only reset and fetch if supplier actually changed (not initial load)
+    selectedSoLogisticId.value = null;
+    soLogisticItems.value = [];
+    fetchSoLogisticsListForEdit();
   }
 });
 
@@ -895,10 +999,27 @@ watch(selectedSoLogisticId, (newVal) => {
   }
 });
 
+// Watch for selectedCustomerId changes to fetch customer sale orders (edit mode only)
+watch(selectedCustomerId, (newVal) => {
+  if (isEditMode.value && newVal) {
+    // Reset selected sale order when customer changes
+    selectedCustomerSaleOrderId.value = null;
+    customerSaleOrderItems.value = [];
+    // Fetch new customer sale orders list
+    fetchCustomerSaleOrders();
+  }
+});
+
 onMounted(async () => {
   fetchUnits();
   fetchConstants();
   fetchSuppliers();
+  
+  // Fetch customers only in edit mode
+  if (isEditMode.value) {
+    fetchCustomers();
+  }
+  
   if (routeId.value) {
     await fetchFormData();
   } else if (pickupId.value) {
@@ -936,8 +1057,8 @@ onMounted(async () => {
                 :error-messages="formErrors['supplier_logistic_id']"
                 @update:model-value="delete formErrors['supplier_logistic_id']" />
             </div>
-            <!-- Logistics Order Select - Only shown when coming from material-product page -->
-            <div v-if="isFromMaterialProduct">
+            <!-- Logistics Order Select - Only shown when coming from material-product page OR in edit mode -->
+            <div v-if="isFromMaterialProduct || isEditMode">
               <selectInput 
                 :items="soLogisticItems" 
                 v-model="selectedSoLogisticId" 
@@ -949,6 +1070,33 @@ onMounted(async () => {
                 :loading="loadingSoLogistics"
               />
             </div>
+            
+            <!-- Customer Select - Only shown in edit mode -->
+            <div v-if="isEditMode">
+              <selectInput 
+                :items="customerItems" 
+                v-model="selectedCustomerId" 
+                label="العميل"
+                density="comfortable" 
+                placeholder="اختر العميل" 
+                :hide-details="false"
+              />
+            </div>
+            
+            <!-- Customer Sale Order Select - Only shown in edit mode -->
+            <div v-if="isEditMode">
+              <selectInput 
+                :items="customerSaleOrderItems" 
+                v-model="selectedCustomerSaleOrderId" 
+                label="طلبية مبيعات العميل"
+                density="comfortable" 
+                placeholder="اختر طلبية العميل" 
+                :hide-details="false"
+                :disabled="!selectedCustomerId"
+                :loading="loadingCustomerSaleOrders"
+              />
+            </div>
+
             <div class="relative">
               <label class="text-sm font-medium text-gray-700 mb-2 block">موقع التحميل</label>
               <div
