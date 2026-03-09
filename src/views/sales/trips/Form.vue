@@ -56,6 +56,7 @@ const selectedCustomerId = ref<number | null>(null);
 const customerSaleOrderItems = ref<{ title: string; value: number }[]>([]);
 const selectedCustomerSaleOrderId = ref<number | null>(null);
 const loadingCustomerSaleOrders = ref(false);
+const tripCategory = ref<string | null>(null); // Category from API response for edit mode
 
 const formData = ref({
   so_pickup_id: null as number | null,
@@ -150,7 +151,7 @@ const fetchCustomerSaleOrders = async () => {
       params: {
         customer_id: selectedCustomerId.value,
         so_type: 'so_with_logistics',
-        category: 'building_material'
+        category: tripCategory.value || 'building_material'
       }
     });
     if (Array.isArray(res.data)) {
@@ -554,6 +555,7 @@ const fetchFormData = async () => {
 
     if (!data) return;
     tripCode.value = data.code || "";
+    tripCategory.value = data.category || 'building_material';
     formData.value = {
       sale_order_id: data.sale_order_id || null,
       so_pickup_id: data.so_pickup_id || null,
@@ -754,6 +756,9 @@ const handleSubmit = async (option: SubmitOption) => {
         payload.sale_order_id = selectedCustomerSaleOrderId.value;
       }
     }
+    
+    // Add category based on routeFrom
+    payload.category = routeFrom.value === 'logistics' ? 'logistics' : 'building_material';
 
     if (isEditMode.value) {
       await api.put(`/sales/trips/${routeId.value}`, payload);
