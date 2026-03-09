@@ -214,6 +214,7 @@ const closeDialog = () => {
   productsList.value = [];
   editItemData.value = null;
   searchQuery.value = '';
+  loading.value = false;
 };
 
 const handleDone = () => {
