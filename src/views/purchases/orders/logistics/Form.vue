@@ -822,17 +822,18 @@ const handleSubmit = async (type: string) => {
   }
 
   // Validate logistics details locations
-  // for (let i = 0; i < logisticsDetails.value.length; i++) {
-  //   const detail = logisticsDetails.value[i];
-  //   if (!detail.source_location?.trim()) {
-  //     warning(`يجب تحديد موقع الاستلام لخدمة النقل رقم ${i + 1}`);
-  //     return;
-  //   }
-  //   if (!detail.target_location?.trim()) {
-  //     warning(`يجب تحديد موقع التسليم لخدمة النقل رقم ${i + 1}`);
-  //     return;
-  //   }
-  // }
+  // skip validation for the first logistics detail (index 0)
+  for (let i = 1; i < logisticsDetails.value.length; i++) {
+    const detail = logisticsDetails.value[i];
+    if (!detail.source_location?.trim()) {
+      warning(`يجب تحديد موقع الاستلام لخدمة النقل رقم ${i + 1}`);
+      return;
+    }
+    if (!detail.target_location?.trim()) {
+      warning(`يجب تحديد موقع التسليم لخدمة النقل رقم ${i + 1}`);
+      return;
+    }
+  }
 
 
   isSubmitting.value = true;
