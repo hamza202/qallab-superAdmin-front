@@ -665,6 +665,15 @@
                     لوحة التحكم المالية
                   </router-link>
                 </li>
+                <li class="relative">
+                  <router-link to="/banks/list" :class="[
+                    isMenuItemActive('/banks/list') || isMenuItemActive('/treasuries/list')
+                      ? 'font-bold text-qallab-yellow'
+                      : 'text-white hover:text-qallab-yellow',
+                  ]">
+                    الخزائن والبنوك
+                  </router-link>
+                </li>
                 <!-- <li v-if="canViewPaymentVouchers" class="relative">
                   <router-link to="/finance/payment-vouchers" :class="[
                     isMenuItemActive('/finance/paّyment-vouchers')
