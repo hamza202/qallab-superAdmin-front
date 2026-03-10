@@ -43,6 +43,26 @@ const feeTypeItems = ref<any[]>([]);
 const currencyItems = ref<any[]>([]);
 const supplierItems = ref<any[]>([]);
 
+
+/** Extract validation error messages from API response (data.errors: { "field.key": ["..."] }). */
+function getApiErrorDisplayMessage(e: any, fallback: string): string {
+  const data = e?.response?.data;
+  if (!data || typeof data !== 'object') return fallback;
+  const errors = data.errors;
+  if (errors && typeof errors === 'object') {
+    const messages: string[] = [];
+    for (const value of Object.values(errors)) {
+      if (Array.isArray(value)) {
+        value.forEach((v) => { if (typeof v === 'string') messages.push(v); });
+      } else if (typeof value === 'string') {
+        messages.push(value);
+      }
+    }
+    if (messages.length > 0) return messages.join(' ');
+  }
+  return (typeof data.message === 'string' && data.message) ? data.message : fallback;
+}
+
 const fetchCategories = async () => {
   try {
     const res = await api.get<any>('/categories/list');
@@ -304,7 +324,7 @@ const fetchQuotationForOrder = async () => {
     }
   } catch (e: any) {
     console.error('Error fetching quotation data:', e);
-    error(e?.response?.data?.message || 'فشل تحميل بيانات عرض السعر');
+    error(getApiErrorDisplayMessage(e, 'فشل تحميل بيانات عرض السعر'));
   } finally {
     isLoading.value = false;
   }
@@ -408,7 +428,7 @@ const fetchFormData = async () => {
     }
   } catch (e: any) {
     console.error('Error fetching form data:', e);
-    error(e?.response?.data?.message || 'فشل تحميل البيانات');
+    error(getApiErrorDisplayMessage(e, 'فشل تحميل البيانات'));
   } finally {
     isLoading.value = false;
   }
@@ -716,26 +736,33 @@ const buildPayload = () => {
     payload.sale_quotation_id = Number(purchaseQuotationId.value);
   }
 
-  payload.po_logistics_details = logisticsDetails.value.map(d => ({
-    id: d.id ?? null,
-    material_type: d.material_type,
-    trip_no: d.trip_no,
-    actual_execution_interval: d.actual_execution_interval,
-    am_pm_interval: d.am_pm_interval,
-    from_date: d.from_date,
-    to_date: d.to_date,
-    transport_type: d.transport_type,
-    transport_no: d.transport_no,
-    loading_responsible_party: d.loading_responsible_party,
-    downloading_responsible_party: d.downloading_responsible_party,
-    target_location: d.target_location,
-    target_latitude: d.target_latitude,
-    target_longitude: d.target_longitude,
-    source_location: d.source_location,
-    source_latitude: d.source_latitude,
-    source_longitude: d.source_longitude,
-    transport_amount: d.transport_amount ?? 0,
-  }));
+  payload.po_logistics_details = logisticsDetails.value.map((d, index) => {
+      const useMainFormLocations =
+        logisticsDetails.value.length === 1 &&
+        formData.value.source_location &&
+        formData.value.target_location;
+      const applyMainLocations = useMainFormLocations && index === 0;
+      return {
+        id: isEditMode.value ? (d.id ?? null) : null,
+        material_type: d.material_type,
+        trip_no: d.trip_no,
+        actual_execution_interval: d.actual_execution_interval,
+        am_pm_interval: d.am_pm_interval,
+        from_date: d.from_date,
+        to_date: d.to_date,
+        transport_type: d.transport_type,
+        transport_no: d.transport_no,
+        loading_responsible_party: d.loading_responsible_party,
+        downloading_responsible_party: d.downloading_responsible_party,
+        target_location: applyMainLocations ? (formData.value.target_location || '') : (d.target_location ?? ''),
+        target_latitude: applyMainLocations ? (formData.value.target_latitude ?? '') : (d.target_latitude ?? ''),
+        target_longitude: applyMainLocations ? (formData.value.target_longitude ?? '') : (d.target_longitude ?? ''),
+        source_location: applyMainLocations ? (formData.value.source_location || '') : (d.source_location ?? ''),
+        source_latitude: applyMainLocations ? (formData.value.source_latitude ?? '') : (d.source_latitude ?? ''),
+        source_longitude: applyMainLocations ? (formData.value.source_longitude ?? '') : (d.source_longitude ?? ''),
+        transport_amount: d.transport_amount ?? 0,
+      };
+    });
 
   payload.po_product_details = productTableItems.value.map(p => ({
     id: p.id ?? null,
@@ -795,18 +822,17 @@ const handleSubmit = async (type: string) => {
   }
 
   // Validate logistics details locations
-  for (let i = 0; i < logisticsDetails.value.length; i++) {
-    const detail = logisticsDetails.value[i];
-    if (!detail.source_location?.trim()) {
-      warning(`يجب تحديد موقع الاستلام لخدمة النقل رقم ${i + 1}`);
-      return;
-    }
-    if (!detail.target_location?.trim()) {
-      warning(`يجب تحديد موقع التسليم لخدمة النقل رقم ${i + 1}`);
-      return;
-    }
-  }
-
+  // for (let i = 0; i < logisticsDetails.value.length; i++) {
+  //   const detail = logisticsDetails.value[i];
+  //   if (!detail.source_location?.trim()) {
+  //     warning(`يجب تحديد موقع الاستلام لخدمة النقل رقم ${i + 1}`);
+  //     return;
+  //   }
+  //   if (!detail.target_location?.trim()) {
+  //     warning(`يجب تحديد موقع التسليم لخدمة النقل رقم ${i + 1}`);
+  //     return;
+  //   }
+  // }
 
 
   isSubmitting.value = true;

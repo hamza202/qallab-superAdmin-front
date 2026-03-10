@@ -152,7 +152,6 @@ const fetchFormData = async () => {
             const attached = data.po_attached_logistics_detail || data.logistics_detail || null;
             if (attached) {
                 formData.value.transport_start_date = attached.from_date || '';
-                formData.value.transport_end_date = attached.to_date || '';
                 formData.value.supplyType = attached.supply_type || null;
                 formData.value.supplyDuration = attached.supply_interval ?? null;
                 formData.value.deliveryDuration = attached.delivered_interval ?? null;
@@ -247,16 +246,13 @@ const fetchQuotationForOrder = async () => {
       formData.value.responsibleName = data.responsible_person || '';
       formData.value.responsiblePhone = data.responsible_phone || null;
       
-      // Map logistics detail
-      const attached = data.po_attached_logistics_detail || data.logistics_detail || null;
-      if (attached) {
-        formData.value.transport_start_date = attached.from_date || '';
-        formData.value.transport_end_date = attached.to_date || '';
-        formData.value.supplyType = attached.supply_type || null;
-        formData.value.supplyDuration = attached.supply_interval ?? null;
-        formData.value.deliveryDuration = attached.delivered_interval ?? null;
-        formData.value.deliveryMethod = attached.delivered_method ?? null;
-      }
+        formData.value.responsibleName = data.responsible_person || '';
+        formData.value.responsiblePhone = data.responsible_phone || null;
+
+        formData.value.supplyType = data.supply_type || null;
+        formData.value.supplyDuration = data.supply_interval ?? null;
+        formData.value.deliveryDuration = data.delivered_interval ?? null;
+        formData.value.deliveryMethod = data.delivered_method ?? null;
 
       // Map products (items) from quotation to order
       if (data.items && Array.isArray(data.items)) {
@@ -356,7 +352,6 @@ const formData = ref({
 
     // Logistics
     transport_start_date: '',
-    transport_end_date: '',
     supplyType: null as string | null,
     supplyDuration: null as number | string | null,
     deliveryDuration: null as number | string | null,
@@ -582,7 +577,6 @@ const resetForm = () => {
         responsibleName: '',
         responsiblePhone: null,
         transport_start_date: '',
-        transport_end_date: '',
         supplyType: null,
         supplyDuration: null,
         deliveryDuration: null,

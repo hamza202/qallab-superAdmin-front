@@ -130,7 +130,6 @@ const fetchFormData = async () => {
             const attached = data.so_attached_logistics_detail || data.logistics_detail || null;
             if (attached) {
                 formData.value.transport_start_date = attached.from_date || '';
-                formData.value.transport_end_date = attached.to_date || '';
                 formData.value.supplyType = attached.supply_type || null;
                 formData.value.supplyDuration = attached.supply_interval ?? null;
                 formData.value.deliveryDuration = attached.delivered_interval ?? null;
@@ -211,16 +210,14 @@ const fetchQuotationForOrder = async () => {
             formData.value.cancel_fee = data.cancel_fee != null ? Number(data.cancel_fee) : null;
             formData.value.textNote = data.notes || '';
             formData.value.po_reference = data.po_reference || '';
+            formData.value.responsibleName = data.responsible_person || '';
+            formData.value.responsiblePhone = data.responsible_phone || null;
 
-            const attached = data.logistics_detail || null;
-            if (attached) {
-                formData.value.transport_start_date = attached.from_date || '';
-                formData.value.transport_end_date = attached.to_date || '';
-                formData.value.supplyType = attached.supply_type || null;
-                formData.value.supplyDuration = attached.supply_interval ?? null;
-                formData.value.deliveryDuration = attached.delivered_interval ?? null;
-                formData.value.deliveryMethod = attached.delivered_method ?? null;
-            }
+            formData.value.supplyType = data.supply_type || null;
+            formData.value.supplyDuration = data.supply_interval ?? null;
+            formData.value.deliveryDuration = data.delivered_interval ?? null;
+            formData.value.deliveryMethod = data.delivered_method ?? null;
+            formData.value.transport_start_date = data.quotation_from_date || '';
 
             if (data.items && Array.isArray(data.items)) {
                 productTableItems.value = data.items.map((item: any) => {
@@ -317,7 +314,6 @@ const formData = ref({
 
     // Logistics
     transport_start_date: '',
-    transport_end_date: '',
     supplyType: null as string | null,
     supplyDuration: null as number | string | null,
     deliveryDuration: null as number | string | null,
@@ -540,7 +536,6 @@ const resetForm = () => {
         responsibleName: '',
         responsiblePhone: null,
         transport_start_date: '',
-        transport_end_date: '',
         supplyType: null,
         supplyDuration: null,
         deliveryDuration: null,
