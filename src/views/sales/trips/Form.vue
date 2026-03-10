@@ -57,6 +57,7 @@ const customerSaleOrderItems = ref<{ title: string; value: number }[]>([]);
 const selectedCustomerSaleOrderId = ref<number | null>(null);
 const loadingCustomerSaleOrders = ref(false);
 const tripCategory = ref<string | null>(null); // Category from API response for edit mode
+const hasCustomerDataFromApi = ref(false); // Track if customer data came from API in edit mode
 
 const formData = ref({
   so_pickup_id: null as number | null,
@@ -655,6 +656,7 @@ const fetchFormData = async () => {
     
     if (data.customer_id) {
       selectedCustomerId.value = data.customer_id;
+      hasCustomerDataFromApi.value = true; // Mark that customer data came from API
       // Fetch customer sale orders list after setting customer
       await fetchCustomerSaleOrders();
     }
@@ -1030,9 +1032,9 @@ onMounted(async () => {
   } else if (pickupId.value) {
     // If pickupId exists, fetch SO pickup data to populate items
     await fetchSoPickupData();
-  } else if (saleOrderId.value && !isFromMaterialProduct.value) {
-    // If sale_order_id exists in query and NOT from material-product, fetch sale order data
-    // For material-product flow, we wait for user to select logistics order
+  } else if (saleOrderId.value) {
+    // If sale_order_id exists in query, fetch sale order data
+    // This will set formData.sale_order_id from the API response
     await fetchSaleOrderData();
   }
 });
@@ -1085,6 +1087,7 @@ onMounted(async () => {
                 density="comfortable" 
                 placeholder="اختر العميل" 
                 :hide-details="false"
+                :disabled="hasCustomerDataFromApi"
               />
             </div>
             
@@ -1097,7 +1100,7 @@ onMounted(async () => {
                 density="comfortable" 
                 placeholder="اختر طلبية العميل" 
                 :hide-details="false"
-                :disabled="!selectedCustomerId"
+                :disabled="!selectedCustomerId || hasCustomerDataFromApi"
                 :loading="loadingCustomerSaleOrders"
               />
             </div>
