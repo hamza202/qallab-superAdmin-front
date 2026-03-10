@@ -321,6 +321,63 @@ const fetchSoLogisticDetails = async () => {
   }
 };
 
+// Fetch logistics order details for edit mode (similar to fetchSoLogisticDetails but for edit)
+const fetchSoLogisticDetailsForEdit = async () => {
+  if (!selectedSoLogisticId.value || !formData.value.supplier_logistic_id) return;
+  
+  const selectedItem = soLogisticItems.value.find(item => item.value === selectedSoLogisticId.value);
+  if (!selectedItem) return;
+  
+  isLoading.value = true;
+  try {
+    const res = await api.get<any>('/sales/orders/list', {
+      params: {
+        supplier_id: formData.value.supplier_logistic_id,
+        category: 'logistics',
+        with_so_trip_details: true,
+        code: selectedItem.code
+      }
+    });
+    
+    const data = Array.isArray(res.data) && res.data.length > 0 ? res.data[0] : null;
+    if (!data) return;
+    
+    // Process so_trip_details - update trip details tables
+    if (data.so_trip_details && Array.isArray(data.so_trip_details)) {
+      const availableDetails: TripLogisticsDetail[] = [];
+
+      data.so_trip_details.forEach((item: any) => {
+        const vehicleTypes = Array.isArray(item.transport_type) 
+          ? item.transport_type.map((t: any) => ({ transport_type: parseInt(t), transport_no: null }))
+          : (item.transport_type != null ? [{ transport_type: parseInt(item.transport_type), transport_no: null }] : []);
+          
+        availableDetails.push({
+          item_id: item.item_id,
+          item_name: item.item_name || '',
+          unit_id: item.unit_id,
+          unit_name: item.unit_name || '',
+          quantity: item.quantity || null,
+          transport_type: [],
+          vehicle_type_no: vehicleTypes,
+          price: null
+        });
+      });
+
+      availableTripDetails.value = JSON.parse(JSON.stringify(availableDetails));
+      customerTripDetails.value = JSON.parse(JSON.stringify(availableDetails));
+      
+      const logistcDetails = JSON.parse(JSON.stringify(availableDetails));
+      logistcDetails.forEach((ld: any) => ld.price = null);
+      logisticCompanyTripDetails.value = logistcDetails;
+    }
+  } catch (err: any) {
+    console.error('Error fetching logistics order details for edit:', err);
+    error(err?.response?.data?.message || 'فشل تحميل تفاصيل طلبية النقل');
+  } finally {
+    isLoading.value = false;
+  }
+};
+
 const fetchSoPickupData = async () => {
   if (!pickupId.value) return;
   console.log('sss');
@@ -1000,9 +1057,12 @@ watch(() => formData.value.supplier_logistic_id, (newVal, oldVal) => {
 });
 
 // Watch for selectedSoLogisticId changes to fetch logistics order details
-watch(selectedSoLogisticId, (newVal) => {
+watch(selectedSoLogisticId, (newVal, oldVal) => {
   if (isFromMaterialProduct.value && newVal) {
     fetchSoLogisticDetails();
+  } else if (isEditMode.value && newVal && oldVal !== null) {
+    // In edit mode, fetch logistics order details when selection changes (not on initial load)
+    fetchSoLogisticDetailsForEdit();
   }
 });
 
