@@ -44,6 +44,29 @@ export const usersRoutes: RouteRecordRaw[] = [
     ],
   },
   {
+    path: "/factories-management",
+    name: "Factories",
+    redirect: "/factories-management/list",
+    children: [
+      {
+        path: "list",
+        name: "FactoriesList",
+        component: () => import("@/views/users/factories/List.vue"),
+        meta: {
+          title: "pages.factories.title",
+        },
+      },
+      {
+        path: "edit/:id",
+        name: "FactoriesEdit",
+        component: () => import("@/views/users/factories/Form.vue"),
+        meta: {
+          title: "pages.factories.edit",
+        },
+      },
+    ],
+  },
+  {
     path: "/logistics",
     name: "Logistics",
     redirect: "/logistics/list",

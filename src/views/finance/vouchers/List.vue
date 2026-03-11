@@ -6,6 +6,7 @@ import { useNotification } from "@/composables/useNotification";
 import { useI18n } from 'vue-i18n'
 import { useTableColumns } from '@/composables/useTableColumns';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog.vue';
+import StatusChangeDialog from '@/components/common/StatusChangeDialog.vue';
 import { trash_1_icon, trash_2_icon, importIcon, columnIcon, exportIcon, plusIcon, searchIcon } from "@/components/icons/globalIcons";
 import DatePickerInput from '@/components/common/forms/DatePickerInput.vue';
 
@@ -46,9 +47,9 @@ interface Voucher {
     unit: string;
     classification: string;
     user: string;
-    status: string;
     class: 'received' | 'payment';
     actions: VoucherAction;
+    status?: string | boolean;
 }
 
 interface TableHeader {
@@ -100,6 +101,9 @@ const canCreate = ref(false);
 const canBulkDelete = ref(true);
 const loading = ref(false);
 const loadingMore = ref(false);
+const showStatusChangeDialog = ref(false);
+const statusChangeLoading = ref(false);
+const itemToChangeStatus = ref<Voucher | null>(null);
 
 // Pagination
 const nextCursor = ref<string | null>(null);
@@ -132,6 +136,40 @@ const classificationItems = ["قطعة", "ضامنة"];
 
 const toggleAdvancedFilters = () => {
     showAdvancedFilters.value = !showAdvancedFilters.value;
+};
+
+const handleStatusChange = (item: Voucher) => {
+    itemToChangeStatus.value = { ...item };
+    showStatusChangeDialog.value = true;
+};
+
+const confirmStatusChange = async () => {
+    if (!itemToChangeStatus.value) return;
+
+    try {
+        statusChangeLoading.value = true;
+        const currentItem = itemToChangeStatus.value;
+        const newStatus = !currentItem.status;
+
+        await api.patch(`/receipts-payments-transactions/${currentItem.id}/change-status`, { status: newStatus });
+
+        success(newStatus ? 'تم تفعيل السند بنجاح' : 'تم إيقاف السند بنجاح');
+
+        const index = tableItems.value.findIndex((voucher) => voucher.id === currentItem.id);
+        if (index !== -1) {
+            tableItems.value[index] = {
+                ...tableItems.value[index],
+                status: newStatus ? 'active' : 'inactive',
+            };
+        }
+    } catch (err: any) {
+        console.error('Error changing voucher status:', err);
+        error(err?.response?.data?.message || 'فشل تغيير حالة السند');
+    } finally {
+        statusChangeLoading.value = false;
+        showStatusChangeDialog.value = false;
+        itemToChangeStatus.value = null;
+    }
 };
 
 // Delete confirmation
@@ -173,10 +211,17 @@ const fetchVouchers = async (cursor?: string | null, append = false) => {
 
         const response = await api.get<VouchersResponse>(url);
 
+        const normalizedData = response.data.map((item) => ({
+            ...item,
+            status: item.status !== undefined
+                ? Boolean(item.status)
+                : item.status === 'active' || item.status === 'enabled' || item.status === '1' || item.status === 1,
+        }));
+
         if (append) {
-            tableItems.value = [...tableItems.value, ...response.data];
+            tableItems.value = [...tableItems.value, ...normalizedData];
         } else {
-            tableItems.value = response.data;
+            tableItems.value = normalizedData;
             canCreate.value = response.actions.can_create;
             canBulkDelete.value = response.actions.can_bulk_delete ?? false;
             initHeaders(response.headers || [], response.shownHeaders || []);
@@ -440,6 +485,12 @@ onBeforeUnmount(() => {
                 <DataTable :headers="tableHeaders" :items="tableItems" :loading="loading" :show-checkbox="canBulkDelete"
                     show-actions @edit="handleEdit" @delete="confirmDelete" @view="handleView"
                     @select="handleSelectVoucher" @selectAll="handleSelectAllVouchers">
+                    <template #item.status="{ item }">
+                        <v-switch :model-value="item.status" hide-details inset density="compact" color="primary"
+                            class="small-switch" @update:model-value="() => handleStatusChange(item)"
+                            v-if="item.actions.can_change_status" />
+                        <span v-else class="text-sm text-gray-600">--</span>
+                    </template>
                 </DataTable>
 
                 <!-- Infinite Scroll Trigger & Loading Indicator -->
@@ -452,6 +503,10 @@ onBeforeUnmount(() => {
         <!-- Bulk delete -->
         <DeleteConfirmDialog v-model="showBulkDeleteDialog" :loading="deleteLoading" title="حذف السندات"
             :message="`هل أنت متأكد من حذف ${selectedVouchers.length} سند؟`" @confirm="confirmBulkDelete" />
+
+        <StatusChangeDialog v-model="showStatusChangeDialog" :loading="statusChangeLoading"
+            :item-name="itemToChangeStatus?.voucher_number" :current-status="itemToChangeStatus?.status || false"
+            @confirm="confirmStatusChange" />
     </default-layout>
 </template>
 

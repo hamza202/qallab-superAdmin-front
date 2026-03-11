@@ -65,6 +65,7 @@ const phone = ref("");
 const email = ref("");
 const buisnessno = ref<string>("");
 const taxno = ref("");
+const unifiedLoginId = ref("");
 const languageId = ref<number | null>(null);
 
 const countryId = ref<number | null>(null);
@@ -144,6 +145,7 @@ const handleSave = async () => {
             if (email.value) payload.email = email.value;
             if (buisnessno.value) payload.buisnessno = String(buisnessno.value);
             if (taxno.value) payload.taxno = String(taxno.value);
+            if (unifiedLoginId.value) payload.unified_login_id = unifiedLoginId.value;
             if (countryId.value) payload.country_id = countryId.value;
             if (cityId.value) payload.city_id = cityId.value;
             if (neighborhood.value) payload.neighborhood = neighborhood.value;
@@ -283,6 +285,7 @@ const handleBasicInfoUpdate = (data: any) => {
     if (data.email !== undefined) email.value = data.email;
     if (data.buisnessno !== undefined) buisnessno.value = data.buisnessno;
     if (data.taxno !== undefined) taxno.value = data.taxno;
+    if (data.unifiedLoginId !== undefined) unifiedLoginId.value = data.unifiedLoginId;
     if (data.countryId !== undefined) countryId.value = data.countryId;
     if (data.cityId !== undefined) cityId.value = data.cityId;
     if (data.neighborhood !== undefined) neighborhood.value = data.neighborhood;
@@ -369,6 +372,7 @@ const fetchCrusherData = async () => {
         email.value = data.email || '';
         buisnessno.value = data.buisnessno || '';
         taxno.value = data.taxno || '';
+        unifiedLoginId.value = data.unified_login_id || '';
         languageId.value = data.language_id || null;
 
         countryId.value = data.country_id || null;
@@ -539,7 +543,7 @@ onMounted(async () => {
                     <v-tabs-window-item :value="0">
                         <BasicInfoTab :businessName="businessName" :businessNameTranslations="businessNameTranslations"
                             :ownerName="ownerName" :mobile="mobile" :phone="phone" :email="email"
-                            :buisnessno="buisnessno" :taxno="taxno" :countryId="countryId" :cityId="cityId"
+                            :buisnessno="buisnessno" :taxno="taxno" :unifiedLoginId="unifiedLoginId" :countryId="countryId" :cityId="cityId"
                             :neighborhood="neighborhood" :streetName="streetName" :postalCode="postalCode"
                             :buildingNumber="buildingNumber" :address1="address1" :languageId="languageId"
                             :countryItems="countryItems" :cityItems="cityItems" :languageItems="languageItems"

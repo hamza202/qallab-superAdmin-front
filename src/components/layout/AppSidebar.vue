@@ -665,6 +665,15 @@
                     لوحة التحكم المالية
                   </router-link>
                 </li>
+                <li class="relative">
+                  <router-link to="/banks/list" :class="[
+                    isMenuItemActive('/banks/list') || isMenuItemActive('/treasuries/list')
+                      ? 'font-bold text-qallab-yellow'
+                      : 'text-white hover:text-qallab-yellow',
+                  ]">
+                    الخزائن والبنوك
+                  </router-link>
+                </li>
                 <!-- <li v-if="canViewPaymentVouchers" class="relative">
                   <router-link to="/finance/payment-vouchers" :class="[
                     isMenuItemActive('/finance/paّyment-vouchers')
@@ -737,6 +746,13 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">إدارة المقاولين</router-link>
+                </li>
+                <li class="relative">
+                  <router-link to="/factories-management/list" :class="[
+                    isMenuItemActive('/factories-management/list')
+                      ? 'font-bold text-qallab-yellow'
+                      : 'text-white hover:text-qallab-yellow',
+                  ]">ادارة المصانع</router-link>
                 </li>
                 <li v-if="canViewLogistics" class="relative">
                   <router-link to="/logistics/list" :class="[
@@ -1217,6 +1233,7 @@ const usersRoutes = [
   "/users",
   "/roles",
   "/crushers",
+  "/factories-management",
   "/contractors",
   "/logistics",
 ];
@@ -1227,7 +1244,6 @@ const settingsRoutes = [
   "/services-categories",
   "/products-categories/tree",
   "/units",
-  "/factories",
   "/brands",
   "/geo-areas",
   "/geo-segments",
@@ -1243,6 +1259,7 @@ const settingsRoutes = [
   "/sample-types",
   "/system-statuses",
   "/doc-status-transitions",
+  "/settings/factories",
   "/settings",
 ];
 

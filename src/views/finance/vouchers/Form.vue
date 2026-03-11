@@ -4,6 +4,7 @@ import { useRoute, useRouter } from "vue-router";
 import { useApi } from "@/composables/useApi";
 import { useNotification } from "@/composables/useNotification";
 import DatePickerInput from '@/components/common/forms/DatePickerInput.vue';
+import DocumentUploadInput from '@/components/common/forms/DocumentUploadInput.vue';
 import { fileIcon_2 } from "@/components/icons/globalIcons";
 
 const route = useRoute();
@@ -46,11 +47,32 @@ const entityLabel = computed(() => formData.value.type === 'customer' ? 'عمي�
 const loading = ref(false);
 const saving = ref(false);
 const voucherCode = ref<string>("");
+const existingAttachmentUrl = ref<string | null>(null);
+const isAttachmentChanged = ref(false);
+
+const existingAttachmentIsImage = computed(() => {
+    if (!existingAttachmentUrl.value) return false;
+    try {
+        const urlWithoutQuery = existingAttachmentUrl.value.split('?')[0] || "";
+        return /\.(png|jpe?g|gif|bmp|webp|svg)$/i.test(urlWithoutQuery);
+    } catch (e) {
+        return false;
+    }
+});
 
 // Form ref
 const formRef = ref<any>(null);
 const isFormValid = ref(false);
 const formErrors = ref<Record<string, string[]>>({});
+const attachmentInputValue = ref<(File | string)[] | null>(null);
+
+watch(attachmentInputValue, (files) => {
+    if (files && files.length > 0 && files[0] instanceof File) {
+        formData.value.attachment = [files[0]];
+    } else {
+        formData.value.attachment = null;
+    }
+});
 
 // Form data
 const formData = ref<VoucherFormData>({
@@ -180,7 +202,7 @@ const fetchVoucher = async () => {
             suppressTypeWatcher.value = true;
             const returnedType = response.data.type.toLowerCase();
             formData.value = {
-                name: response.data.name || { en: "", ar: "" },
+                name: response.data.name_translations || { en: "", ar: "" },
                 class: response.data.class || voucherClass.value || 'received',
                 type: returnedType || 'customer',
                 customer_id: returnedType === 'customer' ? response.data.type_id : null,
@@ -193,6 +215,9 @@ const fetchVoucher = async () => {
                 method_type_id: response.data.method_type_id || null,
             };
             voucherCode.value = response.data.code || "";
+            existingAttachmentUrl.value = response.data.attachment || null;
+            isAttachmentChanged.value = false;
+            attachmentInputValue.value = null;
             if (formData.value.method_type) {
                 await fetchMethodTypeOptions(formData.value.method_type);
             } else {
@@ -224,7 +249,8 @@ const handleSave = async () => {
         formDataToSend.append('expenses_date', formData.value.expenses_date);
         formDataToSend.append('amount', String(formData.value.amount));
         formDataToSend.append('notes', formData.value.notes);
-        if (formData.value.attachment && formData.value.attachment.length > 0) {
+        // Only send attachment if it's a new upload (not in edit mode with unchanged attachment)
+        if (formData.value.attachment && formData.value.attachment.length > 0 && isAttachmentChanged.value) {
             formDataToSend.append('attachment', formData.value.attachment[0]);
         }
         if (formData.value.method_type) formDataToSend.append('method_type', String(formData.value.method_type));
@@ -260,6 +286,15 @@ const handleCancel = () => {
     router.push({ name: 'VouchersList' });
 };
 const pageLoading = ref(false);
+
+// Watch for attachment changes
+watch(() => formData.value.attachment, (newVal) => {
+    if (newVal && newVal.length > 0) {
+        isAttachmentChanged.value = true;
+    } else {
+        isAttachmentChanged.value = false;
+    }
+});
 
 // Lifecycle
 onMounted(async () => {
@@ -328,23 +363,21 @@ const saveIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xm
 
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 gap-y-6">
                             <!-- Client/Supplier Name -->
-                            <SelectWithIconInput show-add-button v-model="typeId"
-                                :label="`اسم ال${entityLabel} *`" :placeholder="`اختر ال${entityLabel}`"
-                                :rules="[required()]" clearable :items="clientItems" :hide-details="false"
-                                :error-messages="formErrors['type_id']"
+                            <SelectWithIconInput show-add-button v-model="typeId" :label="`اسم ال${entityLabel} *`"
+                                :placeholder="`اختر ال${entityLabel}`" :rules="[required()]" clearable
+                                :items="clientItems" :hide-details="false" :error-messages="formErrors['type_id']"
                                 @update:model-value="delete formErrors['type_id']" />
 
                             <!-- Voucher Date -->
-                            <DatePickerInput v-model="formData.expenses_date" label="تاريخ السند"
-                                :rules="[required()]" placeholder="اختر التاريخ" :hide-details="false"
+                            <DatePickerInput v-model="formData.expenses_date" label="تاريخ السند" :rules="[required()]"
+                                placeholder="اختر التاريخ" :hide-details="false"
                                 :error-messages="formErrors['expenses_date']"
                                 @update:model-value="delete formErrors['expenses_date']" />
 
                             <!-- Amount -->
                             <PriceInput showRialIcon v-model="formData.amount" label="المبلغ"
                                 placeholder="ادخل المبلغ مثل: 5000.00" :rules="[required(), positive()]"
-                                :hide-details="false" type="number"
-                                :error-messages="formErrors['amount']"
+                                :hide-details="false" type="number" :error-messages="formErrors['amount']"
                                 @update:model-value="delete formErrors['amount']" />
 
                             <!-- Voucher Title (Bilingual) -->
@@ -352,27 +385,44 @@ const saveIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xm
                                 <template #en>
                                     <TextInput v-model="formData.name.en" placeholder="Enter voucher title in English"
                                         :rules="[required()]" :hide-details="false"
-                                        :error-messages="formErrors['name.en']"
-                                        @input="delete formErrors['name.en']" />
+                                        :error-messages="formErrors['name.en']" @input="delete formErrors['name.en']" />
                                 </template>
                                 <template #ar>
                                     <TextInput v-model="formData.name.ar" placeholder="أدخل عنوان السند بالعربية"
                                         :rules="[required()]" :hide-details="false"
-                                        :error-messages="formErrors['name.ar']"
-                                        @input="delete formErrors['name.ar']" />
+                                        :error-messages="formErrors['name.ar']" @input="delete formErrors['name.ar']" />
                                 </template>
                             </LanguageTabs>
 
                             <!-- Notes (Single field) -->
                             <TextInput v-model="formData.notes" label="وصف السند" placeholder="أدخل وصف السند"
-                                class="md:col-span-2" :hide-details="false"
-                                :error-messages="formErrors['notes']"
+                                class="md:col-span-2" :hide-details="false" :error-messages="formErrors['notes']"
                                 @input="delete formErrors['notes']" />
 
                             <!-- Attachment (Single file) -->
-                            <FileUploadInput v-model="formData.attachment" label="المرفقات"
-                                accept="image/png, image/jpeg, image/jpg, application/pdf" :multiple="false"
-                                :max-files="1" :max-size="10" hint="PNG, JPG, PDF (max. 10MB)" />
+                            <div class="space-y-2 md: col-span-3">
+                                <DocumentUploadInput v-model="attachmentInputValue" label="المرفقات"
+                                    hint="PNG, JPG , PDF, XLS" :multiple="false" />
+
+                                <!-- Show existing attachment if in edit mode and no new file uploaded -->
+                                <div v-if="isEditing && existingAttachmentUrl && !isAttachmentChanged"
+                                    class="space-y-2">
+                                    <div v-if="existingAttachmentIsImage"
+                                        class="rounded-xl overflow-hidden border border-primary-200 bg-white shadow-sm">
+                                        <img :src="existingAttachmentUrl" alt="المرفق الحالي"
+                                            class="w-full max-h-64 object-contain bg-gray-50" />
+                                    </div>
+                                    <div v-else
+                                        class="flex items-center gap-2 p-3 bg-primary-50 rounded-lg border border-primary-200 md:w-72">
+                                        <v-icon color="primary">mdi-file-document-outline</v-icon>
+                                        <span class="text-sm text-gray-700">المرفق السابق:</span>
+                                        <a :href="existingAttachmentUrl" target="_blank"
+                                            class="text-sm text-primary-600 hover:text-primary-800 underline font-medium">
+                                            عرض المرفق
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </v-form>
@@ -393,8 +443,7 @@ const saveIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xm
                         <!-- Bank Name -->
                         <SelectWithIconInput show-add-button v-model="formData.method_type_id" label="اسم البنك"
                             :items="bankItems" placeholder="اختر" :hide-details="false" :loading="isLoadingBankItems"
-                            :disabled="isLoadingBankItems"
-                            :error-messages="formErrors['method_type_id']"
+                            :disabled="isLoadingBankItems" :error-messages="formErrors['method_type_id']"
                             @update:model-value="delete formErrors['method_type_id']" />
                     </div>
                 </div>
@@ -488,8 +537,8 @@ const saveIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xm
                 <ButtonWithIcon variant="flat" color="primary" rounded="4" height="48" custom-class="min-w-56"
                     :prepend-icon="saveIcon" label="حفظ" :loading="saving" @click="handleSave" />
 
-                <ButtonWithIcon prepend-icon="mdi-close" variant="flat" color="primary-50" rounded="4"
-                    height="48" custom-class="font-semibold text-base text-primary-700 px-6 min-w-56" label="إلغاء"
+                <ButtonWithIcon prepend-icon="mdi-close" variant="flat" color="primary-50" rounded="4" height="48"
+                    custom-class="font-semibold text-base text-primary-700 px-6 min-w-56" label="إلغاء"
                     :loading="saving" @click="handleCancel" />
             </div>
         </div>

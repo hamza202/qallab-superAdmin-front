@@ -2,7 +2,7 @@
 import { ref, computed } from "vue";
 
 interface FileUploadInputProps {
-    modelValue: File[] | null;
+    modelValue: File[] | string | null;
     label?: string;
     innerLabel?: string;
     accept?: string;
@@ -30,15 +30,26 @@ const props = withDefaults(defineProps<FileUploadInputProps>(), {
 const isHorizontalLayout = computed(() => props.layout === 'horizontal');
 
 const emit = defineEmits<{
-    (e: "update:modelValue", value: File[] | null): void;
+    (e: "update:modelValue", value: File[] | string | null): void;
 }>();
 
 const isDragging = ref(false);
 const fileInput = ref<HTMLInputElement | null>(null);
 
 const previewUrls = computed(() => {
-    if (!props.modelValue || props.modelValue.length === 0) return [];
-    return props.modelValue.map((file) => URL.createObjectURL(file));
+    if (!props.modelValue) return [];
+    
+    // If modelValue is a string URL, return it as a single-item array
+    if (typeof props.modelValue === 'string') {
+        return [props.modelValue];
+    }
+    
+    // If modelValue is File[], create object URLs
+    if (Array.isArray(props.modelValue) && props.modelValue.length > 0) {
+        return props.modelValue.map((file) => URL.createObjectURL(file));
+    }
+    
+    return [];
 });
 
 const handleDragOver = (e: DragEvent) => {
@@ -76,16 +87,27 @@ const handleFiles = (files: File[]) => {
         return isValidType && isValidSize;
     });
 
-    const currentFiles = props.modelValue || [];
+    // If current value is a string URL, replace it with new files
+    const currentFiles = (Array.isArray(props.modelValue) ? props.modelValue : []) as File[];
     const newFiles = [...currentFiles, ...validFiles].slice(0, props.maxFiles);
     emit("update:modelValue", newFiles);
 };
 
 const removeFile = (index: number) => {
     if (!props.modelValue) return;
-    const newFiles = [...props.modelValue];
-    newFiles.splice(index, 1);
-    emit("update:modelValue", newFiles.length > 0 ? newFiles : null);
+    
+    // If modelValue is a string URL, just clear it
+    if (typeof props.modelValue === 'string') {
+        emit("update:modelValue", null);
+        return;
+    }
+    
+    // If modelValue is File[], remove the specific file
+    if (Array.isArray(props.modelValue)) {
+        const newFiles = [...props.modelValue];
+        newFiles.splice(index, 1);
+        emit("update:modelValue", newFiles.length > 0 ? newFiles : null);
+    }
 };
 
 const triggerFileInput = () => {

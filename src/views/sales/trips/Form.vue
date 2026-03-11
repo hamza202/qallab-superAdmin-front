@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import { useRoute, useRouter } from 'vue-router';
 import { useApi } from '@/composables/useApi';
 import { useNotification } from '@/composables/useNotification';
@@ -41,6 +41,23 @@ const saleOrderId = computed(() => route.query.sale_order_id as string | undefin
 const routeFrom = computed(() => route.query.from as string | undefined);
 
 const tripCode = ref("");
+
+// Check if coming from material-product page (has sale_order_id but not from=logistics)
+const isFromMaterialProduct = computed(() => !!saleOrderId.value && routeFrom.value !== 'logistics');
+
+// Logistics orders list for material-product flow
+const soLogisticItems = ref<{ title: string; value: number; code: string }[]>([]);
+const selectedSoLogisticId = ref<number | null>(null);
+const loadingSoLogistics = ref(false);
+
+// Edit mode specific fields
+const customerItems = ref<{ title: string; value: number }[]>([]);
+const selectedCustomerId = ref<number | null>(null);
+const customerSaleOrderItems = ref<{ title: string; value: number }[]>([]);
+const selectedCustomerSaleOrderId = ref<number | null>(null);
+const loadingCustomerSaleOrders = ref(false);
+const tripCategory = ref<string | null>(null); // Category from API response for edit mode
+const hasCustomerDataFromApi = ref(false); // Track if customer data came from API in edit mode
 
 const formData = ref({
   so_pickup_id: null as number | null,
@@ -113,6 +130,44 @@ const fetchSuppliers = async () => {
   }
 }
 
+// Fetch customers for edit mode
+const fetchCustomers = async () => {
+  try {
+    const res = await api.get<any>('/customers/list');
+    if (Array.isArray(res.data)) {
+      customerItems.value = res.data.map((i: any) => ({ title: i.full_name, value: i.id }));
+    }
+  } catch (e) {
+    console.error('Error fetching customers:', e);
+  }
+};
+
+// Fetch customer sale orders for edit mode
+const fetchCustomerSaleOrders = async () => {
+  if (!isEditMode.value || !selectedCustomerId.value) return;
+  
+  loadingCustomerSaleOrders.value = true;
+  try {
+    const res = await api.get<any>('/sales/orders/list', {
+      params: {
+        customer_id: selectedCustomerId.value,
+        so_type: 'so_with_logistics',
+        category: tripCategory.value || 'building_material'
+      }
+    });
+    if (Array.isArray(res.data)) {
+      customerSaleOrderItems.value = res.data.map((item: any) => ({
+        title: item.code,
+        value: item.id
+      }));
+    }
+  } catch (e) {
+    console.error('Error fetching customer sale orders:', e);
+  } finally {
+    loadingCustomerSaleOrders.value = false;
+  }
+}
+
 const fetchUnits = async () => {
   try {
     const res = await api.get<any>('/units/list');
@@ -124,6 +179,204 @@ const fetchUnits = async () => {
     }
   } catch (e) {
     console.error('Error fetching units:', e);
+  }
+};
+
+const getTransportTypeName = (typeValue: string | number | null): string => {
+  if (typeValue === null || typeValue === undefined) return '';
+  const found = transportTypeItems.value.find(t => t.value == typeValue);
+  return found ? found.title : '';
+};
+
+// Fetch logistics orders list for material-product flow
+const fetchSoLogisticsList = async () => {
+  if (!isFromMaterialProduct.value || !formData.value.supplier_logistic_id) return;
+  
+  loadingSoLogistics.value = true;
+  try {
+    const res = await api.get<any>('/sales/orders/list', {
+      params: {
+        supplier_id: formData.value.supplier_logistic_id,
+        category: 'logistics'
+      }
+    });
+    if (Array.isArray(res.data)) {
+      soLogisticItems.value = res.data.map((item: any) => ({
+        title: item.code,
+        value: item.id,
+        code: item.code
+      }));
+    }
+  } catch (e) {
+    console.error('Error fetching logistics orders:', e);
+  } finally {
+    loadingSoLogistics.value = false;
+  }
+};
+
+// Fetch logistics orders list for edit mode (without isFromMaterialProduct check)
+const fetchSoLogisticsListForEdit = async () => {
+  if (!formData.value.supplier_logistic_id) return;
+  
+  loadingSoLogistics.value = true;
+  try {
+    const res = await api.get<any>('/sales/orders/list', {
+      params: {
+        supplier_id: formData.value.supplier_logistic_id,
+        category: 'logistics'
+      }
+    });
+    if (Array.isArray(res.data)) {
+      soLogisticItems.value = res.data.map((item: any) => ({
+        title: item.code,
+        value: item.id,
+        code: item.code
+      }));
+    }
+  } catch (e) {
+    console.error('Error fetching logistics orders:', e);
+  } finally {
+    loadingSoLogistics.value = false;
+  }
+};
+
+// Fetch logistics order details when selected
+const fetchSoLogisticDetails = async () => {
+  if (!selectedSoLogisticId.value || !formData.value.supplier_logistic_id) return;
+  
+  const selectedItem = soLogisticItems.value.find(item => item.value === selectedSoLogisticId.value);
+  if (!selectedItem) return;
+  
+  isLoading.value = true;
+  try {
+    const res = await api.get<any>('/sales/orders/list', {
+      params: {
+        supplier_id: formData.value.supplier_logistic_id,
+        category: 'logistics',
+        with_so_trip_details: true,
+        code: selectedItem.code
+      }
+    });
+    
+    const data = Array.isArray(res.data) && res.data.length > 0 ? res.data[0] : null;
+    if (!data) return;
+    
+    // Process so_trip_details
+    if (data.so_trip_details && Array.isArray(data.so_trip_details)) {
+      const availableDetails: TripLogisticsDetail[] = [];
+      const productItems: ProductTableItem[] = [];
+
+      data.so_trip_details.forEach((item: any) => {
+        const vehicleTypes = Array.isArray(item.transport_type) 
+          ? item.transport_type.map((t: any) => ({ transport_type: parseInt(t), transport_no: null }))
+          : (item.transport_type != null ? [{ transport_type: parseInt(item.transport_type), transport_no: null }] : []);
+          
+        availableDetails.push({
+          id: item.item_id,
+          item_id: item.item_id,
+          item_name: item.item_name || '',
+          unit_id: item.unit_id,
+          unit_name: item.unit_name || '',
+          quantity: item.quantity || null,
+          transport_type: [],
+          vehicle_type_no: vehicleTypes,
+          price: null
+        });
+
+        // Check if item already exists in productItems
+        const existingIndex = productItems.findIndex(p => p.item_id === item.item_id);
+        if (existingIndex === -1) {
+          productItems.push({
+            item_id: item.item_id,
+            item_name: item.item_name || '',
+            unit_id: item.unit_id,
+            unit_name: item.unit_name || '',
+            quantity: item.quantity || null,
+            transport_type: Array.isArray(item.transport_type) && item.transport_type.length > 0 
+              ? parseInt(item.transport_type[0]) 
+              : (item.transport_type != null ? parseInt(item.transport_type) : null),
+            transport_no: null,
+            transport_type_name: Array.isArray(item.transport_type) && item.transport_type.length > 0 
+              ? getTransportTypeName(parseInt(item.transport_type[0])) 
+              : (item.transport_type != null ? getTransportTypeName(parseInt(item.transport_type)) : ''),
+            notes: '',
+            isAdded: true
+          });
+        }
+      });
+
+      availableTripDetails.value = JSON.parse(JSON.stringify(availableDetails));
+      customerTripDetails.value = JSON.parse(JSON.stringify(availableDetails));
+      
+      const logistcDetails = JSON.parse(JSON.stringify(availableDetails));
+      logistcDetails.forEach((ld: any) => ld.price = null);
+      logisticCompanyTripDetails.value = logistcDetails;
+      
+      productTableItems.value = productItems;
+    }
+  } catch (err: any) {
+    console.error('Error fetching logistics order details:', err);
+    error(err?.response?.data?.message || 'فشل تحميل تفاصيل طلبية النقل');
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+// Fetch logistics order details for edit mode (similar to fetchSoLogisticDetails but for edit)
+const fetchSoLogisticDetailsForEdit = async () => {
+  if (!selectedSoLogisticId.value || !formData.value.supplier_logistic_id) return;
+  
+  const selectedItem = soLogisticItems.value.find(item => item.value === selectedSoLogisticId.value);
+  if (!selectedItem) return;
+  
+  isLoading.value = true;
+  try {
+    const res = await api.get<any>('/sales/orders/list', {
+      params: {
+        supplier_id: formData.value.supplier_logistic_id,
+        category: 'logistics',
+        with_so_trip_details: true,
+        code: selectedItem.code
+      }
+    });
+    
+    const data = Array.isArray(res.data) && res.data.length > 0 ? res.data[0] : null;
+    if (!data) return;
+    
+    // Process so_trip_details - update trip details tables
+    if (data.so_trip_details && Array.isArray(data.so_trip_details)) {
+      const availableDetails: TripLogisticsDetail[] = [];
+
+      data.so_trip_details.forEach((item: any) => {
+        const vehicleTypes = Array.isArray(item.transport_type) 
+          ? item.transport_type.map((t: any) => ({ transport_type: parseInt(t), transport_no: null }))
+          : (item.transport_type != null ? [{ transport_type: parseInt(item.transport_type), transport_no: null }] : []);
+          
+        availableDetails.push({
+          id: item.item_id,
+          item_id: item.item_id,
+          item_name: item.item_name || '',
+          unit_id: item.unit_id,
+          unit_name: item.unit_name || '',
+          quantity: item.quantity || null,
+          transport_type: [],
+          vehicle_type_no: vehicleTypes,
+          price: null
+        });
+      });
+
+      availableTripDetails.value = JSON.parse(JSON.stringify(availableDetails));
+      customerTripDetails.value = JSON.parse(JSON.stringify(availableDetails));
+      
+      const logistcDetails = JSON.parse(JSON.stringify(availableDetails));
+      logistcDetails.forEach((ld: any) => ld.price = null);
+      logisticCompanyTripDetails.value = logistcDetails;
+    }
+  } catch (err: any) {
+    console.error('Error fetching logistics order details for edit:', err);
+    error(err?.response?.data?.message || 'فشل تحميل تفاصيل طلبية النقل');
+  } finally {
+    isLoading.value = false;
   }
 };
 
@@ -219,6 +472,7 @@ const fetchSaleOrderData = async () => {
             : (item.transport_type != null ? [{ transport_type: parseInt(item.transport_type), transport_no: null }] : []);
             
           availableDetails.push({
+            id: item.item_id,
             item_id: item.item_id,
             item_name: item.item_name || '',
             unit_id: item.unit_id,
@@ -287,6 +541,7 @@ const fetchSaleOrderData = async () => {
         
         // Populate available details too
         availableTripDetails.value = data.items.map((item: any) => ({
+            id: item.item_id,
             item_id: item.item_id,
             item_name: item.item_name || '',
             unit_id: item.unit_id,
@@ -304,12 +559,6 @@ const fetchSaleOrderData = async () => {
   } finally {
     isLoading.value = false;
   }
-};
-
-const getTransportTypeName = (typeValue: string | number | null): string => {
-  if (typeValue === null || typeValue === undefined) return '';
-  const found = transportTypeItems.value.find(t => t.value == typeValue);
-  return found ? found.title : '';
 };
 
 const getUnitName = (unit_id: any): string => {
@@ -368,6 +617,7 @@ const fetchFormData = async () => {
 
     if (!data) return;
     tripCode.value = data.code || "";
+    tripCategory.value = data.category || 'building_material';
     formData.value = {
       sale_order_id: data.sale_order_id || null,
       so_pickup_id: data.so_pickup_id || null,
@@ -455,6 +705,26 @@ const fetchFormData = async () => {
         isAdded: true
       }));
     }
+    
+    // Populate edit mode specific fields
+    if (data.so_logistic_id) {
+      selectedSoLogisticId.value = data.so_logistic_id;
+      // Fetch logistics orders list to populate the select
+      if (formData.value.supplier_logistic_id) {
+        await fetchSoLogisticsListForEdit();
+      }
+    }
+    
+    if (data.customer_id) {
+      selectedCustomerId.value = data.customer_id;
+      hasCustomerDataFromApi.value = true; // Mark that customer data came from API
+      // Fetch customer sale orders list after setting customer
+      await fetchCustomerSaleOrders();
+    }
+    
+    if (data.sale_order_id) {
+      selectedCustomerSaleOrderId.value = data.sale_order_id;
+    }
   } catch (err: any) {
     console.error('Error fetching trip data:', err);
     error(err?.response?.data?.message || 'فشل تحميل بيانات الرحلة');
@@ -506,7 +776,7 @@ const handleSubmit = async (option: SubmitOption) => {
 
   isSubmitting.value = true;
   try {
-    const payload = {
+    const payload: Record<string, any> = {
       ...formData.value,
       items: productTableItems.value.map(item => ({
         id: isEditMode.value ? item.id : null,
@@ -534,7 +804,24 @@ const handleSubmit = async (option: SubmitOption) => {
         vehicle_type_no: item.vehicle_type_no
       }))
     };
-
+    
+    // Add so_logistic_id when coming from material-product page or in edit mode
+    if ((isFromMaterialProduct.value || isEditMode.value) && selectedSoLogisticId.value) {
+      payload.so_logistic_id = selectedSoLogisticId.value;
+    }
+    
+    // Add customer_id and sale_order_id in edit mode
+    if (isEditMode.value) {
+      if (selectedCustomerId.value) {
+        payload.customer_id = selectedCustomerId.value;
+      }
+      if (selectedCustomerSaleOrderId.value) {
+        payload.sale_order_id = selectedCustomerSaleOrderId.value;
+      }
+    }
+    
+    // Add category based on routeFrom
+    payload.category = routeFrom.value === 'logistics' ? 'logistics' : 'building_material';
 
     if (isEditMode.value) {
       await api.put(`/sales/trips/${routeId.value}`, payload);
@@ -680,6 +967,7 @@ const addCustomerTripDetail = () => {
 const handleCustomerTripDetailSaved = (products: TripLogisticsDetail[]) => {
   const newItems = products.map(p => ({
     ...p,
+    id: p.id ?? p.item_id,
     unit_name: getUnitName(p.unit_id)
   }));
   customerTripDetails.value = newItems;
@@ -717,6 +1005,7 @@ const addLogisticTripDetail = () => {
 const handleLogisticTripDetailSaved = (products: TripLogisticsDetail[]) => {
   const newItems = products.map(p => ({
     ...p,
+    id: p.id ?? p.item_id,
     unit_name: getUnitName(p.unit_id)
   }));
   logisticCompanyTripDetails.value = newItems;
@@ -752,17 +1041,66 @@ const handleDeleteProduct = (item: any) => {
   }
 };
 
+// Watch for supplier_logistic_id changes to fetch logistics orders list (for material-product flow or edit mode)
+watch(() => formData.value.supplier_logistic_id, (newVal, oldVal) => {
+  if (isFromMaterialProduct.value && newVal) {
+    // Reset selected logistics order when supplier changes
+    selectedSoLogisticId.value = null;
+    soLogisticItems.value = [];
+    // Clear trip details
+    availableTripDetails.value = [];
+    customerTripDetails.value = [];
+    logisticCompanyTripDetails.value = [];
+    productTableItems.value = [];
+    // Fetch new logistics orders list
+    fetchSoLogisticsList();
+  } else if (isEditMode.value && newVal && oldVal !== null) {
+    // In edit mode, only reset and fetch if supplier actually changed (not initial load)
+    selectedSoLogisticId.value = null;
+    soLogisticItems.value = [];
+    fetchSoLogisticsListForEdit();
+  }
+});
+
+// Watch for selectedSoLogisticId changes to fetch logistics order details
+watch(selectedSoLogisticId, (newVal, oldVal) => {
+  if (isFromMaterialProduct.value && newVal) {
+    fetchSoLogisticDetails();
+  } else if (isEditMode.value && newVal && oldVal !== null) {
+    // In edit mode, fetch logistics order details when selection changes (not on initial load)
+    fetchSoLogisticDetailsForEdit();
+  }
+});
+
+// Watch for selectedCustomerId changes to fetch customer sale orders (edit mode only)
+watch(selectedCustomerId, (newVal) => {
+  if (isEditMode.value && newVal) {
+    // Reset selected sale order when customer changes
+    selectedCustomerSaleOrderId.value = null;
+    customerSaleOrderItems.value = [];
+    // Fetch new customer sale orders list
+    fetchCustomerSaleOrders();
+  }
+});
+
 onMounted(async () => {
   fetchUnits();
   fetchConstants();
   fetchSuppliers();
+  
+  // Fetch customers only in edit mode
+  if (isEditMode.value) {
+    fetchCustomers();
+  }
+  
   if (routeId.value) {
     await fetchFormData();
   } else if (pickupId.value) {
     // If pickupId exists, fetch SO pickup data to populate items
     await fetchSoPickupData();
   } else if (saleOrderId.value) {
-    // If sale_order_id exists in query, fetch sale order data to populate items
+    // If sale_order_id exists in query, fetch sale order data
+    // This will set formData.sale_order_id from the API response
     await fetchSaleOrderData();
   }
 });
@@ -792,6 +1130,47 @@ onMounted(async () => {
                 :error-messages="formErrors['supplier_logistic_id']"
                 @update:model-value="delete formErrors['supplier_logistic_id']" />
             </div>
+            <!-- Logistics Order Select - Only shown when coming from material-product page OR in edit mode -->
+            <div v-if="isFromMaterialProduct || isEditMode">
+              <selectInput 
+                :items="soLogisticItems" 
+                v-model="selectedSoLogisticId" 
+                label="طلبية مبيعات خدمة النقل"
+                density="comfortable" 
+                placeholder="اختر طلبية النقل" 
+                :hide-details="false"
+                :disabled="!formData.supplier_logistic_id"
+                :loading="loadingSoLogistics"
+              />
+            </div>
+            
+            <!-- Customer Select - Only shown in edit mode -->
+            <div v-if="isEditMode">
+              <selectInput 
+                :items="customerItems" 
+                v-model="selectedCustomerId" 
+                label="العميل"
+                density="comfortable" 
+                placeholder="اختر العميل" 
+                :hide-details="false"
+                :disabled="hasCustomerDataFromApi"
+              />
+            </div>
+            
+            <!-- Customer Sale Order Select - Only shown in edit mode -->
+            <div v-if="isEditMode">
+              <selectInput 
+                :items="customerSaleOrderItems" 
+                v-model="selectedCustomerSaleOrderId" 
+                label="طلبية مبيعات العميل"
+                density="comfortable" 
+                placeholder="اختر طلبية العميل" 
+                :hide-details="false"
+                :disabled="!selectedCustomerId || hasCustomerDataFromApi"
+                :loading="loadingCustomerSaleOrders"
+              />
+            </div>
+
             <div class="relative">
               <label class="text-sm font-medium text-gray-700 mb-2 block">موقع التحميل</label>
               <div
