@@ -1549,7 +1549,7 @@ onMounted(async () => {
                             class="flex items-center gap-1">
                             {{ item.discount_val }}
                             <span v-if="item.discount_type == 1">%</span>
-                            <span v-else v-html="rialIcon"></span>
+                            <span v-if="item.discount_type == 2" v-html="rialIcon"></span>
                         </span>
                         <span v-else>—</span>
                     </template>

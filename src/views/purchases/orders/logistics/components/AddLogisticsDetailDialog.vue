@@ -23,6 +23,8 @@ export interface LogisticsDetail {
   source_latitude: string | number;
   source_longitude: string | number;
   transport_amount: number | null;
+  discount_val: number | string | null;
+  discount_type: number | string | null;
 }
 
 const props = defineProps<{
@@ -30,6 +32,7 @@ const props = defineProps<{
   transportTypes?: any[];
   categoriesItems?: any[];
   amPmIntervalOptions?: any[];
+  discountTypeOptions?: any[];
   editDetail?: LogisticsDetail | null;
 }>();
 
@@ -67,11 +70,17 @@ const form = reactive({
   source_latitude: "" as string | number,
   source_longitude: "" as string | number,
   transport_amount: null as number | null,
+  discount_val: null as number | string | null,
+  discount_type: 2 as number | string | null,
 });
 
 const transportTypesList = computed(() => props.transportTypes || []);
 const amPmIntervalList = computed(() => props.amPmIntervalOptions || []);
 const categoriesList = computed(() => props.categoriesItems || []);
+const discountTypeOptionsList = computed(() => props.discountTypeOptions || [
+  { title: '%', value: 1 },
+  { title: 'ريال', value: 2 },
+]);
 
 watch(() => props.modelValue, (newVal) => {
   if (newVal && props.editDetail) {
@@ -92,6 +101,8 @@ watch(() => props.modelValue, (newVal) => {
     form.source_latitude = props.editDetail.source_latitude || "";
     form.source_longitude = props.editDetail.source_longitude || "";
     form.transport_amount = props.editDetail.transport_amount ?? null;
+    form.discount_val = props.editDetail.discount_val ?? null;
+    form.discount_type = props.editDetail.discount_type ?? 2;
   } else if (!newVal) {
     resetForm();
     if (formRef.value?.resetValidation) {
@@ -118,6 +129,8 @@ const resetForm = () => {
   form.source_latitude = "";
   form.source_longitude = "";
   form.transport_amount = null;
+  form.discount_val = null;
+  form.discount_type = 2;
 };
 
 const closeDialog = () => {
@@ -150,6 +163,8 @@ const handleSave = async () => {
     source_latitude: form.source_latitude,
     source_longitude: form.source_longitude,
     transport_amount: form.transport_amount,
+    discount_val: form.discount_val,
+    discount_type: form.discount_type,
   };
 
   if (isEditMode.value) {
@@ -207,9 +222,22 @@ const handleCancel = () => {
 
           <TextInput label="مسؤول التفريغ" v-model="form.downloading_responsible_party"
             placeholder="أدخل اسم مسؤول التفريغ" density="comfortable" :rules="[required()]" />
-          <div class="md:col-span-2">
+          <div>
             <PriceInput showRialIcon label="مبلغ النقل" v-model="form.transport_amount" placeholder="أدخل مبلغ النقل"
               density="comfortable" :rules="[required()]" />
+          </div>
+          <div >
+            <TextInputWithSelect
+              v-model="form.discount_val"
+              v-model:selectValue="form.discount_type"
+              label="الخصم"
+              placeholder="الخصم"
+              type="number"
+              density="comfortable"
+              select-width="80px"
+              :select-items="discountTypeOptionsList"
+              select-placeholder="اختر"
+            />
           </div>
         </div>
       </div>

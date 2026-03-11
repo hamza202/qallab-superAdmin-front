@@ -7,7 +7,7 @@ import TopHeader from '@/components/price-offers/TopHeader.vue';
 import { useApi } from '@/composables/useApi';
 import { useCalculations } from "@/composables/useCalculations";
 import { fileIcon, mapMarkerIcon, messagePlusIcon, filePlusIcon, busIcon, listIcon, CoinHandIcon, fileCheckIcon } from '@/components/icons/priceOffersIcons';
-import { returnIcon, saveIcon } from '@/components/icons/globalIcons';
+import { returnIcon, saveIcon, rialIcon } from '@/components/icons/globalIcons';
 const api = useApi();
 const route = useRoute();
 const router = useRouter();
@@ -752,7 +752,7 @@ const headers = [
     { title: 'الوحدة', key: 'unit' },
     { title: 'الكمية', key: 'quantity' },
     { title: 'سعر الوحدة', key: 'unit_price' },
-    { title: 'خصم', key: 'discount' },
+    { title: 'خصم', key: 'discount_display' },
     { title: 'مبلغ الضريبة', key: 'tax_amount' },
     { title: 'إجمالي المبلغ', key: 'total_amount' },
     { title: 'ملاحظات', key: 'notes' },
@@ -769,6 +769,8 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
     quantity: item.quantity,
     unit_price: item.unit_price ?? 0,
     discount: item.discount ?? 0,
+    discount_val: item.discount_val ?? item.discount ?? 0,
+    discount_type: item.discount_type ?? null,
     tax_amount: item.total_tax ?? 0,
     total_amount: item.item_final ?? item.subtotal_after_discount ?? 0,
     notes: item.notes,
@@ -904,6 +906,15 @@ const serviceTableItems = computed(() =>
                 <!-- Products Table -->
                 <DataTable :headers="headers" :items="tableItems" show-actions force-show-edit force-show-delete
                     @edit="handleEditProduct" @delete="handleDeleteProduct">
+                    <template #item.discount_display="{ item }">
+                        <span v-if="item.discount_val != null && Number(item.discount_val) > 0" class="flex items-center gap-1">
+                            {{ item.discount_val }}
+                            <span v-if="item.discount_type == 1">%</span>
+                            <span v-if="item.discount_type == 2" v-html="rialIcon"></span>
+                        </span>
+                        <span v-else>—</span>
+                    </template>
+
                     <template #item.notes="{ item }">
                         <v-menu attach="request-material-product-page" location="bottom" offset="8"
                             :close-on-content-click="false" transition="slide-y-transition">

@@ -447,6 +447,53 @@ export const salesRoutes: RouteRecordRaw[] = [
       },
     ],
   },
+  {
+    path: "/sales/payments",
+    name: "SalesPayments",
+    redirect: "/sales/payments/list",
+    children: [
+      {
+        path: "list",
+        name: "SalesPaymentsList",
+        component: () => import("@/views/sales/payments/List.vue"),
+        meta: {
+          title: "pages.SalesPayments.title",
+        },
+      },
+      {
+        path: "create",
+        name: "SalesPaymentsCreate",
+        component: () => import("@/views/sales/payments/Form.vue"),
+        meta: {
+          title: "pages.SalesPayments.FormTitle",
+        },
+      },
+      {
+        path: "edit/:id",
+        name: "SalesPaymentsEdit",
+        component: () => import("@/views/sales/payments/Form.vue"),
+        meta: {
+          title: "pages.SalesPayments.FormTitle",
+        },
+      },
+      {
+        path: "view/:id",
+        name: "SalesPaymentsView",
+        component: () => import("@/views/sales/payments/View.vue"),
+        meta: {
+          title: "pages.SalesPayments.title",
+        },
+      },
+      {
+        path: "print/:id",
+        name: "SalesPaymentsPrint",
+        component: () => import("@/views/sales/payments/Print.vue"),
+        meta: {
+          title: "pages.SalesPayments.print",
+        },
+      },
+    ],
+  },
   // Sales Logistics Invoices (فواتير مبيعات خدمة نقل)
   {
     path: "/sales/logistics-invoices",

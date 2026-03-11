@@ -673,7 +673,7 @@ onMounted(async () => {
                         <!-- Request Date -->
                         <div>
                             <DatePickerInput v-model="formData.request_datetime" label="تاريخ الطلب"
-                                placeholder="2024-03-01" density="comfortable" :disabled="isEditMode" />
+                                placeholder="2024-03-01" density="comfortable" />
                         </div>
 
                         <!-- Responsible Phone -->

@@ -22,6 +22,7 @@ import {
   returnIcon,
   saveIcon,
   HelpCircleIcon,
+  rialIcon,
 } from '@/components/icons/globalIcons';
 
 useI18n()
@@ -625,7 +626,7 @@ const headers = [
     { title: 'الوحدة', key: 'unit' },
     { title: 'الكمية', key: 'quantity' },
     { title: 'سعر الوحدة', key: 'unit_price' },
-    { title: 'خصم', key: 'discount' },
+    { title: 'خصم', key: 'discount_display' },
     { title: 'مبلغ الضريبة', key: 'tax_amount' },
     { title: 'إجمالي المبلغ', key: 'total_amount' },
     { title: 'ملاحظات', key: 'notes' },
@@ -640,6 +641,8 @@ const tableItems = computed(() =>
         quantity: item.quantity,
         unit_price: item.price_per_unit ?? item.unit_price ?? 0,
         discount: item.discount_val ?? item.discount ?? 0,
+        discount_val: item.discount_val ?? item.discount ?? 0,
+        discount_type: item.discount_type ?? null,
         tax_amount: item.total_tax ?? 0,
         total_amount: item.item_final ?? item.subtotal_after_discount ?? 0,
         notes: item.notes,
@@ -856,6 +859,15 @@ const tableItems = computed(() =>
                     @edit="handleEditProduct"
                     @delete="handleDeleteProduct"
                 >
+                    <template #item.discount_display="{ item }">
+                        <span v-if="item.discount_val != null && Number(item.discount_val) > 0" class="flex items-center gap-1">
+                            {{ item.discount_val }}
+                            <span v-if="item.discount_type == 1">%</span>
+                            <span v-if="item.discount_type == 2" v-html="rialIcon"></span>
+                        </span>
+                        <span v-else>—</span>
+                    </template>
+
                     <template #item.notes="{ item }">
                         <div class="flex items-center gap-2">
                             <v-icon size="20" color="primary" v-html="messagePlusIcon" :title="item.notes"></v-icon>
