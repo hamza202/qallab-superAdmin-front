@@ -6,12 +6,137 @@ import ButtonWithIcon from '@/components/common/buttons/ButtonWithIcon.vue';
 
 const props = defineProps({
   modelValue: {
-    type: [Blob, File, null],
+    type: [Blob, File, String, null] as any,
     default: null
   }
 });
 
 const emit = defineEmits(['update:modelValue']);
+
+const ALLOWED_AUDIO_MIME_TYPES = [
+    'audio/mpeg',
+    'audio/mp3',
+    'audio/wav',
+    'audio/x-wav',
+    'audio/wave',
+    'audio/aac',
+    'audio/m4a',
+    'audio/mp4',
+    'audio/ogg',
+];
+
+const mimeTypeToExtension = (mime?: string) => {
+    if (!mime) return null;
+    const normalized = mime.toLowerCase();
+    if (normalized.includes('mpeg') || normalized.includes('mp3')) return 'mp3';
+    if (normalized.includes('wav')) return 'wav';
+    if (normalized.includes('aac')) return 'aac';
+    if (normalized.includes('m4a') || normalized.includes('mp4')) return 'm4a';
+    if (normalized.includes('ogg')) return 'ogg';
+    return null;
+};
+
+const isAllowedMimeType = (mime?: string) => {
+    if (!mime) return false;
+    const normalized = mime.toLowerCase();
+    return ALLOWED_AUDIO_MIME_TYPES.some((type) => normalized.includes(type));
+};
+
+const interleaveAudioChannels = (audioBuffer: AudioBuffer) => {
+    const numChannels = audioBuffer.numberOfChannels;
+    const length = audioBuffer.length;
+    const result = new Float32Array(length * numChannels);
+    const channelData: Float32Array[] = [];
+    for (let channel = 0; channel < numChannels; channel++) {
+        channelData.push(audioBuffer.getChannelData(channel));
+    }
+
+    let offset = 0;
+    for (let i = 0; i < length; i++) {
+        for (let channel = 0; channel < numChannels; channel++) {
+            result[offset++] = channelData[channel][i];
+        }
+    }
+    return result;
+};
+
+const audioBufferToWav = (audioBuffer: AudioBuffer): ArrayBuffer => {
+    const numChannels = audioBuffer.numberOfChannels;
+    const sampleRate = audioBuffer.sampleRate;
+    const bytesPerSample = 2; // 16-bit PCM
+    const interleaved = interleaveAudioChannels(audioBuffer);
+    const buffer = new ArrayBuffer(44 + interleaved.length * bytesPerSample);
+    const view = new DataView(buffer);
+
+    const writeString = (offset: number, str: string) => {
+        for (let i = 0; i < str.length; i++) {
+            view.setUint8(offset + i, str.charCodeAt(i));
+        }
+    };
+
+    writeString(0, 'RIFF');
+    view.setUint32(4, 36 + interleaved.length * bytesPerSample, true);
+    writeString(8, 'WAVE');
+    writeString(12, 'fmt ');
+    view.setUint32(16, 16, true); // PCM chunk size
+    view.setUint16(20, 1, true); // audio format PCM
+    view.setUint16(22, numChannels, true);
+    view.setUint32(24, sampleRate, true);
+    view.setUint32(28, sampleRate * numChannels * bytesPerSample, true);
+    view.setUint16(32, numChannels * bytesPerSample, true);
+    view.setUint16(34, 8 * bytesPerSample, true);
+    writeString(36, 'data');
+    view.setUint32(40, interleaved.length * bytesPerSample, true);
+
+    let offset = 44;
+    for (let i = 0; i < interleaved.length; i++, offset += 2) {
+        const sample = Math.max(-1, Math.min(1, interleaved[i]));
+        view.setInt16(offset, sample < 0 ? sample * 0x8000 : sample * 0x7fff, true);
+    }
+
+    return buffer;
+};
+
+const convertBlobToWav = async (blob: Blob): Promise<File> => {
+    const arrayBuffer = await blob.arrayBuffer();
+    const audioContext = new AudioContext();
+    const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+    const wavBuffer = audioBufferToWav(audioBuffer);
+    await audioContext.close();
+    return new File([wavBuffer], 'voice-recording.wav', { type: 'audio/wav' });
+};
+
+const ensureAllowedAudioFile = async (blob: Blob): Promise<File> => {
+    if (isAllowedMimeType(blob.type)) {
+        const extension = mimeTypeToExtension(blob.type) || 'ogg';
+        return new File([blob], `voice-recording.${extension}` , { type: blob.type });
+    }
+
+    try {
+        return await convertBlobToWav(blob);
+    } catch (error) {
+        console.error('Failed to convert audio blob to WAV:', error);
+        const extension = mimeTypeToExtension(blob.type) || 'ogg';
+        return new File([blob], `voice-recording.${extension}`, { type: blob.type || 'audio/ogg' });
+    }
+};
+
+const getSupportedMimeType = () => {
+    const mediaRecorder = window.MediaRecorder;
+    if (mediaRecorder && typeof mediaRecorder.isTypeSupported === 'function') {
+        const preferredTypes = [
+            'audio/ogg;codecs=opus',
+            'audio/webm;codecs=opus',
+            'audio/webm',
+        ];
+        for (const type of preferredTypes) {
+            if (MediaRecorder.isTypeSupported(type)) {
+                return type;
+            }
+        }
+    }
+    return undefined;
+};
 
 const containerRef = ref<HTMLElement | null>(null);
 const wavesurfer = ref<WaveSurfer | null>(null);
@@ -24,48 +149,6 @@ const duration = ref('00:00');
 const recordingTimer = ref('00:00');
 let timerInterval: any = null;
 let recordingSeconds = 0;
-
-const convertToWav = async (blob: Blob): Promise<Blob> => {
-    const audioCtx = new AudioContext();
-    const arrayBuffer = await blob.arrayBuffer();
-    const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
-
-    const numChannels = audioBuffer.numberOfChannels;
-    const sampleRate = audioBuffer.sampleRate;
-    const length = audioBuffer.length * numChannels * 2 + 44;
-    const buffer = new ArrayBuffer(length);
-    const view = new DataView(buffer);
-
-    const writeString = (offset: number, str: string) => {
-        for (let i = 0; i < str.length; i++) view.setUint8(offset + i, str.charCodeAt(i));
-    };
-
-    writeString(0, 'RIFF');
-    view.setUint32(4, length - 8, true);
-    writeString(8, 'WAVE');
-    writeString(12, 'fmt ');
-    view.setUint32(16, 16, true);
-    view.setUint16(20, 1, true);
-    view.setUint16(22, numChannels, true);
-    view.setUint32(24, sampleRate, true);
-    view.setUint32(28, sampleRate * numChannels * 2, true);
-    view.setUint16(32, numChannels * 2, true);
-    view.setUint16(34, 16, true);
-    writeString(36, 'data');
-    view.setUint32(40, length - 44, true);
-
-    let offset = 44;
-    for (let i = 0; i < audioBuffer.length; i++) {
-        for (let ch = 0; ch < numChannels; ch++) {
-            const sample = Math.max(-1, Math.min(1, audioBuffer.getChannelData(ch)[i]));
-            view.setInt16(offset, sample < 0 ? sample * 0x8000 : sample * 0x7FFF, true);
-            offset += 2;
-        }
-    }
-
-    await audioCtx.close();
-    return new Blob([buffer], { type: 'audio/wav' });
-};
 
 // Initialize Recorder (Hidden)
 const initRecorder = async () => {
@@ -86,12 +169,12 @@ const initRecorder = async () => {
         waveColor: 'transparent',
     });
 
+    // Register Record Plugin
     record.value = wavesurfer.value.registerPlugin(RecordPlugin.create());
 
-    // Handle recording end — convert to WAV before emitting
+    // Handle recording end
     record.value.on('record-end', async (blob: Blob) => {
-        const wavBlob = await convertToWav(blob);
-        const file = new File([wavBlob], 'voice-recording.wav', { type: 'audio/wav' });
+        const file = await ensureAllowedAudioFile(blob);
         emit('update:modelValue', file);
         
         // Clean up recorder instance
@@ -103,9 +186,9 @@ const initRecorder = async () => {
             hiddenContainer.parentNode.removeChild(hiddenContainer);
         }
 
-        // Initialize Player with the WAV blob
+        // Initialize Player with the recorded blob next tick (once UI calls v-else)
         setTimeout(() => {
-            initPlayer(wavBlob);
+            initPlayer(file);
         }, 100);
     });
 };
@@ -147,11 +230,53 @@ const initPlayer = (blob: Blob) => {
     wavesurfer.value.loadBlob(blob);
 };
 
+// For URL-based audio, we'll use a simple audio element to avoid CORS
+const audioElement = ref<HTMLAudioElement | null>(null);
+const isLoadedFromUrl = ref(false);
+
+const initPlayerFromUrl = (url: string) => {
+    // Clean up any existing wavesurfer instance
+    if (wavesurfer.value) {
+        wavesurfer.value.destroy();
+        wavesurfer.value = null;
+    }
+    
+    // Create audio element for URL playback
+    if (!audioElement.value) {
+        audioElement.value = new Audio();
+        
+        audioElement.value.addEventListener('loadedmetadata', () => {
+            const totalSeconds = audioElement.value?.duration || 0;
+            duration.value = formatTime(totalSeconds);
+        });
+        
+        audioElement.value.addEventListener('timeupdate', () => {
+            const currentSeconds = audioElement.value?.currentTime || 0;
+            currentTime.value = formatTime(currentSeconds);
+        });
+        
+        audioElement.value.addEventListener('ended', () => {
+            isPlaying.value = false;
+            if (audioElement.value) {
+                audioElement.value.currentTime = 0;
+            }
+        });
+        
+        audioElement.value.addEventListener('error', (error) => {
+            console.error('Error loading audio from URL:', error);
+        });
+    }
+    
+    audioElement.value.src = url;
+    isLoadedFromUrl.value = true;
+};
+
 const startRecording = async () => {
     await initRecorder();
     
     if (record.value) {
-        await record.value.startRecording();
+        const mimeType = getSupportedMimeType();
+        await record.value.startRecording(mimeType ? { mimeType } : undefined);
         isRecording.value = true;
         startTimer();
     }
@@ -166,7 +291,15 @@ const stopRecording = () => {
 };
 
 const playPause = () => {
-    if (wavesurfer.value) {
+    if (isLoadedFromUrl.value && audioElement.value) {
+        if (isPlaying.value) {
+            audioElement.value.pause();
+            isPlaying.value = false;
+        } else {
+            audioElement.value.play();
+            isPlaying.value = true;
+        }
+    } else if (wavesurfer.value) {
         wavesurfer.value.playPause();
         isPlaying.value = !isPlaying.value;
     }
@@ -177,12 +310,18 @@ const deleteRecording = () => {
         wavesurfer.value.destroy();
         wavesurfer.value = null;
     }
+    if (audioElement.value) {
+        audioElement.value.pause();
+        audioElement.value.src = '';
+    }
+    isLoadedFromUrl.value = false;
     emit('update:modelValue', null);
     recordingSeconds = 0;
     recordingTimer.value = '00:00';
     currentTime.value = '00:00';
     duration.value = '00:00';
     isPlaying.value = false;
+    isRecording.value = false;
 };
 
 
@@ -208,10 +347,13 @@ const formatTime = (seconds: number) => {
 
 // Handle existing file on mount (if any)
 onMounted(() => {
-    if (props.modelValue && props.modelValue instanceof File) {
-        // initPlayer(props.modelValue); // Can't init immediately as ref might not be ready or v-if issue?
-        // Actually if modelValue exists, v-else is rendered, so containerRef exists.
-        setTimeout(() => initPlayer(props.modelValue as File), 100);
+    if (props.modelValue) {
+        // If it's a string URL, load directly
+        if (typeof props.modelValue === 'string') {
+            setTimeout(() => initPlayerFromUrl(props.modelValue as string), 100);
+        } else if (props.modelValue instanceof File || props.modelValue instanceof Blob) {
+            setTimeout(() => initPlayer(props.modelValue as File), 100);
+        }
     }
 });
 
@@ -219,13 +361,47 @@ onBeforeUnmount(() => {
     if (wavesurfer.value) {
         wavesurfer.value.destroy();
     }
+    if (audioElement.value) {
+        audioElement.value.pause();
+        audioElement.value.src = '';
+    }
     clearInterval(timerInterval);
 });
 
-// Watch for external changes to modelValue (e.g. if cleared)
-watch(() => props.modelValue, (newVal) => {
-    if (!newVal && wavesurfer.value) {
-        wavesurfer.value.empty();
+// Watch for external changes to modelValue (e.g. if cleared or loaded)
+watch(() => props.modelValue, async (newVal, oldVal) => {
+    if (!newVal) {
+        if (wavesurfer.value) {
+            wavesurfer.value.destroy();
+            wavesurfer.value = null;
+        }
+        if (audioElement.value) {
+            audioElement.value.pause();
+            audioElement.value.src = '';
+        }
+        isLoadedFromUrl.value = false;
+        return;
+    }
+    
+    // If new value is loaded and different from old value, initialize player
+    if (newVal && newVal !== oldVal) {
+        // Destroy existing player if any
+        if (wavesurfer.value) {
+            wavesurfer.value.destroy();
+            wavesurfer.value = null;
+        }
+        if (audioElement.value) {
+            audioElement.value.pause();
+            audioElement.value.src = '';
+        }
+        isLoadedFromUrl.value = false;
+        
+        // If it's a string URL, use audio element
+        if (typeof newVal === 'string') {
+            initPlayerFromUrl(newVal);
+        } else if (newVal instanceof File || newVal instanceof Blob) {
+            setTimeout(() => initPlayer(newVal as Blob), 100);
+        }
     }
 });
 
@@ -282,8 +458,15 @@ const trashIcon = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" x
             <span v-else v-html="pauseIcon"></span>
         </button>
 
-        <!-- Waveform Container -->
-        <div ref="containerRef" class="flex-1 h-[40px]"></div>
+        <!-- Waveform Container (only for recorded blobs) or Simple Progress Bar (for URLs) -->
+        <div v-if="!isLoadedFromUrl" ref="containerRef" class="flex-1 h-[40px]"></div>
+        <div v-else class="flex-1 flex items-center gap-2">
+            <div class="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div class="h-full bg-primary-500 transition-all duration-100" 
+                     :style="{ width: audioElement && audioElement.duration ? `${(audioElement.currentTime / audioElement.duration) * 100}%` : '0%' }">
+                </div>
+            </div>
+        </div>
 
         <!-- Duration -->
         <span class="text-xs text-gray-500 font-mono">{{ isPlaying ? currentTime : duration }}</span>

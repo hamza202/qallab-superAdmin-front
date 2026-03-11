@@ -101,6 +101,16 @@ const fetchFormData = async () => {
             formData.value.textNote = data.notes || '';
             formData.value.code = data.code ? String(data.code) : '';
             
+            // Load image URL if exists (store URL for display, not fetch due to CORS)
+            if (data.image) {
+                formData.value.image = data.image as any;
+            }
+            
+            // Load voice attachment URL if exists (store URL for display, not fetch due to CORS)
+            if (data.voice_attachment) {
+                formData.value.voice_attachment = data.voice_attachment as any;
+            }
+            
             // Populate products (items)
             if (data.items && Array.isArray(data.items)) {
                 productTableItems.value = data.items.map((item: any) => ({
@@ -206,16 +216,9 @@ const formData = ref({
     paymentMethod: null,
     advancePayment: null,
     textNote: '',
-    image: null as File | null,
-    voice_attachment: null as File | Blob | null,
+    image: null,
+    voice_attachment: null,
     code: '' as string
-});
-
-const imageFiles = computed({
-    get: () => formData.value.image ? [formData.value.image] as File[] : null,
-    set: (val: File[] | null) => {
-        formData.value.image = val && val.length > 0 ? val[0] : null;
-    }
 });
 
 // Products table items (dynamically populated from dialog)
@@ -434,12 +437,14 @@ const buildFormData = (): FormData => {
     });
     
     // File attachments
-    if (formData.value.image) {
-        fd.append('image', formData.value.image);
+    const imageVal = formData.value.image as any;
+    if (imageVal && Array.isArray(imageVal) && imageVal.length > 0) {
+        fd.append('image', imageVal[0]);
     }
-    
-    if (formData.value.voice_attachment) {
-        fd.append('voice_attachment', formData.value.voice_attachment);
+
+    const voiceVal = formData.value.voice_attachment as any;
+    if (voiceVal && typeof voiceVal !== 'string') {
+        fd.append('voice_attachment', voiceVal);
     }
     
     return fd;
@@ -790,8 +795,8 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
                                 placeholder="هل تود إرفاق بعض الملاحظات، قم بكتابتها هنا من فضلك وسيتم إرفاقها مع طلب عرض السعر المرسل" />
                         </div>
 
-                        <FileUploadInput v-model="imageFiles" class="!mb-0 h-full"
-                            hint="PNG, JPG or GIF (max. 400x400px)" :max-files="1" :multiple="false" />
+                        <FileUploadInput v-model="formData.image" :multiple="false" class="!mb-0 h-full"
+                            hint="PNG, JPG or GIF (max. 400x400px)" :max-files="1" />
                     </div>
                 </div>
 

@@ -272,6 +272,7 @@ const fetchSoLogisticDetails = async () => {
           : (item.transport_type != null ? [{ transport_type: parseInt(item.transport_type), transport_no: null }] : []);
           
         availableDetails.push({
+          id: item.item_id,
           item_id: item.item_id,
           item_name: item.item_name || '',
           unit_id: item.unit_id,
@@ -352,6 +353,7 @@ const fetchSoLogisticDetailsForEdit = async () => {
           : (item.transport_type != null ? [{ transport_type: parseInt(item.transport_type), transport_no: null }] : []);
           
         availableDetails.push({
+          id: item.item_id,
           item_id: item.item_id,
           item_name: item.item_name || '',
           unit_id: item.unit_id,
@@ -470,6 +472,7 @@ const fetchSaleOrderData = async () => {
             : (item.transport_type != null ? [{ transport_type: parseInt(item.transport_type), transport_no: null }] : []);
             
           availableDetails.push({
+            id: item.item_id,
             item_id: item.item_id,
             item_name: item.item_name || '',
             unit_id: item.unit_id,
@@ -538,6 +541,7 @@ const fetchSaleOrderData = async () => {
         
         // Populate available details too
         availableTripDetails.value = data.items.map((item: any) => ({
+            id: item.item_id,
             item_id: item.item_id,
             item_name: item.item_name || '',
             unit_id: item.unit_id,
@@ -963,6 +967,7 @@ const addCustomerTripDetail = () => {
 const handleCustomerTripDetailSaved = (products: TripLogisticsDetail[]) => {
   const newItems = products.map(p => ({
     ...p,
+    id: p.id ?? p.item_id,
     unit_name: getUnitName(p.unit_id)
   }));
   customerTripDetails.value = newItems;
@@ -1000,6 +1005,7 @@ const addLogisticTripDetail = () => {
 const handleLogisticTripDetailSaved = (products: TripLogisticsDetail[]) => {
   const newItems = products.map(p => ({
     ...p,
+    id: p.id ?? p.item_id,
     unit_name: getUnitName(p.unit_id)
   }));
   logisticCompanyTripDetails.value = newItems;
