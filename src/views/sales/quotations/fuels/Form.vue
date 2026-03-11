@@ -771,7 +771,7 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
                         <span v-if="item.discount_val != null && Number(item.discount_val) > 0" class="flex items-center gap-1">
                             {{ item.discount_val }}
                             <span v-if="item.discount_type == 1">%</span>
-                            <span v-else v-html="rialIcon"></span>
+                            <span v-if="item.discount_type == 2" v-html="rialIcon"></span>
                         </span>
                         <span v-else>—</span>
                     </template>

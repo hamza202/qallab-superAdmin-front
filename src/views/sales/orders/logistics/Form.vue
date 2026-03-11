@@ -1509,7 +1509,7 @@ onMounted(async () => {
                 <v-divider vertical class="my-6" v-if="detail.discount_val"></v-divider>
                 <div class="info-item-bordered px-4 py-2" v-if="detail.discount_val">
                     <label class="font-semibold text-sm text-gray-500 mb-2 block">الخصم</label>
-                    <p class="text-base font-semibold text-gray-900 flex items-center gap-1">{{ detail.discount_val }} <span v-if="detail.discount_type == 1">%</span><span v-else v-html="rialIcon"></span></p>
+                    <p class="text-base font-semibold text-gray-900 flex items-center gap-1">{{ detail.discount_val }} <span v-if="detail.discount_type == 1">%</span><span v-if="item.discount_type == 2" v-html="rialIcon"></span></p>
                 </div>
                 <v-divider vertical class="my-6"></v-divider>
                 <div class="info-item-bordered px-4 py-2" v-if="detail.target_location">
@@ -1656,7 +1656,7 @@ onMounted(async () => {
                 <span v-if="item.discount_val != null && Number(item.discount_val) > 0" class="flex items-center gap-1">
                     {{ item.discount_val }}
                     <span v-if="item.discount_type == 1">%</span>
-                    <span v-else v-html="rialIcon"></span>
+                    <span v-if="item.discount_type == 2" v-html="rialIcon"></span>
                 </span>
                 <span v-else>—</span>
             </template>
