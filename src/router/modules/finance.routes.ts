@@ -32,4 +32,66 @@ export const financeRoutes: RouteRecordRaw[] = [
       },
     ],
   },
+  {
+    path: '/banks',
+    name: 'Banks',
+    redirect: '/banks/list',
+    children: [
+      {
+        path: 'list',
+        name: 'BanksList',
+        component: () => import('@/views/finance/banks-and-treasuries/banks/List.vue'),
+        meta: {
+          title: 'pages.banks.title',
+        },
+      },
+      {
+        path: 'create',
+        name: 'BanksCreate',
+        component: () => import('@/views/finance/banks-and-treasuries/banks/Form.vue'),
+        meta: {
+          title: 'pages.banks.create',
+        },
+      },
+      {
+        path: 'edit/:id',
+        name: 'BanksEdit',
+        component: () => import('@/views/finance/banks-and-treasuries/banks/Form.vue'),
+        meta: {
+          title: 'pages.banks.edit',
+        },
+      },
+    ],
+  },
+  {
+    path: '/treasuries',
+    name: 'Treasuries',
+    redirect: '/treasuries/list',
+    children: [
+      {
+        path: 'list',
+        name: 'TreasuriesList',
+        component: () => import('@/views/finance/banks-and-treasuries/treasuries/List.vue'),
+        meta: {
+          title: 'pages.treasuries.title',
+        },
+      },
+      {
+        path: 'create',
+        name: 'TreasuriesCreate',
+        component: () => import('@/views/finance/banks-and-treasuries/treasuries/Form.vue'),
+        meta: {
+          title: 'pages.treasuries.create',
+        },
+      },
+      {
+        path: 'edit/:id',
+        name: 'TreasuriesEdit',
+        component: () => import('@/views/finance/banks-and-treasuries/treasuries/Form.vue'),
+        meta: {
+          title: 'pages.treasuries.edit',
+        },
+      },
+    ],
+  },
 ]

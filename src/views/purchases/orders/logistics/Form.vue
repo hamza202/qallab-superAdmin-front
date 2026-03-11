@@ -1120,7 +1120,7 @@ onMounted(async () => {
                   <p class="text-base font-semibold text-gray-900">{{ detail.source_location }}</p>
                 </div>
               </div>
-              <ButtonWithIcon :icon="tableEditIcon" icon-only @click="handleEditLogisticsDetail(detail)" size="x-small"
+              <ButtonWithIcon :icon="binIcon" icon-only @click="handleEditLogisticsDetail(detail)" size="x-small"
                 rounded="lg" color="primary" variant="text" />
             </div>
             <div class="flex justify-end gap-2 mt-2">
