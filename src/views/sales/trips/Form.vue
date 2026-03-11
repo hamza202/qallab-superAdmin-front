@@ -706,13 +706,12 @@ const fetchFormData = async () => {
       }));
     }
     
-    // Populate edit mode specific fields
+    // Populate edit mode: always fetch logistics orders list when supplier_logistic_id exists (from API or any change)
+    if (formData.value.supplier_logistic_id) {
+      await fetchSoLogisticsListForEdit();
+    }
     if (data.so_logistic_id) {
       selectedSoLogisticId.value = data.so_logistic_id;
-      // Fetch logistics orders list to populate the select
-      if (formData.value.supplier_logistic_id) {
-        await fetchSoLogisticsListForEdit();
-      }
     }
     
     if (data.customer_id) {
@@ -1041,21 +1040,18 @@ const handleDeleteProduct = (item: any) => {
   }
 };
 
-// Watch for supplier_logistic_id changes to fetch logistics orders list (for material-product flow or edit mode)
+// Watch for supplier_logistic_id: fetch logistics list when it exists or changes (edit load handled in fetchFormData)
 watch(() => formData.value.supplier_logistic_id, (newVal, oldVal) => {
   if (isFromMaterialProduct.value && newVal) {
-    // Reset selected logistics order when supplier changes
     selectedSoLogisticId.value = null;
     soLogisticItems.value = [];
-    // Clear trip details
     availableTripDetails.value = [];
     customerTripDetails.value = [];
     logisticCompanyTripDetails.value = [];
     productTableItems.value = [];
-    // Fetch new logistics orders list
     fetchSoLogisticsList();
-  } else if (isEditMode.value && newVal && oldVal !== null) {
-    // In edit mode, only reset and fetch if supplier actually changed (not initial load)
+  } else if (isEditMode.value && newVal && (oldVal !== null && oldVal !== undefined)) {
+    // Edit mode: when user changes supplier (not initial load — initial load is handled in fetchFormData)
     selectedSoLogisticId.value = null;
     soLogisticItems.value = [];
     fetchSoLogisticsListForEdit();
