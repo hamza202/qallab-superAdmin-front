@@ -3,8 +3,8 @@
         <div class="product-view-page -mx-6 bg-qallab-dashboard-bg space-y-4">
             <!-- Page Header -->
             <TopHeader :icon="financeIcon" title-key="pages.treasuries.create"
-                description-key="pages.treasuries.formDescription" :show-action="false" 
-                :code="isEditMode ? (code || '') : ''" :code-icon="fileIcon"/>
+                description-key="pages.treasuries.formDescription" :show-action="false"
+                :code="isEditMode ? (code || '') : ''" :code-icon="fileIcon" />
 
             <!-- Basic Information Section -->
             <div class="p-6 bg-white rounded-3xl border !border-gray-100">
@@ -49,38 +49,33 @@
 
                             <!-- Account -->
                             <div>
-                                <SelectInput v-model="formData.account_id" label="الحساب"
-                                    placeholder="اختر الحساب" :items="accountOptions" density="comfortable"
-                                    variant="outlined" :error-messages="formErrors['account_id']"
+                                <SelectInput v-model="formData.account_id" label="الحساب" placeholder="اختر الحساب"
+                                    :items="accountOptions" density="comfortable" variant="outlined"
+                                    :error-messages="formErrors['account_id']"
                                     @update:model-value="delete formErrors['account_id']" />
                             </div>
 
                             <!-- Deposit -->
                             <div>
-                                <span class="text-sm font-semibold text-gray-700 mb-2 block">إيداع</span>
-                                <v-radio-group v-model="formData.deposit" inline hide-details
-                                    @update:model-value="delete formErrors['deposit']">
-                                    <v-radio label="لا" :value="0" color="primary" />
-                                    <v-radio label="نعم" :value="1" color="primary" />
-                                </v-radio-group>
-                                <div v-if="formErrors['deposit']" class="text-error text-xs mt-1">
-                                    {{ formErrors['deposit'] }}
-                                </div>
+                                <SelectInput v-model="formData.deposit" label="إيداع" placeholder="اختر حساب الإيداع"
+                                    :items="accountOptions" density="comfortable" variant="outlined"
+                                    :error-messages="formErrors['deposit']"
+                                    @update:model-value="delete formErrors['deposit']" />
                             </div>
 
                             <!-- Withdraw -->
                             <div>
-                                <span class="text-sm font-semibold text-gray-700 mb-2 block">سحب</span>
-                                <v-radio-group v-model="formData.withdraw" inline hide-details
-                                    @update:model-value="delete formErrors['withdraw']">
-                                    <v-radio label="لا" :value="0" color="primary" />
-                                    <v-radio label="نعم" :value="1" color="primary" />
-                                </v-radio-group>
-                                <div v-if="formErrors['withdraw']" class="text-error text-xs mt-1">
-                                    {{ formErrors['withdraw'] }}
-                                </div>
+                                <SelectInput v-model="formData.withdraw" label="سحب" placeholder="اختر حساب السحب"
+                                    :items="accountOptions" density="comfortable" variant="outlined"
+                                    :error-messages="formErrors['withdraw']"
+                                    @update:model-value="delete formErrors['withdraw']" />
                             </div>
 
+                            <!-- Notes -->
+                            <div class="md:col-span-2">
+                                <TextareaInput v-model="formData.notes" placeholder="ملاحظات" label="ملاحظات"
+                                    :error-messages="formErrors['notes']" @input="delete formErrors['notes']" />
+                            </div>
                             <!-- Settlement -->
                             <div>
                                 <span class="text-sm font-semibold text-gray-700 mb-2 block">خزينة تسوية</span>
@@ -94,18 +89,13 @@
                                 </div>
                             </div>
 
-                            <!-- Notes -->
-                            <div class="md:col-span-3">
-                                <TextareaInput v-model="formData.notes" placeholder="ملاحظات" label="ملاحظات"
-                                    :error-messages="formErrors['notes']" @input="delete formErrors['notes']" />
-                            </div>
                         </div>
                     </v-form>
                 </div>
             </div>
 
-            <!-- Balance and Verification Section -->
-            <div class="bg-white rounded-3xl border !border-gray-100 pb-10">
+            <!-- Balance and Verification Section (edit mode only) -->
+            <div v-if="isEditMode" class="bg-white rounded-3xl border !border-gray-100 pb-10">
                 <div class="px-6 pt-6 pb-2 flex items-center mb-4 gap-2 text-primary-600">
                     <span class="w-[18px]" v-html="fileCheckIcon"></span>
                     <h2 class="text-base font-bold">سجل ارصدة الخزينة وتاريخ التحقق</h2>
@@ -121,15 +111,20 @@
                 <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col">
                     <ButtonWithIcon variant="flat" color="primary" height="48" rounded="4"
                         custom-class="font-semibold text-base px-6 md:!px-10 min-w-56" :prepend-icon="saveIcon"
-                        label="حفظ " @click="handleSubmit" />
+                        :loading="loading" :disabled="loading" label="حفظ " @click="handleSubmit" />
 
                     <ButtonWithIcon variant="flat" color="primary-50" rounded="4" height="48" prepend-icon="mdi-close"
+                        :loading="loading" :disabled="loading"
                         custom-class="font-semibold text-base text-primary-700 px-6 min-w-56" label="إغلاق"
                         @click="handleCancel" />
                 </div>
             </div>
 
         </div>
+
+        <v-overlay :model-value="pageLoading" contained class="align-center justify-center">
+            <v-progress-circular indeterminate color="primary" size="64" />
+        </v-overlay>
     </default-layout>
 </template>
 
@@ -144,19 +139,20 @@ import TopHeader from '@/components/price-offers/TopHeader.vue'
 
 interface TreasuryFormData {
     branch_id: number | null
-    deposit: number
-    withdraw: number
+    deposit: number | null
+    withdraw: number | null
     account_id: number | null
     is_settlement: number
     notes: string
     currency_id: number | null
 }
 
-interface TreasuryPayload extends TreasuryFormData {
+interface TreasuryPayload extends Omit<TreasuryFormData, 'is_settlement'> {
     name: {
         en: string
         ar: string
     }
+    is_settlement: boolean
     _method?: 'PUT'
 }
 
@@ -169,14 +165,15 @@ const loading = ref(false)
 const formRef = ref()
 const code = ref('')
 const isFormValid = ref(false)
+const pageLoading = ref(false)
 
 const nameEn = ref('')
 const nameAr = ref('')
 
 const formData = ref<TreasuryFormData>({
     branch_id: null,
-    deposit: 1,
-    withdraw: 1,
+    deposit: null,
+    withdraw: null,
     account_id: null,
     is_settlement: 1,
     notes: '',
@@ -220,19 +217,43 @@ const fetchTreasury = async () => {
         loading.value = true
         const response = await api.get(`/treasuries/${route.params.id}`)
         const data = response.data
-        
+
         // Populate form data
-        if (data.name) {
+        const translations = data.name_translations
+        if (translations && typeof translations === 'object') {
+            nameEn.value = translations.en || ''
+            nameAr.value = translations.ar || ''
+        } else if (data.name && typeof data.name === 'object') {
             nameEn.value = data.name.en || ''
             nameAr.value = data.name.ar || ''
+        } else if (typeof data.name === 'string') {
+            nameEn.value = data.name
+            nameAr.value = data.name
         }
-        formData.value.branch_id = data.branch_id || null
-        formData.value.deposit = data.deposit ?? 1
-        formData.value.withdraw = data.withdraw ?? 1
-        formData.value.account_id = data.account_id || null
-        formData.value.is_settlement = data.is_settlement ?? 1
+        formData.value.branch_id = data.branch_id ?? null
+        formData.value.deposit = data.deposit ?? null
+        formData.value.withdraw = data.withdraw ?? null
+        formData.value.account_id = data.account_id ?? null
+        if (typeof data.is_settlement === 'boolean') {
+            formData.value.is_settlement = data.is_settlement ? 1 : 0
+        } else if (typeof data.is_settlement === 'number') {
+            formData.value.is_settlement = data.is_settlement
+        } else {
+            formData.value.is_settlement = 1
+        }
         formData.value.notes = data.notes || ''
-        formData.value.currency_id = data.currency_id || null
+        formData.value.currency_id = data.currency_id ?? null
+
+        if (data.balance !== undefined && data.balance?.length > 1) {
+            balanceRecords.value = [{
+                id: data.id ?? '—',
+                balance: data.balance,
+                currency: data.currency ?? data.currency_code ?? null,
+                verification_date: data.balance_verified_at ?? data.updated_at ?? null
+            }]
+        } else {
+            balanceRecords.value = []
+        }
     } catch (err: any) {
         console.error('Error fetching treasury:', err)
         errorNotification(err?.response?.data?.message || 'حدث خطأ أثناء جلب البيانات')
@@ -256,7 +277,7 @@ const handleSubmit = async () => {
             deposit: formData.value.deposit,
             withdraw: formData.value.withdraw,
             account_id: formData.value.account_id,
-            is_settlement: formData.value.is_settlement,
+            is_settlement: formData.value.is_settlement === 1,
             notes: formData.value.notes,
             currency_id: formData.value.currency_id
         }
@@ -297,20 +318,14 @@ const headers = [
     { title: 'تاريخ التحقق الحالي', key: 'verification_date' },
 ];
 
-const balanceRecords = ref([
-    {
-        id: 1,
-        balance: 15000,
-        currency: 'SAR',
-        verification_date: '2026-03-10',
-    },
-    {
-        id: 2,
-        balance: 8200,
-        currency: 'USD',
-        verification_date: '2026-03-08',
-    },
-]);
+type BalanceRecord = {
+    id: number | string
+    balance: number | string | null
+    currency?: string | null
+    verification_date?: string | null
+}
+
+const balanceRecords = ref<BalanceRecord[]>([])
 
 const tableItems = computed(() =>
     balanceRecords.value.map(record => ({
@@ -319,8 +334,11 @@ const tableItems = computed(() =>
         currency: record.currency ?? '—',
         verification_date: record.verification_date ?? '—',
     }))
-);
-onMounted(() => {
-    fetchTreasury()
+)
+
+onMounted(async () => {
+    pageLoading.value = true
+    await fetchTreasury()
+    pageLoading.value = false
 })
 </script>
