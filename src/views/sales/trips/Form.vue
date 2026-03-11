@@ -151,7 +151,7 @@ const fetchCustomerSaleOrders = async () => {
     const res = await api.get<any>('/sales/orders/list', {
       params: {
         customer_id: selectedCustomerId.value,
-        so_type: 'so_with_logistics',
+        // so_type: 'so_with_logistics',
         category: tripCategory.value || 'building_material'
       }
     });
