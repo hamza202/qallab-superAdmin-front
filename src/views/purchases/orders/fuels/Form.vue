@@ -8,19 +8,22 @@ import DatePickerInput from '@/components/common/forms/DatePickerInput.vue';
 import DateTimePickerInput from '@/components/common/forms/DateTimePickerInput.vue';
 import TelInput from '@/components/common/forms/TelInput.vue';
 import { useApi } from '@/composables/useApi';
+import { useCalculations } from "@/composables/useCalculations";
+
 import {
-  fileIcon,
-  fileCheckIcon,
-  mapMarkerIcon,
-  messagePlusIcon,
-  filePlusIcon,
-  listIcon,
-  CoinHandIcon,
-  fileQuestionIcon,
+    fileIcon,
+    fileCheckIcon,
+    mapMarkerIcon,
+    messagePlusIcon,
+    filePlusIcon,
+    listIcon,
+    CoinHandIcon,
+    fileQuestionIcon,
 } from '@/components/icons/priceOffersIcons';
 import {
-  returnIcon,
-  saveIcon,
+    returnIcon,
+    saveIcon,
+    rialIcon,
 } from '@/components/icons/globalIcons';
 
 useI18n()
@@ -67,16 +70,16 @@ const fetchConstants = async () => {
         const res = await api.get<any>('/purchases/constants');
         const data = res.data;
         if (data) {
-             requestTypeItems.value = data.request_types?.map((i: any) => ({ title: i.label, value: i.key })) || [];
-             paymentMethodItems.value = data.payment_methods?.map((i: any) => ({ title: i.label, value: i.key })) || [];
-             transportTypeItems.value = data.transport_types?.map((i: any) => ({ title: i.label, value: i.key })) || [];
-             amPmIntervalItems.value = data.am_pm_interval?.map((i: any) => ({ title: i.label, value: i.key })) || [];
-             const deliveryMethods = data.delivered_methods ?? data.delivery_methods;
-             if (deliveryMethods?.length) deliveryMethodItems.value = deliveryMethods.map((i: any) => ({ title: i.label, value: i.key }));
-             if (data.supply_types?.length) supplyTypeItems.value = data.supply_types.map((i: any) => ({ title: i.label, value: i.key }));
-             if (data.fillings?.length) fillingsItems.value = data.fillings.map((i: any) => ({ title: i.label, value: i.key }));
+            requestTypeItems.value = data.request_types?.map((i: any) => ({ title: i.label, value: i.key })) || [];
+            paymentMethodItems.value = data.payment_methods?.map((i: any) => ({ title: i.label, value: i.key })) || [];
+            transportTypeItems.value = data.transport_types?.map((i: any) => ({ title: i.label, value: i.key })) || [];
+            amPmIntervalItems.value = data.am_pm_interval?.map((i: any) => ({ title: i.label, value: i.key })) || [];
+            const deliveryMethods = data.delivered_methods ?? data.delivery_methods;
+            if (deliveryMethods?.length) deliveryMethodItems.value = deliveryMethods.map((i: any) => ({ title: i.label, value: i.key }));
+            if (data.supply_types?.length) supplyTypeItems.value = data.supply_types.map((i: any) => ({ title: i.label, value: i.key }));
+            if (data.fillings?.length) fillingsItems.value = data.fillings.map((i: any) => ({ title: i.label, value: i.key }));
         }
-    } catch(e) {
+    } catch (e) {
         console.error('Error fetching constants:', e);
     }
 }
@@ -89,7 +92,7 @@ const fetchOrdersConstants = async () => {
         if (data) {
             feeTypeItems.value = data.fee_types?.map((i: any) => ({ title: i.label, value: i.key })) || [];
         }
-    } catch(e) {
+    } catch (e) {
         console.error('Error fetching orders constants:', e);
     }
 };
@@ -100,7 +103,7 @@ const fetchUnits = async () => {
         if (Array.isArray(res.data)) {
             unitItems.value = res.data.map((i: any) => ({ title: i.name, value: i.id }));
         }
-    } catch(e) {
+    } catch (e) {
         console.error('Error fetching units:', e);
     }
 }
@@ -116,12 +119,12 @@ const getTransportTypeName = (transportTypeId: number | string | null): string =
 // Fetch form data for edit mode
 const fetchFormData = async () => {
     if (!isEditMode.value || !routeId.value) return;
-    
+
     isLoading.value = true;
     try {
         const res = await api.get<any>(`/purchases/orders/fuels/${routeId.value}`);
         const data = res.data;
-        
+
         if (data) {
             // Populate form data
             formData.value.code = data.code || '';
@@ -185,8 +188,15 @@ const fetchFormData = async () => {
                     };
                 });
             }
+
+
+            // Fetch calculations for loaded items
+            if (productTableItems.value.length > 0) {
+                await fetchCalculations();
+            }
+
         }
-    } catch(e) {
+    } catch (e) {
         console.error('Error fetching form data:', e);
     } finally {
         isLoading.value = false;
@@ -195,100 +205,106 @@ const fetchFormData = async () => {
 
 // Helper function to get unit name from id
 const getUnitName = (unitId: number | null): string => {
-  if (unitId == null) return '';
-  const unit = unitItems.value.find((u: any) => u.value === unitId || u.value === Number(unitId));
-  return unit?.title || '';
+    if (unitId == null) return '';
+    const unit = unitItems.value.find((u: any) => u.value === unitId || u.value === Number(unitId));
+    return unit?.title || '';
 };
 
 // Fetch quotation data and pre-fill form when creating order from quotation
 const fetchQuotationForOrder = async () => {
-  if (!fromQuotationId.value) return;
+    if (!fromQuotationId.value) return;
 
-  // Set quotation code from query param
-  if (fromQuotationCode.value) {
-    formData.value.purchase_quotation_code = fromQuotationCode.value as any;
-  }
-
-  isLoading.value = true;
-  try {
-    const res = await api.get<any>(`/purchases/quotations/fuels/${fromQuotationId.value}`);
-    const data = res.data;
-
-    if (data) {
-      // Mark as loaded from quotation to disable supplier select
-      isFromQuotation.value = true;
-      
-      // Set quotation code from API response if not already set from query param
-      if (data.code && !fromQuotationCode.value) {
-        formData.value.purchase_quotation_code = data.code;
-      }
-      
-      // Map quotation fields to order form fields
-      formData.value.supplier_id = data.supplier?.id != null 
-        ? Number(data.supplier.id) 
-        : (data.supplier_id != null ? Number(data.supplier_id) : null);
-      formData.value.project_name = data.project_name || '';
-      formData.value.target_location = data.target_location || null;
-      formData.value.target_latitude = data.target_latitude || null;
-      formData.value.target_longitude = data.target_longitude || null;
-      formData.value.source_location = data.source_location || null;
-      formData.value.source_latitude = data.source_latitude || null;
-      formData.value.source_longitude = data.source_longitude || null;
-      formData.value.paymentMethod = data.payment_method || null;
-      formData.value.advancePayment = data.upfront_payment || null;
-      formData.value.invoice_interval = data.invoice_interval != null ? Number(data.invoice_interval) : null;
-      formData.value.payment_term_no = data.payment_term_no != null ? Number(data.payment_term_no) : null;
-      formData.value.late_fee_type = data.late_fee_type || null;
-      formData.value.late_fee = data.late_fee != null ? Number(data.late_fee) : null;
-      formData.value.cancel_fee_type = data.cancel_fee_type || null;
-      formData.value.cancel_fee = data.cancel_fee != null ? Number(data.cancel_fee) : null;
-      formData.value.textNote = data.notes || '';
-      formData.value.responsibleName = data.responsible_person || '';
-      formData.value.responsiblePhone = data.responsible_phone || null;
-      
-        formData.value.responsibleName = data.responsible_person || '';
-        formData.value.responsiblePhone = data.responsible_phone || null;
-
-        formData.value.supplyType = data.supply_type || null;
-        formData.value.supplyDuration = data.supply_interval ?? null;
-        formData.value.deliveryDuration = data.delivered_interval ?? null;
-        formData.value.deliveryMethod = data.delivered_method ?? null;
-
-      // Map products (items) from quotation to order
-      if (data.items && Array.isArray(data.items)) {
-        productTableItems.value = data.items.map((item: any) => {
-          const itemId = Number(item.item?.id || item.item_id);
-          const unitId = item.unit?.id || item.unit_id;
-          const unitName = item.unit?.name || item.unit_name || getUnitName(unitId);
-
-          return {
-            item_id: itemId,
-            item_name: item.item?.name || item.item_name || item.name || '',
-            unit_id: unitId ?? null,
-            unit_name: unitName,
-            quantity: item.quantity ?? null,
-            transport_type: item.transport_type ?? null,
-            transport_type_name: getTransportTypeName(item.transport_type),
-            trip_no: item.trip_no ?? null,
-            notes: item.note || item.notes || '',
-            price_per_unit: item.price_per_unit ?? null,
-            unit_price: item.price_per_unit ?? null,
-            discount: item.discount_val ?? null,
-            discount_type: item.discount_type ?? null,
-            discount_val: item.discount_val ?? null,
-            total_tax: null,
-            subtotal_before_discount: null,
-            subtotal_after_discount: null,
-            isAdded: true,
-          };
-        });
-      }
+    // Set quotation code from query param
+    if (fromQuotationCode.value) {
+        formData.value.purchase_quotation_code = fromQuotationCode.value as any;
     }
-  } catch (e) {
-    console.error('Error fetching quotation data:', e);
-  } finally {
-    isLoading.value = false;
-  }
+
+    isLoading.value = true;
+    try {
+        const res = await api.get<any>(`/purchases/quotations/fuels/${fromQuotationId.value}`);
+        const data = res.data;
+
+        if (data) {
+            // Mark as loaded from quotation to disable supplier select
+            isFromQuotation.value = true;
+
+            // Set quotation code from API response if not already set from query param
+            if (data.code && !fromQuotationCode.value) {
+                formData.value.purchase_quotation_code = data.code;
+            }
+
+            // Map quotation fields to order form fields
+            formData.value.supplier_id = data.supplier?.id != null
+                ? Number(data.supplier.id)
+                : (data.supplier_id != null ? Number(data.supplier_id) : null);
+            formData.value.project_name = data.project_name || '';
+            formData.value.target_location = data.target_location || null;
+            formData.value.target_latitude = data.target_latitude || null;
+            formData.value.target_longitude = data.target_longitude || null;
+            formData.value.source_location = data.source_location || null;
+            formData.value.source_latitude = data.source_latitude || null;
+            formData.value.source_longitude = data.source_longitude || null;
+            formData.value.paymentMethod = data.payment_method || null;
+            formData.value.advancePayment = data.upfront_payment || null;
+            formData.value.invoice_interval = data.invoice_interval != null ? Number(data.invoice_interval) : null;
+            formData.value.payment_term_no = data.payment_term_no != null ? Number(data.payment_term_no) : null;
+            formData.value.late_fee_type = data.late_fee_type || null;
+            formData.value.late_fee = data.late_fee != null ? Number(data.late_fee) : null;
+            formData.value.cancel_fee_type = data.cancel_fee_type || null;
+            formData.value.cancel_fee = data.cancel_fee != null ? Number(data.cancel_fee) : null;
+            formData.value.textNote = data.notes || '';
+            formData.value.responsibleName = data.responsible_person || '';
+            formData.value.responsiblePhone = data.responsible_phone || null;
+
+            formData.value.responsibleName = data.responsible_person || '';
+            formData.value.responsiblePhone = data.responsible_phone || null;
+
+            formData.value.supplyType = data.supply_type || null;
+            formData.value.supplyDuration = data.supply_interval ?? null;
+            formData.value.deliveryDuration = data.delivered_interval ?? null;
+            formData.value.deliveryMethod = data.delivered_method ?? null;
+
+            // Map products (items) from quotation to order
+            if (data.items && Array.isArray(data.items)) {
+                productTableItems.value = data.items.map((item: any) => {
+                    const itemId = Number(item.item?.id || item.item_id);
+                    const unitId = item.unit?.id || item.unit_id;
+                    const unitName = item.unit?.name || item.unit_name || getUnitName(unitId);
+
+                    return {
+                        item_id: itemId,
+                        item_name: item.item?.name || item.item_name || item.name || '',
+                        unit_id: unitId ?? null,
+                        unit_name: unitName,
+                        quantity: item.quantity ?? null,
+                        transport_type: item.transport_type ?? null,
+                        transport_type_name: getTransportTypeName(item.transport_type),
+                        trip_no: item.trip_no ?? null,
+                        notes: item.note || item.notes || '',
+                        price_per_unit: item.price_per_unit ?? null,
+                        unit_price: item.price_per_unit ?? null,
+                        discount: item.discount_val ?? null,
+                        discount_type: item.discount_type ?? null,
+                        discount_val: item.discount_val ?? null,
+                        total_tax: null,
+                        subtotal_before_discount: null,
+                        subtotal_after_discount: null,
+                        isAdded: true,
+                    };
+                });
+            }
+
+            // Fetch calculations for loaded items
+            if (productTableItems.value.length > 0) {
+                await fetchCalculations();
+            }
+
+        }
+    } catch (e) {
+        console.error('Error fetching quotation data:', e);
+    } finally {
+        isLoading.value = false;
+    }
 };
 
 onMounted(async () => {
@@ -298,7 +314,7 @@ onMounted(async () => {
         fetchUnits(),
         fetchSuppliers()
     ]);
-    
+
     // Fetch form data if in edit mode
     if (isEditMode.value) {
         await fetchFormData();
@@ -373,6 +389,29 @@ const formData = ref({
 // Products table items (dynamically populated from dialog)
 const productTableItems = ref<ProductTableItem[]>([]);
 
+// API-driven calculations via composable
+const { vatRate, fetchCalculations: _fetchCalc, summaryTotals } = useCalculations(productTableItems);
+
+const fetchCalculations = async () => {
+    const calcItems = await _fetchCalc();
+    if (calcItems) {
+        productTableItems.value = productTableItems.value.map((item) => {
+            const calc = calcItems[String(item.item_id)];
+            if (calc) {
+                return {
+                    ...item,
+                    subtotal_before_discount: calc.subtotal_before_discount,
+                    discount_amount: calc.discount_amount,
+                    subtotal_after_discount: calc.subtotal_after_discount,
+                    total_tax: calc.total_tax,
+                    item_final: calc.final,
+                };
+            }
+            return item;
+        });
+    }
+};
+
 import { useNotification } from '@/composables/useNotification';
 import { required, numeric, positive } from '@/utils/validators';
 
@@ -390,9 +429,9 @@ const handleAddProduct = () => {
     showAddProductDialog.value = true;
 };
 
-const handleProductSaved = (products: any[]) => {
+const handleProductSaved = async (products: any[]) => {
     const existingItems = [...productTableItems.value];
-    
+
     products.forEach((p) => {
         const existingIndex = existingItems.findIndex(
             (existing) => existing.item_id === p.item_id,
@@ -415,6 +454,7 @@ const handleProductSaved = (products: any[]) => {
     });
 
     productTableItems.value = existingItems;
+    await fetchCalculations();
 };
 
 const handleEditProduct = (item: any) => {
@@ -422,12 +462,17 @@ const handleEditProduct = (item: any) => {
         (p) => p.item_id === item.item_id,
     );
     if (productToEdit) {
-        editingProduct.value = { ...productToEdit, isAdded: true } as any;
+        editingProduct.value = {
+            ...productToEdit,
+            unit_price: productToEdit.price_per_unit ?? productToEdit.unit_price ?? null,
+            discount: productToEdit.discount_val ?? productToEdit.discount ?? null,
+            isAdded: true,
+        } as any;
         showAddProductDialog.value = true;
     }
 };
 
-const handleProductUpdated = (updatedProduct: any) => {
+const handleProductUpdated = async (updatedProduct: any) => {
     const index = productTableItems.value.findIndex(
         (p) => p.item_id === updatedProduct.item_id,
     );
@@ -435,18 +480,22 @@ const handleProductUpdated = (updatedProduct: any) => {
         const existingNotes = productTableItems.value[index].notes;
         productTableItems.value[index] = {
             ...updatedProduct,
+            price_per_unit: updatedProduct.unit_price ?? updatedProduct.price_per_unit ?? null,
+            discount_val: updatedProduct.discount ?? updatedProduct.discount_val ?? null,
             notes: existingNotes || updatedProduct.notes || '',
         } as ProductTableItem;
     }
     editingProduct.value = null;
+    await fetchCalculations();
 };
 
-const handleDeleteProduct = (item: any) => {
+const handleDeleteProduct = async (item: any) => {
     const index = productTableItems.value.findIndex(
         (p) => p.item_id === item.item_id,
     );
     if (index !== -1) {
         productTableItems.value.splice(index, 1);
+        await fetchCalculations();
     }
 };
 
@@ -511,7 +560,7 @@ const buildFormData = (): FormData => {
     fd.append('supplier_id', String(formData.value.supplier_id || ''));
     fd.append('responsible_person', formData.value.responsibleName || '');
     if (formData.value.responsiblePhone) fd.append('responsible_phone', formData.value.responsiblePhone);
-    
+
     fd.append('source_location', formData.value.source_location || '');
     fd.append('source_latitude', String(formData.value.source_latitude ?? ''));
     fd.append('source_longitude', String(formData.value.source_longitude ?? ''));
@@ -622,7 +671,7 @@ const handleSubmit = async (options?: { redirectToList?: boolean }) => {
         }
 
         success(isEditMode.value ? 'تم تحديث الطلب بنجاح' : 'تم إنشاء الطلب بنجاح');
-        
+
         if (options?.redirectToList) {
             router.push({ name: 'OrdersFuelsList' });
         } else {
@@ -665,7 +714,7 @@ const headers = [
     { title: 'الوحدة', key: 'unit' },
     { title: 'الكمية', key: 'quantity' },
     { title: 'سعر الوحدة', key: 'unit_price' },
-    { title: 'خصم', key: 'discount' },
+    { title: 'خصم', key: 'discount_display' },
     { title: 'مبلغ الضريبة', key: 'tax_amount' },
     { title: 'إجمالي المبلغ', key: 'total_amount' },
     { title: 'ملاحظات', key: 'notes' },
@@ -698,6 +747,8 @@ const tableItems = computed(() =>
         quantity: item.quantity,
         unit_price: item.price_per_unit ?? item.unit_price ?? 0,
         discount: item.discount_val ?? item.discount ?? 0,
+        discount_val: item.discount_val ?? item.discount ?? 0,
+        discount_type: item.discount_type ?? null,
         tax_amount: item.total_tax ?? getTaxAmount(item),
         total_amount: item.subtotal_after_discount ?? getTotalAmount(item),
         notes: item.notes,
@@ -705,45 +756,41 @@ const tableItems = computed(() =>
 );
 
 // Summary totals for the side table
-const summaryTotals = computed(() => {
-    const items = productTableItems.value;
-    const subtotalBeforeDiscount = items.reduce((sum, item) => {
-        const qty = Number(item.quantity) || 0;
-        const price = Number(item.price_per_unit ?? item.unit_price) || 0;
-        return sum + qty * price;
-    }, 0);
-    const totalDiscount = items.reduce(
-        (sum, item) => sum + (Number(item.discount_val ?? item.discount) || 0),
-        0,
-    );
-    const subtotalAfterDiscount = Math.round((subtotalBeforeDiscount - totalDiscount) * 100) / 100;
-    const totalTaxAmount = items.reduce(
-        (sum, item) => sum + (item.total_tax ?? getTaxAmount(item)),
-        0,
-    );
-    const finalTotal = Math.round((subtotalAfterDiscount + totalTaxAmount) * 100) / 100;
-    return {
-        subtotalBeforeDiscount: Math.round(subtotalBeforeDiscount * 100) / 100,
-        totalDiscount: Math.round(totalDiscount * 100) / 100,
-        subtotalAfterDiscount,
-        totalTaxAmount: Math.round(totalTaxAmount * 100) / 100,
-        finalTotal,
-    };
-});
+// const summaryTotals = computed(() => {
+//     const items = productTableItems.value;
+//     const subtotalBeforeDiscount = items.reduce((sum, item) => {
+//         const qty = Number(item.quantity) || 0;
+//         const price = Number(item.price_per_unit ?? item.unit_price) || 0;
+//         return sum + qty * price;
+//     }, 0);
+//     const totalDiscount = items.reduce(
+//         (sum, item) => sum + (Number(item.discount_val ?? item.discount) || 0),
+//         0,
+//     );
+//     const subtotalAfterDiscount = Math.round((subtotalBeforeDiscount - totalDiscount) * 100) / 100;
+//     const totalTaxAmount = items.reduce(
+//         (sum, item) => sum + (item.total_tax ?? getTaxAmount(item)),
+//         0,
+//     );
+//     const finalTotal = Math.round((subtotalAfterDiscount + totalTaxAmount) * 100) / 100;
+//     return {
+//         subtotalBeforeDiscount: Math.round(subtotalBeforeDiscount * 100) / 100,
+//         totalDiscount: Math.round(totalDiscount * 100) / 100,
+//         subtotalAfterDiscount,
+//         totalTaxAmount: Math.round(totalTaxAmount * 100) / 100,
+//         finalTotal,
+//     };
+// });
 </script>
 
 <template>
     <default-layout>
         <div class="request-material-product-page -mx-6 bg-qallab-dashboard-bg space-y-4">
             <!-- Page Header -->
-            <TopHeader
-                :icon="filePlusIcon"
-                title-key="pages.OrdersFuels.FormTitle"
+            <TopHeader :icon="filePlusIcon" title-key="pages.OrdersFuels.FormTitle"
                 :description-key="isEditMode ? 'pages.OrdersFuels.FormDescriptionEdit' : 'pages.OrdersFuels.FormDescriptionCreate'"
-                :show-action="false"
-                :code="isEditMode ? (formData.code ? '#' + formData.code : '') : ''"
-                :code-icon="fileIcon"
-            />
+                :show-action="false" :code="isEditMode ? (formData.code ? '#' + formData.code : '') : ''"
+                :code-icon="fileIcon" />
 
             <!-- البيانات الأساسية -->
             <div class="p-6 bg-white rounded-3xl border !border-gray-100">
@@ -756,57 +803,42 @@ const summaryTotals = computed(() => {
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                         <!-- تاريخ الطلبية -->
                         <div>
-                            <DateTimePickerInput
-                                v-model="formData.po_datetime"
-                                density="comfortable"
-                                placeholder="اختر التاريخ والوقت"
-                                label="تاريخ الطلبية"
-                            />
+                            <DateTimePickerInput v-model="formData.po_datetime" density="comfortable"
+                                placeholder="اختر التاريخ والوقت" label="تاريخ الطلبية" />
                         </div>
 
                         <!-- اسم المورد -->
                         <div>
-                            <SelectInput
-                                v-model="formData.supplier_id"
-                                :items="supplierItems"
-                                placeholder="اختر المورد"
-                                label="اسم المورد"
-                                :rules="[required()]"
-                                density="comfortable"
-                                item-title="title"
-                                item-value="value"
-                            />
+                            <SelectInput v-model="formData.supplier_id" :items="supplierItems" placeholder="اختر المورد"
+                                label="اسم المورد" :rules="[required()]" density="comfortable" item-title="title"
+                                item-value="value" />
                         </div>
 
                         <!-- اسم المسؤول -->
                         <div>
                             <TextInput v-model="formData.responsibleName" placeholder="أدخل اسم المسؤول"
-                               label="اسم المسؤول" density="comfortable" :rules="[required()]" />
+                                label="اسم المسؤول" density="comfortable" :rules="[required()]" />
                         </div>
 
                         <!-- هاتف المسؤول -->
                         <div>
                             <TelInput v-model="formData.responsiblePhone" placeholder="5XX XXX XXXX"
-                              label="هاتف المسؤول" density="comfortable" :rules="[required()]" />
+                                label="هاتف المسؤول" density="comfortable" :rules="[required()]" />
                         </div>
 
                         <!-- المشروع -->
                         <div>
-                            <TextInput
-                                v-model="formData.project_name"
-                                label="المشروع"
-                                :rules="[required()]"
-                                density="comfortable"
-                                placeholder="ادخل اسم المشروع"
-                            />
+                            <TextInput v-model="formData.project_name" label="المشروع" :rules="[required()]"
+                                density="comfortable" placeholder="ادخل اسم المشروع" />
                         </div>
 
                         <!-- موقع مصدر المواد -->
                         <div class="relative">
                             <label class="text-sm font-medium text-gray-700 mb-2 block">موقع مصدر المواد</label>
                             <div @click="openMapDialog('source')"
-                                 class="flex items-center justify-between px-4 py-2 min-h-[48px] border !border-blue-400 rounded-lg cursor-pointer hover:bg-blue-100 transition-colors">
-                                <span class="text-base font-medium text-blue-900 whitespace-nowrap overflow-hidden text-ellipsis">
+                                class="flex items-center justify-between px-4 py-2 min-h-[48px] border !border-blue-400 rounded-lg cursor-pointer hover:bg-blue-100 transition-colors">
+                                <span
+                                    class="text-base font-medium text-blue-900 whitespace-nowrap overflow-hidden text-ellipsis">
                                     {{ formData.source_location || 'حدد الموقع' }}
                                 </span>
                                 <div class="flex items-center gap-2">
@@ -819,8 +851,9 @@ const summaryTotals = computed(() => {
                         <div class="relative">
                             <label class="text-sm font-medium text-gray-700 mb-2 block">موقع المشروع</label>
                             <div @click="openMapDialog('target')"
-                                 class="flex items-center justify-between px-4 py-2 min-h-[48px] border !border-blue-400 rounded-lg cursor-pointer hover:bg-blue-100 transition-colors">
-                                <span class="text-base font-medium text-blue-900 whitespace-nowrap overflow-hidden text-ellipsis">
+                                class="flex items-center justify-between px-4 py-2 min-h-[48px] border !border-blue-400 rounded-lg cursor-pointer hover:bg-blue-100 transition-colors">
+                                <span
+                                    class="text-base font-medium text-blue-900 whitespace-nowrap overflow-hidden text-ellipsis">
                                     {{ formData.target_location || 'حدد الموقع' }}
                                 </span>
                                 <div class="flex items-center gap-2">
@@ -864,8 +897,8 @@ const summaryTotals = computed(() => {
                         <!-- طريقة التسليم -->
                         <div>
                             <SelectInput v-model="formData.deliveryMethod" :items="deliveryMethodItems"
-                                label="طريقة التسليم" density="comfortable" placeholder="اختر"
-                                item-title="title" item-value="value" />
+                                label="طريقة التسليم" density="comfortable" placeholder="اختر" item-title="title"
+                                item-value="value" />
                         </div>
                     </div>
                 </v-form>
@@ -881,30 +914,30 @@ const summaryTotals = computed(() => {
                     <p class="text-emerald-500 text-sm font-bold ms-7">** الأسعار شاملة للنقل</p>
                 </div>
 
-                <DataTable
-                    :headers="headers"
-                    :items="tableItems"
-                    show-actions
-                    force-show-edit
-                    force-show-delete
-                    @edit="handleEditProduct"
-                    @delete="handleDeleteProduct"
-                >
+                <DataTable :headers="headers" :items="tableItems" show-actions force-show-edit force-show-delete
+                    @edit="handleEditProduct" @delete="handleDeleteProduct">
+                    <template #item.discount_display="{ item }">
+                        <span v-if="item.discount_val != null && Number(item.discount_val) > 0"
+                            class="flex items-center gap-1">
+                            {{ item.discount_val }}
+                            <span v-if="item.discount_type == 1">%</span>
+                            <span v-else v-html="rialIcon"></span>
+                        </span>
+                        <span v-else>—</span>
+                    </template>
+
                     <template #item.notes="{ item }">
                         <div class="flex items-center gap-2">
                             <v-icon size="20" color="primary" v-html="messagePlusIcon" :title="item.notes"></v-icon>
-                            <span class="text-gray-900 truncate max-w-[150px]">{{ item.notes || 'لا توجد ملاحظات' }}</span>
+                            <span class="text-gray-900 truncate max-w-[150px]">{{ item.notes || 'لا توجد ملاحظات'
+                                }}</span>
                         </div>
                     </template>
                 </DataTable>
 
                 <div class="flex justify-center my-6">
-                    <ButtonWithIcon
-                        color="primary-100"
-                        variant="flat"
-                        class="!text-primary-900 font-bold w-75"
-                        @click="handleAddProduct"
-                    >
+                    <ButtonWithIcon color="primary-100" variant="flat" class="!text-primary-900 font-bold w-75"
+                        @click="handleAddProduct">
                         + إضافة منتج جديد
                     </ButtonWithIcon>
                 </div>
@@ -920,69 +953,35 @@ const summaryTotals = computed(() => {
                     </div>
                     <div class="p-6">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <SelectInput
-                                v-model="formData.paymentMethod"
-                                :items="paymentMethodItems"
-                                density="comfortable"
-                                placeholder="حدد طريقة الدفع"
-                                label="طريقة الدفع"
-                            />
-                            <PriceInput
-                                showRialIcon
-                                v-model="formData.advancePayment"
-                                density="comfortable"
-                                label="دفعة مقدمة"
-                                placeholder="أدخل قيمة الدفعة"
-                            />
+                            <SelectInput v-model="formData.paymentMethod" :items="paymentMethodItems"
+                                density="comfortable" placeholder="حدد طريقة الدفع" label="طريقة الدفع" />
+                            <PriceInput showRialIcon v-model="formData.advancePayment" density="comfortable"
+                                label="دفعة مقدمة" placeholder="أدخل قيمة الدفعة" />
 
-                            <TextInput
-                                label="مدة رفع المستخلص"
-                                v-model="formData.invoice_interval"
-                                placeholder="أدخل المدة بالأيام"
-                                :rules="[required(), numeric()]"
-                                density="comfortable"
-                            >
+                            <TextInput label="مدة رفع المستخلص" v-model="formData.invoice_interval"
+                                placeholder="أدخل المدة بالأيام" :rules="[required(), numeric()]" density="comfortable">
                                 <template #append-inner>
                                     <span class="text-gray-500 text-sm"> يوم </span>
                                 </template>
                             </TextInput>
-                            <TextInput
-                                label="مدة السداد"
-                                v-model="formData.payment_term_no"
-                                placeholder="أدخل المدة بالأيام"
-                                :rules="[required(), numeric()]"
-                                density="comfortable"
-                            >
+                            <TextInput label="مدة السداد" v-model="formData.payment_term_no"
+                                placeholder="أدخل المدة بالأيام" :rules="[required(), numeric()]" density="comfortable">
                                 <template #append-inner>
                                     <span class="text-gray-500 text-sm"> يوم </span>
                                 </template>
                             </TextInput>
 
                             <!-- غرامة التأخير -->
-                            <TextInputWithSelect
-                                v-model="formData.late_fee"
-                                v-model:selectValue="formData.late_fee_type"
-                                label="غرامة التأخير"
-                                placeholder="أدخل المبلغ"
-                                type="number"
-                                :rules="[numeric(), positive()]"
-                                select-width="110px"
-                                :select-items="feeTypeItems"
-                                select-placeholder="اختر"
-                            />
+                            <TextInputWithSelect v-model="formData.late_fee"
+                                v-model:selectValue="formData.late_fee_type" label="غرامة التأخير"
+                                placeholder="أدخل المبلغ" type="number" :rules="[numeric(), positive()]"
+                                select-width="110px" :select-items="feeTypeItems" select-placeholder="اختر" />
 
                             <!-- غرامة الإلغاء -->
-                            <TextInputWithSelect
-                                v-model="formData.cancel_fee"
-                                v-model:selectValue="formData.cancel_fee_type"
-                                label="غرامة الإلغاء"
-                                placeholder="أدخل المبلغ"
-                                type="number"
-                                :rules="[numeric(), positive()]"
-                                select-width="110px"
-                                :select-items="feeTypeItems"
-                                select-placeholder="اختر"
-                            />
+                            <TextInputWithSelect v-model="formData.cancel_fee"
+                                v-model:selectValue="formData.cancel_fee_type" label="غرامة الإلغاء"
+                                placeholder="أدخل المبلغ" type="number" :rules="[numeric(), positive()]"
+                                select-width="110px" :select-items="feeTypeItems" select-placeholder="اختر" />
                         </div>
                     </div>
                 </div>
@@ -992,34 +991,49 @@ const summaryTotals = computed(() => {
                     <table class="w-full">
                         <thead>
                             <tr class="bg-primary-400">
-                                <th class="text-white font-semibold text-base py-3 px-4 text-center border-l !border-gray-200">العنصر</th>
+                                <th
+                                    class="text-white font-semibold text-base py-3 px-4 text-center border-l !border-gray-200">
+                                    العنصر</th>
                                 <th class="text-white font-semibold text-base py-3 px-4 text-center">المبلغ</th>
                             </tr>
                         </thead>
                         <tbody class="text-sm bg-primary-25">
                             <tr class="border-b !border-gray-200">
-                                <td class="py-6 px-4 text-center font-bold text-gray-900 border-l !border-gray-200">المجموع قبل الخصم</td>
-                                <td class="py-6 px-4 text-center text-gray-600">{{ summaryTotals.subtotalBeforeDiscount }}</td>
+                                <td class="py-6 px-4 text-center font-bold text-gray-900 border-l !border-gray-200">
+                                    المجموع قبل
+                                    الخصم</td>
+                                <td class="py-6 px-4 text-center text-gray-600">{{ summaryTotals.subtotalBeforeDiscount
+                                    }}</td>
                             </tr>
                             <tr class="border-b !border-gray-200">
-                                <td class="py-6 px-4 text-center font-bold text-gray-900 border-l !border-gray-200">الخصم</td>
+                                <td class="py-6 px-4 text-center font-bold text-gray-900 border-l !border-gray-200">
+                                    الخصم</td>
                                 <td class="py-6 px-4 text-center text-gray-600">{{ summaryTotals.totalDiscount }}</td>
                             </tr>
                             <tr class="border-b !border-gray-200">
-                                <td class="py-6 px-4 text-center font-bold text-gray-900 border-l !border-gray-200">المجموع بعد الخصم</td>
-                                <td class="py-6 px-4 text-center text-gray-600">{{ summaryTotals.subtotalAfterDiscount }}</td>
+                                <td class="py-6 px-4 text-center font-bold text-gray-900 border-l !border-gray-200">
+                                    المجموع بعد
+                                    الخصم</td>
+                                <td class="py-6 px-4 text-center text-gray-600">{{ summaryTotals.subtotalAfterDiscount
+                                    }}</td>
                             </tr>
                             <tr class="border-b !border-gray-200">
-                                <td class="py-6 px-4 text-center font-bold text-gray-900 border-l !border-gray-200">الضريبة</td>
+                                <td class="py-6 px-4 text-center font-bold text-gray-900 border-l !border-gray-200">
+                                    الضريبة</td>
                                 <td class="py-6 px-4 text-center text-gray-600">15%</td>
                             </tr>
                             <tr class="border-b !border-gray-200">
-                                <td class="py-6 px-4 text-center font-bold text-gray-900 border-l !border-gray-200">اجمالي الضريبة</td>
+                                <td class="py-6 px-4 text-center font-bold text-gray-900 border-l !border-gray-200">
+                                    اجمالي الضريبة
+                                </td>
                                 <td class="py-6 px-4 text-center text-gray-600">{{ summaryTotals.totalTaxAmount }}</td>
                             </tr>
                             <tr>
-                                <td class="py-6 px-4 text-center font-bold text-gray-900 border-l !border-gray-200">الإجمالي النهائي</td>
-                                <td class="py-6 px-4 font-bold text-center text-gray-900">{{ summaryTotals.finalTotal }}</td>
+                                <td class="py-6 px-4 text-center font-bold text-gray-900 border-l !border-gray-200">
+                                    الإجمالي النهائي
+                                </td>
+                                <td class="py-6 px-4 font-bold text-center text-gray-900">{{ summaryTotals.finalTotal }}
+                                </td>
                             </tr>
                         </tbody>
                     </table>
@@ -1029,31 +1043,15 @@ const summaryTotals = computed(() => {
             <!-- Action Buttons -->
             <div class="mt-3 flex items-center justify-center gap-3">
                 <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col">
-                    <ButtonWithIcon
-                        variant="flat"
-                        color="primary"
-                        height="48"
-                        rounded="4"
-                        custom-class="font-semibold text-base px-6 md:!px-10"
-                        :prepend-icon="returnIcon"
-                        label="حفظ والعودة للرئيسية"
-                        :loading="isSubmitting"
-                        :disabled="isSubmitting"
-                        @click="handleSubmit({ redirectToList: true })"
-                    />
+                    <ButtonWithIcon variant="flat" color="primary" height="48" rounded="4"
+                        custom-class="font-semibold text-base px-6 md:!px-10" :prepend-icon="returnIcon"
+                        label="حفظ والعودة للرئيسية" :loading="isSubmitting" :disabled="isSubmitting"
+                        @click="handleSubmit({ redirectToList: true })" />
 
-                    <ButtonWithIcon
-                        variant="flat"
-                        color="primary-50"
-                        height="48"
-                        rounded="4"
-                        custom-class="font-semibold text-base text-primary-700 px-6 md:!px-10"
-                        :prepend-icon="saveIcon"
-                        label="حفظ وإنشاء جديد"
-                        :loading="isSubmitting"
-                        :disabled="isSubmitting"
-                        @click="handleSubmit({ redirectToList: false })"
-                    />
+                    <ButtonWithIcon variant="flat" color="primary-50" height="48" rounded="4"
+                        custom-class="font-semibold text-base text-primary-700 px-6 md:!px-10" :prepend-icon="saveIcon"
+                        label="حفظ وإنشاء جديد" :loading="isSubmitting" :disabled="isSubmitting"
+                        @click="handleSubmit({ redirectToList: false })" />
                 </div>
             </div>
 
@@ -1061,28 +1059,19 @@ const summaryTotals = computed(() => {
 
         <!-- Map Dialog -->
         <Map v-model="showMapDialog"
-             :latitude="mapDialogMode === 'source' ? formData.source_latitude : formData.target_latitude"
-             :longitude="mapDialogMode === 'source' ? formData.source_longitude : formData.target_longitude"
-             :address="mapDialogMode === 'source' ? formData.source_location : formData.target_location"
-             @location-selected="handleLocationSelected" />
+            :latitude="mapDialogMode === 'source' ? formData.source_latitude : formData.target_latitude"
+            :longitude="mapDialogMode === 'source' ? formData.source_longitude : formData.target_longitude"
+            :address="mapDialogMode === 'source' ? formData.source_location : formData.target_location"
+            @location-selected="handleLocationSelected" />
 
         <!-- Add Product Dialog (Material Type = 2 for Fuels) -->
-        <AddProductDialog
-            v-model="showAddProductDialog"
-            :items-query-params="{ material_type: 2 }"
-            request-type="raw_materials"
-            show-unit-price-and-discount
-            :transport-types="transportTypeItems"
-            :unit-items="unitItems"
-            :supplier-id="formData.supplier_id"
-            :edit-product="editingProduct"
-            :existing-products="productTableItems"
-            @saved="handleProductSaved"
-            @product-updated="handleProductUpdated"
-        />
+        <AddProductDialog v-model="showAddProductDialog" :items-query-params="{ material_type: 2 }"
+            request-type="raw_materials" show-unit-price-and-discount :transport-types="transportTypeItems"
+            :unit-items="unitItems" :supplier-id="formData.supplier_id" :edit-product="editingProduct"
+            :existing-products="productTableItems" @saved="handleProductSaved"
+            @product-updated="handleProductUpdated" />
 
     </default-layout>
 </template>
 
-<style scoped>
-</style>
+<style scoped></style>
