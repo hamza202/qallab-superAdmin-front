@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import AddProductDialog, { type ProductToAdd } from '@/components/price-offers/AddProductDialog.vue';
@@ -8,10 +8,11 @@ import TopHeader from '@/components/price-offers/TopHeader.vue';
 import DateTimePickerInput from '@/components/common/forms/DateTimePickerInput.vue';
 import TelInput from '@/components/common/forms/TelInput.vue';
 import { useApi } from '@/composables/useApi';
-import { fileIcon, mapMarkerIcon, packageIcon, busIcon, globeIcon, CoinHandIcon } from '@/components/icons/priceOffersIcons';
+import { useCalculations, type CalculationItem } from '@/composables/useCalculations';
+import { fileIcon, mapMarkerIcon, packageIcon, busIcon, globeIcon, CoinHandIcon, messagePlusIcon } from '@/components/icons/priceOffersIcons';
 import { useForm } from '@/composables/useForm';
 import { useNotification as useNotify } from '@/composables/useNotification';
-import { binIcon, fileCheckIcon, HelpCircleIcon, returnIcon, saveIcon } from "@/components/icons/globalIcons";
+import { binIcon, fileCheckIcon, HelpCircleIcon, returnIcon, saveIcon, rialIcon } from "@/components/icons/globalIcons";
 import { required, numeric, positive } from '@/utils/validators';
 
 
@@ -42,6 +43,7 @@ const poTypeItems = ref<any[]>([]);
 const feeTypeItems = ref<any[]>([]);
 const currencyItems = ref<any[]>([]);
 const supplierItems = ref<any[]>([]);
+const approvedAmountItems = ref<any[]>([]);
 
 
 /** Extract validation error messages from API response (data.errors: { "field.key": ["..."] }). */
@@ -96,6 +98,7 @@ const fetchOrdersConstants = async () => {
       poTypeItems.value = data.po_types?.map((i: any) => ({ title: i.label, value: i.key })) || [];
       feeTypeItems.value = data.fee_types?.map((i: any) => ({ title: i.label, value: i.key })) || [];
       currencyItems.value = data.currencies?.map((i: any) => ({ title: i.label || i.code, value: i.key || i.code })) || [];
+      approvedAmountItems.value = data.approved_amounts?.map((i: any) => ({ title: i.label, value: String(i.key) })) || [];
     }
   } catch (e) {
     console.error('Error fetching orders constants:', e);
@@ -139,6 +142,7 @@ interface ProductTableItem {
   trip_no?: number | null;
   transport_type?: number | number[] | null;
   transport_type_name?: string;
+  notes: string;
   isAdded?: boolean;
 }
 
@@ -150,7 +154,12 @@ interface TripTableItem {
   unit_name: string;
   quantity: number | null;
   trip_date: string | null;
+  trip_no?: number | null;
   trip_price: number | null;
+  sub_total?: number | null;
+  discount_val?: number | null;
+  discount_type?: number | null;
+  quotation_logistics_detail_id?: number | null;
   transport_type: number[];
   transport_type_names?: string;
   notes?: string;
@@ -180,6 +189,9 @@ const formData = ref({
   cancel_fee_type: null as string | null,
   cancel_fee: null as number | null,
   purchase_quotation_code: null as string | null,
+  approved_amount: null as string | null,
+  final_logistics_service_amount: null as number | null,
+  final_logistics_trip: null as number | null,
 });
 
 const productTableItems = ref<ProductTableItem[]>([]);
@@ -187,7 +199,7 @@ const logisticsDetails = ref<LogisticsDetail[]>([]);
 const tripTableItems = ref<TripTableItem[]>([]);
 
 const showAddProductDialog = ref(false);
-const editingProduct = ref<ProductTableItem | null>(null);
+const editingProduct = ref<ProductToAdd | null>(null);
 const productDialogMode = ref<'logistics' | 'logistics-trips'>('logistics');
 
 const formatValidationFieldKey = (key: string): string => {
@@ -237,6 +249,11 @@ const fetchQuotationForOrder = async () => {
       formData.value.late_fee = data.late_fee ?? null;
       formData.value.cancel_fee_type = data.cancel_fee_type || null;
       formData.value.cancel_fee = data.cancel_fee ?? null;
+      formData.value.approved_amount = data.approved_amount != null ? String(data.approved_amount) : null;
+      formData.value.final_logistics_service_amount = data.final_logistics_service_amount != null ? Number(data.final_logistics_service_amount) : null;
+      formData.value.final_logistics_trip = data.final_logistics_trip != null ? Number(data.final_logistics_trip) : null;
+      formData.value.final_logistics_service_amount = data.final_logistics_service_amount != null ? Number(data.final_logistics_service_amount) : null;
+      formData.value.final_logistics_trip = data.final_logistics_trip != null ? Number(data.final_logistics_trip) : null;
 
       const mapToNumberArray = (value: any): number[] => {
         if (Array.isArray(value)) return value.map((v: any) => Number(v));
@@ -265,6 +282,8 @@ const fetchQuotationForOrder = async () => {
           source_latitude: d.source_latitude ?? '',
           source_longitude: d.source_longitude ?? '',
           transport_amount: d.transport_amount != null ? Number(d.transport_amount) : null,
+          discount_val: d.discount_val != null ? Number(d.discount_val) : null,
+          discount_type: d.discount_type != null ? Number(d.discount_type) : null,
         }));
       }
 
@@ -286,6 +305,7 @@ const fetchQuotationForOrder = async () => {
             trip_no: item.trip_no != null ? Number(item.trip_no) : null,
             transport_type: transportType,
             transport_type_name: transportType != null ? getTransportTypeName(transportType) : '',
+            notes: item.notes ?? '',
           };
         });
       }
@@ -302,9 +322,15 @@ const fetchQuotationForOrder = async () => {
             unit_name: t.unit_name || '',
             quantity: t.quantity != null ? Number(t.quantity) : null,
             trip_date: t.trip_date || null,
+            trip_no: t.trip_no != null ? Number(t.trip_no) : null,
             trip_price: t.trip_price != null ? Number(t.trip_price) : null,
+            sub_total: t.sub_total != null ? Number(t.sub_total) : null,
+            discount_val: t.discount_val != null ? Number(t.discount_val) : null,
+            discount_type: t.discount_type != null ? Number(t.discount_type) : null,
+            quotation_logistics_detail_id: t.quotation_logistics_detail_id != null ? Number(t.quotation_logistics_detail_id) : null,
             transport_type: transportTypes,
             transport_type_names: getTransportTypeNames(transportTypes),
+            notes: t.notes ?? '',
           } as TripTableItem;
         });
       } else {
@@ -319,6 +345,7 @@ const fetchQuotationForOrder = async () => {
           trip_price: null,
           transport_type: (p as any).transport_type != null ? [(p as any).transport_type as number] : [],
           transport_type_names: (p as any).transport_type_name ?? '',
+          notes: (p as any).notes ?? '',
         }));
       }
     }
@@ -358,6 +385,7 @@ const fetchFormData = async () => {
       formData.value.late_fee = data.late_fee ?? null;
       formData.value.cancel_fee_type = data.cancel_fee_type || null;
       formData.value.cancel_fee = data.cancel_fee ?? null;
+      formData.value.approved_amount = data.approved_amount != null ? String(data.approved_amount) : null;
 
       if (data.po_logistics_details && Array.isArray(data.po_logistics_details)) {
         logisticsDetails.value = data.po_logistics_details.map((d: any) => ({
@@ -379,6 +407,8 @@ const fetchFormData = async () => {
           source_latitude: d.source_latitude ?? '',
           source_longitude: d.source_longitude ?? '',
           transport_amount: d.transport_amount ?? null,
+          discount_val: d.discount_val != null ? Number(d.discount_val) : null,
+          discount_type: d.discount_type != null ? Number(d.discount_type) : null,
         }));
       }
       if (data.po_product_details && Array.isArray(data.po_product_details)) {
@@ -393,6 +423,7 @@ const fetchFormData = async () => {
           trip_no: item.trip_no,
           transport_type: item.transport_type,
           transport_type_name: item.transport_type_label,
+          notes: item.notes ?? '',
         }));
       }
       if (data.po_trip_details && Array.isArray(data.po_trip_details) && data.po_trip_details.length > 0) {
@@ -406,9 +437,15 @@ const fetchFormData = async () => {
             unit_name: t.unit_name || '',
             quantity: t.quantity,
             trip_date: t.trip_date || null,
+            trip_no: t.trip_no != null ? Number(t.trip_no) : null,
             trip_price: t.trip_price ?? null,
+            sub_total: t.sub_total != null ? Number(t.sub_total) : null,
+            discount_val: t.discount_val != null ? Number(t.discount_val) : null,
+            discount_type: t.discount_type != null ? Number(t.discount_type) : null,
+            quotation_logistics_detail_id: t.quotation_logistics_detail_id != null ? Number(t.quotation_logistics_detail_id) : null,
             transport_type: transportTypes,
             transport_type_names: getTransportTypeNames(transportTypes),
+            notes: t.notes ?? '',
           } as TripTableItem;
         });
       } else if (!data.po_trip_details || data.po_trip_details.length === 0) {
@@ -423,6 +460,7 @@ const fetchFormData = async () => {
           trip_price: null,
           transport_type: (p as any).transport_type != null ? [(p as any).transport_type as number] : [],
           transport_type_names: (p as any).transport_type_name ?? '',
+          notes: (p as any).notes ?? '',
         }));
       }
     }
@@ -448,9 +486,8 @@ const getTransportTypeName = (transportTypeId: number | string | null): string =
   return item?.title || '';
 };
 
-const handleProductSaved = (products: any[]) => {
+const handleProductSaved = async (products: any[]) => {
   if (productDialogMode.value === 'logistics-trips') {
-    // Handle trip details update
     const newTripItems: TripTableItem[] = [];
     products.forEach(p => {
       newTripItems.push({
@@ -460,16 +497,22 @@ const handleProductSaved = (products: any[]) => {
         unit_name: p.unit_name,
         quantity: p.quantity,
         trip_date: p.trip_date ?? null,
+        trip_no: p.trip_no ?? null,
         trip_price: p.trip_price ?? null,
         transport_type: Array.isArray(p.transport_type) ? p.transport_type : (p.transport_type != null ? [p.transport_type] : []),
         transport_type_names: p.transport_type_names ?? '',
+        discount_val: p.discount ?? null,
+        discount_type: p.discount_type ?? null,
+        notes: p.notes || '',
         isAdded: p.isAdded,
         id: p.id,
       });
     });
+    for (let i = 0; i < newTripItems.length; i++) {
+      newTripItems[i].sub_total = await calculateTripItemSubTotal(newTripItems[i]);
+    }
     tripTableItems.value = newTripItems;
   } else {
-    // Handle logistics products - sync trip items too
     const newItems: ProductTableItem[] = [];
     const newTripItems: TripTableItem[] = [];
     products.forEach(p => {
@@ -485,6 +528,7 @@ const handleProductSaved = (products: any[]) => {
         trip_no: p.trip_no,
         transport_type: p.transport_type,
         transport_type_name: getTransportTypeName(p.transport_type),
+        notes: existing?.notes || p.notes || '',
         isAdded: p.isAdded,
       });
 
@@ -506,6 +550,7 @@ const handleProductSaved = (products: any[]) => {
           unit_name: p.unit_name,
           quantity: p.quantity,
           trip_date: p.from_date ?? null,
+          trip_no: p.trip_no ?? null,
           trip_price: null,
           transport_type: transportArr,
           transport_type_names: getTransportTypeNames(transportArr),
@@ -521,7 +566,7 @@ const handleProductSaved = (products: any[]) => {
 const handleEditProduct = (item: any) => {
   const productToEdit = productTableItems.value.find(px => px.item_id === item.item_id);
   if (productToEdit) {
-    editingProduct.value = { ...productToEdit, isAdded: true };
+    editingProduct.value = { ...productToEdit, isAdded: true, discount_type: (productToEdit as any).discount_type ?? 2 } as any;
     productDialogMode.value = 'logistics';
     showAddProductDialog.value = true;
   }
@@ -530,13 +575,38 @@ const handleEditProduct = (item: any) => {
 const handleEditTrip = (item: any) => {
   const tripToEdit = tripTableItems.value.find(t => t.item_id === item.item_id);
   if (tripToEdit) {
-    editingProduct.value = { ...tripToEdit, isAdded: true } as any;
+    editingProduct.value = {
+      ...tripToEdit,
+      isAdded: true,
+      discount: tripToEdit.discount_val ?? null,
+      discount_type: tripToEdit.discount_type ?? 2,
+    } as unknown as ProductToAdd;
     productDialogMode.value = 'logistics-trips';
     showAddProductDialog.value = true;
   }
 };
 
-const handleProductUpdated = (updatedProduct: any) => {
+const calculateTripItemSubTotal = async (tripItem: TripTableItem) => {
+  const calcItems = ref<CalculationItem[]>([{
+    item_id: tripItem.item_id,
+    quantity: tripItem.trip_no ? Number(tripItem.trip_no) : 0,
+    price_per_unit: tripItem.trip_price ? Number(tripItem.trip_price) : 0,
+    discount_type: tripItem.discount_type ?? 1,
+    discount_val: tripItem.discount_val ? Number(tripItem.discount_val) : 0,
+  }]);
+
+  const { fetchCalculations } = useCalculations(calcItems);
+  const results = await fetchCalculations();
+  if (results) {
+    const itemResult = Object.values(results)[0];
+    if (itemResult) {
+      return itemResult.subtotal_after_discount;
+    }
+  }
+  return Number(tripItem.trip_no ?? 0) * Number(tripItem.trip_price ?? 0);
+};
+
+const handleProductUpdated = async (updatedProduct: any) => {
   if (productDialogMode.value === 'logistics-trips') {
     const index = tripTableItems.value.findIndex(t => t.item_id === updatedProduct.item_id);
     if (index !== -1) {
@@ -547,30 +617,37 @@ const handleProductUpdated = (updatedProduct: any) => {
         unit_name: updatedProduct.unit_name,
         quantity: updatedProduct.quantity,
         trip_date: updatedProduct.trip_date ?? null,
+        trip_no: updatedProduct.trip_no ?? null,
         trip_price: updatedProduct.trip_price ?? null,
         transport_type: Array.isArray(updatedProduct.transport_type) ? updatedProduct.transport_type : (updatedProduct.transport_type != null ? [updatedProduct.transport_type] : []),
         transport_type_names: updatedProduct.transport_type_names ?? '',
+        discount_val: updatedProduct.discount ?? null,
+        discount_type: updatedProduct.discount_type ?? null,
+        notes: updatedProduct.notes || '',
         isAdded: updatedProduct.isAdded,
         id: updatedProduct.id,
       };
+      tripTableItems.value[index].sub_total = await calculateTripItemSubTotal(tripTableItems.value[index]);
       // Sync quantity back to product table
       const productIndex = productTableItems.value.findIndex(p => p.item_id === updatedProduct.item_id);
       if (productIndex !== -1) {
         productTableItems.value[productIndex].quantity = updatedProduct.quantity;
         productTableItems.value[productIndex].unit_id = updatedProduct.unit_id;
         productTableItems.value[productIndex].unit_name = updatedProduct.unit_name;
+        productTableItems.value[productIndex].trip_no = updatedProduct.trip_no ?? null;
       }
     }
   } else {
     const index = productTableItems.value.findIndex(p => p.item_id === updatedProduct.item_id);
     if (index !== -1) {
+      const existingNotes = productTableItems.value[index].notes;
       productTableItems.value[index] = {
-        ...productTableItems.value[index],
         item_id: updatedProduct.item_id,
         item_name: updatedProduct.item_name,
         unit_id: updatedProduct.unit_id,
         unit_name: updatedProduct.unit_name,
         quantity: updatedProduct.quantity,
+        notes: existingNotes || updatedProduct.notes || '',
         id: updatedProduct.id,
         from_date: updatedProduct.from_date,
         trip_no: updatedProduct.trip_no,
@@ -729,11 +806,14 @@ const buildPayload = () => {
     late_fee: formData.value.late_fee ?? null,
     cancel_fee_type: formData.value.cancel_fee_type ?? null,
     cancel_fee: formData.value.cancel_fee ?? null,
+    approved_amount: formData.value.approved_amount ?? null,
+    final_logistics_service_amount: formData.value.final_logistics_service_amount ?? null,
+    final_logistics_trip: formData.value.final_logistics_trip ?? null,
   };
 
   // Include purchase_quotation_id if creating order from quotation
   if (purchaseQuotationId.value) {
-    payload.sale_quotation_id = Number(purchaseQuotationId.value);
+    payload.purchase_quotation_id = Number(purchaseQuotationId.value);
   }
 
   payload.po_logistics_details = logisticsDetails.value.map((d, index) => {
@@ -761,6 +841,8 @@ const buildPayload = () => {
         source_latitude: applyMainLocations ? (formData.value.source_latitude ?? '') : (d.source_latitude ?? ''),
         source_longitude: applyMainLocations ? (formData.value.source_longitude ?? '') : (d.source_longitude ?? ''),
         transport_amount: d.transport_amount ?? 0,
+        discount_val: d.discount_val ?? null,
+        discount_type: d.discount_type ?? null,
       };
     });
 
@@ -772,6 +854,7 @@ const buildPayload = () => {
     from_date: (p as any).from_date || null,
     trip_no: (p as any).trip_no ?? null,
     transport_type: Array.isArray((p as any).transport_type) ? (p as any).transport_type[0] : ((p as any).transport_type ?? null),
+    notes: p.notes || '',
   }));
 
   payload.po_trip_details = tripTableItems.value.map(t => ({
@@ -780,7 +863,12 @@ const buildPayload = () => {
     unit_id: t.unit_id,
     quantity: t.quantity,
     trip_date: t.trip_date,
+    trip_no: t.trip_no ?? null,
     trip_price: t.trip_price ?? 0,
+    sub_total: t.sub_total ?? 0,
+    quotation_logistics_detail_id: t.quotation_logistics_detail_id ?? -1,
+    discount_val: t.discount_val ?? null,
+    discount_type: t.discount_type ?? null,
     transport_type: t.transport_type,
   }));
 
@@ -882,7 +970,7 @@ const headers = [
   { title: 'الكمية', key: 'quantity' },
   { title: 'تاريخ بداية النقل', key: 'from_date' },
   { title: 'عدد الرحلات', key: 'trip_no' },
-  { title: 'نوع الناقلة', key: 'transport_type_name' },
+  { title: 'ملاحظات', key: 'notes' },
 ];
 
 const tableItems = computed(() => productTableItems.value.map(item => ({
@@ -893,7 +981,7 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
   quantity: item.quantity,
   from_date: item.from_date || '—',
   trip_no: item.trip_no ?? '—',
-  transport_type_name: item.transport_type_name || getTransportTypeNames(item.transport_type != null ? [item.transport_type as number] : []) || '—',
+  notes: item.notes,
 })));
 
 // Trip details table headers and computed items
@@ -902,8 +990,11 @@ const tripHeaders = [
   { title: 'الوحدة', key: 'unit' },
   { title: 'الكمية', key: 'quantity' },
   { title: 'تاريخ الرحلة', key: 'trip_date' },
-  { title: 'سعر الرحلة', key: 'trip_price' },
   { title: 'نوع المركبات', key: 'transport_type_names' },
+  { title: 'عدد الرحلات', key: 'trip_no' },
+  { title: 'سعر الرحلة', key: 'trip_price' },
+  { title: 'الخصم', key: 'discount_display' },
+  { title: 'السعر الإجمالي', key: 'sub_total' },
 ];
 
 const tripItems = computed(() => tripTableItems.value.map(item => ({
@@ -913,7 +1004,12 @@ const tripItems = computed(() => tripTableItems.value.map(item => ({
   unit: item.unit_name,
   quantity: item.quantity,
   trip_date: item.trip_date || '—',
+  trip_no: item.trip_no ?? '—',
   trip_price: item.trip_price ?? '—',
+  discount_val: item.discount_val ?? null,
+  discount_type: item.discount_type ?? null,
+  discount_display: '—',
+  sub_total: item.sub_total ?? '—',
   transport_type_names: item.transport_type_names || getTransportTypeNames(item.transport_type) || '—',
 })));
 
@@ -922,7 +1018,19 @@ const tripItems = computed(() => tripTableItems.value.map(item => ({
 const summaryTotals = computed(() => {
   const transportValue = logisticsDetails.value.reduce((total, detail) => {
     const amount = detail.transport_amount != null ? Number(detail.transport_amount) : 0;
-    return total + (isNaN(amount) ? 0 : amount);
+    let finalAmount = isNaN(amount) ? 0 : amount;
+    if (finalAmount > 0 && detail.discount_val) {
+      const discountVal = Number(detail.discount_val);
+      const discountType = Number(detail.discount_type || 2);
+      if (!isNaN(discountVal) && discountVal > 0) {
+        if (discountType === 1) {
+          finalAmount = finalAmount - (finalAmount * (discountVal / 100));
+        } else {
+          finalAmount = finalAmount - discountVal;
+        }
+      }
+    }
+    return total + Math.max(0, finalAmount);
   }, 0);
 
   const taxRatePercent = 15;
@@ -936,6 +1044,40 @@ const summaryTotals = computed(() => {
     finalTotal,
   };
 });
+
+const computedFinalLogisticsServiceAmount = computed(() => {
+  return logisticsDetails.value.reduce((total, detail) => {
+    const amount = detail.transport_amount != null ? Number(detail.transport_amount) : 0;
+    let finalAmount = isNaN(amount) ? 0 : amount;
+    if (finalAmount > 0 && detail.discount_val) {
+      const discountVal = Number(detail.discount_val);
+      const discountType = Number(detail.discount_type || 2);
+      if (!isNaN(discountVal) && discountVal > 0) {
+        if (discountType === 1) {
+          finalAmount = finalAmount - (finalAmount * (discountVal / 100));
+        } else {
+          finalAmount = finalAmount - discountVal;
+        }
+      }
+    }
+    return total + Math.max(0, finalAmount);
+  }, 0);
+});
+
+const computedFinalLogisticsTrip = computed(() => {
+  return tripTableItems.value.reduce((total, item) => {
+    const subTotal = item.sub_total != null ? Number(item.sub_total) : 0;
+    return total + (isNaN(subTotal) ? 0 : subTotal);
+  }, 0);
+});
+
+watch(computedFinalLogisticsServiceAmount, (newVal) => {
+  formData.value.final_logistics_service_amount = newVal;
+}, { immediate: true });
+
+watch(computedFinalLogisticsTrip, (newVal) => {
+  formData.value.final_logistics_trip = newVal;
+}, { immediate: true });
 
 
 const formatCurrency = (value: number): string => {
@@ -984,7 +1126,7 @@ onMounted(async () => {
             <TextInput v-model="formData.responsible_person" label="اسم المسؤول" placeholder="أدخل اسم المسؤول"
               :rules="[required()]" density="comfortable" />
             <DateTimePickerInput v-model="formData.po_datetime" label="تاريخ الطلبية" placeholder="اختر التاريخ والوقت"
-              density="comfortable" :disabled="isEditMode" />
+              density="comfortable" />
             <TelInput v-model="formData.responsible_phone" label="هاتف المسؤول" :rules="[required(), saudiPhone()]"
               density="comfortable" />
             <div class="relative">
@@ -1097,7 +1239,18 @@ onMounted(async () => {
                 <v-divider vertical class="my-6"></v-divider>
                 <div class="info-item-bordered px-4 py-2">
                   <label class="font-semibold text-sm text-gray-500 mb-2 block">مبلغ النقل</label>
-                  <p class="text-base font-semibold text-gray-900">{{ detail.transport_amount ?? '—' }}</p>
+                  <p class="text-base font-semibold text-gray-900 flex items-center gap-2">
+                    {{ detail.transport_amount ?? '—' }} <span v-html="rialIcon"> </span>
+                  </p>
+                </div>
+                <v-divider vertical class="my-6" v-if="detail.discount_val"></v-divider>
+                <div class="info-item-bordered px-4 py-2" v-if="detail.discount_val">
+                  <label class="font-semibold text-sm text-gray-500 mb-2 block">الخصم</label>
+                  <p class="text-base font-semibold text-gray-900 flex items-center gap-1">
+                    {{ detail.discount_val }}
+                    <span v-if="detail.discount_type == 1">%</span>
+                    <span v-if="detail.discount_type == 2" v-html="rialIcon"></span>
+                  </p>
                 </div>
                 <v-divider vertical class="my-6"></v-divider>
                 <div class="info-item-bordered px-4 py-2">
@@ -1149,7 +1302,44 @@ onMounted(async () => {
         </div>
         <div class="mb-4">
           <DataTable :headers="headers" :items="tableItems" show-actions force-show-edit force-show-delete
-            @edit="handleEditProduct" @delete="handleDeleteProduct" />
+            @edit="handleEditProduct" @delete="handleDeleteProduct">
+            <template #item.notes="{ item }">
+              <v-menu
+                attach="request-material-product-page"
+                location="bottom"
+                offset="8"
+                :close-on-content-click="false"
+                transition="slide-y-transition"
+              >
+                <template #activator="{ props }">
+                  <div class="flex items-center gap-2 cursor-pointer" v-bind="props">
+                    <v-icon size="20" color="primary" v-html="messagePlusIcon"></v-icon>
+                    <span class="text-gray-900">{{ item.notes || "أضف ملاحظة" }}</span>
+                  </div>
+                </template>
+
+                <v-card
+                  class="pa-4 shadow-[rgba(149,157,165,0.2)_0px_8px_24px] overflow-hidden px-3 py-3"
+                  color="white"
+                  rounded="lg"
+                  width="300"
+                >
+                  <div class="!flex flex-nowrap items-center gap-3">
+                    <TextInput
+                      v-model="productTableItems[productTableItems.findIndex((p) => p.item_id === item.item_id)].notes"
+                      placeholder="أضف ملاحظة"
+                      variant="outlined"
+                      density="comfortable"
+                      hide-details
+                      autofocus
+                      class="flex-1"
+                    />
+                    <ButtonWithIcon :icon="messagePlusIcon" color="primary" icon-only size="x-small" />
+                  </div>
+                </v-card>
+              </v-menu>
+            </template>
+          </DataTable>
         </div>
         <div class="flex justify-center">
           <ButtonWithIcon color="primary-100" variant="flat" class="!text-primary-900 font-bold w-75"
@@ -1171,6 +1361,14 @@ onMounted(async () => {
         <!-- Trip Details Table -->
         <DataTable :headers="tripHeaders" :items="tripItems" show-actions force-show-edit
           @edit="handleEditTrip">
+          <template #item.discount_display="{ item }">
+            <span v-if="item.discount_val != null && Number(item.discount_val) > 0" class="flex items-center gap-1">
+              {{ item.discount_val }}
+              <span v-if="item.discount_type == 1">%</span>
+              <span v-if="item.discount_type == 2" v-html="rialIcon"></span>
+            </span>
+            <span v-else>—</span>
+          </template>
         </DataTable>
       </div>
 
@@ -1183,6 +1381,25 @@ onMounted(async () => {
           </div>
           <div class="p-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <PriceInput showRialIcon v-model="formData.final_logistics_service_amount" density="comfortable"
+                label="القيمة الإجمالية لمبلغ خدمات النقل" placeholder="0" disabled />
+
+              <PriceInput showRialIcon v-model="formData.final_logistics_trip" density="comfortable"
+                label="القيمة الإجمالية لمبلغ الرحلات" placeholder="0" disabled />
+
+              <div class="md:col-span-1" v-if="approvedAmountItems.length > 0">
+                <label class="font-semibold text-sm text-gray-700 mb-2 block">المبلغ الإجمالي المعتمد في العرض</label>
+                <v-radio-group v-model="formData.approved_amount" inline density="comfortable" hide-details>
+                  <v-radio
+                    v-for="item in approvedAmountItems"
+                    :key="item.value"
+                    :label="item.title"
+                    :value="item.value"
+                    color="primary"
+                  />
+                </v-radio-group>
+              </div>
+
               <SelectInput v-model="formData.payment_method" :items="paymentMethodItems" density="comfortable"
                 placeholder="حدد طريقة الدفع" label="طريقة الدفع" item-title="title" item-value="value"
                 :rules="[required()]" />
@@ -1293,6 +1510,7 @@ onMounted(async () => {
 
     <AddLogisticsDetailDialog v-model="showAddLogisticsDialog" :transport-types="transportTypeItems"
       :am-pm-interval-options="amPmIntervalItems" :categories-items="categoriesItems"
+      :discount-type-options="[{ title: '%', value: 1 }, { title: 'ريال', value: 2 }]"
       :edit-detail="editingLogisticsDetail" @saved="handleLogisticsDetailSaved"
       @updated="handleLogisticsDetailUpdated" />
 

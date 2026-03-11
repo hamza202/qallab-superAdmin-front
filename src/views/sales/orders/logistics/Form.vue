@@ -1074,7 +1074,7 @@ const handleProductSaved = (products: any[]) => {
 const handleEditProduct = (item: any) => {
   const productToEdit = productTableItems.value.find((p) => p.item_id === item.item_id);
   if (productToEdit) {
-    editingProduct.value = { ...productToEdit, isAdded: true } as any;
+    editingProduct.value = { ...productToEdit, isAdded: true, discount_type: (productToEdit as any).discount_type ?? 2 } as any;
     productDialogMode.value = "logistics";
     showAddProductDialog.value = true;
   }
@@ -1087,7 +1087,7 @@ const handleEditTrip = (item: any) => {
         ...tripToEdit,
         isAdded: true,
         discount: tripToEdit.discount_val ?? null,
-        discount_type: tripToEdit.discount_type ?? null,
+        discount_type: tripToEdit.discount_type ?? 2,
     } as unknown as ProductToAdd;
     productDialogMode.value = "logistics-trips";
     showAddProductDialog.value = true;
@@ -1509,7 +1509,7 @@ onMounted(async () => {
                 <v-divider vertical class="my-6" v-if="detail.discount_val"></v-divider>
                 <div class="info-item-bordered px-4 py-2" v-if="detail.discount_val">
                     <label class="font-semibold text-sm text-gray-500 mb-2 block">الخصم</label>
-                    <p class="text-base font-semibold text-gray-900 flex items-center gap-1">{{ detail.discount_val }} <span v-if="detail.discount_type == 1">%</span><span v-if="item.discount_type == 2" v-html="rialIcon"></span></p>
+                    <p class="text-base font-semibold text-gray-900 flex items-center gap-1">{{ detail.discount_val }} <span v-if="detail.discount_type == 1">%</span><span v-if="detail.discount_type == 2" v-html="rialIcon"></span></p>
                 </div>
                 <v-divider vertical class="my-6"></v-divider>
                 <div class="info-item-bordered px-4 py-2" v-if="detail.target_location">
