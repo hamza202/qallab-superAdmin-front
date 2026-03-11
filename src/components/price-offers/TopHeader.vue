@@ -21,7 +21,7 @@
                 <!-- Code Badge -->
                 <div
                     class="flex items-center gap-2 px-2.5 py-1.5 bg-primary-100 border border-primary-300 rounded shadow-xs">
-                    <ButtonWithIcon @click="copyCode" icon-only :icon="fileIcon" color="transparent" size="x-small"
+                    <ButtonWithIcon @click="copyCode" icon-only :icon="codeIcon || fileIcon" color="transparent" size="x-small"
                         class="!py-0" height="30" />
 
                     <span class="font-bold text-primary-800 dir-ltr">

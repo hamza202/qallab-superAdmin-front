@@ -386,7 +386,7 @@
               <h2 class="text-sm font-medium leading-5 my-2">
                 فواتير المبيعات
               </h2>
-              <ul class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
+              <ul class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5 mb-3">
                 <li class="relative">
                   <router-link to="/sales/invoices/list" :class="[
                     isMenuItemActive('/sales/invoices')
@@ -402,6 +402,14 @@
                       : 'text-white hover:text-qallab-yellow',
                   ]">
                     فواتير مبيعات خدمة نقل</router-link>
+                </li>
+                <li class="relative">
+                  <router-link to="/sales/payments/list" :class="[
+                    isMenuItemActive('/sales/payments')
+                      ? 'font-bold text-qallab-yellow'
+                      : 'text-white hover:text-qallab-yellow',
+                  ]">
+                    دفعات المبيعات</router-link>
                 </li>
               </ul>
             </div>
