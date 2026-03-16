@@ -152,7 +152,8 @@ const fetchCustomerSaleOrders = async () => {
       params: {
         customer_id: selectedCustomerId.value,
         // so_type: 'so_with_logistics',
-        category: tripCategory.value || 'building_material'
+        // category: tripCategory.value || 'building_material'
+        category: 'logistics,building_material'
       }
     });
     if (Array.isArray(res.data)) {

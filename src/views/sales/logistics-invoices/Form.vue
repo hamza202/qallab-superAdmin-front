@@ -3,7 +3,7 @@ import { ref, computed, onMounted, watch, nextTick, reactive } from "vue";
 import { useRoute, useRouter } from 'vue-router';
 import TopHeader from '@/components/price-offers/TopHeader.vue';
 import { useApi } from '@/composables/useApi';
-import { returnIcon, saveIcon, fileCheckIcon, fileIcon_2 } from '@/components/icons/globalIcons';
+import { returnIcon, saveIcon, fileCheckIcon, fileIcon_2, rialIcon } from '@/components/icons/globalIcons';
 import { useForm } from '@/composables/useForm';
 import { useNotification as useNotify } from '@/composables/useNotification';
 
@@ -62,6 +62,8 @@ interface ProductTableItem {
     quantity?: number | null;
     price?: number | null;
     discount?: number | null;
+    discount_type: number | string | null;
+    discount_val: number | null;
     taxable_amount?: number | null;
     tax_amount?: number | null;
     total_amount?: number | null;
@@ -99,11 +101,11 @@ const fetchTripsBySaleOrder = async (saleOrderId: number | string | null) => {
         });
 
         const trips = Array.isArray(res.data) ? res.data : res.data?.data || [];
-        
+
         if (trips.length <= 0) {
             warning('لا توجد رحلات لهذه الطلبية لإتمام الفاتورة')
         }
-        
+
         productTableItems.value = trips.map((trip: any) => ({
             id: trip.id,
             trip_id: trip.id,
@@ -127,7 +129,7 @@ const fetchTripsBySaleOrder = async (saleOrderId: number | string | null) => {
             final_total: productTableItems.value.reduce((sum, trip) => sum + Number(trip.total_amount || 0), 0),
             total_out_taxes: productTableItems.value.reduce((sum, trip) => sum + Number(trip.total_amount || 0), 0),
         };
-        
+
     } catch (e) {
         console.error('Error fetching trips:', e);
     }
@@ -410,7 +412,7 @@ const headers = [
     { title: 'موقع التسليم', key: 'unloading_location' },
     { title: 'العدد', key: 'quantity' },
     { title: 'سعر الرحلة', key: 'price' },
-    { title: 'خصم', key: 'discount' },
+    { title: "خصم", key: "discount_display" },
     { title: 'المبلغ الخاضع للضريبة', key: 'taxable_amount' },
     { title: 'مبلغ الضريبة', key: 'tax_amount' },
     { title: 'إجمالي المبلغ', key: 'total_amount' },
@@ -425,6 +427,8 @@ const tableItems = computed(() => productTableItems.value.map((item, index) => (
     quantity: item.quantity,
     price: item.price,
     discount: item.discount,
+    discount_val: item.discount_val ?? 0,
+    discount_type: item.discount_type ?? null,
     taxable_amount: item.taxable_amount,
     tax_amount: item.tax_amount,
     total_amount: item.total_amount,
@@ -496,9 +500,10 @@ onMounted(async () => {
 <template>
     <default-layout>
         <div class="-mx-6 bg-qallab-dashboard-bg space-y-4">
-            <TopHeader :icon="fileCheckIcon" :title-key="isEditMode ? 'pages.SalesLogisticsInvoices.FormTitleEdit' : 'pages.SalesLogisticsInvoices.FormTitle'"
-                :description-key="isEditMode ? 'pages.SalesLogisticsInvoices.FormDescriptionEdit' : 'pages.SalesLogisticsInvoices.FormDescription'" :code="InvoiceCode" code-label="كود الفاتورة"
-                :show-action="false" />
+            <TopHeader :icon="fileCheckIcon"
+                :title-key="isEditMode ? 'pages.SalesLogisticsInvoices.FormTitleEdit' : 'pages.SalesLogisticsInvoices.FormTitle'"
+                :description-key="isEditMode ? 'pages.SalesLogisticsInvoices.FormDescriptionEdit' : 'pages.SalesLogisticsInvoices.FormDescription'"
+                :code="InvoiceCode" code-label="كود الفاتورة" :show-action="false" />
 
             <!-- Request Information Section -->
             <div class="p-6 bg-white rounded-3xl border !border-gray-100 ">
@@ -512,15 +517,15 @@ onMounted(async () => {
                         <!-- اسم العميل -->
                         <div>
                             <SelectInput v-model="formData.customer_id" :items="customerItems" placeholder="اختر العميل"
-                                label="اسم العميل" density="comfortable" :rules="[required()]"
-                                item-title="title" item-value="value" />
+                                label="اسم العميل" density="comfortable" :rules="[required()]" item-title="title"
+                                item-value="value" />
                         </div>
 
                         <!-- Purchase Request Code -->
                         <div>
                             <SelectInput v-model="formData.sale_order_id" placeholder="اختر الطلبية"
                                 label="كود طلبية المبيعات" :items="ordersItems" density="comfortable"
-                                :rules="[required()]" :error-messages="formErrors['sale_order_id']" 
+                                :rules="[required()]" :error-messages="formErrors['sale_order_id']"
                                 @update:model-value="clearFieldError('sale_order_id')" clearable />
                         </div>
 
@@ -594,9 +599,16 @@ onMounted(async () => {
                     <template #item.trip_code="{ item }">
                         <div class="whitespace-pre-line">{{ item.trip_code }}</div>
                     </template>
-                    <template #item.discount="{ item }">
-                        {{ item.discount != null ? item.discount : 0 }}
+                    <template #item.discount_display="{ item }">
+                        <span v-if="item.discount_val != null && Number(item.discount_val) > 0"
+                            class="flex items-center gap-1">
+                            {{ item.discount_val }}
+                            <span v-if="item.discount_type == 1">%</span>
+                            <span v-if="item.discount_type == 2" v-html="rialIcon"></span>
+                        </span>
+                        <span v-else>—</span>
                     </template>
+
                 </DataTable>
             </div>
 

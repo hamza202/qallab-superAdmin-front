@@ -3,7 +3,7 @@ import { ref, computed, onMounted, watch, nextTick, reactive } from "vue";
 import { useRoute, useRouter } from 'vue-router';
 import TopHeader from '@/components/price-offers/TopHeader.vue';
 import { useApi } from '@/composables/useApi';
-import { returnIcon, saveIcon, fileCheckIcon, fileIcon_2 } from '@/components/icons/globalIcons';
+import { returnIcon, saveIcon, fileCheckIcon, fileIcon_2, rialIcon } from '@/components/icons/globalIcons';
 import { useForm } from '@/composables/useForm';
 import { useNotification as useNotify } from '@/composables/useNotification';
 
@@ -522,7 +522,7 @@ const headers = [
     { title: 'الوحدة', key: 'unit' },
     { title: 'الكمية', key: 'quantity' },
     { title: 'سعر الوحدة', key: 'price_per_unit' },
-    { title: 'الخصم', key: 'discount_val' },
+    { title: "خصم", key: "discount_display" },
     { title: 'المبلغ الخاضع للضريبة', key: 'taxable_amount' },
     { title: 'مبلغ الضريبة', key: 'total_tax' },
     { title: 'إجمالي المبلغ', key: 'total_out_taxes' },
@@ -536,7 +536,8 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
     unit: item.unit_name,
     quantity: item.quantity,
     price_per_unit: item.price_per_unit,
-    discount_val: item.discount_val,
+    discount_val: item.discount_val ?? 0,
+    discount_type: item.discount_type ?? null,
     taxable_amount: item.taxable_amount,
     total_tax: item.total_tax,
     total_out_taxes: item.total_out_taxes,
@@ -795,7 +796,17 @@ onMounted(async () => {
                 </div>
 
                 <!-- Products Table -->
-                <DataTable :headers="headers" :items="tableItems" />
+                <DataTable :headers="headers" :items="tableItems">
+                    <template #item.discount_display="{ item }">
+                        <span v-if="item.discount_val != null && Number(item.discount_val) > 0"
+                            class="flex items-center gap-1">
+                            {{ item.discount_val }}
+                            <span v-if="item.discount_type == 1">%</span>
+                            <span v-if="item.discount_type == 2" v-html="rialIcon"></span>
+                        </span>
+                        <span v-else>—</span>
+                    </template>
+                </DataTable>
             </div>
 
             <!-- Summary Table Section -->

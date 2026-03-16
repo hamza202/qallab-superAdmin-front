@@ -140,7 +140,9 @@ const fetchFormData = async () => {
                     item_name: item.item_name || '',
                     unit_id: item.unit_id,
                     unit_name: item.unit_name || '',
-                    quantity: item.quantity
+                    quantity: item.quantity,
+                    from_date: item.from_date || '',
+                    trip_no: item.trip_no || null
                 }));
             }
 
@@ -198,6 +200,8 @@ interface ProductTableItem {
     unit_id: number | null;
     unit_name: string;
     quantity: number | null;
+    from_date?: string; // Date field
+    trip_no?: number | null; // Trip number
     id?: number; // For edit mode
     isAdded?: boolean; // For dialog state
 }
@@ -519,6 +523,8 @@ const buildFormData = (): FormData => {
         fd.append(`items[${index}][item_id]`, String(item.item_id));
         fd.append(`items[${index}][unit_id]`, String(item.unit_id || ''));
         fd.append(`items[${index}][quantity]`, String(item.quantity || ''));
+        fd.append(`items[${index}][from_date]`, formatDate(item.from_date || ''));
+        fd.append(`items[${index}][trip_no]`, String(item.trip_no || ''));
     });
 
     // File attachments
@@ -606,7 +612,9 @@ const openMapDialog = (type: 'target' | 'source' = 'target') => {
 const headers = [
     { title: 'اسم المنتج', key: 'name' },
     { title: 'الكمية', key: 'quantity' },
-    { title: 'الوحدة', key: 'unit' }
+    { title: 'الوحدة', key: 'unit' },
+    { title: 'تاريخ بدء النقل', key: 'from_date' },
+    { title: 'عدد الرحلات', key: 'trip_no' }
 ]
 
 // Computed items for the DataTable (mapped from productTableItems)
@@ -615,7 +623,9 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
     item_id: item.item_id,
     name: item.item_name,
     quantity: item.quantity,
-    unit: item.unit_name
+    unit: item.unit_name,
+    from_date: item.from_date || '—',
+    trip_no: item.trip_no || '—'
 })));
 
 
@@ -903,7 +913,7 @@ onMounted(async () => {
             @location-selected="handleLocationSelected" />
 
         <!-- Add Product Dialog -->
-        <AddProductDialog v-model="showAddProductDialog" :unit-items="unitItems"
+        <AddProductDialog v-model="showAddProductDialog" :unit-items="unitItems" request-type="logistics"
             :edit-product="editingProduct" :existing-products="productTableItems" @saved="handleProductSaved"
             @product-updated="handleProductUpdated" />
 
