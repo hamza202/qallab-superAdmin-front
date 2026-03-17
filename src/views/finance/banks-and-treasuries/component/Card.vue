@@ -13,9 +13,8 @@
                             <h3 class="text-lg font-bold truncate text-primary-500">
                                 {{ item.name }}
                             </h3>
-                            <p v-if="'code' in item && item.code" class="text-xs text-gray-600 truncate">كود: {{
-                                item.code }}</p>
-                            <p v-else-if="bank?.currency" class="text-xs text-gray-600 truncate">{{ bank.currency }}</p>
+                            <!-- <p v-else-if="bank?.currency" class="text-xs text-gray-600 truncate">{{ bank.currency }}</p> -->
+                            <p class="text-xs text-gray-600 truncate">ريال سعودي</p>
                         </div>
 
                         <!-- Status Badge -->
@@ -37,28 +36,30 @@
             </div>
 
             <!-- Actions Section -->
-            <div class="flex items-center justify-between gap-3 mt-4 flex-wrap">
-                <ButtonWithIcon label="مطابقة الرصيد" variant="flat" color="primary-600"
-                    :custom-class="'px-6 text-base'" @click="handleViewBalance" />
+            <div class="flex items-center justify-end gap-3 mt-4 flex-wrap">
+                <!-- <ButtonWithIcon label="مطابقة الرصيد" variant="flat" color="primary-600"
+                    :custom-class="'px-6 text-base'" @click="handleViewBalance" /> -->
+                            <p v-if="'code' in item && item.code" class="text-xs text-gray-600 truncate">كود: {{
+                                item.code }}</p>
 
                 <div class="flex items-center gap-2">
                     <!-- <ButtonWithIcon icon-only :icon="coinsIcon" variant="flat" color="primary-50"
                         :custom-class="'!text-gray-600'" size="x-small" :loading="statusLoading" /> -->
 
-                    <ButtonWithIcon v-if="item.actions?.can_view" icon-only :icon="coinsIcon" variant="flat"
+                    <!-- <ButtonWithIcon v-if="item.actions?.can_view" icon-only :icon="coinsIcon" variant="flat"
                         color="primary-50" :custom-class="'!text-gray-600'" size="x-small" @click="handleView" />
 
                     <ButtonWithIcon icon-only :icon="fileCheckIcon" variant="flat" color="primary-50"
                         :custom-class="'!text-success-600'" size="x-small" />
                     <ButtonWithIcon v-if="item.actions?.can_delete" icon-only icon="mdi-delete-outline" variant="flat"
-                        color="primary-50" :custom-class="'!text-error-600'" size="x-small" @click="handleDelete" />
+                        color="primary-50" :custom-class="'!text-error-600'" size="x-small" @click="handleDelete" /> -->
 
                     <ButtonWithIcon v-if="item.actions?.can_update" icon-only :icon="binIcon" variant="flat"
                         size="x-small" color="primary-50" :custom-class="'!text-primary-700'" @click="handleEdit" />
 
-                    <ButtonWithIcon v-if="item.actions?.can_change_status" icon-only :icon="switchHorisinralIcon"
+                    <!-- <ButtonWithIcon v-if="item.actions?.can_change_status" icon-only :icon="switchHorisinralIcon"
                         variant="flat" color="primary-50" :custom-class="'!text-warning-600'" size="x-small"
-                        :loading="statusLoading" @click="toggleStatus" />
+                        :loading="statusLoading" @click="toggleStatus" /> -->
                 </div>
             </div>
         </div>

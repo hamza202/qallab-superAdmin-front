@@ -47,25 +47,17 @@
                             <!-- Country Code -->
                             <div>
                                 <SelectInput v-model="formData.country_code" label="الدولة" placeholder="اختر"
-                                    :items="countryOptions" density="comfortable" variant="outlined"
+                                    :items="countryItems" density="comfortable" variant="outlined"
                                     :error-messages="formErrors['country_code']"
                                     @update:model-value="delete formErrors['country_code']" />
                             </div>
 
                             <!-- Currency (Multiple) -->
                             <div>
-                                <MultipleSelectInput v-model="formData.currency" label="العملة" placeholder="اختر العملات"
-                                    :items="currencyOptions" density="comfortable" variant="outlined"
-                                    :error-messages="formErrors['currency']"
+                                <MultipleSelectInput v-model="formData.currency" label="العملة"
+                                    placeholder="اختر العملات" :items="currencyItems" density="comfortable"
+                                    variant="outlined" :error-messages="formErrors['currency']"
                                     @update:model-value="delete formErrors['currency']" />
-                            </div>
-
-                            <!-- Bank Branches (Multiple) -->
-                            <div>
-                                <MultipleSelectInput v-model="formData.bank_branch" label="فروع البنك" placeholder="اختر الفروع"
-                                    :items="branchOptions" density="comfortable" variant="outlined" chips
-                                    :error-messages="formErrors['bank_branch']"
-                                    @update:model-value="delete formErrors['bank_branch']" />
                             </div>
 
                             <!-- Status -->
@@ -82,7 +74,7 @@
                             </div>
 
                             <!-- Notes -->
-                            <div class="md:col-span-3">
+                            <div class="md:col-span-2">
                                 <TextareaInput v-model="formData.notes" placeholder="ملاحظات" label="ملاحظات"
                                     :error-messages="formErrors['notes']" @input="delete formErrors['notes']" />
                             </div>
@@ -94,10 +86,10 @@
                     <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col">
                         <ButtonWithIcon variant="flat" color="primary" height="48" rounded="4"
                             custom-class="font-semibold text-base px-6 md:!px-10 min-w-56" :prepend-icon="saveIcon"
-                            label="حفظ " @click="handleSubmit" />
+                            label="حفظ " @click="handleSubmit" :loading="loading" :disabled="loading" />
 
                         <ButtonWithIcon variant="flat" color="primary-50" rounded="4" height="48"
-                            prepend-icon="mdi-close"
+                            prepend-icon="mdi-close" :disabled="loading"
                             custom-class="font-semibold text-base text-primary-700 px-6 min-w-56" label="إغلاق"
                             @click="handleCancel" />
                     </div>
@@ -120,9 +112,9 @@ interface BankFormData {
     code: string
     swift_code: string
     country_code: string | null
-    currency: number[]
+    currency: string[]
     bank_branch: string[]
-    is_active: number
+    is_active: number | boolean
     notes: string
 }
 
@@ -131,7 +123,7 @@ interface BankPayload extends Omit<BankFormData, 'is_active'> {
         en: string
         ar: string
     }
-    is_active: boolean
+    is_active: number
     _method?: 'PUT'
 }
 
@@ -153,7 +145,7 @@ const formData = ref<BankFormData>({
     swift_code: '',
     country_code: null,
     currency: [],
-    bank_branch: [],
+    bank_branch: ['1'],
     is_active: 1,
     notes: ''
 })
@@ -165,30 +157,39 @@ const availableLanguages = ref<Language[]>([
     { code: 'ar', name: 'AR', flag: '/img/sa.svg', dir: 'rtl' }
 ])
 
-const currencyOptions = ref([
-    { title: 'ريال سعودي', value: '1' },
-    { title: 'دولار أمريكي', value: '2' },
-    { title: 'يورو', value: '3' },
-    { title: 'جنيه إسترليني', value: '4' }
-])
-
-const countryOptions = ref([
-    { title: 'المملكة العربية السعودية', value: 'sa' },
-    { title: 'الإمارات العربية المتحدة', value: 'ae' },
-    { title: 'مصر', value: 'eg' },
-    { title: 'الكويت', value: 'kw' },
-    { title: 'قطر', value: 'qa' }
-])
-
-const branchOptions = ref([
-    { title: 'فرع الرياض', value: 'فرع الرياض' },
-    { title: 'فرع جدة', value: 'فرع جدة' },
-    { title: 'فرع مكة المكرمة', value: 'فرع مكة المكرمة' },
-    { title: 'فرع الدمام', value: 'فرع الدمام' },
-    { title: 'فرع المدينة المنورة', value: 'فرع المدينة المنورة' }
-])
+const currencyItems = ref<{ title: string; value: string | number }[]>([])
+const countryItems = ref<{ title: string; value: string | number }[]>([])
 
 const isEditMode = computed(() => !!route.params.id)
+
+const fetchCountriesList = async () => {
+    try {
+        const response = await api.get('/countries/list')
+        if (response.data && Array.isArray(response.data)) {
+            countryItems.value = response.data.map((country: any) => ({
+                title: country.name || country.title,
+                value: String(country.id ?? country.value ?? '')
+            }))
+        }
+    } catch (err: any) {
+        console.error('Error fetching countries list:', err)
+    }
+}
+
+const fetchCurrenciesList = async () => {
+    try {
+        const response = await api.get('/currencies/list')
+        const list = Array.isArray(response.data) ? response.data : response.data?.data
+        if (list && Array.isArray(list)) {
+            currencyItems.value = list.map((currency: any) => ({
+                title: currency.name || currency.title,
+                value: String(currency.id ?? currency.value ?? '')
+            }))
+        }
+    } catch (err: any) {
+        console.error('Error fetching currencies list:', err)
+    }
+}
 
 const fetchBank = async () => {
     if (!isEditMode.value) return
@@ -197,7 +198,7 @@ const fetchBank = async () => {
         loading.value = true
         const response = await api.get(`/banks/${route.params.id}`)
         const data = response.data
-        
+
         // Populate form data
         const translations = data.name_translations
         if (translations && typeof translations === 'object') {
@@ -212,9 +213,11 @@ const fetchBank = async () => {
         }
         formData.value.code = data.code || ''
         formData.value.swift_code = data.swift_code || ''
-        formData.value.country_code = data.country_code || null
-        formData.value.currency = data.currency || []
-        formData.value.bank_branch = data.bank_branch || []
+        formData.value.country_code = data.country_code != null ? String(data.country_code) : null
+        formData.value.currency = Array.isArray(data.currency)
+            ? data.currency.map((cur: any) => String(cur))
+            : []
+        formData.value.bank_branch = ['1']
         if (typeof data.is_active === 'boolean') {
             formData.value.is_active = data.is_active ? 1 : 0
         } else if (typeof data.is_active === 'number') {
@@ -247,9 +250,9 @@ const handleSubmit = async () => {
             swift_code: formData.value.swift_code,
             notes: formData.value.notes,
             bank_branch: formData.value.bank_branch,
-            currency: formData.value.currency,
-            country_code: formData.value.country_code,
-            is_active: formData.value.is_active
+            currency: formData.value.currency.map(cur => String(cur)),
+            country_code: formData.value.country_code != null ? String(formData.value.country_code) : null,
+            is_active: Number(formData.value.is_active)
         }
 
         if (isEditMode.value) {
@@ -283,6 +286,8 @@ const financeIcon = `<svg width="47" height="42" viewBox="0 0 47 42" fill="none"
 `
 
 onMounted(() => {
+    fetchCountriesList()
+    fetchCurrenciesList()
     fetchBank()
 })
 </script>
