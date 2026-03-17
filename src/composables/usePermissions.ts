@@ -37,7 +37,7 @@ const AUTH_PERMISSIONS_KEY = 'auth_permissions';
  * Route to permission mapping
  * Maps route paths to their corresponding permission keys
  */
-const routePermissionMap: Record<string, { group: string; key: string }> = {
+const routePermissionMap: Record<string, { group: string; key: string | string[] }> = {
     // Products
     '/simple-products': { group: 'products', key: 'items' },
     '/group-products': { group: 'products', key: 'grouped-items' },
@@ -53,23 +53,51 @@ const routePermissionMap: Record<string, { group: string; key: string }> = {
     '/services/prices-list': { group: 'services', key: 'price-lists' },
     '/services/service-settings': { group: 'services', key: 'service-settings' },
 
-    // Sales
+    // Sales (new permission keys)
+    '/sales/requests/fuels': { group: 'sales', key: 'fuel-sr' },
+    '/sales/quotations/fuels': { group: 'sales', key: 'fuel-sq' },
+    '/sales/orders/fuels': { group: 'sales', key: 'fuel-so' },
+    '/sales/requests/material-product': { group: 'sales', key: 'building-material-sr' },
+    '/sales/quotations/material-product': { group: 'sales', key: 'building-material-sq' },
+    '/sales/orders/material-product': { group: 'sales', key: 'building-material-so' },
+    '/sales/requests/logistics': { group: 'sales', key: 'logistics-sr' },
+    '/sales/quotations/logistics': { group: 'sales', key: 'logistics-sq' },
+    '/sales/orders/logistics': { group: 'sales', key: 'logistics-so' },
+    '/sales/logistics-invoices': { group: 'sales', key: 'logistics-sale-invoices' },
+    '/sales/delivery-docs-logistics': { group: 'sales', key: 'logistics-delivery-docs' },
+    '/sales/invoices': { group: 'sales', key: 'sale-invoices' },
+    '/sales/payments': { group: 'sales', key: 'sale-invoices' },
+    '/sales/delivery-docs': { group: 'sales', key: 'delivery-docs' },
+    '/sales/so-pickups': { group: 'sales', key: 'so-pickups' },
+    '/sales/trips': { group: 'sales', key: 'trip-management' },
+
+    // Legacy sales routes
     '/customers': { group: 'sales', key: 'customers' },
-    '/sales/invoices': { group: 'sales', key: 'sales-invoices' },
     '/sales/orders': { group: 'sales', key: 'sales-orders' },
-    '/sales/orders/material-product': { group: 'sales', key: 'sales-orders' },
     '/sales/contracts': { group: 'sales', key: 'contracts' },
     '/sales/clearing': { group: 'sales', key: 'clearing' },
-    // '/sales/price-offer-material-product': { group: 'sales', key: 'sales-building-material-price-offer' },
 
     // Projects
     '/projects/list': { group: 'projects', key: 'projects' },
     '/projects/scheduling': { group: 'projects', key: 'project-scheduling' },
 
-    // Purchases
+    // Purchases (new permission keys)
+    '/purchases/requests/fuels': { group: 'purchases', key: 'fuel-pr' },
+    '/purchases/quotations/fuels': { group: 'purchases', key: 'fuel-pq' },
+    '/purchases/orders/fuels': { group: 'purchases', key: 'fuel-po' },
+    '/purchases/requests/material-product': { group: 'purchases', key: 'building-material-pr' },
+    '/purchases/quotations/material-product': { group: 'purchases', key: 'building-material-pq' },
+    '/purchases/orders/material-product': { group: 'purchases', key: 'building-material-po' },
+    '/purchases/requests/logistics': { group: 'purchases', key: 'logistics-pr' },
+    '/purchases/quotations/logistics': { group: 'purchases', key: 'logistics-pq' },
+    '/purchases/orders/logistics': { group: 'purchases', key: 'logistics-po' },
+    '/purchases/invoices': { group: 'purchases', key: ['purchase-invoices', 'logistics-purchase-invoices'] },
+    '/purchases/receiving-docs-logistics': { group: 'purchases', key: 'logistics-receiving-docs' },
+    '/purchases/receiving-docs': { group: 'purchases', key: 'receiving-docs' },
+
+    // Legacy purchases routes
     '/suppliers': { group: 'purchases', key: 'suppliers' },
     '/suppliers/supplier-settlement': { group: 'purchases', key: 'supplier-settlements' },
-    // '/purchases/requests/material-product': { group: 'purchases', key: 'purchases-building-material-price-requests' },
 
     // Finance
     '/finance/vouchers/list': { group: 'finance', key: 'financial-dashboard' },
@@ -164,6 +192,13 @@ export function usePermissions() {
     };
 
     /**
+     * Check if user has at least one permission key in a group
+     */
+    const hasAnyPermission = (group: string, keys: string[]): boolean => {
+        return keys.some((key) => hasPermission(group, key));
+    };
+
+    /**
      * Check if user has permission for a specific route path
      */
     const hasRoutePermission = (path: string): boolean => {
@@ -173,6 +208,9 @@ export function usePermissions() {
         // Find matching permission for the route
         for (const [routePath, permissionInfo] of Object.entries(routePermissionMap)) {
             if (path.startsWith(routePath)) {
+                if (Array.isArray(permissionInfo.key)) {
+                    return hasAnyPermission(permissionInfo.group, permissionInfo.key);
+                }
                 return hasPermission(permissionInfo.group, permissionInfo.key);
             }
         }
@@ -204,11 +242,26 @@ export function usePermissions() {
      * Check if user can view sales related items
      */
     const canViewCustomers = computed(() => hasPermission('sales', 'customers'));
-    const canViewSalesInvoices = computed(() => hasPermission('sales', 'sales-invoices'));
+    const canViewSalesInvoices = computed(() => hasAnyPermission('sales', ['sales-invoices', 'sale-invoices']));
     const canViewSalesOrders = computed(() => hasPermission('sales', 'sales-orders'));
     const canViewContracts = computed(() => hasPermission('sales', 'contracts'));
     const canViewClearing = computed(() => hasPermission('sales', 'clearing'));
     const canViewBuildingMaterialPriceOffer = computed(() => hasPermission('sales', 'sales-building-material-price-offer'));
+    const canViewSalesFuelSR = computed(() => hasPermission('sales', 'fuel-sr'));
+    const canViewSalesFuelSQ = computed(() => hasPermission('sales', 'fuel-sq'));
+    const canViewSalesFuelSO = computed(() => hasPermission('sales', 'fuel-so'));
+    const canViewSalesBuildingMaterialSR = computed(() => hasPermission('sales', 'building-material-sr'));
+    const canViewSalesBuildingMaterialSQ = computed(() => hasPermission('sales', 'building-material-sq'));
+    const canViewSalesBuildingMaterialSO = computed(() => hasPermission('sales', 'building-material-so'));
+    const canViewSalesLogisticsSR = computed(() => hasPermission('sales', 'logistics-sr'));
+    const canViewSalesLogisticsSQ = computed(() => hasPermission('sales', 'logistics-sq'));
+    const canViewSalesLogisticsSO = computed(() => hasPermission('sales', 'logistics-so'));
+    const canViewSalesLogisticsSaleInvoices = computed(() => hasPermission('sales', 'logistics-sale-invoices'));
+    const canViewSalesLogisticsDeliveryDocs = computed(() => hasPermission('sales', 'logistics-delivery-docs'));
+    const canViewSalesSaleInvoices = computed(() => hasPermission('sales', 'sale-invoices'));
+    const canViewSalesDeliveryDocs = computed(() => hasPermission('sales', 'delivery-docs'));
+    const canViewSalesSoPickups = computed(() => hasPermission('sales', 'so-pickups'));
+    const canViewSalesTripManagement = computed(() => hasPermission('sales', 'trip-management'));
 
     /**
      * Check if user can view projects related items
@@ -221,7 +274,20 @@ export function usePermissions() {
      */
     const canViewSuppliers = computed(() => hasPermission('purchases', 'suppliers'));
     const canViewSupplierSettlements = computed(() => hasPermission('purchases', 'supplier-settlements'));
-    const canViewBuildingMaterialPriceRequests = computed(() => hasPermission('purchases', 'purchases-building-material-price-requests'));
+    const canViewBuildingMaterialPriceRequests = computed(() => hasAnyPermission('purchases', ['purchases-building-material-price-requests', 'building-material-pr']));
+    const canViewPurchasesFuelPR = computed(() => hasPermission('purchases', 'fuel-pr'));
+    const canViewPurchasesFuelPQ = computed(() => hasPermission('purchases', 'fuel-pq'));
+    const canViewPurchasesFuelPO = computed(() => hasPermission('purchases', 'fuel-po'));
+    const canViewPurchasesBuildingMaterialPR = computed(() => hasPermission('purchases', 'building-material-pr'));
+    const canViewPurchasesBuildingMaterialPQ = computed(() => hasPermission('purchases', 'building-material-pq'));
+    const canViewPurchasesBuildingMaterialPO = computed(() => hasPermission('purchases', 'building-material-po'));
+    const canViewPurchasesLogisticsPR = computed(() => hasPermission('purchases', 'logistics-pr'));
+    const canViewPurchasesLogisticsPQ = computed(() => hasPermission('purchases', 'logistics-pq'));
+    const canViewPurchasesLogisticsPO = computed(() => hasPermission('purchases', 'logistics-po'));
+    const canViewLogisticsPurchaseInvoices = computed(() => hasPermission('purchases', 'logistics-purchase-invoices'));
+    const canViewPurchaseInvoices = computed(() => hasPermission('purchases', 'purchase-invoices'));
+    const canViewPurchasesReceivingDocs = computed(() => hasPermission('purchases', 'receiving-docs'));
+    const canViewPurchasesLogisticsReceivingDocs = computed(() => hasPermission('purchases', 'logistics-receiving-docs'));
 
     /**
      * Check if user can view finance related items
@@ -285,6 +351,14 @@ export function usePermissions() {
         canViewProductSettings.value
     );
 
+    const hasAnyProductsManagementPermission = computed(() =>
+        canViewProducts.value ||
+        canViewGroupedProducts.value ||
+        canViewGeneralPriceLists.value ||
+        canViewBuildingMaterialPriceLists.value ||
+        canViewProductionCapacity.value
+    );
+
     /**
      * Check if any service permission is available
      */
@@ -304,7 +378,24 @@ export function usePermissions() {
         canViewSalesOrders.value ||
         canViewContracts.value ||
         canViewBuildingMaterialPriceOffer.value ||
-        canViewClearing.value
+        canViewClearing.value ||
+        hasAnyPermission('sales', [
+            'fuel-sr',
+            'fuel-sq',
+            'fuel-so',
+            'building-material-sr',
+            'building-material-sq',
+            'building-material-so',
+            'logistics-sr',
+            'logistics-sq',
+            'logistics-so',
+            'logistics-sale-invoices',
+            'logistics-delivery-docs',
+            'sale-invoices',
+            'delivery-docs',
+            'so-pickups',
+            'trip-management',
+        ])
     );
 
     /**
@@ -321,7 +412,22 @@ export function usePermissions() {
     const hasAnyPurchasesPermission = computed(() =>
         canViewSuppliers.value ||
         canViewSupplierSettlements.value || 
-        canViewBuildingMaterialPriceRequests.value
+        canViewBuildingMaterialPriceRequests.value ||
+        hasAnyPermission('purchases', [
+            'fuel-pr',
+            'fuel-pq',
+            'fuel-po',
+            'building-material-pr',
+            'building-material-pq',
+            'building-material-po',
+            'logistics-pr',
+            'logistics-pq',
+            'logistics-po',
+            'logistics-purchase-invoices',
+            'purchase-invoices',
+            'receiving-docs',
+            'logistics-receiving-docs',
+        ])
     );
 
     /**
@@ -381,6 +487,81 @@ export function usePermissions() {
         canViewSystemStatuses.value
     );
 
+    /**
+     * Sidebar section visibility helpers
+     */
+    const showProductSettingsSection = computed(() =>
+        canViewProductVariables.value || canViewProductSettings.value
+    );
+    const showSalesCustomersSection = computed(() => canViewCustomers.value);
+    const showSalesQuotationsSection = computed(() =>
+        canViewSalesBuildingMaterialSR.value ||
+        canViewSalesBuildingMaterialSQ.value ||
+        canViewSalesFuelSR.value ||
+        canViewSalesFuelSQ.value ||
+        canViewSalesLogisticsSR.value ||
+        canViewSalesLogisticsSQ.value
+    );
+    const showSalesOrdersSection = computed(() =>
+        canViewSalesBuildingMaterialSO.value ||
+        canViewSalesFuelSO.value ||
+        canViewSalesLogisticsSO.value ||
+        canViewSalesSoPickups.value ||
+        canViewSalesTripManagement.value
+    );
+    const showSalesDeliveryDocsSection = computed(() =>
+        canViewSalesDeliveryDocs.value || canViewSalesLogisticsDeliveryDocs.value
+    );
+    const showSalesInvoicesSection = computed(() =>
+        canViewSalesSaleInvoices.value || canViewSalesLogisticsSaleInvoices.value
+    );
+    const showPurchasesSuppliersSection = computed(() => canViewSuppliers.value);
+    const showPurchasesQuotationsSection = computed(() =>
+        canViewPurchasesBuildingMaterialPR.value ||
+        canViewPurchasesBuildingMaterialPQ.value ||
+        canViewPurchasesLogisticsPR.value ||
+        canViewPurchasesLogisticsPQ.value ||
+        canViewPurchasesFuelPR.value ||
+        canViewPurchasesFuelPQ.value
+    );
+    const showPurchasesOrdersSection = computed(() =>
+        canViewPurchasesBuildingMaterialPO.value ||
+        canViewPurchasesLogisticsPO.value ||
+        canViewPurchasesFuelPO.value
+    );
+    const showPurchasesReceivingDocsSection = computed(() =>
+        canViewPurchasesReceivingDocs.value ||
+        canViewPurchasesLogisticsReceivingDocs.value
+    );
+    const showPurchasesInvoicesSection = computed(() =>
+        canViewPurchaseInvoices.value || canViewLogisticsPurchaseInvoices.value
+    );
+    const showSettingsBasicSection = computed(() =>
+        canViewCategories.value ||
+        canViewServiceCategories.value ||
+        canViewTreeCategories.value ||
+        canViewTreeServiceCategories.value ||
+        canViewUnits.value ||
+        canViewManufacturers.value ||
+        canViewBrands.value ||
+        canViewGeoRegions.value ||
+        canViewGeoZones.value
+    );
+    const showSettingsTaxesSection = computed(() => canViewTaxes.value);
+    const showSettingsCountriesCurrenciesSection = computed(() =>
+        canViewCountries.value || canViewCities.value || canViewCurrencies.value
+    );
+    const showSettingsAdvancedSection = computed(() =>
+        canViewCodesSettings.value ||
+        canViewAccountTypes.value ||
+        canViewTestGroups.value ||
+        canViewTests.value ||
+        canViewTestMethodologies.value ||
+        canViewSampleTypes.value ||
+        canViewSystemStatuses.value ||
+        canViewDocStatusTransitions.value
+    );
+
     return {
         // Core functions
         getPermissions,
@@ -398,6 +579,7 @@ export function usePermissions() {
         canViewProductVariables,
         canViewProductSettings,
         hasAnyProductPermission,
+        hasAnyProductsManagementPermission,
 
         // Services permissions
         canViewServices,
@@ -413,6 +595,21 @@ export function usePermissions() {
         canViewContracts,
         canViewClearing,
         canViewBuildingMaterialPriceOffer,
+        canViewSalesFuelSR,
+        canViewSalesFuelSQ,
+        canViewSalesFuelSO,
+        canViewSalesBuildingMaterialSR,
+        canViewSalesBuildingMaterialSQ,
+        canViewSalesBuildingMaterialSO,
+        canViewSalesLogisticsSR,
+        canViewSalesLogisticsSQ,
+        canViewSalesLogisticsSO,
+        canViewSalesLogisticsSaleInvoices,
+        canViewSalesLogisticsDeliveryDocs,
+        canViewSalesSaleInvoices,
+        canViewSalesDeliveryDocs,
+        canViewSalesSoPickups,
+        canViewSalesTripManagement,
         hasAnySalesPermission,
 
         // Projects permissions
@@ -424,6 +621,19 @@ export function usePermissions() {
         canViewSuppliers,
         canViewSupplierSettlements,
         canViewBuildingMaterialPriceRequests,
+        canViewPurchasesFuelPR,
+        canViewPurchasesFuelPQ,
+        canViewPurchasesFuelPO,
+        canViewPurchasesBuildingMaterialPR,
+        canViewPurchasesBuildingMaterialPQ,
+        canViewPurchasesBuildingMaterialPO,
+        canViewPurchasesLogisticsPR,
+        canViewPurchasesLogisticsPQ,
+        canViewPurchasesLogisticsPO,
+        canViewLogisticsPurchaseInvoices,
+        canViewPurchaseInvoices,
+        canViewPurchasesReceivingDocs,
+        canViewPurchasesLogisticsReceivingDocs,
         hasAnyPurchasesPermission,
 
         // Finance permissions
@@ -470,5 +680,22 @@ export function usePermissions() {
         canViewSystemStatuses,
         canViewDocStatusTransitions,
         hasAnySettingsPermission,
+
+        // Sidebar section visibility
+        showProductSettingsSection,
+        showSalesCustomersSection,
+        showSalesQuotationsSection,
+        showSalesOrdersSection,
+        showSalesDeliveryDocsSection,
+        showSalesInvoicesSection,
+        showPurchasesSuppliersSection,
+        showPurchasesQuotationsSection,
+        showPurchasesOrdersSection,
+        showPurchasesReceivingDocsSection,
+        showPurchasesInvoicesSection,
+        showSettingsBasicSection,
+        showSettingsTaxesSection,
+        showSettingsCountriesCurrenciesSection,
+        showSettingsAdvancedSection,
     };
 }
