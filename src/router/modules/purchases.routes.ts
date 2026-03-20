@@ -432,6 +432,58 @@ export const purchasesRoutes: RouteRecordRaw[] = [
     ],
   },
   {
+    path: "/purchases/invoices/logistics",
+    name: "PurchaseInvoicesLogistics",
+    redirect: "/purchases/invoices/logistics/list",
+    children: [
+      {
+        path: "list",
+        name: "PurchaseInvoicesLogisticsList",
+        component: () =>
+          import("@/views/purchases/invoices/logistics/List.vue"),
+        meta: {
+          title: "pages.PurchaseInvoicesLogistics.title",
+        },
+      },
+      {
+        path: "create",
+        name: "PurchaseInvoicesLogisticsCreate",
+        component: () =>
+          import("@/views/purchases/invoices/logistics/Form.vue"),
+        meta: {
+          title: "pages.PurchaseInvoicesLogistics.create",
+        },
+      },
+      {
+        path: "edit/:id",
+        name: "PurchaseInvoicesLogisticsEdit",
+        component: () =>
+          import("@/views/purchases/invoices/logistics/Form.vue"),
+        meta: {
+          title: "pages.PurchaseInvoicesLogistics.edit",
+        },
+      },
+      {
+        path: "view/:id",
+        name: "PurchaseInvoicesLogisticsView",
+        component: () =>
+          import("@/views/purchases/invoices/logistics/View.vue"),
+        meta: {
+          title: "pages.PurchaseInvoicesLogistics.view",
+        },
+      },
+      {
+        path: "print/:id",
+        name: "PurchaseInvoicesLogisticsPrint",
+        component: () =>
+          import("@/views/purchases/invoices/logistics/Print.vue"),
+        meta: {
+          title: "pages.PurchaseInvoicesLogistics.print",
+        },
+      },
+    ],
+  },
+  {
     path: "/purchases/quotations/fuels",
     name: "QuotationsFuels",
     redirect: "/purchases/quotations/fuels/list",

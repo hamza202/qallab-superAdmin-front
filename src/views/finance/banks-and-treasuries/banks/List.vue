@@ -94,6 +94,7 @@ interface Bank {
     name: string
     code?: string
     is_active: boolean
+    swift_code?: string
     balance: number
     currency?: string
     actions?: BankActions

@@ -31,44 +31,21 @@
                                 </LanguageTabs>
                             </div>
 
-                            <!-- Branch -->
-                            <div>
-                                <SelectInput v-model="formData.branch_id" label="الفرع" placeholder="اختر الفرع"
-                                    :items="branchOptions" density="comfortable" variant="outlined"
-                                    :error-messages="formErrors['branch_id']"
-                                    @update:model-value="delete formErrors['branch_id']" />
-                            </div>
-
                             <!-- Currency -->
                             <div>
                                 <SelectInput v-model="formData.currency_id" label="العملة" placeholder="اختر العملة"
-                                    :items="currencyOptions" density="comfortable" variant="outlined"
+                                    :items="currencyItems" density="comfortable" variant="outlined"
                                     :error-messages="formErrors['currency_id']"
                                     @update:model-value="delete formErrors['currency_id']" />
                             </div>
 
-                            <!-- Account -->
+                            <!-- Treasury Responsible -->
                             <div>
-                                <SelectInput v-model="formData.account_id" label="الحساب" placeholder="اختر الحساب"
-                                    :items="accountOptions" density="comfortable" variant="outlined"
-                                    :error-messages="formErrors['account_id']"
-                                    @update:model-value="delete formErrors['account_id']" />
-                            </div>
-
-                            <!-- Deposit -->
-                            <div>
-                                <SelectInput v-model="formData.deposit" label="إيداع" placeholder="اختر حساب الإيداع"
-                                    :items="accountOptions" density="comfortable" variant="outlined"
-                                    :error-messages="formErrors['deposit']"
-                                    @update:model-value="delete formErrors['deposit']" />
-                            </div>
-
-                            <!-- Withdraw -->
-                            <div>
-                                <SelectInput v-model="formData.withdraw" label="سحب" placeholder="اختر حساب السحب"
-                                    :items="accountOptions" density="comfortable" variant="outlined"
-                                    :error-messages="formErrors['withdraw']"
-                                    @update:model-value="delete formErrors['withdraw']" />
+                                <SelectInput v-model="formData.manager_id" label="مسؤول الخزنة"
+                                    placeholder="اختر الموظف المسؤول مثل علي محمد" :items="userItems"
+                                    density="comfortable" variant="outlined"
+                                    :error-messages="formErrors['manager_id']"
+                                    @update:model-value="delete formErrors['manager_id']" />
                             </div>
 
                             <!-- Notes -->
@@ -114,7 +91,7 @@
                         :loading="loading" :disabled="loading" label="حفظ " @click="handleSubmit" />
 
                     <ButtonWithIcon variant="flat" color="primary-50" rounded="4" height="48" prepend-icon="mdi-close"
-                        :loading="loading" :disabled="loading"
+                       :disabled="loading"
                         custom-class="font-semibold text-base text-primary-700 px-6 min-w-56" label="إغلاق"
                         @click="handleCancel" />
                 </div>
@@ -145,6 +122,7 @@ interface TreasuryFormData {
     is_settlement: number
     notes: string
     currency_id: number | null
+    manager_id: number | null
 }
 
 interface TreasuryPayload extends Omit<TreasuryFormData, 'is_settlement'> {
@@ -171,13 +149,14 @@ const nameEn = ref('')
 const nameAr = ref('')
 
 const formData = ref<TreasuryFormData>({
-    branch_id: null,
-    deposit: null,
-    withdraw: null,
-    account_id: null,
+    branch_id: 1,
+    deposit: 1,
+    withdraw: 1,
+    account_id: 1,
     is_settlement: 1,
     notes: '',
-    currency_id: null
+    currency_id: null,
+    manager_id: null
 })
 
 const formErrors = ref<Record<string, string>>({})
@@ -187,28 +166,40 @@ const availableLanguages = ref<Language[]>([
     { code: 'ar', name: 'AR', flag: '/img/sa.svg', dir: 'rtl' }
 ])
 
-const currencyOptions = ref([
-    { title: 'ريال سعودي', value: 1 },
-    { title: 'دولار أمريكي', value: 2 },
-    { title: 'يورو', value: 3 },
-    { title: 'جنيه إسترليني', value: 4 }
-])
-
-const branchOptions = ref([
-    { title: 'فرع الرياض', value: 1 },
-    { title: 'فرع جدة', value: 2 },
-    { title: 'فرع مكة المكرمة', value: 3 },
-    { title: 'فرع الدمام', value: 4 }
-])
-
-const accountOptions = ref([
-    { title: 'حساب النقدية', value: 1 },
-    { title: 'حساب البنك', value: 2 },
-    { title: 'حساب المبيعات', value: 3 },
-    { title: 'حساب المشتريات', value: 4 }
-])
+const currencyItems = ref<{ title: string; value: number | string }[]>([])
+const userItems = ref<{ title: string; value: number | string }[]>([])
 
 const isEditMode = computed(() => !!route.params.id)
+
+const fetchCurrenciesList = async () => {
+    try {
+        const response = await api.get('/currencies/list')
+        const list = Array.isArray(response.data) ? response.data : response.data?.data
+        if (list && Array.isArray(list)) {
+            currencyItems.value = list.map((currency: any) => ({
+                title: currency.name || currency.title,
+                value: currency.id ?? currency.value
+            }))
+        }
+    } catch (err: any) {
+        console.error('Error fetching currencies list:', err)
+    }
+}
+
+const fetchUsersList = async () => {
+    try {
+        const response = await api.get('/users')
+        const list = Array.isArray(response.data) ? response.data : response.data?.data
+        if (list && Array.isArray(list)) {
+            userItems.value = list.map((user: any) => ({
+                title: user.name || `${user.first_name || ''} ${user.last_name || ''}`.trim(),
+                value: user.id
+            }))
+        }
+    } catch (err: any) {
+        console.error('Error fetching users list:', err)
+    }
+}
 
 const fetchTreasury = async () => {
     if (!isEditMode.value) return
@@ -230,10 +221,10 @@ const fetchTreasury = async () => {
             nameEn.value = data.name
             nameAr.value = data.name
         }
-        formData.value.branch_id = data.branch_id ?? null
-        formData.value.deposit = data.deposit ?? null
-        formData.value.withdraw = data.withdraw ?? null
-        formData.value.account_id = data.account_id ?? null
+        formData.value.branch_id = data.branch_id != null ? Number(data.branch_id) : 1
+        formData.value.deposit = data.deposit != null ? Number(data.deposit) : 1
+        formData.value.withdraw = data.withdraw != null ? Number(data.withdraw) : 1
+        formData.value.account_id = data.account_id != null ? Number(data.account_id) : 1
         if (typeof data.is_settlement === 'boolean') {
             formData.value.is_settlement = data.is_settlement ? 1 : 0
         } else if (typeof data.is_settlement === 'number') {
@@ -242,7 +233,8 @@ const fetchTreasury = async () => {
             formData.value.is_settlement = 1
         }
         formData.value.notes = data.notes || ''
-        formData.value.currency_id = data.currency_id ?? null
+        formData.value.currency_id = data.currency_id != null ? Number(data.currency_id) : null
+        formData.value.manager_id = data.manager_id != null ? Number(data.manager_id) : null
 
         if (data.balance !== undefined && data.balance?.length > 1) {
             balanceRecords.value = [{
@@ -273,13 +265,14 @@ const handleSubmit = async () => {
                 en: nameEn.value,
                 ar: nameAr.value
             },
-            branch_id: formData.value.branch_id,
-            deposit: formData.value.deposit,
-            withdraw: formData.value.withdraw,
-            account_id: formData.value.account_id,
+            branch_id: Number(formData.value.branch_id ?? 1),
+            deposit: Number(formData.value.deposit ?? 1),
+            withdraw: Number(formData.value.withdraw ?? 1),
+            account_id: Number(formData.value.account_id ?? 1),
             is_settlement: formData.value.is_settlement === 1,
             notes: formData.value.notes,
-            currency_id: formData.value.currency_id
+            currency_id: formData.value.currency_id != null ? Number(formData.value.currency_id) : null,
+            manager_id: formData.value.manager_id != null ? Number(formData.value.manager_id) : null
         }
 
         if (isEditMode.value) {
@@ -338,6 +331,7 @@ const tableItems = computed(() =>
 
 onMounted(async () => {
     pageLoading.value = true
+    await Promise.all([fetchCurrenciesList(), fetchUsersList()])
     await fetchTreasury()
     pageLoading.value = false
 })

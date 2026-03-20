@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, watch, nextTick, reactive } from "vue";
+import { ref, reactive, computed, onMounted, watch, nextTick } from "vue";
 import { useRoute, useRouter } from 'vue-router';
 import TopHeader from '@/components/price-offers/TopHeader.vue';
 import { useApi } from '@/composables/useApi';
 import { returnIcon, saveIcon, fileCheckIcon, fileIcon_2, rialIcon } from '@/components/icons/globalIcons';
 import { useForm } from '@/composables/useForm';
-import { useNotification as useNotify } from '@/composables/useNotification';
+import { useNotification } from '@/composables/useNotification';
 
 const { formRef, isFormValid, validate } = useForm();
-const { success, error, warning } = useNotify();
+const { success, warning, apiError } = useNotification();
 
 const api = useApi();
 const route = useRoute();
@@ -23,19 +23,35 @@ const isSubmitting = ref(false);
 const categoryOptions = ref<any[]>([]);
 const fetchItemOptions = ref<any[]>([]);
 const ordersItems = ref<any[]>([]);
-const supplierItems = ref<any[]>([]);
 const salesInvoicesItems = ref<any[]>([]);
 const InvoiceCode = ref('')
-const supplierData = ref<any>(null);
-const supplierName = computed(() => supplierData.value?.full_name || supplierData.value?.name || '—');
-const supplierTaxNo = computed(() => supplierData.value?.taxno || '—');
-const supplierAddress = computed(() => supplierData.value?.address || {});
 const summaryData = ref<any>(null);
 const isPopulatingForm = ref(false);
 const skipNextSaleOrderItemsFetch = ref(false);
 const skipNextSalesInvoicesFetch = ref(false);
 const skipNextSupplierRefresh = ref(false);
 const formErrors = reactive<Record<string, string>>({});
+
+const clearFieldError = (field: string) => {
+    delete formErrors[field];
+};
+
+const clearAllErrors = () => {
+    Object.keys(formErrors).forEach((key) => delete formErrors[key]);
+};
+
+const assignFieldErrors = (err: any) => {
+    const errors = err?.response?.data?.errors;
+    if (!errors || typeof errors !== 'object') return;
+
+    Object.entries(errors).forEach(([field, fieldErrors]: [string, any]) => {
+        const list = Array.isArray(fieldErrors) ? fieldErrors : [fieldErrors];
+        const firstMessage = list.find((m: any) => typeof m === 'string' && m.trim());
+        if (firstMessage) {
+            formErrors[field] = firstMessage;
+        }
+    });
+};
 
 const scrollToTop = () => {
     if (typeof window === 'undefined') return;
@@ -44,12 +60,6 @@ const scrollToTop = () => {
         container.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
         window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-};
-
-const clearFieldError = (field: string) => {
-    if (formErrors[field]) {
-        delete formErrors[field];
     }
 };
 
@@ -72,13 +82,10 @@ interface ProductTableItem {
 }
 
 // Form data with static values
-const DEFAULT_FETCH_ITEM = 'from_sales_invoice';
-
 const getDefaultFormData = () => ({
-    supplier_id: null as number | string | null,
     category: null as string | null,
     purchase_order_id: null as number | string | null,
-    fetch_item: DEFAULT_FETCH_ITEM as string | null,
+    fetch_item: 'from_sales_invoice' as string,
     sales_ids: [] as (number | string)[],
     invoice_issues_datetime: null as string | null,
     invoice_due_datetime: null as string | null,
@@ -176,18 +183,8 @@ const fetchConstants = async () => {
         }
 
         if (Array.isArray(data.purchase_invoice_fetch_items) && data.purchase_invoice_fetch_items.length) {
-            const filtered = data.purchase_invoice_fetch_items.filter((i: any) => i.key === DEFAULT_FETCH_ITEM);
-            fetchItemOptions.value = filtered.map((i: any) => ({ label: i.label, value: i.key }));
+            fetchItemOptions.value = data.purchase_invoice_fetch_items.map((i: any) => ({ label: i.label, value: i.key }));
         }
-
-        if (!fetchItemOptions.value.length) {
-            fetchItemOptions.value = [{ label: 'من فاتورة مبيعات', value: DEFAULT_FETCH_ITEM }];
-        }
-
-        if (!formData.value.fetch_item) {
-            formData.value.fetch_item = DEFAULT_FETCH_ITEM;
-        }
-
     } catch (e) {
         console.error('Error fetching constants:', e);
     }
@@ -208,10 +205,6 @@ const fetchOrdersByCategory = async (
             with_items: withItems,
         };
 
-        if (formData.value.supplier_id) {
-            params.supplier_id = formData.value.supplier_id;
-        }
-
         const res = await api.get<any>('/purchases/orders/list', {
             params,
         });
@@ -229,36 +222,6 @@ const fetchOrdersByCategory = async (
     }
 };
 
-const fetchSuppliers = async () => {
-    try {
-        const res = await api.get<any>('/suppliers/list');
-        const list = Array.isArray(res.data) ? res.data : res.data?.data;
-        const suppliers = Array.isArray(list) ? list : [];
-        supplierItems.value = suppliers.map((supplier: any) => ({
-            title: supplier.full_name,
-            value: supplier.id,
-        }));
-    } catch (e) {
-        console.error('Error fetching suppliers list:', e);
-        supplierItems.value = [];
-    }
-};
-
-const fetchSupplierDetails = async (supplierId: number | string | null) => {
-    if (!supplierId) {
-        supplierData.value = null;
-        return;
-    }
-
-    try {
-        const res = await api.get<any>(`/suppliers/${supplierId}`);
-        supplierData.value = res.data || null;
-    } catch (e) {
-        console.error('Error fetching supplier details:', e);
-        supplierData.value = null;
-    }
-};
-
 const fetchSalesInvoicesByPurchaseOrder = async (
     purchaseOrderId: number | string | null,
     category: number | string | null
@@ -273,15 +236,11 @@ const fetchSalesInvoicesByPurchaseOrder = async (
 
     try {
         const params: Record<string, string | number | boolean> = {
-            with_items: true,
+            with_logistic_items: true,
             category,
             po_reference: poReference,
             modules: 'purchases'
         };
-
-        if (formData.value.supplier_id) {
-            params.supplier_id = formData.value.supplier_id;
-        }
 
         const res = await api.get<any>('/sales/invoices/list', {
             params,
@@ -292,7 +251,7 @@ const fetchSalesInvoicesByPurchaseOrder = async (
         salesInvoicesItems.value = list.map((invoice: any) => ({
             title: invoice.code || `فاتورة #${invoice.id ?? invoice.uuid ?? ''}`,
             value: invoice.id ?? invoice.uuid ?? invoice.code,
-            items: invoice.items || [],
+            items: invoice.logistic_items || [],
             summary: {
                 total_quantity: invoice.total_quantity || 0,
                 total_discount: invoice.total_discount || 0,
@@ -356,16 +315,15 @@ const fetchFormData = async () => {
     isLoading.value = true;
     isPopulatingForm.value = true;
     try {
-        const res = await api.get<any>(`/purchases/invoices/${routeId.value}`);
+        const res = await api.get<any>(`/purchases/invoices/logistics/${routeId.value}`);
         const data = res.data;
 
         if (data) {
             // Populate form data
             skipNextSupplierRefresh.value = true;
-            formData.value.supplier_id = data.supplier_id;
             formData.value.purchase_order_id = data.purchase_order_id;
             formData.value.category = data.category;
-            formData.value.fetch_item = data.fetch_item || DEFAULT_FETCH_ITEM;
+            formData.value.fetch_item = data.fetch_item;
             skipNextSaleOrderItemsFetch.value = true;
             skipNextSalesInvoicesFetch.value = true;
             formData.value.invoice_issues_datetime = normalizePoDateTime(data.invoice_issues_datetime) || '';
@@ -374,7 +332,6 @@ const fetchFormData = async () => {
             formData.value.project_name = data.project_name || '';
             formData.value.notes = data.notes;
             InvoiceCode.value = data.code || '';
-            await fetchSupplierDetails(data.supplier_id);
             if (data.category) {
                 await fetchOrdersByCategory(data.category);
                 if (data.purchase_order_id) {
@@ -418,7 +375,6 @@ const buildFormData = (): FormData => {
     const fd = new FormData();
 
     // Basic fields
-    fd.append('supplier_id', String(formData.value.supplier_id || ''));
     fd.append('purchase_order_id', String(formData.value.purchase_order_id || ''));
     fd.append('fetch_item', String(formData.value.fetch_item || ''));
     fd.append('category', String(formData.value.category || ''));
@@ -457,7 +413,6 @@ const buildFormData = (): FormData => {
 
 const resetFormState = async () => {
     formData.value = getDefaultFormData();
-    supplierData.value = null;
     productTableItems.value = [];
     InvoiceCode.value = '';
     ordersItems.value = [];
@@ -465,7 +420,7 @@ const resetFormState = async () => {
     summaryData.value = null;
     skipNextSaleOrderItemsFetch.value = false;
     skipNextSalesInvoicesFetch.value = false;
-    Object.keys(formErrors).forEach(key => delete formErrors[key]);
+    clearAllErrors();
     await nextTick();
     scrollToTop();
     if (formRef.value?.resetValidation) {
@@ -481,17 +436,17 @@ const handleSubmit = async (type: any) => {
         return;
     }
 
-    Object.keys(formErrors).forEach(key => delete formErrors[key]);
+    clearAllErrors();
     isSubmitting.value = true;
     try {
         const fd = buildFormData();
         let response;
         if (isEditMode.value) {
             // Edit mode - PUT request
-            response = await api.put(`/purchases/invoices/${routeId.value}`, fd);
+            response = await api.put(`/purchases/invoices/logistics/${routeId.value}`, fd);
         } else {
             // Create mode - POST request
-            response = await api.post('/purchases/invoices', fd);
+            response = await api.post('/purchases/invoices/logistics', fd);
         }
 
         success(isEditMode.value ? 'تم تحديث الفاتورة بنجاح' : 'تم إنشاء الفاتورة بنجاح');
@@ -500,18 +455,13 @@ const handleSubmit = async (type: any) => {
         if (type === 'createNew') {
             await resetFormState();
         } else if (type === 'backToList') {
-            router.push({ name: 'PurchaseInvoicesList' });
+            router.push({ name: 'PurchaseInvoicesLogisticsList' });
         }
 
     } catch (e: any) {
         console.error('Error submitting form:', e);
-        if (e?.response?.data?.errors) {
-            const apiErrors = e.response.data.errors;
-            Object.keys(apiErrors).forEach((key) => {
-                formErrors[key] = Array.isArray(apiErrors[key]) ? apiErrors[key][0] : apiErrors[key];
-            });
-        }
-        error(e?.response?.data?.message || 'حدث خطأ أثناء حفظ الفاتورة');
+        assignFieldErrors(e);
+        apiError(e, 'حدث خطأ أثناء حفظ الفاتورة');
     } finally {
         isSubmitting.value = false;
     }
@@ -568,25 +518,6 @@ const summaryTotalDue = computed(() =>
     0
 );
 
-watch(
-    () => formData.value.supplier_id,
-    (newVal) => {
-        fetchSupplierDetails(newVal);
-        if (!isPopulatingForm.value) {
-            formData.value.purchase_order_id = null;
-            formData.value.sales_ids = [];
-            ordersItems.value = [];
-            salesInvoicesItems.value = [];
-            productTableItems.value = [];
-            summaryData.value = null;
-            console.log('fff');
-
-            if (formData.value.category) {
-                fetchOrdersByCategory(formData.value.category);
-            }
-        }
-    }
-);
 
 watch(
     () => formData.value.category,
@@ -650,7 +581,6 @@ onMounted(async () => {
     pageLoading.value = true
     await Promise.all([
         fetchConstants(),
-        fetchSuppliers()
     ]);
 
     // Fetch form data if in edit mode
@@ -665,8 +595,8 @@ onMounted(async () => {
 <template>
     <default-layout>
         <div class="-mx-6 bg-qallab-dashboard-bg space-y-4">
-            <TopHeader :icon="fileCheckIcon" title-key="pages.PurchaseInvoices.FormTitle"
-                description-key="pages.PurchaseInvoices.FormDescription" :code="InvoiceCode" code-label="كود الفاتورة"
+            <TopHeader :icon="fileCheckIcon" title-key="pages.PurchaseInvoicesLogistics.FormTitle"
+                description-key="pages.PurchaseInvoicesLogistics.FormDescription" :code="InvoiceCode" code-label="كود الفاتورة"
                 :show-action="false" />
 
             <!-- Request Information Section -->
@@ -679,20 +609,13 @@ onMounted(async () => {
                 <v-form ref="formRef" v-model="isFormValid" @submit.prevent>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 gap-y-6">
                         <div>
-                            <SelectInput v-model="formData.supplier_id" :items="supplierItems" placeholder="اختر"
-                                label="اسم المورد" density="comfortable" :rules="[required()]"
-                                :error-messages="formErrors['category']"
-                                @update:model-value="clearFieldError('category')" clearable />
-                        </div>
-
-                        <div>
                             <SelectInput v-model="formData.category" :items="categoryOptions" placeholder="اختر"
                                 label="نوع الطلبية" density="comfortable" :rules="[required()]"
                                 :error-messages="formErrors['category']"
                                 @update:model-value="clearFieldError('category')" clearable />
                         </div>
 
-                        <div class="col-span-2">
+                        <div class="lg:col-span-2 xl:col-span-3">
                             <label class="block text-sm font-semibold text-gray-700 mb-2">سحب المنتجات</label>
                             <div class="mt-1">
                                 <v-radio-group v-model="formData.fetch_item" inline hide-details
@@ -708,28 +631,6 @@ onMounted(async () => {
                                         </template>
                                     </v-radio>
                                 </v-radio-group>
-                            </div>
-                        </div>
-
-                        <div v-if="supplierData"
-                            class="bg-gray-50 rounded-2xl p-6 md:col-span-2 lg:col-span-3 xl:col-span-4 gap-4 text-gray-700 text-xs border border-gray-300 border-dashed grid grid-cols-1  md:grid-cols-3">
-                            <!-- Name (Read-only) -->
-                            <div>
-                                <p class="mb-2 font-semibold mb-1">الاسم:</p>
-                                <p class="font-bold">{{ supplierName }}</p>
-                            </div>
-
-                            <!-- Tax Number (Read-only) -->
-                            <div>
-                                <p class="mb-2 font-semibold">الرقم الضريبي:</p>
-                                <p class=" font-bold">{{ supplierTaxNo }}</p>
-                            </div>
-
-                            <!-- Address (Read-only) -->
-                            <div>
-                                <p class="mb-2 font-semibold ">العنوان:</p>
-                                <p class=" font-bold">{{ (supplierAddress?.address_1 || '') + '—' +
-                                    (supplierAddress?.address_2 || '') }}</p>
                             </div>
                         </div>
 
@@ -766,10 +667,10 @@ onMounted(async () => {
 
                         <!-- Invoice Recipient Date -->
                         <div>
-                            <DateTimePickerInput v-model="formData.invoice_due_datetime" type="date"
+                            <DateTimePickerInput v-model="formData.invoice_due_datetime" :error-messages="formErrors['invoice_due_datetime']"
+                                @update:model-value="clearFieldError('invoice_due_datetime')" type="date"
                                 density="comfortable" placeholder="2024-03-01" label="تاريخ استحقاق الفاتورة" />
                         </div>
-
 
                         <!-- Project -->
                         <div>

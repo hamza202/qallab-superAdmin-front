@@ -63,8 +63,8 @@
               </v-list-item>
             </template>
             <div class="relative mt-1 ps-10 pe-4 text-sm">
-              <h2 class="text-sm font-medium leading-5 mb-2">إدارة المتجات</h2>
-              <ul class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
+              <h2 v-if="hasAnyProductsManagementPermission" class="text-sm font-medium leading-5 mb-2">إدارة المتجات</h2>
+              <ul v-if="hasAnyProductsManagementPermission" class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
                 <li v-if="canViewProducts" class="relative">
                   <router-link to="/simple-products/list" :class="[
                     isMenuItemActive('/simple-products/list')
@@ -109,10 +109,10 @@
                     قوائم القدرة الإنتاجية</router-link>
                 </li>
               </ul>
-              <h2 class="text-sm font-medium leading-5 my-2">
+              <h2 v-if="showProductSettingsSection" class="text-sm font-medium leading-5 my-2">
                 إعدادات المنتجات
               </h2>
-              <ul class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
+              <ul v-if="showProductSettingsSection" class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
                 <li v-if="canViewProductVariables" class="relative">
                   <router-link to="/product-variables/list" :class="[
                     isMenuItemActive('/product-variables/list')
@@ -202,7 +202,7 @@
           </v-list-group>
 
           <!-- المبيعات -->
-          <v-list-group value="sales" class="mt-1">
+          <v-list-group v-if="hasAnySalesPermission" value="sales" class="mt-1">
             <template #activator="{ props, isOpen }">
               <v-list-item v-bind="props" :class="[
                 { '!mx-1 gap-5': !isSidebarExpanded },
@@ -230,9 +230,9 @@
               </v-list-item>
             </template>
             <div class="relative mt-1 ps-10 pe-4 text-sm">
-              <h2 class="text-sm font-medium leading-5 mb-2">إدارة العملاء</h2>
-              <ul class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
-                <li class="relative">
+              <h2 v-if="showSalesCustomersSection" class="text-sm font-medium leading-5 mb-2">إدارة العملاء</h2>
+              <ul v-if="showSalesCustomersSection" class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
+                <li v-if="canViewCustomers" class="relative">
                   <router-link to="/customers/list" :class="[
                     isMenuItemActive('/customers/list')
                       ? 'font-bold text-qallab-yellow'
@@ -270,11 +270,11 @@
                   ]">إدارة المقاصة</router-link>
                 </li> -->
               </ul>
-              <h2 class="text-sm font-medium leading-5 my-2">
+              <h2 v-if="showSalesQuotationsSection" class="text-sm font-medium leading-5 my-2">
                 إدارة عروض الأسعار
               </h2>
-              <ul class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
-                <li class="relative">
+              <ul v-if="showSalesQuotationsSection" class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
+                <li v-if="canViewSalesBuildingMaterialSR" class="relative">
                   <router-link to="/sales/requests/material-product/list" :class="[
                     isMenuItemActive('/sales/requests/material-product')
                       ? 'font-bold text-qallab-yellow'
@@ -282,7 +282,7 @@
                   ]">
                     طلب عروض أسعار مواد أولية</router-link>
                 </li>
-                <li class="relative">
+                <li v-if="canViewSalesBuildingMaterialSQ" class="relative">
                   <router-link to="/sales/quotations/material-product/list" :class="[
                     isMenuItemActive('/sales/quotations/material-product')
                       ? 'font-bold text-qallab-yellow'
@@ -290,7 +290,7 @@
                   ]">
                     عروض أسعار مواد أولية</router-link>
                 </li>
-                <li class="relative">
+                <li v-if="canViewSalesFuelSR" class="relative">
                   <router-link to="/sales/requests/fuels/list" :class="[
                     $route.path.includes('/sales/requests/fuels')
                       ? 'font-bold text-qallab-yellow'
@@ -299,7 +299,7 @@
                     طلب عروض أسعار محروقات
                   </router-link>
                 </li>
-                <li class="relative">
+                <li v-if="canViewSalesFuelSQ" class="relative">
                   <router-link to="/sales/quotations/fuels/list" :class="[
                     $route.path.includes('/sales/quotations/fuels')
                       ? 'font-bold text-qallab-yellow'
@@ -307,12 +307,12 @@
                   ]">
                     عروض أسعار المحروقات</router-link>
                 </li>
-                <li class="relative">
+                <li v-if="canViewSalesLogisticsSR" class="relative">
                   <router-link to="/sales/requests/logistics/list"
                     :class="[isMenuItemActive('/sales/requests/logistics') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                     طلب عرض سعر خدمة نقل</router-link>
                 </li>
-                <li class="relative">
+                <li v-if="canViewSalesLogisticsSQ" class="relative">
                   <router-link to="/sales/quotations/logistics/list"
                     :class="[isMenuItemActive('/sales/quotations/logistics') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                     عروض أسعار خدمة نقل</router-link>
@@ -320,11 +320,11 @@
 
               </ul>
 
-              <h2 class="text-sm font-medium leading-5 my-2">
+              <h2 v-if="showSalesOrdersSection" class="text-sm font-medium leading-5 my-2">
                 طلبيات المبيعات
               </h2>
-              <ul class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
-                <li class="relative">
+              <ul v-if="showSalesOrdersSection" class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
+                <li v-if="canViewSalesBuildingMaterialSO" class="relative">
                   <router-link to="/sales/orders/material-product/list" :class="[
                     isMenuItemActive('/sales/orders/material-product')
                       ? 'font-bold text-qallab-yellow'
@@ -332,7 +332,7 @@
                   ]">
                     طلبيات بناء مواد اولية</router-link>
                 </li>
-                <li class="relative">
+                <li v-if="canViewSalesFuelSO" class="relative">
                   <router-link to="/sales/orders/fuels/list" :class="[
                     $route.path.includes('/sales/orders/fuels')
                       ? 'font-bold text-qallab-yellow'
@@ -340,7 +340,7 @@
                   ]">
                     طلبيات محروقات</router-link>
                 </li>
-                <li class="relative">
+                <li v-if="canViewSalesLogisticsSO" class="relative">
                   <router-link to="/sales/orders/logistics/list" :class="[
                     $route.path.includes('/sales/orders/logistics')
                       ? 'font-bold text-qallab-yellow'
@@ -348,7 +348,7 @@
                   ]">
                     طلبيات خدمة نقل</router-link>
                 </li>
-                <li class="relative">
+                <li v-if="canViewSalesSoPickups" class="relative">
                   <router-link to="/sales/so-pickups/list" :class="[
                     $route.path.includes('/sales/so-pickups')
                       ? 'font-bold text-qallab-yellow'
@@ -356,17 +356,17 @@
                   ]">
                     حجوزات التسليم</router-link>
                 </li>
-                <li class="relative">
+                <li v-if="canViewSalesTripManagement" class="relative">
                   <router-link to="/sales/trips/list"
                     :class="[$route.path.includes('/sales/trips') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                     جدول الرحلات</router-link>
                 </li>
               </ul>
-              <h2 class="text-sm font-medium leading-5 my-2">
+              <h2 v-if="showSalesDeliveryDocsSection" class="text-sm font-medium leading-5 my-2">
                 وثائق التسليم
               </h2>
-              <ul class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
-                <li class="relative">
+              <ul v-if="showSalesDeliveryDocsSection" class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
+                <li v-if="canViewSalesDeliveryDocs" class="relative">
                   <router-link to="/sales/delivery-docs/list" :class="[
                     $route.path.includes('/sales/delivery-docs') && !$route.path.includes('/sales/delivery-docs-logistics')
                       ? 'font-bold text-qallab-yellow'
@@ -374,7 +374,7 @@
                   ]">
                     وثائق التسليم</router-link>
                 </li>
-                <li class="relative">
+                <li v-if="canViewSalesLogisticsDeliveryDocs" class="relative">
                   <router-link to="/sales/delivery-docs-logistics/list" :class="[
                     $route.path.includes('/sales/delivery-docs-logistics')
                       ? 'font-bold text-qallab-yellow'
@@ -383,11 +383,11 @@
                     وثائق تسليم خدمات النقل</router-link>
                 </li>
               </ul>
-              <h2 class="text-sm font-medium leading-5 my-2">
+              <h2 v-if="showSalesInvoicesSection" class="text-sm font-medium leading-5 my-2">
                 فواتير المبيعات
               </h2>
-              <ul class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5 mb-3">
-                <li class="relative">
+              <ul v-if="showSalesInvoicesSection" class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5 mb-3">
+                <li v-if="canViewSalesSaleInvoices" class="relative">
                   <router-link to="/sales/invoices/list" :class="[
                     isMenuItemActive('/sales/invoices')
                       ? 'font-bold text-qallab-yellow'
@@ -395,7 +395,7 @@
                   ]">
                     فواتير المبيعات</router-link>
                 </li>
-                <li class="relative">
+                <li v-if="canViewSalesLogisticsSaleInvoices" class="relative">
                   <router-link to="/sales/logistics-invoices/list" :class="[
                     isMenuItemActive('/sales/logistics-invoices')
                       ? 'font-bold text-qallab-yellow'
@@ -403,7 +403,7 @@
                   ]">
                     فواتير مبيعات خدمة نقل</router-link>
                 </li>
-                <li class="relative">
+                <li v-if="canViewSalesSaleInvoices" class="relative">
                   <router-link to="/sales/payments/list" :class="[
                     isMenuItemActive('/sales/payments')
                       ? 'font-bold text-qallab-yellow'
@@ -466,7 +466,7 @@
           </v-list-group> -->
 
           <!-- المشتريات -->
-          <v-list-group value="purchases" class="mt-1">
+          <v-list-group v-if="hasAnyPurchasesPermission" value="purchases" class="mt-1">
             <template #activator="{ props, isOpen }">
               <v-list-item v-bind="props" :class="[
                 { '!mx-1 gap-5': !isSidebarExpanded },
@@ -494,9 +494,9 @@
               </v-list-item>
             </template>
             <div class="relative mt-1 ps-10 pe-4 text-sm">
-              <h2 class="text-sm font-medium leading-5 mb-2">إدارة الموردين</h2>
-              <ul class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
-                <li class="relative">
+              <h2 v-if="showPurchasesSuppliersSection" class="text-sm font-medium leading-5 mb-2">إدارة الموردين</h2>
+              <ul v-if="showPurchasesSuppliersSection" class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
+                <li v-if="canViewSuppliers" class="relative">
                   <router-link to="/suppliers/list" :class="[
                     isMenuItemActive('/suppliers/list')
                       ? 'font-bold text-qallab-yellow'
@@ -514,17 +514,17 @@
                     تسوية حساب موردين</router-link>
                 </li> -->
               </ul>
-              <h2 class="text-sm font-medium leading-5 my-2">
+              <h2 v-if="showPurchasesQuotationsSection" class="text-sm font-medium leading-5 my-2">
                 إدارة عروض الأسعار
               </h2>
-              <ul class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
+              <ul v-if="showPurchasesQuotationsSection" class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
                 <!-- <li  class="relative">
                                     v-if="canViewRequestForQuotations"
                                     <router-link to="/purchases/requests/request-for-quotation/create"
                                         :class="[isMenuItemActive('/purchases/requests/request-for-quotation') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                                         طلب عروض الأسعار</router-link>
                                 </li> -->
-                <li class="relative">
+                <li v-if="canViewPurchasesBuildingMaterialPR" class="relative">
                   <router-link to="/purchases/requests/material-product/list" :class="[
                     isMenuItemActive('/purchases/requests/material-product')
                       ? 'font-bold text-qallab-yellow'
@@ -532,7 +532,7 @@
                   ]">
                     طلب عروض أسعار مواد أولية</router-link>
                 </li>
-                <li class="relative">
+                <li v-if="canViewPurchasesBuildingMaterialPQ" class="relative">
                   <router-link to="/purchases/quotations/material-product/list" :class="[
                     isMenuItemActive('/purchases/quotations/material-product')
                       ? 'font-bold text-qallab-yellow'
@@ -540,12 +540,12 @@
                   ]">
                     عروض اسعار مواد اوليه</router-link>
                 </li>
-                <li class="relative">
+                <li v-if="canViewPurchasesLogisticsPR" class="relative">
                   <router-link to="/purchases/requests/logistics/list"
                     :class="[isMenuItemActive('/purchases/requests/logistics') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
                     طلب عرض سعر خدمة نقل</router-link>
                 </li>
-                <li class="relative">
+                <li v-if="canViewPurchasesLogisticsPQ" class="relative">
                   <router-link to="/purchases/quotations/logistics/list" :class="[
                     isMenuItemActive('/purchases/quotations/logistics')
                       ? 'font-bold text-qallab-yellow'
@@ -554,7 +554,7 @@
                     عروض اسعار خدمة نقل</router-link>
                 </li>
 
-                <li class="relative">
+                <li v-if="canViewPurchasesFuelPR" class="relative">
                   <router-link to="/purchases/requests/fuels/list" :class="[
                     isMenuItemActive('/purchases/requests/fuels')
                       ? 'font-bold text-qallab-yellow'
@@ -562,7 +562,7 @@
                   ]">
                     طلب عروض أسعار محروقات</router-link>
                 </li>
-                <li class="relative">
+                <li v-if="canViewPurchasesFuelPQ" class="relative">
                   <router-link to="/purchases/quotations/fuels/list" :class="[
                     isMenuItemActive('/purchases/quotations/fuels')
                       ? 'font-bold text-qallab-yellow'
@@ -571,11 +571,11 @@
                     عروض أسعار محروقات</router-link>
                 </li>
               </ul>
-              <h2 class="text-sm font-medium leading-5 my-2">
+              <h2 v-if="showPurchasesOrdersSection" class="text-sm font-medium leading-5 my-2">
                 طلبيات المشتريات
               </h2>
-              <ul class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
-                <li class="relative">
+              <ul v-if="showPurchasesOrdersSection" class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
+                <li v-if="canViewPurchasesBuildingMaterialPO" class="relative">
                   <router-link to="/purchases/orders/material-product/list" :class="[
                     isMenuItemActive('/purchases/orders/material-product')
                       ? 'font-bold text-qallab-yellow'
@@ -583,12 +583,12 @@
                   ]">
                     طلبيات مواد بناء اولية</router-link>
                 </li>
-                <li class="relative">
+                <li v-if="canViewPurchasesLogisticsPO" class="relative">
                   <router-link to="/purchases/orders/logistics/list"
                     :class="isMenuItemActive('/purchases/orders/logistics') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow'">
                     طلبيات خدمة النقل</router-link>
                 </li>
-                <li class="relative">
+                <li v-if="canViewPurchasesFuelPO" class="relative">
                   <router-link to="/purchases/orders/fuels/list" :class="[
                     isMenuItemActive('/purchases/orders/fuels')
                       ? 'font-bold text-qallab-yellow'
@@ -597,11 +597,11 @@
                     طلبيات محروقات</router-link>
                 </li>
               </ul>
-              <h2 class="text-sm font-medium leading-5 my-2">
+              <h2 v-if="showPurchasesReceivingDocsSection" class="text-sm font-medium leading-5 my-2">
                 وثائق الأستلام
               </h2>
-              <ul class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
-                <li class="relative">
+              <ul v-if="showPurchasesReceivingDocsSection" class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
+                <li v-if="canViewPurchasesReceivingDocs" class="relative">
                   <router-link to="/purchases/receiving-docs/list" :class="[
                     isMenuItemActive('/purchases/receiving-docs') && !$route.path.includes('/purchases/receiving-docs-logistics')
                       ? 'font-bold text-qallab-yellow'
@@ -609,7 +609,7 @@
                   ]">
                     وثائق الأستلام</router-link>
                 </li>
-                <li class="relative">
+                <li v-if="canViewPurchasesLogisticsReceivingDocs" class="relative">
                   <router-link to="/purchases/receiving-docs-logistics/list" :class="[
                     $route.path.includes('/purchases/receiving-docs-logistics')
                       ? 'font-bold text-qallab-yellow'
@@ -618,17 +618,25 @@
                     وثائق استلام خدمات النقل</router-link>
                 </li>
               </ul>
-              <h2 class="text-sm font-medium leading-5 my-2">
+              <h2 v-if="showPurchasesInvoicesSection" class="text-sm font-medium leading-5 my-2">
                 فواتير المشتريات
               </h2>
-              <ul class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
-                <li class="relative">
+              <ul v-if="showPurchasesInvoicesSection" class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
+                <li v-if="canViewPurchaseInvoices" class="relative">
                   <router-link to="/purchases/invoices/list" :class="[
-                    isMenuItemActive('/purchases/invoices')
+                    $route.path.includes('/purchases/invoices') && !$route.path.includes('/purchases/invoices/logistics')
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
                     فواتير المشتريات</router-link>
+                </li>
+                <li v-if="canViewLogisticsPurchaseInvoices" class="relative">
+                  <router-link to="/purchases/invoices/logistics/list" :class="[
+                    $route.path.includes('/purchases/invoices/logistics')
+                      ? 'font-bold text-qallab-yellow'
+                      : 'text-white hover:text-qallab-yellow',
+                  ]">
+                    فاتورة مشتريات خدمة نقل</router-link>
                 </li>
               </ul>
             </div>
@@ -901,10 +909,10 @@
               </v-list-item>
             </template>
             <div class="relative mt-1 ps-10 pe-4 text-sm">
-              <h2 class="text-sm font-medium leading-5 mb-2">
+              <h2 v-if="showSettingsBasicSection" class="text-sm font-medium leading-5 mb-2">
                 الإعدادات الاساسية
               </h2>
-              <ul class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
+              <ul v-if="showSettingsBasicSection" class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
                 <li v-if="canViewCategories" class="relative">
                   <router-link to="/settings/products-categories/list" :class="[
                     isMenuItemActive('/settings/products-categories/list')
@@ -980,8 +988,8 @@
                     تقسيمات النطاقات الجغرافية</router-link>
                 </li>
               </ul>
-              <h2 class="text-sm font-medium leading-5 my-2">إدارة الضرائب</h2>
-              <ul class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
+              <h2 v-if="showSettingsTaxesSection" class="text-sm font-medium leading-5 my-2">إدارة الضرائب</h2>
+              <ul v-if="showSettingsTaxesSection" class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
                 <li v-if="canViewTaxes" class="relative">
                   <router-link to="/settings/tax-rules/list" :class="[
                     isMenuItemActive('/settings/tax-rules/list')
@@ -1000,8 +1008,8 @@
                     الضرائب</router-link>
                 </li>
               </ul>
-              <h2 class="text-sm font-medium leading-5 my-2">الدول والعملات</h2>
-              <ul class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
+              <h2 v-if="showSettingsCountriesCurrenciesSection" class="text-sm font-medium leading-5 my-2">الدول والعملات</h2>
+              <ul v-if="showSettingsCountriesCurrenciesSection" class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
                 <li v-if="canViewCountries" class="relative">
                   <router-link to="/settings/countries/list" :class="[
                     isMenuItemActive('/settings/countries/list')
@@ -1029,8 +1037,8 @@
                     إدارة العملات</router-link>
                 </li>
               </ul>
-              <h2 class="text-sm font-medium leading-5 my-2">إعدادات متقدمة</h2>
-              <ul class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
+              <h2 v-if="showSettingsAdvancedSection" class="text-sm font-medium leading-5 my-2">إعدادات متقدمة</h2>
+              <ul v-if="showSettingsAdvancedSection" class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
                 <li v-if="canViewCodesSettings" class="relative">
                   <router-link to="/settings/codes" :class="[
                     isMenuItemActive('/settings/codes')
@@ -1166,6 +1174,7 @@ const {
   canViewProductVariables,
   canViewProductSettings,
   hasAnyProductPermission,
+  hasAnyProductsManagementPermission,
   // Services
   canViewServices,
   canViewSubscriptions,
@@ -1179,6 +1188,21 @@ const {
   canViewContracts,
   canViewClearing,
   canViewBuildingMaterialPriceOffer,
+  canViewSalesFuelSR,
+  canViewSalesFuelSQ,
+  canViewSalesFuelSO,
+  canViewSalesBuildingMaterialSR,
+  canViewSalesBuildingMaterialSQ,
+  canViewSalesBuildingMaterialSO,
+  canViewSalesLogisticsSR,
+  canViewSalesLogisticsSQ,
+  canViewSalesLogisticsSO,
+  canViewSalesLogisticsSaleInvoices,
+  canViewSalesLogisticsDeliveryDocs,
+  canViewSalesSaleInvoices,
+  canViewSalesDeliveryDocs,
+  canViewSalesSoPickups,
+  canViewSalesTripManagement,
   hasAnySalesPermission,
   // Projects
   canViewProjects,
@@ -1188,6 +1212,19 @@ const {
   canViewSuppliers,
   canViewSupplierSettlements,
   canViewBuildingMaterialPriceRequests,
+  canViewPurchasesFuelPR,
+  canViewPurchasesFuelPQ,
+  canViewPurchasesFuelPO,
+  canViewPurchasesBuildingMaterialPR,
+  canViewPurchasesBuildingMaterialPQ,
+  canViewPurchasesBuildingMaterialPO,
+  canViewPurchasesLogisticsPR,
+  canViewPurchasesLogisticsPQ,
+  canViewPurchasesLogisticsPO,
+  canViewLogisticsPurchaseInvoices,
+  canViewPurchaseInvoices,
+  canViewPurchasesReceivingDocs,
+  canViewPurchasesLogisticsReceivingDocs,
   hasAnyPurchasesPermission,
   // Finance
   canViewFinancialDashboard,
@@ -1228,6 +1265,22 @@ const {
   canViewCodesSettings,
   canViewAccountTypes,
   hasAnySettingsPermission,
+  // Sidebar section visibility
+  showProductSettingsSection,
+  showSalesCustomersSection,
+  showSalesQuotationsSection,
+  showSalesOrdersSection,
+  showSalesDeliveryDocsSection,
+  showSalesInvoicesSection,
+  showPurchasesSuppliersSection,
+  showPurchasesQuotationsSection,
+  showPurchasesOrdersSection,
+  showPurchasesReceivingDocsSection,
+  showPurchasesInvoicesSection,
+  showSettingsBasicSection,
+  showSettingsTaxesSection,
+  showSettingsCountriesCurrenciesSection,
+  showSettingsAdvancedSection,
 } = usePermissions();
 
 // Define routes for each dropdown group
