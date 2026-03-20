@@ -91,7 +91,8 @@ const routePermissionMap: Record<string, { group: string; key: string | string[]
     '/purchases/requests/logistics': { group: 'purchases', key: 'logistics-pr' },
     '/purchases/quotations/logistics': { group: 'purchases', key: 'logistics-pq' },
     '/purchases/orders/logistics': { group: 'purchases', key: 'logistics-po' },
-    '/purchases/invoices': { group: 'purchases', key: ['purchase-invoices', 'logistics-purchase-invoices'] },
+    '/purchases/invoices/logistics': { group: 'purchases', key: 'logistics-purchase-invoices' },
+    '/purchases/invoices': { group: 'purchases', key: 'purchase-invoices' },
     '/purchases/receiving-docs-logistics': { group: 'purchases', key: 'logistics-receiving-docs' },
     '/purchases/receiving-docs': { group: 'purchases', key: 'receiving-docs' },
 

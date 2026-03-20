@@ -622,13 +622,21 @@
                 فواتير المشتريات
               </h2>
               <ul v-if="showPurchasesInvoicesSection" class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
-                <li v-if="canViewPurchaseInvoices || canViewLogisticsPurchaseInvoices" class="relative">
+                <li v-if="canViewPurchaseInvoices" class="relative">
                   <router-link to="/purchases/invoices/list" :class="[
-                    isMenuItemActive('/purchases/invoices')
+                    $route.path.includes('/purchases/invoices') && !$route.path.includes('/purchases/invoices/logistics')
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
                     فواتير المشتريات</router-link>
+                </li>
+                <li v-if="canViewLogisticsPurchaseInvoices" class="relative">
+                  <router-link to="/purchases/invoices/logistics/list" :class="[
+                    $route.path.includes('/purchases/invoices/logistics')
+                      ? 'font-bold text-qallab-yellow'
+                      : 'text-white hover:text-qallab-yellow',
+                  ]">
+                    فاتورة مشتريات خدمة نقل</router-link>
                 </li>
               </ul>
             </div>
