@@ -37,6 +37,7 @@ const routeId = computed(() => route.params.id as string);
 const pickupId = computed(() => route.params.pickupId as string)
 const isLoading = ref(false);
 const isSubmitting = ref(false);
+const isFormDataLoaded = ref(false);
 const saleOrderId = computed(() => route.query.sale_order_id as string | undefined);
 const routeFrom = computed(() => route.query.from as string | undefined);
 
@@ -51,7 +52,6 @@ const selectedSoLogisticId = ref<number | null>(null);
 const loadingSoLogistics = ref(false);
 
 // Edit mode specific fields
-const customerItems = ref<{ title: string; value: number }[]>([]);
 const selectedCustomerId = ref<number | null>(null);
 const customerSaleOrderItems = ref<{ title: string; value: number }[]>([]);
 const selectedCustomerSaleOrderId = ref<number | null>(null);
@@ -86,7 +86,6 @@ const formData = ref({
 
 const unitItems = ref<any[]>([]);
 const transportTypeItems = ref<any[]>([]);
-const supplierItems = ref<any[]>([]);
 const productTableItems = ref<ProductTableItem[]>([]);
 const showAddProductDialog = ref(false);
 const editingProduct = ref<any>(null);
@@ -115,31 +114,90 @@ const fetchConstants = async () => {
   }
 }
 
-const fetchSuppliers = async () => {
-  try {
-    const res = await api.get<any>('/suppliers/list', {
-      params: {
-        service_type: 'logistic_company'
-      }
+const fetchSuppliers = async (search = '', cursor?: string, perPage = 15) => {
+  if (isEditMode.value && !isFormDataLoaded.value) {
+    await new Promise(resolve => {
+      const checkInterval = setInterval(() => {
+        if (isFormDataLoaded.value) {
+          clearInterval(checkInterval);
+          resolve(true);
+        }
+      }, 50);
+      setTimeout(() => {
+        clearInterval(checkInterval);
+        resolve(true);
+      }, 5000);
     });
-    if (Array.isArray(res.data)) {
-      supplierItems.value = res.data.map((i: any) => ({ title: i.full_name, value: i.id }));
-    }
-  } catch (e) {
-    console.error('Error fetching suppliers:', e);
   }
-}
+
+  const params: any = { 
+    per_page: perPage,
+    service_type: 'logistic_company'
+  };
+  if (search) {
+    params.name = search;
+  }
+  if (cursor) {
+    params.cursor = cursor;
+  }
+  if (formData.value.supplier_logistic_id) {
+    params.order_by_id = formData.value.supplier_logistic_id;
+  }
+
+  const res = await api.get<any>('/suppliers/list', { params });
+
+  return {
+    data: res.data || [],
+    next_cursor: res.pagination?.next_cursor || null,
+  };
+};
+
+const waitForCustomerData = async () => {
+  if (!isEditMode.value) return;
+
+  if (isFormDataLoaded.value && selectedCustomerId.value) {
+    return;
+  }
+
+  await new Promise(resolve => {
+    const checkInterval = setInterval(() => {
+      if (isFormDataLoaded.value && selectedCustomerId.value) {
+        clearInterval(checkInterval);
+        clearTimeout(timeoutId);
+        resolve(true);
+      }
+    }, 10);
+
+    const timeoutId = setTimeout(() => {
+      clearInterval(checkInterval);
+      resolve(true);
+    }, 5000);
+  });
+};
 
 // Fetch customers for edit mode
-const fetchCustomers = async () => {
-  try {
-    const res = await api.get<any>('/customers/list');
-    if (Array.isArray(res.data)) {
-      customerItems.value = res.data.map((i: any) => ({ title: i.full_name, value: i.id }));
-    }
-  } catch (e) {
-    console.error('Error fetching customers:', e);
+const fetchCustomers = async (search = '', cursor?: string, perPage = 15) => {
+  if (isEditMode.value) {
+    await waitForCustomerData();
   }
+
+  const params: any = { per_page: perPage };
+  if (search) {
+    params.name = search;
+  }
+  if (cursor) {
+    params.cursor = cursor;
+  }
+  if (selectedCustomerId.value) {
+    params.order_by_id = selectedCustomerId.value;
+  }
+
+  const res = await api.get<any>('/customers/list', { params });
+
+  return {
+    data: res.data || [],
+    next_cursor: res.pagination?.next_cursor || null,
+  };
 };
 
 // Fetch customer sale orders for edit mode
@@ -718,6 +776,8 @@ const fetchFormData = async () => {
     if (data.customer_id) {
       selectedCustomerId.value = data.customer_id;
       hasCustomerDataFromApi.value = true; // Mark that customer data came from API
+      // Allow customer select to fetch once customer_id is ready
+      isFormDataLoaded.value = true;
       // Fetch customer sale orders list after setting customer
       await fetchCustomerSaleOrders();
     }
@@ -728,8 +788,10 @@ const fetchFormData = async () => {
   } catch (err: any) {
     console.error('Error fetching trip data:', err);
     error(err?.response?.data?.message || 'فشل تحميل بيانات الرحلة');
+    isFormDataLoaded.value = true;
   } finally {
     isLoading.value = false;
+    isFormDataLoaded.value = true;
   }
 };
 
@@ -1083,12 +1145,8 @@ watch(selectedCustomerId, (newVal) => {
 onMounted(async () => {
   fetchUnits();
   fetchConstants();
-  fetchSuppliers();
   
-  // Fetch customers only in edit mode
-  if (isEditMode.value) {
-    fetchCustomers();
-  }
+  // Customer data will be loaded via server-side select in edit mode
   
   if (routeId.value) {
     await fetchFormData();
@@ -1122,10 +1180,12 @@ onMounted(async () => {
         <v-form ref="formRef" v-model="isFormValid" @submit.prevent>
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-6">
             <div>
-              <selectInput :items="supplierItems" v-model="formData.supplier_logistic_id" label="شركة النقل"
+              <selectInput :items="[]" v-model="formData.supplier_logistic_id" label="شركة النقل"
                 density="comfortable" placeholder="اختر" :hide-details="false" :rules="[required()]"
                 :error-messages="formErrors['supplier_logistic_id']"
-                @update:model-value="delete formErrors['supplier_logistic_id']" />
+                @update:model-value="delete formErrors['supplier_logistic_id']"
+                :server-side="true" :fetch-function="fetchSuppliers"
+                item-title-key="full_name" item-value-key="id" :debounce-time="500" />
             </div>
             <!-- Logistics Order Select - Only shown when coming from material-product page OR in edit mode -->
             <div v-if="isFromMaterialProduct || isEditMode">
@@ -1144,13 +1204,19 @@ onMounted(async () => {
             <!-- Customer Select - Only shown in edit mode -->
             <div v-if="isEditMode">
               <selectInput 
-                :items="customerItems" 
+                :items="[]" 
                 v-model="selectedCustomerId" 
                 label="العميل"
                 density="comfortable" 
                 placeholder="اختر العميل" 
-                :hide-details="false"
+                item-title="title"
+                item-value="value"
                 :disabled="hasCustomerDataFromApi"
+                :server-side="true"
+                :fetch-function="fetchCustomers"
+                item-title-key="full_name"
+                item-value-key="id"
+                :debounce-time="500"
               />
             </div>
             

@@ -23,13 +23,13 @@ const isEditMode = computed(() => !!route.params.id);
 const routeId = computed(() => route.params.id as string);
 const isLoading = ref(false);
 const isSubmitting = ref(false);
+const isFormDataLoaded = ref(false);
 
 const requestTypeItems = ref<any[]>([]);
 const paymentMethodItems = ref<any[]>([]);
 const transportTypeItems = ref<any[]>([]);
 const amPmIntervalItems = ref<any[]>([]);
 const unitItems = ref<any[]>([]);
-const supplierItems = ref<any[]>([]);
 const actualExecutionIntervalItems = ref<any[]>([]);
 const categoriesItems = ref<any[]>([]);
 
@@ -64,19 +64,51 @@ const fetchConstants = async () => {
     }
 }
 
-const fetchSuppliers = async () => {
-    try {
-        const res = await api.get<any>('/suppliers/list', {
-            params: {
-                service_type: 'logistic_company'
-            }
-        });
-        if (Array.isArray(res.data)) {
-            supplierItems.value = res.data.map((i: any) => ({ title: i.full_name, value: i.id }));
-        }
-    } catch (e) {
-        console.error('Error fetching suppliers:', e);
+const waitForCustomerData = async () => {
+    if (!isEditMode.value) return;
+
+    if (isFormDataLoaded.value && formData.value.customer_id) {
+        return;
     }
+
+    await new Promise(resolve => {
+        const checkInterval = setInterval(() => {
+            if (isFormDataLoaded.value && formData.value.customer_id) {
+                clearInterval(checkInterval);
+                clearTimeout(timeoutId);
+                resolve(true);
+            }
+        }, 10);
+
+        const timeoutId = setTimeout(() => {
+            clearInterval(checkInterval);
+            resolve(true);
+        }, 5000);
+    });
+};
+
+const fetchCustomers = async (search = '', cursor?: string, perPage = 15) => {
+    if (isEditMode.value) {
+        await waitForCustomerData();
+    }
+
+    const params: any = { per_page: perPage };
+    if (search) {
+        params.name = search;
+    }
+    if (cursor) {
+        params.cursor = cursor;
+    }
+    if (formData.value.customer_id) {
+        params.order_by_id = formData.value.customer_id;
+    }
+
+    const res = await api.get<any>('/customers/list', { params });
+
+    return {
+        data: res.data || [],
+        next_cursor: res.pagination?.next_cursor || null,
+    };
 }
 
 const fetchUnits = async () => {
@@ -122,6 +154,9 @@ const fetchFormData = async () => {
             formData.value.request_datetime = data.request_datetime ? String(data.request_datetime) : '';
             formData.value.project_name = data.project_name || '';
             formData.value.paymentMethod = data.payment_method;
+            formData.value.customer_id = data.customer_id;
+            // Set flag immediately after customer_id is populated so SelectInput can proceed
+            isFormDataLoaded.value = true;
             formData.value.advancePayment = data.upfront_payment;
             formData.value.target_location = data.target_location;
             formData.value.target_latitude = data.target_latitude;
@@ -188,6 +223,7 @@ const fetchFormData = async () => {
         }
     } catch (e) {
         console.error('Error fetching form data:', e);
+        isFormDataLoaded.value = true;
     } finally {
         isLoading.value = false;
     }
@@ -231,6 +267,7 @@ const formData = ref({
     requestNumber: '',
     responsible_person: '',
     responsible_phone: '',
+    customer_id: '',
     project_name: '',
     target_location: null as string | null,
     target_latitude: null as string | null,
@@ -389,6 +426,7 @@ const resetForm = () => {
         responsible_person: '',
         responsible_phone: '',
         project_name: '',
+        customer_id: '',
         target_location: null,
         target_latitude: null,
         target_longitude: null,
@@ -634,12 +672,11 @@ const handleNewRequest = () => {
 };
 
 onMounted(async () => {
-    fetchConstants()
-    fetchUnits()
-    fetchSuppliers()
-    fetchCategories()
-
-    // Fetch form data if in edit mode
+    await Promise.all([
+        fetchConstants(),
+        fetchUnits(),
+        fetchCategories()
+    ]);  // Fetch form data if in edit mode
     if (isEditMode.value) {
         await fetchFormData();
     }
@@ -673,6 +710,15 @@ onMounted(async () => {
                         <div>
                             <DatePickerInput v-model="formData.request_datetime" label="تاريخ الطلب"
                                 placeholder="2024-03-01" density="comfortable" :disabled="isEditMode" />
+                        </div>
+
+                        <!-- Supplier Name -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">اسم العميل</label>
+                            <SelectInput :items="[]" disabled v-model="formData.customer_id" :server-side="true"
+                                :fetch-function="fetchCustomers" item-title-key="full_name" item-value-key="id"
+                                :rules="[required()]" density="comfortable"
+                                placeholder="حدد العميل" :debounce-time="500" />
                         </div>
 
                         <!-- Responsible Phone -->
@@ -772,7 +818,7 @@ onMounted(async () => {
                                 <div class="info-item-bordered  px-4 py-2">
                                     <label class="font-semibold text-sm text-gray-500 mb-2 block">مدة التنفيذ</label>
                                     <p class="text-base font-semibold text-gray-900">{{ detail.actual_execution_interval
-                                        }}
+                                    }}
                                     </p>
                                 </div>
                                 <v-divider vertical class="my-6"></v-divider>
@@ -811,7 +857,7 @@ onMounted(async () => {
                                     <label class="font-semibold text-sm text-gray-500 mb-2 block">مسؤول التفريغ
                                     </label>
                                     <p class="text-base font-semibold text-gray-900">{{ detail.loading_responsible_party
-                                        }} </p>
+                                    }} </p>
                                 </div>
                                 <v-divider vertical class="my-6"></v-divider>
                                 <div class="info-item-bordered px-4 py-2">
