@@ -127,12 +127,12 @@ export const settingsRoutes: RouteRecordRaw[] = [
   },
   {
     path: "/settings/factories",
-    name: "Factories",
+    name: "SettingsFactories",
     redirect: "/settings/factories/list",
     children: [
       {
         path: "list",
-        name: "FactoriesList",
+        name: "SettingsFactoriesList",
         component: () => import("@/views/settings/factories/List.vue"),
         meta: {
           title: "pages.factories.title",
