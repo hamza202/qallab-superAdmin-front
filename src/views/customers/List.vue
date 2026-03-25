@@ -13,7 +13,7 @@ const api = useApi();
 const { success, error } = useNotification();
 
 // Table column management
-const TABLE_NAME = 'admin_customers';
+const tableName = ref('');
 const {
     allHeaders,
     shownHeaders,
@@ -22,7 +22,7 @@ const {
     headerCheckStates,
     initHeaders,
     toggleHeader,
-} = useTableColumns(TABLE_NAME);
+} = useTableColumns(tableName);
 
 // TypeScript Interfaces
 interface CustomerAction {
@@ -133,6 +133,9 @@ const fetchList = async (cursor?: string | null, append = false) => {
             tableItems.value = Array.isArray(body?.data) ? body.data : [];
             canCreate.value = body?.actions?.can_create ?? false;
             canBulkDelete.value = body?.actions?.can_bulk_delete ?? false;
+            if (body?.header_table) {
+                tableName.value = body.header_table;
+            }
             initHeaders(body?.headers ?? [], body?.shownHeaders ?? []);
         }
 

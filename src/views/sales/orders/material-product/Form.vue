@@ -33,12 +33,13 @@ const router = useRouter();
 // Check if we're in edit mode
 const isEditMode = computed(() => !!route.params.id);
 const routeId = computed(() => route.params.id as string);
+const isLoading = ref(false);
+const isSubmitting = ref(false);
+const isFormDataLoaded = ref(false);
 // Check if creating order from quotation
 const fromQuotationId = computed(() => route.query.from_quotation as string | undefined);
 const fromQuotationCode = computed(() => route.query.quotation_code as string | undefined);
 const saleQuotationId = computed(() => route.query.sale_quotation_id as string | undefined);
-const isLoading = ref(false);
-const isSubmitting = ref(false);
 
 const requestTypeItems = ref<any[]>([]);
 const paymentMethodItems = ref<any[]>([]);
@@ -46,7 +47,6 @@ const transportTypeItems = ref<any[]>([]);
 const amPmIntervalItems = ref<any[]>([]);
 const feeTypeItems = ref<any[]>([]);
 const unitItems = ref<any[]>([]);
-const customerItems = ref<any[]>([]);
 
 /** /sales/orders/constants – fee_types لغرامة التأخير وغرامة الإلغاء (respons.json) */
 const fetchOrdersConstants = async () => {
@@ -83,18 +83,51 @@ const fetchOrdersConstants = async () => {
   }
 };
 
-const fetchCustomers = async () => {
-  try {
-    const res = await api.get<any>("/customers/list");
-    if (Array.isArray(res.data)) {
-      customerItems.value = res.data.map((i: any) => ({
-        title: i.full_name,
-        value: i.id,
-      }));
-    }
-  } catch (e) {
-    console.error("Error fetching customers:", e);
+const waitForCustomerData = async () => {
+  if (!isEditMode.value && !fromQuotationId.value) return;
+
+  if (isFormDataLoaded.value && formData.value.customer_id) {
+    return;
   }
+
+  await new Promise(resolve => {
+    const checkInterval = setInterval(() => {
+      if (isFormDataLoaded.value && formData.value.customer_id) {
+        clearInterval(checkInterval);
+        clearTimeout(timeoutId);
+        resolve(true);
+      }
+    }, 10);
+
+    const timeoutId = setTimeout(() => {
+      clearInterval(checkInterval);
+      resolve(true);
+    }, 5000);
+  });
+};
+
+const fetchCustomers = async (search = '', cursor?: string, perPage = 15) => {
+  if (isEditMode.value || fromQuotationId.value) {
+    await waitForCustomerData();
+  }
+
+  const params: any = { per_page: perPage };
+  if (search) {
+    params.name = search;
+  }
+  if (cursor) {
+    params.cursor = cursor;
+  }
+  if (formData.value.customer_id) {
+    params.order_by_id = formData.value.customer_id;
+  }
+
+  const res = await api.get<any>('/customers/list', { params });
+
+  return {
+    data: res.data || [],
+    next_cursor: res.pagination?.next_cursor || null,
+  };
 };
 
 const fetchUnits = async () => {
@@ -293,6 +326,7 @@ const fetchFormData = async () => {
     console.error("Error fetching form data:", e);
   } finally {
     isLoading.value = false;
+    isFormDataLoaded.value = true;
   }
 };
 
@@ -409,14 +443,14 @@ const fetchQuotationForOrder = async () => {
     console.error("Error fetching quotation data:", e);
   } finally {
     isLoading.value = false;
+    isFormDataLoaded.value = true;
   }
 };
 
 onMounted(async () => {
   await Promise.all([
     fetchOrdersConstants(),
-    fetchUnits(),
-    fetchCustomers(),
+    fetchUnits()
   ]);
 
   // Fetch form data if in edit mode
@@ -1148,13 +1182,18 @@ const serviceTableItems = computed(() =>
             <div>
               <SelectInput
                 v-model="formData.customer_id"
-                :items="customerItems"
+                :items="[]"
                 placeholder="اختر العميل"
                 label="اسم العميل"
                 :rules="[required()]"
                 density="comfortable"
                 item-title="title"
                 item-value="value"
+                :server-side="true"
+                :fetch-function="fetchCustomers"
+                item-title-key="full_name"
+                item-value-key="id"
+                :debounce-time="500"
               />
             </div>
 
@@ -1779,4 +1818,5 @@ const serviceTableItems = computed(() =>
   </default-layout>
 </template>
 
+<style scoped></style>
 <style scoped></style>

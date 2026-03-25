@@ -41,6 +41,7 @@ const purchaseQuotationId = computed(() => route.query.purchase_quotation_id as 
 const isFromQuotation = ref(false);
 const isLoading = ref(false);
 const isSubmitting = ref(false);
+const isFormDataLoaded = ref(false);
 
 const requestTypeItems = ref<any[]>([]);
 const paymentMethodItems = ref<any[]>([]);
@@ -48,7 +49,6 @@ const transportTypeItems = ref<any[]>([]);
 const amPmIntervalItems = ref<any[]>([]);
 const feeTypeItems = ref<any[]>([]);
 const unitItems = ref<any[]>([]);
-const supplierItems = ref<any[]>([]);
 
 /** /purchases/constants – request_types, payment_methods, transport_types, am_pm_interval (response2.json) */
 const fetchConstants = async () => {
@@ -97,18 +97,51 @@ const fetchOrdersConstants = async () => {
   }
 };
 
-const fetchSuppliers = async () => {
-  try {
-    const res = await api.get<any>("/suppliers/list");
-    if (Array.isArray(res.data)) {
-      supplierItems.value = res.data.map((i: any) => ({
-        title: i.full_name,
-        value: i.id,
-      }));
-    }
-  } catch (e) {
-    console.error("Error fetching suppliers:", e);
+const waitForSupplierData = async () => {
+  if (!isEditMode.value && !fromQuotationId.value) return;
+
+  if (isFormDataLoaded.value && formData.value.supplier_id) {
+    return;
   }
+
+  await new Promise(resolve => {
+    const checkInterval = setInterval(() => {
+      if (isFormDataLoaded.value && formData.value.supplier_id) {
+        clearInterval(checkInterval);
+        clearTimeout(timeoutId);
+        resolve(true);
+      }
+    }, 10);
+
+    const timeoutId = setTimeout(() => {
+      clearInterval(checkInterval);
+      resolve(true);
+    }, 5000);
+  });
+};
+
+const fetchSuppliers = async (search = '', cursor?: string, perPage = 15) => {
+  if (isEditMode.value || fromQuotationId.value) {
+    await waitForSupplierData();
+  }
+
+  const params: any = { per_page: perPage };
+  if (search) {
+    params.name = search;
+  }
+  if (cursor) {
+    params.cursor = cursor;
+  }
+  if (formData.value.supplier_id) {
+    params.order_by_id = formData.value.supplier_id;
+  }
+
+  const res = await api.get<any>('/suppliers/list', { params });
+
+  return {
+    data: res.data || [],
+    next_cursor: res.pagination?.next_cursor || null,
+  };
 };
 
 const fetchUnits = async () => {
@@ -158,6 +191,8 @@ const fetchFormData = async () => {
       formData.value.code = data.code || "";
       formData.value.sale_quotation_code = data.sale_quotation_code || null;
       formData.value.supplier_id = data.supplier_id;
+      // Set flag immediately after supplier_id is populated
+      isFormDataLoaded.value = true;
       formData.value.price_offer_name = data.price_offer_name || "";
       formData.value.project_name = data.project_name || "";
       formData.value.po_type = data.po_type || "";
@@ -303,6 +338,7 @@ const fetchFormData = async () => {
     }
   } catch (e) {
     console.error("Error fetching form data:", e);
+    isFormDataLoaded.value = true;
   } finally {
     isLoading.value = false;
   }
@@ -343,6 +379,8 @@ const fetchQuotationForOrder = async () => {
       formData.value.supplier_id = data.supplier?.id != null 
         ? Number(data.supplier.id) 
         : (data.supplier_id != null ? Number(data.supplier_id) : null);
+      // Set flag immediately after supplier_id is populated
+      isFormDataLoaded.value = true;
       formData.value.project_name = data.project_name || "";
       formData.value.target_location = data.target_location || null;
       formData.value.target_latitude = data.target_latitude || null;
@@ -434,6 +472,7 @@ const fetchQuotationForOrder = async () => {
     }
   } catch (e) {
     console.error("Error fetching quotation data:", e);
+    isFormDataLoaded.value = true;
   } finally {
     isLoading.value = false;
   }
@@ -444,7 +483,6 @@ onMounted(async () => {
     fetchConstants(),
     fetchOrdersConstants(),
     fetchUnits(),
-    fetchSuppliers(),
   ]);
 
   // Fetch form data if in edit mode
@@ -453,6 +491,8 @@ onMounted(async () => {
   } else if (fromQuotationId.value) {
     // Fetch quotation data if creating order from quotation
     await fetchQuotationForOrder();
+  } else {
+    isFormDataLoaded.value = true;
   }
 });
 
@@ -1190,13 +1230,18 @@ const serviceTableItems = computed(() =>
               <SelectInput
                 v-model="formData.supplier_id"
                 :disabled="isFromQuotation"
-                :items="supplierItems"
+                :items="[]"
                 placeholder="اختر المورد"
                 label="اسم المورد"
                 :rules="[required()]"
                 density="comfortable"
                 item-title="title"
                 item-value="value"
+                :server-side="true"
+                :fetch-function="fetchSuppliers"
+                item-title-key="full_name"
+                item-value-key="id"
+                :debounce-time="500"
               />
             </div>
 

@@ -18,7 +18,7 @@ const router = useRouter();
 const api = useApi();
 const { success, error } = useNotification();
 
-const TABLE_NAME = 'admin_purchases_logistics';
+const tableName = ref('');
 const {
   allHeaders,
   shownHeaders,
@@ -27,7 +27,7 @@ const {
   headerCheckStates,
   initHeaders,
   toggleHeader,
-} = useTableColumns(TABLE_NAME);
+} = useTableColumns(tableName);
 
 // Types
 interface ItemActions {
@@ -147,6 +147,9 @@ const fetchList = async (cursor?: string | null, append = false) => {
       tableItems.value = res.data || [];
       canCreate.value = res.actions?.can_create ?? false;
       canBulkDelete.value = res.actions?.can_bulk_delete ?? false;
+      if (res.header_table) {
+        tableName.value = res.header_table;
+      }
       initHeaders(res.headers || [], res.shownHeaders || []);
     }
 

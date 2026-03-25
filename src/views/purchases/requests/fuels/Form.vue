@@ -21,6 +21,7 @@ const isEditMode = computed(() => !!route.params.id);
 const routeId = computed(() => route.params.id as string);
 const isLoading = ref(false);
 const isSubmitting = ref(false);
+const isFormDataLoaded = ref(false);
 
 const requestTypeItems = ref<any[]>([]);
 const paymentMethodItems = ref<any[]>([]);
@@ -30,17 +31,52 @@ const unitItems = ref<any[]>([]);
 const deliveryMethodItems = ref<any[]>([]);
 const supplyTypeItems = ref<any[]>([]);
 const fillingsItems = ref<any[]>([]);
-const supplierItems = ref<any[]>([]);
 
-const fetchSuppliers = async () => {
-    try {
-        const res = await api.get<any>('/suppliers/list', { params: { business_type: 'material_merchant' } });
-        if (Array.isArray(res.data)) {
-            supplierItems.value = res.data.map((i: any) => ({ title: i.full_name, value: i.id }));
-        }
-    } catch (e) {
-        console.error('Error fetching suppliers:', e);
+const waitForSupplierData = async () => {
+    if (!isEditMode.value) return;
+
+    if (isFormDataLoaded.value && formData.value.supplier_id) {
+        return;
     }
+
+    await new Promise(resolve => {
+        const checkInterval = setInterval(() => {
+            if (isFormDataLoaded.value && formData.value.supplier_id) {
+                clearInterval(checkInterval);
+                clearTimeout(timeoutId);
+                resolve(true);
+            }
+        }, 10);
+
+        const timeoutId = setTimeout(() => {
+            clearInterval(checkInterval);
+            resolve(true);
+        }, 5000);
+    });
+};
+
+const fetchSuppliers = async (search = '', cursor?: string, perPage = 15) => {
+    if (isEditMode.value) {
+        await waitForSupplierData();
+    }
+
+    const params: any = { per_page: perPage, business_type: 'fuel_merchant' };
+    if (search) {
+        params.name = search;
+    }
+    if (cursor) {
+        params.cursor = cursor;
+    }
+    if (formData.value.supplier_id) {
+        params.order_by_id = formData.value.supplier_id;
+    }
+
+    const res = await api.get<any>('/suppliers/list', { params });
+
+    return {
+        data: res.data || [],
+        next_cursor: res.pagination?.next_cursor || null,
+    };
 };
 
 const fetchConstants = async () => {
@@ -111,6 +147,8 @@ const fetchFormData = async () => {
             formData.value.deliveryMethod = (data.delivery_method ?? logistics.delivered_method) ?? null;
             formData.value.supplyType = (data.supply_type ?? logistics.supply_type) ?? null;
             formData.value.supplier_id = data.supplier_id ?? null;
+            // Set flag immediately after supplier_id is populated
+            isFormDataLoaded.value = true;
             formData.value.target_location = data.target_location ?? null;
             formData.value.target_latitude = data.target_latitude ?? null;
             formData.value.target_longitude = data.target_longitude ?? null;
@@ -155,6 +193,7 @@ const fetchFormData = async () => {
         }
     } catch(e) {
         console.error('Error fetching form data:', e);
+        isFormDataLoaded.value = true;
     } finally {
         isLoading.value = false;
     }
@@ -163,13 +202,14 @@ const fetchFormData = async () => {
 onMounted(async () => {
     await Promise.all([
         fetchConstants(),
-        fetchUnits(),
-        fetchSuppliers()
+        fetchUnits()
     ]);
     
     // Fetch form data if in edit mode
     if (isEditMode.value) {
         await fetchFormData();
+    } else {
+        isFormDataLoaded.value = true;
     }
 });
 
@@ -513,8 +553,10 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">اسم المورد <span class="text-error-600">*</span></label>
                             <SelectInput v-model="formData.supplier_id"
-                                :items="supplierItems" item-title="title" item-value="value"
-                                placeholder="حدد المورد" density="comfortable" :rules="[required()]" />
+                                :items="[]" item-title="title" item-value="value"
+                                placeholder="حدد المورد" density="comfortable" :rules="[required()]"
+                                :server-side="true" :fetch-function="fetchSuppliers"
+                                item-title-key="full_name" item-value-key="id" :debounce-time="500" />
                         </div>
 
                         <div>

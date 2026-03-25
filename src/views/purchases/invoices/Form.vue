@@ -20,10 +20,10 @@ const routeId = computed(() => route.params.id as string);
 const isLoading = ref(false);
 const pageLoading = ref(false);
 const isSubmitting = ref(false);
+const isFormDataLoaded = ref(false);
 const categoryOptions = ref<any[]>([]);
 const fetchItemOptions = ref<any[]>([]);
 const ordersItems = ref<any[]>([]);
-const supplierItems = ref<any[]>([]);
 const salesInvoicesItems = ref<any[]>([]);
 const InvoiceCode = ref('')
 const supplierData = ref<any>(null);
@@ -229,19 +229,51 @@ const fetchOrdersByCategory = async (
     }
 };
 
-const fetchSuppliers = async () => {
-    try {
-        const res = await api.get<any>('/suppliers/list');
-        const list = Array.isArray(res.data) ? res.data : res.data?.data;
-        const suppliers = Array.isArray(list) ? list : [];
-        supplierItems.value = suppliers.map((supplier: any) => ({
-            title: supplier.full_name,
-            value: supplier.id,
-        }));
-    } catch (e) {
-        console.error('Error fetching suppliers list:', e);
-        supplierItems.value = [];
+const waitForSupplierData = async () => {
+    if (!isEditMode.value) return;
+
+    if (isFormDataLoaded.value && formData.value.supplier_id) {
+        return;
     }
+
+    await new Promise(resolve => {
+        const checkInterval = setInterval(() => {
+            if (isFormDataLoaded.value && formData.value.supplier_id) {
+                clearInterval(checkInterval);
+                clearTimeout(timeoutId);
+                resolve(true);
+            }
+        }, 10);
+
+        const timeoutId = setTimeout(() => {
+            clearInterval(checkInterval);
+            resolve(true);
+        }, 5000);
+    });
+};
+
+const fetchSuppliers = async (search = '', cursor?: string, perPage = 15) => {
+    if (isEditMode.value) {
+        await waitForSupplierData();
+    }
+
+    const params: any = { per_page: perPage };
+    if (search) {
+        params.name = search;
+    }
+    if (cursor) {
+        params.cursor = cursor;
+    }
+    if (formData.value.supplier_id) {
+        params.order_by_id = formData.value.supplier_id;
+    }
+
+    const res = await api.get<any>('/suppliers/list', { params });
+
+    return {
+        data: res.data || [],
+        next_cursor: res.pagination?.next_cursor || null,
+    };
 };
 
 const fetchSupplierDetails = async (supplierId: number | string | null) => {
@@ -649,8 +681,7 @@ watch(
 onMounted(async () => {
     pageLoading.value = true
     await Promise.all([
-        fetchConstants(),
-        fetchSuppliers()
+        fetchConstants()
     ]);
 
     // Fetch form data if in edit mode
@@ -658,6 +689,7 @@ onMounted(async () => {
         await fetchFormData();
     }
     pageLoading.value = false
+    isFormDataLoaded.value = true
 });
 
 </script>
@@ -679,10 +711,12 @@ onMounted(async () => {
                 <v-form ref="formRef" v-model="isFormValid" @submit.prevent>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 gap-y-6">
                         <div>
-                            <SelectInput v-model="formData.supplier_id" :items="supplierItems" placeholder="اختر"
+                            <SelectInput v-model="formData.supplier_id" :items="[]" placeholder="اختر"
                                 label="اسم المورد" density="comfortable" :rules="[required()]"
                                 :error-messages="formErrors['category']"
-                                @update:model-value="clearFieldError('category')" clearable />
+                                @update:model-value="clearFieldError('category')" clearable
+                                :server-side="true" :fetch-function="fetchSuppliers"
+                                item-title-key="full_name" item-value-key="id" :debounce-time="500" />
                         </div>
 
                         <div>
