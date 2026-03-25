@@ -9,7 +9,8 @@ export const settingsRoutes: RouteRecordRaw[] = [
       {
         path: "list",
         name: "ProductsCategoriesList",
-        component: () => import("@/views/settings/products-categories/List.vue"),
+        component: () =>
+          import("@/views/settings/products-categories/List.vue"),
         meta: {
           title: "pages.ProductsCategories.title",
         },
@@ -17,7 +18,8 @@ export const settingsRoutes: RouteRecordRaw[] = [
       {
         path: "create",
         name: "ProductsCategoriesCreate",
-        component: () => import("@/views/settings/products-categories/Form.vue"),
+        component: () =>
+          import("@/views/settings/products-categories/Form.vue"),
         meta: {
           title: "pages.ProductsCategories.title",
         },
@@ -25,7 +27,8 @@ export const settingsRoutes: RouteRecordRaw[] = [
       {
         path: "tree",
         name: "ProductsCategoriesTree",
-        component: () => import("@/views/settings/products-categories/tree.vue"),
+        component: () =>
+          import("@/views/settings/products-categories/tree.vue"),
         meta: {
           title: "pages.ProductsCategories.title",
         },
@@ -33,7 +36,8 @@ export const settingsRoutes: RouteRecordRaw[] = [
       {
         path: "edit/:id",
         name: "ProductsCategoriesEdit",
-        component: () => import("@/views/settings/products-categories/Form.vue"),
+        component: () =>
+          import("@/views/settings/products-categories/Form.vue"),
         meta: {
           title: "pages.ProductsCategories.title",
         },
@@ -41,7 +45,8 @@ export const settingsRoutes: RouteRecordRaw[] = [
       {
         path: "view/:id",
         name: "ProductsCategoriesView",
-        component: () => import("@/views/settings/products-categories/view.vue"),
+        component: () =>
+          import("@/views/settings/products-categories/view.vue"),
         meta: {
           title: "pages.ProductsCategories.title",
         },
@@ -56,7 +61,8 @@ export const settingsRoutes: RouteRecordRaw[] = [
       {
         path: "list",
         name: "ServicesCategoriesList",
-        component: () => import("@/views/settings/services-categories/List.vue"),
+        component: () =>
+          import("@/views/settings/services-categories/List.vue"),
         meta: {
           title: "pages.ServicesCategories.title",
         },
@@ -64,7 +70,8 @@ export const settingsRoutes: RouteRecordRaw[] = [
       {
         path: "create",
         name: "ServicesCategoriesCreate",
-        component: () => import("@/views/settings/services-categories/Form.vue"),
+        component: () =>
+          import("@/views/settings/services-categories/Form.vue"),
         meta: {
           title: "pages.ServicesCategories.title",
         },
@@ -72,7 +79,8 @@ export const settingsRoutes: RouteRecordRaw[] = [
       {
         path: "tree",
         name: "ServicesCategoriesTree",
-        component: () => import("@/views/settings/services-categories/tree.vue"),
+        component: () =>
+          import("@/views/settings/services-categories/tree.vue"),
         meta: {
           title: "pages.ServicesCategories.title",
         },
@@ -80,7 +88,8 @@ export const settingsRoutes: RouteRecordRaw[] = [
       {
         path: "edit/:id",
         name: "ServicesCategoriesEdit",
-        component: () => import("@/views/settings/services-categories/Form.vue"),
+        component: () =>
+          import("@/views/settings/services-categories/Form.vue"),
         meta: {
           title: "pages.ServicesCategories.title",
         },
@@ -88,7 +97,8 @@ export const settingsRoutes: RouteRecordRaw[] = [
       {
         path: "view/:id",
         name: "ServicesCategoriesView",
-        component: () => import("@/views/settings/services-categories/view.vue"),
+        component: () =>
+          import("@/views/settings/services-categories/view.vue"),
         meta: {
           title: "pages.ServicesCategories.title",
         },
@@ -194,6 +204,22 @@ export const settingsRoutes: RouteRecordRaw[] = [
         path: "list",
         name: "GeoAreasList",
         component: () => import("@/views/settings/geo-areas/List.vue"),
+        meta: {
+          title: "pages.geoAreas.title",
+        },
+      },
+      {
+        path: "create",
+        name: "GeoAreasCreate",
+        component: () => import("@/views/settings/geo-areas/Form.vue"),
+        meta: {
+          title: "pages.geoAreas.title",
+        },
+      },
+      {
+        path: "edit/:id",
+        name: "GeoAreasEdit",
+        component: () => import("@/views/settings/geo-areas/Form.vue"),
         meta: {
           title: "pages.geoAreas.title",
         },
@@ -416,7 +442,8 @@ export const settingsRoutes: RouteRecordRaw[] = [
       {
         path: "list",
         name: "DocStatusTransitionsList",
-        component: () => import("@/views/settings/doc-status-transitions/List.vue"),
+        component: () =>
+          import("@/views/settings/doc-status-transitions/List.vue"),
         meta: {
           title: "pages.docStatusTransitions.title",
         },
@@ -424,7 +451,8 @@ export const settingsRoutes: RouteRecordRaw[] = [
       {
         path: "create",
         name: "DocStatusTransitionsCreate",
-        component: () => import("@/views/settings/doc-status-transitions/Form.vue"),
+        component: () =>
+          import("@/views/settings/doc-status-transitions/Form.vue"),
         meta: {
           title: "pages.docStatusTransitions.title",
         },
@@ -432,7 +460,8 @@ export const settingsRoutes: RouteRecordRaw[] = [
       {
         path: "edit/:id",
         name: "DocStatusTransitionsEdit",
-        component: () => import("@/views/settings/doc-status-transitions/Form.vue"),
+        component: () =>
+          import("@/views/settings/doc-status-transitions/Form.vue"),
         meta: {
           title: "pages.docStatusTransitions.title",
         },
@@ -440,7 +469,8 @@ export const settingsRoutes: RouteRecordRaw[] = [
       {
         path: "status-transition/:id",
         name: "DocStatusTransitionsStatusTransition",
-        component: () => import("@/views/settings/doc-status-transitions/StatusTransitions.vue"),
+        component: () =>
+          import("@/views/settings/doc-status-transitions/StatusTransitions.vue"),
         meta: {
           title: "pages.docStatusTransitions.title",
         },

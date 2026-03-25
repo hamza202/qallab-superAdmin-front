@@ -34,14 +34,15 @@ const router = useRouter();
 // Check if we're in edit mode
 const isEditMode = computed(() => !!route.params.id);
 const routeId = computed(() => route.params.id as string);
+const isLoading = ref(false);
+const isSubmitting = ref(false);
+const isFormDataLoaded = ref(false);
 // Check if creating order from quotation
 const fromQuotationId = computed(() => route.query.from_quotation as string | undefined);
 const fromQuotationCode = computed(() => route.query.quotation_code as string | undefined);
 const purchaseQuotationId = computed(() => route.query.purchase_quotation_id as string | undefined);
 // Track if data is loaded from quotation (to disable supplier select)
 const isFromQuotation = ref(false);
-const isLoading = ref(false);
-const isSubmitting = ref(false);
 
 const requestTypeItems = ref<any[]>([]);
 const paymentMethodItems = ref<any[]>([]);
@@ -52,17 +53,52 @@ const unitItems = ref<any[]>([]);
 const deliveryMethodItems = ref<any[]>([]);
 const supplyTypeItems = ref<any[]>([]);
 const fillingsItems = ref<any[]>([]);
-const supplierItems = ref<any[]>([]);
 
-const fetchSuppliers = async () => {
-    try {
-        const res = await api.get<any>('/suppliers/list', { params: { business_type: 'material_merchant' } });
-        if (Array.isArray(res.data)) {
-            supplierItems.value = res.data.map((i: any) => ({ title: i.full_name, value: i.id }));
-        }
-    } catch (e) {
-        console.error('Error fetching suppliers:', e);
+const waitForSupplierData = async () => {
+    if (!isEditMode.value && !fromQuotationId.value) return;
+
+    if (isFormDataLoaded.value && formData.value.supplier_id) {
+        return;
     }
+
+    await new Promise(resolve => {
+        const checkInterval = setInterval(() => {
+            if (isFormDataLoaded.value && formData.value.supplier_id) {
+                clearInterval(checkInterval);
+                clearTimeout(timeoutId);
+                resolve(true);
+            }
+        }, 10);
+
+        const timeoutId = setTimeout(() => {
+            clearInterval(checkInterval);
+            resolve(true);
+        }, 5000);
+    });
+};
+
+const fetchSuppliers = async (search = '', cursor?: string, perPage = 15) => {
+    if (isEditMode.value || fromQuotationId.value) {
+        await waitForSupplierData();
+    }
+
+    const params: any = { per_page: perPage, business_type: 'fuel_merchant' };
+    if (search) {
+        params.name = search;
+    }
+    if (cursor) {
+        params.cursor = cursor;
+    }
+    if (formData.value.supplier_id) {
+        params.order_by_id = formData.value.supplier_id;
+    }
+
+    const res = await api.get<any>('/suppliers/list', { params });
+
+    return {
+        data: res.data || [],
+        next_cursor: res.pagination?.next_cursor || null,
+    };
 };
 
 const fetchConstants = async () => {
@@ -129,6 +165,8 @@ const fetchFormData = async () => {
             // Populate form data
             formData.value.code = data.code || '';
             formData.value.supplier_id = data.supplier_id;
+            // Set flag immediately after supplier_id is populated
+            isFormDataLoaded.value = true;
             formData.value.project_name = data.project_name || '';
             formData.value.invoice_interval = data.invoice_interval ?? null;
             formData.value.payment_term_no = data.payment_term_no ?? null;
@@ -198,6 +236,7 @@ const fetchFormData = async () => {
         }
     } catch (e) {
         console.error('Error fetching form data:', e);
+        isFormDataLoaded.value = true;
     } finally {
         isLoading.value = false;
     }
@@ -237,6 +276,8 @@ const fetchQuotationForOrder = async () => {
             formData.value.supplier_id = data.supplier?.id != null
                 ? Number(data.supplier.id)
                 : (data.supplier_id != null ? Number(data.supplier_id) : null);
+            // Set flag immediately after supplier_id is populated
+            isFormDataLoaded.value = true;
             formData.value.project_name = data.project_name || '';
             formData.value.target_location = data.target_location || null;
             formData.value.target_latitude = data.target_latitude || null;
@@ -302,6 +343,7 @@ const fetchQuotationForOrder = async () => {
         }
     } catch (e) {
         console.error('Error fetching quotation data:', e);
+        isFormDataLoaded.value = true;
     } finally {
         isLoading.value = false;
     }
@@ -311,8 +353,7 @@ onMounted(async () => {
     await Promise.all([
         fetchConstants(),
         fetchOrdersConstants(),
-        fetchUnits(),
-        fetchSuppliers()
+        fetchUnits()
     ]);
 
     // Fetch form data if in edit mode
@@ -321,6 +362,8 @@ onMounted(async () => {
     } else if (fromQuotationId.value) {
         // Fetch quotation data if creating order from quotation
         await fetchQuotationForOrder();
+    } else {
+        isFormDataLoaded.value = true;
     }
 });
 
@@ -809,9 +852,10 @@ const tableItems = computed(() =>
 
                         <!-- اسم المورد -->
                         <div>
-                            <SelectInput v-model="formData.supplier_id" :items="supplierItems" placeholder="اختر المورد"
+                            <SelectInput v-model="formData.supplier_id" :items="[]" placeholder="اختر المورد"
                                 label="اسم المورد" :rules="[required()]" density="comfortable" item-title="title"
-                                item-value="value" />
+                                item-value="value" :server-side="true" :fetch-function="fetchSuppliers"
+                                item-title-key="full_name" item-value-key="id" :debounce-time="500" />
                         </div>
 
                         <!-- اسم المسؤول -->

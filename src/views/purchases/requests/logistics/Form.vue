@@ -23,13 +23,13 @@ const isEditMode = computed(() => !!route.params.id);
 const routeId = computed(() => route.params.id as string);
 const isLoading = ref(false);
 const isSubmitting = ref(false);
+const isFormDataLoaded = ref(false);
 
 const requestTypeItems = ref<any[]>([]);
 const paymentMethodItems = ref<any[]>([]);
 const transportTypeItems = ref<any[]>([]);
 const amPmIntervalItems = ref<any[]>([]);
 const unitItems = ref<any[]>([]);
-const supplierItems = ref<any[]>([]);
 const actualExecutionIntervalItems = ref<any[]>([]);
 const categoriesItems = ref<any[]>([]);
 
@@ -64,19 +64,51 @@ const fetchConstants = async () => {
     }
 }
 
-const fetchSuppliers = async () => {
-    try {
-        const res = await api.get<any>('/suppliers/list', {
-            params: {
-                service_type: 'logistic_company'
-            }
-        });
-        if (Array.isArray(res.data)) {
-            supplierItems.value = res.data.map((i: any) => ({ title: i.full_name, value: i.id }));
-        }
-    } catch (e) {
-        console.error('Error fetching suppliers:', e);
+const waitForSupplierData = async () => {
+    if (!isEditMode.value) return;
+
+    if (isFormDataLoaded.value && formData.value.supplier_id) {
+        return;
     }
+
+    await new Promise(resolve => {
+        const checkInterval = setInterval(() => {
+            if (isFormDataLoaded.value && formData.value.supplier_id) {
+                clearInterval(checkInterval);
+                clearTimeout(timeoutId);
+                resolve(true);
+            }
+        }, 10);
+
+        const timeoutId = setTimeout(() => {
+            clearInterval(checkInterval);
+            resolve(true);
+        }, 5000);
+    });
+};
+
+const fetchSuppliers = async (search = '', cursor?: string, perPage = 15) => {
+    if (isEditMode.value) {
+        await waitForSupplierData();
+    }
+
+    const params: any = { per_page: perPage, service_type: 'logistic_company' };
+    if (search) {
+        params.name = search;
+    }
+    if (cursor) {
+        params.cursor = cursor;
+    }
+    if (formData.value.supplier_id) {
+        params.order_by_id = formData.value.supplier_id;
+    }
+
+    const res = await api.get<any>('/suppliers/list', { params });
+
+    return {
+        data: res.data || [],
+        next_cursor: res.pagination?.next_cursor || null,
+    };
 }
 
 const fetchUnits = async () => {
@@ -119,6 +151,8 @@ const fetchFormData = async () => {
             formData.value.responsible_person = data.responsible_person || '';
             formData.value.responsible_phone = data.responsible_phone || '';
             formData.value.supplier_id = data.supplier_id;
+            // Set flag immediately after supplier_id is populated
+            isFormDataLoaded.value = true;
             formData.value.issueDate = data.request_datetime ? data.request_datetime.split(' ')[0] : '';
             formData.value.request_datetime = data.request_datetime ? String(data.request_datetime) : '';
             formData.value.project_name = data.project_name || '';
@@ -189,6 +223,7 @@ const fetchFormData = async () => {
         }
     } catch (e) {
         console.error('Error fetching form data:', e);
+        isFormDataLoaded.value = true;
     } finally {
         isLoading.value = false;
     }
@@ -640,12 +675,12 @@ const handleNewRequest = () => {
 onMounted(async () => {
     fetchConstants()
     fetchUnits()
-    fetchSuppliers()
     fetchCategories()
-
     // Fetch form data if in edit mode
     if (isEditMode.value) {
         await fetchFormData();
+    } else {
+        isFormDataLoaded.value = true;
     }
 });
 </script>
@@ -675,9 +710,10 @@ onMounted(async () => {
 
                         <!-- Transport Company -->
                         <div>
-                            <SelectInput v-model="formData.supplier_id" label="شركة النقل" :items="supplierItems"
+                            <SelectInput v-model="formData.supplier_id" label="شركة النقل" :items="[]"
                                 item-title="title" :rules="[required()]" item-value="value" density="comfortable"
-                                placeholder="اختر" />
+                                placeholder="اختر" :server-side="true" :fetch-function="fetchSuppliers"
+                                item-title-key="full_name" item-value-key="id" :debounce-time="500" />
                         </div>
 
                         <!-- Request Date -->

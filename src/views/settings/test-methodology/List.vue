@@ -13,6 +13,7 @@ const router = useRouter()
 const { success, error: showError } = useNotification()
 
 // Table columns composable
+const tableName = ref('');
 const {
   allHeaders,
   visibleHeaders,
@@ -21,7 +22,7 @@ const {
   headerCheckStates,
   initHeaders,
   toggleHeader,
-} = useTableColumns('test_methodologies')
+} = useTableColumns(tableName)
 
 // Loading state
 const isLoading = ref(false)
@@ -69,6 +70,9 @@ const fetchTestMethodologies = async () => {
     canBulkDelete.value = response.actions.can_bulk_delete ?? false;
 
     // Initialize headers if available from API
+    if (response.header_table) {
+      tableName.value = response.header_table;
+    }
     if (response.headers && response.shownHeaders) {
       initHeaders(response.headers, response.shownHeaders)
     }

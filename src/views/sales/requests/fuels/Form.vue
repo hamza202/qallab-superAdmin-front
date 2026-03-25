@@ -21,6 +21,7 @@ const isEditMode = computed(() => !!route.params.id);
 const routeId = computed(() => route.params.id as string);
 const isLoading = ref(false);
 const isSubmitting = ref(false);
+const isFormDataLoaded = ref(false);
 
 const requestTypeItems = ref<any[]>([]);
 const paymentMethodItems = ref<any[]>([]);
@@ -36,18 +37,65 @@ const fetchConstants = async () => {
         const res = await api.get<any>('/purchases/constants');
         const data = res.data;
         if (data) {
-             requestTypeItems.value = data.request_types?.map((i: any) => ({ title: i.label, value: i.key })) || [];
-             paymentMethodItems.value = data.payment_methods?.map((i: any) => ({ title: i.label, value: i.key })) || [];
-             transportTypeItems.value = data.transport_types?.map((i: any) => ({ title: i.label, value: i.key })) || [];
-             amPmIntervalItems.value = data.am_pm_interval?.map((i: any) => ({ title: i.label, value: i.key })) || [];
-             const deliveryMethods = data.delivered_methods ?? data.delivery_methods;
-             if (deliveryMethods?.length) deliveryMethodItems.value = deliveryMethods.map((i: any) => ({ title: i.label, value: i.key }));
-             if (data.supply_types?.length) supplyTypeItems.value = data.supply_types.map((i: any) => ({ title: i.label, value: i.key }));
-             if (data.fillings?.length) fillingsItems.value = data.fillings.map((i: any) => ({ title: i.label, value: i.key }));
+            requestTypeItems.value = data.request_types?.map((i: any) => ({ title: i.label, value: i.key })) || [];
+            paymentMethodItems.value = data.payment_methods?.map((i: any) => ({ title: i.label, value: i.key })) || [];
+            transportTypeItems.value = data.transport_types?.map((i: any) => ({ title: i.label, value: i.key })) || [];
+            amPmIntervalItems.value = data.am_pm_interval?.map((i: any) => ({ title: i.label, value: i.key })) || [];
+            const deliveryMethods = data.delivered_methods ?? data.delivery_methods;
+            if (deliveryMethods?.length) deliveryMethodItems.value = deliveryMethods.map((i: any) => ({ title: i.label, value: i.key }));
+            if (data.supply_types?.length) supplyTypeItems.value = data.supply_types.map((i: any) => ({ title: i.label, value: i.key }));
+            if (data.fillings?.length) fillingsItems.value = data.fillings.map((i: any) => ({ title: i.label, value: i.key }));
         }
-    } catch(e) {
+    } catch (e) {
         console.error('Error fetching constants:', e);
     }
+}
+
+const waitForCustomerData = async () => {
+    if (!isEditMode.value) return;
+
+    if (isFormDataLoaded.value && formData.value.customer_id) {
+        return;
+    }
+
+    await new Promise(resolve => {
+        const checkInterval = setInterval(() => {
+            if (isFormDataLoaded.value && formData.value.customer_id) {
+                clearInterval(checkInterval);
+                clearTimeout(timeoutId);
+                resolve(true);
+            }
+        }, 10);
+
+        const timeoutId = setTimeout(() => {
+            clearInterval(checkInterval);
+            resolve(true);
+        }, 5000);
+    });
+};
+
+const fetchCustomers = async (search = '', cursor?: string, perPage = 15) => {
+    if (isEditMode.value) {
+        await waitForCustomerData();
+    }
+
+    const params: any = { per_page: perPage };
+    if (search) {
+        params.name = search;
+    }
+    if (cursor) {
+        params.cursor = cursor;
+    }
+    if (formData.value.customer_id) {
+        params.order_by_id = formData.value.customer_id;
+    }
+
+    const res = await api.get<any>('/customers/list', { params });
+
+    return {
+        data: res.data || [],
+        next_cursor: res.pagination?.next_cursor || null,
+    };
 }
 
 const fetchUnits = async () => {
@@ -56,7 +104,7 @@ const fetchUnits = async () => {
         if (Array.isArray(res.data)) {
             unitItems.value = res.data.map((i: any) => ({ title: i.name, value: i.id }));
         }
-    } catch(e) {
+    } catch (e) {
         console.error('Error fetching units:', e);
     }
 }
@@ -79,12 +127,12 @@ const getFillingName = (key: number | string | null): string => {
 // Fetch form data for edit mode
 const fetchFormData = async () => {
     if (!isEditMode.value || !routeId.value) return;
-    
+
     isLoading.value = true;
     try {
         const res = await api.get<any>(`/sales/fuels/${routeId.value}`);
         const data = res.data;
-        
+
         if (data) {
             const logistics = data.logistics_detail || {};
             // Populate form data (top-level and logistics_detail)
@@ -92,6 +140,9 @@ const fetchFormData = async () => {
             formData.value.request_datetime = data.request_datetime ? formatDateTime(data.request_datetime) : '';
             formData.value.deliveryStartDate = (data.delivery_start_date || logistics.from_date || '')
                 .toString().split(' ')[0] || '';
+            formData.value.customer_id = data.customer_id ?? null;
+            // Set flag immediately after customer_id is populated so SelectInput can proceed
+            isFormDataLoaded.value = true;
             formData.value.paymentMethod = data.payment_method ?? null;
             formData.value.advancePayment = data.upfront_payment != null ? data.upfront_payment : null;
             formData.value.responsibleName = data.responsible_person ?? data.responsible_name ?? '';
@@ -108,12 +159,12 @@ const fetchFormData = async () => {
             formData.value.deliveryDuration = (data.delivery_duration ?? logistics.delivered_interval) ?? null;
             formData.value.textNote = data.notes || '';
             formData.value.code = data.code != null ? String(data.code) : '';
-            
+
             // Load image URL if exists (store URL for display, not fetch due to CORS)
             if (data.image) {
                 formData.value.image = data.image as any;
             }
-            
+
             // Load voice attachment URL if exists (store URL for display, not fetch due to CORS)
             if (data.voice_attachment) {
                 formData.value.voice_attachment = data.voice_attachment as any;
@@ -140,8 +191,9 @@ const fetchFormData = async () => {
                 });
             }
         }
-    } catch(e) {
+    } catch (e) {
         console.error('Error fetching form data:', e);
+        isFormDataLoaded.value = true;
     } finally {
         isLoading.value = false;
     }
@@ -152,7 +204,7 @@ onMounted(async () => {
         fetchConstants(),
         fetchUnits()
     ]);
-    
+
     // Fetch form data if in edit mode
     if (isEditMode.value) {
         await fetchFormData();
@@ -183,6 +235,7 @@ const formData = ref({
     requestNumber: '',
     requestType: null as string | null,
     deliveryStartDate: '' as string,
+    customer_id: '',
     request_datetime: '' as string,
     paymentMethod: null as string | null,
     advancePayment: null as number | string | null,
@@ -231,12 +284,12 @@ const handleAddProduct = () => {
 const handleProductSaved = (products: FuelProductToAdd[]) => {
     // Build a set of item_ids coming from the dialog
     const dialogItemIds = new Set(products.map(p => p.item_id));
-    
+
     // Keep existing products that were NOT part of the dialog session
     const preservedItems: ProductTableItem[] = productTableItems.value.filter(
         existing => !dialogItemIds.has(existing.item_id)
     );
-    
+
     // Build the new/updated items from the dialog
     const dialogItems: ProductTableItem[] = products.map(p => {
         const existing = productTableItems.value.find(e => e.item_id === p.item_id);
@@ -250,7 +303,7 @@ const handleProductSaved = (products: FuelProductToAdd[]) => {
             id: existing?.id ?? undefined, // Preserve the server-side ID for edit mode
         };
     });
-    
+
     // Merge: preserved existing items + dialog items
     productTableItems.value = [...preservedItems, ...dialogItems];
 };
@@ -329,12 +382,12 @@ const formatDateDdMmYyyy = (dateStr: string | null | undefined): string => {
 // Build FormData for submission
 const buildFormData = (): FormData => {
     const fd = new FormData();
-    
+
     // Add _method: PUT for edit mode
     if (isEditMode.value) {
         fd.append('_method', 'PUT');
     }
-    
+
     // Basic fields (aligned with Store endpoint)
     fd.append('request_datetime', formData.value.request_datetime || '');
     fd.append('upfront_payment', String(formData.value.advancePayment || ''));
@@ -355,7 +408,7 @@ const buildFormData = (): FormData => {
     fd.append('logistics_detail[supply_interval]', formData.value.supplyDuration != null && formData.value.supplyDuration !== '' ? String(formData.value.supplyDuration) : '');
     fd.append('logistics_detail[delivered_interval]', formData.value.deliveryDuration != null && formData.value.deliveryDuration !== '' ? String(formData.value.deliveryDuration) : '');
     fd.append('logistics_detail[delivered_method]', formData.value.deliveryMethod || '');
-    
+
     // Items (products) – keys per Postman: item_id, unit_id, quantity, supply_type, filling, notes
     productTableItems.value.forEach((item, index) => {
         if (isEditMode.value && item.id) {
@@ -368,7 +421,7 @@ const buildFormData = (): FormData => {
         if (item.transport_type != null && String(item.transport_type).trim() !== '') fd.append(`items[${index}][filling]`, String(item.transport_type));
         fd.append(`items[${index}][notes]`, item.notes || '');
     });
-    
+
     // File attachments
     const imageVal = formData.value.image as any;
     if (imageVal && Array.isArray(imageVal) && imageVal.length > 0) {
@@ -379,13 +432,13 @@ const buildFormData = (): FormData => {
     if (voiceVal && typeof voiceVal !== 'string') {
         fd.append('voice_attachment', voiceVal);
     }
-    
+
     return fd;
 }
 
 const handleSubmit = async () => {
     if (!await validate()) return;
-    
+
     locationError.value = null;
     sourceLocationError.value = null;
     if (!formData.value.target_location?.trim()) {
@@ -398,17 +451,17 @@ const handleSubmit = async () => {
         warning('الحقل موقع الانطلاق مطلوب.');
         return;
     }
-    
+
     if (productTableItems.value.length === 0) {
         warning('يجب إضافة منتج واحد على الأقل');
         return;
     }
-    
+
     isSubmitting.value = true;
-    
+
     try {
         const fd = buildFormData();
-        
+
         if (isEditMode.value && routeId.value) {
             // Edit mode - POST with _method: PUT and UUID in URL
             await api.post(`/sales/fuels/${routeId.value}`, fd, {
@@ -424,12 +477,12 @@ const handleSubmit = async () => {
                 }
             });
         }
-        
+
         success(isEditMode.value ? 'تم تحديث الطلب بنجاح' : 'تم إنشاء الطلب بنجاح');
-        
+
         // Navigate back to list
         router.push({ name: 'SalesRequestsFuelsList' });
-        
+
     } catch (e: any) {
         console.error('Error submitting form:', e);
         apiError(e);
@@ -507,32 +560,40 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                         <!-- Row 1: تاريخ الطلب, اسم المسؤول*, هاتف المسؤول* -->
                         <div>
-                            <DateTimePickerInput v-model="formData.request_datetime"
-                                label="تاريخ الطلب"
-                                density="comfortable"
-                                placeholder="اختر التاريخ والوقت"
-                            />
+                            <DateTimePickerInput v-model="formData.request_datetime" label="تاريخ الطلب"
+                                density="comfortable" placeholder="اختر التاريخ والوقت" />
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">اسم المسؤول <span class="text-error-600">*</span></label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">اسم المسؤول <span
+                                    class="text-error-600">*</span></label>
                             <TextInput v-model="formData.responsibleName" placeholder="أدخل اسم المسؤول"
                                 density="comfortable" :rules="[required()]" hide-details />
                         </div>
 
+                        <!-- Supplier Name -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">هاتف المسؤول <span class="text-error-600">*</span></label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">اسم العميل</label>
+                            <SelectInput :items="[]" v-model="formData.customer_id" :server-side="true" 
+                                :fetch-function="fetchCustomers" item-title-key="full_name" item-value-key="id"
+                                :rules="[required()]" disabled density="comfortable"
+                                placeholder="حدد العميل" :debounce-time="500" />
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">هاتف المسؤول <span
+                                    class="text-error-600">*</span></label>
                             <TelInput v-model="formData.responsiblePhone" placeholder="5XX XXX XXXX"
                                 density="comfortable" :rules="[required()]" />
                         </div>
 
                         <!-- Row 2: طريقة الدفع*, دفعة مقدمة, طريقة التسليم, موقع تسليم المواد* -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">طريقة الدفع <span class="text-error-600">*</span></label>
-                            <SelectInput v-model="formData.paymentMethod"
-                                :items="paymentMethodItems" item-title="title" placeholder="حدد طريقة الدفع"
-                                :rules="[required()]"
-                                item-value="value" density="comfortable" />
+                            <label class="block text-sm font-medium text-gray-700 mb-2">طريقة الدفع <span
+                                    class="text-error-600">*</span></label>
+                            <SelectInput v-model="formData.paymentMethod" :items="paymentMethodItems" item-title="title"
+                                placeholder="حدد طريقة الدفع" :rules="[required()]" item-value="value"
+                                density="comfortable" />
                         </div>
 
                         <div>
@@ -543,13 +604,14 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">طريقة التسليم</label>
-                            <SelectInput v-model="formData.deliveryMethod"
-                                :items="deliveryMethodItems" item-title="title" placeholder="حدد طريقة التسليم"
-                                item-value="value" density="comfortable" />
+                            <SelectInput v-model="formData.deliveryMethod" :items="deliveryMethodItems"
+                                item-title="title" placeholder="حدد طريقة التسليم" item-value="value"
+                                density="comfortable" />
                         </div>
 
                         <div class="relative">
-                            <label class="text-sm font-medium text-gray-700 mb-2 block">موقع تسليم المواد <span class="text-error-600">*</span></label>
+                            <label class="text-sm font-medium text-gray-700 mb-2 block">موقع تسليم المواد <span
+                                    class="text-error-600">*</span></label>
                             <div @click="openMapDialog"
                                 class="flex items-center justify-between px-4 py-2 min-h-[48px] border rounded-lg cursor-pointer transition-colors"
                                 :class="locationError ? '!border-error-500 bg-error-50' : '!border-blue-400 hover:bg-blue-100'">
@@ -565,7 +627,8 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
                         </div>
 
                         <div class="relative">
-                            <label class="text-sm font-medium text-gray-700 mb-2 block">موقع الانطلاق <span class="text-error-600">*</span></label>
+                            <label class="text-sm font-medium text-gray-700 mb-2 block">موقع الانطلاق <span
+                                    class="text-error-600">*</span></label>
                             <div @click="openSourceMapDialog"
                                 class="flex items-center justify-between px-4 py-2 min-h-[48px] border rounded-lg cursor-pointer transition-colors"
                                 :class="sourceLocationError ? '!border-error-500 bg-error-50' : '!border-blue-400 hover:bg-blue-100'">
@@ -577,33 +640,29 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
                                     <span v-html="mapMarkerIcon"></span>
                                 </div>
                             </div>
-                            <p v-if="sourceLocationError" class="text-error-600 text-xs mt-1">{{ sourceLocationError }}</p>
+                            <p v-if="sourceLocationError" class="text-error-600 text-xs mt-1">{{ sourceLocationError }}
+                            </p>
                         </div>
 
                         <!-- Row 3: تاريخ بدء التسليم*, نوع التوريد*, مدة التوريد, مدة التسليم -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">تاريخ بدء التسليم <span class="text-error-600">*</span></label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">تاريخ بدء التسليم <span
+                                    class="text-error-600">*</span></label>
                             <DatePickerInput v-model="formData.deliveryStartDate" type="date" density="comfortable"
                                 placeholder="اختر التاريخ" :rules="[required()]" />
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">نوع التوريد <span class="text-error-600">*</span></label>
-                            <SelectInput v-model="formData.supplyType"
-                                :items="supplyTypeItems" item-title="title" placeholder="حدد نوع التوريد"
-                                :rules="[required()]"
-                                item-value="value" density="comfortable" />
+                            <label class="block text-sm font-medium text-gray-700 mb-2">نوع التوريد <span
+                                    class="text-error-600">*</span></label>
+                            <SelectInput v-model="formData.supplyType" :items="supplyTypeItems" item-title="title"
+                                placeholder="حدد نوع التوريد" :rules="[required()]" item-value="value"
+                                density="comfortable" />
                         </div>
 
                         <div>
-                            <TextInput
-                                label="مدة التوريد"
-                                v-model="formData.supplyDuration"
-                                type="number"
-                                placeholder="أدخل المدة"
-                                density="comfortable"
-                                hide-details
-                            >
+                            <TextInput label="مدة التوريد" v-model="formData.supplyDuration" type="number"
+                                placeholder="أدخل المدة" density="comfortable" hide-details>
                                 <template #append-inner>
                                     <span class="text-gray-500 text-sm"> يوم </span>
                                 </template>
@@ -611,14 +670,8 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
                         </div>
 
                         <div>
-                            <TextInput
-                                label="مدة التسليم"
-                                v-model="formData.deliveryDuration"
-                                type="number"
-                                placeholder="أدخل المدة"
-                                density="comfortable"
-                                hide-details
-                            >
+                            <TextInput label="مدة التسليم" v-model="formData.deliveryDuration" type="number"
+                                placeholder="أدخل المدة" density="comfortable" hide-details>
                                 <template #append-inner>
                                     <span class="text-gray-500 text-sm"> يوم </span>
                                 </template>
@@ -627,12 +680,8 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
 
                         <!-- تاريخ إصدار الطلب (عرض فقط في التعديل) -->
                         <div v-if="isEditMode">
-                            <DateTimePickerInput v-model="formData.request_datetime"
-                                label="تاريخ إصدار الطلب"
-                                density="comfortable"
-                                placeholder="اختر التاريخ والوقت"
-                                readonly
-                            />
+                            <DateTimePickerInput v-model="formData.request_datetime" label="تاريخ إصدار الطلب"
+                                density="comfortable" placeholder="اختر التاريخ والوقت" readonly />
                         </div>
                     </div>
                 </v-form>
@@ -654,8 +703,7 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
                 <!-- Products Table -->
                 <div class="mb-4">
                     <DataTable :headers="headers" :items="tableItems" show-actions force-show-edit force-show-delete
-                        @edit="handleEditProduct"
-                        @delete="handleDeleteProduct">
+                        @edit="handleEditProduct" @delete="handleDeleteProduct">
                         <template #item.notes="{ item }">
                             <v-menu attach="request-material-product-page" location="bottom" offset="8"
                                 :close-on-content-click="false" transition="slide-y-transition">
@@ -671,9 +719,10 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
                                     class="pa-4 shadow-[rgba(149,157,165,0.2)_0px_8px_24px] overflow-hidden px-3 py-3"
                                     color="white" rounded="lg" width="300">
                                     <div class="!flex flex-nowrap items-center gap-3">
-                                        <TextInput v-model="productTableItems[productTableItems.findIndex(p => p.item_id === item.item_id)].notes" 
-                                            placeholder="أضف ملاحظة" variant="outlined"
-                                            density="comfortable" hide-details autofocus class="flex-1" />
+                                        <TextInput
+                                            v-model="productTableItems[productTableItems.findIndex(p => p.item_id === item.item_id)].notes"
+                                            placeholder="أضف ملاحظة" variant="outlined" density="comfortable"
+                                            hide-details autofocus class="flex-1" />
                                         <ButtonWithIcon :icon="messagePlusIcon" color="primary" icon-only
                                             size="x-small" />
 
@@ -757,30 +806,18 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
             </div>
         </div>
 
-        <Map v-model="showMapDialog" 
-            :latitude="formData.target_latitude"
-            :longitude="formData.target_longitude"
-            :address="formData.target_location"
-            @location-selected="handleLocationSelected" />
-        <Map v-model="showSourceMapDialog"
-            :latitude="formData.source_latitude"
-            :longitude="formData.source_longitude"
-            :address="formData.source_location"
-            @location-selected="handleSourceLocationSelected" />
+        <Map v-model="showMapDialog" :latitude="formData.target_latitude" :longitude="formData.target_longitude"
+            :address="formData.target_location" @location-selected="handleLocationSelected" />
+        <Map v-model="showSourceMapDialog" :latitude="formData.source_latitude" :longitude="formData.source_longitude"
+            :address="formData.source_location" @location-selected="handleSourceLocationSelected" />
 
         <!-- Add Product Dialog -->
-        <AddProductDialogFuels v-model="showAddProductDialog"
-            :fillings-options="fillingsItems"
-            :unit-items="unitItems"
-            :supply-type-options="supplyTypeItems"
-            items-endpoint="/items/supplier-items?material_type=2"
-            :edit-product="editingProduct"
-            :existing-products="productTableItems"
-            @saved="handleProductSaved"
+        <AddProductDialogFuels v-model="showAddProductDialog" :fillings-options="fillingsItems" :unit-items="unitItems"
+            :supply-type-options="supplyTypeItems" items-endpoint="/items/supplier-items?material_type=2"
+            :edit-product="editingProduct" :existing-products="productTableItems" @saved="handleProductSaved"
             @product-updated="handleProductUpdated" />
 
     </default-layout>
 </template>
 
-<style scoped>
-</style>
+<style scoped></style>

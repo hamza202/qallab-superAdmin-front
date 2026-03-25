@@ -38,11 +38,11 @@ const fromQuotationCode = computed(() => route.query.quotation_code as string | 
 const saleQuotationId = computed(() => route.query.sale_quotation_id as string | undefined);
 const isLoading = ref(false);
 const isSubmitting = ref(false);
+const isFormDataLoaded = ref(false);
 
 const paymentMethodItems = ref<any[]>([]);
 const feeTypeItems = ref<any[]>([]);
 const unitItems = ref<any[]>([]);
-const customerItems = ref<any[]>([]);
 const deliveryMethodItems = ref<any[]>([]);
 const supplyTypeItems = ref<any[]>([]);
 const transportTypeItems = ref<any[]>([]);
@@ -63,15 +63,51 @@ const fetchConstants = async () => {
     }
 }
 
-const fetchCustomers = async () => {
-    try {
-        const res = await api.get<any>('/customers/list');
-        if (Array.isArray(res.data)) {
-            customerItems.value = res.data.map((i: any) => ({ title: i.full_name, value: i.id }));
-        }
-    } catch (e) {
-        console.error('Error fetching customers:', e);
+const waitForCustomerData = async () => {
+    if (!isEditMode.value && !fromQuotationId.value) return;
+
+    if (isFormDataLoaded.value && formData.value.customer_id) {
+        return;
     }
+
+    await new Promise(resolve => {
+        const checkInterval = setInterval(() => {
+            if (isFormDataLoaded.value && formData.value.customer_id) {
+                clearInterval(checkInterval);
+                clearTimeout(timeoutId);
+                resolve(true);
+            }
+        }, 10);
+
+        const timeoutId = setTimeout(() => {
+            clearInterval(checkInterval);
+            resolve(true);
+        }, 5000);
+    });
+};
+
+const fetchCustomers = async (search = '', cursor?: string, perPage = 15) => {
+    if (isEditMode.value || fromQuotationId.value) {
+        await waitForCustomerData();
+    }
+
+    const params: any = { per_page: perPage };
+    if (search) {
+        params.name = search;
+    }
+    if (cursor) {
+        params.cursor = cursor;
+    }
+    if (formData.value.customer_id) {
+        params.order_by_id = formData.value.customer_id;
+    }
+
+    const res = await api.get<any>('/customers/list', { params });
+
+    return {
+        data: res.data || [],
+        next_cursor: res.pagination?.next_cursor || null,
+    };
 };
 
 const fetchUnits = async () => {
@@ -173,6 +209,7 @@ const fetchFormData = async () => {
         console.error('Error fetching form data:', e);
     } finally {
         isLoading.value = false;
+        isFormDataLoaded.value = true;
     }
 }
 
@@ -253,14 +290,14 @@ const fetchQuotationForOrder = async () => {
         console.error('Error fetching quotation data:', e);
     } finally {
         isLoading.value = false;
+        isFormDataLoaded.value = true;
     }
 };
 
 onMounted(async () => {
     await Promise.all([
         fetchConstants(),
-        fetchUnits(),
-        fetchCustomers()
+        fetchUnits()
     ]);
     
     if (isEditMode.value) {
@@ -686,13 +723,18 @@ const tableItems = computed(() =>
                         <div>
                             <SelectInput
                                 v-model="formData.customer_id"
-                                :items="customerItems"
+                                :items="[]"
                                 placeholder="حدد العميل"
                                 label="اسم العميل"
                                 :rules="[required()]"
                                 density="comfortable"
                                 item-title="title"
                                 item-value="value"
+                                :server-side="true"
+                                :fetch-function="fetchCustomers"
+                                item-title-key="full_name"
+                                item-value-key="id"
+                                :debounce-time="500"
                             />
                         </div>
 

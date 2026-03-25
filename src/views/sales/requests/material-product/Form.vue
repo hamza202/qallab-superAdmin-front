@@ -18,13 +18,13 @@ const isEditMode = computed(() => !!route.params.id);
 const routeId = computed(() => route.params.id as string);
 const isLoading = ref(false);
 const isSubmitting = ref(false);
+const isFormDataLoaded = ref(false);
 
 const requestTypeItems = ref<any[]>([]);
 const paymentMethodItems = ref<any[]>([]);
 const transportTypeItems = ref<any[]>([]);
 const amPmIntervalItems = ref<any[]>([]);
 const unitItems = ref<any[]>([]);
-const supplierItems = ref<any[]>([]);
 
 const fetchConstants = async () => {
     try {
@@ -41,15 +41,51 @@ const fetchConstants = async () => {
     }
 }
 
-const fetchSuppliers = async () => {
-    try {
-        const res = await api.get<any>('/customers/list');
-        if (Array.isArray(res.data)) {
-            supplierItems.value = res.data.map((i: any) => ({ title: i.full_name, value: i.id }));
-        }
-    } catch(e) {
-        console.error('Error fetching suppliers:', e);
+const waitForCustomerData = async () => {
+    if (!isEditMode.value) return;
+
+    if (isFormDataLoaded.value && formData.value.customer_id) {
+        return;
     }
+
+    await new Promise(resolve => {
+        const checkInterval = setInterval(() => {
+            if (isFormDataLoaded.value && formData.value.customer_id) {
+                clearInterval(checkInterval);
+                clearTimeout(timeoutId);
+                resolve(true);
+            }
+        }, 10);
+
+        const timeoutId = setTimeout(() => {
+            clearInterval(checkInterval);
+            resolve(true);
+        }, 5000);
+    });
+};
+
+const fetchCustomers = async (search = '', cursor?: string, perPage = 15) => {
+    if (isEditMode.value) {
+        await waitForCustomerData();
+    }
+
+    const params: Record<string, any> = { per_page: perPage };
+    if (search) {
+        params.name = search;
+    }
+    if (cursor) {
+        params.cursor = cursor;
+    }
+    if (formData.value.customer_id) {
+        params.order_by_id = formData.value.customer_id;
+    }
+
+    const res = await api.get<any>('/customers/list', { params });
+
+    return {
+        data: res.data || [],
+        next_cursor: res.pagination?.next_cursor || null,
+    };
 }
 
 const fetchUnits = async () => {
@@ -91,6 +127,8 @@ const fetchFormData = async () => {
             // Populate form data
             formData.value.requestType = data.request_type;
             formData.value.customer_id = data.customer_id;
+            // Allow customer select to fetch once customer_id is set
+            isFormDataLoaded.value = true;
             formData.value.issueDate = data.request_datetime ? data.request_datetime.split(' ')[0] : '';
             formData.value.request_datetime = data.request_datetime ? String(data.request_datetime) : '';
             formData.value.paymentMethod = data.payment_method;
@@ -159,6 +197,7 @@ const fetchFormData = async () => {
         }
     } catch(e) {
         console.error('Error fetching form data:', e);
+        isFormDataLoaded.value = true;
     } finally {
         isLoading.value = false;
     }
@@ -167,13 +206,14 @@ const fetchFormData = async () => {
 onMounted(async () => {
     await Promise.all([
         fetchConstants(),
-        fetchUnits(),
-        fetchSuppliers()
+        fetchUnits()
     ]);
     
     // Fetch form data if in edit mode
     if (isEditMode.value) {
         await fetchFormData();
+    } else {
+        isFormDataLoaded.value = true;
     }
 });
 
@@ -635,9 +675,12 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">اسم العميل</label>
                             <SelectInput v-model="formData.customer_id"
-                                :items="supplierItems" item-title="title"
-                                :rules="[required()]"
-                                item-value="value" density="comfortable" placeholder="حدد العميل" />
+                                :items="[]" item-title="title"
+                                :rules="[required()]" disabled
+                                item-value="value" density="comfortable" placeholder="حدد العميل"
+                                :server-side="true" :fetch-function="fetchCustomers"
+                                item-title-key="full_name" item-value-key="id"
+                                :debounce-time="500" />
                         </div>
 
                         <!-- تاريخ إصدار الطلب: يظهر في التعديل فقط (عرض فقط)، ويُرسل تلقائياً عند الحفظ -->

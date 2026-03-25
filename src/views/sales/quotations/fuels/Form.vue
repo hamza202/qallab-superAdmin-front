@@ -22,6 +22,7 @@ const isEditMode = computed(() => !!route.params.id);
 const routeId = computed(() => route.params.id as string);
 const isLoading = ref(false);
 const isSubmitting = ref(false);
+const isFormDataLoaded = ref(false);
 
 // Query params for creating quotation from request
 const fromRequestId = computed(() => route.query.from_request as string | undefined);
@@ -30,7 +31,6 @@ const saleRequestsId = computed(() => route.query.sale_requests_id as string | u
 const paymentMethodItems = ref<any[]>([]);
 const feeTypeItems = ref<any[]>([]);
 const unitItems = ref<any[]>([]);
-const customerItems = ref<any[]>([]);
 const deliveryMethodItems = ref<any[]>([]);
 const supplyTypeItems = ref<any[]>([]);
 const itemUsingItems = ref<any[]>([]); // الاستخدام
@@ -64,16 +64,53 @@ const fetchUnits = async () => {
     }
 }
 
-const fetchCustomers = async () => {
-    try {
-        const res = await api.get<any>('/customers/list');
-        if (Array.isArray(res.data)) {
-            customerItems.value = res.data.map((i: any) => ({ title: i.full_name, value: i.id }));
-        }
-    } catch (e) {
-        console.error('Error fetching customers:', e);
+const waitForCustomerData = async () => {
+    if (!isEditMode.value && !fromRequestId.value) return;
+
+    if (isFormDataLoaded.value && formData.value.customer_id) {
+        return;
     }
-}
+
+    await new Promise(resolve => {
+        const checkInterval = setInterval(() => {
+            if (isFormDataLoaded.value && formData.value.customer_id) {
+                clearInterval(checkInterval);
+                clearTimeout(timeoutId);
+                resolve(true);
+            }
+        }, 10);
+
+        const timeoutId = setTimeout(() => {
+            clearInterval(checkInterval);
+            resolve(true);
+        }, 5000);
+    });
+};
+
+const fetchCustomers = async (search = '', cursor?: string, perPage = 15) => {
+    // Wait for form data to load in edit mode or when creating from request
+    if (isEditMode.value || fromRequestId.value) {
+        await waitForCustomerData();
+    }
+
+    const params: any = { per_page: perPage };
+    if (search) {
+        params.name = search;
+    }
+    if (cursor) {
+        params.cursor = cursor;
+    }
+    if (formData.value.customer_id) {
+        params.order_by_id = formData.value.customer_id;
+    }
+
+    const res = await api.get<any>('/customers/list', { params });
+
+    return {
+        data: res.data || [],
+        next_cursor: res.pagination?.next_cursor || null,
+    };
+};
 
 // Helper: الاستخدام (item_using) label from constants.item_usings
 const getItemUsingName = (key: string | null): string => {
@@ -145,6 +182,7 @@ const fetchFormData = async () => {
         console.error('Error fetching form data:', e);
     } finally {
         isLoading.value = false;
+        isFormDataLoaded.value = true;
     }
 }
 
@@ -211,14 +249,14 @@ const fetchRequestForQuotation = async () => {
         console.error('Error fetching request data:', e);
     } finally {
         isLoading.value = false;
+        isFormDataLoaded.value = true;
     }
 };
 
 onMounted(async () => {
     await Promise.all([
         fetchConstants(),
-        fetchUnits(),
-        fetchCustomers()
+        fetchUnits()
     ]);
 
     if (isEditMode.value) {
@@ -648,9 +686,10 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 items-end">
                         <!-- Customer Name -->
                         <div>
-                            <SelectInput v-model="formData.customer_id" :items="customerItems" label="اسم العميل"
+                            <SelectInput v-model="formData.customer_id" :items="[]" label="اسم العميل"
                                 item-title="title" :rules="[required()]" item-value="value" density="comfortable"
-                                placeholder="حدد العميل" />
+                                placeholder="حدد العميل" :server-side="true" :fetch-function="fetchCustomers"
+                                item-title-key="full_name" item-value-key="id" :debounce-time="500" />
                         </div>
 
                         <!-- Responsible Person -->

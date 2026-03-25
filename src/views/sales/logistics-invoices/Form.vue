@@ -20,9 +20,9 @@ const routeId = computed(() => route.params.id as string);
 const isLoading = ref(false);
 const pageLoading = ref(false);
 const isSubmitting = ref(false);
+const isFormDataLoaded = ref(false);
 
 const ordersItems = ref<any[]>([]);
-const customerItems = ref<any[]>([]);
 const InvoiceCode = ref('')
 const customerData = ref<any>(null);
 const customerName = computed(() => customerData.value?.full_name || customerData.value?.name || '—');
@@ -147,18 +147,51 @@ const fetchConstants = async () => {
     }
 };
 
-const fetchCustomers = async () => {
-    try {
-        const res = await api.get<any>('/customers/list');
-        if (Array.isArray(res.data)) {
-            customerItems.value = res.data.map((i: any) => ({
-                title: i.full_name,
-                value: i.id,
-            }));
-        }
-    } catch (e) {
-        console.error('Error fetching customers:', e);
+const waitForCustomerData = async () => {
+    if (!isEditMode.value) return;
+
+    if (isFormDataLoaded.value && formData.value.customer_id) {
+        return;
     }
+
+    await new Promise(resolve => {
+        const checkInterval = setInterval(() => {
+            if (isFormDataLoaded.value && formData.value.customer_id) {
+                clearInterval(checkInterval);
+                clearTimeout(timeoutId);
+                resolve(true);
+            }
+        }, 10);
+
+        const timeoutId = setTimeout(() => {
+            clearInterval(checkInterval);
+            resolve(true);
+        }, 5000);
+    });
+};
+
+const fetchCustomers = async (search = '', cursor?: string, perPage = 15) => {
+    if (isEditMode.value) {
+        await waitForCustomerData();
+    }
+
+    const params: any = { per_page: perPage };
+    if (search) {
+        params.name = search;
+    }
+    if (cursor) {
+        params.cursor = cursor;
+    }
+    if (formData.value.customer_id) {
+        params.order_by_id = formData.value.customer_id;
+    }
+
+    const res = await api.get<any>('/customers/list', { params });
+
+    return {
+        data: res.data || [],
+        next_cursor: res.pagination?.next_cursor || null,
+    };
 };
 
 const fetchUnits = async () => {
@@ -270,6 +303,8 @@ const fetchFormData = async () => {
         if (data) {
             // Populate form data
             formData.value.customer_id = data.customer_id;
+            // Allow customer select to fetch once customer_id is ready
+            isFormDataLoaded.value = true;
             formData.value.sale_order_id = data.sale_order_id;
             skipNextSaleOrderItemsFetch.value = true;
             formData.value.invoice_issues_datetime = normalizePoDateTime(data.invoice_issues_datetime) || '';
@@ -320,6 +355,7 @@ const fetchFormData = async () => {
         }
     } catch (e) {
         console.error('Error fetching form data:', e);
+        isFormDataLoaded.value = true;
     } finally {
         isLoading.value = false;
         isPopulatingForm.value = false;
@@ -484,8 +520,7 @@ onMounted(async () => {
     pageLoading.value = true
     await Promise.all([
         fetchConstants(),
-        fetchUnits(),
-        fetchCustomers()
+        fetchUnits()
     ]);
 
     // Fetch form data if in edit mode
@@ -493,6 +528,7 @@ onMounted(async () => {
         await fetchFormData();
     }
     pageLoading.value = false
+    isFormDataLoaded.value = true
 });
 
 </script>
@@ -516,9 +552,10 @@ onMounted(async () => {
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 gap-y-6">
                         <!-- اسم العميل -->
                         <div>
-                            <SelectInput v-model="formData.customer_id" :items="customerItems" placeholder="اختر العميل"
+                            <SelectInput v-model="formData.customer_id" :items="[]" placeholder="اختر العميل"
                                 label="اسم العميل" density="comfortable" :rules="[required()]" item-title="title"
-                                item-value="value" />
+                                item-value="value" :server-side="true" :fetch-function="fetchCustomers"
+                                item-title-key="full_name" item-value-key="id" :debounce-time="500" />
                         </div>
 
                         <!-- Purchase Request Code -->

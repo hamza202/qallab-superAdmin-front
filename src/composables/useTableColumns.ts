@@ -1,4 +1,4 @@
-import { ref, computed } from 'vue'
+import { ref, computed, Ref, unref } from 'vue'
 import { useApi } from '@/composables/useApi'
 
 export interface TableHeader {
@@ -8,7 +8,7 @@ export interface TableHeader {
   width?: string
 }
 
-export function useTableColumns(tableName: string) {
+export function useTableColumns(tableName: Ref<string> | string) {
   const api = useApi()
 
   const allHeaders = ref<TableHeader[]>([])
@@ -55,9 +55,15 @@ export function useTableColumns(tableName: string) {
     try {
       updatingHeaders.value = true
       const headerKeys = shownHeaders.value.map(h => h.key)
+      const currentTableName = unref(tableName)
+
+      if (!currentTableName) {
+        console.warn('Table name is empty, skipping header update')
+        return
+      }
 
       const formData = new FormData()
-      formData.append('table', tableName)
+      formData.append('table', currentTableName)
       headerKeys.forEach((header, index) => {
         formData.append(`header[${index}]`, header)
       })

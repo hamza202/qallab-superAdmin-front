@@ -16,7 +16,7 @@ const router = useRouter();
 const api = useApi();
 const { success, error } = useNotification();
 
-const TABLE_NAME = 'receipts_payments_transactions';
+const tableName = ref('');
 const {
     allHeaders,
     shownHeaders,
@@ -25,7 +25,7 @@ const {
     headerCheckStates,
     initHeaders,
     toggleHeader,
-} = useTableColumns(TABLE_NAME);
+} = useTableColumns(tableName);
 
 // TypeScript Interfaces
 interface VoucherAction {
@@ -221,10 +221,13 @@ const fetchVouchers = async (cursor?: string | null, append = false) => {
         if (append) {
             tableItems.value = [...tableItems.value, ...normalizedData];
         } else {
-            tableItems.value = normalizedData;
-            canCreate.value = response.actions.can_create;
+            tableItems.value = Array.isArray(response.data) ? response.data : [];
+            canCreate.value = response.actions.can_create ?? false;
             canBulkDelete.value = response.actions.can_bulk_delete ?? false;
-            initHeaders(response.headers || [], response.shownHeaders || []);
+            if (response.header_table) {
+                tableName.value = response.header_table;
+            }
+            initHeaders(response.headers ?? [], response.shownHeaders ?? []);
         }
 
         nextCursor.value = response.pagination.next_cursor;

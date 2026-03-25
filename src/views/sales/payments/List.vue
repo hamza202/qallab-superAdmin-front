@@ -18,7 +18,7 @@ const { success, error } = useNotification();
 const salesPaymentsIcon = `<svg width="43" height="43" viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M33.4167 32.3333H9.58333M33.4167 23.6667H9.58333M2 15H41M12.4 2H30.6C34.2403 2 36.0605 2 37.4509 2.70846C38.674 3.33163 39.6684 4.32601 40.2915 5.54906C41 6.93949 41 8.75966 41 12.4V30.6C41 34.2403 41 36.0605 40.2915 37.4509C39.6684 38.674 38.674 39.6684 37.4509 40.2915C36.0605 41 34.2403 41 30.6 41H12.4C8.75966 41 6.93949 41 5.54906 40.2915C4.32601 39.6684 3.33163 38.674 2.70846 37.4509C2 36.0605 2 34.2403 2 30.6V12.4C2 8.75966 2 6.93949 2.70846 5.54906C3.33163 4.32601 4.32601 3.33163 5.54906 2.70846C6.93949 2 8.75966 2 12.4 2Z" stroke="#1570EF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`
-const TABLE_NAME = 'admin_sales_invoice_payments';
+const tableName = ref('');
 const {
     allHeaders,
     shownHeaders,
@@ -27,7 +27,7 @@ const {
     headerCheckStates,
     initHeaders,
     toggleHeader,
-} = useTableColumns(TABLE_NAME);
+} = useTableColumns(tableName);
 
 interface ItemActions {
     can_update: boolean;
