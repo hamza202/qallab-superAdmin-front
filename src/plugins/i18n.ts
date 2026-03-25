@@ -39,10 +39,32 @@ function loadLocaleMessages(): Record<AvailableLocales, any> {
 
 export type MessageSchema = ReturnType<typeof loadLocaleMessages>['ar']
 
+const STORAGE_KEY = 'qallab_locale'
+
+const getBrowserLanguage = (): AvailableLocales => {
+  const browserLang = navigator.language.toLowerCase()
+  if (browserLang.startsWith('ar')) {
+    return 'ar'
+  }
+  return 'en'
+}
+
+const getInitialLocale = (): AvailableLocales => {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY) as AvailableLocales
+    if (stored === 'ar' || stored === 'en') {
+      return stored
+    }
+  } catch (error) {
+    console.error('Failed to read locale from localStorage:', error)
+  }
+  return getBrowserLanguage()
+}
+
 const i18n = createI18n<[MessageSchema], AvailableLocales>({
   legacy: false,
   globalInjection: true,
-  locale: import.meta.env.VITE_DEFAULT_LOCALE || 'ar',
+  locale: getInitialLocale(),
   fallbackLocale: import.meta.env.VITE_FALLBACK_LOCALE || 'en',
   messages: loadLocaleMessages()
 })

@@ -3,10 +3,10 @@
         <AppSidebar v-model="drawer" :is-mobile="isMobile" />
 
         <app-header :drawer="drawer" @toggle-drawer="drawer = !drawer" :is-mobile="isMobile" />
-
-        <v-main class="pb-15 !pe-4 md:!pe-6 lg:ms-5 h-full overflow-hidden">
+      
+        <v-main :class="mainClasses">
             <v-container fluid
-                class="bg-white p-0 !border border-gray-100 rounded-[24px] m-1 h-full flex flex-col overflow-hidden">
+                class="bg-white p-0 !border border-gray-100 rounded-[24px] w-[97%] my-1 h-full flex flex-col overflow-hidden">
                 <div class="flex-1 overflow-y-auto overflow-x-hidden main-scroll">
                     <div class="px-6 py-6">
                         <slot />
@@ -22,6 +22,7 @@
 import AppFooter from "@/components/layout/AppFooter.vue";
 import AppHeader from "@/components/layout/AppHeader.vue";
 import AppSidebar from "@/components/layout/AppSidebar.vue";
+import { useLocaleStore } from "@/stores/locale";
 
 import { ref, computed, watch } from "vue";
 import { useDisplay } from "vuetify";
@@ -29,6 +30,16 @@ import { useDisplay } from "vuetify";
 const { smAndDown } = useDisplay();
 const isMobile = computed(() => smAndDown.value);
 const drawer = ref(!isMobile.value);
+const localeStore = useLocaleStore();
+
+// Dynamic classes that respond to RTL/LTR
+const mainClasses = computed(() => {
+    return [
+        'pb-15',
+        'h-full',
+        'overflow-hidden'
+    ];
+});
 
 watch(isMobile, (value) => {
     drawer.value = !value;

@@ -1,6 +1,7 @@
 <template>
   <v-navigation-drawer v-model="drawerProxy" app width="230" :rail="!isMobile && isCollapsed"
     :expand-on-hover="!isMobile && isCollapsed" :permanent="!isMobile" :temporary="isMobile"
+    :location="localeStore.isRtl ? 'right' : 'left'"
     class="py-4 lg:ms-2 max-h-[94vh] border-0 bg-gray-50 !border-t-4 !border-qallab-blue q-sidebar-drawer relative"
     :class="{ 'pt-0 pb-0 min-h-[100vh]': isMobile }" @mouseenter="isDrawerHovered = true"
     @mouseleave="isDrawerHovered = false">
@@ -16,7 +17,9 @@
           <v-btn size="x-small" icon class="bg-qallab-yellow text-white shadow-md !rounded-full"
             @click="toggleCollapse">
             <v-icon size="20">{{
-              isCollapsed ? "mdi-chevron-left" : "mdi-chevron-right"
+              localeStore.isRtl
+                ? (isCollapsed ? "mdi-chevron-left" : "mdi-chevron-right")
+                : (isCollapsed ? "mdi-chevron-right" : "mdi-chevron-left")
             }}</v-icon>
           </v-btn>
         </div>
@@ -1120,7 +1123,7 @@
       <div class="mt-15 px-2">
         <a href="#" class="block relative" v-if="isSidebarExpanded">
           <v-btn size="x-small"
-            class="!absolute !top-[-15px] !left-5 bg-white border-[3px] border-qallab-blue !rounded-full p-1 h-9 w-9 flex items-center justify-center">
+            class="!absolute !top-[-15px] !end-5 bg-white border-[3px] border-qallab-blue !rounded-full p-1 h-9 w-9 flex items-center justify-center">
             <v-icon size="20" class="text-qallab-blue font-bold">mdi-arrow-top-right</v-icon>
           </v-btn>
           <div
@@ -1159,9 +1162,11 @@ import {
 } from "@/components/icons/sidebarIcons";
 import { useI18n } from "vue-i18n";
 import { usePermissions } from "@/composables/usePermissions";
+import { useLocaleStore } from "@/stores/locale";
 
 const { t } = useI18n();
 const route = useRoute();
+const localeStore = useLocaleStore();
 
 // Initialize permissions
 const {
@@ -1589,7 +1594,7 @@ watch(isDrawerHovered, (newValue) => {
 .q-sidebar-drawer:not(.v-navigation-drawer--rail) .q-sidebar-toggle {
   position: absolute;
   top: 3.5rem;
-  left: -1rem;
+  inset-inline-end: -1rem;
   margin-bottom: 0;
 }
 

@@ -1,7 +1,7 @@
 <template>
     <v-app-bar app flat color="qallab-dashboard-bg" class="border-t-4 border-qallab-blue" height="90">
         <div
-            class="!bg-white px-6 py-3 ms-1 me-5 lg:!ms-6 lg:!me-6 md:px-8 flex items-center rounded-3xl border !border-gray-100 flex-1">
+            class="!bg-white px-6 py-3 mx-1 md:ms-1 md:me-5 lg:!ms-6 lg:!me-6 md:px-8 flex items-center rounded-3xl border !border-gray-100 flex-1">
             <v-app-bar-nav-icon density="comfortable" :class="isMobile ? 'block me-2' : 'hidden'"
                 @click="onToggleDrawer" />
             <div class="flex-1 flex items-center gap-4">
@@ -11,8 +11,12 @@
                     </h1>
                 </div> -->
                 <div class="flex items-center gap-5 flex-1">
-                    <v-text-field density="comfortable" variant="outlined" hide-details placeholder="Search"
-                        class="max-w-md w-full flex-1 hidden sm:block" prepend-inner-icon="mdi-magnify" />
+                    <textInput density="comfortable" variant="outlined" hide-details placeholder="Search"
+                        class="max-w-md w-full flex-1 hidden sm:block">
+                        <template #prepend-inner>
+                            <span class="text-gray-500" v-html="searchIcon"></span>
+                        </template>
+                    </textInput>
 
                     <v-badge content="34" color="error" location="top start" offset-x="2" offset-y="4">
                         <v-btn size="small" icon variant="flat"
@@ -20,6 +24,9 @@
                             <v-icon>mdi-bell-outline</v-icon>
                         </v-btn>
                     </v-badge>
+                    <ButtonWithIcon :label="localeStore.currentLocale === 'ar' ? 'EN' : 'AR'" color="gray-200"
+                         rounded="full" height="35" size="default" :class="'text-primary'"
+                        @click="handleLanguageToggle" />
                 </div>
 
                 <div class="flex items-center gap-4 justify-end ms-auto flex-1">
@@ -40,22 +47,27 @@
                     </div>
                     <v-btn size="small" icon variant="flat" class="bg-gray-50 border !border-gray-100 !rounded-full">
                         <span v-html="gearIcon"></span>
-                        <v-menu activator="parent" location="bottom end" offset="8" content-class="shadow-[0px_12px_16px_-4px_rgba(16,24,40,0.08),0px_4px_6px_-2px_rgba(16,24,40,0.03)] !rounded-lg overflow-hidden border border-[#e3e8ef]">
+                        <v-menu activator="parent" location="bottom end" offset="8"
+                            content-class="shadow-[0px_12px_16px_-4px_rgba(16,24,40,0.08),0px_4px_6px_-2px_rgba(16,24,40,0.03)] !rounded-lg overflow-hidden border border-[#e3e8ef]">
                             <v-list class="py-1 bg-white" width="240" density="compact">
-                                <v-list-item @click="handleProfile" class="rounded-md hover:bg-gray-50 cursor-pointer text-gray-700">
+                                <v-list-item @click="handleProfile"
+                                    class="rounded-md hover:bg-gray-50 cursor-pointer text-gray-700">
                                     <template v-slot:prepend>
                                         <span v-html="userIcon" class="me-3 flex items-center"></span>
                                     </template>
-                                    <v-list-item-title class="text-sm font-medium text-start">{{ t('app.viewProfile') }}</v-list-item-title>
+                                    <v-list-item-title class="text-sm font-medium text-start">{{ t('app.viewProfile')
+                                        }}</v-list-item-title>
                                 </v-list-item>
 
                                 <v-divider class="my-1 border-gray-100"></v-divider>
 
-                                <v-list-item @click="handleLogout" class="rounded-md hover:bg-gray-50 cursor-pointer text-gray-700">
+                                <v-list-item @click="handleLogout"
+                                    class="rounded-md hover:bg-gray-50 cursor-pointer text-gray-700">
                                     <template v-slot:prepend>
                                         <span v-html="logoutIcon" class="me-3 flex items-center"></span>
                                     </template>
-                                    <v-list-item-title class="text-sm font-medium">{{ t('app.logOut') }}</v-list-item-title>
+                                    <v-list-item-title class="text-sm font-medium">{{ t('app.logOut')
+                                        }}</v-list-item-title>
                                 </v-list-item>
                             </v-list>
                         </v-menu>
@@ -80,10 +92,13 @@ const props = defineProps({
 
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
+import { useLocaleStore } from '@/stores/locale';
 import { useI18n } from 'vue-i18n';
 import { userIcon, logoutIcon } from '@/components/icons/headerIcons';
+import { searchIcon } from '../icons/globalIcons';
 
 const { t } = useI18n();
+const localeStore = useLocaleStore();
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -95,6 +110,10 @@ const handleProfile = () => {
 const handleLogout = async () => {
     await authStore.logout();
     router.push('/login');
+};
+
+const handleLanguageToggle = () => {
+    localeStore.toggleLocale();
 };
 
 const emit = defineEmits(["toggle-drawer"]);

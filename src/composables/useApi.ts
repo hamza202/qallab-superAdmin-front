@@ -1,5 +1,16 @@
 import axios, { type AxiosRequestConfig, type AxiosResponse } from 'axios';
 
+const STORAGE_KEY = 'qallab_locale';
+
+const getCurrentLanguage = (): string => {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    return stored || 'ar';
+  } catch (error) {
+    return 'ar';
+  }
+};
+
 // Create axios instance with base configuration
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
@@ -7,15 +18,17 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
-    'Accept-Language': 'ar',
   },
 });
 
-// Request interceptor - add auth token
+// Request interceptor - add auth token and language
 api.interceptors.request.use(
   async (config) => {
     const { useAuthStore } = await import('@/stores/auth');
     const authStore = useAuthStore();
+    
+    config.headers['Accept-Language'] = getCurrentLanguage();
+    
     if (authStore.token) {
       config.headers.Authorization = `Bearer ${authStore.token}`;
 
