@@ -15,7 +15,7 @@ const router = useRouter();
 const api = useApi();
 const { success, error } = useNotification();
 
-const TABLE_NAME = 'admin_sale_building_material_quotations';
+const tableName = ref('');
 const {
   allHeaders,
   shownHeaders,
@@ -24,7 +24,7 @@ const {
   headerCheckStates,
   initHeaders,
   toggleHeader,
-} = useTableColumns(TABLE_NAME);
+} = useTableColumns(tableName);
 
 interface ItemActions {
   can_update: boolean;
@@ -144,6 +144,9 @@ const fetchList = async (append = false) => {
       tableItems.value = data;
       canCreate.value = body?.actions?.can_create ?? true;
       canBulkDelete.value = body?.actions?.can_bulk_delete ?? false;
+      if (body?.header_table) {
+        tableName.value = body.header_table;
+      }
       initHeaders(body?.headers ?? [], body?.shownHeaders ?? []);
     }
     nextCursor.value = body?.pagination?.next_cursor ?? null;

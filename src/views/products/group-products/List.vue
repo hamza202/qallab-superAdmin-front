@@ -69,6 +69,7 @@ interface ApiResponse {
 }
 
 // Table columns composable
+const tableName = ref('');
 const {
   allHeaders,
   visibleHeaders,
@@ -77,7 +78,7 @@ const {
   headerCheckStates,
   initHeaders,
   toggleHeader,
-} = useTableColumns('admin_grouped_items')
+} = useTableColumns(tableName)
 
 // === State ===
 const tableItems = ref<GroupProduct[]>([])
@@ -240,6 +241,9 @@ const fetchData = async (cursor?: string | null, append = false) => {
       tableItems.value = response.data
 
       // Initialize headers if available from API
+      if (response.header_table) {
+        tableName.value = response.header_table
+      }
       if (response.headers && response.shownHeaders) {
         initHeaders(response.headers, response.shownHeaders)
       }

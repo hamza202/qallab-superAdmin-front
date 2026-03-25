@@ -39,6 +39,7 @@ const loadMoreTrigger = ref<HTMLElement | null>(null);
 const observer = ref<IntersectionObserver | null>(null);
 
 // Column management
+const tableName = ref('');
 const {
   allHeaders: allColumnHeaders,
   shownHeaders: shownColumnHeaders,
@@ -46,7 +47,7 @@ const {
   headerCheckStates,
   initHeaders,
   toggleHeader,
-} = useTableColumns('sample-types');
+} = useTableColumns(tableName);
 
 const showColumnsMenu = ref(false);
 
@@ -107,6 +108,9 @@ const fetchData = async (cursor?: string | null, append = false) => {
       tableItems.value = response.data;
 
       // Initialize headers from API response
+      if (response.header_table) {
+        tableName.value = response.header_table;
+      }
       if (response.headers && response.shownHeaders) {
         const filteredHeaders = response.headers.filter(h => h.key !== 'id' && h.key !== 'actions');
         const filteredShownHeaders = response.shownHeaders.filter(h => h.key !== 'id' && h.key !== 'actions');
