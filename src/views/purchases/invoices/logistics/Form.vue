@@ -20,7 +20,6 @@ const routeId = computed(() => route.params.id as string);
 const isLoading = ref(false);
 const pageLoading = ref(false);
 const isSubmitting = ref(false);
-const categoryOptions = ref<any[]>([]);
 const fetchItemOptions = ref<any[]>([]);
 const ordersItems = ref<any[]>([]);
 const salesInvoicesItems = ref<any[]>([]);
@@ -83,7 +82,8 @@ interface ProductTableItem {
 
 // Form data with static values
 const getDefaultFormData = () => ({
-    category: null as string | null,
+    category: 'logistics' as string,
+    supplier_id: null as number | string | null,
     purchase_order_id: null as number | string | null,
     fetch_item: 'from_sales_invoice' as string,
     sales_ids: [] as (number | string)[],
@@ -178,16 +178,32 @@ const fetchConstants = async () => {
         const res = await api.get<any>('/purchases/invoices/constants');
         const data = res.data || {};
 
-        if (Array.isArray(data.request_categories) && data.request_categories.length) {
-            categoryOptions.value = data.request_categories.map((c: any) => ({ title: c.label, value: c.key }));
-        }
-
         if (Array.isArray(data.purchase_invoice_fetch_items) && data.purchase_invoice_fetch_items.length) {
             fetchItemOptions.value = data.purchase_invoice_fetch_items.map((i: any) => ({ label: i.label, value: i.key }));
         }
     } catch (e) {
         console.error('Error fetching constants:', e);
     }
+};
+
+const fetchSuppliers = async (search = '', cursor?: string, perPage = 15) => {
+    const params: any = { per_page: perPage, service_type: 'logistic_company' };
+    if (search) {
+        params.name = search;
+    }
+    if (cursor) {
+        params.cursor = cursor;
+    }
+    if (formData.value.supplier_id) {
+        params.order_by_id = formData.value.supplier_id;
+    }
+
+    const res = await api.get<any>('/suppliers/list', { params });
+
+    return {
+        data: res.data || [],
+        next_cursor: res.pagination?.next_cursor || null,
+    };
 };
 
 const fetchOrdersByCategory = async (
@@ -321,8 +337,9 @@ const fetchFormData = async () => {
         if (data) {
             // Populate form data
             skipNextSupplierRefresh.value = true;
+            formData.value.supplier_id = data.supplier_id ?? null;
             formData.value.purchase_order_id = data.purchase_order_id;
-            formData.value.category = data.category;
+            formData.value.category = 'logistics';
             formData.value.fetch_item = data.fetch_item;
             skipNextSaleOrderItemsFetch.value = true;
             skipNextSalesInvoicesFetch.value = true;
@@ -376,6 +393,7 @@ const buildFormData = (): FormData => {
 
     // Basic fields
     fd.append('purchase_order_id', String(formData.value.purchase_order_id || ''));
+    fd.append('supplier_id', String(formData.value.supplier_id || ''));
     fd.append('fetch_item', String(formData.value.fetch_item || ''));
     fd.append('category', String(formData.value.category || ''));
     if (formData.value.sales_ids?.length) {
@@ -440,13 +458,12 @@ const handleSubmit = async (type: any) => {
     isSubmitting.value = true;
     try {
         const fd = buildFormData();
-        let response;
         if (isEditMode.value) {
             // Edit mode - PUT request
-            response = await api.put(`/purchases/invoices/logistics/${routeId.value}`, fd);
+            await api.put(`/purchases/invoices/logistics/${routeId.value}`, fd);
         } else {
             // Create mode - POST request
-            response = await api.post('/purchases/invoices/logistics', fd);
+            await api.post('/purchases/invoices/logistics', fd);
         }
 
         success(isEditMode.value ? 'تم تحديث الفاتورة بنجاح' : 'تم إنشاء الفاتورة بنجاح');
@@ -583,6 +600,8 @@ onMounted(async () => {
         fetchConstants(),
     ]);
 
+    await fetchOrdersByCategory(formData.value.category);
+
     // Fetch form data if in edit mode
     if (isEditMode.value) {
         await fetchFormData();
@@ -609,10 +628,12 @@ onMounted(async () => {
                 <v-form ref="formRef" v-model="isFormValid" @submit.prevent>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 gap-y-6">
                         <div>
-                            <SelectInput v-model="formData.category" :items="categoryOptions" placeholder="اختر"
-                                label="نوع الطلبية" density="comfortable" :rules="[required()]"
-                                :error-messages="formErrors['category']"
-                                @update:model-value="clearFieldError('category')" clearable />
+                            <SelectInput v-model="formData.supplier_id" :items="[]" placeholder="اختر المورد"
+                                label="اسم المورد" :rules="[required()]" density="comfortable" item-title="title"
+                                item-value="value" :server-side="true" :fetch-function="fetchSuppliers"
+                                item-title-key="full_name" item-value-key="id" :debounce-time="500"
+                                :error-messages="formErrors['supplier_id']"
+                                @update:model-value="clearFieldError('supplier_id')" />
                         </div>
 
                         <div class="lg:col-span-2 xl:col-span-3">
