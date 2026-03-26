@@ -101,9 +101,9 @@ const routePermissionMap: Record<string, { group: string; key: string | string[]
     '/suppliers/supplier-settlement': { group: 'purchases', key: 'supplier-settlements' },
 
     // Finance
-    '/finance/vouchers/list': { group: 'finance', key: 'financial-dashboard' },
-    '/finance/payment-vouchers': { group: 'finance', key: 'payment-vouchers' },
-    '/finance/receipt-vouchers': { group: 'finance', key: 'receipt-vouchers' },
+    '/finance/vouchers/list': { group: 'finance', key: 'receipt-payment-transactions' },
+    '/finance/banks': { group: 'finance', key: 'treasury-management' },
+    '/finance/treasuries': { group: 'finance', key: 'treasury-management' },
 
     // Users
     '/users': { group: 'users', key: 'users' },
@@ -293,9 +293,8 @@ export function usePermissions() {
     /**
      * Check if user can view finance related items
      */
-    const canViewFinancialDashboard = computed(() => hasPermission('finance', 'financial-dashboard'));
-    const canViewPaymentVouchers = computed(() => hasPermission('finance', 'payment-vouchers'));
-    const canViewReceiptVouchers = computed(() => hasPermission('finance', 'receipt-vouchers'));
+    const canViewReceiptPaymentTransactions = computed(() => hasPermission('finance', 'receipt-payment-transactions'));
+    const canViewTreasuryManagement = computed(() => hasPermission('finance', 'treasury-management'));
 
     /**
      * Check if user can view reports related items
@@ -435,9 +434,8 @@ export function usePermissions() {
      * Check if any finance permission is available
      */
     const hasAnyFinancePermission = computed(() =>
-        canViewFinancialDashboard.value ||
-        canViewPaymentVouchers.value ||
-        canViewReceiptVouchers.value
+        canViewReceiptPaymentTransactions.value ||
+        canViewTreasuryManagement.value
     );
 
     /**
@@ -638,9 +636,8 @@ export function usePermissions() {
         hasAnyPurchasesPermission,
 
         // Finance permissions
-        canViewFinancialDashboard,
-        canViewPaymentVouchers,
-        canViewReceiptVouchers,
+        canViewReceiptPaymentTransactions,
+        canViewTreasuryManagement,
         hasAnyFinancePermission,
 
         // Users permissions
