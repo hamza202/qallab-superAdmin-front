@@ -213,7 +213,7 @@ const formData = ref({
   source_longitude: null as string | null,
   payment_method: null as string | null,
   upfront_payment: null as number | null,
-  po_type: 'po_with_logistics' as string,
+  po_type: 'others' as string,
   invoice_interval: null as number | null,
   payment_term_no: null as number | null,
   late_fee_type: null as string | null,
@@ -415,7 +415,6 @@ const fetchFormData = async () => {
       formData.value.source_latitude = data.source_latitude ?? null;
       formData.value.source_longitude = data.source_longitude ?? null;
       formData.value.code = data.code ? String(data.code) : '';
-      formData.value.po_type = data.po_type || 'po_with_logistics';
       formData.value.invoice_interval = data.invoice_interval ?? null;
       formData.value.payment_term_no = data.payment_term_no ?? null;
       formData.value.late_fee_type = data.late_fee_type || null;
@@ -835,7 +834,7 @@ const buildPayload = () => {
     source_latitude: formData.value.source_latitude ?? '',
     source_longitude: formData.value.source_longitude ?? '',
     project_name: formData.value.project_name || '',
-    po_type: formData.value.po_type || 'po_with_logistics',
+    po_type: formData.value.po_type,
     payment_method: formData.value.payment_method || 'cash',
     upfront_payment: formData.value.upfront_payment ?? 0,
     invoice_interval: formData.value.invoice_interval ?? null,
@@ -1199,8 +1198,6 @@ onMounted(async () => {
             </div>
             <TextInput v-model="formData.project_name" label="اسم المشروع" placeholder="أدخل اسم المشروع"
               :rules="[required()]" density="comfortable" />
-            <SelectInput v-model="formData.po_type" label="نوع الطلبية" :items="poTypeItems" item-title="title"
-              item-value="value" density="comfortable" />
             <TextInput disabled v-model="formData.purchase_quotation_code" v-if="formData.purchase_quotation_code"
               readonly label="كود عرض السعر" density="comfortable" :hide-details="true">
               <template #append-inner>
