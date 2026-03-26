@@ -448,7 +448,7 @@ const headers = [
     { title: 'موقع التسليم', key: 'unloading_location' },
     { title: 'العدد', key: 'quantity' },
     { title: 'سعر الرحلة', key: 'price' },
-    { title: "خصم", key: "discount_display" },
+    // { title: "خصم", key: "discount_display" },
     { title: 'المبلغ الخاضع للضريبة', key: 'taxable_amount' },
     { title: 'مبلغ الضريبة', key: 'tax_amount' },
     { title: 'إجمالي المبلغ', key: 'total_amount' },

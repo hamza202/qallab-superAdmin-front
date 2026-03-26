@@ -66,8 +66,10 @@
               </v-list-item>
             </template>
             <div class="relative mt-1 ps-10 pe-4 text-sm">
-              <h2 v-if="hasAnyProductsManagementPermission" class="text-sm font-medium leading-5 mb-2">إدارة المتجات</h2>
-              <ul v-if="hasAnyProductsManagementPermission" class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
+              <h2 v-if="hasAnyProductsManagementPermission" class="text-sm font-medium leading-5 mb-2">إدارة المتجات
+              </h2>
+              <ul v-if="hasAnyProductsManagementPermission"
+                class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
                 <li v-if="canViewProducts" class="relative">
                   <router-link to="/simple-products/list" :class="[
                     isMenuItemActive('/simple-products/list')
@@ -115,7 +117,8 @@
               <h2 v-if="showProductSettingsSection" class="text-sm font-medium leading-5 my-2">
                 إعدادات المنتجات
               </h2>
-              <ul v-if="showProductSettingsSection" class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
+              <ul v-if="showProductSettingsSection"
+                class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
                 <li v-if="canViewProductVariables" class="relative">
                   <router-link to="/product-variables/list" :class="[
                     isMenuItemActive('/product-variables/list')
@@ -276,7 +279,8 @@
               <h2 v-if="showSalesQuotationsSection" class="text-sm font-medium leading-5 my-2">
                 إدارة عروض الأسعار
               </h2>
-              <ul v-if="showSalesQuotationsSection" class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
+              <ul v-if="showSalesQuotationsSection"
+                class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
                 <li v-if="canViewSalesBuildingMaterialSR" class="relative">
                   <router-link to="/sales/requests/material-product/list" :class="[
                     isMenuItemActive('/sales/requests/material-product')
@@ -368,7 +372,8 @@
               <h2 v-if="showSalesDeliveryDocsSection" class="text-sm font-medium leading-5 my-2">
                 وثائق التسليم
               </h2>
-              <ul v-if="showSalesDeliveryDocsSection" class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
+              <ul v-if="showSalesDeliveryDocsSection"
+                class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
                 <li v-if="canViewSalesDeliveryDocs" class="relative">
                   <router-link to="/sales/delivery-docs/list" :class="[
                     $route.path.includes('/sales/delivery-docs') && !$route.path.includes('/sales/delivery-docs-logistics')
@@ -389,7 +394,8 @@
               <h2 v-if="showSalesInvoicesSection" class="text-sm font-medium leading-5 my-2">
                 فواتير المبيعات
               </h2>
-              <ul v-if="showSalesInvoicesSection" class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5 mb-3">
+              <ul v-if="showSalesInvoicesSection"
+                class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5 mb-3">
                 <li v-if="canViewSalesSaleInvoices" class="relative">
                   <router-link to="/sales/invoices/list" :class="[
                     isMenuItemActive('/sales/invoices')
@@ -498,7 +504,8 @@
             </template>
             <div class="relative mt-1 ps-10 pe-4 text-sm">
               <h2 v-if="showPurchasesSuppliersSection" class="text-sm font-medium leading-5 mb-2">إدارة الموردين</h2>
-              <ul v-if="showPurchasesSuppliersSection" class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
+              <ul v-if="showPurchasesSuppliersSection"
+                class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
                 <li v-if="canViewSuppliers" class="relative">
                   <router-link to="/suppliers/list" :class="[
                     isMenuItemActive('/suppliers/list')
@@ -520,7 +527,8 @@
               <h2 v-if="showPurchasesQuotationsSection" class="text-sm font-medium leading-5 my-2">
                 إدارة عروض الأسعار
               </h2>
-              <ul v-if="showPurchasesQuotationsSection" class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
+              <ul v-if="showPurchasesQuotationsSection"
+                class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
                 <!-- <li  class="relative">
                                     v-if="canViewRequestForQuotations"
                                     <router-link to="/purchases/requests/request-for-quotation/create"
@@ -577,7 +585,8 @@
               <h2 v-if="showPurchasesOrdersSection" class="text-sm font-medium leading-5 my-2">
                 طلبيات المشتريات
               </h2>
-              <ul v-if="showPurchasesOrdersSection" class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
+              <ul v-if="showPurchasesOrdersSection"
+                class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
                 <li v-if="canViewPurchasesBuildingMaterialPO" class="relative">
                   <router-link to="/purchases/orders/material-product/list" :class="[
                     isMenuItemActive('/purchases/orders/material-product')
@@ -603,7 +612,8 @@
               <h2 v-if="showPurchasesReceivingDocsSection" class="text-sm font-medium leading-5 my-2">
                 وثائق الأستلام
               </h2>
-              <ul v-if="showPurchasesReceivingDocsSection" class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
+              <ul v-if="showPurchasesReceivingDocsSection"
+                class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
                 <li v-if="canViewPurchasesReceivingDocs" class="relative">
                   <router-link to="/purchases/receiving-docs/list" :class="[
                     isMenuItemActive('/purchases/receiving-docs') && !$route.path.includes('/purchases/receiving-docs-logistics')
@@ -624,7 +634,8 @@
               <h2 v-if="showPurchasesInvoicesSection" class="text-sm font-medium leading-5 my-2">
                 فواتير المشتريات
               </h2>
-              <ul v-if="showPurchasesInvoicesSection" class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
+              <ul v-if="showPurchasesInvoicesSection"
+                class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
                 <li v-if="canViewPurchaseInvoices" class="relative">
                   <router-link to="/purchases/invoices/list" :class="[
                     $route.path.includes('/purchases/invoices') && !$route.path.includes('/purchases/invoices/logistics')
@@ -675,7 +686,7 @@
             </template>
             <div class="relative mt-1 ps-10 pe-4 text-sm pb-2">
               <ul class="space-y-2 text-slate-100">
-                <li v-if="canViewFinancialDashboard" class="relative">
+                <li v-if="canViewReceiptPaymentTransactions" class="relative">
                   <router-link to="/finance/vouchers/list" :class="[
                     isMenuItemActive('/finance/vouchers/list')
                       ? 'font-bold text-qallab-yellow'
@@ -684,7 +695,7 @@
                     لوحة التحكم المالية
                   </router-link>
                 </li>
-                <li class="relative">
+                <li class="relative" v-if="canViewTreasuryManagement">
                   <router-link to="/banks/list" :class="[
                     isMenuItemActive('/banks/list') || isMenuItemActive('/treasuries/list')
                       ? 'font-bold text-qallab-yellow'
@@ -1011,8 +1022,10 @@
                     الضرائب</router-link>
                 </li>
               </ul>
-              <h2 v-if="showSettingsCountriesCurrenciesSection" class="text-sm font-medium leading-5 my-2">الدول والعملات</h2>
-              <ul v-if="showSettingsCountriesCurrenciesSection" class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
+              <h2 v-if="showSettingsCountriesCurrenciesSection" class="text-sm font-medium leading-5 my-2">الدول
+                والعملات</h2>
+              <ul v-if="showSettingsCountriesCurrenciesSection"
+                class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
                 <li v-if="canViewCountries" class="relative">
                   <router-link to="/settings/countries/list" :class="[
                     isMenuItemActive('/settings/countries/list')
@@ -1041,7 +1054,8 @@
                 </li>
               </ul>
               <h2 v-if="showSettingsAdvancedSection" class="text-sm font-medium leading-5 my-2">إعدادات متقدمة</h2>
-              <ul v-if="showSettingsAdvancedSection" class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
+              <ul v-if="showSettingsAdvancedSection"
+                class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
                 <li v-if="canViewCodesSettings" class="relative">
                   <router-link to="/settings/codes" :class="[
                     isMenuItemActive('/settings/codes')
@@ -1232,9 +1246,8 @@ const {
   canViewPurchasesLogisticsReceivingDocs,
   hasAnyPurchasesPermission,
   // Finance
-  canViewFinancialDashboard,
-  canViewPaymentVouchers,
-  canViewReceiptVouchers,
+  canViewReceiptPaymentTransactions,
+  canViewTreasuryManagement,
   hasAnyFinancePermission,
   // Users
   canViewUsers,
@@ -1389,7 +1402,7 @@ const isMenuItemActive = (menuLinkPath) => {
     // For purchases/sales quotations and orders link pages
     if (currentPath.includes("/link/") || currentPath.includes("/link")) {
       const category = route.query.category;
-      
+
       // Check if menu link is for a specific category type AND matches the link type (quotations vs orders)
       if (menuLinkPath.includes("/quotations/fuels")) {
         return category === "fuel" && currentPath.includes("/quotations/link");
