@@ -24,10 +24,16 @@ if (typeof (window as any).Apex === 'undefined') {
   fontFamily: 'Cairo, Inter, Tajawal, sans-serif',
 }
 
-app.use(createPinia())
+const pinia = createPinia()
+app.use(pinia)
 app.use(router)
 app.use(i18n)
 app.use(vuetify)
+
+// Initialize locale after pinia is set up
+import { useLocaleStore } from '@/stores/locale'
+const localeStore = useLocaleStore()
+localeStore.initializeLocale()
 app.use(VueGoogleMaps, {
   load: {
     key: '',
@@ -38,7 +44,7 @@ app.use(VueGoogleMaps, {
 app.use(Vue3Toastify, {
   autoClose: 3000,
   position: 'top-left',
-  rtl: true,
+  rtl: localeStore.isRtl,
   clearOnUrlChange: false,
 } as ToastContainerOptions)
 

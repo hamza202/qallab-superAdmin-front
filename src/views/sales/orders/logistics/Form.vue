@@ -134,7 +134,7 @@ const formData = ref({
   code: "" as string,
   customer_id: null as number | null,
   so_datetime: "" as string,
-  so_type: null as string | null,
+  so_type: 'others' as string | null,
   responsible_person: "" as string,
   responsible_phone: null as string | null,
   target_location: null as string | null,
@@ -319,7 +319,6 @@ const fetchFormData = async () => {
     formData.value.code = data.code ? String(data.code) : "";
     formData.value.customer_id = data.customer_id ?? null;
     formData.value.so_datetime = data.so_datetime ? String(data.so_datetime) : "";
-    formData.value.so_type = data.so_type ?? null;
     formData.value.responsible_person = data.responsible_person ?? "";
     formData.value.responsible_phone = data.responsible_phone ?? null;
     formData.value.target_location = data.target_location ?? null;
@@ -488,11 +487,6 @@ const fetchQuotationForOrder = async () => {
       formData.value.cancel_fee_type = data.cancel_fee_type || null;
       formData.value.cancel_fee = data.cancel_fee != null ? Number(data.cancel_fee) : null;
       
-      // Map quotation_type to so_type if available
-      if (data.quotation_type) {
-        formData.value.so_type = data.quotation_type;
-      }
-
       // Map logistics product details (logistics_product_details -> productTableItems with logistics info)
       // Based on respons.json structure: logistics_product_details contains item logistics info
       const logisticsProductDetails = data.logistics_product_details ?? data.quotation_logistics_details;
@@ -741,7 +735,7 @@ const getInitialFormData = () => ({
   code: "" as string,
   customer_id: null as number | null,
   so_datetime: "" as string,
-  so_type: null as string | null,
+  so_type: 'others' as string | null,
   responsible_person: "" as string,
   responsible_phone: null as string | null,
   target_location: null as string | null,
@@ -1376,17 +1370,6 @@ onMounted(async () => {
                 density="comfortable"
                 placeholder="اختر التاريخ"
                 label="تاريخ الطلبية"
-              />
-            </div>
-
-            <!-- Order Type -->
-            <div>
-              <SelectInput
-                v-model="formData.so_type"
-                :items="requestTypeItems"
-                label="نوع الطلبية"
-                density="comfortable"
-                placeholder="اختر"
               />
             </div>
 

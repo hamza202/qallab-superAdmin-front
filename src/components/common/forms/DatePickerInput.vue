@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
+import { useLocaleStore } from "@/stores/locale";
 
 type Density = "default" | "comfortable" | "compact";
 
@@ -32,13 +33,15 @@ const datepickerIcon = `<svg width="17" height="19" viewBox="0 0 17 19" fill="no
 const props = withDefaults(defineProps<DatePickerInputProps>(), {
     color: "primary-300",
     bgColor: "#FFF",
-    dir: "rtl",
     density: "comfortable" as Density,
     hideDetails: true,
     clearable: false,
     labelClass: "",
     showCalendarIcon: true,
 });
+
+const localeStore = useLocaleStore();
+const computedDir = computed(() => props.dir || (localeStore.isRtl ? 'rtl' : 'ltr'));
 
 const emit = defineEmits<{
     (e: "update:modelValue", value: string | null): void;
@@ -87,7 +90,7 @@ const formattedDate = computed(() => {
         <v-menu v-model="menu" :close-on-content-click="false" transition="scale-transition" offset-y min-width="auto">
             <template #activator="{ props: menuProps }">
                 <v-text-field v-model="formattedDate" :placeholder="placeholder" variant="outlined" :color="color"
-                    :density="density" :disabled="disabled" :readonly="true" :error-messages="errorMessages"  :rules="rules" :dir="dir"
+                    :density="density" :disabled="disabled" :readonly="true" :error-messages="errorMessages"  :rules="rules" :dir="computedDir"
                     :clearable="clearable" :hide-details="false" :hint="hint" :persistent-hint="persistentHint"
                     v-bind="menuProps">
                     <template #prepend-inner>

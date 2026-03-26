@@ -1,5 +1,5 @@
 <template>
-    <v-footer app height="auto" class="bg-primary-800 text-white px-4 md:px-8 py-0 w-100 h-[8vh] md:h-[6vh]">
+    <v-footer app height="auto" class="bg-primary-800 text-white px-4 md:px-8 py-0 w-100 h-[8vh] md:h-[6vh] !w-full !left-0">
         <div
             class="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 items-center justify-center md:gap-2 text-xs md:text-sm">
             <div class="flex items-center justify-center sm:!justify-start">
