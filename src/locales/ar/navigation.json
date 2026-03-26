@@ -1,5 +1,10 @@
 {
   "navigation": {
+    "purchaseOrders": "طلبات المشتريات",
+    "receivingDocs": "وثائق الاستلام",
+    "purchaseInvoices": "فواتير المشتريات",
+    "materialQuotations": "عروض اسعار مواد بناء أولية",
+    "transportQuotations": "عروض اسعار خدمات النقل",
     "dashboard": "لوحة التحكم",
     "users": "المستخدمين",
     "settings": "الإعدادات",

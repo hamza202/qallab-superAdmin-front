@@ -32,31 +32,78 @@
     },
     "units": {
       "title": "الوحدات",
-      "description": "تمكنك من ادارة  الوحدات"
+      "description": "تمكنك من ادارة  الوحدات",
+      "list": {
+        "deleteDialog": {
+          "title": "حذف الوحدات"
+        },
+        "messages": {
+          "deleteSuccess": "تم حذف الوحدة بنجاح",
+          "bulkDeleteSuccess": "تم حذف {count} وحدة بنجاح"
+        }
+      }
     },
     "brands": {
       "title": "العلامات التجارية",
-      "description": "تمكنك من ادارة  العلامات التجارية"
-    },
-    "factories": {
-      "title": "المصانع",
-      "description": "تمكنك من ادارة  المصانع"
+      "description": "تمكنك من ادارة  العلامات التجارية",
+      "list": {
+        "deleteDialog": {
+          "title": "حذف العلامات التجارية"
+        },
+        "messages": {
+          "deleteSuccess": "تم حذف العلامة التجارية بنجاح",
+          "bulkDeleteSuccess": "تم حذف {count} علامة تجارية بنجاح"
+        }
+      }
     },
     "cities": {
       "title": "المدن",
-      "description": "تمكنك من ادارة المدن"
+      "description": "تمكنك من ادارة المدن",
+      "list": {
+        "deleteDialog": {
+          "title": "حذف المدن"
+        },
+        "messages": {
+          "deleteSuccess": "تم حذف المدينة بنجاح",
+          "bulkDeleteSuccess": "تم حذف {count} مدينة بنجاح"
+        }
+      }
     },
     "countries": {
       "title": "الدول",
-      "description": "تمكنك من ادارة  الدول"
+      "description": "تمكنك من ادارة  الدول",
+      "list": {
+        "deleteDialog": {
+          "title": "حذف الدول"
+        },
+        "messages": {
+          "deleteSuccess": "تم حذف الدولة بنجاح",
+          "bulkDeleteSuccess": "تم حذف {count} دولة بنجاح"
+        }
+      }
     },
     "taxes": {
       "title": "الضرائب",
-      "description": "تمكنك من ادارة الضرائب"
+      "description": "تمكنك من ادارة الضرائب",
+      "list": {
+        "deleteDialog": {
+          "title": "حذف الضرائب"
+        },
+        "messages": {
+          "deleteSuccess": "تم حذف الضريبة بنجاح",
+          "bulkDeleteSuccess": "تم حذف {count} ضريبة بنجاح"
+        }
+      }
     },
     "accountTypes": {
       "title": "انواع الحسابات",
-      "description": "تمكنك من ادارة انواع الحسابات"
+      "description": "تمكنك من ادارة انواع الحسابات",
+      "list": {
+        "filters": {
+          "accountName": "اسم الحساب",
+          "role": "الدور"
+        }
+      }
     },
     "taxRules": {
       "title": "القواعد الضريبية",
@@ -79,47 +126,50 @@
     "suppliers": {
       "title": "الموردين",
       "description": "تمكنك من ادارة الموردين",
-      "list": "قائمة الموردين",
+      "list": {
+        "addButton": "أضف مورد",
+        "deleteDialog": {
+          "title": "حذف الموردين"
+        },
+        "messages": {
+          "deleteSuccess": "تم حذف المورد بنجاح",
+          "bulkDeleteSuccess": "تم حذف {count} مورد بنجاح",
+          "statusChangeSuccess": "تم {status} المورد بنجاح",
+          "statusChangeError": "فشل تغيير حالة المورد"
+        }
+      },
       "create": "إضافة مورد",
       "edit": "تعديل مورد"
     },
     "customers": {
       "title": "العملاء",
       "description": "تمكنك من ادارة العملاء",
-      "list": "قائمة العملاء",
+      "list": {
+        "addButton": "أضف عميل",
+        "deleteDialog": {
+          "title": "حذف العملاء"
+        },
+        "messages": {
+          "loadError": "فشل تحميل قائمة العملاء",
+          "deleteSuccess": "تم حذف العميل بنجاح",
+          "deleteError": "فشل حذف العميل",
+          "bulkDeleteSuccess": "تم حذف {count} عميل بنجاح",
+          "bulkDeleteError": "فشل الحذف الجماعي",
+          "statusChangeSuccess": "تم {status} العميل بنجاح",
+          "statusChangeError": "فشل تغيير حالة العميل",
+          "columnsUpdateError": "فشل تحديث الأعمدة"
+        }
+      },
       "create": "إضافة عميل",
       "edit": "تعديل عميل"
-    },
-    "crushers": {
-      "title": "الكسارات",
-      "description": "تمكنك من إدارة الكسارات",
-      "editDescription": "تستطيع تعديل بيانات الكسارات من هنا",
-      "list": "قائمة الكسارات",
-      "create": "إضافة كسارة",
-      "edit": "تعديل كسارة"
-    },
-    "contractors": {
-      "title": "المقاولين ",
-      "description": "تمكنك من إدارة المقاولين ",
-      "editDescription": "تستطيع تعديل بيانات المقاولين  من هنا",
-      "list": "قائمة المقاولين ",
-      "create": "إضافة كسارة",
-      "edit": "تعديل كسارة"
-    },
-    "materialMerchants": {
-      "title": "تجار المواد",
-      "sidebarTitle": "إدارة تجار المواد",
-      "description": "تمكنك من إدارة تجار المواد",
-      "editDescription": "تستطيع تعديل بيانات تجار المواد من هنا",
-      "list": "قائمة تجار المواد",
-      "create": "إضافة تاجر مواد",
-      "edit": "تعديل تاجر مواد"
     },
     "projects": {
       "title": "جدول المشاريع",
       "description": "عرض المشاريع",
       "formDescription": "تمكنك من إدراة المشاريع",
-      "list": "قائمة المشاريع",
+      "list": {
+        "addButton": "أضف مشروع"
+      },
       "create": "إضافة مشروع",
       "edit": "تعديل مشروع"
     },
@@ -149,11 +199,31 @@
     },
     "services": {
       "title": "الخدمات",
-      "description": "تمكنك من إدارة الخدمات"
+      "description": "تمكنك من إدارة الخدمات",
+      "list": {
+        "addButton": "أضف خدمة",
+        "deleteDialog": {
+          "title": "حذف الخدمات"
+        },
+        "messages": {
+          "deleteSuccess": "تم حذف الخدمة بنجاح",
+          "bulkDeleteSuccess": "تم حذف {count} خدمة بنجاح",
+          "statusChangeSuccess": "تم {status} الخدمة بنجاح",
+          "statusChangeError": "فشل تغيير حالة الخدمة"
+        }
+      }
     },
     "servicesPricesList": {
       "title": "قوائم أسعار الخدمات",
-      "description": "تمكنك من ادارة أسعار الخدمات"
+      "description": "تمكنك من ادارة أسعار الخدمات",
+      "form": {
+        "categories": {
+          "all": "جميع الفئات",
+          "transport": "النقل",
+          "analysis": "التحليل",
+          "other": "أخرى"
+        }
+      }
     },
     "servicePricesList": {
       "title": "قائمة أسعار الخدمات",
@@ -186,7 +256,31 @@
     },
     "vouchers": {
       "title": "لوحة التحكم المالية",
-      "description": "تمكنك من ادارة  السندات المالية "
+      "description": "تمكنك من ادارة  السندات المالية ",
+      "list": {
+        "voucherTypes": {
+          "receipt": "قبض",
+          "payment": "صرف",
+          "entry": "قيد"
+        },
+        "units": {
+          "customer": "عميل",
+          "supplier": "مورد"
+        },
+        "deleteDialog": {
+          "title": "حذف السندات"
+        },
+        "messages": {
+          "statusChangeSuccess": "تم {status} السند بنجاح",
+          "statusChangeError": "فشل تغيير حالة السند",
+          "loadError": "فشل في تحميل السندات",
+          "deleteSuccess": "تم حذف السند بنجاح",
+          "deleteError": "فشل في حذف السند",
+          "bulkDeleteSuccess": "تم حذف {count} سند بنجاح",
+          "bulkDeleteError": "فشل في حذف السندات",
+          "columnsUpdateError": "فشل تحديث الأعمدة"
+        }
+      }
     },
     "vouchers_form": {
       "title": "لوحة التحكم المالية",
@@ -194,22 +288,251 @@
       "paymentVoucherTitle": "سندات الصرف",
       "description": "تمكنك من ادارة  السندات المالية "
     },
+    "banksAndTreasuries": {
+      "title": "البنوك والخزائن",
+      "description": "تمكنك من ادارة البنوك والخزائن",
+      "banks": {
+        "title": "إدارة البنوك",
+        "addButton": "اضافة بنك جديد",
+        "emptyState": "لا يوجد بنوك",
+        "deleteDialog": {
+          "title": "حذف البنك"
+        }
+      },
+      "treasuries": {
+        "title": "إدارة الخزائن",
+        "addButton": "اضافة خزينة جديدة",
+        "emptyState": "لا يوجد خزائن",
+        "deleteDialog": {
+          "title": "حذف الخزينة"
+        }
+      }
+    },
     "logistics": {
       "title": "شركات اللوجستيات",
       "description": "تمكنك من ادارة بيانات شركات اللوجستيات",
-      "sidebarTitle": "إدراة شركات النقل"
+      "sidebarTitle": "إدراة شركات النقل",
+      "list": {
+        "filters": {
+          "productionLines": "عدد خطوط الإنتاج",
+          "logisticType": "نوع شركة النقل",
+          "currentProductionFrom": "الإنتاج الحالي من",
+          "maxProductionFrom": "الإنتاج الأقصى من"
+        },
+        "deleteDialog": {
+          "title": "حذف شركات النقل"
+        },
+        "messages": {
+          "loadingConstantsError": "فشل تحميل الثوابت",
+          "bulkDeleteSuccess": "تم حذف {count} شركة نقل بنجاح",
+          "deleteSuccess": "تم حذف شركة النقل بنجاح",
+          "statusChangeSuccess": "تم {status} شركة نقل بنجاح",
+          "statusChangeError": "فشل تغيير حالة شركة النقل"
+        }
+      }
+    },
+    "contractors": {
+      "title": "المقاولين ",
+      "description": "تمكنك من إدارة المقاولين ",
+      "editDescription": "تستطيع تعديل بيانات المقاولين  من هنا",
+      "list": {
+        "filters": {
+          "municipalLicenseNumber": "رقم رخصة البلدية",
+          "contractorDegree": "درجة المقاول",
+          "classification": "التصنيف"
+        },
+        "deleteDialog": {
+          "title": "حذف المقاولين"
+        },
+        "messages": {
+          "loadingError": "فشل تحميل المقاولين",
+          "deleteSuccess": "تم حذف المقاول بنجاح",
+          "deleteError": "فشل حذف المقاول",
+          "bulkDeleteSuccess": "تم حذف {count} مقاول بنجاح",
+          "bulkDeleteError": "فشل حذف المقاولين",
+          "statusChangeError": "فشل تغيير حالة المقاول"
+        }
+      },
+      "form": {
+        "editTitle": "تعديل المقاول",
+        "addTitle": "إضافة مقاول",
+        "tabs": {
+          "basicInfo": "البيانات الاساسية",
+          "financialInfo": "البيانات المالية",
+          "commercialInfo": "البيانات التجارية",
+          "operationalInfo": "المعلومات التشغيلية"
+        },
+        "messages": {
+          "saveBasicFirst": "يجب حفظ البيانات الأساسية أولاً",
+          "basicInfoSaved": "تم حفظ البيانات الأساسية بنجاح",
+          "financialInfoSaved": "تم حفظ البيانات المالية بنجاح",
+          "commercialInfoSaved": "تم حفظ البيانات التجارية بنجاح",
+          "operationalInfoSaved": "تم حفظ المعلومات التشغيلية بنجاح",
+          "validationError": "يرجى تصحيح الأخطاء في النموذج",
+          "saveError": "فشل حفظ المقاول",
+          "loadError": "فشل تحميل بيانات المقاول"
+        }
+      }
+    },
+    "crushers": {
+      "title": "الكسارات",
+      "description": "تمكنك من إدارة الكسارات",
+      "editDescription": "تستطيع تعديل بيانات الكسارات من هنا",
+      "list": {
+        "filters": {
+          "productionLines": "عدد خطوط الإنتاج",
+          "crusherType": "نوع الكسارة",
+          "currentProductionFrom": "الإنتاج الحالي من",
+          "maxProductionFrom": "الإنتاج الأقصى من"
+        },
+        "deleteDialog": {
+          "title": "حذف الكسارات"
+        },
+        "messages": {
+          "loadingConstantsError": "فشل تحميل الثوابت",
+          "bulkDeleteSuccess": "تم حذف {count} كسارة بنجاح",
+          "bulkDeleteError": "فشل حذف الكسارات",
+          "loadingError": "فشل تحميل الكسارات",
+          "deleteSuccess": "تم حذف الكسارة بنجاح",
+          "deleteError": "فشل حذف الكسارة",
+          "statusChangeError": "فشل تغيير حالة الكسارة"
+        }
+      },
+      "form": {
+        "editTitle": "تعديل الكسارة",
+        "addTitle": "إضافة كسارة",
+        "tabs": {
+          "basicInfo": "البيانات الاساسية",
+          "financialInfo": "البيانات المالية",
+          "commercialInfo": "البيانات التجارية",
+          "operationalInfo": "المعلومات التشغيلية"
+        },
+        "messages": {
+          "saveBasicFirst": "يجب حفظ البيانات الأساسية أولاً",
+          "basicInfoSaved": "تم حفظ البيانات الأساسية بنجاح",
+          "financialInfoSaved": "تم حفظ البيانات المالية بنجاح",
+          "commercialInfoSaved": "تم حفظ البيانات التجارية بنجاح",
+          "operationalInfoSaved": "تم حفظ المعلومات التشغيلية بنجاح",
+          "validationError": "يرجى تصحيح الأخطاء في النموذج",
+          "saveError": "فشل حفظ الكسارة",
+          "loadError": "فشل تحميل بيانات الكسارة"
+        }
+      }
+    },
+    "factories": {
+      "title": "المصانع",
+      "description": "تمكنك من ادارة  المصانع",
+      "list": {
+        "filters": {
+          "productionLines": "عدد خطوط الإنتاج",
+          "factoryType": "نوع المصنع",
+          "currentProductionFrom": "الإنتاج الحالي من",
+          "maxProductionFrom": "الإنتاج الأقصى من"
+        },
+        "deleteDialog": {
+          "title": "حذف المصانع"
+        },
+        "messages": {
+          "loadingConstantsError": "فشل تحميل الثوابت",
+          "bulkDeleteSuccess": "تم حذف {count} مصنع بنجاح",
+          "deleteSuccess": "تم حذف المصنع بنجاح",
+          "statusChangeSuccess": "تم {status} المصنع بنجاح",
+          "statusChangeError": "فشل تغيير حالة المصنع"
+        }
+      }
+    },
+    "materialMerchants": {
+      "title": "تجار المواد",
+      "sidebarTitle": "إدارة تجار المواد",
+      "description": "تمكنك من إدارة تجار المواد",
+      "editDescription": "تستطيع تعديل بيانات تجار المواد من هنا",
+      "list": {
+        "deleteDialog": {
+          "title": "حذف تجار المواد"
+        },
+        "messages": {
+          "loadingError": "فشل تحميل تجار المواد",
+          "deleteSuccess": "تم حذف تاجر المواد بنجاح",
+          "deleteError": "فشل حذف تاجر المواد",
+          "bulkDeleteSuccess": "تم حذف {count} تاجر مواد بنجاح",
+          "bulkDeleteError": "فشل حذف تجار المواد",
+          "statusChangeSuccess": "تم {status} تاجر المواد بنجاح",
+          "statusChangeError": "فشل تغيير حالة تاجر المواد"
+        }
+      }
     },
     "users": {
       "title": "المستخدمين",
       "description": "إدارة المستخدمين في النظام",
-      "list": "قائمة المستخدمين",
+      "list": {
+        "pageTitle": "المستخدمين والأدوار",
+        "pageDescription": "تمكنك من عرض وتعديل المستخدمين وادوارهم",
+        "tabs": {
+          "users": "المستخدمين",
+          "roles": "الأدوار"
+        },
+        "activeUsers": "المستخدمين الفعّالين :",
+        "usersAndRoles": "المستخدمين والأدوار :",
+        "addNewUser": "اضافة مستخدم جديد",
+        "emptyState": {
+          "title": "لا يوجد مستخدمين",
+          "description": "لم يتم العثور على مستخدمين مطابقين للبحث"
+        },
+        "messages": {
+          "fetchError": "حدث خطأ أثناء جلب البيانات",
+          "statusChangeSuccess": "تم {status} المستخدم بنجاح",
+          "statusChangeError": "حدث خطأ أثناء تغيير الحالة"
+        },
+        "modules": {
+          "products": "المنتجات",
+          "services": "الخدمات",
+          "purchases": "المشتريات",
+          "finance": "المالية",
+          "clearing": "المقاصة والمقايضة",
+          "accounting": "المحاسبة",
+          "users": "المستخدمين",
+          "projectManagement": "ادارة المشاريع",
+          "reports": "التقارير",
+          "carriers": "الناقلات",
+          "funding": "التمويل"
+        }
+      },
       "create": "إضافة مستخدم",
       "edit": "تعديل مستخدم"
     },
     "roles": {
       "title": "الأدوار والصلاحيات",
       "description": "إدارة أدوار المستخدمين وصلاحياتهم",
-      "list": "قائمة الأدوار",
+      "list": {
+        "pageTitle": "المستخدمين والأدوار",
+        "pageDescription": "تمكنك من عرض وتعديل المستخدمين وادوارهم",
+        "tabs": {
+          "users": "المستخدمين",
+          "roles": "الأدوار"
+        },
+        "activeRoles": "الأدوار الفعّالة :",
+        "rolesAndPermissions": "الأدوار والصلاحيات :",
+        "addNewRole": "اضافة دور جديد",
+        "emptyState": {
+          "title": "لا يوجد أدوار",
+          "description": "لم يتم العثور على أدوار مطابقة للبحث"
+        },
+        "messages": {
+          "fetchError": "حدث خطأ أثناء جلب البيانات",
+          "statusChangeSuccess": "تم {status} الدور بنجاح",
+          "statusChangeError": "حدث خطأ أثناء تغيير الحالة"
+        },
+        "modules": {
+          "products": "المنتجات",
+          "services": "الخدمات",
+          "purchases": "المشتريات",
+          "finance": "المالية",
+          "clearing": "المقاصة",
+          "funding": "التمويل",
+          "users": "المستخدمين",
+          "reports": "التقارير"
+        }
+      },
       "create": "إضافة دور",
       "edit": "تعديل دور"
     },
@@ -378,16 +701,19 @@
       "FormDescription": "إصدار فاتورة طلبية مشتريات مواد بناء",
       "edit": "تعديل سند استلام"
     },
-    "QuotationsFuels": {
-      "title": "عروض أسعار المحروقات",
-      "description": "تستطيع استعراض عروض أسعار المحروقات والقيام بالإجراءات عليها",
-      "view": "عرض عرض سعر محروقات"
+    "PurchaseInvoicesLogistics": {
+      "title": "جدول فواتير مشتريات خدمة النقل",
+      "description": "تمكنك من ادارة فواتير مشتريات خدمة النقل",
+      "FormTitle": "اصدار فاتورة مشتريات خدمة نقل",
+      "FormDescription": "إصدار فاتورة طلبية مشتريات خدمة نقل"
     },
     "ReceivingDocs": {
       "title": "جدول سندات الاستلام",
       "description": "تمكنك من ادارة سندات الاستلام",
+      "tableTitle": "جدول عناصر سند الاستلام",
       "edit": "تعديل سند استلام",
-      "view": "عرض سند الاستلام",
+      "view": "عرض سند استلام",
+      "create": "إضافة سند استلام",
       "docCode": "كود السند"
     },
     "ReceivingDocsLogistics": {
@@ -520,10 +846,6 @@
       "create": "إضافة خزينة جديدة",
       "formDescription": "اضافة خزنة مالية وتفاصيلها",
       "edit": "تعديل خزينة"
-    },
-    "banksAndTreasuries": {
-      "title": "الخزائن والبنوك",
-      "description": "تمكنك من إدارة الخزائن والبنوك وتفاصيلهم"
     }
   }
 }

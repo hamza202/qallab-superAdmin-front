@@ -420,8 +420,8 @@ const handleSubmitToOrdersList = async () => {
                                             <span class="text-xs font-medium text-gray-900">{{
                                                 vehicle.transport_type_label }}</span>
                                         </div>
-                                        <div class="bg-[#E2E7EF] col-span-3 h-full flex items-center">
-                                            <PriceInput v-model="vehicle.transport_no" placeholder="أدخل" disabled
+                                        <div class="bg-white col-span-3 h-full flex items-center">
+                                            <PriceInput v-model="vehicle.transport_no" placeholder="أدخل"
                                                 density="comfortable" variant="solo" hide-details class="text-center"
                                                 :input-props="{ class: 'text-center shadow-none' }" />
                                         </div>
