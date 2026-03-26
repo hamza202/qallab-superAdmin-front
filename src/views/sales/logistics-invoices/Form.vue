@@ -34,6 +34,8 @@ const summaryData = ref<any>(null);
 const isPopulatingForm = ref(false);
 const skipNextSaleOrderItemsFetch = ref(false);
 const formErrors = reactive<Record<string, string>>({});
+// Cache: { [saleOrderId]: { [tripId]: invoiceItemId } }
+const itemsIdCache = ref<Record<string | number, Record<string | number, number>>>({});
 
 const scrollToTop = () => {
     if (typeof window === 'undefined') return;
@@ -106,8 +108,10 @@ const fetchTripsBySaleOrder = async (saleOrderId: number | string | null) => {
             warning('لا توجد رحلات لهذه الطلبية لإتمام الفاتورة')
         }
 
+        const cachedIds = isEditMode.value ? itemsIdCache.value[saleOrderId as string | number] : null;
+
         productTableItems.value = trips.map((trip: any) => ({
-            id: trip.id,
+            id: cachedIds?.[trip.id] ?? null,
             trip_id: trip.id,
             trip_code: trip.code || '-',
             date: trip.date || trip.created_at || '-',
@@ -342,6 +346,16 @@ const fetchFormData = async () => {
                     tax_amount: item.total_tax ?? 0,
                     total_amount: item.subtotal_after_tax ?? item.total_out_taxes ?? 0,
                 }));
+
+                if (data.sale_order_id) {
+                    const idMap: Record<string | number, number> = {};
+                    data.items.forEach((item: any) => {
+                        if (item.trip_management_id && item.id) {
+                            idMap[item.trip_management_id] = item.id;
+                        }
+                    });
+                    itemsIdCache.value[data.sale_order_id] = idMap;
+                }
             }
 
             summaryData.value = {
@@ -395,6 +409,7 @@ const resetFormState = async () => {
     ordersItems.value = [];
     summaryData.value = null;
     skipNextSaleOrderItemsFetch.value = false;
+    itemsIdCache.value = {};
     Object.keys(formErrors).forEach(key => delete formErrors[key]);
     await nextTick();
     scrollToTop();

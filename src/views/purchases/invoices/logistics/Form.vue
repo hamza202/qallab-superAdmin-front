@@ -3,7 +3,7 @@ import { ref, reactive, computed, onMounted, watch, nextTick } from "vue";
 import { useRoute, useRouter } from 'vue-router';
 import TopHeader from '@/components/price-offers/TopHeader.vue';
 import { useApi } from '@/composables/useApi';
-import { returnIcon, saveIcon, fileCheckIcon, fileIcon_2, rialIcon } from '@/components/icons/globalIcons';
+import { returnIcon, saveIcon, fileCheckIcon, fileIcon_2 } from '@/components/icons/globalIcons';
 import { useForm } from '@/composables/useForm';
 import { useNotification } from '@/composables/useNotification';
 
@@ -68,6 +68,9 @@ interface ProductTableItem {
     item_name: string;
     unit_id: number | null;
     unit_name: string;
+    code?: string;
+    source_location?: string;
+    target_location?: string;
     quantity: number | null;
     price_per_unit: number | null;
     discount_type: number | string | null;
@@ -77,6 +80,7 @@ interface ProductTableItem {
     total_out_taxes: number | null;
     subtotal_after_tax: number | null;
     id?: number; // For edit mode
+    trip_management_id?: number;
     isAdded?: boolean; // For dialog state
 }
 
@@ -112,12 +116,16 @@ const mapOrderItemsToProducts = (items: any[] = [], options: MapOptions = { pres
         item_name: item.item_name || item.name || '',
         unit_id: item.unit_id,
         unit_name: item.unit_name || item.unit?.name || '',
-        quantity: item.quantity_from_customer ?? item.quantity,
+        code: item.code || '-',
+        source_location: item.source_location || '-',
+        target_location: item.target_location || '-',
+        trip_management_id: item.trip_management_id,
+        quantity: item.total_quantities ?? item.quantity_from_customer ?? item.quantity,
         price_per_unit: item.price_per_unit || 0,
         discount_type: item.discount_type,
         discount_val: item.discount_val,
         total_tax: item.total_tax,
-        taxable_amount: item.total_applied_taxes,
+        taxable_amount: item.taxable_amount ?? item.total_applied_taxes,
         total_out_taxes: item.total_out_taxes ?? item.taxable_amount ?? (item.subtotal_after_tax != null && item.total_tax != null ? Number(item.subtotal_after_tax) - Number(item.total_tax) : null),
         subtotal_after_tax: item.subtotal_after_tax ?? item.subtotal_after_discount,
     }));
@@ -255,7 +263,8 @@ const fetchSalesInvoicesByPurchaseOrder = async (
             with_logistic_items: true,
             category,
             po_reference: poReference,
-            modules: 'purchases'
+            modules: 'purchases',
+            ...(formData.value.supplier_id ? { supplier_id: formData.value.supplier_id } : {}),
         };
 
         const res = await api.get<any>('/sales/invoices/list', {
@@ -391,7 +400,10 @@ const fetchFormData = async () => {
 const buildFormData = (): FormData => {
     const fd = new FormData();
 
-    // Basic fields
+    if (isEditMode.value) {
+        fd.append('_method', 'PUT');
+    }
+
     fd.append('purchase_order_id', String(formData.value.purchase_order_id || ''));
     fd.append('supplier_id', String(formData.value.supplier_id || ''));
     fd.append('fetch_item', String(formData.value.fetch_item || ''));
@@ -406,25 +418,12 @@ const buildFormData = (): FormData => {
     fd.append('project_name', formData.value.project_name || '');
     fd.append('notes', formData.value.notes || '');
 
-    // Items (products)
     productTableItems.value.forEach((item, index) => {
-        // Only include id in edit mode
         if (isEditMode.value && item.id) {
-            fd.append(`items[${index}][id]`, String(item.id));
+            fd.append(`logisticItems[${index}][id]`, String(item.id));
         }
-        fd.append(`items[${index}][item_id]`, String(item.item_id));
-        fd.append(`items[${index}][unit_id]`, String(item.unit_id || ''));
-        fd.append(`items[${index}][quantity]`, String(item.quantity || ''));
-        fd.append(`items[${index}][price_per_unit]`, String(item.price_per_unit || ''));
-        fd.append(`items[${index}][discount_type]`, String(item.discount_type || ''));
-        fd.append(`items[${index}][discount_val]`, String(item.discount_val || ''));
-        fd.append(`items[${index}][total_tax]`, String(item.total_tax || ''));
-        fd.append(`items[${index}][taxable_amount]`, String(item.taxable_amount || ''));
+        fd.append(`logisticItems[${index}][trip_management_id]`, String(item.trip_management_id || ''));
     });
-
-    // if (formData.value.voice_attachment) {
-    //     fd.append('voice_attachment', formData.value.voice_attachment);
-    // }
 
     return fd;
 }
@@ -459,11 +458,13 @@ const handleSubmit = async (type: any) => {
     try {
         const fd = buildFormData();
         if (isEditMode.value) {
-            // Edit mode - PUT request
-            await api.put(`/purchases/invoices/logistics/${routeId.value}`, fd);
+            await api.post(`/purchases/invoices/logistics/${routeId.value}`, fd, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+            });
         } else {
-            // Create mode - POST request
-            await api.post('/purchases/invoices/logistics', fd);
+            await api.post('/purchases/invoices/logistics', fd, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+            });
         }
 
         success(isEditMode.value ? 'تم تحديث الفاتورة بنجاح' : 'تم إنشاء الفاتورة بنجاح');
@@ -485,29 +486,29 @@ const handleSubmit = async (type: any) => {
 };
 
 const headers = [
-    { title: 'اسم المنتج', key: 'name' },
-    { title: 'الوحدة', key: 'unit' },
-    { title: 'الكمية', key: 'quantity' },
-    { title: 'سعر الوحدة', key: 'price_per_unit' },
-    { title: "خصم", key: "discount_display" },
+    { title: 'كود الرحلة', key: 'code' },
+    { title: 'موقع الإستلام', key: 'source_location' },
+    { title: 'موقع التسليم', key: 'target_location' },
+    { title: 'عدد الرحلات', key: 'quantity' },
+    { title: 'سعر الرحلة', key: 'price_per_unit' },
     { title: 'المبلغ الخاضع للضريبة', key: 'taxable_amount' },
     { title: 'مبلغ الضريبة', key: 'total_tax' },
-    { title: 'إجمالي المبلغ', key: 'total_out_taxes' },
+    { title: 'إجمالي المبلغ', key: 'subtotal_after_tax' },
 ]
 
 // Computed items for the DataTable (mapped from productTableItems)
-const tableItems = computed(() => productTableItems.value.map(item => ({
-    id: item.item_id, // Required for DataTable
-    item_id: item.item_id,
-    name: item.item_name,
-    unit: item.unit_name,
+const tableItems = computed(() => productTableItems.value.map((item, index) => ({
+    id: item.trip_management_id || item.item_id || index,
+    code: item.code,
+    source_location: item.source_location,
+    target_location: item.target_location,
     quantity: item.quantity,
     price_per_unit: item.price_per_unit,
     discount_val: item.discount_val ?? 0,
     discount_type: item.discount_type ?? null,
     taxable_amount: item.taxable_amount,
     total_tax: item.total_tax,
-    total_out_taxes: item.total_out_taxes,
+    subtotal_after_tax: item.subtotal_after_tax,
 })));
 
 const summaryTotalQuantities = computed(() =>
@@ -718,17 +719,8 @@ onMounted(async () => {
                 </div>
 
                 <!-- Products Table -->
-                <DataTable :headers="headers" :items="tableItems">
-                    <template #item.discount_display="{ item }">
-                        <span v-if="item.discount_val != null && Number(item.discount_val) > 0"
-                            class="flex items-center gap-1">
-                            {{ item.discount_val }}
-                            <span v-if="item.discount_type == 1">%</span>
-                            <span v-if="item.discount_type == 2" v-html="rialIcon"></span>
-                        </span>
-                        <span v-else>—</span>
-                    </template>
-                </DataTable>
+                <DataTable :headers="headers" :items="tableItems" />
+
             </div>
 
             <!-- Summary Table Section -->
