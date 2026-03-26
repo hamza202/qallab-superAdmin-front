@@ -3,6 +3,19 @@ import { createVuetify } from "vuetify";
 import { aliases, mdi } from "vuetify/iconsets/mdi";
 import { ar, en } from "vuetify/locale";
 
+const STORAGE_KEY = 'qallab_locale';
+const getInitialLocale = (): string => {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored === 'ar' || stored === 'en') {
+      return stored;
+    }
+  } catch (error) {
+    console.error('Failed to read locale from localStorage:', error);
+  }
+  return 'ar';
+};
+
 // Qallab Design System Colors
 const qallabTheme = {
   dark: false,
@@ -48,7 +61,7 @@ const vuetify = createVuetify({
     },
   },
   locale: {
-    locale: "ar",
+    locale: getInitialLocale(),
     fallback: "en",
     messages: { ar, en },
   },

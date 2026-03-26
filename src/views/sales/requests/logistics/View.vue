@@ -9,11 +9,11 @@
                         <span v-html="homeIcon"></span>
                     </router-link>
                     <span class="text-lg text-gray-300">/</span>
-                    <router-link to="/purchases" class="text-gray-600 hover:text-primary-600">
+                    <router-link to="/sales" class="text-gray-600 hover:text-primary-600">
                         المشتريات
                     </router-link>
                     <span class="text-lg text-gray-300">/</span>
-                    <router-link to="/purchases/requests/logistics/list" class="text-gray-600 hover:text-primary-600">
+                    <router-link to="/sales/requests/logistics/list" class="text-gray-600 hover:text-primary-600">
                         طلبات عروض أسعار خدمة نقل
                     </router-link>
                     <span class="text-lg text-gray-300">/</span>
@@ -242,7 +242,7 @@ const fetchLogisticsData = async () => {
 
     isLoading.value = true
     try {
-        const res = await api.get<any>(`/purchases/logistics/${routeId.value}`)
+        const res = await api.get<any>(`/sales/logistics/${routeId.value}`)
         logisticsData.value = res.data
     } catch (e: any) {
         console.error('Error fetching logistics data:', e)

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
+import { useLocaleStore } from "@/stores/locale";
 
 type Density = "default" | "comfortable" | "compact";
 
@@ -42,13 +43,15 @@ const props = withDefaults(defineProps<TextInputProps>(), {
     type: "text",
     color: "primary-300",
     bgColor: "#FFF",
-    dir: "rtl",
     density: "comfortable" as Density,
     hideDetails: true,
     passwordToggle: false,
     inputProps: () => ({}),
     labelClass: "",
 });
+
+const localeStore = useLocaleStore();
+const computedDir = computed(() => props.dir || (localeStore.isRtl ? 'rtl' : 'ltr'));
 
 const emit = defineEmits<{
     (e: "update:modelValue", value: string | number | null): void;
@@ -89,7 +92,7 @@ const handleAppendInnerClick = () => {
         </label>
 
         <v-text-field v-model="internalValue" :type="inputType" :placeholder="placeholder" variant="outlined"
-            :color="color" :density="density" :disabled="disabled" :readonly="readonly" :rules="rules" :dir="dir"
+            :color="color" :density="density" :disabled="disabled" :readonly="readonly" :rules="rules" :dir="computedDir"
             :clearable="clearable" :error-messages="errorMessages" :hide-details="false" :hint="hint" :persistent-hint="persistentHint"
             :prefix="prefix" :suffix="suffix" :prepend-inner-icon="prependInnerIcon"
             :append-inner-icon="effectiveAppendInnerIcon" :prepend-icon="prependIcon" :append-icon="appendIcon"
