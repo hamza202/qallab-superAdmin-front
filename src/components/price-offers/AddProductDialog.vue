@@ -48,6 +48,7 @@ const props = defineProps<{
   existingProducts?: ProductToAdd[];
   /** Options for discount type dropdown */
   discountTypeItems?: any[];
+  hideTripNo?: boolean;
 }>();
 
 const variant = computed(() => props.variant || 'purchases');
@@ -523,7 +524,7 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
           </div>
 
           <!-- Delivery Count (trip_no) - purchases فقط بدون سعر/خصم -->
-          <div v-if="!showPricingFields && requestType == 'raw_materials'|| requestType == 'logistics' || requestType === 'logistics-trips'">
+          <div v-if="!hideTripNo && (!showPricingFields && requestType == 'raw_materials'|| requestType == 'logistics' || requestType === 'logistics-trips')">
             <TextInput 
               v-model="editProductData.trip_no" 
               type="number" 
@@ -750,7 +751,7 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
               </div>
 
               <!-- Delivery Count (trip_no) - purchases فقط بدون سعر/خصم -->
-              <div v-if="requestType == 'raw_materials' || requestType == 'logistics' || requestType === 'logistics-trips'">
+              <div v-if="!hideTripNo && (requestType == 'raw_materials' || requestType == 'logistics' || requestType === 'logistics-trips')">
                 <TextInput 
                   v-model="product.trip_no" 
                   type="number"

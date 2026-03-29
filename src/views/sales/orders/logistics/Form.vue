@@ -2,6 +2,7 @@
 import { ref, computed, onMounted, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import AddProductDialog, { type ProductToAdd } from "@/components/price-offers/AddProductDialog.vue";
+import EditProductsDialog from "@/components/price-offers/EditProductsDialog.vue";
 import TopHeader from "@/components/price-offers/TopHeader.vue";
 import { useApi } from "@/composables/useApi";
 import { useCalculations, type CalculationItem } from '@/composables/useCalculations';
@@ -125,9 +126,11 @@ const logisticsDetails = ref<LogisticsDetail[]>([]);
 
 // Products table items
 const productTableItems = ref<ProductTableItem[]>([]);
+const originalProductIds = ref<Map<number, number>>(new Map());
 
 // Trip details table items
 const tripTableItems = ref<TripTableItem[]>([]);
+const originalTripIds = ref<Map<number, number>>(new Map());
 
 // Form data
 const formData = ref({
@@ -383,19 +386,25 @@ const fetchFormData = async () => {
     // Populate products (so_product_details)
     const productsList = data.so_product_details ?? data.items;
     if (Array.isArray(productsList) && productsList.length > 0) {
-      productTableItems.value = productsList.map((item: any) => ({
-        id: item.id,
-        item_id: Number(item.item_id),
-        item_name: item.item_name ?? "",
-        unit_id: item.unit_id ?? null,
-        unit_name: item.unit_name ?? "",
-        quantity: item.quantity ?? null,
-        from_date: item.from_date ?? null,
-        trip_no: item.trip_no ?? null,
-        transport_type: item.transport_type != null ? Number(item.transport_type) : null,
-        transport_type_name: item.transport_type_name ?? "",
-        notes: item.notes ?? "",
-      }));
+      productTableItems.value = productsList.map((item: any) => {
+        const itemId = Number(item.item_id);
+        if (item.id && itemId) {
+          originalProductIds.value.set(itemId, item.id);
+        }
+        return {
+          id: item.id,
+          item_id: itemId,
+          item_name: item.item_name ?? "",
+          unit_id: item.unit_id ?? null,
+          unit_name: item.unit_name ?? "",
+          quantity: item.quantity ?? null,
+          from_date: item.from_date ?? null,
+          trip_no: item.trip_no ?? null,
+          transport_type: item.transport_type != null ? Number(item.transport_type) : null,
+          transport_type_name: item.transport_type_name ?? "",
+          notes: item.notes ?? "",
+        };
+      });
     } else {
       productTableItems.value = [];
     }
@@ -406,10 +415,14 @@ const fetchFormData = async () => {
         const transportTypes = Array.isArray(item.transport_type)
           ? item.transport_type.map((type: any) => Number(type))
           : [];
+        const itemId = Number(item.item_id);
+        if (item.id && itemId) {
+          originalTripIds.value.set(itemId, item.id);
+        }
 
           return {
             id: item.id,
-          item_id: Number(item.item_id),
+          item_id: itemId,
           item_name: item.item_name ?? "",
             unit_id: item.unit_id ?? null,
           unit_name: item.unit_name ?? "",
@@ -1033,9 +1046,10 @@ const handleAddProduct = () => {
 
 const handleProductSaved = (products: any[]) => {
   if (productDialogMode.value === "logistics-trips") {
-    // Handle trip details
     const newTripItems: TripTableItem[] = [];
     products.forEach((p) => {
+      const existingTrip = tripTableItems.value.find(t => t.item_id === p.item_id);
+      const restoredId = existingTrip?.id ?? originalTripIds.value.get(p.item_id) ?? p.id;
       newTripItems.push({
         item_id: p.item_id,
         item_name: p.item_name,
@@ -1048,16 +1062,16 @@ const handleProductSaved = (products: any[]) => {
         transport_type_names: p.transport_type_names ?? "",
         notes: p.notes || "",
         isAdded: p.isAdded,
-        id: p.id,
+        id: restoredId,
       });
     });
     tripTableItems.value = newTripItems;
   } else {
-    // Handle logistics products
     const newItems: ProductTableItem[] = [];
     const newTripItems: TripTableItem[] = [];
     products.forEach((p) => {
-      const existing = productTableItems.value.find((existing) => existing.item_id === p.item_id);
+      const existing = productTableItems.value.find((e) => e.item_id === p.item_id);
+      const restoredId = existing?.id ?? originalProductIds.value.get(p.item_id) ?? p.id;
       newItems.push({
         item_id: p.item_id,
         item_name: p.item_name,
@@ -1070,10 +1084,10 @@ const handleProductSaved = (products: any[]) => {
         transport_type_name: p.transport_type_name ?? "",
         notes: existing?.notes || p.notes || "",
         isAdded: p.isAdded,
-        id: existing?.id || p.id,
+        id: restoredId,
       });
 
-      const existingTrip = tripTableItems.value.find(existing => existing.item_id === p.item_id);
+      const existingTrip = tripTableItems.value.find(t => t.item_id === p.item_id);
       if (existingTrip) {
           newTripItems.push({
               ...existingTrip,
@@ -1212,6 +1226,91 @@ const handleProductUpdated = async (updatedProduct: any) => {
     }
   }
   editingProduct.value = null;
+};
+
+// Edit Products Dialog (bulk edit)
+const showEditProductsDialog = ref(false);
+const showEditTripsDialog = ref(false);
+
+const handleEditProductsBulk = (updatedProducts: any[]) => {
+  const updatedItemIds = new Set(updatedProducts.map((p: any) => p.item_id));
+
+  const newProducts: ProductTableItem[] = updatedProducts.map((updated: any) => {
+    const existing = productTableItems.value.find(p => p.item_id === updated.item_id);
+    return {
+      ...(existing || {}),
+      item_id: updated.item_id,
+      item_name: updated.item_name,
+      unit_id: updated.unit_id,
+      unit_name: updated.unit_name,
+      quantity: updated.quantity,
+      from_date: updated.from_date ?? existing?.from_date ?? null,
+      trip_no: updated.trip_no ?? existing?.trip_no ?? null,
+      transport_type: updated.transport_type ?? existing?.transport_type ?? null,
+      transport_type_name: updated.transport_type_name ?? existing?.transport_type_name ?? '',
+      notes: existing?.notes ?? updated.notes ?? '',
+      id: existing?.id ?? updated.id,
+    } as ProductTableItem;
+  });
+
+  productTableItems.value = newProducts;
+
+  tripTableItems.value = tripTableItems.value.filter(t => updatedItemIds.has(t.item_id));
+  updatedProducts.forEach((updated: any) => {
+    const tripIndex = tripTableItems.value.findIndex(t => t.item_id === updated.item_id);
+    if (tripIndex !== -1) {
+      tripTableItems.value[tripIndex].quantity = updated.quantity;
+      tripTableItems.value[tripIndex].unit_id = updated.unit_id;
+      tripTableItems.value[tripIndex].unit_name = updated.unit_name;
+    }
+  });
+
+  showEditProductsDialog.value = false;
+};
+
+const handleEditTripsBulk = async (updatedTrips: any[]) => {
+  const newTrips: TripTableItem[] = [];
+
+  for (const updated of updatedTrips) {
+    const existing = tripTableItems.value.find(t => t.item_id === updated.item_id);
+    const trip: TripTableItem = {
+      ...(existing || {}),
+      item_id: updated.item_id,
+      item_name: updated.item_name,
+      unit_id: updated.unit_id,
+      unit_name: updated.unit_name,
+      quantity: updated.quantity,
+      trip_date: updated.trip_date ?? existing?.trip_date ?? null,
+      trip_no: updated.trip_no ?? existing?.trip_no ?? null,
+      trip_price: updated.trip_price ?? existing?.trip_price ?? null,
+      transport_type: updated.transport_type ?? existing?.transport_type ?? [],
+      transport_type_names: updated.transport_type_names ?? existing?.transport_type_names ?? '',
+      discount_val: updated.discount ?? updated.discount_val ?? existing?.discount_val ?? null,
+      discount_type: updated.discount_type ?? existing?.discount_type ?? null,
+      notes: existing?.notes ?? updated.notes ?? '',
+      id: existing?.id ?? updated.id,
+    } as TripTableItem;
+
+    const subTotal = await calculateTripItemSubTotal(trip);
+    trip.sub_total = subTotal;
+    newTrips.push(trip);
+  }
+
+  tripTableItems.value = newTrips;
+
+  const updatedItemIds = new Set(updatedTrips.map((t: any) => t.item_id));
+  productTableItems.value = productTableItems.value.filter(p => updatedItemIds.has(p.item_id));
+  updatedTrips.forEach((updated: any) => {
+    const productIndex = productTableItems.value.findIndex(p => p.item_id === updated.item_id);
+    if (productIndex !== -1) {
+      productTableItems.value[productIndex].quantity = updated.quantity;
+      productTableItems.value[productIndex].unit_id = updated.unit_id;
+      productTableItems.value[productIndex].unit_name = updated.unit_name;
+      productTableItems.value[productIndex].trip_no = updated.trip_no ?? productTableItems.value[productIndex].trip_no;
+    }
+  });
+
+  showEditTripsDialog.value = false;
 };
 
 const handleDeleteProduct = (item: any) => {
@@ -1647,15 +1746,24 @@ onMounted(async () => {
           </template>
         </DataTable>
 
-        <!-- Add Product Button -->
-        <div class="flex justify-center my-6">
+        <!-- Add / Edit Product Buttons -->
+        <div class="flex justify-center gap-3 my-6 md:w-3/4 mx-auto text-center">
           <ButtonWithIcon
             color="primary-100"
             variant="flat"
-            class="!text-primary-900 font-bold w-75"
+            class="!text-primary-900 font-bold flex-1"
             @click="handleAddProduct"
           >
             + إضافة منتج جديد
+          </ButtonWithIcon>
+          <ButtonWithIcon
+            v-if="productTableItems.length > 0"
+            color="primary-100"
+            variant="flat"
+            class="!text-primary-900 font-bold flex-1"
+            @click="showEditProductsDialog = true"
+          >
+            تعديل المنتجات
           </ButtonWithIcon>
         </div>
       </div>
@@ -1686,6 +1794,18 @@ onMounted(async () => {
                 <span v-else>—</span>
             </template>
         </DataTable>
+
+        <!-- Edit Trips Button -->
+        <div class="flex justify-center my-6" v-if="tripTableItems.length > 0">
+          <ButtonWithIcon
+            color="primary-100"
+            variant="flat"
+            class="!text-primary-900 font-bold w-75"
+            @click="showEditTripsDialog = true"
+          >
+            تعديل الرحلات
+          </ButtonWithIcon>
+        </div>
       </div>
 
       <!-- Payment and Summary Section -->
@@ -1860,7 +1980,7 @@ onMounted(async () => {
       @updated="handleLogisticsDetailUpdated"
     />
 
-    <!-- Add Product Dialog -->
+    <!-- Add Product Dialog (no material_type) -->
     <AddProductDialog
       v-model="showAddProductDialog"
       :request-type="productDialogMode"
@@ -1873,6 +1993,26 @@ onMounted(async () => {
       :existing-products="productDialogMode === 'logistics' ? productTableItems : tripTableItems"
       @saved="handleProductSaved"
       @product-updated="handleProductUpdated"
+    />
+
+    <!-- Edit Products Dialog -->
+    <EditProductsDialog
+      v-model="showEditProductsDialog"
+      :products="productTableItems"
+      :unit-items="unitItems"
+      :transport-types="transportTypeItems"
+      request-type="logistics"
+      @products-updated="handleEditProductsBulk"
+    />
+
+    <!-- Edit Trips Dialog -->
+    <EditProductsDialog
+      v-model="showEditTripsDialog"
+      :products="tripTableItems"
+      :unit-items="unitItems"
+      :transport-types="transportTypeItems"
+      request-type="logistics-trips"
+      @products-updated="handleEditTripsBulk"
     />
 
     <v-overlay :model-value="pageLoading" contained class="align-center justify-center">

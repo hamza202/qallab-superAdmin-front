@@ -3,6 +3,7 @@ import { ref, computed, onMounted, watch } from "vue";
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router';
 import AddProductDialog, { type ProductToAdd } from '@/components/price-offers/AddProductDialog.vue';
+import EditProductsDialog from '@/components/price-offers/EditProductsDialog.vue';
 import TopHeader from '@/components/price-offers/TopHeader.vue';
 import { useApi } from '@/composables/useApi';
 import { fileIcon, mapMarkerIcon, messagePlusIcon, filePlusIcon, CoinHandIcon, fileCheckIcon, busIcon, globeIcon } from '@/components/icons/priceOffersIcons';
@@ -209,19 +210,25 @@ const fetchFormData = async () => {
 
         // Populate products (quotation_product_details for logistics)
         if (Array.isArray(data.quotation_product_details) && data.quotation_product_details.length > 0) {
-            productTableItems.value = data.quotation_product_details.map((item: any) => ({
-                id: item.id,
-                item_id: Number(item.item_id),
-                item_name: item.item_name ?? '',
-                unit_id: item.unit_id ?? null,
-                unit_name: item.unit_name ?? '',
-                quantity: item.quantity ?? null,
-                from_date: item.from_date ?? null,
-                trip_no: item.trip_no ?? null,
-                transport_type: item.transport_type != null ? Number(item.transport_type) : null,
-                transport_type_name: item.transport_type_name ?? '',
-                notes: item.notes ?? '',
-            }));
+            productTableItems.value = data.quotation_product_details.map((item: any) => {
+                const itemId = Number(item.item_id);
+                if (item.id && itemId) {
+                    originalProductIds.value.set(itemId, item.id);
+                }
+                return {
+                    id: item.id,
+                    item_id: itemId,
+                    item_name: item.item_name ?? '',
+                    unit_id: item.unit_id ?? null,
+                    unit_name: item.unit_name ?? '',
+                    quantity: item.quantity ?? null,
+                    from_date: item.from_date ?? null,
+                    trip_no: item.trip_no ?? null,
+                    transport_type: item.transport_type != null ? Number(item.transport_type) : null,
+                    transport_type_name: item.transport_type_name ?? '',
+                    notes: item.notes ?? '',
+                };
+            });
         } else {
             productTableItems.value = [];
         }
@@ -232,10 +239,14 @@ const fetchFormData = async () => {
                 const transportTypes = Array.isArray(item.transport_type)
                     ? item.transport_type.map((type: any) => Number(type))
                     : [];
+                const itemId = Number(item.item_id);
+                if (item.id && itemId) {
+                    originalTripIds.value.set(itemId, item.id);
+                }
 
                 return {
                     id: item.id,
-                    item_id: Number(item.item_id),
+                    item_id: itemId,
                     item_name: item.item_name ?? '',
                     unit_id: item.unit_id ?? null,
                     unit_name: item.unit_name ?? '',
@@ -542,9 +553,11 @@ const formData = ref({
 
 // Products table items
 const productTableItems = ref<ProductTableItem[]>([]);
+const originalProductIds = ref<Map<number, number>>(new Map());
 
 // Trip details table items
 const tripTableItems = ref<TripTableItem[]>([]);
+const originalTripIds = ref<Map<number, number>>(new Map());
 
 
 const summaryTotals = computed(() => {
@@ -629,6 +642,7 @@ const handleProductSaved = (products: any[]) => {
         // Handle trip details
         const newTripItems: TripTableItem[] = [];
         (products as TripDetail[]).forEach(p => {
+            const restoredId = p.id || originalTripIds.value.get(p.item_id) || undefined;
             newTripItems.push({
                 item_id: p.item_id,
                 item_name: p.item_name,
@@ -640,7 +654,7 @@ const handleProductSaved = (products: any[]) => {
                 transport_type: p.transport_type ?? [],
                 transport_type_names: p.transport_type_names ?? '',
                 isAdded: p.isAdded,
-                id: p.id,
+                id: restoredId,
             });
         });
         tripTableItems.value = newTripItems;
@@ -650,6 +664,7 @@ const handleProductSaved = (products: any[]) => {
         const newTripItems: TripTableItem[] = [];
         (products as LogisticsQuotationProductToAdd[]).forEach(p => {
             const existing = productTableItems.value.find(existing => existing.item_id === p.item_id);
+            const restoredId = existing?.id || p.id || originalProductIds.value.get(p.item_id) || undefined;
             newItems.push({
                 item_id: p.item_id,
                 item_name: p.item_name,
@@ -662,7 +677,7 @@ const handleProductSaved = (products: any[]) => {
                 transport_type_name: p.transport_type_name ?? '',
                 notes: existing?.notes || p.notes || '',
                 isAdded: p.isAdded,
-                id: existing?.id || p.id,
+                id: restoredId,
             });
 
             const existingTrip = tripTableItems.value.find(existing => existing.item_id === p.item_id);
@@ -821,6 +836,24 @@ const handleDeleteProduct = (item: any) => {
     if (tripIndex !== -1) {
         tripTableItems.value.splice(tripIndex, 1);
     }
+};
+
+const showEditProductsDialog = ref(false);
+const handleEditProductsBulk = (updatedProducts: any[]) => {
+    productTableItems.value = updatedProducts.map(p => ({
+        ...p,
+        id: p.id || originalProductIds.value.get(p.item_id) || undefined,
+    }));
+};
+
+const showEditTripsDialog = ref(false);
+const handleEditTripsBulk = (updatedProducts: any[]) => {
+    tripTableItems.value = updatedProducts.map(p => ({
+        ...p,
+        trip_price: p.trip_price ?? p.unit_price ?? null,
+        transport_type_names: p.transport_type_names || getTransportTypeNames(p.transport_type ?? []),
+        id: p.id || originalTripIds.value.get(p.item_id) || undefined,
+    }));
 };
 
 // Unified location handling
@@ -1562,11 +1595,16 @@ onMounted(async () => {
                     </template>
                 </DataTable>
 
-                <!-- Add Product Button -->
-                <div class="flex justify-center my-6">
-                    <ButtonWithIcon color="primary-100" variant="flat" class="!text-primary-900 font-bold w-75"
+                <!-- Add / Edit Product Buttons -->
+                <div class="flex justify-center gap-3 md:w-3/4 mx-auto my-6">
+                    <ButtonWithIcon color="primary-100" variant="flat" class="!text-primary-900 font-bold flex-1"
                         @click="handleAddProduct">
                         + إضافة منتج جديد
+                    </ButtonWithIcon>
+                    <ButtonWithIcon v-if="productTableItems.length > 0" color="primary-100" variant="flat"
+                        class="!text-primary-900 font-bold flex-1"
+                        @click="showEditProductsDialog = true">
+                        تعديل المنتجات
                     </ButtonWithIcon>
                 </div>
             </div>
@@ -1593,6 +1631,14 @@ onMounted(async () => {
                         <span v-else>—</span>
                     </template>
                 </DataTable>
+
+                <!-- Edit Trips Button -->
+                <div v-if="tripTableItems.length > 0" class="flex justify-center my-6">
+                    <ButtonWithIcon color="primary-100" variant="flat" class="!text-primary-900 font-bold md:w-4/3"
+                        @click="showEditTripsDialog = true">
+                        تعديل الرحلات
+                    </ButtonWithIcon>
+                </div>
             </div>
 
             <!-- Payment and Summary Section -->
@@ -1749,6 +1795,22 @@ onMounted(async () => {
             :customer-id="formData.customer_id" :edit-product="(editingProduct as any)"
             :existing-products="(productDialogMode === 'logistics' ? productTableItems : tripTableItems) as any[]"
             @saved="handleProductSaved" @product-updated="handleProductUpdated" />
+
+        <!-- Edit Products Dialog -->
+        <EditProductsDialog v-model="showEditProductsDialog"
+            request-type="logistics"
+            :products="productTableItems"
+            :transport-types="transportTypeItems"
+            :unit-items="unitItems"
+            @products-updated="handleEditProductsBulk" />
+
+        <!-- Edit Trips Dialog -->
+        <EditProductsDialog v-model="showEditTripsDialog"
+            request-type="logistics-trips"
+            :products="tripTableItems as any[]"
+            :transport-types="transportTypeItems"
+            :unit-items="unitItems"
+            @products-updated="handleEditTripsBulk" />
 
         <v-overlay :model-value="pageLoading" contained class="align-center justify-center">
             <v-progress-circular indeterminate color="primary" size="64" />
