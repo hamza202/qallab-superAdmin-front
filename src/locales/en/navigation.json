@@ -1,8 +1,145 @@
 {
-  "navigation": {
-    "dashboard": "Dashboard",
-    "users": "Users",
-    "settings": "Settings",
-    "profile": "Profile"
+  "sidebar": {
+    "main": {
+      "home": "Home"
+    },
+    "products": {
+      "title": "Products",
+      "management": {
+        "title": "Products Management",
+        "simpleProducts": "Simple Products",
+        "groupProducts": "Group Products",
+        "buildingMaterialPriceLists": "Building Material Price Lists",
+        "generalPriceLists": "General Products Price Lists",
+        "productionCapacity": "Production Capacity Lists"
+      },
+      "settings": {
+        "title": "Product Settings",
+        "productVariables": "Product Variables"
+      }
+    },
+    "services": {
+      "title": "Services",
+      "servicesManagement": "Services Management",
+      "priceListsManagement": "Price Lists Management"
+    },
+    "sales": {
+      "title": "Sales",
+      "customers": {
+        "title": "Customers Management",
+        "customersList": "Customers List"
+      },
+      "quotations": {
+        "title": "Quotations Management",
+        "materialRequests": "Raw Material Quotation Requests",
+        "materialQuotations": "Raw Material Quotations",
+        "fuelRequests": "Fuel Quotation Requests",
+        "fuelQuotations": "Fuel Quotations",
+        "logisticsRequests": "Logistics Quotation Requests",
+        "logisticsQuotations": "Logistics Quotations"
+      },
+      "orders": {
+        "title": "Sales Orders",
+        "materialOrders": "Raw Building Material Orders",
+        "fuelOrders": "Fuel Orders",
+        "logisticsOrders": "Logistics Orders",
+        "pickups": "Delivery Bookings",
+        "trips": "Trips Schedule"
+      },
+      "deliveryDocs": {
+        "title": "Delivery Documents",
+        "deliveryDocs": "Delivery Documents",
+        "logisticsDeliveryDocs": "Logistics Delivery Documents"
+      },
+      "invoices": {
+        "title": "Sales Invoices",
+        "salesInvoices": "Sales Invoices",
+        "logisticsSaleInvoices": "Logistics Sales Invoices",
+        "payments": "Sales Payments"
+      }
+    },
+    "purchases": {
+      "title": "Purchases",
+      "suppliers": {
+        "title": "Suppliers Management",
+        "suppliersManagement": "Suppliers Management"
+      },
+      "quotations": {
+        "title": "Quotations Management",
+        "materialRequests": "Raw Material Quotation Requests",
+        "materialQuotations": "Raw Material Quotations",
+        "logisticsRequests": "Logistics Quotation Requests",
+        "logisticsQuotations": "Logistics Quotations",
+        "fuelRequests": "Fuel Quotation Requests",
+        "fuelQuotations": "Fuel Quotations"
+      },
+      "orders": {
+        "title": "Purchase Orders",
+        "materialOrders": "Raw Building Material Orders",
+        "logisticsOrders": "Logistics Orders",
+        "fuelOrders": "Fuel Orders"
+      },
+      "receivingDocs": {
+        "title": "Receiving Documents",
+        "receivingDocs": "Receiving Documents",
+        "logisticsReceivingDocs": "Logistics Receiving Documents"
+      },
+      "invoices": {
+        "title": "Purchase Invoices",
+        "purchaseInvoices": "Purchase Invoices",
+        "logisticsPurchaseInvoices": "Logistics Purchase Invoices"
+      }
+    },
+    "finance": {
+      "title": "Finance",
+      "financialDashboard": "Financial Dashboard",
+      "banksAndTreasuries": "Banks and Treasuries"
+    },
+    "users": {
+      "title": "Users",
+      "usersAndRoles": "Users and Roles",
+      "crushersManagement": "Crushers Management",
+      "contractorsManagement": "Contractors Management",
+      "factoriesManagement": "Factories Management",
+      "logisticsManagement": "Logistics Management",
+      "materialMerchants": "Material Merchants"
+    },
+    "settings": {
+      "title": "Settings",
+      "basic": {
+        "title": "Basic Settings",
+        "productCategories": "Product Categories List",
+        "serviceCategories": "Service Categories List",
+        "productTreeCategories": "Product Categories",
+        "serviceTreeCategories": "Service Categories",
+        "units": "Units",
+        "factories": "Factories",
+        "brands": "Brands",
+        "geoRegions": "Geographical Regions",
+        "geoZones": "Geographical Zones"
+      },
+      "taxes": {
+        "title": "Tax Management",
+        "taxRules": "Tax Rules",
+        "taxes": "Taxes"
+      },
+      "countriesCurrencies": {
+        "title": "Countries and Currencies",
+        "countriesManagement": "Countries Management",
+        "citiesManagement": "Cities Management",
+        "currenciesManagement": "Currencies Management"
+      },
+      "advanced": {
+        "title": "Advanced Settings",
+        "codesSettings": "Codes Settings",
+        "accountTypes": "Account Types",
+        "testGroups": "Test Groups",
+        "tests": "Tests",
+        "testMethodologies": "Test Methodologies",
+        "sampleTypes": "Sample Types",
+        "systemStatuses": "System Statuses",
+        "docStatusTransitions": "Document Status Transitions"
+      }
+    }
   }
 }

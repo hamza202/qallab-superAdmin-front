@@ -177,7 +177,7 @@ const fetchContractors = async (append = false) => {
 
   } catch (err: any) {
     console.error('Error fetching contractors:', err);
-    toast.error(err?.response?.data?.message || 'فشل تحميل المقاولين');
+    toast.error(err?.response?.data?.message || t('common.messages.general.loadDataFailed'));
   } finally {
     loading.value = false;
     loadingMore.value = false;
@@ -195,11 +195,11 @@ const confirmDelete = async (item: any) => {
   try {
     deleteLoading.value = true;
     await api.delete(`/contractors/${item.id}`);
-    toast.success('تم حذف المقاول بنجاح');
+    toast.success(t('common.messages.general.deleteSuccess'));
     await fetchContractors();
   } catch (err: any) {
     console.error('Error deleting contractor:', err);
-    toast.error(err?.response?.data?.message || 'فشل حذف المقاول');
+    toast.error(err?.response?.data?.message || t('common.messages.general.deleteError'));
   } finally {
     deleteLoading.value = false;
   }
@@ -222,7 +222,7 @@ const confirmStatusChange = async () => {
       status: newStatus
     });
 
-    toast.success(`تم ${newStatus ? 'تفعيل' : 'تعطيل'} المقاول بنجاح`);
+    toast.success(t('common.messages.general.changeStatusSuccess'));
 
     const index = tableItems.value.findIndex(c => c.id === itemToChangeStatus.value!.id);
     if (index !== -1) {
@@ -231,7 +231,7 @@ const confirmStatusChange = async () => {
 
   } catch (err: any) {
     console.error('Error changing crusher status:', err);
-    toast.error(err?.response?.data?.message || 'فشل تغيير حالة المقاول');
+    toast.error(err?.response?.data?.message || t('common.messages.general.changeStatusError'));
   } finally {
     statusChangeLoading.value = false;
     showStatusChangeDialog.value = false;
@@ -260,12 +260,12 @@ const fetchConstants = async () => {
     })) || [];
 
     statusItems.value = [
-      { title: 'فعال', value: 1 },
-      { title: 'غير فعال', value: 0 }
+      { title: t('common.status.active'), value: 1 },
+      { title: t('common.status.inactive'), value: 0 }
     ];
   } catch (err: any) {
     console.error('Fetch constants error:', err);
-    toast.error(err?.response?.data?.message || 'فشل تحميل الثوابت');
+    toast.error(err?.response?.data?.message || t('common.messages.general.loadConstantsFailed'));
   }
 };
 
@@ -282,13 +282,13 @@ const confirmBulkDelete = async () => {
     await api.post('/contractors/bulk-delete', {
       ids: selectedContractors.value
     });
-    toast.success(`تم حذف ${selectedContractors.value.length} مقاول بنجاح`);
+    toast.success(t('common.messages.general.deleteSuccess'));
     selectedContractors.value = [];
     showBulkDeleteDialog.value = false;
     await fetchContractors();
   } catch (err: any) {
     console.error('Error bulk deleting:', err);
-    toast.error(err?.response?.data?.message || 'فشل حذف المقاولين');
+    toast.error(err?.response?.data?.message || t('common.messages.general.deleteError'));
   } finally {
     deleteLoading.value = false;
   }
@@ -414,11 +414,11 @@ const toggleAdvancedFilters = () => {
         class="flex justify-end items-stretch rounded border border-gray-300 w-fit ms-auto mb-4 overflow-hidden bg-white text-sm">
         <ButtonWithIcon variant="flat" height="40" rounded="0"
           custom-class="font-semibold text-base border-gray-300 bg-primary-100 !text-primary-900"
-          :prepend-icon="importIcon" :label="t('common.import')" />
+          :prepend-icon="importIcon" :label="t('common.actions.import')" />
 
         <ButtonWithIcon variant="flat" height="40" rounded="0"
           custom-class="font-semibold text-base border-gray-300 bg-primary-50 !text-primary-900"
-          :prepend-icon="exportIcon" :label="t('common.export')" />
+          :prepend-icon="exportIcon" :label="t('common.actions.export')" />
       </div>
 
       <div class="bg-gray-50 rounded-md -mx-6">
@@ -429,11 +429,11 @@ const toggleAdvancedFilters = () => {
             class="flex flex-wrap items-stretch rounded overflow-hidden border border-gray-200 bg-white text-sm">
             <ButtonWithIcon variant="flat" height="40" rounded="0"
               custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-              :prepend-icon="trash_1_icon" color="white" :label="t('common.delete')" @click="handleBulkDelete" />
+              :prepend-icon="trash_1_icon" color="white" :label="t('common.table.deleteSelected')" @click="handleBulkDelete" />
             <div class="w-px bg-gray-200"></div>
             <ButtonWithIcon variant="flat" height="40" rounded="0"
               custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-              :prepend-icon="trash_2_icon" color="white" :label="t('common.deleteAll')" @click="handleBulkDelete" />
+              :prepend-icon="trash_2_icon" color="white" :label="t('common.actions.delete')" @click="handleBulkDelete" />
           </div>
 
           <!-- Main header controls -->
@@ -442,7 +442,7 @@ const toggleAdvancedFilters = () => {
               <template v-slot:activator="{ props }">
                 <ButtonWithIcon v-bind="props" variant="outlined" rounded="4" color="gray-500" height="40"
                   custom-class="font-semibold text-base border-gray-400" :prepend-icon="columnIcon"
-                  :label="t('common.columns')" append-icon="mdi-chevron-down" />
+                  :label="t('common.table.columns')" append-icon="mdi-chevron-down" />
               </template>
               <v-list>
                 <v-list-item v-for="header in allHeaders" :key="header.key" @click="toggleHeader(header.key)">
@@ -456,7 +456,7 @@ const toggleAdvancedFilters = () => {
             </v-menu>
             <ButtonWithIcon variant="flat" color="primary-500" height="40" rounded="4"
               custom-class="px-7 font-semibold text-base text-white border !border-primary-200"
-              :prepend-icon="searchIcon" :label="t('common.advancedSearch')" @click="toggleAdvancedFilters" />
+              :prepend-icon="searchIcon" :label="t('common.table.advancedSearch')" @click="toggleAdvancedFilters" />
           </div>
         </div>
 
@@ -465,29 +465,29 @@ const toggleAdvancedFilters = () => {
           class="border-y border-y-primary-100 bg-primary-50 px-4 sm:px-6 py-3 flex flex-col gap-3 sm:gap-2">
           <div class="flex flex-wrap xl:!flex-nowrap gap-3 justify-end sm:justify-start">
             <v-text-field v-model="filterTradeName" density="comfortable" variant="outlined" hide-details
-              placeholder="الاسم التجاري" class="w-full sm:w-40 bg-white" @keyup.enter="applyFilters" />
+              :placeholder="t('form.identity.businessName.label')" class="w-full sm:w-40 bg-white" @keyup.enter="applyFilters" />
             <v-text-field v-model="filterCommercialRegister" density="comfortable" variant="outlined" hide-details
-              placeholder="السجل التجاري" class="w-full sm:w-40 bg-white" @keyup.enter="applyFilters" />
+              :placeholder="t('form.identity.commercialRegister.label')" class="w-full sm:w-40 bg-white" @keyup.enter="applyFilters" />
             <v-text-field v-model="filterTaxRegister" density="comfortable" variant="outlined" hide-details
-              placeholder="الرقم الضريبي" class="w-full sm:w-40 bg-white" @keyup.enter="applyFilters" />
+              :placeholder="t('form.identity.taxNumber.label')" class="w-full sm:w-40 bg-white" @keyup.enter="applyFilters" />
             <v-text-field v-model="filterLicenseNumber" density="comfortable" variant="outlined" hide-details
-              placeholder="رقم رخصة البلدية" class="w-full sm:w-40 bg-white" @keyup.enter="applyFilters" />
+              :placeholder="t('form.contractor.commercialInfo.municipalLicenseNumber.label')" class="w-full sm:w-40 bg-white" @keyup.enter="applyFilters" />
             <v-select v-model="filterContractorGrade" :items="classificationGradeItems" density="comfortable"
-              variant="outlined" hide-details placeholder="درجة المقاول" class="w-full sm:w-40 bg-white"
+              variant="outlined" hide-details :placeholder="t('form.contractor.commercialInfo.classificationGrade.label')" class="w-full sm:w-40 bg-white"
               @update:model-value="applyFilters" />
             <v-select v-model="filterClassification" :items="contractorClassificationItems" density="comfortable"
-              variant="outlined" hide-details placeholder="التصنيف" class="w-full sm:w-40 bg-white"
+              variant="outlined" hide-details :placeholder="t('form.contractor.commercialInfo.contractorClassification.label')" class="w-full sm:w-40 bg-white"
               @update:model-value="applyFilters" />
             <v-select v-model="filterStatus" :items="statusItems" density="comfortable" variant="outlined" hide-details
-              placeholder="الحالة" class="w-full sm:w-40 bg-white" @update:model-value="applyFilters" />
+              :placeholder="t('common.form.status')" class="w-full sm:w-40 bg-white" @update:model-value="applyFilters" />
 
             <div class="flex gap-2 items-center">
               <ButtonWithIcon variant="flat" color="primary-500" rounded="4" height="40"
                 custom-class="px-5 font-semibold !text-white text-sm sm:text-base" :prepend-icon="searchIcon"
-                label="ابحث" @click="applyFilters" />
+                :label="t('common.actions.search')" @click="applyFilters" />
               <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4" border="sm"
                 custom-class="px-5 font-semibold text-sm sm:text-base !text-primary-800 !border-primary-200"
-                prepend-icon="mdi-refresh" label="إعادة تعيين" @click="resetFilters" />
+                prepend-icon="mdi-refresh" :label="t('common.actions.reset')" @click="resetFilters" />
             </div>
           </div>
         </div>
@@ -519,15 +519,15 @@ const toggleAdvancedFilters = () => {
         <div ref="loadMoreTrigger" class="h-4"></div>
         <div v-if="loadingMore" class="flex justify-center items-center py-4">
           <v-progress-circular indeterminate color="primary" size="32" />
-          <span class="mr-2 text-gray-600">جاري تحميل المزيد...</span>
+          <span class="ms-2 text-gray-600">{{ t('common.ui.loadingMore') }}</span>
         </div>
       </div>
 
     </div>
 
     <!-- Bulk Delete Confirmation Dialog -->
-    <DeleteConfirmDialog v-model="showBulkDeleteDialog" :loading="deleteLoading" title="حذف المقاولين"
-      :message="`هل أنت متأكد من حذف ${selectedContractors.length} مقاول؟`" @confirm="confirmBulkDelete" />
+    <DeleteConfirmDialog v-model="showBulkDeleteDialog" :loading="deleteLoading" :title="t('pages.contractors.list.deleteDialog.title')"
+      :message="t('pages.contractors.list.deleteDialog.message', { count: selectedContractors.length })" @confirm="confirmBulkDelete" />
 
     <!-- Status Change Confirmation Dialog -->
     <StatusChangeDialog v-model="showStatusChangeDialog" :loading="statusChangeLoading"

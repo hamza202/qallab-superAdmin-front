@@ -132,12 +132,12 @@ const confirmBulkDelete = async () => {
   try {
     deleteLoading.value = true;
     await api.post('/test-methodologies/bulk-delete', { ids: selectedItems.value });
-    toast.success(`تم حذف ${selectedItems.value.length} ضريبة بنجاح`);
+    toast.success(t('common.messages.general.bulkDeleteSuccess', { count: selectedItems.value.length }));
     selectedItems.value = [];
     await fetchTestMethodologies();
   } catch (err: any) {
     console.error('Error deleting taxes:', err);
-    toast.error(err?.response?.data?.message || 'Failed to delete taxes');
+    toast.error(err?.response?.data?.message || t('common.messages.general.deleteError'));
   } finally {
     deleteLoading.value = false;
     showDeleteDialog.value = false;
@@ -231,8 +231,8 @@ const plusIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
 <template>
   <default-layout>
     <div class="test-methodology-list-page">
-      <PageHeader :icon="testMethodologyIcon" title-key="منهجية الاختبارات"
-        description-key="تمكنك من إدارة منهجية الاختبارات" />
+      <PageHeader :icon="testMethodologyIcon" :title-key="t('pages.testMethodology.title')"
+        :description-key="t('pages.testMethodology.description')" />
 
       <div class="bg-gray-50 rounded-md -mx-6">
         <div class="flex flex-wrap items-center justify-between gap-3 border-y border-y-slate-300 px-4 sm:px-6 py-3">
@@ -241,14 +241,14 @@ const plusIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
             class="flex flex-wrap items-stretch rounded overflow-hidden border border-gray-200 bg-white text-sm">
             <ButtonWithIcon variant="flat" height="40" rounded="0"
               custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-              :prepend-icon="trash_1_icon" color="white" :label="t('common.delete')" @click="handleBulkDelete" />
+              :prepend-icon="trash_1_icon" color="white" :label="t('common.table.deleteSelected')" @click="handleBulkDelete" />
             <div class="w-px bg-gray-200"></div>
             <ButtonWithIcon variant="flat" height="40" rounded="0"
               custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-              :prepend-icon="trash_2_icon" color="white" :label="t('common.deleteAll')" @click="handleBulkDelete" />
+              :prepend-icon="trash_2_icon" color="white" :label="t('common.actions.delete')" @click="handleBulkDelete" />
           </div>
 
-          <h3 class="text-lg font-bold text-gray-900" v-else>جدول منهجيات الاختبار</h3>
+          <h3 class="text-lg font-bold text-gray-900" v-else>{{ t('pages.testMethodology.tableTitle') }}</h3>
 
           <div class="flex flex-wrap gap-3">
             <!-- Column Management -->
@@ -256,7 +256,7 @@ const plusIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
               <template v-slot:activator="{ props }">
                 <ButtonWithIcon v-bind="props" variant="outlined" rounded="4" color="gray-500" height="40"
                   custom-class="font-semibold text-base border-gray-400" :prepend-icon="columnIcon"
-                  :label="t('common.columns')" append-icon="mdi-chevron-down" />
+                  :label="t('common.table.columns')" append-icon="mdi-chevron-down" />
               </template>
               <v-list>
                 <v-list-item v-for="header in allHeaders" :key="header.key" @click="toggleHeader(header.key)">
@@ -271,11 +271,11 @@ const plusIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
 
             <ButtonWithIcon variant="flat" color="primary-500" height="40" rounded="4"
               custom-class="px-7 font-semibold text-base text-white border !border-primary-200"
-              :prepend-icon="searchIcon" :label="t('common.advancedSearch')" @click="toggleAdvancedFilters" />
+              :prepend-icon="searchIcon" :label="t('common.table.advancedSearch')" @click="toggleAdvancedFilters" />
 
             <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4"
               custom-class="px-7 font-semibold text-base !text-primary-800 border !border-primary-200"
-              :prepend-icon="plusIcon" label="إضافة منهجية" @click="openCreateTestMethodology" />
+              :prepend-icon="plusIcon" :label="t('common.form.addNew')" @click="openCreateTestMethodology" />
           </div>
         </div>
 
@@ -291,11 +291,11 @@ const plusIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
             <div class="flex gap-2 items-center">
               <ButtonWithIcon variant="flat" color="primary-500" rounded="4" height="40"
                 custom-class="px-5 font-semibold !text-white text-sm sm:text-base" :prepend-icon="searchIcon"
-                label="ابحث" @click="handleSearch" />
+                :label="t('common.actions.search')" @click="handleSearch" />
 
               <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4" border="sm"
                 custom-class="px-5 font-semibold text-sm sm:text-base !text-primary-800 !border-primary-200"
-                prepend-icon="mdi-refresh" label="إعادة تعيين" @click="resetFilters" />
+                prepend-icon="mdi-refresh" :label="t('common.actions.reset')" @click="resetFilters" />
             </div>
 
           </div>
@@ -328,8 +328,8 @@ const plusIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
 
 
     <!-- Bulk Delete Confirmation Dialog -->
-    <DeleteConfirmDialog v-model="showDeleteDialog" :loading="deleteLoading" title="حذف الوحدات"
-      :message="`هل أنت متأكد من حذف ${selectedItems.length} وحدة؟`" @confirm="confirmBulkDelete" />
+    <DeleteConfirmDialog v-model="showDeleteDialog" :loading="deleteLoading" :title="$t('pages.testMethodology.list.deleteDialog.title')"
+      :message="$t('pages.testMethodology.list.deleteDialog.message', { count: selectedItems.length })" @confirm="confirmBulkDelete" />
 
     <!-- Status Change Confirmation Dialog -->
     <StatusChangeDialog v-model="showStatusChangeDialog" :loading="statusChangeLoading"

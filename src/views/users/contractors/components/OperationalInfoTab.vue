@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { reactive, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 interface Props {
   ongoingProjects: number | null;
@@ -58,40 +61,40 @@ const emitUpdate = () => {
 
 <template>
   <div class="mb-6 bg-gray-50 rounded-lg p-6">
-    <h2 class="text-lg font-bold text-primary-900 mb-4">المعلومات التشغيلية</h2>
+    <h2 class="text-lg font-bold text-primary-900 mb-4">{{ t('form.contractor.operationalInfo.sectionTitle') }}</h2>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-      <TextInput v-model="formData.ongoingProjects" @input="emitUpdate" label="عدد المشاريع الجارية"
-        placeholder="ادخل العدد" type="number" :rules="[numeric(), positive()]"/>
-      <TextInput v-model="formData.completedProjects" @input="emitUpdate" label="عدد المشاريع المكتملة"
-        placeholder="ادخل العدد" type="number" :rules="[numeric(), positive()]"/>
-      <TextInput v-model="formData.employeesCount" @input="emitUpdate" label="إجمالي عدد الموظفين"
-        placeholder="ادخل العدد" type="number" :rules="[numeric(), positive()]"/>
-      <TextInput v-model="formData.engineersCount" @input="emitUpdate" label="عدد المهندسين" placeholder="ادخل العدد"
+      <TextInput v-model="formData.ongoingProjects" @input="emitUpdate" :label="t('form.contractor.operationalInfo.ongoingProjects.label')"
+        :placeholder="t('form.contractor.operationalInfo.ongoingProjects.placeholder')" type="number" :rules="[numeric(), positive()]"/>
+      <TextInput v-model="formData.completedProjects" @input="emitUpdate" :label="t('form.contractor.operationalInfo.completedProjects.label')"
+        :placeholder="t('form.contractor.operationalInfo.completedProjects.placeholder')" type="number" :rules="[numeric(), positive()]"/>
+      <TextInput v-model="formData.employeesCount" @input="emitUpdate" :label="t('form.contractor.operationalInfo.employeesCount.label')"
+        :placeholder="t('form.contractor.operationalInfo.employeesCount.placeholder')" type="number" :rules="[numeric(), positive()]"/>
+      <TextInput v-model="formData.engineersCount" @input="emitUpdate" :label="t('form.contractor.operationalInfo.engineersCount.label')" :placeholder="t('form.contractor.operationalInfo.engineersCount.placeholder')"
         type="number" :rules="[numeric(), positive()]"/>
-      <TextInput v-model="formData.techniciansCount" @input="emitUpdate" label="عدد الفنيين" placeholder="ادخل العدد"
+      <TextInput v-model="formData.techniciansCount" @input="emitUpdate" :label="t('form.contractor.operationalInfo.techniciansCount.label')" :placeholder="t('form.contractor.operationalInfo.techniciansCount.placeholder')"
         type="number" :rules="[numeric(), positive()]"/>
       <SelectWithIconInput clearable v-model="formData.operationalCapacity" @update:model-value="emitUpdate"
-        label="القدرة التشغيلية للمقاول" placeholder="اختر" :items="operationalCapacityItems" />
+        :label="t('form.contractor.operationalInfo.operationalCapacity.label')" :placeholder="t('form.contractor.operationalInfo.operationalCapacity.placeholder')" :items="operationalCapacityItems" />
       <SelectWithIconInput clearable v-model="formData.specialization" @update:model-value="emitUpdate"
-        label="التخصص الرئيسي المقاول" placeholder="اختر" :items="specializationItems" />
-      <SelectWithIconInput clearable v-model="formData.siteReadiness" @update:model-value="emitUpdate" label="جاهزية مواقع العمل"
-        placeholder="اختر" :items="siteReadinessItems" />
+        :label="t('form.contractor.operationalInfo.specialization.label')" :placeholder="t('form.contractor.operationalInfo.specialization.placeholder')" :items="specializationItems" />
+      <SelectWithIconInput clearable v-model="formData.siteReadiness" @update:model-value="emitUpdate" :label="t('form.contractor.operationalInfo.siteReadiness.label')"
+        :placeholder="t('form.contractor.operationalInfo.siteReadiness.placeholder')" :items="siteReadinessItems" />
       <div>
-        <span class="text-gray-700 text-sm font-semibold mb-2 block">نظام إدارة السلامة</span>
+        <span class="text-gray-700 text-sm font-semibold mb-2 block">{{ t('form.contractor.operationalInfo.safetyManagementSystem.label') }}</span>
         <div class="flex gap-4">
           <v-radio-group v-model="formData.safetyManagementSystem" @update:model-value="emitUpdate" inline hide-details>
             <v-radio :value="true" color="primary">
               <template #label>
                 <span :class="formData.safetyManagementSystem ? 'text-primary font-semibold' : 'text-gray-600'">
-                  نعم
+                  {{ t('common.options.yes') }}
                 </span>
               </template>
             </v-radio>
             <v-radio :value="false" color="primary">
               <template #label>
                 <span :class="!formData.safetyManagementSystem ? 'text-primary font-semibold' : 'text-gray-600'">
-                  لا
+                  {{ t('common.options.no') }}
                 </span>
               </template>
             </v-radio>
@@ -99,21 +102,21 @@ const emitUpdate = () => {
         </div>
       </div>
       <div>
-        <span class="text-gray-700 text-sm font-semibold mb-2 block">الالتزام بالأنظمة البيئية</span>
+        <span class="text-gray-700 text-sm font-semibold mb-2 block">{{ t('form.contractor.operationalInfo.environmentalCompliance.label') }}</span>
         <div class="flex gap-4">
           <v-radio-group v-model="formData.environmentalCompliance" @update:model-value="emitUpdate" inline
             hide-details>
             <v-radio :value="true" color="primary">
               <template #label>
                 <span :class="formData.environmentalCompliance ? 'text-primary font-semibold' : 'text-gray-600'">
-                  نعم
+                  {{ t('common.options.yes') }}
                 </span>
               </template>
             </v-radio>
             <v-radio :value="false" color="primary">
               <template #label>
                 <span :class="!formData.environmentalCompliance ? 'text-primary font-semibold' : 'text-gray-600'">
-                  لا
+                  {{ t('common.options.no') }}
                 </span>
               </template>
             </v-radio>

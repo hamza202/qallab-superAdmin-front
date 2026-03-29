@@ -2,6 +2,9 @@
 import { reactive, watch, ref } from 'vue';
 import MapDialog from '@/components/common/MapDialog.vue';
 import Map from '@/components/common/Map.vue';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 interface Props {
   licenseNumber: string;
   licenseIssueDate: string;
@@ -112,13 +115,13 @@ const datepickerInput = `<svg width="17" height="19" viewBox="0 0 17 19" fill="n
 
 <template>
   <div class="mb-6 bg-gray-50 rounded-lg p-6">
-    <h2 class="text-lg font-bold text-primary-900 mb-4">البيانات التجارية</h2>
+    <h2 class="text-lg font-bold text-primary-900 mb-4">{{ $t('pages.crushers.form.tabs.commercialInfo') }}</h2>
 
     <!-- License Information -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-      <TextInput v-model="formData.licenseNumber" @input="emitUpdate" label="رقم الرخصة" placeholder="رقم الرخصة" />
-      <DatePickerInput v-model="formData.licenseIssueDate" @input="emitUpdate" label="تاريخ إصدار الرخصة"
-        placeholder="اختر التاريخ">
+      <TextInput v-model="formData.licenseNumber" @input="emitUpdate" :label="$t('form.identity.licenseNumber.label')" :placeholder="$t('form.identity.licenseNumber.placeholder')" />
+      <DatePickerInput v-model="formData.licenseIssueDate" @input="emitUpdate" :label="$t('form.identity.licenseIssueDate.label')"
+        :placeholder="$t('form.identity.licenseIssueDate.placeholder')">
         <template #append-inner>
           <v-tooltip location="top" content-class="custom-tooltip">
             <template #activator="{ props: tooltipProps }">
@@ -126,7 +129,7 @@ const datepickerInput = `<svg width="17" height="19" viewBox="0 0 17 19" fill="n
                 :prepend-icon="infoIcon" v-bind="tooltipProps" />
             </template>
             <div>
-              تاريخ إصدار رخصة الكسارة الرسمي
+              {{ $t('form.crusher.commercialInfo.licenseIssueDate.info') }}
             </div>
           </v-tooltip>
         </template>
@@ -134,8 +137,8 @@ const datepickerInput = `<svg width="17" height="19" viewBox="0 0 17 19" fill="n
           <span v-html="datepickerInput"></span>
         </template>
       </DatePickerInput>
-      <DatePickerInput v-model="formData.licenseExpiryDate" @input="emitUpdate" label="تاريخ انتهاء الرخصة"
-        placeholder="اختر التاريخ">
+      <DatePickerInput v-model="formData.licenseExpiryDate" @input="emitUpdate" :label="$t('form.identity.licenseExpiryDate.label')"
+        :placeholder="$t('form.identity.licenseExpiryDate.placeholder')">
         <template #append-inner>
           <v-tooltip location="top" content-class="custom-tooltip">
             <template #activator="{ props: tooltipProps }">
@@ -143,7 +146,7 @@ const datepickerInput = `<svg width="17" height="19" viewBox="0 0 17 19" fill="n
                 :prepend-icon="infoIcon" v-bind="tooltipProps" />
             </template>
             <div>
-              تاريخ انتهاء صلاحية رخصة الكسارة
+              {{ $t('form.crusher.commercialInfo.licenseExpiryDate.info') }}
             </div>
           </v-tooltip>
         </template>
@@ -152,35 +155,35 @@ const datepickerInput = `<svg width="17" height="19" viewBox="0 0 17 19" fill="n
         </template>
       </DatePickerInput>
       <div class="relative">
-        <label class="text-sm font-medium text-gray-700 mb-2 block">الموقع الجغرافي</label>
+        <label class="text-sm font-medium text-gray-700 mb-2 block">{{ $t('form.address.selectLocationOnMap.label') }}</label>
         <div @click="openMapDialog"
           class="flex items-center justify-between px-4 py-2 bg-blue-50 border-2 border-blue-400 rounded-lg cursor-pointer hover:bg-blue-100 transition-colors">
-          <span class="text-base font-medium text-blue-900">حدد الموقع</span>
+          <span class="text-base font-medium text-blue-900">{{ $t('form.address.selectLocationOnMap.placeholder') }}</span>
           <div class="flex items-center gap-2">
             <span v-html="locationIcon"></span>
           </div>
         </div>
       </div>
-      <TextInput v-model="formData.latitude" v-if="formData.latitude" label="خط العرض (Latitude)" placeholder="24.7136"
+      <TextInput v-model="formData.latitude" v-if="formData.latitude" :label="$t('form.address.latitude.label')" :placeholder="$t('form.address.latitude.placeholder')"
         disabled dir="ltr" />
-      <TextInput v-model="formData.longitude" v-if="formData.longitude" label="خط الطول (Longitude)"
-        placeholder="46.6753" disabled dir="ltr" />
+      <TextInput v-model="formData.longitude" v-if="formData.longitude" :label="$t('form.address.longitude.label')"
+        :placeholder="$t('form.address.longitude.placeholder')" disabled dir="ltr" />
     </div>
 
     <!-- Manager Data Section -->
-    <h3 class="text-md font-bold text-primary-900 mb-4 mt-6">بيانات المدير</h3>
+    <h3 class="text-md font-bold text-primary-900 mb-4 mt-6">{{ $t('form.crusher.commercialInfo.managerData.sectionTitle') }}</h3>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-      <TextInput v-model="formData.managerName" @input="emitUpdate" label="اسم المدير / المسؤول"
-        placeholder="اسم المدير / المسؤول" />
-      <TextInput v-model="formData.managerId" @input="emitUpdate" label="رقم الهوية / الإقامة"
-        placeholder="845987565" />
+      <TextInput v-model="formData.managerName" @input="emitUpdate" :label="$t('form.transport.responsiblePerson.label')"
+        :placeholder="$t('form.transport.responsiblePerson.placeholder')" />
+      <TextInput v-model="formData.managerId" @input="emitUpdate" :label="$t('form.identity.IdNumber.label')"
+        :placeholder="$t('form.identity.IdNumber.placeholder')" />
 
-      <TelInput v-model="formData.managerPhone" label="الهاتف" :rules="[required(), saudiPhone()]"
+      <TelInput v-model="formData.managerPhone" :label="$t('form.identity.phone.label')" :rules="[required(), saudiPhone()]"
         :error-messages="props.formErrors?.['manager_phone']" @input="() => handleInputUpdate('manager_phone')" />
 
       <TextInput v-model="formData.managerEmail" :hide-details="false" @input="() => handleInputUpdate('manager_email')"
-        label="البريد الإلكتروني" placeholder="info@buildtrans.sa" dir="ltr" :rules="[required(), email()]"
+        :label="$t('form.identity.email.label')" :placeholder="$t('form.identity.email.placeholder', {email : 'example@gmail.com'})" dir="ltr" :rules="[required(), email()]"
         :error-messages="props.formErrors?.['manager_email']" />
     </div>
 

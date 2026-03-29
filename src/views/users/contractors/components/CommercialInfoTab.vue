@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { reactive, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 interface Props {
   contractorClassification: string | null;
@@ -75,20 +78,20 @@ const datepickerInput = `<svg width="16" height="16" viewBox="0 0 16 16" fill="n
 
 <template>
   <div class="mb-6 bg-gray-50 rounded-lg p-6">
-    <h2 class="text-lg font-bold text-primary-900 mb-4">البيانات التجارية</h2>
+    <h2 class="text-lg font-bold text-primary-900 mb-4">{{ t('pages.contractors.form.tabs.commercialInfo') }}</h2>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
       <SelectWithIconInput clearable v-model="formData.contractorClassification" @update:model-value="emitUpdate"
-        label="تصنيف المقاول" placeholder="اختر" :items="contractorClassificationItems" required />
+        :label="t('form.contractor.commercialInfo.contractorClassification.label')" :placeholder="t('form.contractor.commercialInfo.contractorClassification.placeholder')" :items="contractorClassificationItems" required />
       <SelectWithIconInput clearable v-model="formData.classificationGrade" @update:model-value="emitUpdate"
-        label="درجة تصنيف المقاول" placeholder="اختر" :items="classificationGradeItems" required />
-      <SelectWithIconInput clearable v-model="formData.scopeOfWork" @update:model-value="emitUpdate" label="نطاق الأعمال"
-        placeholder="اختر" :items="scopeOfWorkItems" />
+        :label="t('form.contractor.commercialInfo.classificationGrade.label')" :placeholder="t('form.contractor.commercialInfo.classificationGrade.placeholder')" :items="classificationGradeItems" required />
+      <SelectWithIconInput clearable v-model="formData.scopeOfWork" @update:model-value="emitUpdate" :label="t('form.contractor.commercialInfo.scopeOfWork.label')"
+        :placeholder="t('form.contractor.commercialInfo.scopeOfWork.placeholder')" :items="scopeOfWorkItems" />
 
-      <TextInput v-model="formData.municipalLicenseNumber" @input="emitUpdate" label="رقم رخصة البلدية"
-        placeholder="ادخل الرقم" />
-      <DatePickerInput v-model="formData.municipalLicenseExpiry" @input="emitUpdate" label="تاريخ انتهاء رخصة البلدية"
-        placeholder="اختر التاريخ">
+      <TextInput v-model="formData.municipalLicenseNumber" @input="emitUpdate" :label="t('form.contractor.commercialInfo.municipalLicenseNumber.label')"
+        :placeholder="t('form.contractor.commercialInfo.municipalLicenseNumber.placeholder')" />
+      <DatePickerInput v-model="formData.municipalLicenseExpiry" @input="emitUpdate" :label="t('form.contractor.commercialInfo.municipalLicenseExpiry.label')"
+        :placeholder="t('form.contractor.commercialInfo.municipalLicenseExpiry.placeholder')">
         <template #append-inner>
           <v-tooltip location="top" content-class="custom-tooltip">
             <template #activator="{ props: tooltipProps }">
@@ -96,7 +99,7 @@ const datepickerInput = `<svg width="16" height="16" viewBox="0 0 16 16" fill="n
                 custom-class="!min-w-0 p-0" :prepend-icon="infoIcon" v-bind="tooltipProps" />
             </template>
             <div>
-              تاريخ انتهاء صلاحية رخصة البلدية
+              {{ t('form.contractor.commercialInfo.municipalLicenseExpiry.tooltip') }}
             </div>
           </v-tooltip>
         </template>
@@ -105,29 +108,29 @@ const datepickerInput = `<svg width="16" height="16" viewBox="0 0 16 16" fill="n
         </template>
       </DatePickerInput>
       <SelectWithIconInput clearable v-model="formData.municipalLicenseStatus" @update:model-value="emitUpdate"
-        label="حالة رخصة البلدية" placeholder="اختر" :items="municipalLicenseStatusItems" />
+        :label="t('form.contractor.commercialInfo.municipalLicenseStatus.label')" :placeholder="t('form.contractor.commercialInfo.municipalLicenseStatus.placeholder')" :items="municipalLicenseStatusItems" />
 
       <SelectWithIconInput clearable v-model="formData.safetyCertification" @update:model-value="emitUpdate"
-        label="شهادات السلامة المهنية" placeholder="اختر" :items="safetyCertificationItems" />
+        :label="t('form.contractor.commercialInfo.safetyCertification.label')" :placeholder="t('form.contractor.commercialInfo.safetyCertification.placeholder')" :items="safetyCertificationItems" />
 
       <SelectWithIconInput clearable v-model="formData.environmentalCertification" @update:model-value="emitUpdate"
-        label="شهادات البيئة" placeholder="اختر" :items="environmentalCertificationItems" />
+        :label="t('form.contractor.commercialInfo.environmentalCertification.label')" :placeholder="t('form.contractor.commercialInfo.environmentalCertification.placeholder')" :items="environmentalCertificationItems" />
 
       <div>
-        <span class="text-gray-700 text-sm font-semibold mb-2 block">موافقة الدفاع المدني ؟</span>
+        <span class="text-gray-700 text-sm font-semibold mb-2 block">{{ t('form.contractor.commercialInfo.civilDefenseApproval.label') }}</span>
         <div class="flex gap-4">
           <v-radio-group v-model="formData.civilDefenseApproval" @update:model-value="emitUpdate" inline hide-details>
             <v-radio :value="true" color="primary">
               <template #label>
                 <span :class="formData.civilDefenseApproval ? 'text-primary font-semibold' : 'text-gray-600'">
-                  نعم
+                  {{ t('common.options.yes') }}
                 </span>
               </template>
             </v-radio>
             <v-radio :value="false" color="primary">
               <template #label>
                 <span :class="!formData.civilDefenseApproval ? 'text-primary font-semibold' : 'text-gray-600'">
-                  لا
+                  {{ t('common.options.no') }}
                 </span>
               </template>
             </v-radio>

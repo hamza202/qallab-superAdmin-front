@@ -1,53 +1,117 @@
 {
-  "common": {
+  "actions": {
     "save": "Save",
     "cancel": "Cancel",
     "delete": "Delete",
     "edit": "Edit",
     "add": "Add",
+    "close": "Close",
     "search": "Search",
-    "loading": "Loading...",
-    "noData": "No data available",
     "confirm": "Confirm",
+    "reset": "Reset",
+    "activate": "Activate",
+    "deactivate": "Deactivate",
+    "import": "Import",
+    "export": "Export"
+  },
+  "ui": {
+    "loading": "Loading...",
+    "noData": "No data",
+    "loadingMore": "Loading more...",
+    "dataLoadError": "Error loading data",
+    "retry": "Retry"
+  },
+  "status": {
+    "active": "Active",
+    "inactive": "Inactive",
+    "completed": "Completed",
+    "underReview": "Under review",
+    "confirmed": "Confirmed",
+    "cancelled": "Cancelled",
+    "draft": "Draft"
+  },
+  "options": {
     "yes": "Yes",
     "no": "No",
+    "yesOption": "Yes",
+    "noOption": "No"
+  },
+  "financial": {
+    "totalTrips": "Total Trips",
+    "totalExcludingTax": "Total (Excluding Tax)",
+    "totalDiscounts": "Total Discounts",
+    "totalTaxable": "Total Taxable",
+    "totalAmountDue": "Total Amount Due"
+  },
+  "filters": {
+    "from": "From",
+    "to": "To"
+  },
+  "table": {
     "actions": "Actions",
-    "import": "Import",
-    "export": "Export",
     "columns": "Columns",
     "advancedSearch": "Advanced Search",
-    "addProduct": "Add Product",
-    "deleteAll": "Delete All",
+    "searchNow": "Search now",
+    "deleteAll": "Delete all",
+    "deleteSelected": "Delete Selected",
+    "loadingMore": "Loading more..."
+  },
+  "form": {
     "status": "Status",
-    "updatedAt": "Updated At",
-    "productName": "Product Name",
+    "updatedAt": "Updated at",
+    "productName": "Product name",
     "skuCode": "SKU Code",
     "unit": "Unit",
     "category": "Category",
-    "active": "Active",
-    "inactive": "Inactive",
-    "createdAt": "Created At",
+    "addNew": "Add new",
+    "addProduct": "Add product",
+    "createdAt": "Created at",
     "name": "Name",
-    "reset": "Reset",
-    "confirmStatusChange": "Confirm Status Change",
+    "noDescription": "No description"
+  },
+  "dialogs": {
+    "confirmStatusChange": "Confirm status change",
     "statusChangeMessage": "Are you sure you want to change the status of '{name}' to '{status}'?",
+    "confirmDelete": "Are you sure you want to delete",
     "deleteConfirm": {
-      "title": "Delete confirmation",
+      "title": "Confirm deletion",
       "message": "Are you sure you want to delete",
       "confirm": "Delete",
       "cancel": "Cancel"
-    },
-    "dashboard": {
-      "welcomeText": "Welcome to",
-      "qallab": "Qallab"
-    },
-    "errors": {
-      "pageNotFound": "Page not found",
-      "pageNotFoundDescription": "Sorry, the page you are looking for doesn't exist or has been moved. Here are some helpful links:",
-      "accessDenied": "Access Denied",
-      "accessDeniedDescription": "Sorry, you don't have permission to access this page. Please contact the administrator to get the required permissions.",
-      "goBack": "Go back",
-      "takeMeHome": "Take me home"
+    }
+  },
+  "dashboard": {
+    "welcomeText": "Welcome to",
+    "qallab": "Qallab"
+  },
+  "errors": {
+    "pageNotFound": "Page not found",
+    "pageNotFoundDescription": "Sorry, the page you are looking for does not exist or has been moved. Here are some helpful links:",
+    "accessDenied": "Access denied",
+    "accessDeniedDescription": "Sorry, you do not have permission to access this page. Please contact the administrator for the required permissions.",
+    "goBack": "Go back",
+    "takeMeHome": "Home page"
+  },
+  "messages": {
+    "general": {
+      "saveError": "Error while saving",
+      "editSuccess": "Edited successfully",
+      "createSuccess": "Created successfully",
+      "saveSuccess": "Saved successfully",
+      "deleteSuccess": "Deleted successfully",
+      "bulkDeleteSuccess": "{count} items deleted successfully",
+      "activateSuccess": "Activated successfully",
+      "deactivateSuccess": "Deactivated successfully",
+      "changeStatusSuccess": "Status changed successfully",
+      "changeStatusError": "Error while Changign Status",
+      "deleteError": "Error while Deleting",
+      "completeStep1First": "Please complete the first step first",
+      "taxDataSaved": "Tax data saved successfully",
+      "saveDataFailed": "Failed to save data",
+      "loadDataFailed": "Failed to load Data",
+      "loadConstantsFailed": "Failed to load constants",
+      "loadCategoriesFailed": "Failed to load categories",
+      "fetchCategoriesFailed": "Failed to fetch categories"
     }
   }
 }

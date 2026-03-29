@@ -96,7 +96,7 @@ const isSvgIcon = (icon: string | undefined | null) => {
 </script>
 
 <template>
-  <v-btn :variant="variant" :color="color" :size="size" :density="density" :height="height" :width="width"
+  <v-btn :variant="variant" class="normal-case" :color="color" :size="size" :density="density" :height="height" :width="width"
     :rounded="rounded" :disabled="disabled" :loading="loading" :block="block" :elevation="elevation" :border="border"
     :type="type" :href="href" :to="to" :class="customClass" @click="handleClick">
     <!-- Prepend Icon Slot -->

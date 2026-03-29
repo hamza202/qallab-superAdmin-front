@@ -2,6 +2,7 @@
 import { ref, computed, onMounted, reactive } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useApi } from "@/composables/useApi";
+import { useI18n } from 'vue-i18n';
 import BasicInfoTab from "./components/BasicInfoTab.vue";
 import FinancialInfoTab, { LogisticBankAccount } from './components/FinancialInfoTab.vue';
 import CommercialInfoTab from "./components/CommercialInfoTab.vue";
@@ -11,6 +12,7 @@ import DocumentsTab from "./components/DocumentsTab.vue";
 const route = useRoute();
 const router = useRouter();
 const api = useApi();
+const { t } = useI18n();
 
 const logisticsIcon = `<svg width="47" height="47" viewBox="0 0 47 47" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M29.6667 2.4919C27.6147 1.84743 25.4313 1.5 23.1667 1.5C11.2005 1.5 1.5 11.2005 1.5 23.1667C1.5 35.1328 11.2005 44.8333 23.1667 44.8333C35.1328 44.8333 44.8333 35.1328 44.8333 23.1667C44.8333 19.4501 43.8976 15.9521 42.2488 12.8955M34 9.625H34.0108M19.9168 44.5912L19.917 39.8173C19.917 39.5588 20.0095 39.3087 20.1778 39.1124L25.5637 32.8287C26.0063 32.3123 25.8691 31.5205 25.2786 31.1831L19.0902 27.6468C18.922 27.5507 18.7827 27.4113 18.6867 27.2431L14.6527 20.1737C14.4427 19.8058 14.0376 19.594 13.6156 19.6316L1.63906 20.6983M42.6667 10.1667C42.6667 14.9531 38.3333 18.8333 34 23.1667C29.6667 18.8333 25.3333 14.9531 25.3333 10.1667C25.3333 5.3802 29.2135 1.5 34 1.5C38.7865 1.5 42.6667 5.3802 42.6667 10.1667ZM34.5417 9.625C34.5417 9.92415 34.2992 10.1667 34 10.1667C33.7008 10.1667 33.4583 9.92415 33.4583 9.625C33.4583 9.32585 33.7008 9.08333 34 9.08333C34.2992 9.08333 34.5417 9.32585 34.5417 9.625Z" stroke="#1570EF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
@@ -31,7 +33,7 @@ const checkCircleIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
 </svg>`;
 
 const isEditing = computed(() => !!route.params.id);
-const pageTitle = computed(() => isEditing.value ? "تعديل الكسارة" : "إضافة كسارة");
+const pageTitle = computed(() => isEditing.value ? t('pages.logistics.form.editTitle') : t('pages.logistics.form.addTitle'));
 const logisticId = ref<number | null>(null);
 
 const formRef = ref<any>(null);
@@ -40,12 +42,12 @@ const formErrors = reactive<Record<string, string>>({});
 const hasValidationErrors = ref(false);
 
 const activeTab = ref(0);
-const tabs = [
-    { title: "البيانات الاساسية", value: 0 },
-    { title: "البيانات المالية", value: 1 },
-    { title: "المعلومات التشغيلية", value: 2 },
-    { title: "البيانات التجارية", value: 3 },
-];
+const tabs = computed(() => [
+    { title: t('pages.logistics.form.tabs.basicInfo'), value: 0 },
+    { title: t('pages.logistics.form.tabs.financialInfo'), value: 1 },
+    { title: t('pages.logistics.form.tabs.operationalInfo'), value: 2 },
+    { title: t('pages.logistics.form.tabs.commercialInfo'), value: 3 },
+]);
 
 const isTabActive = (value: number) => activeTab.value === value;
 
@@ -192,7 +194,7 @@ const handleSave = async () => {
         // Step 2: Financial Info
         if (step === 2) {
             if (!isEditing.value) {
-                toast.error('يجب حفظ البيانات الأساسية أولاً');
+                toast.error(t('common.messages.general.completeStep1First'));
                 saving.value = false;
                 return;
             }
@@ -217,7 +219,7 @@ const handleSave = async () => {
         // Step 3: Operational Info (new structure)
         if (step === 3) {
             if (!isEditing.value) {
-                toast.error('يجب حفظ البيانات الأساسية أولاً');
+                toast.error(t('common.messages.general.completeStep1First'));
                 saving.value = false;
                 return;
             }
@@ -239,7 +241,7 @@ const handleSave = async () => {
         // Step 5: Transport Licensing & Compliance (new step)
         if (step === 5) {
             if (!isEditing.value) {
-                toast.error('يجب حفظ البيانات الأساسية أولاً');
+                toast.error(t('common.messages.general.completeStep1First'));
                 saving.value = false;
                 return;
             }
@@ -298,9 +300,9 @@ const handleSave = async () => {
             Object.keys(apiErrors).forEach(key => {
                 formErrors[key] = apiErrors[key][0];
             });
-            toast.error(err?.response?.data?.message || 'يرجى تصحيح الأخطاء في النموذج');
+            toast.error(err?.response?.data?.message || t('common.messages.general.saveError'));
         } else {
-            toast.error(err?.response?.data?.message || 'فشل حفظ الكسارة');
+            toast.error(err?.response?.data?.message || t('common.messages.general.saveError'));
         }
     } finally {
         saving.value = false;
@@ -499,7 +501,7 @@ const fetchLogisticData = async () => {
         managerEmail.value = data.manager_email || '';
     } catch (err: any) {
         console.error('Error fetching logistic:', err);
-        toast.error(err?.response?.data?.message || 'فشل تحميل بيانات الكسارة');
+        toast.error(err?.response?.data?.message || t('common.messages.general.loadDataFailed'));
     }
 };
 
@@ -727,10 +729,10 @@ onMounted(async () => {
 
             <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col">
                 <ButtonWithIcon variant="flat" color="primary" rounded="4" height="48" custom-class="min-w-56"
-                    :prepend-icon="saveIcon" label="حفظ التعديلات" @click="handleSave" :loading="saving" />
+                    :prepend-icon="saveIcon" :label="t('common.actions.save')" @click="handleSave" :loading="saving" />
 
                 <ButtonWithIcon prepend-icon="mdi-close" variant="flat" color="primary-50" rounded="4" height="48"
-                    custom-class="font-semibold text-base text-primary-700 px-6 min-w-56" label="إغلاق"
+                    custom-class="font-semibold text-base text-primary-700 px-6 min-w-56" :label="t('common.actions.close')"
                     :disabled="saving" @click="handleCancel" />
             </div>
         </div>

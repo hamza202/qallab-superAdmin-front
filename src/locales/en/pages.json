@@ -1,227 +1,974 @@
 {
   "pages": {
-    "simpleProducts": {
-      "title": "Simple Products",
-      "description": "Allows you to add simple products",
-      "list": "Simple Products List",
-      "create": "Add Simple Product",
-      "edit": "Edit Simple Product"
+    "accountTypes": {
+      "title": "Account Types",
+      "description": "Enables you to manage account types",
+      "list": {
+        "filters": {
+          "accountName": "Account Name",
+          "role": "Role"
+        }
+      }
     },
-    "profile": {
-      "title": "Profile Settings",
-      "description": "Allows you to manage profile settings"
+    "banks": {
+      "title": "Banks Management",
+      "description": "Enables you to manage banks and their accounts",
+      "list": "Banks List",
+      "create": "Add New Bank",
+      "formDescription": "Enables you to add a new bank and its details",
+      "edit": "Edit Bank"
+    },
+    "banksAndTreasuries": {
+      "title": "Banks and Treasuries",
+      "description": "Enables you to manage banks and treasuries",
+      "banks": {
+        "title": "Banks Management",
+        "addButton": "Add New Bank",
+        "emptyState": "No banks",
+        "deleteDialog": {
+          "title": "Delete Bank"
+        }
+      },
+      "treasuries": {
+        "title": "Treasuries Management",
+        "addButton": "Add New Treasury",
+        "emptyState": "No treasuries",
+        "deleteDialog": {
+          "title": "Delete Treasury"
+        }
+      }
+    },
+    "brands": {
+      "title": "Brands",
+      "description": "Enables you to manage brands",
+      "list": {
+        "deleteDialog": {
+          "title": "Delete Brands",
+          "message": "Are you sure you want to delete {count} brand(s)?"
+        },
+        "messages": {
+          "deleteSuccess": "Brand deleted successfully",
+          "bulkDeleteSuccess": "{count} brands deleted successfully"
+        }
+      }
+    },
+    "cities": {
+      "title": "Cities",
+      "description": "Enables you to manage cities",
+      "list": {
+        "deleteDialog": {
+          "title": "Delete Cities",
+          "message": "Are you sure you want to delete {count} city(s)?"
+        },
+        "messages": {
+          "deleteSuccess": "City deleted successfully",
+          "bulkDeleteSuccess": "{count} cities deleted successfully"
+        }
+      }
+    },
+    "codes": {
+      "title": "Codes Settings",
+      "description": "Enables you to add code settings"
+    },
+    "compositeProducts": {
+      "title": "Composite Products",
+      "description": "Enables you to add composite products"
+    },
+    "contractors": {
+      "title": "Contractors",
+      "description": "Enables you to manage contractors",
+      "editDescription": "You can edit contractor details here",
+      "list": {
+        "deleteDialog": {
+          "title": "Delete Contractors",
+          "message": "Are you sure you want to delete {count} contractor(s)?"
+        },
+        "messages": {
+          "loadingError": "Failed to load contractors",
+          "deleteSuccess": "Contractor deleted successfully",
+          "deleteError": "Failed to delete contractor",
+          "bulkDeleteSuccess": "{count} contractors deleted successfully",
+          "bulkDeleteError": "Failed to delete contractors",
+          "statusChangeError": "Failed to change contractor status"
+        }
+      },
+      "form": {
+        "editTitle": "Edit Contractor",
+        "addTitle": "Add Contractor",
+        "tabs": {
+          "basicInfo": "Basic Info",
+          "financialInfo": "Financial Info",
+          "commercialInfo": "Commercial Info",
+          "operationalInfo": "Operational Info"
+        },
+        "messages": {
+          "saveBasicFirst": "Basic info must be saved first",
+          "basicInfoSaved": "Basic info saved successfully",
+          "financialInfoSaved": "Financial info saved successfully",
+          "commercialInfoSaved": "Commercial info saved successfully",
+          "operationalInfoSaved": "Operational info saved successfully",
+          "validationError": "Please correct the errors in the form",
+          "saveError": "Failed to save contractor",
+          "loadError": "Failed to load contractor data"
+        }
+      }
+    },
+    "countries": {
+      "title": "Countries",
+      "description": "Enables you to manage countries",
+      "list": {
+        "deleteDialog": {
+          "title": "Delete Countries",
+          "message": "Are you sure you want to delete {count} country?"
+        },
+        "messages": {
+          "deleteSuccess": "Country deleted successfully",
+          "bulkDeleteSuccess": "{count} countries deleted successfully"
+        }
+      }
+    },
+    "crushers": {
+      "title": "Crushers",
+      "description": "Enables you to manage crushers",
+      "editDescription": "You can edit crusher details here",
+      "addTitle": "Add Crusher",
+      "editTitle": "Edit Crusher",
+      "list": {
+        "filters": {
+          "productionLines": "Number of Production Lines",
+          "crusherType": "Crusher Type",
+          "currentProductionFrom": "Current Production From",
+          "maxProductionFrom": "Maximum Production From"
+        },
+        "deleteDialog": {
+          "title": "Delete Crushers",
+          "message": "Are you sure you want to delete {count} crusher(s)?"
+        },
+        "messages": {
+          "loadingConstantsError": "Failed to load constants",
+          "bulkDeleteSuccess": "{count} crushers deleted successfully",
+          "bulkDeleteError": "Failed to delete crushers",
+          "loadingError": "Failed to load crushers",
+          "deleteSuccess": "Crusher deleted successfully",
+          "deleteError": "Failed to delete crusher",
+          "statusChangeError": "Failed to change crusher status"
+        }
+      },
+      "form": {
+        "editTitle": "Edit Crusher",
+        "addTitle": "Add Crusher",
+        "tabs": {
+          "basicInfo": "Basic Info",
+          "financialInfo": "Financial Info",
+          "commercialInfo": "Commercial Info",
+          "operationalInfo": "Operational Info"
+        },
+        "messages": {
+          "saveBasicFirst": "Basic info must be saved first",
+          "basicInfoSaved": "Basic info saved successfully",
+          "financialInfoSaved": "Financial info saved successfully",
+          "commercialInfoSaved": "Commercial info saved successfully",
+          "operationalInfoSaved": "Operational info saved successfully",
+          "validationError": "Please correct the errors in the form",
+          "saveError": "Failed to save crusher",
+          "loadError": "Failed to load crusher data"
+        }
+      }
+    },
+    "customers": {
+      "title": "Customers",
+      "description": "Enables you to manage customers",
+      "list": {
+        "addButton": "Add Customer",
+        "deleteDialog": {
+          "title": "Delete Customers",
+          "message": "Are you sure you want to delete {count} customer?"
+        },
+        "messages": {
+          "loadError": "Failed to load customers list",
+          "deleteSuccess": "Customer deleted successfully",
+          "deleteError": "Failed to delete customer",
+          "bulkDeleteSuccess": "{count} customers deleted successfully",
+          "bulkDeleteError": "Failed bulk delete",
+          "statusChangeSuccess": "Customer {status} successfully",
+          "statusChangeError": "Failed to change customer status",
+          "columnsUpdateError": "Failed to update columns"
+        }
+      },
+      "form": {
+        "subTabs": {
+          "addressInfo": "Address Information",
+          "contactList": "Contact List"
+        },
+        "sections": {
+          "customerData": "Customer Data",
+          "balances": "Balances"
+        },
+        "contacts": {
+          "firstName": "First Name",
+          "lastName": "Last Name",
+          "email": "Email",
+          "telephone": "Telephone",
+          "mobile": "Mobile",
+          "actions": "Actions"
+        },
+        "accounting": {
+          "priceType": "Price Type",
+          "customerClassification": "Customer Classification",
+          "salesRepresentative": "Sales Representative",
+          "createAccountInTree": "Create a special account in the accounting tree",
+          "account": "Account",
+          "relatedCustomers": "Related Customers",
+          "defaultStatus": "Default Status"
+        },
+        "balance": {
+          "debit": "Debit",
+          "credit": "Credit",
+          "balance": "Balance",
+          "lastAmount": "Last Amount",
+          "lastUpdate": "Last Update"
+        }
+      },
+      "create": "Add Customer",
+      "edit": "Edit Customer"
+    },
+    "DeliveryDocs": {
+      "title": "Delivery Documents Table",
+      "description": "Enables you to manage delivery documents",
+      "edit": "Enables you to edit a delivery document",
+      "create": "Enables you to add a delivery document"
+    },
+    "DeliveryDocsLogistics": {
+      "title": "Logistics Delivery Documents Table",
+      "description": "Enables you to manage logistics delivery documents",
+      "edit": "Edit logistics delivery document",
+      "view": "View logistics delivery document",
+      "create": "Add logistics delivery document"
+    },
+    "docStatusTransitions": {
+      "title": "Document and Status Management",
+      "description": "Enables you to manage documents and statuses",
+      "FormTitle": "Documents Workflow Management",
+      "FormDescription": "Enables you to add status and transitions",
+      "statusTransitionsTitle": "Status Transitions Management"
+    },
+    "factories": {
+      "title": "Factories",
+      "description": "Enables you to manage factories",
+      "list": {
+        "filters": {
+          "productionLines": "Number of Production Lines",
+          "factoryType": "Factory Type",
+          "currentProductionFrom": "Current Production From",
+          "maxProductionFrom": "Maximum Production From"
+        },
+        "deleteDialog": {
+          "title": "Delete Factories",
+          "message": "Are you sure you want to delete {count} factory?"
+        },
+        "messages": {
+          "loadingConstantsError": "Failed to load constants",
+          "bulkDeleteSuccess": "{count} factories deleted successfully",
+          "bulkDeleteError": "Failed to delete factories",
+          "loadingError": "Failed to load factories",
+          "deleteSuccess": "Factory deleted successfully",
+          "deleteError": "Failed to delete factory",
+          "statusChangeSuccess": "Factory {status} successfully",
+          "statusChangeError": "Failed to change factory status"
+        }
+      }
+    },
+    "GeneralProductPriceList": {
+      "title": "General Products Price List",
+      "description": "Enables you to manage general products prices"
+    },
+    "GeneralProductsPriceLists": {
+      "title": "General Products Price Lists",
+      "description": "Enables you to manage general products prices"
+    },
+    "geoAreas": {
+      "title": "Geographical Regions",
+      "description": "Enables you to manage geographical regions",
+      "FormTitle": "Geographical Regions",
+      "FormDescription": "Enables you to add geographical regions"
+    },
+    "geoSegments": {
+      "title": "Geographic Segments",
+      "description": "Enables you to manage geographic segments",
+      "tableTitle": "Geographic Segments Division"
     },
     "groupProducts": {
       "title": "Group Products",
-      "description": "Allows you to manage added group products and add new group products",
+      "description": "Enables you to manage added group products and add other group products",
       "list": "Group Products List",
       "create": "Add Group Product",
       "edit": "Edit Group Product"
     },
-    "compositeProducts": {
-      "title": "Composite Products",
-      "description": "Allows you to add composite products"
+    "logistics": {
+      "title": "Logistics Companies",
+      "description": "Enables you to manage logistics companies data",
+      "sidebarTitle": "Transport Companies Management",
+      "list": {
+        "filters": {
+          "productionLines": "Number of Production Lines",
+          "logisticType": "Transport Company Type",
+          "currentProductionFrom": "Current Production From",
+          "maxProductionFrom": "Maximum Production From"
+        },
+        "deleteDialog": {
+          "title": "Delete Transport Companies",
+          "message": "Are you sure you want to delete {count} transport company?"
+        },
+        "messages": {
+          "loadingConstantsError": "Failed to load constants",
+          "bulkDeleteSuccess": "{count} transport companies deleted successfully",
+          "deleteSuccess": "Transport company deleted successfully",
+          "statusChangeSuccess": "Transport company {status} successfully",
+          "statusChangeError": "Failed to change transport company status"
+        }
+      },
+      "form": {
+        "editTitle": "Edit Logistics Company",
+        "addTitle": "Add Logistics Company",
+        "tabs": {
+          "basicInfo": "Basic Information",
+          "financialInfo": "Financial Information",
+          "commercialInfo": "Commercial Information",
+          "operationalInfo": "Operational Information"
+        },
+        "messages": {
+          "saveBasicFirst": "You must save the basic information first",
+          "basicInfoSaved": "Basic information saved successfully",
+          "financialInfoSaved": "Financial information saved successfully",
+          "commercialInfoSaved": "Commercial information saved successfully",
+          "operationalInfoSaved": "Operational information saved successfully",
+          "validationError": "Please correct the errors in the form",
+          "saveError": "Failed to save logistics company",
+          "loadError": "Failed to load logistics company data"
+        }
+      }
     },
-    "categories": {
-      "title": "Categories",
-      "description": "Allows you to add Categories"
+    "materialMerchants": {
+      "title": "Material Merchants",
+      "sidebarTitle": "Material Merchants Management",
+      "description": "Enables you to manage material merchants",
+      "editDescription": "You can edit material merchants data here",
+      "list": {
+        "deleteDialog": {
+          "title": "Delete Material Merchants",
+          "message": "Are you sure you want to delete {count} material merchant?"
+        },
+        "messages": {
+          "loadingError": "Failed to load material merchants",
+          "deleteSuccess": "Material merchant deleted successfully",
+          "deleteError": "Failed to delete material merchant",
+          "bulkDeleteSuccess": "{count} material merchants deleted successfully",
+          "bulkDeleteError": "Failed to delete material merchants",
+          "statusChangeSuccess": "Material merchant {status} successfully",
+          "statusChangeError": "Failed to change material merchant status"
+        }
+      },
+      "form": {
+        "editTitle": "Edit Material Merchant",
+        "addTitle": "Add Material Merchant",
+        "tabs": {
+          "basicInfo": "Basic Information",
+          "financialInfo": "Financial Information"
+        },
+        "messages": {
+          "saveBasicFirst": "You must save the basic information first",
+          "basicInfoSaved": "Basic information saved successfully",
+          "financialInfoSaved": "Financial information saved successfully",
+          "validationError": "Please correct the errors in the form",
+          "saveError": "Failed to save material merchant",
+          "loadError": "Failed to load material merchant data"
+        }
+      }
     },
-    "taxes": {
-      "title": "Taxes",
-      "description": "Allows you to manage taxes"
+    "OrdersFuels": {
+      "title": "Fuel Purchase Orders Table",
+      "description": "Enables you to manage fuel purchase orders",
+      "FormTitle": "Fuel Order",
+      "FormDescriptionCreate": "Enables you to add a fuel order",
+      "FormDescriptionEdit": "Enables you to edit a fuel order"
     },
-    "accountTypes": {
-      "title": "Account Types",
-      "description": "Allows you to manage account types"
+    "OrdersLogistics": {
+      "title": "Logistics Service Orders List",
+      "description": "You can view logistics service orders and perform actions on them",
+      "FormTitle": "Logistics Service Order",
+      "FormDescription": "Issue a logistics service order",
+      "edit": "Edit logistics service order",
+      "view": "View logistics service order"
     },
-    "taxRules": {
-      "title": "Tax Rules",
-      "description": "Allows you to manage tax rules"
+    "OrdersMaterialProduct": {
+      "title": "Raw Material Purchase Orders Table",
+      "description": "Enables you to manage raw material purchase orders",
+      "FormTitle": "Raw Building Material Purchase Order",
+      "FormDescription": "Issue a building material purchase order",
+      "edit": "Edit purchase order"
     },
-    "cities": {
-      "title": "Cities",
-      "description": "Allows you to manage cities"
+    "PricesOffersMaterialProduct": {
+      "title": "Raw Building Material Quotations List",
+      "description": "You can view raw building material quotations and perform actions on them",
+      "FormTitle": "Raw Building Material Quotation",
+      "FormDescription": "You can add a raw building material quotation"
     },
-    "suppliers": {
-      "title": "Suppliers",
-      "description": "Allows you to manage suppliers",
-      "list": "Suppliers List",
-      "create": "Add Supplier",
-      "edit": "Edit Supplier"
+    "productionCapacityList": {
+      "title": "Production Capacity List",
+      "description": "Enables you to manage products production capacity"
     },
-    "customers": {
-      "title": "Customers",
-      "description": "Allows you to manage customers",
-      "list": "Customers List",
-      "create": "Add Customer",
-      "edit": "Edit Customer"
+    "productionCapacityLists": {
+      "title": "Production Capacity Lists",
+      "description": "Enables you to manage products production capacity"
     },
-    "crushers": {
-      "title": "Crushers",
-      "description": "Allows you to manage crushers",
-      "list": "Crushers List",
-      "create": "Add Crusher",
-      "edit": "Edit Crusher"
+    "ProductsBuildingMaterialPriceList": {
+      "title": "Raw Building Material Products Price List",
+      "description": "Enables you to manage raw building material products prices"
+    },
+    "ProductsBuildingMaterialPriceLists": {
+      "title": "Raw Building Material Products Price Lists",
+      "description": "Enables you to manage raw building material products prices"
+    },
+    "ProductsCategories": {
+      "title": "Product Categories",
+      "description": "Enables you to manage product categories",
+      "list": {
+        "deleteDialog": {
+          "title": "Delete Categories",
+          "message": "Are you sure you want to delete {count} category?"
+        }
+      }
+    },
+    "productVariables": {
+      "title": "Product Variables",
+      "description": "Enables you to manage product variables"
+    },
+    "profile": {
+      "title": "Profile Settings",
+      "description": "You can edit your personal data here"
     },
     "projects": {
       "title": "Projects Table",
       "description": "View projects",
-      "list": "Projects List",
+      "formDescription": "Enables you to manage projects",
+      "list": {
+        "addButton": "Add Project"
+      },
       "create": "Add Project",
       "edit": "Edit Project"
     },
-    "priceLists": {
-      "title": "Price Lists",
-      "description": "Allows you to manage product prices"
+    "PurchaseInvoices": {
+      "title": "Purchase Invoices Table",
+      "description": "Enables you to manage purchase invoices",
+      "FormTitle": "Issue Raw Building Material Purchase Invoice",
+      "FormDescription": "Issue building material purchase order invoice",
+      "edit": "Edit receiving document"
     },
-    "productionCapacity": {
-      "title": "Production Capacity",
-      "description": "Allows you to manage product production capacity"
+    "PurchaseInvoicesLogistics": {
+      "title": "Logistics Service Purchase Invoices Table",
+      "description": "Enables you to manage logistics service purchase invoices",
+      "FormTitle": "Issue Logistics Service Purchase Invoice",
+      "FormDescription": "Issue logistics service purchase order invoice"
     },
-    "testGroup": {
-      "title": "Test Groups",
-      "description": "Allows you to manage test groups",
-      "tableTitle": "Test Groups Table"
+    "purchasesLogistics": {
+      "title": "Logistics Service Quotation Requests List",
+      "description": "You can view logistics service quotation requests and perform actions on them",
+      "list": "Logistics Service Quotation Requests List",
+      "create": "Request Logistics Service Quotation",
+      "createDescription": "Enables you to add a logistics service quotation request",
+      "edit": "Edit logistics service request",
+      "view": "View logistics service request"
     },
-    "tests": {
-      "title": "Tests",
-      "description": "Allows you to manage tests"
+    "PurchasesRequests": {
+      "title": "Purchase Orders Table",
+      "description": "Enables you to manage purchase orders",
+      "FormTitle": "Raw Building Material Purchase Order",
+      "FormDescription": "Issue building material purchase order"
     },
-    "testMethodology": {
-      "title": "Test Methodology",
-      "description": "Allows you to manage test methodology"
+    "PurchasesRequestsFuels": {
+      "title": "Fuel Quotation Requests",
+      "description": "You can view fuel quotation requests and perform actions on them",
+      "FormTitle": "Fuel Quotation Request",
+      "FormDescription": "Enables you to add a fuel quotation request",
+      "edit": "Edit fuel quotation request",
+      "view": "View fuel quotation request"
     },
-    "sampleTypes": {
-      "title": "Sample Types",
-      "description": "Allows you to manage sample types"
+    "PurchasesRequestsMaterialProduct": {
+      "title": "Raw Building Material Quotation Requests List",
+      "description": "You can view raw building material quotation requests and perform actions on them",
+      "FormTitle": "Raw Building Material Quotation Request",
+      "FormDescription": "Enables you to add a raw building material quotation request",
+      "edit": "Edit raw building material quotation request",
+      "view": "View raw building material quotation request"
     },
-    "users": {
-      "title": "Users",
-      "description": "Manage system users",
-      "list": "Users List",
-      "create": "Add User",
-      "edit": "Edit User"
+    "QuotationsLogistics": {
+      "title": "Logistics Services Quotations",
+      "description": "You can view logistics services quotations and perform actions on them",
+      "view": "View logistics service quotation"
+    },
+    "QuotationsMaterialProduct": {
+      "title": "Raw Material Quotations",
+      "description": "You can view raw building material quotations in purchases",
+      "view": "View raw material quotation"
+    },
+    "ReceiptVouchers": {
+      "title": "Receiving Documents Table",
+      "description": "Enables you to manage purchase orders",
+      "FormTitle": "Add Receiving Document",
+      "FormDescription": "Create a receiving document for a purchase order",
+      "edit": "Edit receiving document"
+    },
+    "ReceivingDocs": {
+      "title": "Receiving Documents Table",
+      "description": "Enables you to manage receiving documents",
+      "tableTitle": "Receiving Document Items Table",
+      "edit": "Edit receiving document",
+      "view": "View receiving document",
+      "create": "Add receiving document",
+      "docCode": "Document Code"
+    },
+    "ReceivingDocsLogistics": {
+      "title": "Logistics Service Receiving Documents Table",
+      "description": "Enables you to manage logistics service receiving documents",
+      "edit": "Edit logistics service receiving document",
+      "view": "View logistics service receiving document",
+      "create": "Add logistics service receiving document",
+      "docCode": "Document Code"
+    },
+    "requestForQuotation": {
+      "title": "Request for Quotation",
+      "description": "Simply choose the product or service you need and enter the required details",
+      "list": "Requests for Quotation List",
+      "create": "Add quotation request",
+      "edit": "Edit quotation request",
+      "view": "View quotation request"
+    },
+    "requestForQuotationFuel": {
+      "title": "Fuel Quotation Requests List",
+      "description": "You can view fuel quotation requests and perform actions on them",
+      "FormTitle": "Fuel Quotation Request",
+      "FormDescription": "Enables you to add a fuel quotation request",
+      "create": "Add fuel quotation request",
+      "edit": "Edit fuel quotation request",
+      "view": "View fuel quotation request"
+    },
+    "requestForQuotationMaterialProduct": {
+      "title": "Raw Building Material Quotation Requests List",
+      "description": "You can view raw building material quotation requests and perform actions on them",
+      "FormTitle": "Raw Material Quotation",
+      "FormDescription": "Enables you to add a raw material quotation",
+      "create": "Add physical product quotation request",
+      "edit": "Edit physical product quotation request",
+      "view": "View physical product quotation request"
     },
     "roles": {
-      "title": "Roles & Permissions",
-      "description": "Manage user roles and permissions",
-      "list": "Roles List",
+      "title": "Roles and Permissions",
+      "description": "Manage user roles and their permissions",
+      "list": {
+        "pageTitle": "Users and Roles",
+        "pageDescription": "Enables you to view and edit users and their roles",
+        "tabs": {
+          "users": "Users",
+          "roles": "Roles"
+        },
+        "activeRoles": "Active Roles :",
+        "rolesAndPermissions": "Roles and Permissions :",
+        "addNewRole": "Add New Role",
+        "emptyState": {
+          "title": "No roles",
+          "description": "No roles matching the search were found"
+        },
+        "messages": {
+          "fetchError": "An error occurred while fetching data",
+          "statusChangeSuccess": "Role {status} successfully",
+          "statusChangeError": "An error occurred while changing status"
+        },
+        "modules": {
+          "products": "Products",
+          "services": "Services",
+          "purchases": "Purchases",
+          "finance": "Finance",
+          "clearing": "Clearing",
+          "funding": "Funding",
+          "users": "Users",
+          "reports": "Reports"
+        }
+      },
       "create": "Add Role",
       "edit": "Edit Role"
     },
-    "OrdersMaterialProduct": {
-      "title": "Purchase Orders Table",
-      "description": "Manage purchase orders",
-      "FormTitle": "Purchase Order - Building Materials",
-      "FormDescription": "Create purchase order for building materials",
-      "edit": "Edit Purchase Order"
+    "SalesInvoices": {
+      "title": "Sales Invoices Table",
+      "description": "Enables you to manage sales invoices",
+      "FormTitle": "Issue Raw Building Material Sales Invoice",
+      "FormDescription": "Issue building material sales order invoice"
+    },
+    "SalesLogisticsInvoices": {
+      "title": "Logistics Service Sales Invoices Table",
+      "description": "Enables you to manage logistics service sales invoices",
+      "FormTitle": "Issue Logistics Service Sales Invoice",
+      "FormDescription": "Issue logistics service sales order invoice",
+      "FormTitleEdit": "Edit Logistics Service Sales Invoice",
+      "FormDescriptionEdit": "Edit logistics service sales order invoice",
+      "print": "Print Invoice"
+    },
+    "SalesOrdersFuels": {
+      "title": "Fuel Sales Orders Table",
+      "description": "Enables you to manage fuel sales orders",
+      "FormTitle": "Fuel Sales Order",
+      "FormDescriptionCreate": "Enables you to add a fuel sales order",
+      "FormDescriptionEdit": "Enables you to edit a fuel sales order",
+      "edit": "Edit fuel sales order",
+      "view": "View fuel sales order"
+    },
+    "SalesOrdersLogistics": {
+      "title": "Logistics Service Sales Orders Table",
+      "description": "Enables you to manage logistics service sales orders",
+      "FormTitle": "Logistics Service Order",
+      "FormDescriptionCreate": "Enables you to add a logistics service order",
+      "FormDescriptionEdit": "Enables you to edit a logistics service order",
+      "edit": "Edit logistics service order",
+      "view": "View logistics service order"
     },
     "SalesOrdersMaterialProduct": {
-      "pickupTitle": "Add Delivery Appointment",
-      "pickupDescr": "Add a delivery appointment booking action"
+      "pickupTitle": "Add Delivery Booking",
+      "pickupDescr": "Add delivery booking action"
+    },
+    "SalesPayments": {
+      "title": "Sales Payments Table",
+      "description": "View sales payments",
+      "FormTitle": "Pay Financial Installment",
+      "FormDescription": "Enter financial payment data",
+      "print": "Print Payment",
+      "view": "Payment Details",
+      "viewDescription": "View all details of the payment"
+    },
+    "SalesQuotationsFuels": {
+      "title": "Fuel Quotations",
+      "description": "Manage fuel quotations",
+      "FormTitle": "Fuel Quotation",
+      "FormDescription": "Create a new fuel quotation",
+      "edit": "Edit fuel quotation",
+      "view": "View fuel quotation"
+    },
+    "SalesQuotationsLogistics": {
+      "title": "Logistics Service Quotations",
+      "description": "Manage logistics service quotations",
+      "FormTitle": "Logistics Service Quotation",
+      "FormDescription": "Create a new logistics service quotation",
+      "edit": "Edit logistics service quotation",
+      "view": "View logistics service quotation"
+    },
+    "SalesRequests": {
+      "title": "Sales Orders Table",
+      "description": "Enables you to manage sales orders",
+      "FormTitle": "Raw Building Material Sales Order",
+      "FormDescription": "Issue building material sales order"
+    },
+    "SalesRequestsFuels": {
+      "title": "Fuel Quotation Requests",
+      "description": "Manage fuel quotation requests",
+      "FormTitle": "Fuel Quotation Request",
+      "FormDescription": "Create a new fuel quotation request",
+      "edit": "Edit fuel quotation request",
+      "view": "View fuel quotation request"
+    },
+    "SalesRequestsLogistics": {
+      "title": "Logistics Service Quotation Requests",
+      "description": "Manage logistics service quotation requests",
+      "FormTitle": "Logistics Service Quotation Request",
+      "FormDescription": "Create a new logistics service quotation request",
+      "edit": "Edit logistics service quotation request",
+      "view": "View logistics service quotation request"
     },
     "SalesSoPickups": {
-      "title": "Delivery Appointments",
-      "description": "Manage delivery appointments",
-      "edit": "Edit delivery appointment",
-      "view": "View delivery appointment",
+      "title": "Delivery Bookings",
+      "description": "Manage delivery bookings",
+      "edit": "Edit delivery booking",
+      "view": "View delivery booking",
       "viewPage": {
         "retry": "Retry",
-        "headerSubtitle": "Delivery appointment details and related information",
+        "headerSubtitle": "Delivery booking details and information",
         "breadcrumb": {
           "sales": "Sales",
-          "pickupsList": "Delivery Appointments"
+          "pickupsList": "Delivery Bookings"
+        },
+        "labels": {
+          "morning": "Morning",
+          "evening": "Evening"
         },
         "orderInfo": {
           "title": "Order Information",
           "transportCompany": "Transport Company",
           "date": "Date",
-          "coordinatesSendCount": "Coordinates send count",
-          "tripTiming": "Trip timing",
-          "loadingResponsible": "Loading responsible",
+          "coordinatesSendCount": "Frequency of sending coordinates",
+          "tripTiming": "Trip Timing",
+          "loadingResponsible": "Loading Responsible",
           "driver": "Driver",
-          "tripCost": "Trip cost",
-          "unloadingLocation": "Unloading location",
-          "loadingLocation": "Loading location",
-          "unloadingResponsible": "Unloading responsible",
-          "vehicleCount": "Vehicle count",
-          "vehicleType": "Vehicle type",
+          "tripCost": "Trip Cost",
+          "unloadingLocation": "Unloading Location",
+          "loadingLocation": "Loading Location",
+          "unloadingResponsible": "Unloading Responsible",
+          "vehicleCount": "Number of Vehicles",
+          "vehicleType": "Vehicle Type",
           "notes": "Notes"
         },
         "productsTable": {
           "title": "Products",
-          "productImage": "Product image",
-          "productName": "Product name",
+          "productImage": "Product Image",
+          "productName": "Product Name",
           "quantity": "Quantity",
           "unit": "Unit",
-          "vehicleType": "Carrier type",
-          "tripsCount": "Carriers count",
+          "vehicleType": "Carrier Type",
+          "tripsCount": "Number of Carriers",
           "notes": "Notes"
         },
         "errors": {
-          "loadFailed": "Failed to load delivery appointment details"
+          "loadFailed": "Failed to load delivery booking details"
         }
       }
     },
-    "ReceivingDocs": {
-      "title": "Receiving Documents Table",
-      "description": "Enables you to manage purchase orders",
-      "edit": "Edit Receiving Document",
-      "view": "View Receiving Document",
-      "docCode": "Document Code"
-    },
     "SalesTrips": {
       "title": "Trips",
-      "description": "Allows you to manage trips",
+      "description": "Enables you to manage trips",
       "list": "Trips List",
-      "create": "Add Trip",
-      "edit": "Edit Trip"
+      "create": "Create Trip",
+      "createDescription": "Enables you to create trips",
+      "edit": "Edit trip"
     },
-    "purchasesLogistics": {
-      "title": "Logistics Service Requests",
-      "description": "Allows you to manage logistics service requests",
-      "list": "Logistics Service Requests List",
-      "create": "Create Logistics Service Request",
-      "edit": "Edit Logistics Service Request",
-      "view": "View Logistics Service Request"
+    "sampleTypes": {
+      "title": "Sample Types",
+      "description": "Enables you to manage sample types"
     },
-    "QuotationsFuels": {
-      "title": "Fuel Quotations",
-      "description": "View and manage fuel quotations",
-      "view": "View fuel quotation"
+    "servicePricesList": {
+      "title": "Service Prices List",
+      "description": "Enables you to manage service prices"
     },
-    "PurchasesRequestsFuels": {
-      "title": "Purchase Requests for Fuel Quotations",
-      "description": "View and manage purchase requests for fuel quotations",
-      "FormTitle": "Purchase Request for Fuel Quotations",
-      "FormDescription": "Add purchase request for fuel quotations",
-      "edit": "Edit purchase request for fuel quotations",
-      "view": "View purchase request for fuel quotations"
+    "services": {
+      "title": "Services",
+      "description": "Enables you to manage services",
+      "list": {
+        "addButton": "Add Service",
+        "deleteDialog": {
+          "title": "Delete Services",
+          "message": "Are you sure you want to delete {count} service?"
+        },
+        "messages": {
+          "deleteSuccess": "Service deleted successfully",
+          "bulkDeleteSuccess": "{count} services deleted successfully",
+          "statusChangeSuccess": "Service {status} successfully",
+          "statusChangeError": "Failed to change service status"
+        }
+      }
     },
-    "PurchasesRequestsMaterialProduct": {
-      "title": "Purchase Requests for Material Product Quotations",
-      "description": "View and manage purchase requests for material product quotations",
-      "FormTitle": "Purchase Request for Material Product Quotations",
-      "FormDescription": "Add purchase request for material product quotations",
-      "edit": "Edit purchase request for material product quotations",
-      "view": "View purchase request for material product quotations"
+    "ServicesCategories": {
+      "title": "Service Categories",
+      "description": "Enables you to manage service categories",
+      "list": {
+        "deleteDialog": {
+          "title": "Delete Service Categories",
+          "message": "Are you sure you want to delete {count} Service Category?"
+        }
+      }
     },
-    "SalesLogisticsInvoices": {
-      "title": "Logistics Service Sales Invoices",
-      "description": "Manage logistics service sales invoices",
-      "FormTitle": "Issue Logistics Service Sales Invoice",
-      "FormDescription": "Issue logistics sales invoice",
-      "FormTitleEdit": "Edit Logistics Service Sales Invoice",
-      "FormDescriptionEdit": "Edit logistics sales invoice",
-      "print": "Print Invoice"
+    "servicesPricesList": {
+      "title": "Service Prices Lists",
+      "description": "Enables you to manage service prices",
+      "form": {
+        "categories": {
+          "all": "All Categories",
+          "transport": "Transport",
+          "analysis": "Analysis",
+          "other": "Other"
+        }
+      }
     },
-    "OrdersLogistics": {
-      "title": "Logistics Orders",
-      "description": "View and manage logistics orders",
-      "FormTitle": "Logistics Order",
-      "FormDescription": "Create a logistics order",
-      "edit": "Edit Logistics Order",
-      "view": "View Logistics Order"
+    "servicesSettings": {
+      "title": "Services Settings",
+      "description": "Enables you to manage services settings"
+    },
+    "simpleProducts": {
+      "title": "Simple Products",
+      "description": "Enables you to manage added simple products and add other simple products",
+      "list": "Simple Products List",
+      "create": "Add Simple Product",
+      "edit": "Edit Simple Product"
+    },
+    "suppliers": {
+      "title": "Suppliers",
+      "description": "Enables you to manage suppliers",
+      "view": "Supplier Data",
+      "list": {
+        "addButton": "Add Supplier",
+        "deleteDialog": {
+          "title": "Delete Suppliers",
+          "message": "Are you sure you want to delete {count} supplier?"
+        },
+        "messages": {
+          "deleteSuccess": "Supplier deleted successfully",
+          "bulkDeleteSuccess": "{count} suppliers deleted successfully",
+          "statusChangeSuccess": "Supplier {status} successfully",
+          "statusChangeError": "Failed to change supplier status"
+        }
+      },
+      "form": {
+        "balances": {
+          "label": "Balances",
+          "noBalances": "No balances available",
+          "headers": {
+            "balance": "Balance",
+            "dueAmount": "Due Amount",
+            "currency": "Currency",
+            "lastValidationDate": "Last Audit Date"
+          }
+        }
+      },
+      "create": "Add Supplier",
+      "edit": "Edit Supplier"
+    },
+    "systemStatuses": {
+      "title": "System Statuses Management",
+      "description": "Enables you to manage system statuses",
+      "list": {
+        "deleteDialog": {
+          "title": "Delete System Statuses",
+          "message": "Are you sure you want to delete {count} system status?"
+        }
+      }
+    },
+    "taxes": {
+      "title": "Taxes",
+      "description": "Enables you to manage taxes",
+      "list": {
+        "deleteDialog": {
+          "title": "Delete Taxes",
+          "message": "Are you sure you want to delete {count} tax?"
+        },
+        "messages": {
+          "deleteSuccess": "Tax deleted successfully",
+          "bulkDeleteSuccess": "{count} taxes deleted successfully"
+        }
+      }
+    },
+    "taxRules": {
+      "title": "Tax Rules",
+      "description": "Enables you to manage tax rules"
+    },
+    "testGroup": {
+      "title": "Test Groups",
+      "description": "Enables you to manage test groups",
+      "tableTitle": "Test Groups Table"
+    },
+    "testMethodology": {
+      "title": "Test Methodologies",
+      "description": "Enables you to manage test methodologies",
+      "tableTitle": "Test Methodologies Table",
+      "list": {
+        "deleteDialog": {
+          "title": "Delete Test Methodologies",
+          "message": "Are you sure you want to delete {count} methodology?"
+        }
+      }
+    },
+    "tests": {
+      "title": "Tests",
+      "description": "Enables you to manage tests",
+      "tableTitle": "Tests Table"
+    },
+    "treasuries": {
+      "title": "Treasuries Management",
+      "description": "Enables you to manage treasuries and their accounts",
+      "list": "Treasuries List",
+      "create": "Add New Treasury",
+      "formDescription": "Add a financial treasury and its details",
+      "edit": "Edit Treasury"
+    },
+    "units": {
+      "title": "Units",
+      "description": "Enables you to manage units",
+      "list": {
+        "deleteDialog": {
+          "title": "Delete Units",
+          "message": "Are you sure you want to delete {count} unit?"
+        },
+        "messages": {
+          "deleteSuccess": "Unit deleted successfully",
+          "bulkDeleteSuccess": "{count} units deleted successfully"
+        }
+      }
+    },
+    "users": {
+      "title": "Users",
+      "description": "Manage users in the system",
+      "list": {
+        "pageTitle": "Users and Roles",
+        "pageDescription": "Enables you to view and edit users and their roles",
+        "tabs": {
+          "users": "Users",
+          "roles": "Roles"
+        },
+        "activeUsers": "Active Users :",
+        "usersAndRoles": "Users and Roles :",
+        "addNewUser": "Add New User",
+        "emptyState": {
+          "title": "No Users",
+          "description": "No users matching the search were found"
+        },
+        "messages": {
+          "fetchError": "An error occurred while fetching data",
+          "statusChangeSuccess": "User {status} successfully",
+          "statusChangeError": "An error occurred while changing status"
+        },
+        "modules": {
+          "products": "Products",
+          "services": "Services",
+          "purchases": "Purchases",
+          "finance": "Finance",
+          "clearing": "Clearing and Barter",
+          "accounting": "Accounting",
+          "users": "Users",
+          "projectManagement": "Project Management",
+          "reports": "Reports",
+          "carriers": "Carriers",
+          "funding": "Funding"
+        }
+      },
+      "create": "Add User",
+      "edit": "Edit User"
+    },
+    "vouchers": {
+      "title": "Financial Dashboard",
+      "description": "Enables you to manage financial vouchers",
+      "list": {
+        "voucherTypes": {
+          "receipt": "Receipt",
+          "payment": "Payment",
+          "entry": "Journal Entry"
+        },
+        "units": {
+          "customer": "Customer",
+          "supplier": "Supplier"
+        },
+        "deleteDialog": {
+          "title": "Delete Vouchers"
+        },
+        "messages": {
+          "statusChangeSuccess": "Voucher {status} successfully",
+          "statusChangeError": "Failed to change voucher status",
+          "loadError": "Failed to load vouchers",
+          "deleteSuccess": "Voucher deleted successfully",
+          "deleteError": "Failed to delete voucher",
+          "bulkDeleteSuccess": "{count} vouchers deleted successfully",
+          "bulkDeleteError": "Failed to delete vouchers",
+          "columnsUpdateError": "Failed to update columns"
+        }
+      }
+    },
+    "vouchers_form": {
+      "title": "Financial Dashboard",
+      "receiptVoucherTitle": "Receipt Vouchers",
+      "paymentVoucherTitle": "Payment Vouchers",
+      "description": "Enables you to manage financial vouchers"
     }
   }
 }

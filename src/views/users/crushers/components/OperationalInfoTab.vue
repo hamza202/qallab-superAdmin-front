@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { reactive, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 interface Props {
     productionLines: number | null;
@@ -81,19 +84,19 @@ const infoIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
 
 <template>
     <div class="mb-4 bg-gray-50 rounded-lg p-6">
-        <h2 class="text-lg font-bold text-primary-900 mb-4">المعلومات التشغيلية</h2>
+        <h2 class="text-lg font-bold text-primary-900 mb-4">{{ t('form.crusher.operationalInfo.sectionTitle') }}</h2>
 
         <!-- Row 1: Production Lines, Rock Type, Crusher Type -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
             <TextInput v-model="formData.productionLines" @input="() => handleInputUpdate('production_lines')"
-                label="عدد خطوط الإنتاج" placeholder="20" type="number" :rules="[numeric(),positive()]"
+                :label="t('form.crusher.operationalInfo.productionLines.label')" :placeholder="t('form.crusher.operationalInfo.productionLines.placeholder')" type="number" :rules="[numeric(),positive()]"
                 :error-messages="props.formErrors?.['production_lines']" :hide-details="false" />
             <SelectWithIconInput clearable v-model="formData.rockType" @update:model-value="emitUpdate"
-                label="نوع الصخر" placeholder="اختر نوع الصخر" :items="rockTypeItems" />
+                :label="t('form.crusher.operationalInfo.rockType.label')" :placeholder="t('form.crusher.operationalInfo.rockType.placeholder')" :items="rockTypeItems" />
             <SelectWithIconInput clearable v-model="formData.crusherType" @update:model-value="emitUpdate"
-                label="نوع الكسارة" placeholder="اختر نوع الكسارة" :items="crusherTypeItems" />
-            <TextInput v-model="formData.feedRate" @input="() => handleInputUpdate('feed_rate')" label="سرعة التغذية"
-                placeholder="20" :rules="[numeric(),positive()]" :error-messages="props.formErrors?.['feed_rate']"
+                :label="t('form.crusher.operationalInfo.crusherType.label')" :placeholder="t('form.crusher.operationalInfo.crusherType.placeholder')" :items="crusherTypeItems" />
+            <TextInput v-model="formData.feedRate" @input="() => handleInputUpdate('feed_rate')" :label="t('form.crusher.operationalInfo.feedRate.label')"
+                :placeholder="t('form.crusher.operationalInfo.feedRate.placeholder')" :rules="[numeric(),positive()]" :error-messages="props.formErrors?.['feed_rate']"
                 :hide-details="false">
                 <template #append-inner>
                     <v-tooltip location="top" content-class="custom-tooltip">
@@ -102,13 +105,13 @@ const infoIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
                                 :prepend-icon="infoIcon" v-bind="tooltipProps" />
                         </template>
                         <div>
-                            سرعة تغذية المواد الخام للكسارة
+                            {{ t('form.crusher.operationalInfo.feedRate.tooltip') }}
                         </div>
                     </v-tooltip>
                 </template>
             </TextInput>
             <TextInput v-model="formData.maxProduction" :hide-details="false"
-                @input="() => handleInputUpdate('max_production')" label="الحد الأقصى للإنتاج" placeholder="50"
+                @input="() => handleInputUpdate('max_production')" :label="t('form.crusher.operationalInfo.maxProduction.label')" :placeholder="t('form.crusher.operationalInfo.maxProduction.placeholder')"
                 :rules="[numeric(),positive()]" :error-messages="props.formErrors?.['max_production']">
                 <template #append-inner>
                     <v-tooltip location="top" content-class="custom-tooltip">
@@ -117,19 +120,19 @@ const infoIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
                                 :prepend-icon="infoIcon" v-bind="tooltipProps" />
                         </template>
                         <div>
-                            أقصى قدرة إنتاجية للكسارة
+                            {{ t('form.crusher.operationalInfo.maxProduction.tooltip') }}
                         </div>
                     </v-tooltip>
                 </template>
             </TextInput>
             <TextInput v-model="formData.currentProduction" :hide-details="false"
-                @input="() => handleInputUpdate('current_production')" label="الإنتاج الحالي" placeholder="45"
+                @input="() => handleInputUpdate('current_production')" :label="t('form.crusher.operationalInfo.currentProduction.label')" :placeholder="t('form.crusher.operationalInfo.currentProduction.placeholder')"
                 :rules="[numeric(),positive()]" :error-messages="props.formErrors?.['current_production']" />
 
             <SelectWithIconInput clearable v-model="formData.design" @update:model-value="emitUpdate"
-                label="تصميم الكسارة" placeholder="اختر التصميم" :items="crusherDesignItems" />
+                :label="t('form.crusher.operationalInfo.design.label')" :placeholder="t('form.crusher.operationalInfo.design.placeholder')" :items="crusherDesignItems" />
             <TextInput v-model="formData.workersCount" :hide-details="false"
-                @input="() => handleInputUpdate('workers_count')" label="عدد العمال" placeholder="50" type="number"
+                @input="() => handleInputUpdate('workers_count')" :label="t('form.crusher.operationalInfo.workersCount.label')" :placeholder="t('form.crusher.operationalInfo.workersCount.placeholder')" type="number"
                 :rules="[numeric(),positive()]" :error-messages="props.formErrors?.['workers_count']" />
         </div>
     </div>

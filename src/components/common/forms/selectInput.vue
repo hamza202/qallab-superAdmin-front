@@ -271,7 +271,7 @@ watch(() => displayItems.value.length, async () => {
                 <div ref="loadMoreRef" style="height: 1px; visibility: hidden;"></div>
                 <v-list-item v-if="isLoading" class="py-2">
                     <v-list-item-title class="text-center">
-                        <v-progress-circular indeterminate size="20" color="blue-grey" width="2" class="ml-2" />
+                        <v-progress-circular indeterminate size="20" color="blue-grey" width="2" class="me-2" />
                         <span class="text-gray-500">جاري التحميل...</span>
                     </v-list-item-title>
                 </v-list-item>

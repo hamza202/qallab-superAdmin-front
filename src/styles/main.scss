@@ -22,7 +22,7 @@ $shadow-focus: 0px 0px 0px 4px rgb(var(--v-theme-primary-25)),
 }
 
 .qallab-label {
-  @apply font-cairo text-sm font-semibold leading-5 text-gray-700 block mb-1.5 text-right;
+  @apply font-cairo text-sm font-semibold leading-5 text-gray-700 block mb-1.5 text-start;
 }
 
 .v-overlay__content .v-list {

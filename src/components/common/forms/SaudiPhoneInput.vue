@@ -93,7 +93,7 @@ const saudiPhoneRule = (v: string) => {
       @update:model-value="handleInput"
     >
       <template #prepend-inner>
-        <div class="flex items-center gap-2 pl-2 border-l border-gray-200 ml-2 h-full">
+        <div class="flex items-center gap-2 pl-2 border-l border-gray-200 me-2 h-full">
           <span class="text-sm font-medium px-2 py-1">KSA</span>
         </div>
       </template>

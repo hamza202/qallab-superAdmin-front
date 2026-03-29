@@ -94,7 +94,7 @@ const infoIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 px-6 pt-6 pb-8">
       <TextInput v-model="debitLimit" @input="emitUpdate" :rules="[numeric(),positive()]" :hide-details="false"
         :error-messages="props.formErrors?.['debit_limit']" @update:model-value="clearError('debit_limit')"
-        label="الحد الأعلى للدين" placeholder="ادخل الحد الأعلى للدين">
+        :label="$t('form.financial.debitLimit.label')" :placeholder="$t('form.financial.debitLimit.placeholder')">
         <template #append-inner>
           <v-tooltip location="top" content-class="custom-tooltip">
             <template #activator="{ props: tooltipProps }">
@@ -102,14 +102,14 @@ const infoIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
                 :prepend-icon="infoIcon" v-bind="tooltipProps" />
             </template>
             <div>
-              الحد الأقصى المسموح به للديون
+              {{ $t('form.financial.debitLimit.info') }}
             </div>
           </v-tooltip>
         </template>
       </TextInput>
       <TextInput v-model="creditLimit" @input="emitUpdate" :rules="[numeric(),positive()]" :hide-details="false"
         :error-messages="props.formErrors?.['credit_limit']" @update:model-value="clearError('credit_limit')"
-        label="الحد الأعلى للائتمان" placeholder="ادخل الحد الأعلى للإتمان">
+        :label="$t('form.financial.creditLimit.label')" :placeholder="$t('form.financial.creditLimit.placeholder')">
         <template #append-inner>
           <v-tooltip location="top" content-class="custom-tooltip">
             <template #activator="{ props: tooltipProps }">
@@ -117,7 +117,7 @@ const infoIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
                 :prepend-icon="infoIcon" v-bind="tooltipProps" />
             </template>
             <div>
-              الحد الأقصى المسموح به للائتمان
+              {{ $t('form.financial.creditLimit.info') }}
             </div>
           </v-tooltip>
         </template>
@@ -125,36 +125,36 @@ const infoIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
     </div>
 
     <div class="flex justify-between items-center mb-4 border-y border-gray-200 px-6 py-2">
-      <h2 class="text-lg font-bold text-primary-900">الحسابات البنكية</h2>
+      <h2 class="text-lg font-bold text-primary-900">{{ $t('form.contractor.financialInfo.sections.bankAccounts') }}</h2>
       <ButtonWithIcon variant="flat" color="primary-500" height="40" rounded="4"
-        custom-class="font-bold px-5 !text-white" :prepend-icon="addIcon" label="إضافة حساب" @click="addAccount" />
+        custom-class="font-bold px-5 !text-white" :prepend-icon="addIcon" :label="$t('form.contractor.financialInfo.bankAccount.addAccount.label')" @click="addAccount" />
     </div>
 
     <v-table v-if="bankAccounts.length > 0" class="bg-white rounded-none">
       <thead>
         <tr class="bg-gray-100">
-          <th class="text-right font-semibold text-gray-700 py-3 px-4">اسم البنك</th>
-          <th class="text-right font-semibold text-gray-700 py-3 px-4">فرع البنك</th>
-          <th class="text-right font-semibold text-gray-700 py-3 px-4">الآيبان/IBAN</th>
-          <th class="text-right font-semibold text-gray-700 py-3 px-4">رقم الحساب البنكي</th>
-          <th class="text-right font-semibold text-gray-700 py-3 px-4">الحالة</th>
-          <th class="text-right font-semibold text-gray-700 py-3 px-4">الإجراءات</th>
+          <th class="font-semibold text-gray-700 py-3 px-4">{{ $t('form.contractor.financialInfo.bankAccount.bankName.label') }}</th>
+          <th class="font-semibold text-gray-700 py-3 px-4">{{ $t('form.contractor.financialInfo.bankAccount.bankBranch.label') }}</th>
+          <th class="font-semibold text-gray-700 py-3 px-4">{{ $t('form.contractor.financialInfo.bankAccount.iban.label') }}</th>
+          <th class="font-semibold text-gray-700 py-3 px-4">{{ $t('form.contractor.financialInfo.bankAccount.accountNumber.label') }}</th>
+          <th class="font-semibold text-gray-700 py-3 px-4">{{ $t('form.contractor.financialInfo.bankAccount.status.label') }}</th>
+          <th class="font-semibold text-gray-700 py-3 px-4">{{ $t('form.contractor.financialInfo.bankAccount.actions.label') }}</th>
         </tr>
       </thead>
       <tbody>
         <tr v-for="(account, index) in bankAccounts" :key="index" class="border-b border-gray-200">
           <td class="py-3 px-4">
             <SelectInput clearable v-model="account.bank_id" :input-props="{ class : 'min-w-40' }" density="compact" variant="outlined" :hide-details="false"
-              placeholder="اسم البنك" :items="bankItems" :error-messages="getBankAccountError(index, 'bank_id')"
+              :placeholder="$t('form.contractor.financialInfo.bankAccount.bankName.placeholder')" :items="bankItems" :error-messages="getBankAccountError(index, 'bank_id')"
               @update:model-value="() => { clearBankAccountError(index, 'bank_id'); emitUpdate(); }" />
           </td>
           <td class="py-3 px-4">
             <TextInput v-model="account.bank_branch" :input-props="{ class : 'min-w-40' }" density="compact" variant="outlined" :hide-details="false"
-              placeholder="فرع البنك" @input="emitUpdate()" />
+              :placeholder="$t('form.contractor.financialInfo.bankAccount.bankBranch.placeholder')" @input="emitUpdate()" />
           </td>
           <td class="py-3 px-4">
             <TextInput v-model="account.iban" :input-props="{ class : 'min-w-40' }" density="compact" variant="outlined" :hide-details="false"
-              placeholder="الآيبان/IBAN" @input="emitUpdate()">
+              :placeholder="$t('form.contractor.financialInfo.bankAccount.iban.placeholder')" @input="emitUpdate()">
               <template #append-inner>
                 <v-tooltip location="top" content-class="custom-tooltip">
                   <template #activator="{ props: tooltipProps }">
@@ -162,7 +162,7 @@ const infoIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
                       :prepend-icon="infoIcon" v-bind="tooltipProps" />
                   </template>
                   <div>
-                    الرقم التعريفي الدولي للحساب البنكي
+                    {{ $t('form.contractor.financialInfo.bankAccount.iban.tooltip') }}
                   </div>
                 </v-tooltip>
               </template>
@@ -170,7 +170,7 @@ const infoIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
           </td>
           <td class="py-3 px-4">
             <TextInput v-model="account.account_number" :input-props="{ class : 'min-w-40' }" density="compact" variant="outlined" :hide-details="false"
-              placeholder="رقم الحساب البنكي" @input="emitUpdate()" />
+              :placeholder="$t('form.contractor.financialInfo.bankAccount.accountNumber.placeholder')" @input="emitUpdate()" />
           </td>
           <td class="py-3 px-4">
             <v-switch v-model="account.is_active" @update:model-value="emitUpdate" hide-details inset density="compact"
@@ -186,7 +186,7 @@ const infoIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
     </v-table>
 
     <div v-else class="text-center py-8 text-gray-500">
-      لا توجد حسابات بنكية. انقر على "أضف حساب بنكي" لإضافة حساب جديد.
+      {{ $t('form.contractor.financialInfo.bankAccount.noAccounts') }}
     </div>
   </div>
 </template>

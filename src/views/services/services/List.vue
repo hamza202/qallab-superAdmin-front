@@ -233,7 +233,7 @@ const fetchServices = async (append = false) => {
     perPage.value = response.pagination.per_page
   } catch (err: any) {
     console.error('Error fetching services:', err)
-    toast.error(err?.response?.data?.message || 'فشل في جلب الخدمات')
+    toast.error(err?.response?.data?.message || t('common.messages.general.loadDataFailed'))
   } finally {
     loading.value = false
     loadingMore.value = false
@@ -293,7 +293,7 @@ const updateHeadersOnServer = async () => {
     await api.post('/headers', formData)
   } catch (err: any) {
     console.error('Error updating headers:', err)
-    toast.error(err?.response?.data?.message || 'Failed to update headers')
+    toast.error(err?.response?.data?.message || t('common.messages.general.saveError'))
   } finally {
     updatingHeaders.value = false
   }
@@ -334,7 +334,7 @@ const confirmStatusChange = async () => {
     }
   } catch (err: any) {
     console.error('Error changing service status:', err)
-    toast.error(err?.response?.data?.message || 'فشل تغيير حالة الخدمة')
+    toast.error(err?.response?.data?.message || t('common.messages.general.changeStatusError'))
   } finally {
     statusChangeLoading.value = false
     showStatusChangeDialog.value = false
@@ -351,7 +351,7 @@ const confirmDelete = async (item: any) => {
     itemToDelete.value = null
   } catch (err: any) {
     console.error('Error deleting service:', err)
-    toast.error(err?.response?.data?.message || 'فشل في حذف الخدمة')
+    toast.error(err?.response?.data?.message || t('common.messages.general.deleteError'))
   } finally {
     deleteLoading.value = false
     showDeleteDialog.value = false
@@ -372,7 +372,7 @@ const confirmBulkDelete = async () => {
     await fetchServices()
   } catch (err: any) {
     console.error('Error bulk deleting services:', err)
-    toast.error(err?.response?.data?.message || 'فشل في حذف الخدمات')
+    toast.error(err?.response?.data?.message || t('common.messages.general.deleteError'))
   } finally {
     deleteLoading.value = false
     showBulkDeleteDialog.value = false
@@ -451,10 +451,10 @@ onBeforeUnmount(() => {
         class="flex justify-end items-stretch rounded border border-gray-300 w-fit ms-auto mb-4 overflow-hidden bg-white text-sm">
         <ButtonWithIcon variant="flat" height="40" rounded="0"
           custom-class="font-semibold text-base border-gray-300 bg-primary-100 !text-primary-900"
-          :prepend-icon="importIcon" :label="t('common.import')" />
+          :prepend-icon="importIcon" :label="t('common.actions.import')" />
         <ButtonWithIcon variant="flat" height="40" rounded="0"
           custom-class="font-semibold text-base border-gray-300 bg-primary-50 !text-primary-900"
-          :prepend-icon="exportIcon" :label="t('common.export')" />
+          :prepend-icon="exportIcon" :label="t('common.actions.export')" />
       </div>
 
       <div class="bg-gray-50 rounded-md -mx-6">
@@ -464,11 +464,11 @@ onBeforeUnmount(() => {
             class="flex flex-wrap items-stretch rounded overflow-hidden border border-gray-200 bg-white text-sm">
             <ButtonWithIcon variant="flat" height="40" rounded="0"
               custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-              :prepend-icon="trash_1_icon" color="white" :label="t('common.delete')" @click="handleBulkDelete" />
+              :prepend-icon="trash_1_icon" color="white" :label="t('common.table.deleteSelected')" @click="handleBulkDelete" />
             <div class="w-px bg-gray-200"></div>
             <ButtonWithIcon variant="flat" height="40" rounded="0"
               custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-              :prepend-icon="trash_2_icon" color="white" :label="t('common.deleteAll')" @click="handleBulkDelete" />
+              :prepend-icon="trash_2_icon" color="white" :label="t('common.actions.delete')" @click="handleBulkDelete" />
           </div>
 
           <div class="flex flex-wrap gap-3">
@@ -476,7 +476,7 @@ onBeforeUnmount(() => {
               <template v-slot:activator="{ props }">
                 <ButtonWithIcon v-bind="props" variant="outlined" rounded="4" color="gray-500" height="40"
                   custom-class="font-semibold text-base border-gray-400" :prepend-icon="columnIcon"
-                  :label="t('common.columns')" append-icon="mdi-chevron-down" />
+                  :label="t('common.table.columns')" append-icon="mdi-chevron-down" />
               </template>
               <v-list>
                 <v-list-item v-for="header in allHeaders" :key="header.key" @click="toggleHeader(header.key)">
@@ -491,11 +491,11 @@ onBeforeUnmount(() => {
 
             <ButtonWithIcon variant="flat" color="primary-500" height="40" rounded="4"
               custom-class="px-7 font-semibold text-base text-white border !border-primary-200"
-              :prepend-icon="searchIcon" :label="t('common.advancedSearch')" @click="toggleAdvancedFilters" />
+              :prepend-icon="searchIcon" :label="t('common.table.advancedSearch')" @click="toggleAdvancedFilters" />
 
             <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4"
               custom-class="px-7 font-semibold text-base !text-primary-800 border !border-primary-200"
-              :prepend-icon="plusIcon" :label="t('common.addNew')" @click="openCreate" />
+              :prepend-icon="plusIcon" :label="t('common.form.addNew')" @click="openCreate" />
           </div>
         </div>
 
@@ -520,12 +520,12 @@ onBeforeUnmount(() => {
             <div class="flex gap-2 items-center">
               <ButtonWithIcon variant="flat" color="primary-500" rounded="4" height="40"
                 custom-class="px-5 font-semibold !text-white text-sm sm:text-base" :prepend-icon="searchIcon"
-                label="ابحث" @click="applyFilters" />
+                :label="$t('common.actions.search')" @click="applyFilters" />
 
               <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4" border="sm"
                 @click="resetFilters"
                 custom-class="px-5 font-semibold text-sm sm:text-base !text-primary-800 !border-primary-200"
-                label="إعادة تعيين" prepend-icon="mdi-refresh" />
+                :label="$t('common.actions.reset')" prepend-icon="mdi-refresh" />
             </div>
           </div>
         </div>
@@ -548,8 +548,8 @@ onBeforeUnmount(() => {
       </div>
     </div>
     <!-- Bulk Delete Confirmation Dialog -->
-    <DeleteConfirmDialog v-model="showBulkDeleteDialog" :loading="deleteLoading" title="حذف الخدمات"
-      :message="`هل أنت متأكد من حذف ${selectedRows.length} خدمة؟`" @confirm="confirmBulkDelete" />
+    <DeleteConfirmDialog v-model="showBulkDeleteDialog" :loading="deleteLoading" :title="$t('pages.services.list.deleteDialog.title')"
+      :message="$t('pages.services.list.deleteDialog.message', { count: selectedRows.length })" @confirm="confirmBulkDelete" />
 
     <!-- Status Change Confirmation Dialog -->
     <StatusChangeDialog v-model="showStatusChangeDialog" :loading="statusChangeLoading"

@@ -1,0 +1,1557 @@
+{
+  "form": {
+    "fields": {
+      "nameAr": {
+        "label": "Arabic Name",
+        "placeholder": "Enter name in Arabic"
+      },
+      "nameEn": {
+        "label": "English Name",
+        "placeholder": "Enter name in English"
+      },
+      "status": {
+        "label": "Status",
+        "placeholder": "Status"
+      },
+      "defaultStatus": {
+        "label": "Default Status"
+      },
+      "code": {
+        "label": "Code",
+        "placeholder": "Code"
+      },
+      "type": {
+        "label": "Type"
+      },
+      "description": {
+        "label": "Description"
+      },
+      "descriptionArabic": {
+        "label": "Arabic Description"
+      },
+      "descriptionEnglish": {
+        "label": "English Description"
+      },
+      "notes": {
+        "label": "Notes"
+      },
+      "textNote": {
+        "label": "Text Note",
+        "placeholder": "If you would like to attach some notes, please write them here and they will be attached with the sent quotation request"
+      },
+      "startDate": {
+        "label": "Start Date"
+      },
+      "endDate": {
+        "label": "End Date"
+      },
+      "from": {
+        "label": "From"
+      },
+      "to": {
+        "label": "To"
+      },
+      "createdAt": {
+        "label": "Created At"
+      },
+      "referenceNumber": {
+        "label": "Reference Number"
+      },
+      "listName": {
+        "label": "List Name"
+      },
+      "account": {
+        "label": "Account"
+      },
+      "position": {
+        "label": "Position"
+      },
+      "price": {
+        "label": "Price"
+      },
+      "value": {
+        "label": "Value"
+      },
+      "min": {
+        "label": "Minimum"
+      },
+      "max": {
+        "label": "Maximum"
+      },
+      "percentage": {
+        "label": "Percentage"
+      },
+      "attachments": {
+        "label": "Attachments"
+      }
+    },
+    "identity": {
+      "ownerName": {
+        "label": "Owner Name / Owning Company",
+        "placeholder": "Enter Owner Name / Owning Company"
+      },
+      "licenseNumber": {
+        "label": "License Number",
+        "placeholder": "License Number"
+      },
+      "firstName": {
+        "label": "First Name",
+        "placeholder": "Enter first name in Arabic",
+        "placeholderEn": "Enter first name in English"
+      },
+      "unifiedLoginId": {
+        "label": "Unified Login ID",
+        "placeholder": "Enter unified login ID"
+      },
+      "lastName": {
+        "label": "Last Name",
+        "placeholder": "Enter last name in Arabic",
+        "placeholderEn": "Enter last name in English"
+      },
+      "fullName": {
+        "label": "Full Name",
+        "placeholder": "Full Name"
+      },
+      "fullNameArabic": {
+        "label": "Arabic Name",
+        "placeholder": "Full name in Arabic"
+      },
+      "fullNameEnglish": {
+        "label": "English Name",
+        "placeholder": "Full name (English)"
+      },
+      "businessName": {
+        "label": "Business Name",
+        "placeholder": "Enter business name in Arabic",
+        "placeholderEn": "Enter business name in English"
+      },
+      "legalName": {
+        "label": "Legal Name",
+        "placeholder": "Enter legal name"
+      },
+      "entityType": {
+        "label": "Entity Type",
+        "placeholder": "Select entity type"
+      },
+      "language": {
+        "label": "Language",
+        "placeholder": "Select Language"
+      },
+      "commercialRegister": {
+        "label": "Commercial Register",
+        "placeholder": "Register Number"
+      },
+      "commercialRegisterNumber": {
+        "label": "Commercial Register Number",
+        "placeholder": "Enter commercial register number"
+      },
+      "taxNumber": {
+        "label": "Tax Number",
+        "placeholder": "Enter tax number"
+      },
+      "userName": {
+        "label": "Username",
+        "placeholder": "Username"
+      },
+      "password": {
+        "label": "Password"
+      },
+      "passwordConfirmation": {
+        "label": "Password Confirmation"
+      },
+      "role": {
+        "label": "Role",
+        "placeholder": "Role Name"
+      },
+      "roles": {
+        "label": "Roles",
+        "placeholder": "Roles"
+      },
+      "roleName": {
+        "label": "Role Name",
+        "placeholder": "Role Name"
+      },
+      "defaultCurrency": {
+        "label": "Default Currency"
+      },
+      "phone": {
+        "label": "Phone",
+        "placeholder": "Phone"
+      },
+      "IdNumber": {
+        "label": "Id Number",
+        "placeholder": "Enter Id Number"
+      },
+      "mobilePhone": {
+        "label": "Mobile",
+        "placeholder": "Mobile Number"
+      },
+      "email": {
+        "label": "Email",
+        "placeholder": "Email"
+      },
+      "licenseIssueDate": {
+        "label": "License Issue Date",
+        "placeholder": "Select Date"
+      },
+      "licenseExpiryDate": {
+        "label": "License Expiry Date",
+        "placeholder": "Select Date"
+      }
+    },
+    "address": {
+      "sections": {
+        "addressInfo": "Address Information"
+      },
+      "address": {
+        "label": "Address"
+      },
+      "address2": {
+        "label": "Address 2"
+      },
+      "country": {
+        "label": "Country",
+        "placeholder": "Select Country"
+      },
+      "city": {
+        "label": "City",
+        "placeholder": "Select City"
+      },
+      "district": {
+        "label": "District Name",
+        "placeholder": "Enter district name"
+      },
+      "streetName": {
+        "label": "Street Name",
+        "placeholder": "Enter street name"
+      },
+      "buildingNumber": {
+        "label": "Building Number",
+        "placeholder": "Enter building number"
+      },
+      "postalCode": {
+        "label": "Postal Code",
+        "placeholder": "Example: 12345"
+      },
+      "nationalAddress": {
+        "label": "National Address",
+        "placeholder": "Write the full national address"
+      },
+      "additionalAddressDetails": {
+        "label": "Address 2",
+        "placeholder": "Additional address details"
+      },
+      "geoLocation": {
+        "label": "Geolocation"
+      },
+      "selectLocationOnMap": {
+        "label": "Geolocation",
+        "placeholder": "Select location on the map"
+      },
+      "latitude": {
+        "label": "Latitude"
+      },
+      "longitude": {
+        "label": "Longitude"
+      }
+    },
+    "customer": {
+      "customerName": {
+        "label": "Customer Name",
+        "placeholder": "Customer Code"
+      },
+      "customerType": {
+        "label": "Customer Type"
+      },
+      "customerClassification": {
+        "label": "Customer Classification"
+      },
+      "salesRepresentative": {
+        "label": "Sales Representative"
+      },
+      "accountTypeLabel": {
+        "label": "Customer Account Type"
+      },
+      "priceType": {
+        "label": "Price Type"
+      },
+      "contactsList": {
+        "label": "Contacts List"
+      },
+      "customersList": {
+        "label": "Customer's Customers List"
+      },
+      "attachmentsList": {
+        "label": "Attachments List"
+      },
+      "basicInfo": {
+        "label": "Basic Information"
+      },
+      "accountingInfo": {
+        "label": "Accounting Information"
+      }
+    },
+    "supplier": {
+      "supplierName": {
+        "label": "Supplier Name",
+        "placeholder": "Select Supplier"
+      },
+      "supplierCode": {
+        "label": "Supplier Code",
+        "placeholder": "Supplier Code"
+      }
+    },
+    "contractor": {
+      "basicInfo": {
+        "fullName": {
+          "label": "Full Name",
+          "placeholderEn": "Enter full name in English",
+          "placeholderAr": "Enter full name in Arabic"
+        }
+      },
+      "commercialInfo": {
+        "contractorClassification": {
+          "label": "Contractor Classification",
+          "placeholder": "Select"
+        },
+        "classificationGrade": {
+          "label": "Classification Grade",
+          "placeholder": "Select"
+        },
+        "scopeOfWork": {
+          "label": "Scope of Work",
+          "placeholder": "Select"
+        },
+        "municipalLicenseNumber": {
+          "label": "Municipal License Number",
+          "placeholder": "Enter Number"
+        },
+        "municipalLicenseExpiry": {
+          "label": "Municipal License Expiry Date",
+          "placeholder": "Select Date",
+          "tooltip": "Municipal license expiration date"
+        },
+        "municipalLicenseStatus": {
+          "label": "Municipal License Status",
+          "placeholder": "Select"
+        },
+        "safetyCertification": {
+          "label": "Occupational Safety Certificates",
+          "placeholder": "Select"
+        },
+        "environmentalCertification": {
+          "label": "Environmental Certificates",
+          "placeholder": "Select"
+        },
+        "civilDefenseApproval": {
+          "label": "Civil Defense Approval?"
+        }
+      },
+      "financialInfo": {
+        "sections": {
+          "bankAccounts": "Bank Accounts"
+        },
+        "bankAccount": {
+          "bankName": {
+            "label": "Bank Name",
+            "placeholder": "Bank Name"
+          },
+          "bankBranch": {
+            "label": "Bank Branch",
+            "placeholder": "Bank Branch"
+          },
+          "iban": {
+            "label": "IBAN",
+            "placeholder": "IBAN",
+            "tooltip": "International Bank Account Number"
+          },
+          "accountNumber": {
+            "label": "Bank Account Number",
+            "placeholder": "Bank Account Number"
+          },
+          "status": {
+            "label": "Status"
+          },
+          "actions": {
+            "label": "Actions"
+          },
+          "addAccount": {
+            "label": "Add Account"
+          },
+          "noAccounts": "No bank accounts. Click \"Add Account\" to add a new account."
+        }
+      },
+      "operationalInfo": {
+        "sectionTitle": "Operational Information",
+        "ongoingProjects": {
+          "label": "Number of Ongoing Projects",
+          "placeholder": "Enter Number"
+        },
+        "completedProjects": {
+          "label": "Number of Completed Projects",
+          "placeholder": "Enter Number"
+        },
+        "employeesCount": {
+          "label": "Total Number of Employees",
+          "placeholder": "Enter Number"
+        },
+        "engineersCount": {
+          "label": "Number of Engineers",
+          "placeholder": "Enter Number"
+        },
+        "techniciansCount": {
+          "label": "Number of Technicians",
+          "placeholder": "Enter Number"
+        },
+        "operationalCapacity": {
+          "label": "Contractor's Operational Capacity",
+          "placeholder": "Select"
+        },
+        "specialization": {
+          "label": "Contractor's Main Specialization",
+          "placeholder": "Select"
+        },
+        "siteReadiness": {
+          "label": "Worksite Readiness",
+          "placeholder": "Select"
+        },
+        "safetyManagementSystem": {
+          "label": "Safety Management System"
+        },
+        "environmentalCompliance": {
+          "label": "Compliance with Environmental Regulations"
+        }
+      },
+      "documents": {
+        "sectionTitle": "Documents",
+        "documentName": {
+          "label": "File Name",
+          "placeholder": "Enter Name"
+        },
+        "documentType": {
+          "label": "File Type",
+          "placeholder": "Select"
+        },
+        "fileUpload": {
+          "label": "Upload File",
+          "hint": "Click to upload or drag and drop"
+        },
+        "addButton": {
+          "label": "Add"
+        },
+        "tableHeaders": {
+          "attachmentName": "Attachment Name",
+          "attachmentDate": "Attachment Date",
+          "attachmentType": "Attachment Type",
+          "file": "File",
+          "actions": "Actions"
+        }
+      }
+    },
+    "crusher": {
+      "commercialInfo": {
+        "managerData": {
+          "sectionTitle": "Manager Data"
+        }
+      },
+      "operationalInfo": {
+        "sectionTitle": "Operational Information",
+        "productionLines": {
+          "label": "Number of Production Lines",
+          "placeholder": "20"
+        },
+        "rockType": {
+          "label": "Rock Type",
+          "placeholder": "Select Rock Type"
+        },
+        "crusherType": {
+          "label": "Crusher Type",
+          "placeholder": "Select Crusher Type"
+        },
+        "feedRate": {
+          "label": "Feed Rate",
+          "placeholder": "20",
+          "tooltip": "Raw material feed rate for the crusher"
+        },
+        "maxProduction": {
+          "label": "Maximum Production",
+          "placeholder": "50",
+          "tooltip": "Maximum production capacity of the crusher"
+        },
+        "currentProduction": {
+          "label": "Current Production",
+          "placeholder": "45"
+        },
+        "design": {
+          "label": "Crusher Design",
+          "placeholder": "Select Design"
+        },
+        "workersCount": {
+          "label": "Number of Workers",
+          "placeholder": "50"
+        }
+      }
+    },
+    "factory": {
+      "commercialInfo": {
+        "contractorClassification": {
+          "label": "Contractor Classification",
+          "placeholder": "Select"
+        },
+        "classificationGrade": {
+          "label": "Classification Grade",
+          "placeholder": "Select"
+        },
+        "scopeOfWork": {
+          "label": "Scope of Work",
+          "placeholder": "Select"
+        },
+        "municipalLicenseNumber": {
+          "label": "Municipal License Number",
+          "placeholder": "Enter Number"
+        },
+        "municipalLicenseExpiry": {
+          "label": "Municipal License Expiry Date",
+          "placeholder": "Select Date",
+          "tooltip": "Municipal license expiration date"
+        },
+        "municipalLicenseStatus": {
+          "label": "Municipal License Status",
+          "placeholder": "Select"
+        },
+        "safetyCertification": {
+          "label": "Safety Certificates",
+          "placeholder": "Select"
+        },
+        "environmentalCertification": {
+          "label": "Environmental Certificates",
+          "placeholder": "Select"
+        },
+        "civilDefenseApproval": {
+          "label": "Civil Defense Approval"
+        }
+      },
+      "operationalInfo": {
+        "ongoingProjects": {
+          "label": "Number of Ongoing Projects",
+          "placeholder": "Enter Number"
+        },
+        "completedProjects": {
+          "label": "Number of Completed Projects",
+          "placeholder": "Enter Number"
+        },
+        "employeesCount": {
+          "label": "Total Number of Employees",
+          "placeholder": "Enter Number"
+        },
+        "engineersCount": {
+          "label": "Number of Engineers",
+          "placeholder": "Enter Number"
+        },
+        "techniciansCount": {
+          "label": "Number of Technicians",
+          "placeholder": "Enter Number"
+        },
+        "operationalCapacity": {
+          "label": "Contractor's Operational Capacity",
+          "placeholder": "Select"
+        },
+        "specialization": {
+          "label": "Contractor's Main Specialization",
+          "placeholder": "Select"
+        },
+        "siteReadiness": {
+          "label": "Worksite Readiness",
+          "placeholder": "Select"
+        },
+        "safetyManagementSystem": {
+          "label": "Safety Management System"
+        },
+        "environmentalCompliance": {
+          "label": "Compliance with Environmental Regulations"
+        }
+      }
+    },
+    "logistics": {
+      "commercialInfo": {
+        "sections": {
+          "licenseCompliance": "Licensing and Compliance"
+        },
+        "transportMinistryLicenseNumber": {
+          "label": "Ministry of Transport License Number",
+          "placeholder": "11478523"
+        },
+        "transportLicenseIssueDate": {
+          "label": "License Issue Date",
+          "placeholder": "DD-MM-YYYY"
+        },
+        "transportLicenseExpiryDate": {
+          "label": "License Expiry Date",
+          "placeholder": "DD-MM-YYYY"
+        },
+        "activityClassification": {
+          "label": "Activity Classification",
+          "placeholder": "Select Activity Classification"
+        },
+        "safetyClassification": {
+          "label": "Safety Classification",
+          "placeholder": "Select Safety Classification"
+        },
+        "insuranceProvider": {
+          "label": "Insurance Provider",
+          "placeholder": "Insurance Company Name"
+        },
+        "fleetInsuranceCoverage": {
+          "label": "Comprehensive Fleet Insurance Coverage"
+        },
+        "hazardousTransport": {
+          "label": "Hazardous Materials Transport License for Fuels"
+        },
+        "civilDefensePermit": {
+          "label": "Civil Defense Permit"
+        },
+        "ownershipType": {
+          "label": "Ownership Type",
+          "placeholder": "Select Ownership Type"
+        }
+      },
+      "operationalInfo": {
+        "sections": {
+          "operationalData": "Operational Information"
+        },
+        "materialTypes": {
+          "label": "Material Types",
+          "placeholder": "Select Material Types"
+        },
+        "fleetSize": {
+          "label": "Fleet Size",
+          "placeholder": "Enter number of fleets"
+        },
+        "branchesCount": {
+          "label": "Number of Branches",
+          "placeholder": "Enter number of branches"
+        },
+        "operationScope": {
+          "label": "Scope of Operation",
+          "placeholder": "Select scope of operation"
+        },
+        "driversCount": {
+          "label": "Number of Drivers",
+          "placeholder": "Enter number of drivers"
+        },
+        "supervisorsCount": {
+          "label": "Number of Supervisors",
+          "placeholder": "Enter number of supervisors"
+        },
+        "dailyTripsAvg": {
+          "label": "Average Daily Trips",
+          "placeholder": "Enter average daily trips"
+        },
+        "operationMode": {
+          "label": "Operating System",
+          "placeholder": "Select operating system"
+        },
+        "maintenanceStrategy": {
+          "label": "Maintenance System",
+          "placeholder": "Select maintenance system"
+        },
+        "fleetManagementSystem": {
+          "label": "Fleet Management System"
+        },
+        "gpsTracking": {
+          "label": "GPS Tracking System"
+        }
+      }
+    },
+    "project": {
+      "projectName": {
+        "label": "Project Name",
+        "placeholder": "Project Number"
+      },
+      "projectLocation": {
+        "label": "Project Location"
+      },
+      "projectInfo": {
+        "label": "Project Information"
+      },
+      "projectContact": {
+        "label": "Project Contact"
+      },
+      "projectAttachments": {
+        "label": "Project Attachments"
+      },
+      "startDate": {
+        "label": "Start Date",
+        "placeholder": "Minimum start date"
+      },
+      "endDate": {
+        "label": "End Date",
+        "placeholder": "Maximum start date"
+      }
+    },
+    "voucher": {
+      "voucherTitle": {
+        "label": "Voucher Title"
+      },
+      "voucherDescription": {
+        "label": "Voucher Description"
+      },
+      "voucherNumber": {
+        "label": "Reference Number",
+        "placeholder": "Voucher Number"
+      },
+      "voucherType": {
+        "label": "Type",
+        "placeholder": "Voucher Type"
+      },
+      "voucherDate": {
+        "label": "Start Date",
+        "placeholder": "Voucher Date"
+      },
+      "amount": {
+        "label": "Amount",
+        "placeholder": "Enter payment amount"
+      },
+      "paymentMethod": {
+        "label": "Payment Method",
+        "placeholder": "Select payment method"
+      },
+      "bankTransfer": {
+        "label": "Bank Transfer"
+      },
+      "paymentTermNo": {
+        "label": "Payment Term"
+      },
+      "upfrontPayment": {
+        "label": "Upfront Payment"
+      }
+    },
+    "financial": {
+      "amount": {
+        "label": "Amount"
+      },
+      "discount": {
+        "label": "Discount"
+      },
+      "taxAmount": {
+        "label": "Tax Amount"
+      },
+      "totalAmount": {
+        "label": "Total Amount"
+      },
+      "totalBeforeDiscount": {
+        "label": "Total Before Discount"
+      },
+      "totalAfterDiscount": {
+        "label": "Total After Discount"
+      },
+      "totalTax": {
+        "label": "Total Tax"
+      },
+      "finalTotal": {
+        "label": "Final Total"
+      },
+      "approvedTotalAmount": {
+        "label": "Approved Total Amount in Quotation"
+      },
+      "totalServiceAmount": {
+        "label": "Total Value of Transport Services"
+      },
+      "totalTripsAmount": {
+        "label": "Total Value of Trips"
+      },
+      "salePrice": {
+        "label": "Sale Price"
+      },
+      "priceType": {
+        "label": "Price Type"
+      },
+      "minPrice": {
+        "label": "Minimum Price"
+      },
+      "maxPrice": {
+        "label": "Maximum Price"
+      },
+      "minValue": {
+        "label": "Minimum Value"
+      },
+      "invoiceInterval": {
+        "label": "Invoice Submission Interval"
+      },
+      "minimumCredit": {
+        "label": "Minimum Credit (Creditor)"
+      },
+      "maximumCredit": {
+        "label": "Maximum Credit (Creditor)"
+      },
+      "minimumDebit": {
+        "label": "Minimum Debit (Debtor)"
+      },
+      "maximumDebit": {
+        "label": "Maximum Debit (Debtor)"
+      },
+      "debitLimit": {
+        "label": "Debit limit",
+        "placeholder": "Enter debit limit",
+        "info": "Maximum allowed debit amount"
+      },
+      "creditLimit": {
+        "label": "Credit limit",
+        "placeholder": "Enter credit limit",
+        "info": "Maximum allowed credit amount"
+      },
+      "saudiRiyal": "Saudi Riyal"
+    },
+    "tax": {
+      "taxName": {
+        "label": "Tax Name",
+        "placeholder": "Tax Name"
+      },
+      "taxPercentage": {
+        "label": "Tax Percentage"
+      },
+      "taxAccount": {
+        "label": "Tax Account"
+      },
+      "taxData": {
+        "label": "Tax Data"
+      },
+      "taxInfo": {
+        "label": "Tax Information"
+      },
+      "taxInvoice": {
+        "label": "Tax Sales Invoice"
+      },
+      "tax": {
+        "label": "Tax",
+        "placeholder": "Select Tax"
+      },
+      "percentage": {
+        "label": "Percentage"
+      },
+      "priority": {
+        "label": "Priority",
+        "placeholder":"Select Priority"
+      },
+      "minValue": {
+        "label": "Minimum Value"
+      },
+      "noTaxesAdded": {
+        "label": "No taxes added yet"
+      }
+    },
+    "product": {
+      "productName": {
+        "label": "Product Name",
+        "placeholder": "Unit Name"
+      },
+      "productCode": {
+        "label": "Product Code"
+      },
+      "productStatus": {
+        "label": "Product Status"
+      },
+      "parentProduct": {
+        "label": "Parent Product"
+      },
+      "parentCategory": {
+        "label": "Parent Category",
+        "placeholder": "Select Parent Category"
+      },
+      "categoryDetails": {
+        "label": "Category Details",
+        "placeholder": "Enter Category Details in English",
+        "placeholderEn": "أدخل تفاصيل التصنيف بالعربية"
+      },
+      "hasSubProducts": {
+        "label": "Has Sub-products"
+      },
+      "subProductName": {
+        "label": "Sub-product Name"
+      },
+      "product": {
+        "label": "Product"
+      },
+      "products": {
+        "label": "Products"
+      },
+      "unit": {
+        "label": "Unit",
+        "placeholder": "Unit"
+      },
+      "unitCode": {
+        "label": "Unit Code"
+      },
+      "parentUnit": {
+        "label": "Related Base Unit"
+      },
+      "quantity": {
+        "label": "Quantity"
+      },
+      "minQuantity": {
+        "label": "Minimum Quantity"
+      },
+      "materialType": {
+        "label": "Material Type"
+      },
+      "productGeneralInfo": {
+        "label": "Product General Information"
+      },
+      "productDetails": {
+        "label": "Product Details and Information"
+      },
+      "productTests": {
+        "label": "Tests on Product"
+      },
+      "additionalData": {
+        "label": "Additional Data"
+      },
+      "groupProductsTable": {
+        "label": "Group Products Table"
+      },
+      "productsTable": {
+        "label": "Products Table"
+      },
+      "productCount": {
+        "label": "Number of Products"
+      },
+      "productVariableNameAr": {
+        "label": "Enter variable name in Arabic"
+      },
+      "productVariableNameEn": {
+        "label": "Enter variable name in English"
+      },
+      "bulkEdit": {
+        "label": "Bulk Edit"
+      },
+      "increase": {
+        "label": "Increase"
+      },
+      "decrease": {
+        "label": "Decrease"
+      },
+      "searchByCode": {
+        "label": "Search by Code"
+      },
+      "getProductsByCategory": {
+        "label": "Get Products by Specific Category"
+      },
+      "generalProductsPriceList": {
+        "label": "General Products Price List"
+      },
+      "buildingMaterialPriceList": {
+        "label": "Building Material Products Price List"
+      },
+      "salePrice": {
+        "label": "Sale Price"
+      }
+    },
+    "tests": {
+      "tests": {
+        "label": "Tests"
+      },
+      "test": {
+        "label": "Test"
+      },
+      "testCode": {
+        "label": "Test Code"
+      },
+      "testMethod": {
+        "label": "Test Methodology"
+      },
+      "testGroup": {
+        "label": "Test Group"
+      },
+      "testsList": {
+        "label": "Tests List"
+      },
+      "testsCount": {
+        "label": "Number of Tests"
+      },
+      "samplesCount": {
+        "label": "Number of Samples"
+      },
+      "sampleQuantity": {
+        "label": "Sample Quantity"
+      }
+    },
+    "production": {
+      "productionPerHour": {
+        "label": "Production Quantity (Ton / Hour)"
+      },
+      "productionPerDay": {
+        "label": "Production Quantity (Ton / Day)"
+      },
+      "productionPerWeek": {
+        "label": "Production Quantity (Ton / Week)"
+      },
+      "productionPerMonth": {
+        "label": "Production Quantity (Ton / Month)"
+      }
+    },
+    "services": {
+      "services": {
+        "label": "Services"
+      },
+      "serviceName": {
+        "label": "Product Name",
+        "placeholder": "Service Name"
+      },
+      "serviceCode": {
+        "label": "Code",
+        "placeholder": "Service Code"
+      },
+      "serviceCategory": {
+        "label": "Type",
+        "placeholder": "Service Category"
+      }
+    },
+    "order": {
+      "requestType": {
+        "label": "Request Type",
+        "placeholder": "Select Request Type"
+      },
+      "requestCode": {
+        "label": "Request Code"
+      },
+      "requestDate": {
+        "label": "Request Date"
+      },
+      "requestIssueDate": {
+        "label": "Request Issue Date"
+      },
+      "requestStatus": {
+        "label": "Request Status"
+      },
+      "requestInfo": {
+        "label": "Request Information"
+      },
+      "requestSummary": {
+        "label": "Request Summary"
+      },
+      "sendRequest": {
+        "label": "Send Request"
+      },
+      "convertToQuotation": {
+        "label": "Convert to Quotation"
+      },
+      "orderType": {
+        "label": "Order Type"
+      },
+      "orderDateTime": {
+        "label": "Order Date"
+      },
+      "orderDateFrom": {
+        "label": "Order Date From"
+      },
+      "orderDateTo": {
+        "label": "Order Date To"
+      },
+      "orderInfo": {
+        "label": "Order Information"
+      },
+      "orderDetails": {
+        "label": "Order Details and Information"
+      },
+      "orderItemsTable": {
+        "label": "Order Items Table"
+      },
+      "generalInfo": {
+        "label": "General Request Information"
+      },
+      "addedProducts": {
+        "label": "Added Products"
+      },
+      "purchaseOrderCode": {
+        "label": "Purchase Order Code"
+      },
+      "purchaseOrderDate": {
+        "label": "Purchase Order Date"
+      },
+      "validityPeriod": {
+        "label": "Validity Period"
+      },
+      "executionPeriod": {
+        "label": "Execution Period",
+        "placeholder": "Enter execution period in days"
+      },
+      "actualExecutionDuration": {
+        "label": "Actual Execution Duration"
+      },
+      "supplyType": {
+        "label": "Supply Type"
+      },
+      "supplyDuration": {
+        "label": "Supply Duration"
+      },
+      "supplyDetails": {
+        "label": "Additional Supply Data"
+      },
+      "additionalSupplyData": {
+        "label": "Additional Supply Data"
+      },
+      "editSupplyDetails": {
+        "label": "Edit Supply Details"
+      },
+      "pricesIncludeTransport": {
+        "label": "Prices Include Transport"
+      },
+      "basicData": {
+        "label": "Basic Data"
+      }
+    },
+    "quotation": {
+      "quotationName": {
+        "label": "Quotation Name"
+      },
+      "quotationDateTime": {
+        "label": "Quotation Date"
+      },
+      "quotationValidity": {
+        "label": "Quotation Validity"
+      },
+      "quotationSummary": {
+        "label": "Quotation Summary"
+      },
+      "quotationDetails": {
+        "label": "Quotation Details and Information"
+      },
+      "quotationItemsTable": {
+        "label": "Quotation Items Table"
+      },
+      "priceOffers": {
+        "label": "Quotations"
+      }
+    },
+    "invoice": {
+      "invoiceCode": {
+        "label": "Invoice Code",
+        "placeholder": "Invoice Code"
+      },
+      "invoiceNumber": {
+        "label": "Invoice Number"
+      },
+      "invoiceDueDate": {
+        "label": "Invoice Due Date"
+      },
+      "invoiceDateLabel": {
+        "label": "Invoice Date"
+      },
+      "invoiceDetails": {
+        "label": "Invoice Details and Information"
+      },
+      "invoiceInfo": {
+        "label": "Invoice Information"
+      },
+      "salesInvoices": {
+        "label": "Sales Invoices"
+      },
+      "logisticsSalesInvoices": {
+        "label": "Logistics Sales Invoices"
+      },
+      "salesInvoiceItemsTable": {
+        "label": "Sales Invoice Items Table"
+      },
+      "printInvoice": {
+        "label": "Print Invoice"
+      },
+      "taxInvoice": {
+        "label": "Tax Sales Invoice"
+      }
+    },
+    "receivingDoc": {
+      "receivingDocCode": {
+        "label": "Receiving Document Code"
+      },
+      "receivingDate": {
+        "label": "Receiving Date"
+      },
+      "receivingDocsTable": {
+        "label": "Receiving Document Items Table"
+      },
+      "receivingLocation": {
+        "label": "Receiving Location"
+      },
+      "receivingStatus": {
+        "label": "Receiving Status"
+      }
+    },
+    "deliveryDoc": {
+      "deliveryLocation": {
+        "label": "Delivery Location"
+      },
+      "deliveryReceivingSite": {
+        "label": "Delivery and Receiving Site"
+      },
+      "deliveryDate": {
+        "label": "Delivery Date"
+      },
+      "deliveryStatus": {
+        "label": "Delivery Status"
+      },
+      "deliveryMethod": {
+        "label": "Delivery Method"
+      },
+      "deliveryDuration": {
+        "label": "Delivery Duration"
+      },
+      "deliveryDocCode": {
+        "label": "Delivery Document Code"
+      },
+      "logisticsDeliveryDocCode": {
+        "label": "Logistics Delivery Document Code"
+      },
+      "deliveryDocDetails": {
+        "label": "Delivery Document Details and Information"
+      },
+      "logisticsDeliveryDocDetails": {
+        "label": "Logistics Delivery Document Details and Information"
+      },
+      "deliveryDocsList": {
+        "label": "Delivery Documents List"
+      },
+      "logisticsDeliveryDocsList": {
+        "label": "Logistics Delivery Documents List"
+      },
+      "deliveryDocItemsTable": {
+        "label": "Delivery Document Items Table"
+      },
+      "logisticsDeliveryDocItemsTable": {
+        "label": "Logistics Delivery Document Items Table"
+      }
+    },
+    "transport": {
+      "transportService": {
+        "label": "Transport Service"
+      },
+      "transportCompany": {
+        "label": "Transport Company"
+      },
+      "transportDetails": {
+        "label": "Transport Details"
+      },
+      "transportMovements": {
+        "label": "Transport Movements"
+      },
+      "transportTimes": {
+        "label": "Transport Times"
+      },
+      "transportStartDate": {
+        "label": "Transport Start Date"
+      },
+      "transportEndDate": {
+        "label": "Transport End Date"
+      },
+      "transportedMaterialType": {
+        "label": "Transported Material Type"
+      },
+      "transportMaterialType": {
+        "label": "Transport Material Type"
+      },
+      "transportVehicleType": {
+        "label": "Transport Vehicle Type"
+      },
+      "vehicleType": {
+        "label": "Vehicle Type"
+      },
+      "vehicleCount": {
+        "label": "Vehicle Count"
+      },
+      "sourceLocation": {
+        "label": "Material Source Location"
+      },
+      "targetLocation": {
+        "label": "Target Location"
+      },
+      "departureLocation": {
+        "label": "Departure Location"
+      },
+      "loadingLocation": {
+        "label": "Loading Location"
+      },
+      "loadingDateTime": {
+        "label": "Loading Date / Time"
+      },
+      "loadingResponsible": {
+        "label": "Loading Responsible",
+        "placeholder": "Enter loading responsible name"
+      },
+      "loadingResponsibleParty": {
+        "label": "Loading Responsible Party"
+      },
+      "unloadingLocation": {
+        "label": "Unloading Location"
+      },
+      "unloadingDateTime": {
+        "label": "Unloading Date / Time"
+      },
+      "unloadingDatetime": {
+        "label": "Unloading Date / Time"
+      },
+      "unloadingResponsible": {
+        "label": "Unloading Responsible",
+        "placeholder": "Enter unloading responsible name"
+      },
+      "unloadingResponsibleParty": {
+        "label": "Unloading Responsible Party"
+      },
+      "lateFee": {
+        "label": "Late Fee"
+      },
+      "cancelFee": {
+        "label": "Cancellation Fee"
+      },
+      "invoiceInterval": {
+        "label": "Invoice Submission Interval"
+      },
+      "responsiblePerson": {
+        "label": "Responsible Name",
+        "placeholder": "Enter responsible name"
+      },
+      "responsiblePhone": {
+        "label": "Responsible Phone"
+      },
+      "logisticsSaleOrder": {
+        "label": "Logistics Sales Order"
+      },
+      "selectLogisticsOrder": {
+        "label": "Select Transport Order"
+      },
+      "customer": {
+        "label": "Customer"
+      },
+      "selectCustomer": {
+        "label": "Select Customer"
+      },
+      "customerSaleOrder": {
+        "label": "Customer Sales Order"
+      },
+      "selectCustomerOrder": {
+        "label": "Select Customer Order"
+      },
+      "selectLocation": {
+        "label": "Select Location"
+      }
+    },
+    "quantity": {
+      "quantity": {
+        "label": "Quantity"
+      },
+      "baseQuantity": {
+        "label": "Base Quantity"
+      },
+      "receivedQuantity": {
+        "label": "Received Quantity"
+      },
+      "actualQuantity": {
+        "label": "Actual Quantity"
+      },
+      "quantityFromSupplier": {
+        "label": "Quantity from Supplier"
+      },
+      "quantityFromTransport": {
+        "label": "Quantity from Transport"
+      },
+      "quantityFromCustomer": {
+        "label": "Quantity from Customer"
+      },
+      "actualQuantityFromSupplier": {
+        "label": "Actual Quantity from Supplier"
+      },
+      "actualQuantityFromTransport": {
+        "label": "Actual Quantity from Transport Company"
+      },
+      "actualQuantityFromCustomer": {
+        "label": "Actual Quantity from Customer"
+      },
+      "totalQuantityTon": {
+        "label": "Total Quantity / Ton"
+      },
+      "totalQuantityM3": {
+        "label": "Total Quantity / m³"
+      },
+      "minQuantity": {
+        "label": "Minimum Quantity"
+      }
+    },
+    "trip": {
+      "tripName": {
+        "label": "Trip Name"
+      },
+      "tripCount": {
+        "label": "Number of Trips",
+        "placeholder": "Enter number of trips"
+      },
+      "dailyTrips": {
+        "label": "Daily Trips Count"
+      },
+      "tripCapacity": {
+        "label": "Trip Capacity"
+      },
+      "tripTiming": {
+        "label": "Trip Timing"
+      },
+      "tripValue": {
+        "label": "Trip Price"
+      },
+      "tripDetails": {
+        "label": "Trips Details"
+      },
+      "tripDetailsInfo": {
+        "label": "Trip Details and Information"
+      },
+      "tripInfo": {
+        "label": "Trip Information"
+      },
+      "tripDateFrom": {
+        "label": "Trip Date From"
+      },
+      "tripDateTo": {
+        "label": "Trip Date To"
+      },
+      "tripsList": {
+        "label": "Trips List"
+      },
+      "timePeriod": {
+        "label": "Time Period"
+      },
+      "timing": {
+        "label": "Timing"
+      },
+      "morning": {
+        "label": "Morning"
+      },
+      "evening": {
+        "label": "Evening"
+      },
+      "both": {
+        "label": "Both"
+      },
+      "morningAndEvening": {
+        "label": "Morning and Evening"
+      },
+      "billOfLading": {
+        "label": "Bill of Lading Number",
+        "placeholder": "Enter bill of lading number"
+      },
+      "trackingPoints": {
+        "label": "Frequency of Sending Coordinates"
+      },
+      "trackingPointsCount": {
+        "label": "Frequency of Sending Coordinates",
+        "placeholder": "Enter frequency of sending coordinates"
+      },
+      "customerTripAmount": {
+        "label": "Trip Amount for Customer"
+      },
+      "logisticCompanyTripAmount": {
+        "label": "Trip Amount for Transport Company"
+      },
+      "enterTripAmount": {
+        "label": "Trip Price",
+        "placeholder": "Enter number of trips"
+      },
+      "sentTransportVehicles": {
+        "label": "Sent Transport Vehicles"
+      },
+      "receivedTransportVehicles": {
+        "label": "Received Transport Vehicles"
+      },
+      "vehicles": {
+        "label": "Vehicles"
+      },
+      "enterQuantityTon": {
+        "label": "Total Quantity / Ton",
+        "placeholder": "Enter quantity in tons"
+      },
+      "enterQuantityM3": {
+        "label": "Total Quantity / m³",
+        "placeholder": "Enter quantity in cubic meters"
+      },
+      "tripDetailsBetweenQallabCustomer": {
+        "label": "Trip Details Between Qallab and Customer"
+      },
+      "tripDetailsBetweenQallabLogistic": {
+        "label": "Trip Details Between Qallab and Transport Company"
+      }
+    },
+    "pickup": {
+      "pickupDate": {
+        "label": "Date"
+      },
+      "timing": {
+        "label": "Timing"
+      },
+      "morning": {
+        "label": "Morning"
+      },
+      "evening": {
+        "label": "Evening"
+      },
+      "both": {
+        "label": "Both"
+      },
+      "morningAndEvening": {
+        "label": "Morning and Evening"
+      },
+      "referenceNumber": {
+        "label": "Reference Number"
+      }
+    },
+    "ui": {
+      "noData": "No data",
+      "noNotes": "No notes",
+      "noProducts": "No products",
+      "attachFile": "Attach File",
+      "noAttachments": "No attachments to show",
+      "noAttachmentsToShow": "No attachments to show",
+      "noTransportDetailsAdded": "No transport details added",
+      "clickAddTransportService": "Click \"Add Transport Service\" to add new details",
+      "selectDate": "Select Date",
+      "selectDateTime": "Select Date and Time",
+      "select": "Select",
+      "loadingMore": "Loading more...",
+      "view": "View",
+      "refresh": "Refresh",
+      "changeStatus": "Change Status",
+      "changeStatusMessage": "Change Status:",
+      "attachment": "Attachment",
+      "deleteDeliveryDocs": "Delete Delivery Documents",
+      "deleteDeliveryDocConfirm": "Are you sure you want to delete {count} receiving documents?",
+      "deleteQuotations": "Delete Quotations",
+      "deleteQuotationConfirm": "Are you sure you want to delete {count} quotations?",
+      "importFromExcel": "Import from Excel file",
+      "enterNumber": "Enter number",
+      "exampleEmail": "{email}"
+    },
+    "buttons": {
+      "addContact": "Add Contact",
+      "addCustomer": "Add Customer",
+      "addAttachment": "Add Attachment",
+      "addList": "Add List",
+      "addTest": "Add Test",
+      "addUnit": "Add Unit",
+      "addReceiptVoucher": "Add Receipt Voucher",
+      "addPaymentVoucher": "Add Payment Voucher",
+      "apply": "Apply",
+      "saveChanges": "Save Changes",
+      "addNewUser": "Add New User",
+      "addRequest": "Add Request",
+      "addOrder": "Add Order",
+      "addQuotation": "Add Quotation",
+      "addInvoice": "Add Invoice",
+      "addReceivingDoc": "Add Receiving Document",
+      "addProduct": "Add New Product",
+      "addTransportService": "Add New Transport Data",
+      "addLogisticTripDetails": "Add Trip Details for Transport Company",
+      "addCustomerTripDetails": "Add Trip Details for Customer",
+      "addNote": "Add Note",
+      "importFromExcel": "Import from Excel file",
+      "selectLocation": "Select Location",
+      "saveAndReturnToPickups": "Save and return to bookings list",
+      "saveAndReturnToOrders": "Save and return to orders table",
+      "saveAndReturnToTrips": "Save and return to trips table",
+      "saveAndCreateNew": "Save and Create New"
+    }
+  }
+}
