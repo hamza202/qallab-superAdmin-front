@@ -9,13 +9,6 @@ interface Category {
   name: string;
 }
 
-interface SupplierItem {
-  id: number;
-  name: string;
-  code: string;
-  category: Category;
-}
-
 export interface ProductToAdd {
   item_id: number;
   item_name: string;
@@ -92,13 +85,15 @@ const internalOpen = computed({
 const isEditMode = computed(() => !!props.editProduct);
 
 // Data states
-const loading = ref(false);
-const supplierItems = ref<SupplierItem[]>([]);
+const categoriesLoading = ref(false);
+const itemsLoading = ref(false);
 const categories = ref<Category[]>([]);
 const activeTabId = ref<number | null>(null);
 const searchQuery = ref('');
 const showFullCategory = ref(false);
 const visibleTabsCount = 6;
+const loadedCategoryIds = ref<Set<number>>(new Set());
+const loadedItemIds = ref<Set<number>>(new Set());
 
 // Products with their form data
 const productsList = ref<ProductToAdd[]>([]);
@@ -112,17 +107,6 @@ const editProductData = ref<ProductToAdd | null>(null);
 const unitItemsList = computed(() => props.unitItems || []);
 const packageTypeItemsList = computed(() => props.transportTypes || []);
 
-// Computed: unique categories from supplier items
-const extractCategories = (items: SupplierItem[]): Category[] => {
-  const categoryMap = new Map<number, Category>();
-  items.forEach(item => {
-    if (item.category && !categoryMap.has(item.category.id)) {
-      categoryMap.set(item.category.id, item.category);
-    }
-  });
-  return Array.from(categoryMap.values());
-};
-
 // Computed: displayed tabs
 const displayedTabs = computed(() => {
   if (showFullCategory.value) {
@@ -131,19 +115,13 @@ const displayedTabs = computed(() => {
   return categories.value.slice(0, visibleTabsCount);
 });
 
-// Computed: products filtered by active tab and search (order is set on dialog open, not during typing)
 const filteredProducts = computed(() => {
   let filtered = productsList.value;
   
-  // Filter by category
   if (activeTabId.value !== null) {
-    filtered = filtered.filter(product => {
-      const supplierItem = supplierItems.value.find(i => i.id === product.item_id);
-      return supplierItem?.category?.id === activeTabId.value;
-    });
+    filtered = filtered.filter(product => product._categoryId === activeTabId.value);
   }
   
-  // Filter by search
   if (searchQuery.value.trim()) {
     const query = searchQuery.value.trim().toLowerCase();
     filtered = filtered.filter(product => 
@@ -168,33 +146,40 @@ const canAddProduct = (product: ProductToAdd): boolean => {
   return true;
 };
 
-// Fetch items: للمشتريات مع supplier_id => /items/supplier-items?supplier_id=:id
-const fetchItems = async () => {
-  loading.value = true;
+const fetchCategories = async () => {
+  categoriesLoading.value = true;
   try {
-    const isPurchasesWithSupplier = !isSalesMode.value && props.supplierId != null;
-    let url = isPurchasesWithSupplier
-      ? `/items/supplier-items?supplier_id=${props.supplierId}`
-      : '/items/supplier-items';
-
-    if (props.itemsQueryParams) {
-      const params = new URLSearchParams();
-      Object.entries(props.itemsQueryParams).forEach(([key, value]) => {
-        params.append(key, String(value));
-      });
-      url += (url.includes('?') ? '&' : '?') + params.toString();
-    }
-    
-    const res = await api.get<any>(url);
+    const materialType = props.itemsQueryParams?.material_type ?? 1;
+    const res = await api.get<any>(`/categories/list?material_type=${materialType}`);
     if (Array.isArray(res.data)) {
-      supplierItems.value = res.data;
-      categories.value = extractCategories(res.data);
+      categories.value = res.data;
+      if (categories.value.length > 0) {
+        activeTabId.value = categories.value[0].id;
+      }
+    }
+  } catch (e) {
+    console.error('Error fetching categories:', e);
+    categories.value = [];
+  } finally {
+    categoriesLoading.value = false;
+  }
+};
 
-      const mappedProducts = res.data.map((item: SupplierItem) => {
-        const existingProduct = props.existingProducts?.find(p => p.item_id === item.id);
-        if (existingProduct) {
-          return { ...existingProduct, isAdded: true };
-        }
+const fetchCategoryItems = async (categoryId: number) => {
+  if (loadedCategoryIds.value.has(categoryId)) return;
+
+  itemsLoading.value = true;
+  try {
+    const materialType = props.itemsQueryParams?.material_type ?? 1;
+    const res = await api.get<any>(`/items/list?material_type=${materialType}&category_id=${categoryId}`);
+    if (Array.isArray(res.data)) {
+      const newProducts: ProductToAdd[] = [];
+      res.data.forEach((item: any) => {
+        loadedItemIds.value.add(item.id);
+
+        const isAlreadyInTable = props.existingProducts?.some(p => p.item_id === item.id);
+        if (isAlreadyInTable) return;
+
         const base: ProductToAdd = {
           item_id: item.id,
           item_name: item.name,
@@ -215,43 +200,44 @@ const fetchItems = async () => {
           discount: null,
           discount_type: null,
           id: null,
+          _categoryId: categoryId,
         };
         if (showPricingFields.value) {
           base.unit_price = null;
           base.discount = null;
         }
-        return base;
+        newProducts.push(base);
       });
 
-      // Sort on dialog open: products with values (isAdded) come first
-      productsList.value = mappedProducts.sort((a: ProductToAdd, b: ProductToAdd) => {
-        if (a.isAdded && !b.isAdded) return -1;
-        if (!a.isAdded && b.isAdded) return 1;
-        return 0;
+      const existingItemIds = new Set(productsList.value.map(p => p.item_id));
+      newProducts.forEach(p => {
+        if (!existingItemIds.has(p.item_id)) {
+          productsList.value.push(p);
+        }
       });
 
-      if (categories.value.length > 0) {
-        activeTabId.value = categories.value[0].id;
-      }
+      loadedCategoryIds.value.add(categoryId);
     }
   } catch (e) {
-    console.error('Error fetching items:', e);
-    supplierItems.value = [];
-    categories.value = [];
-    productsList.value = [];
+    console.error('Error fetching category items:', e);
   } finally {
-    loading.value = false;
+    itemsLoading.value = false;
   }
 };
 
-// Watch for dialog open
 watch(() => props.modelValue, (newVal) => {
   if (newVal) {
     if (isEditMode.value && props.editProduct) {
       editProductData.value = { ...props.editProduct };
     } else {
-      fetchItems();
+      fetchCategories();
     }
+  }
+});
+
+watch(activeTabId, (newId) => {
+  if (newId !== null && !isEditMode.value) {
+    fetchCategoryItems(newId);
   }
 });
 
@@ -337,7 +323,6 @@ const handleEditSave = () => {
 };
 
 const resetForm = () => {
-  supplierItems.value = [];
   categories.value = [];
   productsList.value = [];
   activeTabId.value = null;
@@ -345,6 +330,8 @@ const resetForm = () => {
   showFullCategory.value = false;
   editProductData.value = null;
   manuallyUnchecked.value.clear();
+  loadedCategoryIds.value.clear();
+  loadedItemIds.value.clear();
 };
 
 const closeDialog = () => {
@@ -356,9 +343,10 @@ const handleDone = () => {
   if (isEditMode.value) {
     handleEditSave();
   } else {
-    // Only save products that are explicitly marked as added (isAdded = true)
-    const productsToSave = productsList.value.filter(p => p.isAdded);
-    
+    const newlyAdded = productsList.value.filter(p => p.isAdded);
+    const existing = (props.existingProducts || []).map(ep => ({ ...ep, isAdded: true as boolean | undefined }));
+    const productsToSave = [...existing, ...newlyAdded];
+
     emit('saved', productsToSave);
     closeDialog();
   }
@@ -419,8 +407,8 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
       </div>
     </template>
 
-    <!-- Loading State -->
-    <div v-if="loading" class="flex items-center justify-center py-20">
+    <!-- Loading Categories -->
+    <div v-if="categoriesLoading" class="flex items-center justify-center py-20">
       <v-progress-circular indeterminate color="primary" />
     </div>
 
@@ -584,10 +572,10 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
       </div>
     </div>
 
-    <!-- No Products State -->
-    <div v-else-if="!isEditMode && supplierItems.length === 0" class="flex flex-col items-center justify-center py-20 text-gray-500">
+    <!-- No Categories State -->
+    <div v-else-if="!isEditMode && categories.length === 0" class="flex flex-col items-center justify-center py-20 text-gray-500">
       <v-icon size="64" color="gray-400">mdi-package-variant-closed</v-icon>
-      <p class="mt-4 text-lg font-medium">{{ isSalesMode ? 'لا توجد منتجات تابعة لهذا العميل' : 'لا توجد منتجات تابعة لهذا المزود' }}</p>
+      <p class="mt-4 text-lg font-medium">لا توجد تصنيفات</p>
     </div>
 
     <!-- Add Mode Content -->
@@ -629,8 +617,13 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
         </TextInput>
       </div>
 
+      <!-- Products Loading -->
+      <div v-if="itemsLoading" class="flex items-center justify-center py-10 min-h-[250px]">
+        <v-progress-circular indeterminate color="primary" size="32" />
+      </div>
+
       <!-- Products List -->
-      <div class="space-y-1 max-h-[350px] min-h-[250px] overflow-auto custom-scroll">
+      <div v-else class="space-y-1 max-h-[350px] min-h-[250px] overflow-auto custom-scroll">
         <div v-for="product in filteredProducts" :key="product.item_id">
           <div class="flex gap-3 rounded-lg border !border-gray-100 p-3 bg-white">
             <!-- Actions -->

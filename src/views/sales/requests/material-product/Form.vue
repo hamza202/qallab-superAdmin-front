@@ -3,6 +3,7 @@ import { ref, computed, onMounted } from "vue";
 
 import { useRoute, useRouter } from 'vue-router';
 import AddProductDialog from '@/components/price-offers/AddProductDialog.vue';
+import EditProductsDialog from '@/components/price-offers/EditProductsDialog.vue';
 import AddTransportServiceDialog from '@/components/price-offers/AddTransportServiceDialog.vue';
 import TopHeader from '@/components/price-offers/TopHeader.vue';
 import VoiceRecorder from '@/components/common/forms/VoiceRecorder.vue';
@@ -353,6 +354,24 @@ const handleDeleteProduct = (item: any) => {
     if (index !== -1) {
         productTableItems.value.splice(index, 1);
     }
+};
+
+const showEditProductsDialog = ref(false);
+
+const handleEditProductsBulk = (updatedProducts: any[]) => {
+    productTableItems.value = updatedProducts.map(p => ({
+        item_id: p.item_id,
+        item_name: p.item_name,
+        unit_id: p.unit_id,
+        unit_name: p.unit_name,
+        quantity: p.quantity,
+        transport_type: p.transport_type ?? null,
+        trip_no: p.trip_no ?? null,
+        transport_type_name: getTransportTypeName(p.transport_type),
+        notes: p.notes || '',
+        id: p.id,
+        isAdded: p.isAdded
+    }));
 };
 
 const showAddTransportServiceDialog = ref(false);
@@ -775,11 +794,16 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
                     </DataTable>
                 </div>
 
-                <!-- Add Product Button -->
-                <div class="flex justify-center">
-                    <ButtonWithIcon color="primary-100" variant="flat" class="!text-primary-900 font-bold w-75"
+                <!-- Add / Edit Product Buttons -->
+                <div class="flex justify-center gap-3 w-75 mx-auto">
+                    <ButtonWithIcon color="primary-100" variant="flat" class="!text-primary-900 font-bold flex-1"
                         @click="handleAddProduct">
                         + إضافة منتج جديد
+                    </ButtonWithIcon>
+                    <ButtonWithIcon v-if="productTableItems.length > 0" color="primary-100" variant="flat"
+                        class="!text-primary-900 font-bold flex-1"
+                        @click="showEditProductsDialog = true">
+                        تعديل المنتجات
                     </ButtonWithIcon>
                 </div>
             </div>
@@ -896,6 +920,14 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
             :existing-products="productTableItems"
             @saved="handleProductSaved"
             @product-updated="handleProductUpdated" />
+
+        <!-- Edit Products Dialog -->
+        <EditProductsDialog v-model="showEditProductsDialog"
+            request-type="raw_materials"
+            :products="productTableItems"
+            :transport-types="transportTypeItems"
+            :unit-items="unitItems"
+            @products-updated="handleEditProductsBulk" />
 
         <!-- Add Transport Service Dialog -->
         <AddTransportServiceDialog v-model="showAddTransportServiceDialog" 
