@@ -3,6 +3,7 @@ import { ref, computed, onMounted } from "vue";
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router';
 import AddProductDialog from '@/components/price-offers/AddProductDialog.vue';
+import EditProductsDialog from '@/components/price-offers/EditProductsDialog.vue';
 import AddLogisticsDetailDialog from './components/AddLogisticsDetailDialog.vue';
 import TopHeader from '@/components/price-offers/TopHeader.vue';
 import { useApi } from '@/composables/useApi';
@@ -169,16 +170,22 @@ const fetchFormData = async () => {
 
             // Populate products (items)
             if (data.items && Array.isArray(data.items)) {
-                productTableItems.value = data.items.map((item: any) => ({
-                    id: item.id,
-                    item_id: item.item_id,
-                    item_name: item.item_name || '',
-                    unit_id: item.unit_id,
-                    unit_name: item.unit_name || '',
-                    quantity: item.quantity,
-                    from_date: item.from_date || '',
-                    trip_no: item.trip_no || null
-                }));
+                productTableItems.value = data.items.map((item: any) => {
+                    const itemId = Number(item.item_id);
+                    if (item.id && itemId) {
+                        originalProductIds.value.set(itemId, item.id);
+                    }
+                    return {
+                        id: item.id,
+                        item_id: item.item_id,
+                        item_name: item.item_name || '',
+                        unit_id: item.unit_id,
+                        unit_name: item.unit_name || '',
+                        quantity: item.quantity,
+                        from_date: item.from_date || '',
+                        trip_no: item.trip_no || null
+                    };
+                });
             }
 
             // Populate logistics details (array)
@@ -287,6 +294,7 @@ const formData = ref({
 
 // Products table items (dynamically populated from dialog)
 const productTableItems = ref<ProductTableItem[]>([]);
+const originalProductIds = ref<Map<number, number>>(new Map());
 
 // Logistics details (array - dynamically populated from dialog)
 const logisticsDetails = ref<LogisticsDetail[]>([]);
@@ -313,7 +321,19 @@ const handleAddProduct = () => {
 };
 
 const handleProductSaved = (products: ProductTableItem[]) => {
-    productTableItems.value = products;
+    const newItems: ProductTableItem[] = products.map(p => {
+        const restoredId = p.id || originalProductIds.value.get(p.item_id) || undefined;
+        return { ...p, id: restoredId };
+    });
+    productTableItems.value = newItems;
+};
+
+const showEditProductsDialog = ref(false);
+const handleEditProductsBulk = (updatedProducts: any[]) => {
+    productTableItems.value = updatedProducts.map(p => ({
+        ...p,
+        id: p.id || originalProductIds.value.get(p.item_id) || undefined,
+    }));
 };
 
 const handleEditProduct = (item: any) => {
@@ -927,11 +947,16 @@ onMounted(async () => {
                         @edit="handleEditProduct" @delete="handleDeleteProduct" />
                 </div>
 
-                <!-- Add Product Button -->
-                <div class="flex justify-center">
-                    <ButtonWithIcon color="primary-100" variant="flat" class="!text-primary-900 font-bold w-75 mb-4"
+                <!-- Add / Edit Product Buttons -->
+                <div class="flex justify-center gap-3 md:w-3/4 mx-auto mb-4">
+                    <ButtonWithIcon color="primary-100" variant="flat" class="!text-primary-900 font-bold flex-1"
                         @click="handleAddProduct">
                         + إضافة منتج جديد
+                    </ButtonWithIcon>
+                    <ButtonWithIcon v-if="productTableItems.length > 0" color="primary-100" variant="flat"
+                        class="!text-primary-900 font-bold flex-1"
+                        @click="showEditProductsDialog = true">
+                        تعديل المنتجات
                     </ButtonWithIcon>
                 </div>
             </div>
@@ -962,6 +987,14 @@ onMounted(async () => {
         <AddProductDialog v-model="showAddProductDialog" :unit-items="unitItems" request-type="logistics"
             :edit-product="editingProduct" :existing-products="productTableItems" @saved="handleProductSaved"
             @product-updated="handleProductUpdated" />
+
+        <!-- Edit Products Dialog -->
+        <EditProductsDialog v-model="showEditProductsDialog"
+            request-type="logistics"
+            :products="productTableItems"
+            :transport-types="transportTypeItems"
+            :unit-items="unitItems"
+            @products-updated="handleEditProductsBulk" />
 
         <!-- Add Logistics Detail Dialog -->
         <AddLogisticsDetailDialog v-model="showAddLogisticsDialog" :transport-types="transportTypeItems"

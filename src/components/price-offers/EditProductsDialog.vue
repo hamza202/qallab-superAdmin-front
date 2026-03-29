@@ -15,6 +15,8 @@ const props = defineProps<{
   showUnitPriceAndDiscount?: boolean;
   variant?: 'purchases' | 'sales';
   discountTypeItems?: any[];
+  fillingsItems?: any[];
+  supplyTypeItems?: any[];
 }>();
 
 const emit = defineEmits<{
@@ -32,6 +34,8 @@ const showPricingFields = computed(() => isSalesMode.value || !!props.showUnitPr
 
 const unitItemsList = computed(() => props.unitItems || []);
 const packageTypeItemsList = computed(() => props.transportTypes || []);
+const fillingsOptionsList = computed(() => props.fillingsItems || []);
+const supplyTypeOptionsList = computed(() => props.supplyTypeItems || []);
 const discountTypeOptionsList = computed(() => {
   if (props.discountTypeItems && props.discountTypeItems.length > 0) {
     return props.discountTypeItems;
@@ -79,6 +83,7 @@ watch(() => props.modelValue, (newVal) => {
         unit_price: p.unit_price ?? raw.price_per_unit ?? null,
         discount: p.discount ?? raw.discount_val ?? null,
         discount_type: matchDiscountType(p.discount_type),
+        supply_type: raw.supply_type ?? null,
       } as ProductToAdd;
     });
   }
@@ -100,8 +105,15 @@ const resolveNames = (product: ProductToAdd): ProductToAdd => {
       .join(', ');
   } else {
     const single = tt == null ? null : (Array.isArray(tt) ? tt[0] : tt);
+    const filling = fillingsOptionsList.value.find((f: any) => f.value === single);
     const transport = packageTypeItemsList.value.find((t: any) => t.value === single);
-    result.transport_type_name = transport?.title ?? product.transport_type_name ?? '';
+    result.transport_type_name = filling?.title ?? transport?.title ?? product.transport_type_name ?? '';
+  }
+
+  const st = (product as any).supply_type;
+  if (st != null) {
+    const supply = supplyTypeOptionsList.value.find((s: any) => s.value === st);
+    (result as any).supply_type_name = supply?.title ?? (product as any).supply_type_name ?? '';
   }
 
   (result as any).price_per_unit = product.unit_price;
@@ -178,6 +190,31 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
               v-model="product.unit_id"
               :items="unitItemsList"
               placeholder="الوحدة"
+              density="compact"
+              class="min-w-[170px]"
+              item-title="title"
+              item-value="value"
+            />
+          </div>
+
+          <div v-if="requestType === 'fuel'">
+            <SelectInput
+              v-model="product.transport_type"
+              :items="fillingsOptionsList"
+              placeholder="التعبئة"
+              density="compact"
+              class="min-w-[170px]"
+              item-title="title"
+              item-value="value"
+            />
+          </div>
+
+          <div v-if="requestType === 'fuel'">
+            <SelectInput
+              :model-value="(product as any).supply_type ?? null"
+              @update:model-value="(v: any) => { (product as any).supply_type = Array.isArray(v) ? v[0] : v }"
+              :items="supplyTypeOptionsList"
+              placeholder="نوع التوريد"
               density="compact"
               class="min-w-[170px]"
               item-title="title"

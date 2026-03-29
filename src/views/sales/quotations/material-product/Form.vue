@@ -2,6 +2,7 @@
 import { ref, computed, onMounted } from "vue";
 import { useRoute, useRouter } from 'vue-router';
 import AddProductDialog from '@/components/price-offers/AddProductDialog.vue';
+import EditProductsDialog from '@/components/price-offers/EditProductsDialog.vue';
 import EditSupplyDetailsDialog from '@/components/price-offers/EditSupplyDetailsDialog.vue';
 import TopHeader from '@/components/price-offers/TopHeader.vue';
 import { useApi } from '@/composables/useApi';
@@ -180,6 +181,13 @@ const fetchFormData = async () => {
                 const transportTypeName = vehicleTypes.length
                     ? vehicleTypes.map((id: number) => getTransportTypeName(id)).filter(Boolean).join(', ')
                     : '';
+
+                if (item.id && itemId) {
+                    originalProductIds.value.set(itemId, item.id);
+                }
+                if (log?.id && itemId) {
+                    originalLogisticsDetailIds.value.set(itemId, log.id);
+                }
 
                 return {
                     id: item.id,
@@ -389,6 +397,10 @@ const formData = ref({
 // Products table items (dynamically populated from dialog)
 const productTableItems = ref<ProductTableItem[]>([]);
 
+// Maps item_id → server id from original response, used to restore id on re-add
+const originalProductIds = ref<Map<number, number>>(new Map());
+const originalLogisticsDetailIds = ref<Map<number, number>>(new Map());
+
 // API-driven calculations via composable
 const { vatRate, fetchCalculations: _fetchCalc, summaryTotals } = useCalculations(productTableItems);
 
@@ -431,16 +443,18 @@ const handleAddProduct = () => {
 };
 
 const handleProductSaved = async (products: any[]) => {
-    // Merge new products while preserving existing notes
     const newItems: ProductTableItem[] = [];
 
     products.forEach(p => {
-        // Find if this product already exists in the table
         const existing = productTableItems.value.find(existing => existing.item_id === p.item_id);
+        const restoredId = p.id || originalProductIds.value.get(p.item_id) || null;
+        const restoredLogisticsId = p.logistics_detail_id || originalLogisticsDetailIds.value.get(p.item_id) || null;
 
         newItems.push({
             ...p,
-            notes: existing?.notes || p.notes || '' // Preserve existing notes
+            id: restoredId,
+            logistics_detail_id: restoredLogisticsId,
+            notes: existing?.notes || p.notes || '',
         });
     });
 
@@ -486,6 +500,18 @@ const handleDeleteProduct = async (item: any) => {
     }
 };
 
+const showEditProductsDialog = ref(false);
+
+const handleEditProductsBulk = async (updatedProducts: any[]) => {
+    productTableItems.value = updatedProducts.map(p => ({
+        ...p,
+        price_per_unit: p.unit_price ?? p.price_per_unit ?? null,
+        discount_val: p.discount ?? p.discount_val ?? null,
+        id: p.id || originalProductIds.value.get(p.item_id) || null,
+        logistics_detail_id: p.logistics_detail_id || originalLogisticsDetailIds.value.get(p.item_id) || null,
+    }));
+    await fetchCalculations();
+};
 
 const handleNewRequest = () => {
     console.log('New Request clicked');
@@ -980,11 +1006,16 @@ const serviceTableItems = computed(() =>
                     </template>
                 </DataTable>
 
-                <!-- Add Product Button -->
-                <div class="flex justify-center my-6 ">
-                    <ButtonWithIcon color="primary-100" variant="flat" class="!text-primary-900 font-bold w-75"
+                <!-- Add / Edit Product Buttons -->
+                <div class="flex justify-center gap-3 w-75 mx-auto my-6">
+                    <ButtonWithIcon color="primary-100" variant="flat" class="!text-primary-900 font-bold flex-1"
                         @click="handleAddProduct">
                         + إضافة منتج جديد
+                    </ButtonWithIcon>
+                    <ButtonWithIcon v-if="productTableItems.length > 0" color="primary-100" variant="flat"
+                        class="!text-primary-900 font-bold flex-1"
+                        @click="showEditProductsDialog = true">
+                        تعديل المنتجات
                     </ButtonWithIcon>
                 </div>
             </div>
@@ -1168,6 +1199,16 @@ const serviceTableItems = computed(() =>
             :transport-types="transportTypeItems" :unit-items="unitItems" :customer-id="formData.customer_id"
             :edit-product="editingProduct" :existing-products="productTableItems" @saved="handleProductSaved"
             @product-updated="handleProductUpdated" />
+
+        <!-- Edit Products Dialog -->
+        <EditProductsDialog v-model="showEditProductsDialog"
+            request-type="raw_materials"
+            variant="sales"
+            :showUnitPriceAndDiscount="true"
+            :products="productTableItems"
+            :transport-types="transportTypeItems"
+            :unit-items="unitItems"
+            @products-updated="handleEditProductsBulk" />
 
         <!-- Edit Supply Details Dialog -->
         <EditSupplyDetailsDialog

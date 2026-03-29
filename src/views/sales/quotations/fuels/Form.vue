@@ -3,6 +3,7 @@ import { ref, computed, onMounted } from "vue";
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router';
 import AddProductDialogFuelsQuotation, { type FuelQuotationProductToAdd } from '@/components/price-offers/AddProductDialogFuelsQuotation.vue';
+import EditProductsDialog from '@/components/price-offers/EditProductsDialog.vue';
 import TopHeader from '@/components/price-offers/TopHeader.vue';
 import DatePickerInput from '@/components/common/forms/DatePickerInput.vue';
 import DateTimePickerInput from '@/components/common/forms/DateTimePickerInput.vue';
@@ -158,21 +159,27 @@ const fetchFormData = async () => {
 
         // Populate products (items)
         if (Array.isArray(data.items) && data.items.length > 0) {
-            productTableItems.value = data.items.map((item: any) => ({
-                id: item.id,
-                item_id: Number(item.item_id),
-                item_name: item.item_name ?? '',
-                unit_id: item.unit_id ?? null,
-                unit_name: item.unit_name ?? '',
-                quantity: item.quantity ?? null,
-                item_using: item.item_using ?? null,
-                item_using_name: getItemUsingName(item.item_using),
-                unit_price: item.price_per_unit ?? null,
-                discount: item.discount_val ?? null,
-                discount_type: item.discount_type ?? 2, // 1 = percentage, 2 = fixed
-                tax_amount: item.total_tax ?? null,
-                notes: item.note ?? item.notes ?? '',
-            }));
+            productTableItems.value = data.items.map((item: any) => {
+                const itemId = Number(item.item_id);
+                if (item.id && itemId) {
+                    originalProductIds.value.set(itemId, item.id);
+                }
+                return {
+                    id: item.id,
+                    item_id: itemId,
+                    item_name: item.item_name ?? '',
+                    unit_id: item.unit_id ?? null,
+                    unit_name: item.unit_name ?? '',
+                    quantity: item.quantity ?? null,
+                    item_using: item.item_using ?? null,
+                    item_using_name: getItemUsingName(item.item_using),
+                    unit_price: item.price_per_unit ?? null,
+                    discount: item.discount_val ?? null,
+                    discount_type: item.discount_type ?? 2,
+                    tax_amount: item.total_tax ?? null,
+                    notes: item.note ?? item.notes ?? '',
+                };
+            });
         }
 
         if (productTableItems.value.length > 0) {
@@ -322,6 +329,8 @@ const formData = ref({
 // Products table items
 const productTableItems = ref<ProductTableItem[]>([]);
 
+const originalProductIds = ref<Map<number, number>>(new Map());
+
 // API-driven calculations via composable
 const { vatRate, fetchCalculations: _fetchCalc, summaryTotals } = useCalculations(productTableItems as any);
 
@@ -411,6 +420,7 @@ const handleProductSaved = async (products: FuelQuotationProductToAdd[]) => {
     const newItems: ProductTableItem[] = [];
     products.forEach(p => {
         const existing = productTableItems.value.find(existing => existing.item_id === p.item_id);
+        const restoredId = p.id || originalProductIds.value.get(p.item_id) || undefined;
         newItems.push({
             item_id: p.item_id,
             item_name: p.item_name,
@@ -421,11 +431,11 @@ const handleProductSaved = async (products: FuelQuotationProductToAdd[]) => {
             item_using_name: p.item_using_name,
             unit_price: p.unit_price ?? null,
             discount: p.discount ?? null,
-            discount_type: p.discount_type ?? 2, // 1 = percentage, 2 = fixed
+            discount_type: p.discount_type ?? 2,
             tax_amount: p.tax_amount ?? null,
             notes: existing?.notes || p.notes || '',
             isAdded: p.isAdded,
-            id: p.id,
+            id: restoredId,
         });
     });
     productTableItems.value = newItems;
@@ -466,6 +476,19 @@ const handleDeleteProduct = async (item: any) => {
         productTableItems.value.splice(index, 1);
         await fetchCalculations();
     }
+};
+
+const showEditProductsDialog = ref(false);
+
+const handleEditProductsBulk = async (updatedProducts: any[]) => {
+    productTableItems.value = updatedProducts.map(p => ({
+        ...p,
+        price_per_unit: p.unit_price ?? p.price_per_unit ?? null,
+        discount_val: p.discount ?? p.discount_val ?? null,
+        item_using_name: p.item_using_name || getItemUsingName(p.item_using ?? null),
+        id: p.id || originalProductIds.value.get(p.item_id) || undefined,
+    }));
+    await fetchCalculations();
 };
 
 import { useForm } from '@/composables/useForm';
@@ -839,11 +862,16 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
                     </template>
                 </DataTable>
 
-                <!-- Add Product Button -->
-                <div class="flex justify-center my-6">
-                    <ButtonWithIcon color="primary-100" variant="flat" class="!text-primary-900 font-bold w-75"
+                <!-- Add / Edit Product Buttons -->
+                <div class="flex justify-center gap-3 md:w-3/4 mx-auto my-6">
+                    <ButtonWithIcon color="primary-100" variant="flat" class="!text-primary-900 font-bold flex-1"
                         @click="handleAddProduct">
                         + إضافة منتج جديد
+                    </ButtonWithIcon>
+                    <ButtonWithIcon v-if="productTableItems.length > 0" color="primary-100" variant="flat"
+                        class="!text-primary-900 font-bold flex-1"
+                        @click="showEditProductsDialog = true">
+                        تعديل المنتجات
                     </ButtonWithIcon>
                 </div>
             </div>
@@ -988,14 +1016,24 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
 
         <!-- Add Product Dialog -->
         <AddProductDialogFuelsQuotation v-model="showAddProductDialog"
+            :material-type="0"
             :item-using-options="itemUsingItems"
             :unit-items="unitItems"
             :discount-type-options="discountTypeItems"
-            items-endpoint="/items/supplier-items?material_type=2"
             :edit-product="editProductForDialog"
             :existing-products="existingProductsForDialog"
             @saved="handleProductSaved"
             @product-updated="handleProductUpdated" />
+
+        <!-- Edit Products Dialog -->
+        <EditProductsDialog v-model="showEditProductsDialog"
+            request-type="fuel"
+            variant="sales"
+            :showUnitPriceAndDiscount="true"
+            :products="productTableItems"
+            :unit-items="unitItems"
+            :discount-type-items="discountTypeItems"
+            @products-updated="handleEditProductsBulk" />
     </default-layout>
 </template>
 

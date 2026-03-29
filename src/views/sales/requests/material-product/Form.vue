@@ -152,18 +152,23 @@ const fetchFormData = async () => {
             
             // Populate products (items)
             if (data.items && Array.isArray(data.items)) {
-                productTableItems.value = data.items.map((item: any) => ({
-                    id: item.id,
-                    item_id: item.item_id,
-                    item_name: item.item_name || '',
-                    unit_id: item.unit_id,
-                    unit_name: item.unit_name || '',
-                    quantity: item.quantity,
-                    transport_type: item.transport_type,
-                    transport_type_name: getTransportTypeName(item.transport_type),
-                    trip_no: item.trip_no,
-                    notes: item.notes || ''
-                }));
+                productTableItems.value = data.items.map((item: any) => {
+                    if (item.id && item.item_id) {
+                        originalProductIds.value.set(item.item_id, item.id);
+                    }
+                    return {
+                        id: item.id,
+                        item_id: item.item_id,
+                        item_name: item.item_name || '',
+                        unit_id: item.unit_id,
+                        unit_name: item.unit_name || '',
+                        quantity: item.quantity,
+                        transport_type: item.transport_type,
+                        transport_type_name: getTransportTypeName(item.transport_type),
+                        trip_no: item.trip_no,
+                        notes: item.notes || ''
+                    };
+                });
             }
             
             // Populate transport service (logistics_detail)
@@ -265,6 +270,9 @@ const formData = ref({
 // Products table items (dynamically populated from dialog)
 const productTableItems = ref<ProductTableItem[]>([]);
 
+// Maps item_id → server id from original response, used to restore id on re-add
+const originalProductIds = ref<Map<number, number>>(new Map());
+
 // Transport service (single item - dynamically populated from dialog)
 const transportService = ref<TransportService | null>(null);
 
@@ -293,12 +301,11 @@ const handleAddProduct = () => {
 };
 
 const handleProductSaved = (products: any[]) => {
-    // Merge new products while preserving existing notes
     const newItems: ProductTableItem[] = [];
     
     products.forEach(p => {
-        // Find if this product already exists in the table
         const existing = productTableItems.value.find(existing => existing.item_id === p.item_id);
+        const restoredId = p.id || originalProductIds.value.get(p.item_id) || null;
         
         newItems.push({
             item_id: p.item_id,
@@ -309,8 +316,8 @@ const handleProductSaved = (products: any[]) => {
             transport_type: p.transport_type ?? null,
             trip_no: p.trip_no ?? null,
             transport_type_name: getTransportTypeName(p.transport_type),
-            notes: existing?.notes || p.notes || '', // Preserve existing notes
-            id: p.id,
+            notes: existing?.notes || p.notes || '',
+            id: restoredId,
             isAdded: p.isAdded
         });
     });
@@ -369,7 +376,7 @@ const handleEditProductsBulk = (updatedProducts: any[]) => {
         trip_no: p.trip_no ?? null,
         transport_type_name: getTransportTypeName(p.transport_type),
         notes: p.notes || '',
-        id: p.id,
+        id: p.id || originalProductIds.value.get(p.item_id) || null,
         isAdded: p.isAdded
     }));
 };
@@ -795,7 +802,7 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
                 </div>
 
                 <!-- Add / Edit Product Buttons -->
-                <div class="flex justify-center gap-3 w-75 mx-auto">
+                <div class="flex justify-center gap-3 mx-auto md:w-3/4">
                     <ButtonWithIcon color="primary-100" variant="flat" class="!text-primary-900 font-bold flex-1"
                         @click="handleAddProduct">
                         + إضافة منتج جديد
@@ -831,7 +838,7 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
 
                 <!-- Add Transport Service Button (only show when no service exists) -->
                 <div class="flex justify-center" v-if="!hasTransportService">
-                    <ButtonWithIcon color="primary-100" variant="flat" class="!text-primary-900 font-bold w-75"
+                    <ButtonWithIcon color="primary-100" variant="flat" class="!text-primary-900 font-bold md:w-4/3"
                         @click="handleAddTransportService">
                         + إضافة بيانات نقل جديدة
                     </ButtonWithIcon>

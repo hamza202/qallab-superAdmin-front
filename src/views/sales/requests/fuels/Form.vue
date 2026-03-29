@@ -3,6 +3,7 @@ import { ref, computed, onMounted } from "vue";
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router';
 import AddProductDialogFuels, { type FuelProductToAdd } from '@/components/price-offers/AddProductDialogFuels.vue';
+import EditProductsDialog from '@/components/price-offers/EditProductsDialog.vue';
 import TopHeader from '@/components/price-offers/TopHeader.vue';
 import VoiceRecorder from '@/components/common/forms/VoiceRecorder.vue';
 import DatePickerInput from '@/components/common/forms/DatePickerInput.vue';
@@ -174,9 +175,15 @@ const fetchFormData = async () => {
             if (data.items && Array.isArray(data.items)) {
                 productTableItems.value = data.items.map((item: any) => {
                     const transportType = item.filling ?? item.transport_type;
+                    const itemId = Number(item.item_id);
+
+                    if (item.id && itemId) {
+                        originalProductIds.value.set(itemId, item.id);
+                    }
+
                     return {
                         id: item.id,
-                        item_id: item.item_id,
+                        item_id: itemId,
                         item_name: item.item_name || '',
                         unit_id: item.unit_id,
                         unit_name: item.unit_name || '',
@@ -260,6 +267,8 @@ const formData = ref({
 // Products table items (dynamically populated from dialog)
 const productTableItems = ref<ProductTableItem[]>([]);
 
+const originalProductIds = ref<Map<number, number>>(new Map());
+
 // Summary data
 const summaryData = computed(() => ({
     productsCount: productTableItems.value.length,
@@ -282,17 +291,10 @@ const handleAddProduct = () => {
 };
 
 const handleProductSaved = (products: FuelProductToAdd[]) => {
-    // Build a set of item_ids coming from the dialog
-    const dialogItemIds = new Set(products.map(p => p.item_id));
-
-    // Keep existing products that were NOT part of the dialog session
-    const preservedItems: ProductTableItem[] = productTableItems.value.filter(
-        existing => !dialogItemIds.has(existing.item_id)
-    );
-
-    // Build the new/updated items from the dialog
-    const dialogItems: ProductTableItem[] = products.map(p => {
+    const newItems: ProductTableItem[] = products.map(p => {
         const existing = productTableItems.value.find(e => e.item_id === p.item_id);
+        const restoredId = p.id || originalProductIds.value.get(p.item_id) || undefined;
+
         return {
             ...p,
             trip_no: p.trip_no ?? null,
@@ -300,12 +302,11 @@ const handleProductSaved = (products: FuelProductToAdd[]) => {
             discount: p.discount ?? null,
             transport_type_name: getFillingName(p.transport_type) || getTransportTypeName(p.transport_type),
             notes: existing?.notes || p.notes || '',
-            id: existing?.id ?? undefined, // Preserve the server-side ID for edit mode
+            id: restoredId,
         };
     });
 
-    // Merge: preserved existing items + dialog items
-    productTableItems.value = [...preservedItems, ...dialogItems];
+    productTableItems.value = newItems;
 };
 
 const handleEditProduct = (item: any) => {
@@ -337,6 +338,16 @@ const handleDeleteProduct = (item: any) => {
     if (index !== -1) {
         productTableItems.value.splice(index, 1);
     }
+};
+
+const showEditProductsDialog = ref(false);
+
+const handleEditProductsBulk = (updatedProducts: any[]) => {
+    productTableItems.value = updatedProducts.map(p => ({
+        ...p,
+        transport_type_name: getFillingName(p.transport_type) || getTransportTypeName(p.transport_type),
+        id: p.id || originalProductIds.value.get(p.item_id) || undefined,
+    }));
 };
 
 import { useForm } from '@/composables/useForm';
@@ -733,11 +744,16 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
                     </DataTable>
                 </div>
 
-                <!-- Add Product Button -->
-                <div class="flex justify-center">
-                    <ButtonWithIcon color="primary-100" variant="flat" class="!text-primary-900 font-bold w-75"
+                <!-- Add / Edit Product Buttons -->
+                <div class="flex justify-center gap-3 md:w-4/3 mx-auto">
+                    <ButtonWithIcon color="primary-100" variant="flat" class="!text-primary-900 font-bold flex-1"
                         @click="handleAddProduct">
                         + إضافة منتج جديد
+                    </ButtonWithIcon>
+                    <ButtonWithIcon v-if="productTableItems.length > 0" color="primary-100" variant="flat"
+                        class="!text-primary-900 font-bold flex-1"
+                        @click="showEditProductsDialog = true">
+                        تعديل المنتجات
                     </ButtonWithIcon>
                 </div>
             </div>
@@ -812,10 +828,21 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
             :address="formData.source_location" @location-selected="handleSourceLocationSelected" />
 
         <!-- Add Product Dialog -->
-        <AddProductDialogFuels v-model="showAddProductDialog" :fillings-options="fillingsItems" :unit-items="unitItems"
-            :supply-type-options="supplyTypeItems" items-endpoint="/items/supplier-items?material_type=2"
+        <AddProductDialogFuels v-model="showAddProductDialog" :material-type="0"
+            :fillings-options="fillingsItems" :unit-items="unitItems"
+            :supply-type-options="supplyTypeItems"
             :edit-product="editingProduct" :existing-products="productTableItems" @saved="handleProductSaved"
             @product-updated="handleProductUpdated" />
+
+        <!-- Edit Products Dialog -->
+        <EditProductsDialog v-model="showEditProductsDialog"
+            request-type="fuel"
+            :products="productTableItems"
+            :transport-types="transportTypeItems"
+            :unit-items="unitItems"
+            :fillings-items="fillingsItems"
+            :supply-type-items="supplyTypeItems"
+            @products-updated="handleEditProductsBulk" />
 
     </default-layout>
 </template>

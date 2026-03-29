@@ -149,8 +149,11 @@ const canAddProduct = (product: ProductToAdd): boolean => {
 const fetchCategories = async () => {
   categoriesLoading.value = true;
   try {
-    const materialType = props.itemsQueryParams?.material_type ?? 1;
-    const res = await api.get<any>(`/categories/list?material_type=${materialType}`);
+    const materialType = props.itemsQueryParams?.material_type;
+    const categoryUrl = materialType != null
+      ? `/categories/list?material_type=${materialType}`
+      : '/categories/list';
+    const res = await api.get<any>(categoryUrl);
     if (Array.isArray(res.data)) {
       categories.value = res.data;
       if (categories.value.length > 0) {
@@ -170,8 +173,11 @@ const fetchCategoryItems = async (categoryId: number) => {
 
   itemsLoading.value = true;
   try {
-    const materialType = props.itemsQueryParams?.material_type ?? 1;
-    const res = await api.get<any>(`/items/list?material_type=${materialType}&category_id=${categoryId}`);
+    const materialType = props.itemsQueryParams?.material_type;
+    const itemsUrl = materialType != null
+      ? `/items/list?material_type=${materialType}&category_id=${categoryId}`
+      : `/items/list?category_id=${categoryId}`;
+    const res = await api.get<any>(itemsUrl);
     if (Array.isArray(res.data)) {
       const newProducts: ProductToAdd[] = [];
       res.data.forEach((item: any) => {
@@ -217,6 +223,13 @@ const fetchCategoryItems = async (categoryId: number) => {
       });
 
       loadedCategoryIds.value.add(categoryId);
+
+      if (newProducts.length === 0) {
+        categories.value = categories.value.filter(c => c.id !== categoryId);
+        if (activeTabId.value === categoryId && categories.value.length > 0) {
+          activeTabId.value = categories.value[0].id;
+        }
+      }
     }
   } catch (e) {
     console.error('Error fetching category items:', e);

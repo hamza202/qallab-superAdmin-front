@@ -111,15 +111,17 @@ const confirmDelete = async () => {
   deleteLoading.value = true;
   emit("delete", pendingDeleteItem.value);
 
-  // Wait a bit for the parent to handle the delete
-  // The parent should ideally emit a success/error event, but for now we'll use a timeout
-  await new Promise(resolve => setTimeout(resolve, 100));
+  await new Promise(resolve => setTimeout(resolve, 300));
+
+  deleteLoading.value = false;
+  showDeleteDialog.value = false;
+  pendingDeleteItem.value = null;
 };
 
 const cancelDelete = () => {
-  if (deleteLoading.value) return;
   pendingDeleteItem.value = null;
   showDeleteDialog.value = false;
+  deleteLoading.value = false;
 };
 
 // Watch for when the pending item is cleared externally (after successful delete)
