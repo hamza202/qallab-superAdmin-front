@@ -8,7 +8,7 @@ import TopHeader from '@/components/price-offers/TopHeader.vue';
 import AddProductDialog from '@/components/price-offers/AddProductDialog.vue';
 import EditProductsDialog from '@/components/price-offers/EditProductsDialog.vue';
 import Map from '@/components/common/Map.vue';
-import type { TripLogisticsDetail } from '@/components/trips/AddTripDetailsDialog.vue';
+import AddTripDetailsDialog, { type TripLogisticsDetail } from '@/components/trips/AddTripDetailsDialog.vue';
 import EditTripDetailsDialog from '@/components/trips/EditTripDetailsDialog.vue';
 import { returnIcon, saveIcon, fileCheckIcon, fileIcon } from '@/components/icons/globalIcons';
 import { mapMarkerIcon, packageIcon, downloadIcon, messagePlusIcon, busIcon } from '@/components/icons/priceOffersIcons';
@@ -106,6 +106,9 @@ const logisticCompanyTripDetails = ref<TripLogisticsDetail[]>([]);
 const availableTripDetails = ref<TripLogisticsDetail[]>([]);
 const showEditCustomerDetailsDialog = ref(false);
 const showEditLogisticDetailsDialog = ref(false);
+const showCustomerRowDetailsDialog = ref(false);
+const showLogisticRowDetailsDialog = ref(false);
+const editingTripDetail = ref<TripLogisticsDetail | null>(null);
 
 const showMapDialog = ref(false);
 const amPmIntervalItems = ref<any[]>([]);
@@ -257,6 +260,142 @@ const getTransportTypeName = (typeValue: string | number | null): string => {
   return found ? found.title : '';
 };
 
+const vehicleTypesFromTransportField = (transportType: unknown): { transport_type: number; transport_no: number | null }[] => {
+  if (transportType == null) return [];
+  if (Array.isArray(transportType)) {
+    return transportType
+      .map((t: any) => {
+        const n = parseInt(String(t), 10);
+        return Number.isNaN(n) ? null : { transport_type: n, transport_no: null as number | null };
+      })
+      .filter((x): x is { transport_type: number; transport_no: number | null } => x != null);
+  }
+  const n = parseInt(String(transportType), 10);
+  return Number.isNaN(n) ? [] : [{ transport_type: n, transport_no: null }];
+};
+
+/** ملء المنتجات وجداول تفاصيل الرحلة من استجابة طلبية النقل (so_trip_details أو items + so_logistics_product_details) */
+const populateTripFormFromLogisticsOrderData = (data: any): boolean => {
+  if (!data) return false;
+
+  if (data.so_trip_details && Array.isArray(data.so_trip_details) && data.so_trip_details.length > 0) {
+    const availableDetails: TripLogisticsDetail[] = [];
+    const productItems: ProductTableItem[] = [];
+
+    data.so_trip_details.forEach((item: any) => {
+      const vehicleTypes = vehicleTypesFromTransportField(item.transport_type);
+
+      availableDetails.push({
+        item_id: item.item_id,
+        item_name: item.item_name || '',
+        unit_id: item.unit_id,
+        unit_name: item.unit_name || '',
+        quantity: item.quantity || null,
+        transport_type: [],
+        vehicle_type_no: vehicleTypes,
+        price: null
+      });
+
+      const existingIndex = productItems.findIndex(p => p.item_id === item.item_id);
+      if (existingIndex === -1) {
+        const firstT = vehicleTypes.length > 0 ? vehicleTypes[0].transport_type : null;
+        productItems.push({
+          item_id: item.item_id,
+          item_name: item.item_name || '',
+          unit_id: item.unit_id,
+          unit_name: item.unit_name || '',
+          quantity: item.quantity || null,
+          transport_type: firstT,
+          transport_no: null,
+          transport_type_name: getTransportTypeName(firstT),
+          notes: '',
+          isAdded: true
+        });
+      }
+    });
+
+    availableTripDetails.value = JSON.parse(JSON.stringify(availableDetails));
+    customerTripDetails.value = JSON.parse(JSON.stringify(availableDetails));
+
+    const logistcDetails = JSON.parse(JSON.stringify(availableDetails));
+    logistcDetails.forEach((ld: any) => { ld.price = null; });
+    logisticCompanyTripDetails.value = logistcDetails;
+
+    productTableItems.value = productItems;
+    return true;
+  }
+
+  if (data.items && Array.isArray(data.items) && data.items.length > 0) {
+    const logisticsList = data.so_logistics_product_details ?? data.logistics_product_details;
+    const logisticsByItemId: Record<number, any> = {};
+    if (Array.isArray(logisticsList)) {
+      logisticsList.forEach((log: any) => {
+        const iid = Number(log.item_id);
+        if (!Number.isNaN(iid) && logisticsByItemId[iid] === undefined) {
+          logisticsByItemId[iid] = log;
+        }
+      });
+    }
+
+    const availableDetails: TripLogisticsDetail[] = [];
+    const productItems: ProductTableItem[] = [];
+
+    data.items.forEach((item: any) => {
+      const itemId = Number(item.item_id);
+      const log = logisticsByItemId[itemId];
+      const vehicleTypes =
+        log != null
+          ? vehicleTypesFromTransportField(log.transport_type)
+          : vehicleTypesFromTransportField(item.transport_type);
+
+      availableDetails.push({
+        item_id: itemId,
+        item_name: item.item_name || '',
+        unit_id: item.unit_id,
+        unit_name: item.unit_name || '',
+        quantity: item.quantity ?? null,
+        transport_type: [],
+        vehicle_type_no: vehicleTypes,
+        price: null
+      });
+
+      const firstT =
+        vehicleTypes.length > 0
+          ? vehicleTypes[0].transport_type
+          : (item.transport_type != null
+            ? (Array.isArray(item.transport_type)
+              ? parseInt(String(item.transport_type[0]), 10)
+              : parseInt(String(item.transport_type), 10))
+            : null);
+
+      productItems.push({
+        item_id: itemId,
+        item_name: item.item_name || '',
+        unit_id: item.unit_id,
+        unit_name: item.unit_name || '',
+        quantity: item.quantity ?? null,
+        transport_type: Number.isNaN(firstT as number) ? null : firstT,
+        transport_no: null,
+        transport_type_name: getTransportTypeName(Number.isNaN(firstT as number) ? null : firstT),
+        notes: '',
+        isAdded: true
+      });
+    });
+
+    availableTripDetails.value = JSON.parse(JSON.stringify(availableDetails));
+    customerTripDetails.value = JSON.parse(JSON.stringify(availableDetails));
+
+    const logistcDetails = JSON.parse(JSON.stringify(availableDetails));
+    logistcDetails.forEach((ld: any) => { ld.price = null; });
+    logisticCompanyTripDetails.value = logistcDetails;
+
+    productTableItems.value = productItems;
+    return true;
+  }
+
+  return false;
+};
+
 // Fetch logistics orders list for material-product flow
 const fetchSoLogisticsList = async () => {
   if (!isFromMaterialProduct.value || !formData.value.supplier_logistic_id) return;
@@ -323,65 +462,16 @@ const fetchSoLogisticDetails = async () => {
         supplier_id: formData.value.supplier_logistic_id,
         category: 'logistics',
         with_so_trip_details: true,
+        with_so_logistics_product_details: true,
         code: selectedItem.code
       }
     });
     
     const data = Array.isArray(res.data) && res.data.length > 0 ? res.data[0] : null;
     if (!data) return;
-    
-    // Process so_trip_details
-    if (data.so_trip_details && Array.isArray(data.so_trip_details)) {
-      const availableDetails: TripLogisticsDetail[] = [];
-      const productItems: ProductTableItem[] = [];
 
-      data.so_trip_details.forEach((item: any) => {
-        const vehicleTypes = Array.isArray(item.transport_type) 
-          ? item.transport_type.map((t: any) => ({ transport_type: parseInt(t), transport_no: null }))
-          : (item.transport_type != null ? [{ transport_type: parseInt(item.transport_type), transport_no: null }] : []);
-          
-        availableDetails.push({
-          id: item.item_id,
-          item_id: item.item_id,
-          item_name: item.item_name || '',
-          unit_id: item.unit_id,
-          unit_name: item.unit_name || '',
-          quantity: item.quantity || null,
-          transport_type: [],
-          vehicle_type_no: vehicleTypes,
-          price: null
-        });
-
-        // Check if item already exists in productItems
-        const existingIndex = productItems.findIndex(p => p.item_id === item.item_id);
-        if (existingIndex === -1) {
-          productItems.push({
-            item_id: item.item_id,
-            item_name: item.item_name || '',
-            unit_id: item.unit_id,
-            unit_name: item.unit_name || '',
-            quantity: item.quantity || null,
-            transport_type: Array.isArray(item.transport_type) && item.transport_type.length > 0 
-              ? parseInt(item.transport_type[0]) 
-              : (item.transport_type != null ? parseInt(item.transport_type) : null),
-            transport_no: null,
-            transport_type_name: Array.isArray(item.transport_type) && item.transport_type.length > 0 
-              ? getTransportTypeName(parseInt(item.transport_type[0])) 
-              : (item.transport_type != null ? getTransportTypeName(parseInt(item.transport_type)) : ''),
-            notes: '',
-            isAdded: true
-          });
-        }
-      });
-
-      availableTripDetails.value = JSON.parse(JSON.stringify(availableDetails));
-      customerTripDetails.value = JSON.parse(JSON.stringify(availableDetails));
-      
-      const logistcDetails = JSON.parse(JSON.stringify(availableDetails));
-      logistcDetails.forEach((ld: any) => ld.price = null);
-      logisticCompanyTripDetails.value = logistcDetails;
-      
-      productTableItems.value = productItems;
+    if (populateTripFormFromLogisticsOrderData(data)) {
+      syncProductsToTripDetails();
     }
   } catch (err: any) {
     console.error('Error fetching logistics order details:', err);
@@ -405,41 +495,16 @@ const fetchSoLogisticDetailsForEdit = async () => {
         supplier_id: formData.value.supplier_logistic_id,
         category: 'logistics',
         with_so_trip_details: true,
+        with_so_logistics_product_details: true,
         code: selectedItem.code
       }
     });
     
     const data = Array.isArray(res.data) && res.data.length > 0 ? res.data[0] : null;
     if (!data) return;
-    
-    // Process so_trip_details - update trip details tables
-    if (data.so_trip_details && Array.isArray(data.so_trip_details)) {
-      const availableDetails: TripLogisticsDetail[] = [];
 
-      data.so_trip_details.forEach((item: any) => {
-        const vehicleTypes = Array.isArray(item.transport_type) 
-          ? item.transport_type.map((t: any) => ({ transport_type: parseInt(t), transport_no: null }))
-          : (item.transport_type != null ? [{ transport_type: parseInt(item.transport_type), transport_no: null }] : []);
-          
-        availableDetails.push({
-          id: item.item_id,
-          item_id: item.item_id,
-          item_name: item.item_name || '',
-          unit_id: item.unit_id,
-          unit_name: item.unit_name || '',
-          quantity: item.quantity || null,
-          transport_type: [],
-          vehicle_type_no: vehicleTypes,
-          price: null
-        });
-      });
-
-      availableTripDetails.value = JSON.parse(JSON.stringify(availableDetails));
-      customerTripDetails.value = JSON.parse(JSON.stringify(availableDetails));
-      
-      const logistcDetails = JSON.parse(JSON.stringify(availableDetails));
-      logistcDetails.forEach((ld: any) => ld.price = null);
-      logisticCompanyTripDetails.value = logistcDetails;
+    if (populateTripFormFromLogisticsOrderData(data)) {
+      syncProductsToTripDetails();
     }
   } catch (err: any) {
     console.error('Error fetching logistics order details for edit:', err);
@@ -477,6 +542,7 @@ const fetchSoPickupData = async () => {
         notes: '',
         isAdded: true
       }));
+      syncProductsToTripDetails();
     }
   } catch (err: any) {
     console.error('Error fetching SO pickup data:', err);
@@ -541,7 +607,6 @@ const fetchSaleOrderData = async () => {
             : (item.transport_type != null ? [{ transport_type: parseInt(item.transport_type), transport_no: null }] : []);
             
           availableDetails.push({
-            id: item.item_id,
             item_id: item.item_id,
             item_name: item.item_name || '',
             unit_id: item.unit_id,
@@ -583,7 +648,14 @@ const fetchSaleOrderData = async () => {
         logisticCompanyTripDetails.value = logistcDetails;
       }
 
-      productTableItems.value = productItems;
+      if (productItems.length > 0) {
+        productTableItems.value = productItems;
+      } else if (!populateTripFormFromLogisticsOrderData(data)) {
+        productTableItems.value = [];
+      }
+      if (productTableItems.value.length > 0) {
+        syncProductsToTripDetails();
+      }
     } else {
       // Handle building materials order response
       formData.value.source_location = data.source_location || "";
@@ -609,17 +681,8 @@ const fetchSaleOrderData = async () => {
         }));
         
         // Populate available details too
-        availableTripDetails.value = data.items.map((item: any) => ({
-            id: item.item_id,
-            item_id: item.item_id,
-            item_name: item.item_name || '',
-            unit_id: item.unit_id,
-            unit_name: item.unit_name || '',
-            quantity: item.quantity || null,
-            transport_type: [],
-            vehicle_type_no: [],
-            price: null
-        }));
+        syncProductsToTripDetails();
+        availableTripDetails.value = JSON.parse(JSON.stringify(customerTripDetails.value));
       }
     }
   } catch (err: any) {
@@ -778,6 +841,10 @@ const fetchFormData = async () => {
         isAdded: true
       }));
     }
+
+    if (productTableItems.value.length > 0) {
+      syncProductsToTripDetails();
+    }
     
     // Populate edit mode: always fetch logistics orders list when supplier_logistic_id exists (from API or any change)
     if (formData.value.supplier_logistic_id) {
@@ -864,7 +931,7 @@ const handleSubmit = async (option: SubmitOption) => {
         notes: item.notes
       })),
       customer_trip_logistics_details: customerTripDetails.value.map(item => ({
-        id: isEditMode.value ? item.id : null,
+        ...(isEditMode.value && item.id != null ? { id: item.id } : {}),
         item_id: item.item_id,
         unit_id: item.unit_id,
         quantity: item.quantity,
@@ -872,7 +939,7 @@ const handleSubmit = async (option: SubmitOption) => {
         vehicle_type_no: item.vehicle_type_no
       })),
       logistic_company_trip_logistics_details: logisticCompanyTripDetails.value.map(item => ({
-        id: isEditMode.value ? item.id : null,
+        ...(isEditMode.value && item.id != null ? { id: item.id } : {}),
         item_id: item.item_id,
         unit_id: item.unit_id,
         quantity: item.quantity,
@@ -997,7 +1064,6 @@ const syncProductsToTripDetails = () => {
         };
       }
       return {
-        id: product.item_id,
         item_id: product.item_id,
         item_name: product.item_name,
         unit_id: product.unit_id,
@@ -1072,6 +1138,37 @@ const tripDetailsHeaders = [
   { title: "السعر", key: "price" }
 ];
 
+const handleEditCustomerTripDetail = (item: any) => {
+  const toEdit = customerTripDetails.value.find(p => p.item_id === item.item_id);
+  if (toEdit) {
+    editingTripDetail.value = { ...toEdit, isAdded: true };
+    showCustomerRowDetailsDialog.value = true;
+  }
+};
+
+const handleCustomerTripDetailRowUpdated = (updatedProduct: TripLogisticsDetail) => {
+  const index = customerTripDetails.value.findIndex(p => p.item_id === updatedProduct.item_id);
+  if (index !== -1) {
+    customerTripDetails.value[index] = { ...updatedProduct };
+  }
+  editingTripDetail.value = null;
+};
+
+const handleEditLogisticTripDetail = (item: any) => {
+  const toEdit = logisticCompanyTripDetails.value.find(p => p.item_id === item.item_id);
+  if (toEdit) {
+    editingTripDetail.value = { ...toEdit, isAdded: true };
+    showLogisticRowDetailsDialog.value = true;
+  }
+};
+
+const handleLogisticTripDetailRowUpdated = (updatedProduct: TripLogisticsDetail) => {
+  const index = logisticCompanyTripDetails.value.findIndex(p => p.item_id === updatedProduct.item_id);
+  if (index !== -1) {
+    logisticCompanyTripDetails.value[index] = { ...updatedProduct };
+  }
+  editingTripDetail.value = null;
+};
 
 const handleCustomerDetailsUpdated = (details: TripLogisticsDetail[]) => {
   customerTripDetails.value = details;
@@ -1417,7 +1514,8 @@ onMounted(async () => {
           </div>
         </div>
         <div class="mb-4">
-          <DataTable :headers="tripDetailsHeaders" :items="customerTripDetails">
+          <DataTable :headers="tripDetailsHeaders" :items="customerTripDetails" show-actions force-show-edit
+            @edit="handleEditCustomerTripDetail">
             <template #item.vehicle_type_no="{ item }">
               <div class="flex gap-2 my-2">
                 <div v-for="(vehicle, index) in item.vehicle_type_no" :key="index" class="w-[180px]">
@@ -1460,7 +1558,8 @@ onMounted(async () => {
           </div>  
         </div>
         <div class="mb-4">
-          <DataTable :headers="tripDetailsHeaders" :items="logisticCompanyTripDetails">
+          <DataTable :headers="tripDetailsHeaders" :items="logisticCompanyTripDetails" show-actions force-show-edit
+            @edit="handleEditLogisticTripDetail">
             <template #item.vehicle_type_no="{ item }">
               <div class="flex gap-2 my-2 items-center">
                 <div v-for="(vehicle, index) in item.vehicle_type_no" :key="index" class="w-[180px]">
@@ -1534,6 +1633,28 @@ onMounted(async () => {
       :unit-items="unitItems"
       request-type="transfer_service"
       @products-updated="handleEditProductsBulk"
+    />
+
+    <!-- تعديل صف واحد — تفاصيل العميل -->
+    <AddTripDetailsDialog
+      v-model="showCustomerRowDetailsDialog"
+      :transport-types="transportTypeItems"
+      :unit-items="unitItems"
+      :edit-item="editingTripDetail"
+      :available-items="availableTripDetails.length ? availableTripDetails : customerTripDetails"
+      :existing-items="customerTripDetails"
+      @product-updated="handleCustomerTripDetailRowUpdated"
+    />
+
+    <!-- تعديل صف واحد — شركة النقل -->
+    <AddTripDetailsDialog
+      v-model="showLogisticRowDetailsDialog"
+      :transport-types="transportTypeItems"
+      :unit-items="unitItems"
+      :edit-item="editingTripDetail"
+      :available-items="availableTripDetails.length ? availableTripDetails : logisticCompanyTripDetails"
+      :existing-items="logisticCompanyTripDetails"
+      @product-updated="handleLogisticTripDetailRowUpdated"
     />
 
     <!-- Customer Trip Details Edit Dialog -->
