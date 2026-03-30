@@ -2,19 +2,30 @@
 import { reactive, watch } from 'vue';
 
 interface Props {
-  ongoingProjects: number | null;
-  completedProjects: number | null;
-  employeesCount: number | null;
+  productionLinesCount: number | null;
+  operationalReadiness: string | null;
+  operationalStatus: string | null;
+  totalWorkers: number | null;
   engineersCount: number | null;
   techniciansCount: number | null;
-  operationalCapacity: string | null;
-  specialization: string | null;
-  siteReadiness: string | null;
-  safetyManagementSystem: boolean;
-  environmentalCompliance: boolean;
-  operationalCapacityItems: Array<{ title: string; value: string }>;
-  specializationItems: Array<{ title: string; value: string }>;
-  siteReadinessItems: Array<{ title: string; value: string }>;
+  qualityControlSystem: string | null;
+  qualityLabAvailability: boolean;
+  safetySystem: string | null;
+  workingHours: string | null;
+  equipmentType: string[];
+  operationMode: string | null;
+  maintenanceSystem: string | null;
+  weighbridgeAvailability: boolean;
+  weighbridgeType: string | null;
+  operationalReadinessItems: Array<{ title: string; value: string }>;
+  operationalStatusItems: Array<{ title: string; value: string }>;
+  qualityControlSystemItems: Array<{ title: string; value: string }>;
+  safetySystemItems: Array<{ title: string; value: string }>;
+  workingHoursItems: Array<{ title: string; value: string }>;
+  equipmentTypesItems: Array<{ title: string; value: string }>;
+  operationModeItems: Array<{ title: string; value: string }>;
+  maintenanceSystemItems: Array<{ title: string; value: string }>;
+  weighbridgeTypeItems: Array<{ title: string; value: string }>;
   formErrors?: Record<string, string>;
 }
 
@@ -25,45 +36,53 @@ const emit = defineEmits<{
   'clear:error': [field: string];
 }>();
 
-const clearError = (field: string) => {
-  emit('clear:error', field);
+const formData = reactive({
+  productionLinesCount: props.productionLinesCount,
+  operationalReadiness: props.operationalReadiness,
+  operationalStatus: props.operationalStatus,
+  totalWorkers: props.totalWorkers,
+  engineersCount: props.engineersCount,
+  techniciansCount: props.techniciansCount,
+  qualityControlSystem: props.qualityControlSystem,
+  qualityLabAvailability: props.qualityLabAvailability,
+  safetySystem: props.safetySystem,
+  workingHours: props.workingHours,
+  equipmentType: props.equipmentType,
+  operationMode: props.operationMode,
+  maintenanceSystem: props.maintenanceSystem,
+  weighbridgeAvailability: props.weighbridgeAvailability,
+  weighbridgeType: props.weighbridgeType,
+});
+
+watch(() => props, (newProps) => {
+  Object.assign(formData, {
+    productionLinesCount: newProps.productionLinesCount,
+    operationalReadiness: newProps.operationalReadiness,
+    operationalStatus: newProps.operationalStatus,
+    totalWorkers: newProps.totalWorkers,
+    engineersCount: newProps.engineersCount,
+    techniciansCount: newProps.techniciansCount,
+    qualityControlSystem: newProps.qualityControlSystem,
+    qualityLabAvailability: newProps.qualityLabAvailability,
+    safetySystem: newProps.safetySystem,
+    workingHours: newProps.workingHours,
+    equipmentType: newProps.equipmentType,
+    operationMode: newProps.operationMode,
+    maintenanceSystem: newProps.maintenanceSystem,
+    weighbridgeAvailability: newProps.weighbridgeAvailability,
+    weighbridgeType: newProps.weighbridgeType,
+  });
+}, { deep: true });
+
+const clearError = (field: string) => emit('clear:error', field);
+
+const emitUpdate = () => {
+  emit('update:formData', { ...formData });
 };
 
 const handleFieldUpdate = (field: string) => {
   clearError(field);
   emitUpdate();
-};
-
-const formData = reactive({
-  ongoingProjects: props.ongoingProjects,
-  completedProjects: props.completedProjects,
-  employeesCount: props.employeesCount,
-  engineersCount: props.engineersCount,
-  techniciansCount: props.techniciansCount,
-  operationalCapacity: props.operationalCapacity,
-  specialization: props.specialization,
-  siteReadiness: props.siteReadiness,
-  safetyManagementSystem: props.safetyManagementSystem,
-  environmentalCompliance: props.environmentalCompliance,
-});
-
-watch(() => props, (newProps) => {
-  Object.assign(formData, {
-    ongoingProjects: newProps.ongoingProjects,
-    completedProjects: newProps.completedProjects,
-    employeesCount: newProps.employeesCount,
-    engineersCount: newProps.engineersCount,
-    techniciansCount: newProps.techniciansCount,
-    operationalCapacity: newProps.operationalCapacity,
-    specialization: newProps.specialization,
-    siteReadiness: newProps.siteReadiness,
-    safetyManagementSystem: newProps.safetyManagementSystem,
-    environmentalCompliance: newProps.environmentalCompliance,
-  });
-}, { deep: true });
-
-const emitUpdate = () => {
-  emit('update:formData', { ...formData });
 };
 </script>
 
@@ -72,47 +91,65 @@ const emitUpdate = () => {
     <h2 class="text-lg font-bold text-primary-900 mb-4">المعلومات التشغيلية</h2>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-      <TextInput v-model="formData.ongoingProjects" @input="() => handleFieldUpdate('ongoing_projects')" 
-        label="عدد المشاريع الجارية" placeholder="ادخل العدد" type="number" 
-        :error-messages="formErrors?.ongoing_projects" />
-      <TextInput v-model="formData.completedProjects" @input="() => handleFieldUpdate('completed_projects')" 
-        label="عدد المشاريع المكتملة" placeholder="ادخل العدد" type="number" 
-        :error-messages="formErrors?.completed_projects" />
-      <TextInput v-model="formData.employeesCount" @input="() => handleFieldUpdate('employees_count')" 
-        label="إجمالي عدد الموظفين" placeholder="ادخل العدد" type="number" 
-        :error-messages="formErrors?.employees_count" />
-      <TextInput v-model="formData.engineersCount" @input="() => handleFieldUpdate('engineers_count')" 
-        label="عدد المهندسين" placeholder="ادخل العدد" type="number" 
-        :error-messages="formErrors?.engineers_count" />
-      <TextInput v-model="formData.techniciansCount" @input="() => handleFieldUpdate('technicians_count')" 
-        label="عدد الفنيين" placeholder="ادخل العدد" type="number" 
-        :error-messages="formErrors?.technicians_count" />
-      <SelectWithIconInput clearable v-model="formData.operationalCapacity" 
-        @update:model-value="() => handleFieldUpdate('operational_capacity')"
-        label="القدرة التشغيلية للمقاول" placeholder="اختر" :items="operationalCapacityItems" 
-        :error-messages="formErrors?.operational_capacity" />
-      <SelectWithIconInput clearable v-model="formData.specialization" 
-        @update:model-value="() => handleFieldUpdate('specialization')"
-        label="التخصص الرئيسي المقاول" placeholder="اختر" :items="specializationItems" 
-        :error-messages="formErrors?.specialization" />
-      <SelectWithIconInput clearable v-model="formData.siteReadiness" 
-        @update:model-value="() => handleFieldUpdate('site_readiness')" label="جاهزية مواقع العمل"
-        placeholder="اختر" :items="siteReadinessItems" :error-messages="formErrors?.site_readiness" />
+      <PriceInput v-model="formData.productionLinesCount" @update:model-value="() => handleFieldUpdate('production_lines_count')"
+        label="عدد خطوط الإنتاج" placeholder="ادخل عدد خطوط الإنتاج مثل: 5"
+        :error-messages="formErrors?.production_lines_count" />
+
+      <SelectWithIconInput clearable v-model="formData.operationalStatus" @update:model-value="() => handleFieldUpdate('operational_status')"
+        label="حالة التشغيل" placeholder="اختر حالة التشغيل مثل: نشط" :items="operationalStatusItems" 
+        :error-messages="formErrors?.operational_status" />
+
+      <PriceInput v-model="formData.totalWorkers" @update:model-value="() => handleFieldUpdate('total_workers')" label="عدد العمال"
+        placeholder="ادخل عدد العمال مثل: 200" :error-messages="formErrors?.total_workers" />
+
+      <PriceInput v-model="formData.engineersCount" @update:model-value="() => handleFieldUpdate('engineers_count')" label="عدد المهندسين" 
+        placeholder="ادخل عدد المهندسين مثل: 30" :error-messages="formErrors?.engineers_count" />
+
+      <PriceInput v-model="formData.techniciansCount" @update:model-value="() => handleFieldUpdate('technicians_count')" label="عدد الفنيين" 
+        placeholder="ادخل عدد الفنيين مثل: 50" :error-messages="formErrors?.technicians_count" />
+
+      <SelectWithIconInput clearable v-model="formData.qualityControlSystem" @update:model-value="() => handleFieldUpdate('quality_control_system')"
+        label="نظام ضبط الجودة" placeholder="اختر نظام الجودة مثل: ISO 9001" :items="qualityControlSystemItems" 
+        :error-messages="formErrors?.quality_control_system" />
+
+      <SelectWithIconInput clearable v-model="formData.workingHours" @update:model-value="() => handleFieldUpdate('working_hours')"
+        label="اوقات العمل" placeholder="اختر أوقات العمل مثل: 8:00 am - 5:00 pm" :items="workingHoursItems" 
+        :error-messages="formErrors?.working_hours" />
+
+      <SelectWithIconInput clearable v-model="formData.safetySystem" @update:model-value="() => handleFieldUpdate('safety_system')"
+        label="نظام السلامة" placeholder="اختر نظام السلامة مثل: متكامل" :items="safetySystemItems" 
+        :error-messages="formErrors?.safety_system" />
+
+      <MultipleSelectInput v-model="formData.equipmentType" @update:model-value="() => handleFieldUpdate('equipment_type')"
+        label="نوع المعدات" placeholder="اختر نوع المعدات مثل: أوتوماتيكي" :items="equipmentTypesItems"
+        :input-props="{ clearable: true }" :error-messages="formErrors?.equipment_type" />
+
+      <SelectWithIconInput clearable v-model="formData.maintenanceSystem" @update:model-value="() => handleFieldUpdate('maintenance_system')"
+        label="نظام الصيانة" placeholder="اختر نظام الصيانة مثل: وقائي" :items="maintenanceSystemItems" 
+        :error-messages="formErrors?.maintenance_system" />
+
+      <SelectWithIconInput clearable v-model="formData.operationMode" @update:model-value="() => handleFieldUpdate('operation_mode')"
+        label="طريقة التشغيل" placeholder="اختر طريقة التشغيل مثل: متواصل" :items="operationModeItems" 
+        :error-messages="formErrors?.operation_mode" />
+
+      <SelectWithIconInput clearable v-model="formData.weighbridgeType" @update:model-value="() => handleFieldUpdate('weighbridge_type')"
+        label="نوع الميزان" placeholder="اختر نوع الميزان مثل: إلكتروني" :items="weighbridgeTypeItems" 
+        :error-messages="formErrors?.weighbridge_type" />
+
       <div>
-        <span class="text-gray-700 text-sm font-semibold mb-2 block">نظام إدارة السلامة</span>
+        <span class="text-gray-700 text-sm font-semibold mb-2 block">وجود ميزان</span>
         <div class="flex gap-4">
-          <v-radio-group v-model="formData.safetyManagementSystem" 
-            @update:model-value="() => handleFieldUpdate('safety_management_system')" inline hide-details>
+          <v-radio-group v-model="formData.weighbridgeAvailability" @update:model-value="() => handleFieldUpdate('weighbridge_availability')" inline hide-details>
             <v-radio :value="true" color="primary">
               <template #label>
-                <span :class="formData.safetyManagementSystem ? 'text-primary font-semibold' : 'text-gray-600'">
+                <span :class="formData.weighbridgeAvailability ? 'text-primary font-semibold' : 'text-gray-600'">
                   نعم
                 </span>
               </template>
             </v-radio>
             <v-radio :value="false" color="primary">
               <template #label>
-                <span :class="!formData.safetyManagementSystem ? 'text-primary font-semibold' : 'text-gray-600'">
+                <span :class="!formData.weighbridgeAvailability ? 'text-primary font-semibold' : 'text-gray-600'">
                   لا
                 </span>
               </template>
@@ -120,27 +157,26 @@ const emitUpdate = () => {
           </v-radio-group>
         </div>
       </div>
+
       <div>
-        <span class="text-gray-700 text-sm font-semibold mb-2 block">الالتزام بالأنظمة البيئية</span>
+        <span class="text-gray-700 text-sm font-semibold mb-2 block">وجود مختبر جودة</span>
         <div class="flex gap-4">
-          <v-radio-group v-model="formData.environmentalCompliance" 
-            @update:model-value="() => handleFieldUpdate('environmental_compliance')" inline hide-details>
+          <v-radio-group v-model="formData.qualityLabAvailability" @update:model-value="() => handleFieldUpdate('quality_lab_availability')" inline hide-details>
             <v-radio :value="true" color="primary">
               <template #label>
-                <span :class="formData.environmentalCompliance ? 'text-primary font-semibold' : 'text-gray-600'">
+                <span :class="formData.qualityLabAvailability ? 'text-primary font-semibold' : 'text-gray-600'">
                   نعم
                 </span>
               </template>
             </v-radio>
             <v-radio :value="false" color="primary">
               <template #label>
-                <span :class="!formData.environmentalCompliance ? 'text-primary font-semibold' : 'text-gray-600'">
+                <span :class="!formData.qualityLabAvailability ? 'text-primary font-semibold' : 'text-gray-600'">
                   لا
                 </span>
               </template>
             </v-radio>
           </v-radio-group>
-
         </div>
       </div>
     </div>

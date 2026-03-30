@@ -113,7 +113,7 @@ const editIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none" xm
   <div class="mb-6 bg-gray-50 -mx-6">
     <!-- Credit and Debt Limits -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 px-6 pt-6 pb-8">
-      <TextInput v-model="creditLimit" @input="emitUpdate" label="الحد الأعلى للائتمان" placeholder="أدخل الحد الأعلى للائتمان"
+      <PriceInput v-model="creditLimit" @input="emitUpdate" label="الحد الأعلى للائتمان" placeholder="ادخل الحد الأعلى للائتمان"
         :rules="[numeric()]"  :error-messages="props.formErrors?.['credit_limit']"
         @update:model-value="clearError('credit_limit')">
         <template #append-inner>
@@ -127,8 +127,8 @@ const editIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none" xm
             </div>
           </v-tooltip>
         </template>
-      </TextInput>
-      <TextInput v-model="debitLimit" @input="emitUpdate" label="الحد الأعلى للدين" placeholder="أدخل الحد الأعلى للدين"
+      </PriceInput>
+      <PriceInput v-model="debitLimit" @input="emitUpdate" label="الحد الأعلى للدين" placeholder="ادخل الحد الأعلى للدين"
         :rules="[numeric()]"  :error-messages="props.formErrors?.['debit_limit']"
         @update:model-value="clearError('debit_limit')">
         <template #append-inner>
@@ -142,7 +142,7 @@ const editIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none" xm
             </div>
           </v-tooltip>
         </template>
-      </TextInput>
+      </PriceInput>
     </div>
 
     <div class="flex justify-between items-center mb-4 border-y border-gray-200 px-6 py-2">
@@ -169,15 +169,15 @@ const editIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none" xm
             <SelectInput clearable v-model="account.bank_id" :input-props="{ class : 'min-w-40' }"  :rules="[required()]"
               :error-messages="getBankAccountError(index, 'bank_id')"
               @update:model-value="() => { clearBankAccountError(index, 'bank_id'); emitUpdate(); }" 
-              density="compact" variant="outlined" placeholder="اسم البنك" :items="bankItems" />
+              density="compact" variant="outlined" placeholder="اختر اسم البنك" :items="bankItems" />
           </td>
           <td class="py-3 px-4">
             <TextInput v-model="account.bank_branch" :input-props="{ class : 'min-w-40' }" density="compact" variant="outlined" hide-details
-              placeholder="فرع البنك" @blur="emitUpdate" />
+              placeholder="ادخل فرع البنك" @blur="emitUpdate" />
           </td>
           <td class="px-4">
             <TextInput v-model="account.iban" :input-props="{ class : 'min-w-40' }" density="compact" variant="outlined" hide-details
-              placeholder="الآيبان/IBAN" @blur="emitUpdate">
+              placeholder="ادخل الآيبان/IBAN" @blur="emitUpdate">
               <template #append-inner>
                 <v-tooltip location="top" content-class="custom-tooltip">
                   <template #activator="{ props: tooltipProps }">

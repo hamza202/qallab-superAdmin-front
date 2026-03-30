@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { reactive, watch, ref } from 'vue';
-import SelectInput from '@/components/common/forms/selectInput.vue';
 import { taxNo, unifiedLoginId, email } from '@/utils/validators';
 
 // Available languages
@@ -11,7 +10,7 @@ const availableLanguages = ref([
 
 interface Props {
   businessNameTranslations: { ar: string; en: string };
-  ownerName: string;
+  ownerCompanyName: string;
   mobile: string;
   phone: string;
   email: string;
@@ -30,9 +29,6 @@ interface Props {
   cityItems: Array<{ title: string; value: number }>;
   languageItems: Array<{ title: string; value: number }>;
   tradeNameTranslations: { ar: string; en: string };
-  entityType: string | null;
-  isActive: boolean;
-  entityTypeItems?: Array<{ title: string; value: string }>;
   formErrors?: Record<string, string>;
 }
 
@@ -54,7 +50,7 @@ const handleInputUpdate = (field: string) => {
 
 const formData = reactive({
   businessNameTranslations: props.businessNameTranslations,
-  ownerName: props.ownerName,
+  ownerCompanyName: props.ownerCompanyName,
   mobile: props.mobile,
   phone: props.phone,
   email: props.email,
@@ -70,15 +66,13 @@ const formData = reactive({
   address1: props.address1,
   languageId: props.languageId,
   tradeNameTranslations: props.tradeNameTranslations,
-  entityType: props.entityType,
-  isActive: props.isActive,
 });
 
 // Watch props and update local formData
 watch(() => props, (newProps) => {
   Object.assign(formData, {
     businessNameTranslations: newProps.businessNameTranslations,
-    ownerName: newProps.ownerName,
+    ownerCompanyName: newProps.ownerCompanyName,
     mobile: newProps.mobile,
     phone: newProps.phone,
     email: newProps.email,
@@ -94,8 +88,6 @@ watch(() => props, (newProps) => {
     address1: newProps.address1,
     languageId: newProps.languageId,
     tradeNameTranslations: newProps.tradeNameTranslations,
-    entityType: newProps.entityType,
-    isActive: newProps.isActive,
   });
 }, { deep: true });
 
@@ -138,20 +130,20 @@ const markIcon = `<svg width="18" height="22" viewBox="0 0 18 22" fill="none" xm
       
       
       <TextInput 
-        v-model="formData.ownerName" 
+        v-model="formData.ownerCompanyName" 
         @input="emitUpdate"
         label="اسم المالك / الشركة المالكة"
         placeholder="ادخل اسم المالك أو الشركة المالكة" 
-        :error-messages="props.formErrors?.['owner_name']" 
-        @update:model-value="clearError('owner_name')" 
+        :error-messages="props.formErrors?.['owner_company_name']" 
+        @update:model-value="clearError('owner_company_name')" 
       />
       
       <TextInput v-model="formData.buisnessno" :rules="[required(), numeric()]" 
-        @input="() => handleInputUpdate('buisnessno')" label="السجل التجاري" 
-        placeholder="أدخل السجل التجاري" :error-messages="props.formErrors?.['commercial_register'] || props.formErrors?.['buisnessno']"
+        @input="() => handleInputUpdate('commercial_register')" label="السجل التجاري" 
+        placeholder="ادخل رقم السجل التجاري" :error-messages="props.formErrors?.['commercial_register'] || props.formErrors?.['buisnessno']"
         @update:model-value="clearError('commercial_register')" type="text" />
 
-      <!-- Row 2: الرقم الضريبي | معرف الدخول الموحد | نوع الكيان -->
+      <!-- Row 2: الرقم الضريبي | معرف الدخول الموحد | الهاتف -->
       <TextInput v-model="formData.taxno" :hide-details="false" @input="() => handleInputUpdate('taxno')"
         label="الرقم الضريبي" placeholder="أدخل الرقم الضريبي" :rules="[taxNo()]"
         :error-messages="props.formErrors?.['taxno']" @update:model-value="clearError('taxno')" type="text" />
@@ -161,24 +153,25 @@ const markIcon = `<svg width="18" height="22" viewBox="0 0 18 22" fill="none" xm
         :rules="[unifiedLoginId()]" :error-messages="props.formErrors?.['unified_login_id']"
         @update:model-value="clearError('unified_login_id')" type="text" />
 
-      <SelectInput clearable v-model="formData.entityType" @update:model-value="emitUpdate" label="نوع الكيان"
-        placeholder="اختر نوع الكيان" :items="props.entityTypeItems || []"
-        :error-messages="props.formErrors?.['entity_type']" />
-
       <TelInput v-model="formData.phone" label="الهاتف" :rules="[required(), saudiPhone()]"
-        :error-messages="props.formErrors?.['phone']" @input="() => handleInputUpdate('phone')" />
+        :error-messages="props.formErrors?.['phone']"
+       @update:model-value="clearError('phone')"
+        @input="() => handleInputUpdate('phone')" />
       <TelInput v-model="formData.mobile" label="الجوال" :rules="[required(), saudiPhone()]"
-        :error-messages="props.formErrors?.['mobile']" @input="() => handleInputUpdate('mobile')" />
+        :error-messages="props.formErrors?.['mobile']"
+        @update:model-value="clearError('mobile')"
+        @input="() => handleInputUpdate('mobile')" />
+
 
       <TextInput v-model="formData.email" @input="() => handleInputUpdate('email')" label="البريد الإلكتروني"
-        placeholder="info@buildtrans.sa" :rules="[required()]" dir="ltr" type="email"
+        placeholder="ادخل البريد الإلكتروني" :rules="[required()]" dir="ltr" type="email"
         :error-messages="props.formErrors?.['email']" />
 
       <!-- Row 4: اللغة (Full width) -->
       <div>
-        <SelectWithIconInput clearable show-add-button v-model="formData.languageId"
+        <SelectWithIconInput clearable show-add-button v-model="formData.languageId" @update:model-value="emitUpdate" 
           label="اللغة" placeholder="اختر اللغة" :items="languageItems" :rules="[required()]" 
-          @update:model-value="() => { clearError('language_id'); emitUpdate(); }" :error-messages="props.formErrors?.['language_id']" />
+          @input="() => handleInputUpdate('language_id')" :error-messages="props.formErrors?.['language_id']" />
       </div>
     </div>
 
@@ -188,12 +181,12 @@ const markIcon = `<svg width="18" height="22" viewBox="0 0 18 22" fill="none" xm
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 gap-y-6">
       <!-- Row 1: الدولة | المدينة | الحي -->
       <SelectWithIconInput clearable v-model="formData.countryId" label="الدولة"
-        placeholder="Saudi arabia" :items="countryItems" 
+        placeholder="اختر الدولة" :items="countryItems" 
         :error-messages="props.formErrors?.['country_id']" 
         @update:model-value="() => { clearError('country_id'); emitUpdate(); }" />
       
       <SelectWithIconInput clearable v-model="formData.cityId" label="المدينة"
-        placeholder="Riyadh" :items="cityItems" 
+        placeholder="اختر المدينة" :items="cityItems" 
         :error-messages="props.formErrors?.['city_id']" 
         @update:model-value="() => { clearError('city_id'); emitUpdate(); }" />
       
@@ -208,36 +201,13 @@ const markIcon = `<svg width="18" height="22" viewBox="0 0 18 22" fill="none" xm
       
       <TextInput v-model="formData.buildingNumber" @input="emitUpdate" label="رقم المبنى" placeholder="ادخل رقم المبنى" />
 
-      <!-- Row 3: العنوان الوطني | حالة المقاول -->
+      <!-- Row 3: العنوان الوطني -->
       <TextInput v-model="formData.address1" dir="ltr" @input="emitUpdate" label="العنوان الوطني"
-        placeholder="ادخل العنوان الوطني">
+        placeholder="ادخل العنوان الوطني الكامل هنا">
         <template #prepend-inner>
           <span v-html="markIcon"></span>
         </template>
       </TextInput>
-
-      <!-- <div>
-        <span class="text-sm font-semibold text-gray-700 mb-2 block">حالة المقاول ؟</span>
-        <div class="flex items-center gap-3 mt-1">
-          <v-radio-group v-model="formData.isActive" inline hide-details @update:model-value="emitUpdate">
-            <v-radio :value="true" color="primary">
-              <template #label>
-                <span :class="formData.isActive ? 'text-primary font-semibold' : 'text-gray-600'">
-                  فعال
-                </span>
-              </template>
-            </v-radio>
-            <v-radio :value="false" color="primary">
-              <template #label>
-                <span :class="!formData.isActive ? 'text-primary font-semibold' : 'text-gray-600'">
-                  غير فعال
-                </span>
-              </template>
-            </v-radio>
-          </v-radio-group>
-        </div>
-      </div> -->
-      
     </div>
   </div>
 </template>
