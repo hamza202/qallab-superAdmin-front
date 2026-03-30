@@ -131,7 +131,7 @@ const fetchMaterialMerchants = async (append = false) => {
     nextCursor.value = response.pagination?.next_cursor ?? null;
   } catch (err: any) {
     console.error('Error fetching material merchants:', err);
-    toast.error(err?.response?.data?.message || 'فشل تحميل تجار المواد');
+    toast.error(err?.response?.data?.message || t('common.messages.general.loadDataFailed'));
   } finally {
     loading.value = false;
     loadingMore.value = false;
@@ -149,11 +149,11 @@ const confirmDelete = async (item: any) => {
   try {
     deleteLoading.value = true;
     await api.delete(`/material-merchants/${item.id}`);
-    toast.success('تم حذف تاجر المواد بنجاح');
+    toast.success(t('common.messages.general.deleteSuccess'));
     await fetchMaterialMerchants();
   } catch (err: any) {
     console.error('Error deleting material merchant:', err);
-    toast.error(err?.response?.data?.message || 'فشل حذف تاجر المواد');
+    toast.error(err?.response?.data?.message || t('common.messages.general.deleteError'));
   } finally {
     deleteLoading.value = false;
   }
@@ -176,7 +176,7 @@ const confirmStatusChange = async () => {
       status: newStatus
     });
 
-    toast.success(`تم ${newStatus ? 'تفعيل' : 'تعطيل'} تاجر المواد بنجاح`);
+    toast.success(t('common.messages.general.changeStatusSuccess'));
 
     const index = tableItems.value.findIndex(c => c.id === itemToChangeStatus.value!.id);
     if (index !== -1) {
@@ -185,7 +185,7 @@ const confirmStatusChange = async () => {
 
   } catch (err: any) {
     console.error('Error changing material merchant status:', err);
-    toast.error(err?.response?.data?.message || 'فشل تغيير حالة تاجر المواد');
+    toast.error(err?.response?.data?.message || t('common.messages.general.changeStatusError'));
   } finally {
     statusChangeLoading.value = false;
     showStatusChangeDialog.value = false;
@@ -220,13 +220,13 @@ const confirmBulkDelete = async () => {
     await api.post('/material-merchants/bulk-delete', {
       ids: selectedMaterialMerchants.value
     });
-    toast.success(`تم حذف ${selectedMaterialMerchants.value.length} تاجر مواد بنجاح`);
+    toast.success(t('common.messages.general.deleteSuccess'));
     selectedMaterialMerchants.value = [];
     showBulkDeleteDialog.value = false;
     await fetchMaterialMerchants();
   } catch (err: any) {
     console.error('Error bulk deleting:', err);
-    toast.error(err?.response?.data?.message || 'فشل حذف تجار المواد');
+    toast.error(err?.response?.data?.message || t('common.messages.general.deleteError'));
   } finally {
     deleteLoading.value = false;
   }
@@ -283,7 +283,7 @@ const updateHeadersOnServer = async () => {
     });
   } catch (err: any) {
     console.error('Error updating headers:', err);
-    toast.error(err?.response?.data?.message || 'Failed to update headers');
+    toast.error(err?.response?.data?.message || t('common.messages.general.saveError'));
   } finally {
     updatingHeaders.value = false;
   }
@@ -350,11 +350,11 @@ const toggleAdvancedFilters = () => {
         class="flex justify-end items-stretch rounded border border-gray-300 w-fit ms-auto mb-4 overflow-hidden bg-white text-sm">
         <ButtonWithIcon variant="flat" height="40" rounded="0"
           custom-class="font-semibold text-base border-gray-300 bg-primary-100 !text-primary-900"
-          :prepend-icon="importIcon" :label="t('common.import')" />
+          :prepend-icon="importIcon" :label="t('common.actions.import')" />
 
         <ButtonWithIcon variant="flat" height="40" rounded="0"
           custom-class="font-semibold text-base border-gray-300 bg-primary-50 !text-primary-900"
-          :prepend-icon="exportIcon" :label="t('common.export')" />
+          :prepend-icon="exportIcon" :label="t('common.actions.export')" />
       </div>
 
       <div class="bg-gray-50 rounded-md -mx-6">
@@ -364,11 +364,11 @@ const toggleAdvancedFilters = () => {
             class="flex flex-wrap items-stretch rounded overflow-hidden border border-gray-200 bg-white text-sm">
             <ButtonWithIcon variant="flat" height="40" rounded="0"
               custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-              :prepend-icon="trash_1_icon" color="white" :label="t('common.delete')" @click="handleBulkDelete" />
+              :prepend-icon="trash_1_icon" color="white" :label="t('common.table.deleteSelected')" @click="handleBulkDelete" />
             <div class="w-px bg-gray-200"></div>
             <ButtonWithIcon variant="flat" height="40" rounded="0"
               custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-              :prepend-icon="trash_2_icon" color="white" :label="t('common.deleteAll')" @click="handleBulkDelete" />
+              :prepend-icon="trash_2_icon" color="white" :label="t('common.actions.delete')" @click="handleBulkDelete" />
           </div>
 
           <div class="flex flex-wrap gap-3">
@@ -376,7 +376,7 @@ const toggleAdvancedFilters = () => {
               <template v-slot:activator="{ props }">
                 <ButtonWithIcon v-bind="props" variant="outlined" rounded="4" color="gray-500" height="40"
                   custom-class="font-semibold text-base border-gray-400" :prepend-icon="columnIcon"
-                  :label="t('common.columns')" append-icon="mdi-chevron-down" />
+                  :label="t('common.table.columns')" append-icon="mdi-chevron-down" />
               </template>
               <v-list>
                 <v-list-item v-for="header in allHeaders" :key="header.key" @click="toggleHeader(header.key)">
@@ -390,7 +390,7 @@ const toggleAdvancedFilters = () => {
             </v-menu>
             <ButtonWithIcon variant="flat" color="primary-500" height="40" rounded="4"
               custom-class="px-7 font-semibold text-base text-white border !border-primary-200"
-              :prepend-icon="searchIcon" :label="t('common.advancedSearch')" @click="toggleAdvancedFilters" />
+              :prepend-icon="searchIcon" :label="t('common.table.advancedSearch')" @click="toggleAdvancedFilters" />
           </div>
         </div>
 
@@ -398,27 +398,27 @@ const toggleAdvancedFilters = () => {
           class="border-y border-y-primary-100 bg-primary-50 px-4 sm:px-6 py-3 flex flex-col gap-3 sm:gap-2">
           <div class="flex flex-wrap xl:!flex-nowrap gap-3 justify-end sm:justify-start">
             <v-text-field v-model="filterBusinessName" density="comfortable" variant="outlined" hide-details
-              placeholder="اسم الشركة" class="w-full sm:w-40 bg-white" @keyup.enter="applyFilters" />
+              :placeholder="$t('form.identity.businessName.placeholder')" class="w-full sm:w-40 bg-white" @keyup.enter="applyFilters" />
             <v-text-field v-model="filterBusinessNo" density="comfortable" variant="outlined" hide-details
-              placeholder="رقم السجل" class="w-full sm:w-40 bg-white" @keyup.enter="applyFilters" />
+              :placeholder="$t('form.identity.commercialRegister.placeholder')" class="w-full sm:w-40 bg-white" @keyup.enter="applyFilters" />
             <v-text-field v-model="filterTaxNo" density="comfortable" variant="outlined" hide-details
-              placeholder="الرقم الضريبي" class="w-full sm:w-40 bg-white" @keyup.enter="applyFilters" />
+              :placeholder="$t('form.identity.taxNumber.placeholder')" class="w-full sm:w-40 bg-white" @keyup.enter="applyFilters" />
             <v-text-field v-model="filterOwnerName" density="comfortable" variant="outlined" hide-details
-              placeholder="اسم المالك" class="w-full sm:w-40 bg-white" @keyup.enter="applyFilters" />
+              :placeholder="$t('form.identity.ownerName.placeholder')" class="w-full sm:w-40 bg-white" @keyup.enter="applyFilters" />
             <v-text-field v-model="filterPhone" density="comfortable" variant="outlined" hide-details
-              placeholder="الهاتف" class="w-full sm:w-40 bg-white" @keyup.enter="applyFilters" />
+              :placeholder="$t('form.identity.phone.placeholder')" class="w-full sm:w-40 bg-white" @keyup.enter="applyFilters" />
             <v-text-field v-model="filterEmail" density="comfortable" variant="outlined" hide-details
-              placeholder="البريد الإلكتروني" class="w-full sm:w-40 bg-white" @keyup.enter="applyFilters" />
+              :placeholder="$t('form.identity.email.placeholder',{email: 'info@ex.sa'})" class="w-full sm:w-40 bg-white" @keyup.enter="applyFilters" />
             <v-select v-model="filterStatus" :items="statusItems" density="comfortable" variant="outlined" hide-details
-              placeholder="الحالة" class="w-full sm:w-40 bg-white" @update:model-value="applyFilters" />
+              :placeholder="$t('form.fields.status.placeholder')" class="w-full sm:w-40 bg-white" @update:model-value="applyFilters" />
 
             <div class="flex gap-2 items-center">
               <ButtonWithIcon variant="flat" color="primary-500" rounded="4" height="40"
                 custom-class="px-5 font-semibold !text-white text-sm sm:text-base" :prepend-icon="searchIcon"
-                label="ابحث" @click="applyFilters" />
+                :label="$t('common.actions.search')" @click="applyFilters" />
               <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4" border="sm"
                 custom-class="px-5 font-semibold text-sm sm:text-base !text-primary-800 !border-primary-200"
-                prepend-icon="mdi-refresh" label="إعادة تعيين" @click="resetFilters" />
+                prepend-icon="mdi-refresh" :label="$t('common.actions.reset')" @click="resetFilters" />
             </div>
           </div>
         </div>
@@ -439,14 +439,14 @@ const toggleAdvancedFilters = () => {
         <div ref="loadMoreTrigger" class="h-4"></div>
         <div v-if="loadingMore" class="flex justify-center items-center py-4">
           <v-progress-circular indeterminate color="primary" size="32" />
-          <span class="mr-2 text-gray-600">جاري تحميل المزيد...</span>
+          <span class="ms-2 text-gray-600">{{ $t('common.ui.loadingMore') }}</span>
         </div>
       </div>
 
     </div>
 
-    <DeleteConfirmDialog v-model="showBulkDeleteDialog" :loading="deleteLoading" title="حذف تجار المواد"
-      :message="`هل أنت متأكد من حذف ${selectedMaterialMerchants.length} تاجر مواد؟`" @confirm="confirmBulkDelete" />
+    <DeleteConfirmDialog v-model="showBulkDeleteDialog" :loading="deleteLoading" :title="$t('pages.materialMerchants.list.deleteDialog.title')"
+      :message="$t('pages.materialMerchants.list.deleteDialog.message', { count: selectedMaterialMerchants.length })" @confirm="confirmBulkDelete" />
 
     <StatusChangeDialog v-model="showStatusChangeDialog" :loading="statusChangeLoading"
       :item-name="itemToChangeStatus?.business_name" :current-status="itemToChangeStatus?.status || false"

@@ -1,100 +1,5 @@
 {
   "pages": {
-    "simpleProducts": {
-      "title": "المنتجات البسيطة",
-      "description": "تمكنك من ادرة المنتجات البسيطة المضافة واضافة منتجات بسيطة اخرى",
-      "list": "قائمة المنتجات البسيطة",
-      "create": "إضافة منتج بسيط",
-      "edit": "تعديل منتج بسيط"
-    },
-    "profile": {
-      "title": "إعدادات الملف الشخصي",
-      "description": "تستطيع تعديل بياناتك الشخصية من هنا"
-    },
-    "groupProducts": {
-      "title": "منتجات المجموعة",
-      "description": "تمكنك من ادرة المنتجات المجموعة المضافة واضافة منتجات مجموعة اخرى",
-      "list": "قائمة المنتجات المجموعة",
-      "create": "إضافة منتج مجموعة",
-      "edit": "تعديل منتج مجموعة"
-    },
-    "compositeProducts": {
-      "title": "المنتجات المركبة",
-      "description": "تمكنك من اضافة المنتجات المركبة"
-    },
-    "ProductsCategories": {
-      "title": "تصنيفات المنتجات",
-      "description": "تمكنك من إدارة تصنيفات المنتجات"
-    },
-    "ServicesCategories": {
-      "title": "تصنيفات الخدمات",
-      "description": "تمكنك من إدارة تصنيفات الخدمات"
-    },
-    "units": {
-      "title": "الوحدات",
-      "description": "تمكنك من ادارة  الوحدات",
-      "list": {
-        "deleteDialog": {
-          "title": "حذف الوحدات"
-        },
-        "messages": {
-          "deleteSuccess": "تم حذف الوحدة بنجاح",
-          "bulkDeleteSuccess": "تم حذف {count} وحدة بنجاح"
-        }
-      }
-    },
-    "brands": {
-      "title": "العلامات التجارية",
-      "description": "تمكنك من ادارة  العلامات التجارية",
-      "list": {
-        "deleteDialog": {
-          "title": "حذف العلامات التجارية"
-        },
-        "messages": {
-          "deleteSuccess": "تم حذف العلامة التجارية بنجاح",
-          "bulkDeleteSuccess": "تم حذف {count} علامة تجارية بنجاح"
-        }
-      }
-    },
-    "cities": {
-      "title": "المدن",
-      "description": "تمكنك من ادارة المدن",
-      "list": {
-        "deleteDialog": {
-          "title": "حذف المدن"
-        },
-        "messages": {
-          "deleteSuccess": "تم حذف المدينة بنجاح",
-          "bulkDeleteSuccess": "تم حذف {count} مدينة بنجاح"
-        }
-      }
-    },
-    "countries": {
-      "title": "الدول",
-      "description": "تمكنك من ادارة  الدول",
-      "list": {
-        "deleteDialog": {
-          "title": "حذف الدول"
-        },
-        "messages": {
-          "deleteSuccess": "تم حذف الدولة بنجاح",
-          "bulkDeleteSuccess": "تم حذف {count} دولة بنجاح"
-        }
-      }
-    },
-    "taxes": {
-      "title": "الضرائب",
-      "description": "تمكنك من ادارة الضرائب",
-      "list": {
-        "deleteDialog": {
-          "title": "حذف الضرائب"
-        },
-        "messages": {
-          "deleteSuccess": "تم حذف الضريبة بنجاح",
-          "bulkDeleteSuccess": "تم حذف {count} ضريبة بنجاح"
-        }
-      }
-    },
     "accountTypes": {
       "title": "انواع الحسابات",
       "description": "تمكنك من ادارة انواع الحسابات",
@@ -105,188 +10,13 @@
         }
       }
     },
-    "taxRules": {
-      "title": "القواعد الضريبية",
-      "description": "تمكنك من ادارة القواعد الضريبية"
-    },
-    "codes": {
-      "title": "اعدادات الكود",
-      "description": "تمكنك من اضافة اعدادات الكود"
-    },
-    "geoAreas": {
-      "title": "تقسيمات المناطق الجغرافية",
-      "description": "تمكنك من ادارة تقسيمات المناطق الجغرافية",
-      "FormTitle": "تقسيمات المناطق الجغرافية",
-      "FormDescription": "تمكنك من إضافة تقسيمات المناطق الجغرافية"
-    },
-    "geoSegments": {
-      "title": "تقسيمات النطاقات الجغرافية",
-      "description": "تمكنك من ادارة تقسيمات النطاقات الجغرافية"
-    },
-    "suppliers": {
-      "title": "الموردين",
-      "description": "تمكنك من ادارة الموردين",
-      "list": {
-        "addButton": "أضف مورد",
-        "deleteDialog": {
-          "title": "حذف الموردين"
-        },
-        "messages": {
-          "deleteSuccess": "تم حذف المورد بنجاح",
-          "bulkDeleteSuccess": "تم حذف {count} مورد بنجاح",
-          "statusChangeSuccess": "تم {status} المورد بنجاح",
-          "statusChangeError": "فشل تغيير حالة المورد"
-        }
-      },
-      "create": "إضافة مورد",
-      "edit": "تعديل مورد"
-    },
-    "customers": {
-      "title": "العملاء",
-      "description": "تمكنك من ادارة العملاء",
-      "list": {
-        "addButton": "أضف عميل",
-        "deleteDialog": {
-          "title": "حذف العملاء"
-        },
-        "messages": {
-          "loadError": "فشل تحميل قائمة العملاء",
-          "deleteSuccess": "تم حذف العميل بنجاح",
-          "deleteError": "فشل حذف العميل",
-          "bulkDeleteSuccess": "تم حذف {count} عميل بنجاح",
-          "bulkDeleteError": "فشل الحذف الجماعي",
-          "statusChangeSuccess": "تم {status} العميل بنجاح",
-          "statusChangeError": "فشل تغيير حالة العميل",
-          "columnsUpdateError": "فشل تحديث الأعمدة"
-        }
-      },
-      "create": "إضافة عميل",
-      "edit": "تعديل عميل"
-    },
-    "projects": {
-      "title": "جدول المشاريع",
-      "description": "عرض المشاريع",
-      "formDescription": "تمكنك من إدراة المشاريع",
-      "list": {
-        "addButton": "أضف مشروع"
-      },
-      "create": "إضافة مشروع",
-      "edit": "تعديل مشروع"
-    },
-    "ProductsBuildingMaterialPriceLists": {
-      "title": "قوائم أسعار منتجات مواد البناء الأولية",
-      "description": "تمكنك من ادارة أسعار منتجات مواد البناء الأولية"
-    },
-    "ProductsBuildingMaterialPriceList": {
-      "title": "قائمة أسعار منتجات مواد البناء الأولية",
-      "description": "تمكنك من ادارة أسعار منتجات مواد البناء الأولية"
-    },
-    "GeneralProductsPriceLists": {
-      "title": "قوائم أسعار المنتجات العامة",
-      "description": "تمكنك من ادارة اسعار المنتجات العامة"
-    },
-    "GeneralProductPriceList": {
-      "title": "قائمة أسعار المنتجات العامة",
-      "description": "تمكنك من ادارة اسعار المنتجات العامة"
-    },
-    "productionCapacityLists": {
-      "title": "قوائم  القدرة الانتاجية",
-      "description": "تمكنك من إدارة القدرة الإنتاجية للمنتجات"
-    },
-    "productionCapacityList": {
-      "title": "قائمة  القدرة الانتاجية",
-      "description": "تمكنك من إدارة القدرة الإنتاجية للمنتجات"
-    },
-    "services": {
-      "title": "الخدمات",
-      "description": "تمكنك من إدارة الخدمات",
-      "list": {
-        "addButton": "أضف خدمة",
-        "deleteDialog": {
-          "title": "حذف الخدمات"
-        },
-        "messages": {
-          "deleteSuccess": "تم حذف الخدمة بنجاح",
-          "bulkDeleteSuccess": "تم حذف {count} خدمة بنجاح",
-          "statusChangeSuccess": "تم {status} الخدمة بنجاح",
-          "statusChangeError": "فشل تغيير حالة الخدمة"
-        }
-      }
-    },
-    "servicesPricesList": {
-      "title": "قوائم أسعار الخدمات",
-      "description": "تمكنك من ادارة أسعار الخدمات",
-      "form": {
-        "categories": {
-          "all": "جميع الفئات",
-          "transport": "النقل",
-          "analysis": "التحليل",
-          "other": "أخرى"
-        }
-      }
-    },
-    "servicePricesList": {
-      "title": "قائمة أسعار الخدمات",
-      "description": "تمكنك من ادارة أسعار الخدمات"
-    },
-    "servicesSettings": {
-      "title": "إعدادات الخدمات",
-      "description": "تمكنك من ادارة إعدادات الخدمات"
-    },
-    "productVariables": {
-      "title": "متغيرات المنتج",
-      "description": "تمكنك من ادارة متغيرات المنتجات"
-    },
-    "testGroup": {
-      "title": "مجموعات الاختبارات",
-      "description": "تمكنك من ادارة مجموعات الاختبارات",
-      "tableTitle": "جدول مجموعات الاختبار"
-    },
-    "tests": {
-      "title": "الاختبارات",
-      "description": "تمكنك من إدارة الاختبارات"
-    },
-    "testMethodology": {
-      "title": "منهجية الاختبارات",
-      "description": "تمكنك من إدارة منهجية الاختبارات"
-    },
-    "sampleTypes": {
-      "title": "أنواع العينات",
-      "description": "تمكنك من إدارة أنواع العينات"
-    },
-    "vouchers": {
-      "title": "لوحة التحكم المالية",
-      "description": "تمكنك من ادارة  السندات المالية ",
-      "list": {
-        "voucherTypes": {
-          "receipt": "قبض",
-          "payment": "صرف",
-          "entry": "قيد"
-        },
-        "units": {
-          "customer": "عميل",
-          "supplier": "مورد"
-        },
-        "deleteDialog": {
-          "title": "حذف السندات"
-        },
-        "messages": {
-          "statusChangeSuccess": "تم {status} السند بنجاح",
-          "statusChangeError": "فشل تغيير حالة السند",
-          "loadError": "فشل في تحميل السندات",
-          "deleteSuccess": "تم حذف السند بنجاح",
-          "deleteError": "فشل في حذف السند",
-          "bulkDeleteSuccess": "تم حذف {count} سند بنجاح",
-          "bulkDeleteError": "فشل في حذف السندات",
-          "columnsUpdateError": "فشل تحديث الأعمدة"
-        }
-      }
-    },
-    "vouchers_form": {
-      "title": "لوحة التحكم المالية",
-      "receiptVoucherTitle": "سندات القبض",
-      "paymentVoucherTitle": "سندات الصرف",
-      "description": "تمكنك من ادارة  السندات المالية "
+    "banks": {
+      "title": "إدارة البنوك",
+      "description": "تمكنك من إدارة البنوك وحساباتها",
+      "list": "قائمة البنوك",
+      "create": "إضافة بنك جديد",
+      "formDescription": "تمكنك من إضافة بنك جديد وتفاصيله",
+      "edit": "تعديل بنك"
     },
     "banksAndTreasuries": {
       "title": "البنوك والخزائن",
@@ -308,41 +38,50 @@
         }
       }
     },
-    "logistics": {
-      "title": "شركات اللوجستيات",
-      "description": "تمكنك من ادارة بيانات شركات اللوجستيات",
-      "sidebarTitle": "إدراة شركات النقل",
+    "brands": {
+      "title": "العلامات التجارية",
+      "description": "تمكنك من ادارة  العلامات التجارية",
       "list": {
-        "filters": {
-          "productionLines": "عدد خطوط الإنتاج",
-          "logisticType": "نوع شركة النقل",
-          "currentProductionFrom": "الإنتاج الحالي من",
-          "maxProductionFrom": "الإنتاج الأقصى من"
-        },
         "deleteDialog": {
-          "title": "حذف شركات النقل"
+          "title": "حذف العلامات التجارية",
+          "message": "هل أنت متأكد من حذف {count} علامة تجارية"
         },
         "messages": {
-          "loadingConstantsError": "فشل تحميل الثوابت",
-          "bulkDeleteSuccess": "تم حذف {count} شركة نقل بنجاح",
-          "deleteSuccess": "تم حذف شركة النقل بنجاح",
-          "statusChangeSuccess": "تم {status} شركة نقل بنجاح",
-          "statusChangeError": "فشل تغيير حالة شركة النقل"
+          "deleteSuccess": "تم حذف العلامة التجارية بنجاح",
+          "bulkDeleteSuccess": "تم حذف {count} علامة تجارية بنجاح"
         }
       }
+    },
+    "cities": {
+      "title": "المدن",
+      "description": "تمكنك من ادارة المدن",
+      "list": {
+        "deleteDialog": {
+          "title": "حذف المدن",
+          "message": "هل أنت متأكد من حذف {count} مدينة"
+        },
+        "messages": {
+          "deleteSuccess": "تم حذف المدينة بنجاح",
+          "bulkDeleteSuccess": "تم حذف {count} مدينة بنجاح"
+        }
+      }
+    },
+    "codes": {
+      "title": "اعدادات الكود",
+      "description": "تمكنك من اضافة اعدادات الكود"
+    },
+    "compositeProducts": {
+      "title": "المنتجات المركبة",
+      "description": "تمكنك من اضافة المنتجات المركبة"
     },
     "contractors": {
       "title": "المقاولين ",
       "description": "تمكنك من إدارة المقاولين ",
       "editDescription": "تستطيع تعديل بيانات المقاولين  من هنا",
       "list": {
-        "filters": {
-          "municipalLicenseNumber": "رقم رخصة البلدية",
-          "contractorDegree": "درجة المقاول",
-          "classification": "التصنيف"
-        },
         "deleteDialog": {
-          "title": "حذف المقاولين"
+          "title": "حذف المقاولين",
+          "message": "هل أنت متأكد من حذف {count} مقاول؟"
         },
         "messages": {
           "loadingError": "فشل تحميل المقاولين",
@@ -374,10 +113,26 @@
         }
       }
     },
+    "countries": {
+      "title": "الدول",
+      "description": "تمكنك من ادارة  الدول",
+      "list": {
+        "deleteDialog": {
+          "title": "حذف الدول",
+          "message": "هل أنت متأكد من حذف {count} دولة؟"
+        },
+        "messages": {
+          "deleteSuccess": "تم حذف الدولة بنجاح",
+          "bulkDeleteSuccess": "تم حذف {count} دولة بنجاح"
+        }
+      }
+    },
     "crushers": {
       "title": "الكسارات",
       "description": "تمكنك من إدارة الكسارات",
       "editDescription": "تستطيع تعديل بيانات الكسارات من هنا",
+      "addTitle": "إضافة كسارة",
+      "editTitle": "تعديل الكسارة",
       "list": {
         "filters": {
           "productionLines": "عدد خطوط الإنتاج",
@@ -386,7 +141,8 @@
           "maxProductionFrom": "الإنتاج الأقصى من"
         },
         "deleteDialog": {
-          "title": "حذف الكسارات"
+          "title": "حذف الكسارات",
+          "message": "هل أنت متأكد من حذف {count} كسارة؟"
         },
         "messages": {
           "loadingConstantsError": "فشل تحميل الثوابت",
@@ -419,6 +175,83 @@
         }
       }
     },
+    "customers": {
+      "title": "العملاء",
+      "description": "تمكنك من ادارة العملاء",
+      "list": {
+        "addButton": "أضف عميل",
+        "deleteDialog": {
+          "title": "حذف العملاء",
+          "message": "هل أنت متأكد من حذف {count} عميل؟"
+        },
+        "messages": {
+          "loadError": "فشل تحميل قائمة العملاء",
+          "deleteSuccess": "تم حذف العميل بنجاح",
+          "deleteError": "فشل حذف العميل",
+          "bulkDeleteSuccess": "تم حذف {count} عميل بنجاح",
+          "bulkDeleteError": "فشل الحذف الجماعي",
+          "statusChangeSuccess": "تم {status} العميل بنجاح",
+          "statusChangeError": "فشل تغيير حالة العميل",
+          "columnsUpdateError": "فشل تحديث الأعمدة"
+        }
+      },
+      "form": {
+        "subTabs": {
+          "addressInfo": "معلومات العنوان",
+          "contactList": "قائمة الاتصال"
+        },
+        "sections": {
+          "customerData": "بيانات العميل",
+          "balances": "الارصدة"
+        },
+        "contacts": {
+          "firstName": "الاسم الاول",
+          "lastName": "الاسم الاخير",
+          "email": "البريد الالكتروني",
+          "telephone": "الهاتف",
+          "mobile": "الجوال",
+          "actions": "الاجراءات"
+        },
+        "accounting": {
+          "priceType": "نوع السعر",
+          "customerClassification": "تصنيف العميل",
+          "salesRepresentative": "مندوب المبيعات",
+          "createAccountInTree": "انشاء حساب خاص في شجرة المحاسبة",
+          "account": "الحساب",
+          "relatedCustomers": "العملاء المرتبطين",
+          "defaultStatus": "الحالة الافتراضية"
+        },
+        "balance": {
+          "debit": "دائن",
+          "credit": "مدين",
+          "balance": "الرصيد",
+          "lastAmount": "آخر مبلغ",
+          "lastUpdate": "آخر تحديث"
+        }
+      },
+      "create": "إضافة عميل",
+      "edit": "تعديل عميل"
+    },
+    "DeliveryDocs": {
+      "title": "جدول وثائق التسليم",
+      "description": "تمكنك من ادارة وثائق التسليم",
+      "edit": "تمكنك من تعديل سند التسليم",
+      "create": "تمكنك من إضافة سند تسليم"
+    },
+    "DeliveryDocsLogistics": {
+      "title": "جدول وثائق تسليم خدمات النقل",
+      "description": "تمكنك من ادارة وثائق تسليم خدمات النقل",
+      "edit": "تعديل وثيقة تسليم خدمة نقل",
+      "view": "عرض وثيقة تسليم خدمة نقل",
+      "create": "إضافة وثيقة تسليم خدمة نقل"
+    },
+    "docStatusTransitions": {
+      "title": "إدارة الوثائق والحالات",
+      "description": "تمكنك من إدارة الوثائق والحالات",
+      "FormTitle": "ادارة مسار عمل المستندات",
+      "FormDescription": "تمكنك من اضافة الحالة والتنقلات",
+      "statusTransitionsTitle": "ادارة انتقال الحالة"
+    },
     "factories": {
       "title": "المصانع",
       "description": "تمكنك من ادارة  المصانع",
@@ -430,7 +263,8 @@
           "maxProductionFrom": "الإنتاج الأقصى من"
         },
         "deleteDialog": {
-          "title": "حذف المصانع"
+          "title": "حذف المصانع",
+          "message": "هل أنت متأكد من حذف {count} مصنع؟"
         },
         "messages": {
           "loadingConstantsError": "فشل تحميل الثوابت",
@@ -441,6 +275,76 @@
         }
       }
     },
+    "GeneralProductPriceList": {
+      "title": "قائمة أسعار المنتجات العامة",
+      "description": "تمكنك من ادارة اسعار المنتجات العامة"
+    },
+    "GeneralProductsPriceLists": {
+      "title": "قوائم أسعار المنتجات العامة",
+      "description": "تمكنك من ادارة اسعار المنتجات العامة"
+    },
+    "geoAreas": {
+      "title": "تقسيمات المناطق الجغرافية",
+      "description": "تمكنك من ادارة تقسيمات المناطق الجغرافية",
+      "FormTitle": "تقسيمات المناطق الجغرافية",
+      "FormDescription": "تمكنك من إضافة تقسيمات المناطق الجغرافية"
+    },
+    "geoSegments": {
+      "title": "تقسيم النطاقات الجغرافية",
+      "description": "تمكنك من إدارة تقسيم النطاقات الجغرافية",
+      "tableTitle": "تقسيم النطاقات الجغرافية"
+    },
+    "groupProducts": {
+      "title": "منتجات المجموعة",
+      "description": "تمكنك من ادرة المنتجات المجموعة المضافة واضافة منتجات مجموعة اخرى",
+      "list": "قائمة المنتجات المجموعة",
+      "create": "إضافة منتج مجموعة",
+      "edit": "تعديل منتج مجموعة"
+    },
+    "logistics": {
+      "title": "شركات اللوجستيات",
+      "description": "تمكنك من ادارة بيانات شركات اللوجستيات",
+      "sidebarTitle": "إدراة شركات النقل",
+      "list": {
+        "filters": {
+          "productionLines": "عدد خطوط الإنتاج",
+          "logisticType": "نوع شركة النقل",
+          "currentProductionFrom": "الإنتاج الحالي من",
+          "maxProductionFrom": "الإنتاج الأقصى من"
+        },
+        "deleteDialog": {
+          "title": "حذف شركات النقل",
+          "message": "هل أنت متأكد من حذف {count} شركة نقل؟"
+        },
+        "messages": {
+          "loadingConstantsError": "فشل تحميل الثوابت",
+          "bulkDeleteSuccess": "تم حذف {count} شركة نقل بنجاح",
+          "deleteSuccess": "تم حذف شركة النقل بنجاح",
+          "statusChangeSuccess": "تم {status} شركة نقل بنجاح",
+          "statusChangeError": "فشل تغيير حالة شركة النقل"
+        }
+      },
+      "form": {
+        "editTitle": "تعديل شركة النقل",
+        "addTitle": "إضافة شركة النقل",
+        "tabs": {
+          "basicInfo": "البيانات الاساسية",
+          "financialInfo": "البيانات المالية",
+          "commercialInfo": "البيانات التجارية",
+          "operationalInfo": "المعلومات التشغيلية"
+        },
+        "messages": {
+          "saveBasicFirst": "يجب حفظ البيانات الأساسية أولاً",
+          "basicInfoSaved": "تم حفظ البيانات الأساسية بنجاح",
+          "financialInfoSaved": "تم حفظ البيانات المالية بنجاح",
+          "commercialInfoSaved": "تم حفظ البيانات التجارية بنجاح",
+          "operationalInfoSaved": "تم حفظ المعلومات التشغيلية بنجاح",
+          "validationError": "يرجى تصحيح الأخطاء في النموذج",
+          "saveError": "فشل حفظ شركة النقل",
+          "loadError": "فشل تحميل بيانات شركة النقل"
+        }
+      }
+    },
     "materialMerchants": {
       "title": "تجار المواد",
       "sidebarTitle": "إدارة تجار المواد",
@@ -448,7 +352,8 @@
       "editDescription": "تستطيع تعديل بيانات تجار المواد من هنا",
       "list": {
         "deleteDialog": {
-          "title": "حذف تجار المواد"
+          "title": "حذف تجار المواد",
+          "message": "هل أنت متأكد من حذف {count} تاجر مواد؟"
         },
         "messages": {
           "loadingError": "فشل تحميل تجار المواد",
@@ -459,46 +364,199 @@
           "statusChangeSuccess": "تم {status} تاجر المواد بنجاح",
           "statusChangeError": "فشل تغيير حالة تاجر المواد"
         }
-      }
-    },
-    "users": {
-      "title": "المستخدمين",
-      "description": "إدارة المستخدمين في النظام",
-      "list": {
-        "pageTitle": "المستخدمين والأدوار",
-        "pageDescription": "تمكنك من عرض وتعديل المستخدمين وادوارهم",
+      },
+      "form": {
+        "editTitle": "تعديل تاجر المواد",
+        "addTitle": "إضافة تاجر المواد",
         "tabs": {
-          "users": "المستخدمين",
-          "roles": "الأدوار"
-        },
-        "activeUsers": "المستخدمين الفعّالين :",
-        "usersAndRoles": "المستخدمين والأدوار :",
-        "addNewUser": "اضافة مستخدم جديد",
-        "emptyState": {
-          "title": "لا يوجد مستخدمين",
-          "description": "لم يتم العثور على مستخدمين مطابقين للبحث"
+          "basicInfo": "البيانات الاساسية",
+          "financialInfo": "البيانات المالية"
         },
         "messages": {
-          "fetchError": "حدث خطأ أثناء جلب البيانات",
-          "statusChangeSuccess": "تم {status} المستخدم بنجاح",
-          "statusChangeError": "حدث خطأ أثناء تغيير الحالة"
-        },
-        "modules": {
-          "products": "المنتجات",
-          "services": "الخدمات",
-          "purchases": "المشتريات",
-          "finance": "المالية",
-          "clearing": "المقاصة والمقايضة",
-          "accounting": "المحاسبة",
-          "users": "المستخدمين",
-          "projectManagement": "ادارة المشاريع",
-          "reports": "التقارير",
-          "carriers": "الناقلات",
-          "funding": "التمويل"
+          "saveBasicFirst": "يجب حفظ البيانات الأساسية أولاً",
+          "basicInfoSaved": "تم حفظ البيانات الأساسية بنجاح",
+          "financialInfoSaved": "تم حفظ البيانات المالية بنجاح",
+          "validationError": "يرجى تصحيح الأخطاء في النموذج",
+          "saveError": "فشل حفظ تاجر المواد",
+          "loadError": "فشل تحميل بيانات تاجر المواد"
         }
+      }
+    },
+    "OrdersFuels": {
+      "title": "جدول طلبيات مشتريات المحروقات",
+      "description": "تمكنك من ادارة طلبيات مشتريات المحروقات",
+      "FormTitle": "طلبية محروقات",
+      "FormDescriptionCreate": "تمكنك من اضافة طلبية محروقات",
+      "FormDescriptionEdit": "تمكنك من تعديل طلبية محروقات"
+    },
+    "OrdersLogistics": {
+      "title": "قائمة طلبيات خدمة النقل",
+      "description": "تستطيع استعراض طلبيات خدمة النقل والقيام بالإجراءات عليها",
+      "FormTitle": "طلبية خدمة النقل",
+      "FormDescription": "إصدار طلبية خدمة النقل",
+      "edit": "تعديل طلبية خدمة النقل",
+      "view": "عرض طلبية خدمة النقل"
+    },
+    "OrdersMaterialProduct": {
+      "title": "جدول طلبيات مشتريات مواد اولية",
+      "description": "تمكنك من ادارة طلبيات مشتريات مواد اولية",
+      "FormTitle": "طلبية مشتريات مواد بناء أولية",
+      "FormDescription": "إصدار طلبية مشتريات مواد بناء",
+      "edit": "تعديل طلبية مشتريات"
+    },
+    "PricesOffersMaterialProduct": {
+      "title": "  قائمة عروض أسعار مواد بناء أولية",
+      "description": "تستطيع استعراض عروض أسعار مواد البناء الأولية والقيام بالإجراءات عليها",
+      "FormTitle": "عرض سعر مواد بناء أولية",
+      "FormDescription": "تستطيع اضافة عرض سعر مواد بناء أولية"
+    },
+    "productionCapacityList": {
+      "title": "قائمة  القدرة الانتاجية",
+      "description": "تمكنك من إدارة القدرة الإنتاجية للمنتجات"
+    },
+    "productionCapacityLists": {
+      "title": "قوائم  القدرة الانتاجية",
+      "description": "تمكنك من إدارة القدرة الإنتاجية للمنتجات"
+    },
+    "ProductsBuildingMaterialPriceList": {
+      "title": "قائمة أسعار منتجات مواد البناء الأولية",
+      "description": "تمكنك من ادارة أسعار منتجات مواد البناء الأولية"
+    },
+    "ProductsBuildingMaterialPriceLists": {
+      "title": "قوائم أسعار منتجات مواد البناء الأولية",
+      "description": "تمكنك من ادارة أسعار منتجات مواد البناء الأولية"
+    },
+    "ProductsCategories": {
+      "title": "تصنيفات المنتجات",
+      "description": "تمكنك من إدارة تصنيفات المنتجات",
+      "list": {
+        "deleteDialog": {
+          "title": "حذف التصنيفات",
+          "message": "هل أنت متأكد من حذف {count} تصنيف؟"
+        }
+      }
+    },
+    "productVariables": {
+      "title": "متغيرات المنتج",
+      "description": "تمكنك من ادارة متغيرات المنتجات"
+    },
+    "profile": {
+      "title": "إعدادات الملف الشخصي",
+      "description": "تستطيع تعديل بياناتك الشخصية من هنا"
+    },
+    "projects": {
+      "title": "جدول المشاريع",
+      "description": "عرض المشاريع",
+      "formDescription": "تمكنك من إدراة المشاريع",
+      "list": {
+        "addButton": "أضف مشروع"
       },
-      "create": "إضافة مستخدم",
-      "edit": "تعديل مستخدم"
+      "create": "إضافة مشروع",
+      "edit": "تعديل مشروع"
+    },
+    "PurchaseInvoices": {
+      "title": "جدول فواتير المشتريات",
+      "description": "تمكنك من ادارة فواتير المشتريات",
+      "FormTitle": "اصدار فاتورة مشتريات مواد بناء أولية",
+      "FormDescription": "إصدار فاتورة طلبية مشتريات مواد بناء",
+      "edit": "تعديل سند استلام"
+    },
+    "PurchaseInvoicesLogistics": {
+      "title": "جدول فواتير مشتريات خدمة النقل",
+      "description": "تمكنك من ادارة فواتير مشتريات خدمة النقل",
+      "FormTitle": "اصدار فاتورة مشتريات خدمة نقل",
+      "FormDescription": "إصدار فاتورة طلبية مشتريات خدمة نقل"
+    },
+    "purchasesLogistics": {
+      "title": " قائمة طلبات عروض أسعار خدمات النقل",
+      "description": "تستطيع استعراض طلبات عروض أسعار  خدمات النقل والقيام بالإجراءات عليها",
+      "list": "قائمة طلبات عروض أسعار خدمات النقل",
+      "create": "طلب عرض سعر خدمة النقل",
+      "createDescription": "تمكنك من إضافة طلب عرض سعر خدمة نقل",
+      "edit": "تعديل طلب خدمة لوجستية",
+      "view": "عرض طلب خدمة لوجستية"
+    },
+    "PurchasesRequests": {
+      "title": "جدول طلبيات المشتريات",
+      "description": "تمكنك من ادارة طلبيات المشتريات",
+      "FormTitle": "طلبية مشتريات مواد بناء أولية",
+      "FormDescription": "إصدار طلبية مشتريات مواد بناء"
+    },
+    "PurchasesRequestsFuels": {
+      "title": "طلبات عروض أسعار المحروقات",
+      "description": "تستطيع استعراض طلبات عروض سعر المحروقات والقيام بالإجراءات عليها",
+      "FormTitle": "طلب عرض سعر محروقات",
+      "FormDescription": "تمكنك من اضافة طلب عرض سعر محروقات",
+      "edit": "تعديل طلب عرض سعر محروقات",
+      "view": "عرض طلب عرض سعر محروقات"
+    },
+    "PurchasesRequestsMaterialProduct": {
+      "title": "قائمة طلبات عروض اسعار مواد بناء أولية",
+      "description": "تستطيع استعراض طلبات عروض اسعار مواد البناء الأولية والقيام بالإجراءات عليها",
+      "FormTitle": "طلب عرض سعر مواد بناء أولية",
+      "FormDescription": "تمكنك من اضافة عرض سعر مواد بناء أولية",
+      "edit": "تعديل طلب عرض سعر مواد بناء أولية",
+      "view": "عرض طلب عرض سعر مواد بناء أولية"
+    },
+    "QuotationsLogistics": {
+      "title": "عروض أسعار خدمات النقل",
+      "description": "تستطيع استعراض عروض أسعار خدمات النقل والقيام بالإجراءات عليها",
+      "view": "عرض عرض سعر خدمة النقل"
+    },
+    "QuotationsMaterialProduct": {
+      "title": "عروض اسعار مواد اوليه",
+      "description": "تستطيع استعراض عروض أسعار مواد البناء الأولية في المشتريات",
+      "view": "عرض عرض سعر مواد أولية"
+    },
+    "ReceiptVouchers": {
+      "title": "جدول سندات الاستلام",
+      "description": "تمكنك من ادارة طلبيات المشتريات",
+      "FormTitle": "إضافة سند استلام",
+      "FormDescription": "إنشاء سند استلام لطلبية مشتريات",
+      "edit": "تعديل سند استلام"
+    },
+    "ReceivingDocs": {
+      "title": "جدول سندات الاستلام",
+      "description": "تمكنك من ادارة سندات الاستلام",
+      "tableTitle": "جدول عناصر سند الاستلام",
+      "edit": "تعديل سند استلام",
+      "view": "عرض سند استلام",
+      "create": "إضافة سند استلام",
+      "docCode": "كود السند"
+    },
+    "ReceivingDocsLogistics": {
+      "title": "جدول سندات استلام خدمات النقل",
+      "description": "تمكنك من ادارة سندات استلام خدمات النقل",
+      "edit": "تعديل وثيقة استلام خدمة نقل",
+      "view": "عرض وثيقة استلام خدمة نقل",
+      "create": "إضافة وثيقة استلام خدمة نقل",
+      "docCode": "كود السند"
+    },
+    "requestForQuotation": {
+      "title": "طلب عروض الأسعار",
+      "description": "اختر المنتج أو الخدمة التي تحتاجها، وأدخل التفاصيل المطلوبة بكل بساطة",
+      "list": "قائمة طلبات عروض الأسعار",
+      "create": "إضافة طلب عرض سعر",
+      "edit": "تعديل طلب عرض سعر",
+      "view": "عرض طلب عرض سعر"
+    },
+    "requestForQuotationFuel": {
+      "title": "قائمة طلبات عروض أسعار المحروقات",
+      "description": "تستطيع استعراض طلبات عروض سعر المحروقات والقيام بالإجراءات عليها",
+      "FormTitle": "طلب عرض سعر محروقات",
+      "FormDescription": "تمكنك من اضافة طلب عرض سعر  المحروقات",
+      "create": "إضافة طلب عرض سعر محروقات",
+      "edit": "تعديل طلب عرض سعر محروقات",
+      "view": "عرض طلب عرض سعر محروقات"
+    },
+    "requestForQuotationMaterialProduct": {
+      "title": " قائمة طلبات عروض اسعار مواد بناء أولية",
+      "description": "تستطيع استعراض طلبات عروض اسعار مواد البناء الأولية والقيام بالإجراءات عليها",
+      "FormTitle": "عرض سعر مواد أولية",
+      "FormDescription": "تمكنك من اضافة عرض سعر  مواد أولية",
+      "create": "إضافة طلب عرض سعر منتج مادي",
+      "edit": "تعديل طلب عرض سعر منتج مادي",
+      "view": "عرض طلب عرض سعر منتج مادي"
     },
     "roles": {
       "title": "الأدوار والصلاحيات",
@@ -536,73 +594,20 @@
       "create": "إضافة دور",
       "edit": "تعديل دور"
     },
-    "requestForQuotation": {
-      "title": "طلب عروض الأسعار",
-      "description": "اختر المنتج أو الخدمة التي تحتاجها، وأدخل التفاصيل المطلوبة بكل بساطة",
-      "list": "قائمة طلبات عروض الأسعار",
-      "create": "إضافة طلب عرض سعر",
-      "edit": "تعديل طلب عرض سعر",
-      "view": "عرض طلب عرض سعر"
+    "SalesInvoices": {
+      "title": "جدول فواتير المبيعات",
+      "description": "تمكنك من ادارة فواتير المبيعات",
+      "FormTitle": "اصدار فاتورة مبيعات مواد بناء أولية",
+      "FormDescription": "إصدار فاتورة طلبية مبيعات مواد بناء"
     },
-    "QuotationsMaterialProduct": {
-      "title": "عروض اسعار مواد اوليه",
-      "description": "تستطيع استعراض عروض أسعار مواد البناء الأولية في المشتريات",
-      "view": "عرض عرض سعر مواد أولية"
-    },
-    "requestForQuotationMaterialProduct": {
-      "title": " قائمة طلبات عروض اسعار مواد بناء أولية",
-      "description": "تستطيع استعراض طلبات عروض اسعار مواد البناء الأولية والقيام بالإجراءات عليها",
-      "FormTitle": "عرض سعر مواد أولية",
-      "FormDescription": "تمكنك من اضافة عرض سعر  مواد أولية",
-      "create": "إضافة طلب عرض سعر منتج مادي",
-      "edit": "تعديل طلب عرض سعر منتج مادي",
-      "view": "عرض طلب عرض سعر منتج مادي"
-    },
-    "requestForQuotationFuel": {
-      "title": "قائمة طلبات عروض أسعار المحروقات",
-      "description": "تستطيع استعراض طلبات عروض سعر المحروقات والقيام بالإجراءات عليها",
-      "FormTitle": "طلب عرض سعر محروقات",
-      "FormDescription": "تمكنك من اضافة طلب عرض سعر  المحروقات",
-      "create": "إضافة طلب عرض سعر محروقات",
-      "edit": "تعديل طلب عرض سعر محروقات",
-      "view": "عرض طلب عرض سعر محروقات"
-    },
-    "systemStatuses": {
-      "title": "ادارة حالات النظام",
-      "description": "تمكنك من ادارة حالات النظام"
-    },
-    "docStatusTransitions": {
-      "title": "إدارة الوثائق والحالات",
-      "description": "تمكنك من إدارة الوثائق والحالات",
-      "FormTitle": "ادارة مسار عمل المستندات",
-      "FormDescription": "تمكنك من اضافة الحالة والتنقلات",
-      "statusTransitionsTitle": "ادارة انتقال الحالة"
-    },
-    "PricesOffersMaterialProduct": {
-      "title": "  قائمة عروض أسعار مواد بناء أولية",
-      "description": "تستطيع استعراض عروض أسعار مواد البناء الأولية والقيام بالإجراءات عليها",
-      "FormTitle": "عرض سعر مواد بناء أولية",
-      "FormDescription": "تستطيع اضافة عرض سعر مواد بناء أولية"
-    },
-    "PurchasesRequests": {
-      "title": "جدول طلبيات المشتريات",
-      "description": "تمكنك من ادارة طلبيات المشتريات",
-      "FormTitle": "طلبية مشتريات مواد بناء أولية",
-      "FormDescription": "إصدار طلبية مشتريات مواد بناء"
-    },
-    "OrdersMaterialProduct": {
-      "title": "جدول طلبيات مشتريات مواد اولية",
-      "description": "تمكنك من ادارة طلبيات مشتريات مواد اولية",
-      "FormTitle": "طلبية مشتريات مواد بناء أولية",
-      "FormDescription": "إصدار طلبية مشتريات مواد بناء",
-      "edit": "تعديل طلبية مشتريات"
-    },
-    "OrdersFuels": {
-      "title": "جدول طلبيات مشتريات المحروقات",
-      "description": "تمكنك من ادارة طلبيات مشتريات المحروقات",
-      "FormTitle": "طلبية محروقات",
-      "FormDescriptionCreate": "تمكنك من اضافة طلبية محروقات",
-      "FormDescriptionEdit": "تمكنك من تعديل طلبية محروقات"
+    "SalesLogisticsInvoices": {
+      "title": "جدول فواتير مبيعات خدمة النقل",
+      "description": "تمكنك من ادارة فواتير مبيعات خدمة النقل",
+      "FormTitle": "اصدار فاتورة مبيعات خدمة نقل",
+      "FormDescription": "إصدار فاتورة طلبية مبيعات خدمة نقل",
+      "FormTitleEdit": "تعديل فاتورة مبيعات خدمة نقل",
+      "FormDescriptionEdit": "تعديل فاتورة طلبية مبيعات خدمة نقل",
+      "print": "طباعة الفاتورة"
     },
     "SalesOrdersFuels": {
       "title": "جدول طلبيات مبيعات المحروقات",
@@ -622,15 +627,56 @@
       "edit": "تعديل طلبية خدمة نقل",
       "view": "عرض طلبية خدمة نقل"
     },
+    "SalesOrdersMaterialProduct": {
+      "pickupTitle": "إضافة حجز موعد تسليم",
+      "pickupDescr": "إضافة إجراء حجز موعد تسليم"
+    },
+    "SalesPayments": {
+      "title": "جدول دفعات المبيعات",
+      "description": "عرض دفعات المبيعات",
+      "FormTitle": "دفع الدفعة المالية",
+      "FormDescription": "ادخل بيانات الدفعة المالية",
+      "print": "طباعة الدفعة",
+      "view": "تفاصيل الدفع",
+      "viewDescription": "اطلع على كافة تفاصيل الدفعة"
+    },
+    "SalesQuotationsFuels": {
+      "title": "عروض أسعار المحروقات",
+      "description": "إدارة عروض أسعار المحروقات",
+      "FormTitle": "عرض سعر محروقات",
+      "FormDescription": "إنشاء عرض سعر محروقات جديد",
+      "edit": "تعديل عرض سعر محروقات",
+      "view": "عرض عرض سعر محروقات"
+    },
+    "SalesQuotationsLogistics": {
+      "title": "عروض أسعار خدمات النقل",
+      "description": "إدارة عروض أسعار خدمات النقل",
+      "FormTitle": "عرض سعر خدمة النقل",
+      "FormDescription": "إنشاء عرض سعر خدمة النقل جديد",
+      "edit": "تعديل عرض سعر خدمة النقل",
+      "view": "عرض عرض سعر خدمة النقل"
+    },
     "SalesRequests": {
       "title": "جدول طلبيات المبيعات",
       "description": "تمكنك من ادارة طلبيات المبيعات",
       "FormTitle": "طلبية مبيعات مواد بناء أولية",
       "FormDescription": "إصدار طلبية مبيعات مواد بناء"
     },
-    "SalesOrdersMaterialProduct": {
-      "pickupTitle": "إضافة حجز موعد تسليم",
-      "pickupDescr": "إضافة إجراء حجز موعد تسليم"
+    "SalesRequestsFuels": {
+      "title": "طلبات عروض أسعار محروقات",
+      "description": "إدارة طلبات عروض أسعار المحروقات",
+      "FormTitle": "طلب عرض سعر محروقات",
+      "FormDescription": "إنشاء طلب عرض سعر محروقات جديد",
+      "edit": "تعديل طلب عرض سعر محروقات",
+      "view": "عرض طلب عرض سعر محروقات"
+    },
+    "SalesRequestsLogistics": {
+      "title": "طلبات عروض أسعار خدمات النقل",
+      "description": "إدارة طلبات عروض أسعار خدمات النقل",
+      "FormTitle": "طلب عرض سعر خدمة نقل",
+      "FormDescription": "إنشاء طلب عرض سعر خدمة نقل جديد",
+      "edit": "تعديل طلب عرض سعر خدمة نقل",
+      "view": "عرض طلب عرض سعر خدمة نقل"
     },
     "SalesSoPickups": {
       "title": "حجوزات التسليم",
@@ -679,51 +725,6 @@
         }
       }
     },
-    "ReceiptVouchers": {
-      "title": "جدول سندات الاستلام",
-      "description": "تمكنك من ادارة طلبيات المشتريات",
-      "FormTitle": "إضافة سند استلام",
-      "FormDescription": "إنشاء سند استلام لطلبية مشتريات",
-      "edit": "تعديل سند استلام"
-    },
-    "PurchasesRequestsFuels": {
-      "title": "طلبات عروض أسعار المحروقات",
-      "description": "تستطيع استعراض طلبات عروض سعر المحروقات والقيام بالإجراءات عليها",
-      "FormTitle": "طلب عرض سعر محروقات",
-      "FormDescription": "تمكنك من اضافة طلب عرض سعر محروقات",
-      "edit": "تعديل طلب عرض سعر محروقات",
-      "view": "عرض طلب عرض سعر محروقات"
-    },
-    "PurchaseInvoices": {
-      "title": "جدول فواتير المشتريات",
-      "description": "تمكنك من ادارة فواتير المشتريات",
-      "FormTitle": "اصدار فاتورة مشتريات مواد بناء أولية",
-      "FormDescription": "إصدار فاتورة طلبية مشتريات مواد بناء",
-      "edit": "تعديل سند استلام"
-    },
-    "PurchaseInvoicesLogistics": {
-      "title": "جدول فواتير مشتريات خدمة النقل",
-      "description": "تمكنك من ادارة فواتير مشتريات خدمة النقل",
-      "FormTitle": "اصدار فاتورة مشتريات خدمة نقل",
-      "FormDescription": "إصدار فاتورة طلبية مشتريات خدمة نقل"
-    },
-    "ReceivingDocs": {
-      "title": "جدول سندات الاستلام",
-      "description": "تمكنك من ادارة سندات الاستلام",
-      "tableTitle": "جدول عناصر سند الاستلام",
-      "edit": "تعديل سند استلام",
-      "view": "عرض سند استلام",
-      "create": "إضافة سند استلام",
-      "docCode": "كود السند"
-    },
-    "ReceivingDocsLogistics": {
-      "title": "جدول سندات استلام خدمات النقل",
-      "description": "تمكنك من ادارة سندات استلام خدمات النقل",
-      "edit": "تعديل وثيقة استلام خدمة نقل",
-      "view": "عرض وثيقة استلام خدمة نقل",
-      "create": "إضافة وثيقة استلام خدمة نقل",
-      "docCode": "كود السند"
-    },
     "SalesTrips": {
       "title": "الرحلات",
       "description": "تمكنك من إدارة الرحلات",
@@ -732,112 +733,144 @@
       "createDescription": "تمكنك من إنشاء الرحلات",
       "edit": "تعديل رحلة"
     },
-    "purchasesLogistics": {
-      "title": " قائمة طلبات عروض أسعار خدمات النقل",
-      "description": "تستطيع استعراض طلبات عروض أسعار  خدمات النقل والقيام بالإجراءات عليها",
-      "list": "قائمة طلبات عروض أسعار خدمات النقل",
-      "create": "طلب عرض سعر خدمة النقل",
-      "createDescription": "تمكنك من إضافة طلب عرض سعر خدمة نقل",
-      "edit": "تعديل طلب خدمة لوجستية",
-      "view": "عرض طلب خدمة لوجستية"
+    "sampleTypes": {
+      "title": "أنواع العينات",
+      "description": "تمكنك من إدارة أنواع العينات"
     },
-    "QuotationsLogistics": {
-      "title": "عروض أسعار خدمات النقل",
-      "description": "تستطيع استعراض عروض أسعار خدمات النقل والقيام بالإجراءات عليها",
-      "view": "عرض عرض سعر خدمة النقل"
+    "servicePricesList": {
+      "title": "قائمة أسعار الخدمات",
+      "description": "تمكنك من ادارة أسعار الخدمات"
     },
-    "PurchasesRequestsMaterialProduct": {
-      "title": "قائمة طلبات عروض اسعار مواد بناء أولية",
-      "description": "تستطيع استعراض طلبات عروض اسعار مواد البناء الأولية والقيام بالإجراءات عليها",
-      "FormTitle": "طلب عرض سعر مواد بناء أولية",
-      "FormDescription": "تمكنك من اضافة عرض سعر مواد بناء أولية",
-      "edit": "تعديل طلب عرض سعر مواد بناء أولية",
-      "view": "عرض طلب عرض سعر مواد بناء أولية"
+    "services": {
+      "title": "الخدمات",
+      "description": "تمكنك من إدارة الخدمات",
+      "list": {
+        "addButton": "أضف خدمة",
+        "deleteDialog": {
+          "title": "حذف الخدمات",
+          "message": "هل أنت متأكد من حذف {count} خدمة؟"
+        },
+        "messages": {
+          "deleteSuccess": "تم حذف الخدمة بنجاح",
+          "bulkDeleteSuccess": "تم حذف {count} خدمة بنجاح",
+          "statusChangeSuccess": "تم {status} الخدمة بنجاح",
+          "statusChangeError": "فشل تغيير حالة الخدمة"
+        }
+      }
     },
-    "SalesRequestsFuels": {
-      "title": "طلبات عروض أسعار محروقات",
-      "description": "إدارة طلبات عروض أسعار المحروقات",
-      "FormTitle": "طلب عرض سعر محروقات",
-      "FormDescription": "إنشاء طلب عرض سعر محروقات جديد",
-      "edit": "تعديل طلب عرض سعر محروقات",
-      "view": "عرض طلب عرض سعر محروقات"
+    "ServicesCategories": {
+      "title": "تصنيفات الخدمات",
+      "description": "تمكنك من إدارة تصنيفات الخدمات",
+      "list": {
+        "deleteDialog": {
+          "title": "حذف تصنيفات الخدمات",
+          "message": "هل أنت متأكد من حذف {count} التصنيف"
+        }
+      }
     },
-    "SalesQuotationsFuels": {
-      "title": "عروض أسعار المحروقات",
-      "description": "إدارة عروض أسعار المحروقات",
-      "FormTitle": "عرض سعر محروقات",
-      "FormDescription": "إنشاء عرض سعر محروقات جديد",
-      "edit": "تعديل عرض سعر محروقات",
-      "view": "عرض عرض سعر محروقات"
+    "servicesPricesList": {
+      "title": "قوائم أسعار الخدمات",
+      "description": "تمكنك من ادارة أسعار الخدمات",
+      "form": {
+        "categories": {
+          "all": "جميع الفئات",
+          "transport": "النقل",
+          "analysis": "التحليل",
+          "other": "أخرى"
+        }
+      }
     },
-    "SalesInvoices": {
-      "title": "جدول فواتير المبيعات",
-      "description": "تمكنك من ادارة فواتير المبيعات",
-      "FormTitle": "اصدار فاتورة مبيعات مواد بناء أولية",
-      "FormDescription": "إصدار فاتورة طلبية مبيعات مواد بناء"
+    "servicesSettings": {
+      "title": "إعدادات الخدمات",
+      "description": "تمكنك من ادارة إعدادات الخدمات"
     },
-    "SalesPayments": {
-      "title": "جدول دفعات المبيعات",
-      "description": "عرض دفعات المبيعات",
-      "FormTitle": "دفع الدفعة المالية",
-      "FormDescription": "ادخل بيانات الدفعة المالية",
-      "print": "طباعة الدفعة",
-      "view": "تفاصيل الدفع",
-      "viewDescription":"اطلع على كافة تفاصيل الدفعة"
+    "simpleProducts": {
+      "title": "المنتجات البسيطة",
+      "description": "تمكنك من ادرة المنتجات البسيطة المضافة واضافة منتجات بسيطة اخرى",
+      "list": "قائمة المنتجات البسيطة",
+      "create": "إضافة منتج بسيط",
+      "edit": "تعديل منتج بسيط"
     },
-    "DeliveryDocs": {
-      "title": "جدول وثائق التسليم",
-      "description": "تمكنك من ادارة وثائق التسليم",
-      "edit": "تمكنك من تعديل سند التسليم",
-      "create": "تمكنك من إضافة سند تسليم"
+    "suppliers": {
+      "title": "الموردين",
+      "description": "تمكنك من ادارة الموردين",
+      "view": "بيانات المورد",
+      "list": {
+        "addButton": "أضف مورد",
+        "deleteDialog": {
+          "title": "حذف الموردين",
+          "message": "هل أنت متأكد من حذف {count} مورد؟"
+        },
+        "messages": {
+          "deleteSuccess": "تم حذف المورد بنجاح",
+          "bulkDeleteSuccess": "تم حذف {count} مورد بنجاح",
+          "statusChangeSuccess": "تم {status} المورد بنجاح",
+          "statusChangeError": "فشل تغيير حالة المورد"
+        }
+      },
+      "form": {
+        "balances": {
+          "label": "الارصدة",
+          "noBalances": "لا توجد أرصدة متاحة",
+          "headers": {
+            "balance": "الرصيد",
+            "dueAmount": "المبلغ المستحق",
+            "currency": "العملة",
+            "lastValidationDate": "تاريخ التدقيق الأخير"
+          }
+        }
+      },
+      "create": "إضافة مورد",
+      "edit": "تعديل مورد"
     },
-    "DeliveryDocsLogistics": {
-      "title": "جدول وثائق تسليم خدمات النقل",
-      "description": "تمكنك من ادارة وثائق تسليم خدمات النقل",
-      "edit": "تعديل وثيقة تسليم خدمة نقل",
-      "view": "عرض وثيقة تسليم خدمة نقل",
-      "create": "إضافة وثيقة تسليم خدمة نقل"
+    "systemStatuses": {
+      "title": "ادارة حالات النظام",
+      "description": "تمكنك من ادارة حالات النظام",
+      "list": {
+        "deleteDialog": {
+          "title": "حذف حالات النظام",
+          "message": "هل أنت متأكد من حذف {count} حالة نظام؟"
+        }
+      }
     },
-    "SalesRequestsLogistics": {
-      "title": "طلبات عروض أسعار خدمات النقل",
-      "description": "إدارة طلبات عروض أسعار خدمات النقل",
-      "FormTitle": "طلب عرض سعر خدمة نقل",
-      "FormDescription": "إنشاء طلب عرض سعر خدمة نقل جديد",
-      "edit": "تعديل طلب عرض سعر خدمة نقل",
-      "view": "عرض طلب عرض سعر خدمة نقل"
+    "taxes": {
+      "title": "الضرائب",
+      "description": "تمكنك من ادارة الضرائب",
+      "list": {
+        "deleteDialog": {
+          "title": "حذف الضرائب",
+          "message": "هل أنت متأكد من حذف {count} ضريبة؟"
+        },
+        "messages": {
+          "deleteSuccess": "تم حذف الضريبة بنجاح",
+          "bulkDeleteSuccess": "تم حذف {count} ضريبة بنجاح"
+        }
+      }
     },
-    "SalesQuotationsLogistics": {
-      "title": "عروض أسعار خدمات النقل",
-      "description": "إدارة عروض أسعار خدمات النقل",
-      "FormTitle": "عرض سعر خدمة النقل",
-      "FormDescription": "إنشاء عرض سعر خدمة النقل جديد",
-      "edit": "تعديل عرض سعر خدمة النقل",
-      "view": "عرض عرض سعر خدمة النقل"
+    "taxRules": {
+      "title": "القواعد الضريبية",
+      "description": "تمكنك من ادارة القواعد الضريبية"
     },
-    "SalesLogisticsInvoices": {
-      "title": "جدول فواتير مبيعات خدمة النقل",
-      "description": "تمكنك من ادارة فواتير مبيعات خدمة النقل",
-      "FormTitle": "اصدار فاتورة مبيعات خدمة نقل",
-      "FormDescription": "إصدار فاتورة طلبية مبيعات خدمة نقل",
-      "FormTitleEdit": "تعديل فاتورة مبيعات خدمة نقل",
-      "FormDescriptionEdit": "تعديل فاتورة طلبية مبيعات خدمة نقل",
-      "print": "طباعة الفاتورة"
+    "testGroup": {
+      "title": "مجموعات الاختبارات",
+      "description": "تمكنك من ادارة مجموعات الاختبارات",
+      "tableTitle": "جدول مجموعات الاختبار"
     },
-    "OrdersLogistics": {
-      "title": "قائمة طلبيات خدمة النقل",
-      "description": "تستطيع استعراض طلبيات خدمة النقل والقيام بالإجراءات عليها",
-      "FormTitle": "طلبية خدمة النقل",
-      "FormDescription": "إصدار طلبية خدمة النقل",
-      "edit": "تعديل طلبية خدمة النقل",
-      "view": "عرض طلبية خدمة النقل"
+    "testMethodology": {
+      "title": "منهجية الاختبارات",
+      "description": "تمكنك من إدارة منهجية الاختبارات",
+      "tableTitle": "جدول منهجيات الاختبار",
+      "list": {
+        "deleteDialog": {
+          "title": "حذف منهجيات الاختبار",
+          "message": "هل أنت متأكد من حذف {count} منهجية؟"
+        }
+      }
     },
-    "banks": {
-      "title": "إدارة البنوك",
-      "description": "تمكنك من إدارة البنوك وحساباتها",
-      "list": "قائمة البنوك",
-      "create": "إضافة بنك جديد",
-      "formDescription": "تمكنك من إضافة بنك جديد وتفاصيله",
-      "edit": "تعديل بنك"
+    "tests": {
+      "title": "الاختبارات",
+      "description": "تمكنك من إدارة الاختبارات",
+      "tableTitle": "جدول الاختبارات"
     },
     "treasuries": {
       "title": "إدارة الخزائن",
@@ -846,6 +879,93 @@
       "create": "إضافة خزينة جديدة",
       "formDescription": "اضافة خزنة مالية وتفاصيلها",
       "edit": "تعديل خزينة"
+    },
+    "units": {
+      "title": "الوحدات",
+      "description": "تمكنك من ادارة  الوحدات",
+      "list": {
+        "deleteDialog": {
+          "title": "حذف الوحدات",
+          "message": "هل أنت متأكد من حذف {count} وحدة؟"
+        },
+        "messages": {
+          "deleteSuccess": "تم حذف الوحدة بنجاح",
+          "bulkDeleteSuccess": "تم حذف {count} وحدة بنجاح"
+        }
+      }
+    },
+    "users": {
+      "title": "المستخدمين",
+      "description": "إدارة المستخدمين في النظام",
+      "list": {
+        "pageTitle": "المستخدمين والأدوار",
+        "pageDescription": "تمكنك من عرض وتعديل المستخدمين وادوارهم",
+        "tabs": {
+          "users": "المستخدمين",
+          "roles": "الأدوار"
+        },
+        "activeUsers": "المستخدمين الفعّالين :",
+        "usersAndRoles": "المستخدمين والأدوار :",
+        "addNewUser": "اضافة مستخدم جديد",
+        "emptyState": {
+          "title": "لا يوجد مستخدمين",
+          "description": "لم يتم العثور على مستخدمين مطابقين للبحث"
+        },
+        "messages": {
+          "fetchError": "حدث خطأ أثناء جلب البيانات",
+          "statusChangeSuccess": "تم {status} المستخدم بنجاح",
+          "statusChangeError": "حدث خطأ أثناء تغيير الحالة"
+        },
+        "modules": {
+          "products": "المنتجات",
+          "services": "الخدمات",
+          "purchases": "المشتريات",
+          "finance": "المالية",
+          "clearing": "المقاصة والمقايضة",
+          "accounting": "المحاسبة",
+          "users": "المستخدمين",
+          "projectManagement": "ادارة المشاريع",
+          "reports": "التقارير",
+          "carriers": "الناقلات",
+          "funding": "التمويل"
+        }
+      },
+      "create": "إضافة مستخدم",
+      "edit": "تعديل مستخدم"
+    },
+    "vouchers": {
+      "title": "لوحة التحكم المالية",
+      "description": "تمكنك من ادارة  السندات المالية ",
+      "list": {
+        "voucherTypes": {
+          "receipt": "قبض",
+          "payment": "صرف",
+          "entry": "قيد"
+        },
+        "units": {
+          "customer": "عميل",
+          "supplier": "مورد"
+        },
+        "deleteDialog": {
+          "title": "حذف السندات"
+        },
+        "messages": {
+          "statusChangeSuccess": "تم {status} السند بنجاح",
+          "statusChangeError": "فشل تغيير حالة السند",
+          "loadError": "فشل في تحميل السندات",
+          "deleteSuccess": "تم حذف السند بنجاح",
+          "deleteError": "فشل في حذف السند",
+          "bulkDeleteSuccess": "تم حذف {count} سند بنجاح",
+          "bulkDeleteError": "فشل في حذف السندات",
+          "columnsUpdateError": "فشل تحديث الأعمدة"
+        }
+      }
+    },
+    "vouchers_form": {
+      "title": "لوحة التحكم المالية",
+      "receiptVoucherTitle": "سندات القبض",
+      "paymentVoucherTitle": "سندات الصرف",
+      "description": "تمكنك من ادارة  السندات المالية "
     }
   }
 }

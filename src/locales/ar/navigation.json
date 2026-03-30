@@ -1,13 +1,145 @@
 {
-  "navigation": {
-    "purchaseOrders": "طلبات المشتريات",
-    "receivingDocs": "وثائق الاستلام",
-    "purchaseInvoices": "فواتير المشتريات",
-    "materialQuotations": "عروض اسعار مواد بناء أولية",
-    "transportQuotations": "عروض اسعار خدمات النقل",
-    "dashboard": "لوحة التحكم",
-    "users": "المستخدمين",
-    "settings": "الإعدادات",
-    "profile": "الملف الشخصي"
+  "sidebar": {
+    "main": {
+      "home": "الرئيسية"
+    },
+    "products": {
+      "title": "المنتجات",
+      "management": {
+        "title": "إدارة المتجات",
+        "simpleProducts": "منتجات بسيطة",
+        "groupProducts": "منتجات المجموعة",
+        "buildingMaterialPriceLists": "قوائم أسعار مواد البناء",
+        "generalPriceLists": "قوائم أسعار المنتجات العامة",
+        "productionCapacity": "قوائم القدرة الإنتاجية"
+      },
+      "settings": {
+        "title": "إعدادات المنتجات",
+        "productVariables": "متغيرات المنتج"
+      }
+    },
+    "services": {
+      "title": "الخدمات",
+      "servicesManagement": "إدارة الخدمات",
+      "priceListsManagement": "إدارة قوائم الاسعار"
+    },
+    "sales": {
+      "title": "المبيعات",
+      "customers": {
+        "title": "إدارة العملاء",
+        "customersList": "قائمة العملاء"
+      },
+      "quotations": {
+        "title": "إدارة عروض الأسعار",
+        "materialRequests": "طلب عروض أسعار مواد أولية",
+        "materialQuotations": "عروض أسعار مواد أولية",
+        "fuelRequests": "طلب عروض أسعار محروقات",
+        "fuelQuotations": "عروض أسعار المحروقات",
+        "logisticsRequests": "طلب عرض سعر خدمة نقل",
+        "logisticsQuotations": "عروض أسعار خدمة نقل"
+      },
+      "orders": {
+        "title": "طلبيات المبيعات",
+        "materialOrders": "طلبيات بناء مواد اولية",
+        "fuelOrders": "طلبيات محروقات",
+        "logisticsOrders": "طلبيات خدمة نقل",
+        "pickups": "حجوزات التسليم",
+        "trips": "جدول الرحلات"
+      },
+      "deliveryDocs": {
+        "title": "وثائق التسليم",
+        "deliveryDocs": "وثائق التسليم",
+        "logisticsDeliveryDocs": "وثائق تسليم خدمات النقل"
+      },
+      "invoices": {
+        "title": "فواتير المبيعات",
+        "salesInvoices": "فواتير المبيعات",
+        "logisticsSaleInvoices": "فواتير مبيعات خدمة نقل",
+        "payments": "دفعات المبيعات"
+      }
+    },
+    "purchases": {
+      "title": "المشتريات",
+      "suppliers": {
+        "title": "إدارة الموردين",
+        "suppliersManagement": "إدارة الموردين"
+      },
+      "quotations": {
+        "title": "إدارة عروض الأسعار",
+        "materialRequests": "طلب عروض أسعار مواد أولية",
+        "materialQuotations": "عروض اسعار مواد اوليه",
+        "logisticsRequests": "طلب عرض سعر خدمة نقل",
+        "logisticsQuotations": "عروض اسعار خدمة نقل",
+        "fuelRequests": "طلب عروض أسعار محروقات",
+        "fuelQuotations": "عروض أسعار محروقات"
+      },
+      "orders": {
+        "title": "طلبيات المشتريات",
+        "materialOrders": "طلبيات مواد بناء اولية",
+        "logisticsOrders": "طلبيات خدمة النقل",
+        "fuelOrders": "طلبيات محروقات"
+      },
+      "receivingDocs": {
+        "title": "وثائق الأستلام",
+        "receivingDocs": "وثائق الأستلام",
+        "logisticsReceivingDocs": "وثائق استلام خدمات النقل"
+      },
+      "invoices": {
+        "title": "فواتير المشتريات",
+        "purchaseInvoices": "فواتير المشتريات",
+        "logisticsPurchaseInvoices": "فاتورة مشتريات خدمة نقل"
+      }
+    },
+    "finance": {
+      "title": "المالية",
+      "financialDashboard": "لوحة التحكم المالية",
+      "banksAndTreasuries": "الخزائن والبنوك"
+    },
+    "users": {
+      "title": "المستخدمين",
+      "usersAndRoles": "المستخدمين والأدوار",
+      "crushersManagement": "إدارة الكسارات",
+      "contractorsManagement": "إدارة المقاولين",
+      "factoriesManagement": "إدارة المصانع",
+      "logisticsManagement": "إدارة شركات النقل",
+      "materialMerchants": "إدارة تجار المواد"
+    },
+    "settings": {
+      "title": "الإعدادات",
+      "basic": {
+        "title": "الإعدادات الاساسية",
+        "productCategories": "قائمة تصنيفات المنتجات",
+        "serviceCategories": "قائمة تصنيفات الخدمات",
+        "productTreeCategories": "تصنيفات المنتجات",
+        "serviceTreeCategories": "تصنيفات الخدمات",
+        "units": "الوحدات",
+        "factories": "المصانع",
+        "brands": "العلامة التجارية",
+        "geoRegions": "تقسيمات المناطق الجغرافية",
+        "geoZones": "تقسيمات النطاقات الجغرافية"
+      },
+      "taxes": {
+        "title": "إدارة الضرائب",
+        "taxRules": "القواعد الضريبية",
+        "taxes": "الضرائب"
+      },
+      "countriesCurrencies": {
+        "title": "الدول والعملات",
+        "countriesManagement": "إدارة الدول",
+        "citiesManagement": "إدارة المدن",
+        "currenciesManagement": "إدارة العملات"
+      },
+      "advanced": {
+        "title": "إعدادات متقدمة",
+        "codesSettings": "اعدادات الاكواد",
+        "accountTypes": "أنواع الحسابات",
+        "testGroups": "مجموعات الاختبارات",
+        "tests": "الاختبارات",
+        "testMethodologies": "منهجية الاختبارات",
+        "sampleTypes": "أنواع العينات",
+        "systemStatuses": "حالات النظام",
+        "docStatusTransitions": "إدارة الوثائق والحالات"
+      }
+    }
   }
 }

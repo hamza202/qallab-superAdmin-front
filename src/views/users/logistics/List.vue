@@ -223,7 +223,7 @@ const fetchLogistics = async (cursor?: string | null, append = false) => {
         nextCursor.value = response.pagination.next_cursor ?? null;
     } catch (err: any) {
         console.error('Error fetching logistics:', err);
-        toast.error(err?.response?.data?.message || 'Failed to fetch logistics');
+        toast.error(err?.response?.data?.message || t('common.messages.general.loadDataFailed'));
     } finally {
         loading.value = false;
         loadingMore.value = false;
@@ -278,7 +278,7 @@ const updateHeadersOnServer = async () => {
         });
     } catch (err: any) {
         console.error('Error updating headers:', err);
-        toast.error(err?.response?.data?.message || 'Failed to update headers');
+        toast.error(err?.response?.data?.message || t('common.messages.general.saveError'));
     } finally {
         updatingHeaders.value = false;
     }
@@ -305,7 +305,7 @@ const confirmStatusChange = async () => {
             status: newStatus
         });
 
-        toast.success(`تم ${newStatus ? 'تفعيل' : 'تعطيل'} الكسارة بنجاح`);
+        toast.success(t('common.messages.general.changeStatusSuccess'));
 
         const index = tableItems.value.findIndex(t => t.id === itemToChangeStatus.value!.id)
         if (index !== -1) {
@@ -314,7 +314,7 @@ const confirmStatusChange = async () => {
 
     } catch (err: any) {
         console.error('Error changing logistic status:', err);
-        toast.error(err?.response?.data?.message || 'فشل تغيير حالة الكسارة');
+        toast.error(err?.response?.data?.message || t('common.messages.general.changeStatusError'));
     } finally {
         statusChangeLoading.value = false;
         showStatusChangeDialog.value = false;
@@ -326,11 +326,11 @@ const confirmDelete = async (item: any) => {
     try {
         deleteLoading.value = true;
         await api.delete(`/logistics-companies/${item.id}`);
-        toast.success('تم حذف الكسارة بنجاح');
+        toast.success(t('common.messages.general.deleteSuccess'));
         await fetchLogistics();
     } catch (err: any) {
         console.error('Error deleting logistic:', err);
-        toast.error(err?.response?.data?.message || 'Failed to delete logistic');
+        toast.error(err?.response?.data?.message || t('common.messages.general.deleteError'));
     } finally {
         deleteLoading.value = false;
     }
@@ -345,12 +345,12 @@ const confirmBulkDelete = async () => {
     try {
         deleteLoading.value = true;
         await api.post('/logistics-companies/bulk-delete', { ids: selectedLogistics.value });
-        toast.success(`تم حذف ${selectedLogistics.value.length} كسارة بنجاح`);
+        toast.success(t('common.messages.general.deleteSuccess'));
         selectedLogistics.value = [];
         await fetchLogistics();
     } catch (err: any) {
         console.error('Error bulk deleting logistics:', err);
-        toast.error(err?.response?.data?.message || 'Failed to delete logistics');
+        toast.error(err?.response?.data?.message || t('common.messages.general.deleteError'));
     } finally {
         deleteLoading.value = false;
         showBulkDeleteDialog.value = false;
@@ -395,7 +395,7 @@ const fetchConstants = async () => {
         }
     } catch (err: any) {
         console.error('Fetch constants error:', err);
-        toast.error(err?.response?.data?.message || 'فشل تحميل الثوابت');
+        toast.error(err?.response?.data?.message || t('common.messages.general.loadConstantsFailed'));
     } finally {
         loadingConstants.value = false;
     }
@@ -448,11 +448,11 @@ onBeforeUnmount(() => {
                 class="flex justify-end items-stretch rounded border border-gray-300 w-fit ms-auto mb-4 overflow-hidden bg-white text-sm">
                 <ButtonWithIcon variant="flat" height="40" rounded="0"
                     custom-class="font-semibold text-base border-gray-300 bg-primary-100 !text-primary-900"
-                    :prepend-icon="importIcon" :label="t('common.import')" />
+                    :prepend-icon="importIcon" :label="t('common.actions.import')" />
 
                 <ButtonWithIcon variant="flat" height="40" rounded="0"
                     custom-class="font-semibold text-base border-gray-300 bg-primary-50 !text-primary-900"
-                    :prepend-icon="exportIcon" :label="t('common.export')" />
+                    :prepend-icon="exportIcon" :label="t('common.actions.export')" />
             </div>
 
             <div class="bg-gray-50 rounded-md -mx-6">
@@ -463,12 +463,12 @@ onBeforeUnmount(() => {
                         class="flex flex-wrap items-stretch rounded overflow-hidden border border-gray-200 bg-white text-sm">
                         <ButtonWithIcon variant="flat" height="40" rounded="0"
                             custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-                            :prepend-icon="trash_1_icon" color="white" :label="t('common.delete')"
+                            :prepend-icon="trash_1_icon" color="white" :label="t('common.table.deleteSelected')"
                             @click="handleBulkDelete" />
                         <div class="w-px bg-gray-200"></div>
                         <ButtonWithIcon variant="flat" height="40" rounded="0"
                             custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-                            :prepend-icon="trash_2_icon" color="white" :label="t('common.deleteAll')"
+                            :prepend-icon="trash_2_icon" color="white" :label="t('common.actions.delete')"
                             @click="handleBulkDelete" />
                     </div>
 
@@ -479,7 +479,7 @@ onBeforeUnmount(() => {
                             <template v-slot:activator="{ props }">
                                 <ButtonWithIcon v-bind="props" variant="outlined" rounded="4" color="gray-500"
                                     height="40" custom-class="font-semibold text-base border-gray-400"
-                                    :prepend-icon="columnIcon" :label="t('common.columns')"
+                                    :prepend-icon="columnIcon" :label="t('common.table.columns')"
                                     append-icon="mdi-chevron-down" />
                             </template>
                             <v-list>
@@ -497,7 +497,7 @@ onBeforeUnmount(() => {
 
                         <ButtonWithIcon variant="flat" color="primary-500" height="40" rounded="4"
                             custom-class="px-7 font-semibold text-base text-white border !border-primary-200"
-                            :prepend-icon="searchIcon" :label="t('common.advancedSearch')"
+                            :prepend-icon="searchIcon" :label="t('common.table.advancedSearch')"
                             @click="toggleAdvancedFilters" />
 
                         <!-- <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4"
@@ -554,11 +554,11 @@ onBeforeUnmount(() => {
                         <div class="flex gap-2 items-center">
                             <ButtonWithIcon variant="flat" color="primary-500" rounded="4" height="40"
                                 custom-class="px-5 font-semibold !text-white text-sm sm:text-base"
-                                :prepend-icon="searchIcon" label="ابحث" @click="applyFilters" />
+                                :prepend-icon="searchIcon" :label="$t('common.actions.search')" @click="applyFilters" />
 
                             <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4" border="sm"
                                 custom-class="px-5 font-semibold text-sm sm:text-base !text-primary-800 !border-primary-200"
-                                prepend-icon="mdi-refresh" label="إعادة تعيين" @click="resetFilters" />
+                                prepend-icon="mdi-refresh" :label="$t('common.actions.reset')" @click="resetFilters" />
                         </div>
                     </div>
                 </div>
@@ -582,14 +582,14 @@ onBeforeUnmount(() => {
                 <div ref="loadMoreTrigger" class="h-4"></div>
                 <div v-if="loadingMore" class="flex justify-center items-center py-4">
                     <v-progress-circular indeterminate color="primary" size="32" />
-                    <span class="mr-2 text-gray-600">جاري تحميل المزيد...</span>
+                    <span class="ms-2 text-gray-600">{{ $t('common.ui.loadingMore') }}</span>
                 </div>
             </div>
         </div>
 
         <!-- Bulk Delete Confirmation Dialog -->
-        <DeleteConfirmDialog v-model="showBulkDeleteDialog" :loading="deleteLoading" title="حذف الكسارات"
-            :message="`هل أنت متأكد من حذف ${selectedLogistics.length} كسارة؟`" @confirm="confirmBulkDelete" />
+        <DeleteConfirmDialog v-model="showBulkDeleteDialog" :loading="deleteLoading" :title="$t('pages.logistics.list.deleteDialog.title')"
+            :message="$t('pages.logistics.list.deleteDialog.message', { count: selectedLogistics.length })" @confirm="confirmBulkDelete" />
 
         <!-- Status Change Confirmation Dialog -->
         <StatusChangeDialog v-model="showStatusChangeDialog" :loading="statusChangeLoading"

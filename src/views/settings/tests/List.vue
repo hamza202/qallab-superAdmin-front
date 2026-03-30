@@ -132,25 +132,25 @@ const plusIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
 <template>
   <default-layout>
     <div class="tests-list-page">
-      <PageHeader :icon="testIcon" title-key="الاختبارات" description-key="تمكنك من إدارة الاختبارات" />
+      <PageHeader :icon="testIcon" :title-key="t('pages.tests.title')" :description-key="t('pages.tests.description')" />
 
       <div class="bg-gray-50 rounded-md -mx-6">
         <div class="flex flex-wrap items-center justify-between gap-3 border-y border-y-slate-300 px-4 sm:px-6 py-3">
-          <h3 class="text-lg font-bold text-gray-900">جدول الاختبارات</h3>
+          <h3 class="text-lg font-bold text-gray-900">{{ t('pages.tests.tableTitle') }}</h3>
 
           <!-- Main header controls -->
           <div class="flex flex-wrap gap-3">
             <ButtonWithIcon variant="outlined" rounded="4" color="gray-500" height="40"
               custom-class="font-semibold text-base border-gray-400"
-              :prepend-icon="columnIcon" :label="t('common.columns')" append-icon="mdi-chevron-down" />
+              :prepend-icon="columnIcon" :label="t('common.table.columns')" append-icon="mdi-chevron-down" />
             
             <ButtonWithIcon variant="flat" color="primary-500" height="40" rounded="4"
               custom-class="px-7 font-semibold text-base text-white border !border-primary-200"
-              :prepend-icon="searchIcon" :label="t('common.advancedSearch')" @click="toggleAdvancedFilters" />
+              :prepend-icon="searchIcon" :label="t('common.table.advancedSearch')" @click="toggleAdvancedFilters" />
 
             <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4"
               custom-class="px-7 font-semibold text-base !text-primary-800 border !border-primary-200"
-              :prepend-icon="plusIcon" label="إضافة اختبار" @click="openCreateTest" />
+              :prepend-icon="plusIcon" :label="t('common.form.addNew')" @click="openCreateTest" />
           </div>
         </div>
 
@@ -173,11 +173,11 @@ const plusIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
             <div class="flex gap-2 items-center">
               <ButtonWithIcon variant="flat" color="primary-500" rounded="4" height="40"
                 custom-class="px-5 font-semibold !text-white text-sm sm:text-base"
-                :prepend-icon="searchIcon" label="ابحث" />
+                :prepend-icon="searchIcon" :label="t('common.actions.search')" />
               
               <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4" border="sm"
                 custom-class="px-5 font-semibold text-sm sm:text-base !text-primary-800 !border-primary-200"
-                prepend-icon="mdi-refresh" label="إعادة تعيين" />
+                prepend-icon="mdi-refresh" :label="t('common.actions.reset')" />
             </div>
           </div>
         </div>
@@ -187,11 +187,11 @@ const plusIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
           <template #item.status="{ item }">
             <span v-if="item.status === 'فعال'"
               class="inline-flex items-center px-3 py-1 rounded-full bg-success-50 text-success-700 text-sm font-medium">
-              فعال
+              {{ t('common.status.active') }}
             </span>
             <span v-else
               class="inline-flex items-center px-3 py-1 rounded-full bg-error-100 text-error-600 text-sm font-medium">
-              غير فعال
+              {{ t('common.status.inactive') }}
             </span>
           </template>
         </DataTable>

@@ -2,6 +2,8 @@
 import { useApi } from '@/composables/useApi';
 import { useRoute } from 'vue-router';
 import { useRouter } from "vue-router";
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
 
 const router = useRouter();
 const route = useRoute();
@@ -205,7 +207,7 @@ const fetchConstants = async () => {
     ];
   } catch (error) {
     console.error('Failed to fetch constants:', error);
-    toast.error('حدث خطأ أثناء تحميل البيانات');
+    toast.error(t('common.messages.general.loadConstantsFailed'));
   }
 };
 
@@ -225,8 +227,8 @@ const fetchTaxes = async () => {
       })),
     ];
   } catch (error) {
-    console.error('Failed to fetch constants:', error);
-    toast.error('حدث خطأ أثناء تحميل البيانات');
+    console.error('Failed to fetch taxes:', error);
+    toast.error(t('common.messages.general.loadDataFailed'));
   }
 };
 
@@ -244,7 +246,7 @@ const fetchCategories = async () => {
     ];
   } catch (error) {
     console.error('Failed to fetch categories:', error);
-    toast.error('حدث خطأ أثناء تحميل البيانات');
+    toast.error(t('common.messages.general.loadCategoriesFailed'));
   }
 };
 
@@ -261,8 +263,8 @@ const fetchUnits = async () => {
       })),
     ];
   } catch (error) {
-    console.error('Failed to fetch categories:', error);
-    toast.error('حدث خطأ أثناء تحميل البيانات');
+    console.error('Failed to fetch units:', error);
+    toast.error(t('common.messages.general.loadDataFailed'));
   }
 };
 
@@ -299,7 +301,7 @@ const fetchCategoryDetails = async (id: number) => {
     }
   } catch (error) {
     console.error('Failed to fetch category details:', error);
-    toast.error('حدث خطأ أثناء تحميل بيانات التصنيف');
+    toast.error(t('common.messages.general.loadDataFailed'));
   } finally {
     isLoading.value = false;
   }
@@ -378,7 +380,7 @@ const handleSave = async () => {
       } else {
         await api.put(`/categories/${categoryId.value}`, payload);
       }
-      toast.success('تم تحديث التصنيف بنجاح');
+      toast.success(t('common.messages.general.editSuccess'));
     } else {
       // Create new category
       // If image exists, use FormData
@@ -405,7 +407,7 @@ const handleSave = async () => {
       } else {
         await api.post('/categories', payload);
       }
-      toast.success('تم إضافة التصنيف بنجاح');
+      toast.success(t('common.messages.general.createSuccess'));
     }
 
     // Reset form and redirect or close
@@ -423,9 +425,9 @@ const handleSave = async () => {
       Object.keys(apiErrors).forEach(key => {
         formErrors[key] = apiErrors[key][0];
       });
-      toast.error(err?.response?.data?.message || 'يرجى تصحيح الأخطاء في النموذج');
+      toast.error(err?.response?.data?.message || t('form.messages.validationError'));
     } else {
-      toast.error(err?.response?.data?.message || 'حدث خطأ أثناء حفظ التصنيف');
+      toast.error(err?.response?.data?.message || t('common.messages.general.saveError'));
     }
   } finally {
     isSaving.value = false;
@@ -448,11 +450,11 @@ const handleDeleteConfirm = async () => {
   deleteLoading.value = true;
   try {
     await api.delete(`/categories/${categoryId.value}`);
-    toast.success('تم حذف التصنيف بنجاح');
+    toast.success(t('common.messages.general.deleteSuccess'));
     returnToList();
   } catch (error) {
     console.error('Failed to delete category:', error);
-    toast.error('حدث خطأ أثناء حذف التصنيف');
+    toast.error(t('common.messages.general.deleteError'));
   } finally {
     deleteLoading.value = false;
     showDeleteDialog.value = false;
@@ -536,46 +538,46 @@ const saveIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xm
           <!-- Category Form -->
           <div class="bg-gray-50 rounded-md p-4 sm:p-6">
             <div class="mb-4">
-              <h2 class="text-lg font-bold text-primary-900">التصنيفات</h2>
+              <h2 class="text-lg font-bold text-primary-900">{{ t('pages.ProductsCategories.title') }}</h2>
             </div>
 
             <div class="grid gap-4 mb-4 grid-cols-1 md:grid-cols-[repeat(auto-fit,minmax(250px,1fr))]">
               <div class="md:col-span-2">
-                <LanguageTabs :languages="availableLanguages" label="الإسم">
+                <LanguageTabs :languages="availableLanguages" :label="t('common.form.name')">
                   <template #en>
-                    <TextInput v-model="categoryNameEn" placeholder="Enter name in English"
+                    <TextInput v-model="categoryNameEn" :placeholder="t('form.fields.nameEn.placeholder')"
                       :rules="[required(), minLength(2), maxLength(100)]" :hide-details="false"
                       :error-messages="formErrors['name.en']" @input="delete formErrors['name.en']" />
                   </template>
                   <template #ar>
-                    <TextInput v-model="categoryNameAr" placeholder="ادخل الاسم بالعربية"
+                    <TextInput v-model="categoryNameAr" :placeholder="t('form.fields.nameAr.placeholder')"
                       :rules="[required(), minLength(2), maxLength(100)]" :hide-details="false"
                       :error-messages="formErrors['name.ar']" @input="delete formErrors['name.ar']" />
                   </template>
                 </LanguageTabs>
               </div>
 
-              <SelectWithIconInput show-add-button v-model="parentCategory" label="التصنيف الرئيسي"
-                placeholder="اختر التصنيف الرئيسي" clearable :items="categoriesList" :hide-details="false" />
+              <SelectWithIconInput show-add-button v-model="parentCategory" :label="t('form.product.parentCategory.label')"
+                :placeholder="t('form.product.parentCategory.placeholder')" clearable :items="categoriesList" :hide-details="false" />
 
-              <SelectWithIconInput show-add-button v-model="unit" clearable label="الوحدة" placeholder="اختر الوحدة"
+              <SelectWithIconInput show-add-button v-model="unit" clearable :label="t('common.form.unit')" :placeholder="t('form.product.unit.placeholder')"
                 :items="unitItems" :hide-details="false" />
 
               <div>
-                <span class="text-sm font-semibold text-gray-700 mb-2 block">الحالة </span>
+                <span class="text-sm font-semibold text-gray-700 mb-2 block">{{ t('common.form.status') }} </span>
                 <div class="flex items-center gap-3 mt-1">
                   <v-radio-group v-model="isActive" inline hide-details>
                     <v-radio :value="true" color="primary">
                       <template #label>
                         <span :class="isActive ? 'text-primary font-semibold' : 'text-gray-600'">
-                          فعال
+                          {{ t('common.status.active') }}
                         </span>
                       </template>
                     </v-radio>
                     <v-radio :value="false" color="primary">
                       <template #label>
                         <span :class="!isActive ? 'text-primary font-semibold' : 'text-gray-600'">
-                          غير فعال
+                          {{ t('common.status.inactive') }}
                         </span>
                       </template>
                     </v-radio>
@@ -587,14 +589,14 @@ const saveIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xm
             <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
               <div class="md:col-span-2 flex flex-col gap-3">
                 <!-- Description with Language Tabs -->
-                <LanguageTabs :languages="availableLanguages" label="تفاصيل التصنيف" class="mb-[20px]">
+                <LanguageTabs :languages="availableLanguages" :label="t('form.product.categoryDetails.label')" class="mb-[20px]">
                   <template #en>
-                    <TextareaInput :rules="[required()]" v-model="categoryDescriptionEn" placeholder="Enter Category Description in English"
+                    <TextareaInput :rules="[required()]" v-model="categoryDescriptionEn" :placeholder="t('form.product.categoryDetails.placeholder')"
                       min-height="120px" :hide-details="false"
                       :error-messages="formErrors['description.en']" @input="delete formErrors['description.en']" />
                   </template>
                   <template #ar>
-                    <TextareaInput :rules="[required()]" v-model="categoryDescriptionAr" placeholder="ادخل تفاصيل التصنيف بالعربية"
+                    <TextareaInput :rules="[required()]" v-model="categoryDescriptionAr" :placeholder="t('form.product.categoryDetails.placeholderEn')"
                       min-height="120px" :hide-details="false"
                       :error-messages="formErrors['description.ar']" @input="delete formErrors['description.ar']" />
                   </template>
@@ -603,7 +605,7 @@ const saveIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xm
               </div>
 
               <div>
-                <FileUploadInput v-model="categoryImage" label="أرفق صورة" hint="PNG, JPG or GIF (max. 400x400px)"
+                <FileUploadInput v-model="categoryImage" :label="t('form.ui.attachFile')" :hint="t('form.contractor.documents.fileUpload.hint')"
                   :max-files="1" />
               </div>
 
@@ -613,34 +615,34 @@ const saveIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xm
           <!-- Taxes Section -->
           <div class="bg-gray-50 rounded-md p-4 sm:p-6">
             <div class="flex items-center justify-between mb-4 gap-3">
-              <h2 class="text-lg font-bold text-primary-900">الضرائب</h2>
+              <h2 class="text-lg font-bold text-primary-900">{{ t('form.tax.taxData.label') }}</h2>
               <div class="w-full sm:w-auto flex justify-start sm:justify-end">
                 <ButtonWithIcon :append-icon="editingTaxIndex !== null ? 'mdi-pencil' : 'mdi-plus'" variant="flat"
                   color="primary" height="40" custom-class="font-semibold text-sm px-4 w-full sm:w-auto"
-                  :label="editingTaxIndex !== null ? 'تعديل ضريبة' : 'اضافة ضريبة'" :disabled="!isNewTaxValid"
+                  :label="editingTaxIndex !== null ? t('common.actions.edit') + ' ' + t('form.tax.tax.label') : t('common.actions.add') + ' ' + t('form.tax.tax.label')" :disabled="!isNewTaxValid"
                   @click="addTaxRule" />
               </div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
               <div class="w-full lg:w-auto lg:flex-1 min-w-[250px]">
-                <SelectWithIconInput v-model="newTaxRule.tax_id" label="الضريبة" placeholder="اختر الضريبة"
+                <SelectWithIconInput v-model="newTaxRule.tax_id" :label="t('form.tax.tax.label')" :placeholder="t('form.tax.tax.placeholder')"
                   :items="taxNameItems" show-add-button :hide-details="false"
                   :error-messages="formErrors['taxes']" @update:model-value="delete formErrors['taxes']" />
               </div>
 
               <div class="w-full sm:flex-1 lg:w-auto min-w-[100px]">
-                <TextInput v-model="newTaxRule.percentage" label="النسبة" placeholder="قم باختيار الضريبة"
+                <TextInput v-model="newTaxRule.percentage" :label="t('form.tax.percentage.label')" :placeholder="t('form.tax.tax.placeholder')"
                   :hide-details="false" readonly disabled />
               </div>
 
               <div class="w-full sm:flex-1 lg:w-auto min-w-[140px]">
-                <TextInput v-model="newTaxRule.minValue" label="أقل قيمة" placeholder="قم باختيار الضريبة"
+                <TextInput v-model="newTaxRule.minValue" :label="t('form.tax.minValue.label')" :placeholder="t('form.tax.tax.placeholder')"
                   :hide-details="false" readonly disabled />
               </div>
 
               <div class="w-full sm:flex-1 lg:w-auto min-w-[140px]">
-                <SelectWithIconInput v-model="newTaxRule.priority" label="الأولوية" placeholder="اختر الأولوية"
+                <SelectWithIconInput v-model="newTaxRule.priority" :label="t('form.tax.priority.label')" :placeholder="t('form.tax.priority.placeholder')"
                   :items="priorityItems" :hide-details="false" />
               </div>
             </div>
@@ -648,17 +650,17 @@ const saveIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xm
             <div
               class="mt-4 bg-white !rounded-xl shadow-[0px_1px_2px_0px_rgba(16,24,40,0.06)] shadow-[0px_1px_3px_0px_rgba(16,24,40,0.10)] outline outline-1 outline-offset-[-1px] outline-slate-200 overflow-hidden">
               <h3 class="text-base sm:text-lg font-bold text-gray-900 px-6 py-5">
-                الضرائب المطبقة على التصنيف
+                {{ t('form.tax.taxInfo.label') }}
               </h3>
 
               <v-table class="rounded-none border border-gray-200">
                 <thead>
                   <tr class="bg-gray-50 text-gray-600">
-                    <th class="!font-bold">الضريبة</th>
-                    <th class="!font-bold">النسبة</th>
-                    <th class="!font-bold">أقل قيمة</th>
-                    <th class="!font-bold">الأولوية</th>
-                    <th class="text-center w-[120px] !font-bold">إجراءات</th>
+                    <th class="!font-bold">{{ t('form.tax.tax.label') }}</th>
+                    <th class="!font-bold">{{ t('form.tax.percentage.label') }}</th>
+                    <th class="!font-bold">{{ t('form.tax.minValue.label') }}</th>
+                    <th class="!font-bold">{{ t('form.tax.priority.label') }}</th>
+                    <th class="text-center w-[120px] !font-bold">{{ t('common.table.actions') }}</th>
                   </tr>
                 </thead>
                 <tbody class="bg-white">
@@ -687,7 +689,7 @@ const saveIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xm
 
                   <tr v-if="!taxRules.length">
                     <td colspan="5" class="text-center text-gray-500 py-4">
-                      لا توجد ضرائب مضافة بعد
+                      {{ t('form.tax.noTaxesAdded.label') }}
                     </td>
                   </tr>
                 </tbody>
@@ -697,15 +699,15 @@ const saveIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xm
 
           <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col">
             <ButtonWithIcon variant="flat" color="primary" rounded="4" height="48" custom-class="min-w-56"
-              :prepend-icon="saveIcon" :label="isEditing ? 'تحديث' : 'حفظ'" @click="handleSave" :loading="isSaving"
+              :prepend-icon="saveIcon" :label="isEditing ? t('common.actions.edit') : t('common.actions.save')" @click="handleSave" :loading="isSaving"
               :disabled="isSaving || isDeleting" />
 
             <ButtonWithIcon prepend-icon="mdi-close" variant="flat" color="primary-50" rounded="4" height="48"
-              custom-class="font-semibold text-base text-primary-700 px-6 min-w-56" label="إغلاق"
+              custom-class="font-semibold text-base text-primary-700 px-6 min-w-56" :label="t('common.actions.close')"
               :disabled="isSaving || isDeleting" @click="handleClose" />
 
             <ButtonWithIcon v-if="isEditing" :prepend-icon="trashIcon_2" variant="flat" color="error-50" rounded="4"
-              height="48" custom-class="font-semibold text-base px-6 min-w-56 text-error-700" label="حذف"
+              height="48" custom-class="font-semibold text-base px-6 min-w-56 text-error-700" :label="t('common.actions.delete')"
               @click="handleDeleteClick" :loading="deleteLoading" :disabled="isSaving || deleteLoading" />
           </div>
         </div>

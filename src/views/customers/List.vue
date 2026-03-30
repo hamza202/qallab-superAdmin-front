@@ -144,7 +144,7 @@ const fetchList = async (cursor?: string | null, append = false) => {
         perPage.value = body?.pagination?.per_page || 15;
     } catch (err: any) {
         console.error('Error fetching customers:', err);
-        error(err?.response?.data?.message || 'فشل تحميل قائمة العملاء');
+        error(err?.response?.data?.message || t('common.messages.general.loadDataFailed'));
     } finally {
         loading.value = false;
         loadingMore.value = false;
@@ -176,7 +176,7 @@ const resetFilters = () => {
 // Toggle column and persist
 const handleToggleHeader = async (headerKey: string) => {
     await toggleHeader(headerKey).catch((err: any) => {
-        error(err?.response?.data?.message || 'فشل تحديث الأعمدة');
+        error(err?.response?.data?.message || t('common.messages.general.saveError'));
     });
 };
 
@@ -212,7 +212,7 @@ const confirmStatusChange = async () => {
 
     } catch (err: any) {
         console.error('Error changing customer status:', err);
-        error(err?.response?.data?.message || 'فشل تغيير حالة العميل');
+        error(err?.response?.data?.message || t('common.messages.general.changeStatusError'));
     } finally {
         statusChangeLoading.value = false;
         showStatusChangeDialog.value = false;
@@ -227,7 +227,7 @@ const confirmDelete = async (item: any) => {
         await fetchList();
     } catch (err: any) {
         console.error('Error deleting customer:', err);
-        error(err?.response?.data?.message || 'فشل حذف العميل');
+        error(err?.response?.data?.message || t('common.messages.general.deleteError'));
     }
 };
 
@@ -245,7 +245,7 @@ const confirmBulkDelete = async () => {
         await fetchList();
     } catch (err: any) {
         console.error('Error bulk deleting customers:', err);
-        error(err?.response?.data?.message || 'فشل الحذف الجماعي');
+        error(err?.response?.data?.message || t('common.messages.general.deleteError'));
     } finally {
         deleteLoading.value = false;
         showBulkDeleteDialog.value = false;
@@ -326,11 +326,11 @@ onBeforeUnmount(() => {
                 class="flex justify-end items-stretch rounded border border-gray-300 w-fit ms-auto mb-4 overflow-hidden bg-white text-sm">
                 <ButtonWithIcon variant="flat" height="40" rounded="0"
                     custom-class="font-semibold text-base border-gray-300 bg-primary-100 !text-primary-900"
-                    :prepend-icon="importIcon" :label="t('common.import')" />
+                    :prepend-icon="importIcon" :label="t('common.actions.import')" />
 
                 <ButtonWithIcon variant="flat" height="40" rounded="0"
                     custom-class="font-semibold text-base border-gray-300 bg-primary-50 !text-primary-900"
-                    :prepend-icon="exportIcon" :label="t('common.export')" />
+                    :prepend-icon="exportIcon" :label="t('common.actions.export')" />
             </div>
             <div class="bg-gray-50 rounded-md -mx-6">
                 <div :class="hasSelectedCustomers ? 'justify-between' : 'justify-end'"
@@ -340,12 +340,12 @@ onBeforeUnmount(() => {
                         class="flex flex-wrap items-stretch rounded overflow-hidden border border-gray-200 bg-white text-sm">
                         <ButtonWithIcon variant="flat" height="40" rounded="0"
                             custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-                            :prepend-icon="trash_1_icon" color="white" :label="t('common.delete')"
+                            :prepend-icon="trash_1_icon" color="white" :label="t('common.table.deleteSelected')"
                             @click="handleBulkDelete" />
                         <div class="w-px bg-gray-200"></div>
                         <ButtonWithIcon variant="flat" height="40" rounded="0"
                             custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-                            :prepend-icon="trash_2_icon" color="white" :label="t('common.deleteAll')"
+                            :prepend-icon="trash_2_icon" color="white" :label="t('common.actions.delete')"
                             @click="handleBulkDelete" />
                     </div>
 
@@ -356,7 +356,7 @@ onBeforeUnmount(() => {
                                 <ButtonWithIcon v-bind="props" variant="outlined" append-icon="mdi-chevron-down"
                                     rounded="4" color="gray-500" height="40"
                                     custom-class="font-semibold text-base border-gray-400" :prepend-icon="columnIcon"
-                                    :label="t('common.columns')">
+                                    :label="t('common.table.columns')">
                                     <template #append>
                                         <v-icon>mdi-chevron-down</v-icon>
                                     </template>
@@ -376,12 +376,12 @@ onBeforeUnmount(() => {
 
                         <ButtonWithIcon variant="flat" color="primary-500" height="40" rounded="4"
                             custom-class="px-7 font-semibold text-base text-white border !border-primary-200"
-                            :prepend-icon="searchIcon" :label="t('common.advancedSearch')"
+                            :prepend-icon="searchIcon" :label="t('common.table.advancedSearch')"
                             @click="toggleAdvancedFilters" />
 
                         <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4"
                             custom-class="px-7 font-semibold text-base !text-primary-800 border !border-primary-200"
-                            :prepend-icon="plusIcon" label="أضف عميل" @click="openCreateCustomer" />
+                            :prepend-icon="plusIcon" :label="t('pages.customers.list.addButton')" @click="openCreateCustomer" />
                     </div>
                 </div>
 
@@ -401,10 +401,10 @@ onBeforeUnmount(() => {
                     <div class="flex gap-2 items-center">
                         <ButtonWithIcon variant="flat" color="primary-500" rounded="4" height="40"
                             custom-class="px-5 font-semibold !text-white text-sm sm:text-base"
-                            :prepend-icon="searchIcon" label="ابحث" @click="applyFilters" />
+                            :prepend-icon="searchIcon" :label="$t('common.actions.search')" @click="applyFilters" />
                         <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4" border="sm"
                             custom-class="px-5 font-semibold text-sm sm:text-base !text-primary-800 !border-primary-200"
-                            prepend-icon="mdi-refresh" label="إعادة تعيين" @click="resetFilters" />
+                            prepend-icon="mdi-refresh" :label="$t('common.actions.reset')" @click="resetFilters" />
                     </div>
                 </div>
 
@@ -428,8 +428,8 @@ onBeforeUnmount(() => {
         </div>
 
         <!-- Bulk Delete Confirmation Dialog -->
-        <DeleteConfirmDialog v-model="showBulkDeleteDialog" :loading="deleteLoading" title="حذف العملاء"
-            :message="`هل أنت متأكد من حذف ${selectedCustomers.length} عميل؟`" @confirm="confirmBulkDelete" />
+        <DeleteConfirmDialog v-model="showBulkDeleteDialog" :loading="deleteLoading" :title="$t('pages.customers.list.deleteDialog.title')"
+            :message="$t('pages.customers.list.deleteDialog.message', { count: selectedCustomers.length })" @confirm="confirmBulkDelete" />
 
         <!-- Status Change Confirmation Dialog -->
         <StatusChangeDialog v-model="showStatusChangeDialog" :loading="statusChangeLoading"

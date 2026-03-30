@@ -502,7 +502,7 @@ onBeforeUnmount(() => {
         <!-- Loading more indicator -->
         <div v-if="loadingMore" class="flex justify-center items-center py-4">
           <v-progress-circular indeterminate color="primary" size="32" />
-          <span class="mr-2 text-gray-600">جاري تحميل المزيد...</span>
+          <span class="ms-2 text-gray-600">جاري تحميل المزيد...</span>
         </div>
       </div>
     </div>

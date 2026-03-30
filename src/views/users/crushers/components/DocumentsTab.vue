@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 interface Document {
     id: number | null;
@@ -54,7 +57,7 @@ const addDocument = () => {
     const firstFile = documentFile.value?.[0] || null;
     documents.value.push({
         id: Date.now(),
-        name: documentName.value || 'اسم المرفوق',
+        name: documentName.value || t('form.contractors.documents.defaultName'),
         type: documentType.value || '',
         file: firstFile,
         fileName: firstFile?.name || '',
@@ -87,18 +90,18 @@ const saveIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xm
 
 <template>
     <div class="mb-6 bg-gray-50 rounded-lg p-6">
-        <h2 class="text-lg font-bold text-primary-900 mb-4">المستندات</h2>
+        <h2 class="text-lg font-bold text-primary-900 mb-4">{{ t('form.contractors.documents.sectionTitle') }}</h2>
 
         <!-- Form Section -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <TextInput v-model="documentName" label="اسم الملف" placeholder="اسم الملف" />
-            <SelectWithIconInput v-model="documentType" label="نوع الملف" placeholder="اختر"
+            <TextInput v-model="documentName" :label="t('form.contractors.documents.documentName.label')" :placeholder="t('form.contractors.documents.documentName.placeholder')" />
+            <SelectWithIconInput v-model="documentType" :label="t('form.contractors.documents.documentType.label')" :placeholder="t('form.contractors.documents.documentType.placeholder')"
                 :items="documentTypeItems" />
-            <FileUploadInput v-model="documentFile" :innerLabel="'أختر ملف'" label="إرفاق الملف"
-                hint="لا يتجاوز حجم الملف (10 MB)" />
+            <FileUploadInput v-model="documentFile" :innerLabel="t('form.contractors.documents.chooseFile')" :label="t('form.contractors.documents.attachFile.label')"
+                :hint="t('form.contractors.documents.attachFile.hint')" />
             <div class="flex items-end pb-4">
                 <ButtonWithIcon variant="flat" color="primary" custom-class="mb-6"
-      label="إضافة" @click="addDocument" />
+      :label="t('common.add')" @click="addDocument" />
             </div>
 
 
@@ -108,11 +111,11 @@ const saveIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xm
         <v-table v-if="documents.length > 0" class="bg-white rounded-lg mt-6">
             <thead>
                 <tr class="bg-gray-100">
-                    <th class="text-right font-semibold text-gray-700 py-3 px-4">اسم المرفوق</th>
-                    <th class="text-right font-semibold text-gray-700 py-3 px-4">تاريخ المرفوق</th>
-                    <th class="text-right font-semibold text-gray-700 py-3 px-4">نوع المرفوق</th>
-                    <th class="text-right font-semibold text-gray-700 py-3 px-4">الملف</th>
-                    <th class="text-right font-semibold text-gray-700 py-3 px-4">الإجراءات</th>
+                    <th class="text-right font-semibold text-gray-700 py-3 px-4">{{ t('form.contractors.documents.table.attachmentName') }}</th>
+                    <th class="text-right font-semibold text-gray-700 py-3 px-4">{{ t('form.contractors.documents.table.attachmentDate') }}</th>
+                    <th class="text-right font-semibold text-gray-700 py-3 px-4">{{ t('form.contractors.documents.table.attachmentType') }}</th>
+                    <th class="text-right font-semibold text-gray-700 py-3 px-4">{{ t('form.contractors.documents.table.file') }}</th>
+                    <th class="text-right font-semibold text-gray-700 py-3 px-4">{{ t('form.contractors.documents.table.actions') }}</th>
                 </tr>
             </thead>
             <tbody>

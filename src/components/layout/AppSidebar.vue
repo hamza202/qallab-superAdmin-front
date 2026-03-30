@@ -29,7 +29,7 @@
           <!-- الرئيسية -->
           <v-list-item to="/" value="home" :class="{ '!mx-1 gap-5': !isSidebarExpanded }"
             class="mx-4 px-2 py-1.5 !ps-[11px] rounded-lg text-white hover:bg-primary-700/40 transition flex items-center justify-start gap-2">
-            <template #title> الرئيسية </template>
+            <template #title> {{ t('navigation.sidebar.main.home') }} </template>
             <template #prepend>
               <div class="bg-qallab-yellow text-white rounded-md w-6 h-6 flex items-center justify-center">
                 <span v-html="homeIcon"></span>
@@ -55,7 +55,7 @@
                 </template>
                 <template #title>
                   <div class="flex-1">
-                    <span class="font-semibold" :class="isProductsActive ? '!text-[#1570EF]' : ''">المنتجات</span>
+                    <span class="font-semibold" :class="isProductsActive ? '!text-[#1570EF]' : ''">{{ t('navigation.sidebar.products.title') }}</span>
                   </div>
                 </template>
                 <template #prepend>
@@ -66,7 +66,7 @@
               </v-list-item>
             </template>
             <div class="relative mt-1 ps-10 pe-4 text-sm">
-              <h2 v-if="hasAnyProductsManagementPermission" class="text-sm font-medium leading-5 mb-2">إدارة المتجات
+              <h2 v-if="hasAnyProductsManagementPermission" class="text-sm font-medium leading-5 mb-2">{{ t('navigation.sidebar.products.management.title') }}
               </h2>
               <ul v-if="hasAnyProductsManagementPermission"
                 class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
@@ -76,7 +76,7 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
-                    منتجات بسيطة
+                    {{ t('navigation.sidebar.products.management.simpleProducts') }}
                   </router-link>
                 </li>
                 <li v-if="canViewGroupedProducts" class="relative">
@@ -85,7 +85,7 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
-                    منتجات المجموعة</router-link>
+                    {{ t('navigation.sidebar.products.management.groupProducts') }}</router-link>
                 </li>
                 <li v-if="canViewBuildingMaterialPriceLists" class="relative">
                   <router-link to="/products/building-material-products-prices" :class="[
@@ -95,7 +95,7 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
-                    قوائم أسعار مواد البناء</router-link>
+                    {{ t('navigation.sidebar.products.management.buildingMaterialPriceLists') }}</router-link>
                 </li>
                 <li v-if="canViewGeneralPriceLists" class="relative">
                   <router-link to="/products/general-products-prices" :class="[
@@ -103,7 +103,7 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
-                    قوائم أسعار المنتجات العامة</router-link>
+                    {{ t('navigation.sidebar.products.management.generalPriceLists') }}</router-link>
                 </li>
                 <li v-if="canViewProductionCapacity" class="relative">
                   <router-link to="/products/production-capacity" :class="[
@@ -111,11 +111,11 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
-                    قوائم القدرة الإنتاجية</router-link>
+                    {{ t('navigation.sidebar.products.management.productionCapacity') }}</router-link>
                 </li>
               </ul>
               <h2 v-if="showProductSettingsSection" class="text-sm font-medium leading-5 my-2">
-                إعدادات المنتجات
+                {{ t('navigation.sidebar.products.settings.title') }}
               </h2>
               <ul v-if="showProductSettingsSection"
                 class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
@@ -125,7 +125,7 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
-                    متغيرات المنتج
+                    {{ t('navigation.sidebar.products.settings.productVariables') }}
                   </router-link>
                 </li>
                 <!-- <li v-if="canViewProductSettings" class="relative">
@@ -158,7 +158,7 @@
                 </template>
                 <template #title>
                   <div class="flex-1">
-                    <span class="font-semibold" :class="isServicesActive ? '!text-[#1570EF]' : ''">الخدمات</span>
+                    <span class="font-semibold" :class="isServicesActive ? '!text-[#1570EF]' : ''">{{ t('navigation.sidebar.services.title') }}</span>
                   </div>
                 </template>
                 <template #prepend>
@@ -176,7 +176,7 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
-                    إدارة الخدمات
+                    {{ t('navigation.sidebar.services.servicesManagement') }}
                   </router-link>
                 </li>
                 <!-- <li v-if="canViewSubscriptions" class="relative">
@@ -193,7 +193,7 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
-                    إدارة قوائم الاسعار</router-link>
+                    {{ t('navigation.sidebar.services.priceListsManagement') }}</router-link>
                 </li>
                 <!-- <li v-if="canViewServiceSettings" class="relative">
                   <router-link to="/services/service-settings" :class="[
@@ -225,7 +225,7 @@
                 </template>
                 <template #title>
                   <div class="flex-1">
-                    <span class="font-semibold" :class="isSalesActive ? '!text-[#1570EF]' : ''">المبيعات</span>
+                    <span class="font-semibold" :class="isSalesActive ? '!text-[#1570EF]' : ''">{{ t('navigation.sidebar.sales.title') }}</span>
                   </div>
                 </template>
                 <template #prepend>
@@ -236,7 +236,7 @@
               </v-list-item>
             </template>
             <div class="relative mt-1 ps-10 pe-4 text-sm">
-              <h2 v-if="showSalesCustomersSection" class="text-sm font-medium leading-5 mb-2">إدارة العملاء</h2>
+              <h2 v-if="showSalesCustomersSection" class="text-sm font-medium leading-5 mb-2">{{ t('navigation.sidebar.sales.customers.title') }}</h2>
               <ul v-if="showSalesCustomersSection" class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
                 <li v-if="canViewCustomers" class="relative">
                   <router-link to="/customers/list" :class="[
@@ -244,7 +244,7 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
-                    قائمة العملاء
+                    {{ t('navigation.sidebar.sales.customers.customersList') }}
                   </router-link>
                 </li>
                 <!-- <li v-if="canViewSalesInvoices" class="relative">
@@ -277,7 +277,7 @@
                 </li> -->
               </ul>
               <h2 v-if="showSalesQuotationsSection" class="text-sm font-medium leading-5 my-2">
-                إدارة عروض الأسعار
+                {{ t('navigation.sidebar.sales.quotations.title') }}
               </h2>
               <ul v-if="showSalesQuotationsSection"
                 class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
@@ -287,7 +287,7 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
-                    طلب عروض أسعار مواد أولية</router-link>
+                    {{ t('navigation.sidebar.sales.quotations.materialRequests') }}</router-link>
                 </li>
                 <li v-if="canViewSalesBuildingMaterialSQ" class="relative">
                   <router-link to="/sales/quotations/material-product/list" :class="[
@@ -295,7 +295,7 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
-                    عروض أسعار مواد أولية</router-link>
+                    {{ t('navigation.sidebar.sales.quotations.materialQuotations') }}</router-link>
                 </li>
                 <li v-if="canViewSalesFuelSR" class="relative">
                   <router-link to="/sales/requests/fuels/list" :class="[
@@ -303,7 +303,7 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
-                    طلب عروض أسعار محروقات
+                    {{ t('navigation.sidebar.sales.quotations.fuelRequests') }}
                   </router-link>
                 </li>
                 <li v-if="canViewSalesFuelSQ" class="relative">
@@ -312,23 +312,23 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
-                    عروض أسعار المحروقات</router-link>
+                    {{ t('navigation.sidebar.sales.quotations.fuelQuotations') }}</router-link>
                 </li>
                 <li v-if="canViewSalesLogisticsSR" class="relative">
                   <router-link to="/sales/requests/logistics/list"
                     :class="[isMenuItemActive('/sales/requests/logistics') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
-                    طلب عرض سعر خدمة نقل</router-link>
+                    {{ t('navigation.sidebar.sales.quotations.logisticsRequests') }}</router-link>
                 </li>
                 <li v-if="canViewSalesLogisticsSQ" class="relative">
                   <router-link to="/sales/quotations/logistics/list"
                     :class="[isMenuItemActive('/sales/quotations/logistics') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
-                    عروض أسعار خدمة نقل</router-link>
+                    {{ t('navigation.sidebar.sales.quotations.logisticsQuotations') }}</router-link>
                 </li>
 
               </ul>
 
               <h2 v-if="showSalesOrdersSection" class="text-sm font-medium leading-5 my-2">
-                طلبيات المبيعات
+                {{ t('navigation.sidebar.sales.orders.title') }}
               </h2>
               <ul v-if="showSalesOrdersSection" class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
                 <li v-if="canViewSalesBuildingMaterialSO" class="relative">
@@ -337,7 +337,7 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
-                    طلبيات بناء مواد اولية</router-link>
+                    {{ t('navigation.sidebar.sales.orders.materialOrders') }}</router-link>
                 </li>
                 <li v-if="canViewSalesFuelSO" class="relative">
                   <router-link to="/sales/orders/fuels/list" :class="[
@@ -345,7 +345,7 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
-                    طلبيات محروقات</router-link>
+                    {{ t('navigation.sidebar.sales.orders.fuelOrders') }}</router-link>
                 </li>
                 <li v-if="canViewSalesLogisticsSO" class="relative">
                   <router-link to="/sales/orders/logistics/list" :class="[
@@ -353,7 +353,7 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
-                    طلبيات خدمة نقل</router-link>
+                    {{ t('navigation.sidebar.sales.orders.logisticsOrders') }}</router-link>
                 </li>
                 <li v-if="canViewSalesSoPickups" class="relative">
                   <router-link to="/sales/so-pickups/list" :class="[
@@ -361,16 +361,16 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
-                    حجوزات التسليم</router-link>
+                    {{ t('navigation.sidebar.sales.orders.pickups') }}</router-link>
                 </li>
                 <li v-if="canViewSalesTripManagement" class="relative">
                   <router-link to="/sales/trips/list"
                     :class="[$route.path.includes('/sales/trips') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
-                    جدول الرحلات</router-link>
+                    {{ t('navigation.sidebar.sales.orders.trips') }}</router-link>
                 </li>
               </ul>
               <h2 v-if="showSalesDeliveryDocsSection" class="text-sm font-medium leading-5 my-2">
-                وثائق التسليم
+                {{ t('navigation.sidebar.sales.deliveryDocs.title') }}
               </h2>
               <ul v-if="showSalesDeliveryDocsSection"
                 class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
@@ -380,7 +380,7 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
-                    وثائق التسليم</router-link>
+                    {{ t('navigation.sidebar.sales.deliveryDocs.deliveryDocs') }}</router-link>
                 </li>
                 <li v-if="canViewSalesLogisticsDeliveryDocs" class="relative">
                   <router-link to="/sales/delivery-docs-logistics/list" :class="[
@@ -388,11 +388,11 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
-                    وثائق تسليم خدمات النقل</router-link>
+                    {{ t('navigation.sidebar.sales.deliveryDocs.logisticsDeliveryDocs') }}</router-link>
                 </li>
               </ul>
               <h2 v-if="showSalesInvoicesSection" class="text-sm font-medium leading-5 my-2">
-                فواتير المبيعات
+                {{ t('navigation.sidebar.sales.invoices.title') }}
               </h2>
               <ul v-if="showSalesInvoicesSection"
                 class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5 mb-3">
@@ -402,7 +402,7 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
-                    فواتير المبيعات</router-link>
+                    {{ t('navigation.sidebar.sales.invoices.salesInvoices') }}</router-link>
                 </li>
                 <li v-if="canViewSalesLogisticsSaleInvoices" class="relative">
                   <router-link to="/sales/logistics-invoices/list" :class="[
@@ -410,7 +410,7 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
-                    فواتير مبيعات خدمة نقل</router-link>
+                    {{ t('navigation.sidebar.sales.invoices.logisticsSaleInvoices') }}</router-link>
                 </li>
                 <li v-if="canViewSalesSaleInvoices" class="relative">
                   <router-link to="/sales/payments/list" :class="[
@@ -418,7 +418,7 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
-                    دفعات المبيعات</router-link>
+                    {{ t('navigation.sidebar.sales.invoices.payments') }}</router-link>
                 </li>
               </ul>
             </div>
@@ -492,7 +492,7 @@
                 </template>
                 <template #title>
                   <div class="flex-1">
-                    <span class="font-semibold" :class="isPurchasesActive ? '!text-[#1570EF]' : ''">المشتريات</span>
+                    <span class="font-semibold" :class="isPurchasesActive ? '!text-[#1570EF]' : ''">{{ t('navigation.sidebar.purchases.title') }}</span>
                   </div>
                 </template>
                 <template #prepend>
@@ -503,7 +503,7 @@
               </v-list-item>
             </template>
             <div class="relative mt-1 ps-10 pe-4 text-sm">
-              <h2 v-if="showPurchasesSuppliersSection" class="text-sm font-medium leading-5 mb-2">إدارة الموردين</h2>
+              <h2 v-if="showPurchasesSuppliersSection" class="text-sm font-medium leading-5 mb-2">{{ t('navigation.sidebar.purchases.suppliers.title') }}</h2>
               <ul v-if="showPurchasesSuppliersSection"
                 class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
                 <li v-if="canViewSuppliers" class="relative">
@@ -512,7 +512,7 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
-                    إدارة الموردين
+                    {{ t('navigation.sidebar.purchases.suppliers.suppliersManagement') }}
                   </router-link>
                 </li>
                 <!-- <li v-if="canViewSupplierSettlements" class="relative">
@@ -525,7 +525,7 @@
                 </li> -->
               </ul>
               <h2 v-if="showPurchasesQuotationsSection" class="text-sm font-medium leading-5 my-2">
-                إدارة عروض الأسعار
+                {{ t('navigation.sidebar.purchases.quotations.title') }}
               </h2>
               <ul v-if="showPurchasesQuotationsSection"
                 class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
@@ -541,7 +541,7 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
-                    طلب عروض أسعار مواد أولية</router-link>
+                    {{ t('navigation.sidebar.purchases.quotations.materialRequests') }}</router-link>
                 </li>
                 <li v-if="canViewPurchasesBuildingMaterialPQ" class="relative">
                   <router-link to="/purchases/quotations/material-product/list" :class="[
@@ -549,12 +549,12 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
-                    عروض اسعار مواد اوليه</router-link>
+                    {{ t('navigation.sidebar.purchases.quotations.materialQuotations') }}</router-link>
                 </li>
                 <li v-if="canViewPurchasesLogisticsPR" class="relative">
                   <router-link to="/purchases/requests/logistics/list"
                     :class="[isMenuItemActive('/purchases/requests/logistics') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow']">
-                    طلب عرض سعر خدمة نقل</router-link>
+                    {{ t('navigation.sidebar.purchases.quotations.logisticsRequests') }}</router-link>
                 </li>
                 <li v-if="canViewPurchasesLogisticsPQ" class="relative">
                   <router-link to="/purchases/quotations/logistics/list" :class="[
@@ -562,7 +562,7 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
-                    عروض اسعار خدمة نقل</router-link>
+                    {{ t('navigation.sidebar.purchases.quotations.logisticsQuotations') }}</router-link>
                 </li>
 
                 <li v-if="canViewPurchasesFuelPR" class="relative">
@@ -571,7 +571,7 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
-                    طلب عروض أسعار محروقات</router-link>
+                    {{ t('navigation.sidebar.purchases.quotations.fuelRequests') }}</router-link>
                 </li>
                 <li v-if="canViewPurchasesFuelPQ" class="relative">
                   <router-link to="/purchases/quotations/fuels/list" :class="[
@@ -579,11 +579,11 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
-                    عروض أسعار محروقات</router-link>
+                    {{ t('navigation.sidebar.purchases.quotations.fuelQuotations') }}</router-link>
                 </li>
               </ul>
               <h2 v-if="showPurchasesOrdersSection" class="text-sm font-medium leading-5 my-2">
-                طلبيات المشتريات
+                {{ t('navigation.sidebar.purchases.orders.title') }}
               </h2>
               <ul v-if="showPurchasesOrdersSection"
                 class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
@@ -593,12 +593,12 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
-                    طلبيات مواد بناء اولية</router-link>
+                    {{ t('navigation.sidebar.purchases.orders.materialOrders') }}</router-link>
                 </li>
                 <li v-if="canViewPurchasesLogisticsPO" class="relative">
                   <router-link to="/purchases/orders/logistics/list"
                     :class="isMenuItemActive('/purchases/orders/logistics') ? 'font-bold text-qallab-yellow' : 'text-white hover:text-qallab-yellow'">
-                    طلبيات خدمة النقل</router-link>
+                    {{ t('navigation.sidebar.purchases.orders.logisticsOrders') }}</router-link>
                 </li>
                 <li v-if="canViewPurchasesFuelPO" class="relative">
                   <router-link to="/purchases/orders/fuels/list" :class="[
@@ -606,11 +606,11 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
-                    طلبيات محروقات</router-link>
+                    {{ t('navigation.sidebar.purchases.orders.fuelOrders') }}</router-link>
                 </li>
               </ul>
               <h2 v-if="showPurchasesReceivingDocsSection" class="text-sm font-medium leading-5 my-2">
-                وثائق الأستلام
+                {{ t('navigation.sidebar.purchases.receivingDocs.title') }}
               </h2>
               <ul v-if="showPurchasesReceivingDocsSection"
                 class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
@@ -620,7 +620,7 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
-                    وثائق الأستلام</router-link>
+                    {{ t('navigation.sidebar.purchases.receivingDocs.receivingDocs') }}</router-link>
                 </li>
                 <li v-if="canViewPurchasesLogisticsReceivingDocs" class="relative">
                   <router-link to="/purchases/receiving-docs-logistics/list" :class="[
@@ -628,11 +628,11 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
-                    وثائق استلام خدمات النقل</router-link>
+                    {{ t('navigation.sidebar.purchases.receivingDocs.logisticsReceivingDocs') }}</router-link>
                 </li>
               </ul>
               <h2 v-if="showPurchasesInvoicesSection" class="text-sm font-medium leading-5 my-2">
-                فواتير المشتريات
+                {{ t('navigation.sidebar.purchases.invoices.title') }}
               </h2>
               <ul v-if="showPurchasesInvoicesSection"
                 class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
@@ -642,7 +642,7 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
-                    فواتير المشتريات</router-link>
+                    {{ t('navigation.sidebar.purchases.invoices.purchaseInvoices') }}</router-link>
                 </li>
                 <li v-if="canViewLogisticsPurchaseInvoices" class="relative">
                   <router-link to="/purchases/invoices/logistics/list" :class="[
@@ -650,7 +650,7 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
-                    فاتورة مشتريات خدمة نقل</router-link>
+                    {{ t('navigation.sidebar.purchases.invoices.logisticsPurchaseInvoices') }}</router-link>
                 </li>
               </ul>
             </div>
@@ -674,7 +674,7 @@
                 </template>
                 <template #title>
                   <div class="flex-1">
-                    <span class="font-semibold" :class="isFinanceActive ? '!text-[#1570EF]' : ''">المالية</span>
+                    <span class="font-semibold" :class="isFinanceActive ? '!text-[#1570EF]' : ''">{{ t('navigation.sidebar.finance.title') }}</span>
                   </div>
                 </template>
                 <template #prepend>
@@ -692,7 +692,7 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
-                    لوحة التحكم المالية
+                    {{ t('navigation.sidebar.finance.financialDashboard') }}
                   </router-link>
                 </li>
                 <li class="relative" v-if="canViewTreasuryManagement">
@@ -701,7 +701,7 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
-                    الخزائن والبنوك
+                    {{ t('navigation.sidebar.finance.banksAndTreasuries') }}
                   </router-link>
                 </li>
                 <!-- <li v-if="canViewPaymentVouchers" class="relative">
@@ -740,7 +740,7 @@
                 </template>
                 <template #title>
                   <div class="flex-1">
-                    <span class="font-semibold" :class="isUsersActive ? '!text-[#1570EF]' : ''">المستخدمين</span>
+                    <span class="font-semibold" :class="isUsersActive ? '!text-[#1570EF]' : ''">{{ t('navigation.sidebar.users.title') }}</span>
                   </div>
                 </template>
                 <template #prepend>
@@ -760,7 +760,7 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
-                    المستخدمين والأدوار
+                    {{ t('navigation.sidebar.users.usersAndRoles') }}
                   </router-link>
                 </li>
                 <li v-if="canViewCrushers" class="relative">
@@ -768,21 +768,24 @@
                     isMenuItemActive('/crushers/list')
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
-                  ]">إدارة الكسارات</router-link>
+                  ]">
+                    {{ t('navigation.sidebar.users.crushersManagement') }}</router-link>
                 </li>
                 <li v-if="canViewContractors" class="relative">
                   <router-link to="/contractors/list" :class="[
                     isMenuItemActive('/contractors/list')
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
-                  ]">إدارة المقاولين</router-link>
+                  ]">
+                    {{ t('navigation.sidebar.users.contractorsManagement') }}</router-link>
                 </li>
                 <li class="relative">
                   <router-link to="/factories-management/list" :class="[
                     isMenuItemActive('/factories-management/list')
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
-                  ]">ادارة المصانع</router-link>
+                  ]">
+                    {{ t('navigation.sidebar.users.factoriesManagement') }}</router-link>
                 </li>
                 <li v-if="canViewLogistics" class="relative">
                   <router-link to="/logistics/list" :class="[
@@ -790,7 +793,7 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
-                    {{ t("pages.logistics.sidebarTitle") }}
+                    {{ t('navigation.sidebar.users.logisticsManagement') }}
                   </router-link>
                 </li>
                 <li v-if="canViewLogistics" class="relative">
@@ -799,7 +802,7 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
-                    {{ t("pages.materialMerchants.sidebarTitle") }}
+                    {{ t('navigation.sidebar.users.materialMerchants') }}
                   </router-link>
                 </li>
               </ul>
@@ -912,7 +915,7 @@
                 </template>
                 <template #title>
                   <div class="flex-1">
-                    <span class="font-semibold" :class="isSettingsActive ? '!text-[#1570EF]' : ''">الإعدادات</span>
+                    <span class="font-semibold" :class="isSettingsActive ? '!text-[#1570EF]' : ''">{{ t('navigation.sidebar.settings.title') }}</span>
                   </div>
                 </template>
                 <template #prepend>
@@ -924,7 +927,7 @@
             </template>
             <div class="relative mt-1 ps-10 pe-4 text-sm">
               <h2 v-if="showSettingsBasicSection" class="text-sm font-medium leading-5 mb-2">
-                الإعدادات الاساسية
+                {{ t('navigation.sidebar.settings.basic.title') }}
               </h2>
               <ul v-if="showSettingsBasicSection" class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
                 <li v-if="canViewCategories" class="relative">
@@ -933,7 +936,7 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
-                    قائمة تصنيفات المنتجات
+                    {{ t('navigation.sidebar.settings.basic.productCategories') }}
                   </router-link>
                 </li>
                 <li v-if="canViewServiceCategories" class="relative">
@@ -942,7 +945,7 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
-                    قائمة تصنيفات الخدمات</router-link>
+                    {{ t('navigation.sidebar.settings.basic.serviceCategories') }}</router-link>
                 </li>
                 <li v-if="canViewTreeCategories" class="relative">
                   <router-link to="/settings/products-categories/tree" :class="[
@@ -950,7 +953,7 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
-                    تصنيفات المنتجات
+                    {{ t('navigation.sidebar.settings.basic.productTreeCategories') }}
                   </router-link>
                 </li>
                 <li v-if="canViewTreeServiceCategories" class="relative">
@@ -959,7 +962,7 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
-                    تصنيفات الخدمات</router-link>
+                    {{ t('navigation.sidebar.settings.basic.serviceTreeCategories') }}</router-link>
                 </li>
                 <li v-if="canViewUnits" class="relative">
                   <router-link to="/settings/units/list" :class="[
@@ -967,7 +970,7 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
-                    الوحدات</router-link>
+                    {{ t('navigation.sidebar.settings.basic.units') }}</router-link>
                 </li>
                 <li v-if="canViewManufacturers" class="relative">
                   <router-link to="/settings/factories/list" :class="[
@@ -975,7 +978,7 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
-                    المصانع</router-link>
+                    {{ t('navigation.sidebar.settings.basic.factories') }}</router-link>
                 </li>
                 <li v-if="canViewBrands" class="relative">
                   <router-link to="/settings/brands/list" :class="[
@@ -983,7 +986,7 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
-                    العلامة التجارية</router-link>
+                    {{ t('navigation.sidebar.settings.basic.brands') }}</router-link>
                 </li>
                 <li v-if="canViewGeoRegions" class="relative">
                   <router-link to="/settings/geo-areas/list" :class="[
@@ -991,7 +994,7 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
-                    تقسيمات المناطق الجغرافية</router-link>
+                    {{ t('navigation.sidebar.settings.basic.geoRegions') }}</router-link>
                 </li>
                 <li v-if="canViewGeoZones" class="relative">
                   <router-link to="/settings/geo-segments/list" :class="[
@@ -999,10 +1002,10 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
-                    تقسيمات النطاقات الجغرافية</router-link>
+                    {{ t('navigation.sidebar.settings.basic.geoZones') }}</router-link>
                 </li>
               </ul>
-              <h2 v-if="showSettingsTaxesSection" class="text-sm font-medium leading-5 my-2">إدارة الضرائب</h2>
+              <h2 v-if="showSettingsTaxesSection" class="text-sm font-medium leading-5 my-2">{{ t('navigation.sidebar.settings.taxes.title') }}</h2>
               <ul v-if="showSettingsTaxesSection" class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
                 <li v-if="canViewTaxes" class="relative">
                   <router-link to="/settings/tax-rules/list" :class="[
@@ -1010,7 +1013,7 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
-                    القواعد الضريبية
+                    {{ t('navigation.sidebar.settings.taxes.taxRules') }}
                   </router-link>
                 </li>
                 <li v-if="canViewTaxes" class="relative">
@@ -1019,11 +1022,10 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
-                    الضرائب</router-link>
+                    {{ t('navigation.sidebar.settings.taxes.taxes') }}</router-link>
                 </li>
               </ul>
-              <h2 v-if="showSettingsCountriesCurrenciesSection" class="text-sm font-medium leading-5 my-2">الدول
-                والعملات</h2>
+              <h2 v-if="showSettingsCountriesCurrenciesSection" class="text-sm font-medium leading-5 my-2">{{ t('navigation.sidebar.settings.countriesCurrencies.title') }}</h2>
               <ul v-if="showSettingsCountriesCurrenciesSection"
                 class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
                 <li v-if="canViewCountries" class="relative">
@@ -1032,7 +1034,7 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
-                    إدارة الدول
+                    {{ t('navigation.sidebar.settings.countriesCurrencies.countriesManagement') }}
                   </router-link>
                 </li>
                 <li v-if="canViewCities" class="relative">
@@ -1041,7 +1043,7 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
-                    إدارة المدن
+                    {{ t('navigation.sidebar.settings.countriesCurrencies.citiesManagement') }}
                   </router-link>
                 </li>
                 <li v-if="canViewCurrencies" class="relative">
@@ -1050,10 +1052,10 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
-                    إدارة العملات</router-link>
+                    {{ t('navigation.sidebar.settings.countriesCurrencies.currenciesManagement') }}</router-link>
                 </li>
               </ul>
-              <h2 v-if="showSettingsAdvancedSection" class="text-sm font-medium leading-5 my-2">إعدادات متقدمة</h2>
+              <h2 v-if="showSettingsAdvancedSection" class="text-sm font-medium leading-5 my-2">{{ t('navigation.sidebar.settings.advanced.title') }}</h2>
               <ul v-if="showSettingsAdvancedSection"
                 class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
                 <li v-if="canViewCodesSettings" class="relative">
@@ -1062,7 +1064,7 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
-                    اعدادات الاكواد
+                    {{ t('navigation.sidebar.settings.advanced.codesSettings') }}
                   </router-link>
                 </li>
                 <li v-if="canViewAccountTypes" class="relative">
@@ -1071,7 +1073,7 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
-                    أنواع الحسابات
+                    {{ t('navigation.sidebar.settings.advanced.accountTypes') }}
                   </router-link>
                 </li>
                 <li v-if="canViewTestGroups" class="relative">
@@ -1080,7 +1082,7 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
-                    مجموعات الاختبارات
+                    {{ t('navigation.sidebar.settings.advanced.testGroups') }}
                   </router-link>
                 </li>
                 <li v-if="canViewTests" class="relative">
@@ -1089,7 +1091,7 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
-                    الاختبارات
+                    {{ t('navigation.sidebar.settings.advanced.tests') }}
                   </router-link>
                 </li>
                 <li v-if="canViewTestMethodologies" class="relative">
@@ -1098,7 +1100,7 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
-                    منهجية الاختبارات
+                    {{ t('navigation.sidebar.settings.advanced.testMethodologies') }}
                   </router-link>
                 </li>
                 <li v-if="canViewSampleTypes" class="relative">
@@ -1107,7 +1109,7 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
-                    أنواع العينات
+                    {{ t('navigation.sidebar.settings.advanced.sampleTypes') }}
                   </router-link>
                 </li>
                 <li v-if="canViewSystemStatuses" class="relative">
@@ -1116,7 +1118,7 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
-                    حالات النظام
+                    {{ t('navigation.sidebar.settings.advanced.systemStatuses') }}
                   </router-link>
                 </li>
                 <li class="relative" v-if="canViewDocStatusTransitions">
@@ -1125,7 +1127,7 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
-                    إدارة الوثائق والحالات
+                    {{ t('navigation.sidebar.settings.advanced.docStatusTransitions') }}
                   </router-link>
                 </li>
               </ul>

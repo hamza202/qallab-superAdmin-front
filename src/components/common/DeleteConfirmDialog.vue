@@ -49,10 +49,10 @@ const internalOpen = computed({
   set: (val: boolean) => emit("update:modelValue", val),
 });
 
-const titleText = computed(() => props.title ?? t("common.deleteConfirm.title"));
-const confirmText = computed(() => props.confirmText ?? t("common.deleteConfirm.confirm"));
-const cancelText = computed(() => props.cancelText ?? t("common.deleteConfirm.cancel"));
-const messageText = computed(() => props.message ?? t("common.deleteConfirm.message"));
+const titleText = computed(() => props.title ?? t("common.dialogs.deleteConfirm.title"));
+const confirmText = computed(() => props.confirmText ?? t("common.dialogs.deleteConfirm.confirm"));
+const cancelText = computed(() => props.cancelText ?? t("common.dialogs.deleteConfirm.cancel"));
+const messageText = computed(() => props.message ?? t("common.dialogs.deleteConfirm.message"));
 
 const handleCancel = () => {
   internalOpen.value = false;

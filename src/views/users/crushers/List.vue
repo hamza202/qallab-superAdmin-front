@@ -227,7 +227,7 @@ const fetchCrushers = async (cursor?: string | null, append = false) => {
         nextCursor.value = response.pagination.next_cursor ?? null;
     } catch (err: any) {
         console.error('Error fetching crushers:', err);
-        toast.error(err?.response?.data?.message || 'Failed to fetch crushers');
+        toast.error(err?.response?.data?.message || t('common.messages.general.loadDataFailed'));
     } finally {
         loading.value = false;
         loadingMore.value = false;
@@ -309,7 +309,7 @@ const confirmStatusChange = async () => {
             status: newStatus
         });
 
-        toast.success(`تم ${newStatus ? 'تفعيل' : 'تعطيل'} الكسارة بنجاح`);
+        toast.success(t('common.messages.general.changeStatusSuccess'));
 
         const index = tableItems.value.findIndex(t => t.id === itemToChangeStatus.value!.id)
         if (index !== -1) {
@@ -318,7 +318,7 @@ const confirmStatusChange = async () => {
 
     } catch (err: any) {
         console.error('Error changing crusher status:', err);
-        toast.error(err?.response?.data?.message || 'فشل تغيير حالة الكسارة');
+        toast.error(err?.response?.data?.message || t('common.messages.general.changeStatusError'));
     } finally {
         statusChangeLoading.value = false;
         showStatusChangeDialog.value = false;
@@ -330,11 +330,11 @@ const confirmDelete = async (item: any) => {
     try {
         deleteLoading.value = true;
         await api.delete(`/crushers/${item.id}`);
-        toast.success('تم حذف الكسارة بنجاح');
+        toast.success(t('common.messages.general.deleteSuccess'));
         await fetchCrushers();
     } catch (err: any) {
         console.error('Error deleting crusher:', err);
-        toast.error(err?.response?.data?.message || 'Failed to delete crusher');
+        toast.error(err?.response?.data?.message || t('common.messages.general.deleteError'));
     } finally {
         deleteLoading.value = false;
     }
@@ -349,12 +349,12 @@ const confirmBulkDelete = async () => {
     try {
         deleteLoading.value = true;
         await api.post('/crushers/bulk-delete', { ids: selectedCrushers.value });
-        toast.success(`تم حذف ${selectedCrushers.value.length} كسارة بنجاح`);
+        toast.success(t('common.messages.general.deleteSuccess'));
         selectedCrushers.value = [];
         await fetchCrushers();
     } catch (err: any) {
         console.error('Error bulk deleting crushers:', err);
-        toast.error(err?.response?.data?.message || 'Failed to delete crushers');
+        toast.error(err?.response?.data?.message || t('common.messages.general.deleteError'));
     } finally {
         deleteLoading.value = false;
         showBulkDeleteDialog.value = false;
@@ -397,9 +397,10 @@ const fetchConstants = async () => {
                 value: ct.key
             }));
         }
+
     } catch (err: any) {
         console.error('Fetch constants error:', err);
-        toast.error(err?.response?.data?.message || 'فشل تحميل الثوابت');
+        toast.error(err?.response?.data?.message || t('common.messages.general.loadConstantsFailed'));
     } finally {
         loadingConstants.value = false;
     }
@@ -452,26 +453,27 @@ onBeforeUnmount(() => {
                 class="flex justify-end items-stretch rounded border border-gray-300 w-fit ms-auto mb-4 overflow-hidden bg-white text-sm">
                 <ButtonWithIcon variant="flat" height="40" rounded="0"
                     custom-class="font-semibold text-base border-gray-300 bg-primary-100 !text-primary-900"
-                    :prepend-icon="importIcon" :label="t('common.import')" />
+                    :prepend-icon="importIcon" :label="t('common.actions.import')" />
 
-                <ButtonWithIcon variant="flat" height="40" rounded="0"
-                    custom-class="font-semibold text-base border-gray-300 bg-primary-50 !text-primary-900"
-                    :prepend-icon="exportIcon" :label="t('common.export')" />
+                <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="0"
+                    custom-class="font-semibold text-base !text-primary-800 border !border-primary-200"
+                    :prepend-icon="exportIcon" :label="t('common.actions.export')" />
             </div>
 
             <div class="bg-gray-50 rounded-md -mx-6">
                 <div :class="hasSelectedCrushers ? 'justify-between' : 'justify-end'"
                     class="flex flex-wrap items-center gap-3 border-y border-y-slate-300 px-4 sm:px-6 py-3">
                     <!-- Actions when rows are selected -->
-                    <div v-if="hasSelectedCrushers" class="flex flex-wrap items-stretch rounded overflow-hidden border border-gray-200 bg-white text-sm">
+                    <div v-if="hasSelectedCrushers"
+                        class="flex flex-wrap items-stretch rounded overflow-hidden border border-gray-200 bg-white text-sm">
                         <ButtonWithIcon variant="flat" height="40" rounded="0"
                             custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-                            :prepend-icon="trash_1_icon" color="white" :label="t('common.delete')"
+                            :prepend-icon="trash_1_icon" color="white" :label="t('common.table.deleteSelected')"
                             @click="handleBulkDelete" />
                         <div class="w-px bg-gray-200"></div>
                         <ButtonWithIcon variant="flat" height="40" rounded="0"
                             custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-                            :prepend-icon="trash_2_icon" color="white" :label="t('common.deleteAll')"
+                            :prepend-icon="trash_2_icon" color="white" :label="t('common.actions.delete')"
                             @click="handleBulkDelete" />
 
                     </div>
@@ -482,7 +484,7 @@ onBeforeUnmount(() => {
                             <template v-slot:activator="{ props }">
                                 <ButtonWithIcon v-bind="props" variant="outlined" rounded="4" color="gray-500"
                                     height="40" custom-class="font-semibold text-base border-gray-400"
-                                    :prepend-icon="columnIcon" :label="t('common.columns')"
+                                    :prepend-icon="columnIcon" :label="t('common.table.columns')"
                                     append-icon="mdi-chevron-down" />
                             </template>
                             <v-list>
@@ -500,14 +502,13 @@ onBeforeUnmount(() => {
 
                         <ButtonWithIcon variant="flat" color="primary-500" height="40" rounded="4"
                             custom-class="px-7 font-semibold text-base text-white border !border-primary-200"
-                            :prepend-icon="searchIcon" :label="t('common.advancedSearch')"
+                            :prepend-icon="searchIcon" :label="t('common.table.advancedSearch')"
                             @click="toggleAdvancedFilters" />
 
                         <!-- <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4"
                             custom-class="px-7 font-semibold text-base !text-primary-800 border !border-primary-200"
                             :prepend-icon="plusIcon" label="أضف كسارة" @click="openCreateCrusher" /> -->
                     </div>
-
                 </div>
 
                 <!-- Advanced filters row -->
@@ -517,37 +518,44 @@ onBeforeUnmount(() => {
                         <div class="flex flex-wrap gap-3 flex-1">
                             <!-- Production Lines -->
                             <TextInput v-model="filterProductionLines" density="comfortable" variant="outlined"
-                                hide-details placeholder="عدد خطوط الإنتاج" type="number"
-                                class="w-full sm:w-40 bg-white" @update:model-value="applyFilters" />
+                                hide-details :placeholder="t('form.crusher.operationalInfo.productionLines.label')"
+                                type="number" class="w-full sm:w-40 bg-white" @update:model-value="applyFilters" />
 
                             <!-- Crusher Type -->
                             <SelectInput v-model="filterCrusherType" :items="crusherTypeItems" item-title="title"
                                 item-value="value" density="comfortable" variant="outlined" hide-details
-                                placeholder="نوع الكسارة" class="w-full sm:w-40 bg-white" :loading="loadingConstants"
+                                :placeholder="t('form.crusher.operationalInfo.crusherType.label')"
+                                class="w-full sm:w-40 bg-white" :loading="loadingConstants"
                                 @update:model-value="applyFilters" />
 
                             <!-- Current Production Range From-To -->
                             <div class="flex items-center gap-2">
-                                <span class="text-sm text-gray-700 w-full whitespace-nowrap">الإنتاج الحالي من</span>
+                                <span class="text-sm text-gray-700 w-full whitespace-nowrap">{{
+                                    t('pages.crushers.list.filters.currentProductionFrom') }}</span>
                                 <div
                                     class="flex items-center gap-2 bg-white rounded-lg border border-gray-300 py-2.5 px-2">
-                                    <input v-model="filterCurrentProductionFrom" type="number" placeholder="من"
+                                    <input v-model="filterCurrentProductionFrom" type="number"
+                                        :placeholder="t('common.filters.from')"
                                         class="w-16 text-center text-gray-700 outline-none border-none bg-transparent no-spinner" />
                                     <span class="text-gray-400">-</span>
-                                    <input v-model="filterCurrentProductionTo" type="number" placeholder="إلى"
+                                    <input v-model="filterCurrentProductionTo" type="number"
+                                        :placeholder="t('common.filters.to')"
                                         class="w-16 text-center text-gray-700 outline-none border-none bg-transparent no-spinner" />
                                 </div>
                             </div>
 
                             <!-- Max Production Range From-To -->
                             <div class="flex items-center gap-2">
-                                <span class="text-sm text-gray-700 w-full whitespace-nowrap">الإنتاج الأقصى من</span>
+                                <span class="text-sm text-gray-700 w-full whitespace-nowrap">{{
+                                    t('pages.crushers.list.filters.maxProductionFrom') }}</span>
                                 <div
                                     class="flex items-center gap-2 bg-white rounded-lg border border-gray-300 py-2.5 px-2">
-                                    <input v-model="filterMaxProductionFrom" type="number" placeholder="من"
+                                    <input v-model="filterMaxProductionFrom" type="number"
+                                        :placeholder="t('common.filters.from')"
                                         class="w-16 text-center text-gray-700 outline-none border-none bg-transparent no-spinner" />
                                     <span class="text-gray-400">-</span>
-                                    <input v-model="filterMaxProductionTo" type="number" placeholder="إلى"
+                                    <input v-model="filterMaxProductionTo" type="number"
+                                        :placeholder="t('common.filters.to')"
                                         class="w-16 text-center text-gray-700 outline-none border-none bg-transparent no-spinner" />
                                 </div>
                             </div>
@@ -557,11 +565,11 @@ onBeforeUnmount(() => {
                         <div class="flex gap-2 items-center">
                             <ButtonWithIcon variant="flat" color="primary-500" rounded="4" height="40"
                                 custom-class="px-5 font-semibold !text-white text-sm sm:text-base"
-                                :prepend-icon="searchIcon" label="ابحث" @click="applyFilters" />
+                                :prepend-icon="searchIcon" :label="t('common.actions.search')" @click="applyFilters" />
 
                             <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4" border="sm"
                                 custom-class="px-5 font-semibold text-sm sm:text-base !text-primary-800 !border-primary-200"
-                                prepend-icon="mdi-refresh" label="إعادة تعيين" @click="resetFilters" />
+                                prepend-icon="mdi-refresh" :label="t('common.actions.reset')" @click="resetFilters" />
                         </div>
                     </div>
                 </div>
@@ -581,14 +589,16 @@ onBeforeUnmount(() => {
                 <div ref="loadMoreTrigger" class="h-4"></div>
                 <div v-if="loadingMore" class="flex justify-center items-center py-4">
                     <v-progress-circular indeterminate color="primary" size="32" />
-                    <span class="mr-2 text-gray-600">جاري تحميل المزيد...</span>
+                    <span class="ms-2 text-gray-600">{{ t('common.ui.loadingMore') }}</span>
                 </div>
             </div>
         </div>
 
         <!-- Bulk Delete Confirmation Dialog -->
-        <DeleteConfirmDialog v-model="showBulkDeleteDialog" :loading="deleteLoading" title="حذف الكسارات"
-            :message="`هل أنت متأكد من حذف ${selectedCrushers.length} كسارة؟`" @confirm="confirmBulkDelete" />
+        <DeleteConfirmDialog v-model="showBulkDeleteDialog" :loading="deleteLoading"
+            :title="t('pages.crushers.list.deleteDialog.title')"
+            :message="t('pages.crushers.list.deleteDialog.message', { count: selectedCrushers.length })"
+            @confirm="confirmBulkDelete" />
 
         <!-- Status Change Confirmation Dialog -->
         <StatusChangeDialog v-model="showStatusChangeDialog" :loading="statusChangeLoading"
