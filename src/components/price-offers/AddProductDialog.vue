@@ -44,6 +44,8 @@ const props = defineProps<{
   /** عند true في المشتريات: عرض سعر الوحدة والخصم بدل عدد الرحلات/نوع الناقلة (مثل طلبات المشتريات) */
   showUnitPriceAndDiscount?: boolean;
   itemsQueryParams?: Record<string, string | number>;
+  /** Override default /items/list endpoint (e.g. /items/supplier-items) */
+  itemsEndpoint?: string;
   editProduct?: ProductToAdd | null;
   existingProducts?: ProductToAdd[];
   /** Options for discount type dropdown */
@@ -150,10 +152,13 @@ const canAddProduct = (product: ProductToAdd): boolean => {
 const fetchCategories = async () => {
   categoriesLoading.value = true;
   try {
+    const params = new URLSearchParams();
     const materialType = props.itemsQueryParams?.material_type;
-    const categoryUrl = materialType != null
-      ? `/categories/list?material_type=${materialType}`
-      : '/categories/list';
+    if (materialType != null) params.set('material_type', String(materialType));
+    const supplierId = props.itemsQueryParams?.supplier_id ?? props.supplierId;
+    if (supplierId != null) params.set('supplier_id', String(supplierId));
+    const qs = params.toString();
+    const categoryUrl = qs ? `/categories/list?${qs}` : '/categories/list';
     const res = await api.get<any>(categoryUrl);
     if (Array.isArray(res.data)) {
       categories.value = res.data;
@@ -174,10 +179,14 @@ const fetchCategoryItems = async (categoryId: number) => {
 
   itemsLoading.value = true;
   try {
+    const baseEndpoint = props.itemsEndpoint || '/items/list';
+    const params = new URLSearchParams();
+    params.set('category_id', String(categoryId));
     const materialType = props.itemsQueryParams?.material_type;
-    const itemsUrl = materialType != null
-      ? `/items/list?material_type=${materialType}&category_id=${categoryId}`
-      : `/items/list?category_id=${categoryId}`;
+    if (materialType != null) params.set('material_type', String(materialType));
+    const supplierId = props.itemsQueryParams?.supplier_id ?? props.supplierId;
+    if (supplierId != null) params.set('supplier_id', String(supplierId));
+    const itemsUrl = `${baseEndpoint}?${params.toString()}`;
     const res = await api.get<any>(itemsUrl);
     if (Array.isArray(res.data)) {
       const newProducts: ProductToAdd[] = [];

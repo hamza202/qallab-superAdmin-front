@@ -6,8 +6,10 @@ import { useNotification } from '@/composables/useNotification';
 import { useForm } from '@/composables/useForm';
 import TopHeader from '@/components/price-offers/TopHeader.vue';
 import AddProductDialog from '@/components/price-offers/AddProductDialog.vue';
+import EditProductsDialog from '@/components/price-offers/EditProductsDialog.vue';
 import Map from '@/components/common/Map.vue';
-import AddTripDetailsDialog, { TripLogisticsDetail } from '@/components/trips/AddTripDetailsDialog.vue';
+import type { TripLogisticsDetail } from '@/components/trips/AddTripDetailsDialog.vue';
+import EditTripDetailsDialog from '@/components/trips/EditTripDetailsDialog.vue';
 import { returnIcon, saveIcon, fileCheckIcon, fileIcon } from '@/components/icons/globalIcons';
 import { mapMarkerIcon, packageIcon, downloadIcon, messagePlusIcon, busIcon } from '@/components/icons/priceOffersIcons';
 
@@ -59,6 +61,13 @@ const loadingCustomerSaleOrders = ref(false);
 const tripCategory = ref<string | null>(null); // Category from API response for edit mode
 const hasCustomerDataFromApi = ref(false); // Track if customer data came from API in edit mode
 
+const productDialogQueryParams = computed(() => {
+  if (isEditMode.value) {
+    return tripCategory.value === 'logistics' ? undefined : { material_type: 1 };
+  }
+  return routeFrom.value === 'logistics' ? undefined : { material_type: 1 };
+});
+
 const formData = ref({
   so_pickup_id: null as number | null,
   sale_order_id: null as number | null,
@@ -87,15 +96,16 @@ const formData = ref({
 const unitItems = ref<any[]>([]);
 const transportTypeItems = ref<any[]>([]);
 const productTableItems = ref<ProductTableItem[]>([]);
+const originalProductIds = ref<Record<number, number>>({});
 const showAddProductDialog = ref(false);
+const showEditProductsDialog = ref(false);
 const editingProduct = ref<any>(null);
 
 const customerTripDetails = ref<TripLogisticsDetail[]>([]);
 const logisticCompanyTripDetails = ref<TripLogisticsDetail[]>([]);
 const availableTripDetails = ref<TripLogisticsDetail[]>([]);
-const showCustomerDetailsDialog = ref(false);
-const showLogisticCompanyDetailsDialog = ref(false);
-const editingTripDetail = ref<TripLogisticsDetail | null>(null);
+const showEditCustomerDetailsDialog = ref(false);
+const showEditLogisticDetailsDialog = ref(false);
 
 const showMapDialog = ref(false);
 const amPmIntervalItems = ref<any[]>([]);
@@ -667,8 +677,6 @@ const normalizePoDateTime = (value: string): string => {
 
 const fetchFormData = async () => {
   if (!isEditMode.value || !routeId.value) return;
-  console.log('ttt');
-
   isLoading.value = true;
   try {
     const raw = await api.get<any>(`/sales/trips/${routeId.value}`);
@@ -704,19 +712,25 @@ const fetchFormData = async () => {
 
     // Populate products (items)
     if (data.items && Array.isArray(data.items)) {
-      productTableItems.value = data.items.map((item: any) => ({
-        id: item.id,
-        item_id: item.item_id,
-        item_name: item.item_name || '',
-        unit_id: item.unit_id,
-        unit_name: item.unit_name || '',
-        quantity: item.quantity,
-        transport_type: item.transport_type,
-        transport_no: item.transport_no,
-        transport_type_name: getTransportTypeName(item.transport_type),
-        notes: item.notes || '',
-        isAdded: true
-      }));
+      productTableItems.value = data.items.map((item: any) => {
+        const itemId = Number(item.item_id);
+        if (item.id && itemId) {
+          originalProductIds.value[itemId] = item.id;
+        }
+        return {
+          id: item.id,
+          item_id: itemId,
+          item_name: item.item_name || '',
+          unit_id: item.unit_id,
+          unit_name: item.unit_name || '',
+          quantity: item.quantity,
+          transport_type: item.transport_type,
+          transport_no: item.transport_no,
+          transport_type_name: getTransportTypeName(item.transport_type),
+          notes: item.notes || '',
+          isAdded: true
+        };
+      });
     }
 
     // Populate customer trip logistics details
@@ -966,17 +980,54 @@ const headers = [
   { title: 'ملاحظات', key: 'notes' },
 ];
 
+const syncProductsToTripDetails = () => {
+  const syncToDetails = (
+    existingDetails: TripLogisticsDetail[],
+    products: ProductTableItem[]
+  ): TripLogisticsDetail[] => {
+    return products.map(product => {
+      const existing = existingDetails.find(d => d.item_id === product.item_id);
+      if (existing) {
+        return {
+          ...existing,
+          item_name: product.item_name,
+          unit_id: product.unit_id,
+          unit_name: product.unit_name || getUnitName(product.unit_id),
+          quantity: product.quantity,
+        };
+      }
+      return {
+        id: product.item_id,
+        item_id: product.item_id,
+        item_name: product.item_name,
+        unit_id: product.unit_id,
+        unit_name: product.unit_name || getUnitName(product.unit_id),
+        quantity: product.quantity,
+        transport_type: [],
+        vehicle_type_no: [],
+        price: null,
+      };
+    });
+  };
+
+  customerTripDetails.value = syncToDetails(customerTripDetails.value, productTableItems.value);
+  logisticCompanyTripDetails.value = syncToDetails(logisticCompanyTripDetails.value, productTableItems.value);
+};
+
 const handleProductSaved = (products: any[]) => {
   const newItems: ProductTableItem[] = products.map(p => {
-    const existing = productTableItems.value.find(existing => existing.item_id === p.item_id);
+    const existing = productTableItems.value.find(e => e.item_id === p.item_id);
+    const restoredId = existing?.id ?? originalProductIds.value[p.item_id] ?? p.id;
     return {
       ...p,
+      id: restoredId,
       transport_type: p.transport_type ?? null,
       transport_type_name: getTransportTypeName(p.transport_type ?? null),
       notes: existing?.notes || p.notes || ''
     } as ProductTableItem;
   });
   productTableItems.value = newItems;
+  syncProductsToTripDetails();
 };
 
 const tableItems = computed(() => productTableItems.value.map(item => ({
@@ -1010,6 +1061,7 @@ const handleProductUpdated = (updatedProduct: any) => {
     } as ProductTableItem;
   }
   editingProduct.value = null;
+  syncProductsToTripDetails();
 };
 
 const tripDetailsHeaders = [
@@ -1020,80 +1072,34 @@ const tripDetailsHeaders = [
   { title: "السعر", key: "price" }
 ];
 
-// Customer Trip Details Handlers
-const addCustomerTripDetail = () => {
-  editingTripDetail.value = null;
-  showCustomerDetailsDialog.value = true;
+
+const handleCustomerDetailsUpdated = (details: TripLogisticsDetail[]) => {
+  customerTripDetails.value = details;
 };
 
-const handleCustomerTripDetailSaved = (products: TripLogisticsDetail[]) => {
-  const newItems = products.map(p => ({
-    ...p,
-    id: p.id ?? p.item_id,
-    unit_name: getUnitName(p.unit_id)
-  }));
-  customerTripDetails.value = newItems;
+const handleLogisticDetailsUpdated = (details: TripLogisticsDetail[]) => {
+  logisticCompanyTripDetails.value = details;
 };
 
-const handleEditCustomerTripDetail = (item: any) => {
-  const toEdit = customerTripDetails.value.find(p => p.item_id === item.item_id);
-  if (toEdit) {
-    editingTripDetail.value = { ...toEdit, isAdded: true };
-    showCustomerDetailsDialog.value = true;
-  }
-};
-
-const handleCustomerTripDetailUpdated = (updatedProduct: TripLogisticsDetail) => {
-  const index = customerTripDetails.value.findIndex(p => p.item_id === updatedProduct.item_id);
-  if (index !== -1) {
-    customerTripDetails.value[index] = { ...updatedProduct };
-  }
-  editingTripDetail.value = null;
-};
-
-const handleDeleteCustomerTripDetail = (item: any) => {
-  const index = customerTripDetails.value.findIndex(p => p.item_id === item.item_id);
-  if (index !== -1) {
-    customerTripDetails.value.splice(index, 1);
-  }
-};
-
-// Logistic Company Trip Details Handlers
-const addLogisticTripDetail = () => {
-  editingTripDetail.value = null;
-  showLogisticCompanyDetailsDialog.value = true;
-};
-
-const handleLogisticTripDetailSaved = (products: TripLogisticsDetail[]) => {
-  const newItems = products.map(p => ({
-    ...p,
-    id: p.id ?? p.item_id,
-    unit_name: getUnitName(p.unit_id)
-  }));
-  logisticCompanyTripDetails.value = newItems;
-};
-
-const handleEditLogisticTripDetail = (item: any) => {
-  const toEdit = logisticCompanyTripDetails.value.find(p => p.item_id === item.item_id);
-  if (toEdit) {
-    editingTripDetail.value = { ...toEdit, isAdded: true };
-    showLogisticCompanyDetailsDialog.value = true;
-  }
-};
-
-const handleLogisticTripDetailUpdated = (updatedProduct: TripLogisticsDetail) => {
-  const index = logisticCompanyTripDetails.value.findIndex(p => p.item_id === updatedProduct.item_id);
-  if (index !== -1) {
-    logisticCompanyTripDetails.value[index] = { ...updatedProduct };
-  }
-  editingTripDetail.value = null;
-};
-
-const handleDeleteLogisticTripDetail = (item: any) => {
-  const index = logisticCompanyTripDetails.value.findIndex(p => p.item_id === item.item_id);
-  if (index !== -1) {
-    logisticCompanyTripDetails.value.splice(index, 1);
-  }
+const handleEditProductsBulk = (updatedProducts: any[]) => {
+  productTableItems.value = updatedProducts.map((updated: any) => {
+    const existing = productTableItems.value.find(p => p.item_id === updated.item_id);
+    return {
+      item_id: updated.item_id,
+      item_name: updated.item_name,
+      unit_id: updated.unit_id,
+      unit_name: updated.unit_name,
+      quantity: updated.quantity,
+      transport_type: updated.transport_type ?? existing?.transport_type ?? null,
+      transport_no: updated.transport_no ?? existing?.transport_no ?? null,
+      transport_type_name: getTransportTypeName(updated.transport_type ?? existing?.transport_type ?? null),
+      notes: existing?.notes ?? updated.notes ?? '',
+      id: existing?.id ?? updated.id,
+      isAdded: true,
+    } as ProductTableItem;
+  });
+  showEditProductsDialog.value = false;
+  syncProductsToTripDetails();
 };
 
 const handleDeleteProduct = (item: any) => {
@@ -1101,6 +1107,7 @@ const handleDeleteProduct = (item: any) => {
   if (index !== -1) {
     productTableItems.value.splice(index, 1);
   }
+  syncProductsToTripDetails();
 };
 
 // Watch for supplier_logistic_id: fetch logistics list when it exists or changes (edit load handled in fetchFormData)
@@ -1387,10 +1394,19 @@ onMounted(async () => {
           </DataTable>
         </div>
 
-        <div class="flex justify-center my-6">
-          <ButtonWithIcon color="primary-100" variant="flat" class="!text-primary-900 font-bold w-75"
+        <div class="flex justify-center gap-3 my-6 md:w-3/4 mx-auto">
+          <ButtonWithIcon color="primary-100" variant="flat" class="!text-primary-900 font-bold flex-1"
             @click="addProduct">
             + اضافة منتج جديد
+          </ButtonWithIcon>
+          <ButtonWithIcon
+            v-if="productTableItems.length > 0"
+            color="primary-100"
+            variant="flat"
+            class="!text-primary-900 font-bold flex-1"
+            @click="showEditProductsDialog = true"
+          >
+            تعديل المنتجات
           </ButtonWithIcon>
         </div>
 
@@ -1401,8 +1417,7 @@ onMounted(async () => {
           </div>
         </div>
         <div class="mb-4">
-          <DataTable :headers="tripDetailsHeaders" :items="customerTripDetails" show-actions force-show-edit force-show-delete
-            @edit="handleEditCustomerTripDetail" @delete="handleDeleteCustomerTripDetail">
+          <DataTable :headers="tripDetailsHeaders" :items="customerTripDetails">
             <template #item.vehicle_type_no="{ item }">
               <div class="flex gap-2 my-2">
                 <div v-for="(vehicle, index) in item.vehicle_type_no" :key="index" class="w-[180px]">
@@ -1429,10 +1444,11 @@ onMounted(async () => {
             </template>
           </DataTable>
         </div>
-        <div class="flex my-6 justify-center">
-          <ButtonWithIcon color="primary-100" variant="flat" class="!text-primary-900 font-bold w-75"
-            @click="addCustomerTripDetail">
-            + اضافة تفاصيل رحلة للعميل
+        <div class="flex my-6 justify-center md:w-3/4 mx-auto">
+          <ButtonWithIcon color="primary-100" variant="flat" class="!text-primary-900 font-bold flex-1"
+            @click="showEditCustomerDetailsDialog = true"
+            :disabled="customerTripDetails.length === 0">
+            تعديل تفاصيل الرحلات للعميل
           </ButtonWithIcon>
         </div>
 
@@ -1444,8 +1460,7 @@ onMounted(async () => {
           </div>  
         </div>
         <div class="mb-4">
-          <DataTable :headers="tripDetailsHeaders" :items="logisticCompanyTripDetails" show-actions force-show-edit force-show-delete
-            @edit="handleEditLogisticTripDetail" @delete="handleDeleteLogisticTripDetail">
+          <DataTable :headers="tripDetailsHeaders" :items="logisticCompanyTripDetails">
             <template #item.vehicle_type_no="{ item }">
               <div class="flex gap-2 my-2 items-center">
                 <div v-for="(vehicle, index) in item.vehicle_type_no" :key="index" class="w-[180px]">
@@ -1472,10 +1487,11 @@ onMounted(async () => {
             </template>
           </DataTable>
         </div>
-        <div class="flex justify-center my-6">
-          <ButtonWithIcon color="primary-100" variant="flat" class="!text-primary-900 font-bold w-75"
-            @click="addLogisticTripDetail">
-            + اضافة تفاصيل رحلة لشركة النقل
+        <div class="flex justify-center my-6 md:w-3/4 mx-auto">
+          <ButtonWithIcon color="primary-100" variant="flat" class="!text-primary-900 font-bold flex-1"
+            @click="showEditLogisticDetailsDialog = true"
+            :disabled="logisticCompanyTripDetails.length === 0">
+            تعديل تفاصيل الرحلات لشركة النقل
           </ButtonWithIcon>
         </div>
 
@@ -1499,21 +1515,46 @@ onMounted(async () => {
     </div>
 
     <!-- Add Product Dialog -->
-    <AddProductDialog v-model="showAddProductDialog" request-type="trips" :transport-types="transportTypeItems"
-      :unit-items="unitItems" :edit-product="editingProduct" :existing-products="productTableItems"
-      @saved="handleProductSaved" @product-updated="handleProductUpdated" />
+    <AddProductDialog
+      v-model="showAddProductDialog"
+      request-type="trips"
+      :items-query-params="productDialogQueryParams"
+      :transport-types="transportTypeItems"
+      :unit-items="unitItems"
+      :edit-product="editingProduct"
+      :existing-products="productTableItems"
+      @saved="handleProductSaved"
+      @product-updated="handleProductUpdated"
+    />
 
-    <!-- Customer Trip Details Dialog -->
-    <AddTripDetailsDialog v-model="showCustomerDetailsDialog" :transport-types="transportTypeItems"
-      :unit-items="unitItems" :edit-item="editingTripDetail" :available-items="availableTripDetails"
-      :existing-items="customerTripDetails"
-      @saved="handleCustomerTripDetailSaved" @product-updated="handleCustomerTripDetailUpdated" />
+    <!-- Edit Products Dialog -->
+    <EditProductsDialog
+      v-model="showEditProductsDialog"
+      :products="productTableItems"
+      :unit-items="unitItems"
+      request-type="transfer_service"
+      @products-updated="handleEditProductsBulk"
+    />
 
-    <!-- Logistic Company Trip Details Dialog -->
-    <AddTripDetailsDialog v-model="showLogisticCompanyDetailsDialog" :transport-types="transportTypeItems"
-      :unit-items="unitItems" :edit-item="editingTripDetail" :available-items="availableTripDetails"
-      :existing-items="logisticCompanyTripDetails"
-      @saved="handleLogisticTripDetailSaved" @product-updated="handleLogisticTripDetailUpdated" />
+    <!-- Customer Trip Details Edit Dialog -->
+    <EditTripDetailsDialog
+      v-model="showEditCustomerDetailsDialog"
+      :trip-details="customerTripDetails"
+      :transport-types="transportTypeItems"
+      :unit-items="unitItems"
+      title="تعديل تفاصيل الرحلات للعميل"
+      @details-updated="handleCustomerDetailsUpdated"
+    />
+
+    <!-- Logistic Company Trip Details Edit Dialog -->
+    <EditTripDetailsDialog
+      v-model="showEditLogisticDetailsDialog"
+      :trip-details="logisticCompanyTripDetails"
+      :transport-types="transportTypeItems"
+      :unit-items="unitItems"
+      title="تعديل تفاصيل الرحلات لشركة النقل"
+      @details-updated="handleLogisticDetailsUpdated"
+    />
 
     <Map v-model="showMapDialog"
       :latitude="String(currentMapType === 'target' ? (formData.target_latitude || '') : (formData.source_latitude || ''))"

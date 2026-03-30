@@ -3,6 +3,7 @@ import { ref, computed, onMounted } from "vue";
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router';
 import AddProductDialog from '@/components/price-offers/AddProductDialog.vue';
+import EditProductsDialog from '@/components/price-offers/EditProductsDialog.vue';
 import AddTransportServiceDialog from '@/components/price-offers/AddTransportServiceDialog.vue';
 import TopHeader from '@/components/price-offers/TopHeader.vue';
 import VoiceRecorder from '@/components/common/forms/VoiceRecorder.vue';
@@ -158,18 +159,24 @@ const fetchFormData = async () => {
 
             // Populate products (items)
             if (data.items && Array.isArray(data.items)) {
-                productTableItems.value = data.items.map((item: any) => ({
-                    id: item.id,
-                    item_id: item.item_id,
-                    item_name: item.item_name || '',
-                    unit_id: item.unit_id,
-                    unit_name: item.unit_name || '',
-                    quantity: item.quantity,
-                    transport_type: item.transport_type,
-                    transport_type_name: getTransportTypeName(item.transport_type),
-                    trip_no: item.trip_no,
-                    notes: item.notes || ''
-                }));
+                productTableItems.value = data.items.map((item: any) => {
+                    const itemId = Number(item.item_id);
+                    if (item.id && itemId) {
+                        originalProductIds.value[itemId] = item.id;
+                    }
+                    return {
+                        id: item.id,
+                        item_id: itemId,
+                        item_name: item.item_name || '',
+                        unit_id: item.unit_id,
+                        unit_name: item.unit_name || '',
+                        quantity: item.quantity,
+                        transport_type: item.transport_type,
+                        transport_type_name: getTransportTypeName(item.transport_type),
+                        trip_no: item.trip_no,
+                        notes: item.notes || ''
+                    };
+                });
             }
 
             // Populate transport service (logistics_detail)
@@ -271,6 +278,7 @@ const formData = ref({
 
 // Products table items (dynamically populated from dialog)
 const productTableItems = ref<ProductTableItem[]>([]);
+const originalProductIds = ref<Record<number, number>>({});
 
 // Transport service (single item - dynamically populated from dialog)
 const transportService = ref<TransportService | null>(null);
@@ -292,6 +300,7 @@ import { required } from '@/utils/validators';
 const { success, warning, apiError } = useNotification();
 
 const showAddProductDialog = ref(false);
+const showEditProductsDialog = ref(false);
 const editingProduct = ref<ProductTableItem | null>(null);
 
 const handleAddProduct = () => {
@@ -304,12 +313,11 @@ const handleAddProduct = () => {
 };
 
 const handleProductSaved = (products: any[]) => {
-    // Merge new products while preserving existing notes
     const newItems: ProductTableItem[] = [];
 
     products.forEach(p => {
-        // Find if this product already exists in the table
-        const existing = productTableItems.value.find(existing => existing.item_id === p.item_id);
+        const existing = productTableItems.value.find(e => e.item_id === p.item_id);
+        const restoredId = existing?.id ?? originalProductIds.value[p.item_id] ?? p.id;
 
         newItems.push({
             item_id: p.item_id,
@@ -320,8 +328,8 @@ const handleProductSaved = (products: any[]) => {
             transport_type: p.transport_type ?? null,
             trip_no: p.trip_no ?? null,
             transport_type_name: getTransportTypeName(p.transport_type),
-            notes: existing?.notes || p.notes || '', // Preserve existing notes
-            id: p.id,
+            notes: existing?.notes || p.notes || '',
+            id: restoredId,
             isAdded: p.isAdded
         });
     });
@@ -358,6 +366,26 @@ const handleProductUpdated = (updatedProduct: any) => {
         };
     }
     editingProduct.value = null;
+};
+
+const handleEditProductsBulk = (updatedProducts: any[]) => {
+    productTableItems.value = updatedProducts.map((updated: any) => {
+        const existing = productTableItems.value.find(p => p.item_id === updated.item_id);
+        return {
+            item_id: updated.item_id,
+            item_name: updated.item_name,
+            unit_id: updated.unit_id,
+            unit_name: updated.unit_name,
+            quantity: updated.quantity,
+            transport_type: updated.transport_type ?? existing?.transport_type ?? null,
+            transport_type_name: getTransportTypeName(updated.transport_type ?? existing?.transport_type ?? null),
+            trip_no: updated.trip_no ?? existing?.trip_no ?? null,
+            notes: existing?.notes ?? updated.notes ?? '',
+            id: existing?.id ?? updated.id,
+            isAdded: true,
+        } as ProductTableItem;
+    });
+    showEditProductsDialog.value = false;
 };
 
 const handleDeleteProduct = (item: any) => {
@@ -812,11 +840,20 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
                     </DataTable>
                 </div>
 
-                <!-- Add Product Button -->
-                <div class="flex justify-center">
+                <!-- Add / Edit Product Buttons -->
+                <div class="flex justify-center gap-3">
                     <ButtonWithIcon color="primary-100" variant="flat" class="!text-primary-900 font-bold w-75"
                         @click="handleAddProduct">
                         + إضافة منتج جديد
+                    </ButtonWithIcon>
+                    <ButtonWithIcon
+                        v-if="productTableItems.length > 0"
+                        color="primary-100"
+                        variant="flat"
+                        class="!text-primary-900 font-bold w-75"
+                        @click="showEditProductsDialog = true"
+                    >
+                        تعديل المنتجات
                     </ButtonWithIcon>
                 </div>
             </div>
@@ -920,11 +957,29 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
             :address="formData.target_location" @location-selected="handleLocationSelected" />
 
         <!-- Add Product Dialog -->
-        <AddProductDialog v-model="showAddProductDialog" request-type="raw_materials"
-            :transport-types="transportTypeItems" :unit-items="unitItems" :supplier-id="formData.supplier_id"
-            :edit-product="editingProduct" :existing-products="productTableItems"
-            :items-query-params="{ material_type: 1 }" @saved="handleProductSaved"
-            @product-updated="handleProductUpdated" />
+        <AddProductDialog
+            v-model="showAddProductDialog"
+            request-type="raw_materials"
+            :transport-types="transportTypeItems"
+            :unit-items="unitItems"
+            :supplier-id="formData.supplier_id"
+            :edit-product="editingProduct"
+            :existing-products="productTableItems"
+            items-endpoint="/items/supplier-items"
+            :items-query-params="{ material_type: 1, supplier_id: formData.supplier_id ?? '' }"
+            @saved="handleProductSaved"
+            @product-updated="handleProductUpdated"
+        />
+
+        <!-- Edit Products Dialog -->
+        <EditProductsDialog
+            v-model="showEditProductsDialog"
+            :products="productTableItems"
+            :unit-items="unitItems"
+            :transport-types="transportTypeItems"
+            request-type="raw_materials"
+            @products-updated="handleEditProductsBulk"
+        />
 
         <!-- Add Transport Service Dialog -->
         <AddTransportServiceDialog v-model="showAddTransportServiceDialog" :transport-types="transportTypeItems"
