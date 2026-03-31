@@ -1,0 +1,435 @@
+{
+  "deliveryDocs": {
+    "list": {
+      "title": "جدول وثائق التسليم",
+      "description": "تمكنك من ادارة وثائق التسليم"
+    },
+    "addReceivingDoc": "إضافة سند استلام",
+    "search": "ابحث",
+    "filters": {
+      "code": "كود الاستلام",
+      "purchaseOrderCode": "كود طلبية المشتريات",
+      "receivingDate": "تاريخ الاستلام",
+      "status": "الحالة"
+    },
+    "bulkDelete": {
+      "title": "حذف سندات الاستلام",
+      "message": "هل أنت متأكد من حذف {count} سند استلام؟"
+    },
+    "messages": {
+      "loadListError": "فشل تحميل قائمة سندات الاستلام",
+      "columnsUpdateError": "فشل تحديث الأعمدة",
+      "deleteSuccess": "تم حذف سند الاستلام بنجاح",
+      "deleteError": "فشل حذف سند الاستلام",
+      "bulkDeleteSuccess": "تم حذف {count} سند استلام بنجاح",
+      "bulkDeleteError": "فشل الحذف الجماعي"
+    }
+  },
+  "deliveryDocsLogistics": {
+    "list": {
+      "title": "جدول وثائق تسليم خدمات النقل",
+      "description": "تمكنك من ادارة وثائق تسليم خدمات النقل"
+    },
+    "addDoc": "إضافة وثيقة تسليم خدمة نقل",
+    "search": "ابحث",
+    "filters": {
+      "code": "كود الاستلام",
+      "purchaseOrderCode": "كود طلبية المشتريات",
+      "receivingDate": "تاريخ الاستلام",
+      "status": "الحالة"
+    },
+    "bulkDelete": {
+      "title": "حذف وثائق تسليم خدمات النقل",
+      "message": "هل أنت متأكد من حذف {count} وثيقة تسليم؟"
+    },
+    "messages": {
+      "loadListError": "فشل تحميل قائمة وثائق تسليم خدمات النقل",
+      "columnsUpdateError": "فشل تحديث الأعمدة",
+      "deleteSuccess": "تم حذف وثيقة التسليم بنجاح",
+      "deleteError": "فشل حذف وثيقة التسليم",
+      "bulkDeleteSuccess": "تم حذف {count} وثيقة تسليم بنجاح",
+      "bulkDeleteError": "فشل الحذف الجماعي"
+    }
+  },
+  "invoices": {
+    "list": {
+      "title": "جدول فواتير المبيعات",
+      "description": "تمكنك من ادارة فواتير المبيعات"
+    },
+    "addInvoice": "أضف فاتورة",
+    "search": "ابحث",
+    "filters": {
+      "invoiceCode": "كود الفاتورة",
+      "customerName": "اسم العميل",
+      "finalTotal": "إجمالي المبلغ",
+      "startDate": "تاريخ البداية",
+      "endDate": "تاريخ النهاية"
+    },
+    "bulkDelete": {
+      "title": "حذف الفواتير",
+      "message": "هل أنت متأكد من حذف {count} فاتورة؟"
+    },
+    "whatsAppShareText": "رابط عرض الفاتورة: {url}",
+    "messages": {
+      "loadListError": "فشل تحميل قائمة الفواتير",
+      "columnsUpdateError": "فشل تحديث الأعمدة",
+      "deleteSuccess": "تم حذف الفاتورة بنجاح",
+      "deleteError": "فشل حذف الفاتورة",
+      "bulkDeleteSuccess": "تم حذف {count} فاتورة بنجاح",
+      "bulkDeleteError": "فشل الحذف الجماعي"
+    }
+  },
+  "logisticsInvoices": {
+    "list": {
+      "title": "جدول فواتير مبيعات خدمة النقل",
+      "description": "تمكنك من ادارة فواتير مبيعات خدمة النقل"
+    },
+    "addInvoice": "أضف فاتورة",
+    "search": "ابحث",
+    "filters": {
+      "invoiceCode": "كود الفاتورة",
+      "customerName": "اسم العميل",
+      "finalTotal": "إجمالي المبلغ",
+      "startDate": "تاريخ البداية",
+      "endDate": "تاريخ النهاية"
+    },
+    "bulkDelete": {
+      "title": "حذف الفواتير",
+      "message": "هل أنت متأكد من حذف {count} فاتورة؟"
+    },
+    "messages": {
+      "loadListError": "فشل تحميل قائمة فواتير مبيعات خدمة النقل",
+      "columnsUpdateError": "فشل تحديث الأعمدة",
+      "deleteSuccess": "تم حذف الفاتورة بنجاح",
+      "deleteError": "فشل حذف الفاتورة",
+      "bulkDeleteSuccess": "تم حذف {count} فاتورة بنجاح",
+      "bulkDeleteError": "فشل الحذف الجماعي"
+    }
+  },
+  "ordersFuels": {
+    "list": {
+      "title": "جدول طلبيات مبيعات المحروقات",
+      "description": "تمكنك من ادارة طلبيات مبيعات المحروقات"
+    },
+    "addOrder": "أضف طلب",
+    "search": "ابحث",
+    "filters": {
+      "requestCode": "كود الطلب",
+      "supplierName": "اسم المورد",
+      "upfrontPayment": "دفعة مقدمة",
+      "projectLocation": "موقع المشروع",
+      "requestDate": "تاريخ الطلب"
+    },
+    "delete": {
+      "titleSingle": "حذف الطلب",
+      "titleBulk": "حذف الطلبات",
+      "messageSingle": "هل أنت متأكد من حذف هذا الطلب؟",
+      "messageBulk": "هل أنت متأكد من حذف {count} طلب؟"
+    },
+    "messages": {
+      "loadListError": "فشل تحميل قائمة الطلبات",
+      "columnsUpdateError": "فشل تحديث الأعمدة",
+      "deleteSuccess": "تم حذف الطلب بنجاح",
+      "deleteError": "فشل حذف الطلب",
+      "bulkDeleteSuccess": "تم حذف {count} طلب بنجاح",
+      "bulkDeleteError": "فشل الحذف الجماعي"
+    }
+  },
+  "ordersLogistics": {
+    "list": {
+      "title": "جدول طلبيات خدمة النقل",
+      "description": "تمكنك من ادارة طلبيات خدمة النقل"
+    },
+    "addOrder": "أضف طلبية",
+    "search": "ابحث",
+    "filters": {
+      "orderCode": "كود الطلبية",
+      "supplierName": "اسم المورد",
+      "dateFrom": "تاريخ الطلبية من",
+      "dateTo": "تاريخ الطلبية إلى"
+    },
+    "delete": {
+      "titleSingle": "حذف الطلبية",
+      "titleBulk": "حذف الطلبيات",
+      "messageSingle": "هل أنت متأكد من حذف هذه الطلبية؟",
+      "messageBulk": "هل أنت متأكد من حذف {count} طلبية؟"
+    },
+    "messages": {
+      "loadListError": "فشل تحميل قائمة الطلبيات",
+      "columnsUpdateError": "فشل تحديث الأعمدة",
+      "deleteSuccess": "تم حذف الطلبية بنجاح",
+      "deleteError": "فشل حذف الطلبية",
+      "bulkDeleteSuccess": "تم حذف {count} طلبية بنجاح",
+      "bulkDeleteError": "فشل الحذف الجماعي"
+    }
+  },
+  "ordersMaterialProduct": {
+    "list": {
+      "title": "جدول طلبيات المبيعات",
+      "description": "تمكنك من ادارة طلبيات المبيعات"
+    },
+    "addOrder": "أضف طلبية",
+    "search": "ابحث",
+    "filters": {
+      "orderCode": "كود الطلبية",
+      "supplierName": "اسم المورد",
+      "dateFrom": "تاريخ الطلبية من",
+      "dateTo": "تاريخ الطلبية إلى"
+    },
+    "delete": {
+      "titleSingle": "حذف الطلبية",
+      "titleBulk": "حذف الطلبيات",
+      "messageSingle": "هل أنت متأكد من حذف هذه الطلبية؟",
+      "messageBulk": "هل أنت متأكد من حذف {count} طلبية؟"
+    },
+    "messages": {
+      "loadListError": "فشل تحميل قائمة الطلبيات",
+      "columnsUpdateError": "فشل تحديث الأعمدة",
+      "deleteSuccess": "تم حذف الطلبية بنجاح",
+      "deleteError": "فشل حذف الطلبية",
+      "bulkDeleteSuccess": "تم حذف {count} طلبية بنجاح",
+      "bulkDeleteError": "فشل الحذف الجماعي"
+    }
+  },
+  "payments": {
+    "list": {
+      "title": "جدول دفعات المبيعات",
+      "description": "عرض دفعات المبيعات"
+    },
+    "addPayment": "أضف دفعة",
+    "search": "ابحث",
+    "filters": {
+      "paymentCode": "كود الدفعة",
+      "customerName": "اسم العميل",
+      "amount": "المبلغ",
+      "startDate": "تاريخ البداية",
+      "endDate": "تاريخ النهاية"
+    },
+    "bulkDelete": {
+      "title": "حذف الدفعات",
+      "message": "هل أنت متأكد من حذف {count} دفعة؟"
+    },
+    "messages": {
+      "loadListError": "فشل تحميل قائمة دفعات المبيعات",
+      "columnsUpdateError": "فشل تحديث الأعمدة",
+      "deleteSuccess": "تم حذف الدفعة بنجاح",
+      "deleteError": "فشل حذف الدفعة",
+      "bulkDeleteSuccess": "تم حذف {count} دفعة بنجاح",
+      "bulkDeleteError": "فشل الحذف الجماعي"
+    }
+  },
+  "quotationsFuels": {
+    "list": {
+      "title": "عروض أسعار المحروقات",
+      "description": "إدارة عروض أسعار المحروقات"
+    },
+    "addQuotation": "أضف عرض سعر",
+    "search": "ابحث",
+    "filters": {
+      "quotationCode": "كود العرض",
+      "customerName": "اسم العميل",
+      "price": "السعر",
+      "quotationDate": "تاريخ العرض"
+    },
+    "delete": {
+      "titleSingle": "حذف عرض السعر",
+      "titleBulk": "حذف عروض السعر",
+      "messageSingle": "هل أنت متأكد من حذف هذا العرض؟",
+      "messageBulk": "هل أنت متأكد من حذف {count} عرض؟"
+    },
+    "messages": {
+      "loadListError": "فشل تحميل قائمة عروض السعر",
+      "columnsUpdateError": "فشل تحديث الأعمدة",
+      "deleteSuccess": "تم حذف عرض السعر بنجاح",
+      "deleteError": "فشل حذف عرض السعر",
+      "bulkDeleteSuccess": "تم حذف {count} عرض بنجاح",
+      "bulkDeleteError": "فشل الحذف الجماعي"
+    }
+  },
+  "quotationsLogistics": {
+    "list": {
+      "title": "عروض أسعار خدمات النقل",
+      "description": "إدارة عروض أسعار خدمات النقل"
+    },
+    "addQuotation": "أضف عرض سعر",
+    "search": "ابحث",
+    "filters": {
+      "quotationCode": "كود العرض",
+      "customerName": "اسم العميل",
+      "price": "السعر",
+      "quotationDate": "تاريخ العرض"
+    },
+    "delete": {
+      "titleSingle": "حذف عرض السعر",
+      "titleBulk": "حذف عروض السعر",
+      "messageSingle": "هل أنت متأكد من حذف هذا العرض؟",
+      "messageBulk": "هل أنت متأكد من حذف {count} عرض؟"
+    },
+    "messages": {
+      "loadListError": "فشل تحميل قائمة عروض السعر",
+      "columnsUpdateError": "فشل تحديث الأعمدة",
+      "deleteSuccess": "تم حذف عرض السعر بنجاح",
+      "deleteError": "فشل حذف عرض السعر",
+      "bulkDeleteSuccess": "تم حذف {count} عرض بنجاح",
+      "bulkDeleteError": "فشل الحذف الجماعي"
+    }
+  },
+  "quotationsMaterialProduct": {
+    "list": {
+      "title": "قائمة عروض أسعار مواد بناء أولية",
+      "description": "تستطيع استعراض عروض أسعار مواد البناء الأولية والقيام بالإجراءات عليها"
+    },
+    "addQuotation": "أضف عرض",
+    "search": "ابحث",
+    "filters": {
+      "quotationCode": "كود العرض",
+      "customerName": "اسم العميل",
+      "price": "السعر",
+      "quotationDate": "تاريخ العرض"
+    },
+    "bulkDelete": {
+      "title": "حذف عروض السعر",
+      "message": "هل أنت متأكد من حذف {count} عرض؟"
+    },
+    "messages": {
+      "loadListError": "فشل تحميل قائمة عروض السعر",
+      "columnsUpdateError": "فشل تحديث الأعمدة",
+      "deleteSuccess": "تم حذف عرض السعر بنجاح",
+      "deleteError": "فشل حذف عرض السعر",
+      "bulkDeleteSuccess": "تم حذف {count} عرض بنجاح",
+      "bulkDeleteError": "فشل الحذف الجماعي"
+    }
+  },
+  "requestsFuels": {
+    "list": {
+      "title": "طلبات عروض أسعار محروقات",
+      "description": "إدارة طلبات عروض أسعار المحروقات"
+    },
+    "addRequest": "أضف طلب",
+    "search": "ابحث",
+    "filters": {
+      "requestCode": "كود الطلب",
+      "customerName": "اسم العميل",
+      "upfrontPayment": "دفعة مقدمة",
+      "projectLocation": "موقع المشروع",
+      "requestDate": "تاريخ الطلب"
+    },
+    "delete": {
+      "titleSingle": "حذف الطلب",
+      "titleBulk": "حذف الطلبات",
+      "messageSingle": "هل أنت متأكد من حذف هذا الطلب؟",
+      "messageBulk": "هل أنت متأكد من حذف {count} طلب؟"
+    },
+    "messages": {
+      "loadListError": "فشل تحميل قائمة الطلبات",
+      "columnsUpdateError": "فشل تحديث الأعمدة",
+      "deleteSuccess": "تم حذف الطلب بنجاح",
+      "deleteError": "فشل حذف الطلب",
+      "bulkDeleteSuccess": "تم حذف {count} طلب بنجاح",
+      "bulkDeleteError": "فشل الحذف الجماعي"
+    }
+  },
+  "requestsLogistics": {
+    "list": {
+      "title": "طلبات عروض أسعار خدمات النقل",
+      "description": "إدارة طلبات عروض أسعار خدمات النقل"
+    },
+    "addRequest": "أضف طلب",
+    "search": "ابحث",
+    "filters": {
+      "requestCode": "كود الطلب",
+      "supplierName": "اسم المورد",
+      "upfrontPayment": "دفعة مقدمة",
+      "projectLocation": "موقع المشروع",
+      "requestDate": "تاريخ الطلب"
+    },
+    "bulkDelete": {
+      "title": "حذف الطلبات",
+      "message": "هل أنت متأكد من حذف {count} طلب؟"
+    },
+    "messages": {
+      "loadListError": "فشل تحميل قائمة الطلبات",
+      "columnsUpdateError": "فشل تحديث الأعمدة",
+      "deleteSuccess": "تم حذف الطلب بنجاح",
+      "deleteError": "فشل حذف الطلب",
+      "bulkDeleteSuccess": "تم حذف {count} طلب بنجاح",
+      "bulkDeleteError": "فشل الحذف الجماعي"
+    }
+  },
+  "requestsMaterialProduct": {
+    "list": {
+      "title": "قائمة طلبات عروض اسعار مواد بناء أولية",
+      "description": "تستطيع استعراض طلبات عروض اسعار مواد البناء الأولية والقيام بالإجراءات عليها"
+    },
+    "addRequest": "أضف طلب",
+    "search": "ابحث",
+    "filters": {
+      "requestCode": "كود الطلب",
+      "supplierName": "اسم المورد",
+      "upfrontPayment": "دفعة مقدمة",
+      "projectLocation": "موقع المشروع",
+      "requestDate": "تاريخ الطلب"
+    },
+    "bulkDelete": {
+      "title": "حذف الطلبات",
+      "message": "هل أنت متأكد من حذف {count} طلب؟"
+    },
+    "messages": {
+      "loadListError": "فشل تحميل قائمة الطلبات",
+      "columnsUpdateError": "فشل تحديث الأعمدة",
+      "deleteSuccess": "تم حذف الطلب بنجاح",
+      "deleteError": "فشل حذف الطلب",
+      "bulkDeleteSuccess": "تم حذف {count} طلب بنجاح",
+      "bulkDeleteError": "فشل الحذف الجماعي"
+    }
+  },
+  "soPickups": {
+    "list": {
+      "title": "حجوزات التسليم",
+      "description": "إدارة حجوزات التسليم"
+    },
+    "search": "ابحث",
+    "delete": {
+      "titleSingle": "حذف حجز التسليم",
+      "titleBulk": "حذف حجوزات التسليم",
+      "messageSingle": "هل أنت متأكد من حذف حجز التسليم؟",
+      "messageBulk": "هل أنت متأكد من حذف {count} حجز تسليم؟"
+    },
+    "messages": {
+      "loadListError": "فشل تحميل قائمة حجوزات التسليم",
+      "columnsUpdateError": "فشل تحديث الأعمدة",
+      "deleteSuccess": "تم حذف حجز التسليم بنجاح",
+      "deleteError": "فشل حذف حجز التسليم",
+      "bulkDeleteSuccess": "تم حذف {count} حجز تسليم بنجاح",
+      "bulkDeleteError": "فشل الحذف الجماعي"
+    }
+  },
+  "trips": {
+    "list": {
+      "title": "الرحلات",
+      "description": "تمكنك من إدارة الرحلات"
+    },
+    "addTrip": "أضف رحلة",
+    "search": "ابحث",
+    "filters": {
+      "tripCode": "كود الرحلة",
+      "tripName": "اسم الرحلة",
+      "dateFrom": "تاريخ الرحلة من",
+      "dateTo": "تاريخ الرحلة إلى"
+    },
+    "delete": {
+      "titleSingle": "حذف الرحلة",
+      "titleBulk": "حذف الرحلات",
+      "messageSingle": "هل أنت متأكد من حذف هذه الرحلة؟",
+      "messageBulk": "هل أنت متأكد من حذف {count} رحلة؟"
+    },
+    "messages": {
+      "loadListError": "فشل تحميل قائمة الرحلات",
+      "columnsUpdateError": "فشل تحديث الأعمدة",
+      "deleteSuccess": "تم حذف الرحلة بنجاح",
+      "deleteError": "فشل حذف الرحلة",
+      "bulkDeleteSuccess": "تم حذف {count} رحلة بنجاح",
+      "bulkDeleteError": "فشل الحذف الجماعي"
+    }
+  }
+}

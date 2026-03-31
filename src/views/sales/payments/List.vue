@@ -201,7 +201,7 @@ const fetchList = async (cursor?: string | null, append = false) => {
         perPage.value = 15;
     } catch (err: any) {
         console.error('Error fetching payments list:', err);
-        error(err?.response?.data?.message || 'فشل تحميل قائمة دفعات المبيعات');
+        error(err?.response?.data?.message || t('sales.payments.messages.loadListError'));
     } finally {
         loading.value = false;
         loadingMore.value = false;
@@ -216,7 +216,7 @@ const loadMore = () => {
 
 const handleToggleHeader = async (headerKey: string) => {
     await toggleHeader(headerKey).catch((err: any) => {
-        error(err?.response?.data?.message || 'فشل تحديث الأعمدة');
+        error(err?.response?.data?.message || t('sales.payments.messages.columnsUpdateError'));
     });
 };
 
@@ -256,11 +256,11 @@ const confirmDelete = async (item: { uuid?: string; id?: string | number } & Par
     const uuid = item.uuid;
     try {
         await api.delete(`/sales/invoice-payments/${uuid}`);
-        success('تم حذف الدفعة بنجاح');
+        success(t('sales.payments.messages.deleteSuccess'));
         await fetchList();
     } catch (err: any) {
         console.error('Error deleting payment:', err);
-        error(err?.response?.data?.message || 'فشل حذف الدفعة');
+        error(err?.response?.data?.message || t('sales.payments.messages.deleteError'));
     } finally {
     }
 };
@@ -293,12 +293,12 @@ const confirmBulkDelete = async () => {
         await api.post('/sales/invoice-payments/bulk-delete', {
             ids: selectedPayments.value,
         });
-        success(`تم حذف ${selectedPayments.value.length} دفعة بنجاح`);
+        success(t('sales.payments.messages.bulkDeleteSuccess', { count: selectedPayments.value.length }));
         selectedPayments.value = [];
         await fetchList();
     } catch (err: any) {
         console.error('Error bulk deleting:', err);
-        error(err?.response?.data?.message || 'فشل الحذف الجماعي');
+        error(err?.response?.data?.message || t('sales.payments.messages.bulkDeleteError'));
     } finally {
         deleteLoading.value = false;
         showBulkDeleteDialog.value = false;
@@ -372,17 +372,17 @@ onBeforeUnmount(() => {
 <template>
     <default-layout>
         <div class="sales-payments-page">
-            <PageHeader :icon="salesPaymentsIcon" title-key="pages.SalesPayments.title"
-                description-key="pages.SalesPayments.description" />
+            <PageHeader :icon="salesPaymentsIcon" title-key="sales.payments.list.title"
+                description-key="sales.payments.list.description" />
 
             <div
                 class="flex justify-end items-stretch rounded border border-gray-300 w-fit ms-auto mb-4 overflow-hidden bg-white text-sm">
                 <ButtonWithIcon variant="flat" height="40" rounded="0"
                     custom-class="font-semibold text-base border-gray-300 bg-primary-100 !text-primary-900"
-                    :prepend-icon="importIcon" :label="t('common.import')" />
+                    :prepend-icon="importIcon" :label="t('common.action.import')" />
                 <ButtonWithIcon variant="flat" height="40" rounded="0"
                     custom-class="font-semibold text-base border-gray-300 bg-primary-50 !text-primary-900"
-                    :prepend-icon="exportIcon" :label="t('common.export')" />
+                    :prepend-icon="exportIcon" :label="t('common.action.export')" />
             </div>
 
             <div class="bg-gray-50 rounded-md -mx-6">
@@ -392,12 +392,12 @@ onBeforeUnmount(() => {
                         class="flex flex-wrap items-stretch rounded overflow-hidden border border-gray-200 bg-white text-sm">
                         <ButtonWithIcon variant="flat" height="40" rounded="0"
                             custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-                            :prepend-icon="trash_1_icon" color="white" :label="t('common.delete')"
+                            :prepend-icon="trash_1_icon" color="white" :label="t('common.action.delete')"
                             @click="handleBulkDelete" />
                         <div class="w-px bg-gray-200"></div>
                         <ButtonWithIcon variant="flat" height="40" rounded="0"
                             custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-                            :prepend-icon="trash_2_icon" color="white" :label="t('common.deleteAll')"
+                            :prepend-icon="trash_2_icon" color="white" :label="t('common.action.deleteAll')"
                             @click="handleBulkDelete" />
                     </div>
 
@@ -407,7 +407,7 @@ onBeforeUnmount(() => {
                                 <ButtonWithIcon v-bind="props" variant="outlined" append-icon="mdi-chevron-down"
                                     rounded="4" color="gray-500" height="40"
                                     custom-class="font-semibold text-base border-gray-400" :prepend-icon="columnIcon"
-                                    :label="t('common.columns')">
+                                    :label="t('common.table.columns')">
                                     <template #append>
                                         <v-icon>mdi-chevron-down</v-icon>
                                     </template>
@@ -427,12 +427,12 @@ onBeforeUnmount(() => {
 
                         <ButtonWithIcon variant="flat" color="primary-500" height="40" rounded="4"
                             custom-class="px-7 font-semibold text-base text-white border !border-primary-200"
-                            :prepend-icon="searchIcon" :label="t('common.advancedSearch')"
+                            :prepend-icon="searchIcon" :label="t('common.table.advancedSearch')"
                             @click="toggleAdvancedFilters" />
 
                         <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4"
                             custom-class="px-7 font-semibold text-base !text-primary-800 border !border-primary-200"
-                            :prepend-icon="plusIcon" label="أضف دفعة" @click="openCreatePayment" />
+                            :prepend-icon="plusIcon" :label="t('sales.payments.addPayment')" @click="openCreatePayment" />
                     </div>
                 </div>
 
@@ -440,23 +440,23 @@ onBeforeUnmount(() => {
                     class="border-y border-y-primary-100 bg-primary-50 px-4 sm:px-6 py-3 gap-3 flex justify-between flex-wrap">
                     <div class="flex flex-wrap gap-3 items-end">
                         <TextInput v-model="filterPaymentCode" density="comfortable" variant="outlined" hide-details
-                            placeholder="كود الدفعة" class="w-full sm:w-40 bg-white" />
+                            :placeholder="t('sales.payments.filters.paymentCode')" class="w-full sm:w-40 bg-white" />
                         <TextInput v-model="filterCustomerName" density="comfortable" variant="outlined" hide-details
-                            placeholder="اسم العميل" class="w-full sm:w-40 bg-white" />
+                            :placeholder="t('sales.payments.filters.customerName')" class="w-full sm:w-40 bg-white" />
                         <TextInput v-model="filterAmount" density="comfortable" variant="outlined" hide-details
-                            placeholder="المبلغ" class="w-full sm:w-40 bg-white" />
+                            :placeholder="t('sales.payments.filters.amount')" class="w-full sm:w-40 bg-white" />
                         <DatePickerInput v-model="filterStartDate" density="comfortable" hide-details
-                            placeholder="تاريخ البداية" class="w-full sm:w-40 bg-white" />
+                            :placeholder="t('sales.payments.filters.startDate')" class="w-full sm:w-40 bg-white" />
                         <DatePickerInput v-model="filterEndDate" density="comfortable" hide-details
-                            placeholder="تاريخ النهاية" class="w-full sm:w-40 bg-white" />
+                            :placeholder="t('sales.payments.filters.endDate')" class="w-full sm:w-40 bg-white" />
                     </div>
                     <div class="flex gap-2 items-center">
                         <ButtonWithIcon variant="flat" color="primary-500" rounded="4" height="40"
                             custom-class="px-5 font-semibold !text-white text-sm sm:text-base"
-                            :prepend-icon="searchIcon" label="ابحث" @click="applyFilters" />
+                            :prepend-icon="searchIcon" :label="t('sales.payments.search')" @click="applyFilters" />
                         <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4" border="sm"
                             custom-class="px-5 font-semibold text-sm sm:text-base !text-primary-800 !border-primary-200"
-                            prepend-icon="mdi-refresh" label="إعادة تعيين" @click="resetFilters" />
+                            prepend-icon="mdi-refresh" :label="t('common.actions.reset')" @click="resetFilters" />
                     </div>
                 </div>
 
@@ -503,8 +503,10 @@ onBeforeUnmount(() => {
         </div>
 
         <!-- Bulk Delete Confirmation Dialog -->
-        <DeleteConfirmDialog v-model="showBulkDeleteDialog" :loading="deleteLoading" title="حذف الدفعات"
-            :message="`هل أنت متأكد من حذف ${selectedPayments.length} دفعة؟`" @confirm="confirmBulkDelete" />
+        <DeleteConfirmDialog v-model="showBulkDeleteDialog" :loading="deleteLoading"
+            :title="t('sales.payments.bulkDelete.title')"
+            :message="t('sales.payments.bulkDelete.message', { count: selectedPayments.length })"
+            @confirm="confirmBulkDelete" />
     </default-layout>
 </template>
 

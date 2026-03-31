@@ -116,12 +116,14 @@ const isDeleteDialogOpen = computed({
   },
 });
 const deleteDialogTitle = computed(() =>
-  showBulkDeleteDialog.value ? 'حذف الطلبات' : 'حذف الطلب'
+  showBulkDeleteDialog.value
+    ? t('sales.requestsFuels.delete.titleBulk')
+    : t('sales.requestsFuels.delete.titleSingle')
 );
 const deleteDialogMessage = computed(() =>
   showBulkDeleteDialog.value
-    ? `هل أنت متأكد من حذف ${selectedRequests.value.length} طلب؟`
-    : 'هل أنت متأكد من حذف هذا الطلب؟'
+    ? t('sales.requestsFuels.delete.messageBulk', { count: selectedRequests.value.length })
+    : t('sales.requestsFuels.delete.messageSingle')
 );
 const onDeleteConfirm = () => {
   if (showBulkDeleteDialog.value) confirmBulkDelete();
@@ -168,7 +170,7 @@ const fetchList = async () => {
     initHeaders(res.headers || [], res.shownHeaders || []);
   } catch (err: any) {
     console.error('Error fetching sales fuels list:', err);
-    error(err?.response?.data?.message || 'فشل تحميل قائمة الطلبات');
+    error(err?.response?.data?.message || t('sales.requestsFuels.messages.loadListError'));
   } finally {
     loading.value = false;
   }
@@ -177,7 +179,7 @@ const fetchList = async () => {
 // Toggle column and persist
 const handleToggleHeader = async (headerKey: string) => {
   await toggleHeader(headerKey).catch((err: any) => {
-    error(err?.response?.data?.message || 'فشل تحديث الأعمدة');
+    error(err?.response?.data?.message || t('sales.requestsFuels.messages.columnsUpdateError'));
   });
 };
 
@@ -203,11 +205,11 @@ const confirmDelete = async () => {
   try {
     deleteLoading.value = true;
     await api.delete(`/sales/fuels/${uuid}`);
-    success('تم حذف الطلب بنجاح');
+    success(t('sales.requestsFuels.messages.deleteSuccess'));
     await fetchList();
   } catch (err: any) {
     console.error('Error deleting request:', err);
-    error(err?.response?.data?.message || 'فشل حذف الطلب');
+    error(err?.response?.data?.message || t('sales.requestsFuels.messages.deleteError'));
   } finally {
     deleteLoading.value = false;
   }
@@ -303,12 +305,12 @@ const confirmBulkDelete = async () => {
     await api.post('/sales/fuels/bulk-delete', {
       ids: selectedRequests.value,
     });
-    success(`تم حذف ${selectedRequests.value.length} طلب بنجاح`);
+    success(t('sales.requestsFuels.messages.bulkDeleteSuccess', { count: selectedRequests.value.length }));
     selectedRequests.value = [];
     await fetchList();
   } catch (err: any) {
     console.error('Error bulk deleting:', err);
-    error(err?.response?.data?.message || 'فشل الحذف الجماعي');
+    error(err?.response?.data?.message || t('sales.requestsFuels.messages.bulkDeleteError'));
   } finally {
     deleteLoading.value = false;
     showBulkDeleteDialog.value = false;
@@ -325,8 +327,8 @@ onMounted(() => {
     <div class="pricesOffers-page">
       <PageHeader
         :icon="GridIcon"
-        title-key="pages.SalesRequestsFuels.title"
-        description-key="pages.SalesRequestsFuels.description"
+        title-key="sales.requestsFuels.list.title"
+        description-key="sales.requestsFuels.list.description"
       />
 
       <div
@@ -338,7 +340,7 @@ onMounted(() => {
           rounded="0"
           custom-class="font-semibold text-base border-gray-300 bg-primary-100 !text-primary-900"
           :prepend-icon="importIcon"
-          :label="t('common.import')"
+          :label="t('common.action.import')"
         />
         <ButtonWithIcon
           variant="flat"
@@ -346,7 +348,7 @@ onMounted(() => {
           rounded="0"
           custom-class="font-semibold text-base border-gray-300 bg-primary-50 !text-primary-900"
           :prepend-icon="exportIcon"
-          :label="t('common.export')"
+          :label="t('common.action.export')"
         />
       </div>
 
@@ -367,7 +369,7 @@ onMounted(() => {
               custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
               :prepend-icon="trash_1_icon"
               color="white"
-              :label="t('common.delete')"
+              :label="t('common.action.delete')"
               @click="handleBulkDelete"
             />
             <div class="w-px bg-gray-200"></div>
@@ -378,7 +380,7 @@ onMounted(() => {
               custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
               :prepend-icon="trash_2_icon"
               color="white"
-              :label="t('common.deleteAll')"
+              :label="t('common.action.deleteAll')"
               @click="handleBulkDelete"
             />
           </div>
@@ -396,7 +398,7 @@ onMounted(() => {
                   height="40"
                   custom-class="font-semibold text-base border-gray-400"
                   :prepend-icon="columnIcon"
-                  :label="t('common.columns')"
+                  :label="t('common.table.columns')"
                 />
               </template>
               <v-list>
@@ -424,7 +426,7 @@ onMounted(() => {
               rounded="4"
               custom-class="px-7 font-semibold text-base text-white border !border-primary-200"
               :prepend-icon="searchIcon"
-              :label="t('common.advancedSearch')"
+              :label="t('common.table.advancedSearch')"
               @click="toggleAdvancedFilters"
             />
 
@@ -436,7 +438,7 @@ onMounted(() => {
               rounded="4"
               custom-class="px-7 font-semibold text-base !text-primary-800 border !border-primary-200"
               :prepend-icon="plusIcon"
-              label="أضف طلب"
+              :label="t('sales.requestsFuels.addRequest')"
               @click="openCreateRequest"
             />
           </div>
@@ -453,7 +455,7 @@ onMounted(() => {
               density="comfortable"
               variant="outlined"
               hide-details
-              placeholder="كود الطلب"
+              :placeholder="t('sales.requestsFuels.filters.requestCode')"
               class="w-full sm:w-40 bg-white"
             />
             <TextInput
@@ -461,7 +463,7 @@ onMounted(() => {
               density="comfortable"
               variant="outlined"
               hide-details
-              placeholder="اسم العميل"
+              :placeholder="t('sales.requestsFuels.filters.customerName')"
               class="w-full sm:w-40 bg-white"
             />
             <TextInput
@@ -469,7 +471,7 @@ onMounted(() => {
               density="comfortable"
               variant="outlined"
               hide-details
-              placeholder="دفعة مقدمة"
+              :placeholder="t('sales.requestsFuels.filters.upfrontPayment')"
               class="w-full sm:w-40 bg-white"
             />
             <SelectInput
@@ -478,14 +480,14 @@ onMounted(() => {
               density="comfortable"
               variant="outlined"
               hide-details
-              placeholder="موقع المشروع"
+              :placeholder="t('sales.requestsFuels.filters.projectLocation')"
               class="w-full sm:w-40 bg-white"
             />
             <DatePickerInput
               v-model="filterStartDateMin"
               density="comfortable"
               hide-details
-              placeholder="تاريخ الطلب"
+              :placeholder="t('sales.requestsFuels.filters.requestDate')"
               class="w-full sm:w-40 bg-white"
             />
           </div>
@@ -497,7 +499,7 @@ onMounted(() => {
               height="40"
               custom-class="px-5 font-semibold !text-white text-sm sm:text-base"
               :prepend-icon="searchIcon"
-              label="ابحث"
+              :label="t('sales.requestsFuels.search')"
               @click="applyFilters"
             />
             <ButtonWithIcon
@@ -508,7 +510,7 @@ onMounted(() => {
               border="sm"
               custom-class="px-5 font-semibold text-sm sm:text-base !text-primary-800 !border-primary-200"
               prepend-icon="mdi-refresh"
-              label="إعادة تعيين"
+              :label="t('common.actions.reset')"
               @click="resetFilters"
             />
           </div>

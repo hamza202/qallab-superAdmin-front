@@ -6,6 +6,7 @@ import { useApi } from '@/composables/useApi';
 import { useNotification } from '@/composables/useNotification';
 import { useTableColumns } from '@/composables/useTableColumns';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog.vue';
+import DatePickerInput from '@/components/common/forms/DatePickerInput.vue';
 import StatusChangeFeature from '@/components/common/StatusChangeFeature.vue';
 import { GridIcon, trash_1_icon, trash_2_icon, importIcon, columnIcon, exportIcon, plusIcon, searchIcon } from "@/components/icons/globalIcons";
 import { switcStatusIcon, refreshIcon } from '@/components/icons/priceOffersIcons';
@@ -151,7 +152,7 @@ const fetchList = async (cursor?: string | null, append = false) => {
     perPage.value = body?.pagination?.per_page || 15;
   } catch (err: any) {
     console.error('Error fetching trips list:', err);
-    error(err?.response?.data?.message || 'فشل تحميل قائمة الرحلات');
+    error(err?.response?.data?.message || t('sales.trips.messages.loadListError'));
   } finally {
     loading.value = false;
     loadingMore.value = false;
@@ -166,7 +167,7 @@ const loadMore = () => {
 
 const handleToggleHeader = async (headerKey: string) => {
   await toggleHeader(headerKey).catch((err: any) => {
-    error(err?.response?.data?.message || 'فشل تحديث الأعمدة');
+    error(err?.response?.data?.message || t('sales.trips.messages.columnsUpdateError'));
   });
 };
 
@@ -191,13 +192,13 @@ const confirmDelete = async () => {
   try {
     deleteLoading.value = true;
     await api.delete(`/sales/trips/${uuid}`);
-    success('تم حذف الرحلة بنجاح');
+    success(t('sales.trips.messages.deleteSuccess'));
     showDeleteDialog.value = false;
     itemToDelete.value = null;
     await fetchList();
   } catch (err: any) {
     console.error('Error deleting trip:', err);
-    error(err?.response?.data?.message || 'فشل حذف الرحلة');
+    error(err?.response?.data?.message || t('sales.trips.messages.deleteError'));
   } finally {
     deleteLoading.value = false;
   }
@@ -252,12 +253,12 @@ const confirmBulkDelete = async () => {
     await api.post('/sales/trips/bulk-delete', {
       ids: selectedRequests.value,
     });
-    success(`تم حذف ${selectedRequests.value.length} رحلة بنجاح`);
+    success(t('sales.trips.messages.bulkDeleteSuccess', { count: selectedRequests.value.length }));
     selectedRequests.value = [];
     await fetchList();
   } catch (err: any) {
     console.error('Error bulk deleting:', err);
-    error(err?.response?.data?.message || 'فشل الحذف الجماعي');
+    error(err?.response?.data?.message || t('sales.trips.messages.bulkDeleteError'));
   } finally {
     deleteLoading.value = false;
     showBulkDeleteDialog.value = false;
@@ -310,17 +311,17 @@ onBeforeUnmount(() => {
 <template>
   <default-layout>
     <div class="trips-page">
-      <PageHeader :icon="GridIcon" title-key="pages.SalesTrips.title"
-        description-key="pages.SalesTrips.description" />
+      <PageHeader :icon="GridIcon" title-key="sales.trips.list.title"
+        description-key="sales.trips.list.description" />
 
       <div
         class="flex justify-end items-stretch rounded border border-gray-300 w-fit ms-auto mb-4 overflow-hidden bg-white text-sm">
         <ButtonWithIcon variant="flat" height="40" rounded="0"
           custom-class="font-semibold text-base border-gray-300 bg-primary-100 !text-primary-900"
-          :prepend-icon="importIcon" :label="t('common.import')" />
+          :prepend-icon="importIcon" :label="t('common.action.import')" />
         <ButtonWithIcon variant="flat" height="40" rounded="0"
           custom-class="font-semibold text-base border-gray-300 bg-primary-50 !text-primary-900"
-          :prepend-icon="exportIcon" :label="t('common.export')" />
+          :prepend-icon="exportIcon" :label="t('common.action.export')" />
       </div>
 
       <div class="bg-gray-50 rounded-md -mx-6">
@@ -330,11 +331,11 @@ onBeforeUnmount(() => {
             class="flex flex-wrap items-stretch rounded overflow-hidden border border-gray-200 bg-white text-sm">
             <ButtonWithIcon variant="flat" height="40" rounded="0"
               custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-              :prepend-icon="trash_1_icon" color="white" :label="t('common.delete')" @click="handleBulkDelete" />
+              :prepend-icon="trash_1_icon" color="white" :label="t('common.action.delete')" @click="handleBulkDelete" />
             <div class="w-px bg-gray-200"></div>
             <ButtonWithIcon variant="flat" height="40" rounded="0"
               custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-              :prepend-icon="trash_2_icon" color="white" :label="t('common.deleteAll')" @click="handleBulkDelete" />
+              :prepend-icon="trash_2_icon" color="white" :label="t('common.action.deleteAll')" @click="handleBulkDelete" />
           </div>
 
           <div class="flex flex-wrap gap-3">
@@ -342,7 +343,7 @@ onBeforeUnmount(() => {
               <template #activator="{ props: menuProps }">
                 <ButtonWithIcon v-bind="menuProps" variant="outlined" append-icon="mdi-chevron-down" rounded="4"
                   color="gray-500" height="40" custom-class="font-semibold text-base border-gray-400"
-                  :prepend-icon="columnIcon" :label="t('common.columns')" />
+                  :prepend-icon="columnIcon" :label="t('common.table.columns')" />
               </template>
               <v-list>
                 <v-list-item v-for="header in allHeaders" :key="header.key" @click="handleToggleHeader(header.key)">
@@ -357,7 +358,7 @@ onBeforeUnmount(() => {
 
             <ButtonWithIcon variant="flat" color="primary-500" height="40" rounded="4"
               custom-class="px-7 font-semibold text-base text-white border !border-primary-200"
-              :prepend-icon="searchIcon" :label="t('common.advancedSearch')" @click="toggleAdvancedFilters" />
+              :prepend-icon="searchIcon" :label="t('common.table.advancedSearch')" @click="toggleAdvancedFilters" />
 
             <!-- <ButtonWithIcon v-if="canCreate" variant="flat" color="primary-100" height="40" rounded="4"
               custom-class="px-7 font-semibold text-base !text-primary-800 border !border-primary-200"
@@ -369,21 +370,21 @@ onBeforeUnmount(() => {
           class="border-y border-y-primary-100 bg-primary-50 px-4 sm:px-6 py-3 gap-3 flex justify-between flex-wrap">
           <div class="flex flex-wrap gap-3 items-end">
             <TextInput v-model="filterTripCode" density="comfortable" variant="outlined" hide-details
-              placeholder="كود الرحلة" class="w-full sm:w-40 bg-white" />
+              :placeholder="t('sales.trips.filters.tripCode')" class="w-full sm:w-40 bg-white" />
             <TextInput v-model="filterTripName" density="comfortable" variant="outlined" hide-details
-              placeholder="اسم الرحلة" class="w-full sm:w-40 bg-white" />
+              :placeholder="t('sales.trips.filters.tripName')" class="w-full sm:w-40 bg-white" />
             <DatePickerInput v-model="filterStartDateMin" density="comfortable" hide-details
-              placeholder="تاريخ الرحلة من" class="w-full sm:w-40 bg-white" />
+              :placeholder="t('sales.trips.filters.dateFrom')" class="w-full sm:w-40 bg-white" />
             <DatePickerInput v-model="filterStartDateMax" density="comfortable" hide-details
-              placeholder="تاريخ الرحلة إلى" class="w-full sm:w-40 bg-white" />
+              :placeholder="t('sales.trips.filters.dateTo')" class="w-full sm:w-40 bg-white" />
           </div>
           <div class="flex gap-2 items-center">
             <ButtonWithIcon variant="flat" color="primary-500" rounded="4" height="40"
               custom-class="px-5 font-semibold !text-white text-sm sm:text-base"
-              :prepend-icon="searchIcon" label="ابحث" @click="applyFilters" />
+              :prepend-icon="searchIcon" :label="t('sales.trips.search')" @click="applyFilters" />
             <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4" border="sm"
               custom-class="px-5 font-semibold text-sm sm:text-base !text-primary-800 !border-primary-200"
-              prepend-icon="mdi-refresh" label="إعادة تعيين" @click="resetFilters" />
+              prepend-icon="mdi-refresh" :label="t('common.actions.reset')" @click="resetFilters" />
           </div>
         </div>
 
@@ -421,16 +422,19 @@ onBeforeUnmount(() => {
       v-model="showChangeStatusDialog"
       :item="itemToChangeStatus"
       :change-status-url="`/sales/trips/${itemToChangeStatus?.uuid}/change-status`"
-      title="تغيير الحالة"
-      message="تغيير الحالة:"
+      :title="t('common.statusChange.title')"
+      :message="t('common.statusChange.message')"
       @success="fetchList"
     />
 
-    <DeleteConfirmDialog v-model="showDeleteDialog" :loading="deleteLoading" title="حذف الرحلة"
-      message="هل أنت متأكد من حذف هذه الرحلة؟" @confirm="confirmDelete" />
+    <DeleteConfirmDialog v-model="showDeleteDialog" :loading="deleteLoading"
+      :title="t('sales.trips.delete.titleSingle')"
+      :message="t('sales.trips.delete.messageSingle')" @confirm="confirmDelete" />
 
-    <DeleteConfirmDialog v-model="showBulkDeleteDialog" :loading="deleteLoading" title="حذف الرحلات"
-      :message="`هل أنت متأكد من حذف ${selectedRequests.length} رحلة؟`" @confirm="confirmBulkDelete" />
+    <DeleteConfirmDialog v-model="showBulkDeleteDialog" :loading="deleteLoading"
+      :title="t('sales.trips.delete.titleBulk')"
+      :message="t('sales.trips.delete.messageBulk', { count: selectedRequests.length })"
+      @confirm="confirmBulkDelete" />
   </default-layout>
 </template>
 

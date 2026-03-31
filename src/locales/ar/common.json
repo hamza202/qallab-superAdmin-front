@@ -1,4 +1,10 @@
 {
+  "action": {
+    "import": "استيراد",
+    "export": "تصدير",
+    "delete": "حذف",
+    "deleteAll": "حذف الجميع"
+  },
   "actions": {
     "save": "حفظ",
     "cancel": "إلغاء",

@@ -108,7 +108,11 @@ const filterPurchaseOrderCode = ref("");
 const filterDeliveryDate = ref("");
 const filterStatus = ref<string | null>(null);
 
-const statusFilterItems = ["تأكيد", "الغاء", "مسودة"];
+const statusFilterItems = computed(() => [
+  t("common.status.confirmed"),
+  t("common.status.cancelled"),
+  t("common.status.draft"),
+]);
 
 // Delete dialogs
 const showBulkDeleteDialog = ref(false);
@@ -162,7 +166,7 @@ const fetchList = async (append = false) => {
     nextCursor.value = res.pagination?.next_cursor ?? null;
   } catch (err: any) {
     console.error("Error fetching receiving docs list:", err);
-    error(err?.response?.data?.message || "فشل تحميل قائمة سندات الاستلام");
+    error(err?.response?.data?.message || t("sales.deliveryDocs.messages.loadListError"));
   } finally {
     loading.value = false;
     loadingMore.value = false;
@@ -193,7 +197,7 @@ const cleanupInfiniteScroll = () => {
 // Toggle column and persist
 const handleToggleHeader = async (headerKey: string) => {
   await toggleHeader(headerKey).catch((err: any) => {
-    error(err?.response?.data?.message || "فشل تحديث الأعمدة");
+    error(err?.response?.data?.message || t("sales.deliveryDocs.messages.columnsUpdateError"));
   });
 };
 
@@ -226,11 +230,11 @@ const confirmDelete = async (item: { id?: string | number }) => {
   try {
     deleteLoading.value = true;
     await api.delete(`/sales/delivery-docs/${String(item.id)}`);
-    success("تم حذف سند الاستلام بنجاح");
+    success(t("sales.deliveryDocs.messages.deleteSuccess"));
     await fetchList();
   } catch (err: any) {
     console.error("Error deleting receiving doc:", err);
-    error(err?.response?.data?.message || "فشل حذف سند الاستلام");
+    error(err?.response?.data?.message || t("sales.deliveryDocs.messages.deleteError"));
   } finally {
     deleteLoading.value = false;
   }
@@ -286,12 +290,16 @@ const confirmBulkDelete = async () => {
     await api.post("/sales/delivery-docs/bulk-delete", {
       ids: selectedItems.value,
     });
-    success(`تم حذف ${selectedItems.value.length} سند استلام بنجاح`);
+    success(
+      t("sales.deliveryDocs.messages.bulkDeleteSuccess", {
+        count: selectedItems.value.length,
+      })
+    );
     selectedItems.value = [];
     await fetchList();
   } catch (err: any) {
     console.error("Error bulk deleting:", err);
-    error(err?.response?.data?.message || "فشل الحذف الجماعي");
+    error(err?.response?.data?.message || t("sales.deliveryDocs.messages.bulkDeleteError"));
   } finally {
     deleteLoading.value = false;
     showBulkDeleteDialog.value = false;
@@ -311,17 +319,17 @@ onBeforeUnmount(() => {
 <template>
   <default-layout>
     <div class="receiving-docs-page">
-      <PageHeader :icon="GridIcon" title-key="pages.DeliveryDocs.title"
-        description-key="pages.DeliveryDocs.description" />
+      <PageHeader :icon="GridIcon" title-key="sales.deliveryDocs.list.title"
+        description-key="sales.deliveryDocs.list.description" />
 
       <div
         class="flex justify-end items-stretch rounded border border-gray-300 w-fit ms-auto mb-4 overflow-hidden bg-white text-sm">
         <ButtonWithIcon variant="flat" height="40" rounded="0"
           custom-class="font-semibold text-base border-gray-300 bg-primary-100 !text-primary-900"
-          :prepend-icon="importIcon" :label="t('common.import')" />
+          :prepend-icon="importIcon" :label="t('common.action.import')" />
         <ButtonWithIcon variant="flat" height="40" rounded="0"
           custom-class="font-semibold text-base border-gray-300 bg-primary-50 !text-primary-900"
-          :prepend-icon="exportIcon" :label="t('common.export')" />
+          :prepend-icon="exportIcon" :label="t('common.action.export')" />
       </div>
 
       <div class="bg-gray-50 rounded-md -mx-6">
@@ -332,11 +340,11 @@ onBeforeUnmount(() => {
             class="flex flex-wrap items-stretch rounded overflow-hidden border border-gray-200 bg-white text-sm">
             <ButtonWithIcon variant="flat" height="40" rounded="0"
               custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-              :prepend-icon="trash_1_icon" color="white" :label="t('common.delete')" @click="handleBulkDelete" />
+              :prepend-icon="trash_1_icon" color="white" :label="t('common.action.delete')" @click="handleBulkDelete" />
             <div class="w-px bg-gray-200"></div>
             <ButtonWithIcon variant="flat" height="40" rounded="0"
               custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-              :prepend-icon="trash_2_icon" color="white" :label="t('common.deleteAll')" @click="handleBulkDelete" />
+              :prepend-icon="trash_2_icon" color="white" :label="t('common.action.deleteAll')" @click="handleBulkDelete" />
           </div>
 
           <!-- Main header controls -->
@@ -345,7 +353,7 @@ onBeforeUnmount(() => {
               <template #activator="{ props: menuProps }">
                 <ButtonWithIcon v-bind="menuProps" variant="outlined" append-icon="mdi-chevron-down" rounded="4"
                   color="gray-500" height="40" custom-class="font-semibold text-base border-gray-400"
-                  :prepend-icon="columnIcon" :label="t('common.columns')" />
+                  :prepend-icon="columnIcon" :label="t('common.table.columns')" />
               </template>
               <v-list>
                 <v-list-item v-for="header in allHeaders" :key="header.key" @click="handleToggleHeader(header.key)">
@@ -360,11 +368,11 @@ onBeforeUnmount(() => {
 
             <ButtonWithIcon variant="flat" color="primary-500" height="40" rounded="4"
               custom-class="px-7 font-semibold text-base text-white border !border-primary-200"
-              :prepend-icon="searchIcon" :label="t('common.advancedSearch')" @click="toggleAdvancedFilters" />
+              :prepend-icon="searchIcon" :label="t('common.table.advancedSearch')" @click="toggleAdvancedFilters" />
 
             <ButtonWithIcon v-if="canCreate" variant="flat" color="primary-100" height="40" rounded="4"
               custom-class="px-7 font-semibold text-base !text-primary-800 border !border-primary-200"
-              :prepend-icon="plusIcon" label="إضافة سند استلام" @click="openCreate" />
+              :prepend-icon="plusIcon" :label="t('sales.deliveryDocs.addReceivingDoc')" @click="openCreate" />
           </div>
         </div>
 
@@ -373,21 +381,24 @@ onBeforeUnmount(() => {
           class="border-y border-y-primary-100 bg-primary-50 px-4 sm:px-6 py-3 gap-3 flex justify-between flex-wrap">
           <div class="flex flex-wrap gap-3 items-end">
             <TextInput v-model="filterCode" density="comfortable" variant="outlined" hide-details
-              placeholder="كود الاستلام" class="w-full sm:w-40 bg-white border-primary-200" />
+              :placeholder="t('sales.deliveryDocs.filters.code')" class="w-full sm:w-40 bg-white border-primary-200" />
             <TextInput v-model="filterPurchaseOrderCode" density="comfortable" variant="outlined" hide-details
-              placeholder="كود طلبية المشتريات" class="w-full sm:w-40 bg-white border-primary-200" />
+              :placeholder="t('sales.deliveryDocs.filters.purchaseOrderCode')"
+              class="w-full sm:w-40 bg-white border-primary-200" />
             <DatePickerInput v-model="filterDeliveryDate" density="comfortable" hide-details
-              placeholder="تاريخ الاستلام" class="w-full sm:w-40 bg-white border-primary-200" />
+              :placeholder="t('sales.deliveryDocs.filters.receivingDate')"
+              class="w-full sm:w-40 bg-white border-primary-200" />
             <SelectInput v-model="filterStatus" :items="statusFilterItems" density="comfortable" variant="outlined"
-              hide-details placeholder="الحالة" class="w-full sm:w-40 bg-white border-primary-200" />
+              hide-details :placeholder="t('sales.deliveryDocs.filters.status')"
+              class="w-full sm:w-40 bg-white border-primary-200" />
           </div>
           <div class="flex gap-2 items-center">
             <ButtonWithIcon variant="flat" color="primary-500" rounded="4" height="40"
-              custom-class="px-5 font-semibold !text-white text-sm sm:text-base" :prepend-icon="searchIcon" label="ابحث"
-              @click="applyFilters" />
+              custom-class="px-5 font-semibold !text-white text-sm sm:text-base" :prepend-icon="searchIcon"
+              :label="t('sales.deliveryDocs.search')" @click="applyFilters" />
             <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4" border="sm"
               custom-class="px-5 font-semibold text-sm sm:text-base !text-primary-800 !border-primary-200"
-              prepend-icon="mdi-refresh" label="إعادة تعيين" @click="resetFilters" />
+              prepend-icon="mdi-refresh" :label="t('common.actions.reset')" @click="resetFilters" />
           </div>
         </div>
 
@@ -418,19 +429,20 @@ onBeforeUnmount(() => {
         <div ref="loadMoreTrigger" class="h-4"></div>
         <div v-if="loadingMore" class="flex justify-center items-center py-4">
           <v-progress-circular indeterminate color="primary" size="32" />
-          <span class="ms-2 text-gray-600">جاري تحميل المزيد...</span>
+          <span class="ms-2 text-gray-600">{{ t('common.ui.loadingMore') }}</span>
         </div>
       </div>
     </div>
 
     <!-- Bulk Delete Confirmation Dialog -->
-    <DeleteConfirmDialog v-model="showBulkDeleteDialog" :loading="deleteLoading" title="حذف سندات الاستلام"
-      :message="`هل أنت متأكد من حذف ${selectedItems.length} سند استلام؟`" @confirm="confirmBulkDelete" />
+    <DeleteConfirmDialog v-model="showBulkDeleteDialog" :loading="deleteLoading"
+      :title="t('sales.deliveryDocs.bulkDelete.title')"
+      :message="t('sales.deliveryDocs.bulkDelete.message', { count: selectedItems.length })" @confirm="confirmBulkDelete" />
 
     <!-- Status Change Dialog -->
     <StatusChangeFeature v-model="showChangeStatusDialog" :item="itemToChangeStatus"
       :change-status-url="`/sales/delivery-docs/${itemToChangeStatus?.uuid}/change-status`"
-      title="تغيير الحالة" message="تغيير الحالة:" @success="fetchList" />
+      :title="t('common.statusChange.title')" :message="t('common.statusChange.message')" @success="fetchList" />
 
   </default-layout>
 </template>

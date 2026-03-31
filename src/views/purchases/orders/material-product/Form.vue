@@ -1452,9 +1452,9 @@ const serviceTableItems = computed(() =>
 
         <DataTable :headers="ServicesHeaders" :items="serviceTableItems" show-actions force-show-edit
           @edit="handleEditSupply" />
-
+        
         <div class="flex justify-center my-6">
-          <ButtonWithIcon color="primary-100" variant="flat" class="!text-primary-900 font-bold w-75"
+          <ButtonWithIcon color="primary-100" variant="flat" class="!text-primary-900 font-bold md:w-3/4"
             :disabled="productTableItems.length === 0" @click="handleAddSupply">
             {{ t('purchases.orders.shared.labels.editSupplyDetails') }}
           </ButtonWithIcon>
