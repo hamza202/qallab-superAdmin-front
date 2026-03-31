@@ -249,12 +249,15 @@ const fetchCategoryItems = async (categoryId: number) => {
 };
 
 watch(() => props.modelValue, (newVal) => {
-  if (newVal) {
-    if (isEditMode.value && props.editProduct) {
-      editProductData.value = { ...props.editProduct };
-    } else {
-      fetchCategories();
-    }
+  if (!newVal) {
+    resetForm();
+    return;
+  }
+  if (isEditMode.value && props.editProduct) {
+    editProductData.value = { ...props.editProduct };
+  } else {
+    resetForm();
+    fetchCategories();
   }
 });
 
@@ -533,7 +536,7 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
           </div>
 
           <!-- Delivery Count (trip_no) - purchases فقط بدون سعر/خصم -->
-          <div v-if="!hideTripNo && (!showPricingFields && requestType == 'raw_materials'|| requestType == 'logistics' || requestType === 'logistics-trips')">
+          <div v-if="!hideTripNo && ((!showPricingFields && requestType == 'raw_materials') || requestType == 'logistics' || requestType === 'logistics-trips')">
             <TextInput 
               v-model="editProductData.trip_no" 
               type="number" 
@@ -759,8 +762,8 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
                 />
               </div>
 
-              <!-- Delivery Count (trip_no) - purchases فقط بدون سعر/خصم -->
-              <div v-if="!hideTripNo && (requestType == 'raw_materials' || requestType == 'logistics' || requestType === 'logistics-trips')">
+              <!-- Delivery Count (trip_no) - purchases فقط بدون سعر/خصم (مخفي مع سعر الوحدة/الخصم لمواد خام) -->
+              <div v-if="!hideTripNo && ((!showPricingFields && requestType == 'raw_materials') || requestType == 'logistics' || requestType === 'logistics-trips')">
                 <TextInput 
                   v-model="product.trip_no" 
                   type="number"

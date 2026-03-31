@@ -3,6 +3,7 @@ import { ref, computed, onMounted } from "vue";
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router';
 import AddProductDialog from '@/components/price-offers/AddProductDialog.vue';
+import EditProductsDialog from '@/components/price-offers/EditProductsDialog.vue';
 import AddLogisticsDetailDialog from './components/AddLogisticsDetailDialog.vue';
 import TopHeader from '@/components/price-offers/TopHeader.vue';
 import { useApi } from '@/composables/useApi';
@@ -169,16 +170,22 @@ const fetchFormData = async () => {
 
             // Populate products (items)
             if (data.items && Array.isArray(data.items)) {
-                productTableItems.value = data.items.map((item: any) => ({
-                    id: item.id,
-                    item_id: item.item_id,
-                    item_name: item.item_name || '',
-                    unit_id: item.unit_id,
-                    unit_name: item.unit_name || '',
-                    quantity: item.quantity,
-                    from_date: item.from_date || '',
-                    trip_no: item.trip_no || null
-                }));
+                productTableItems.value = data.items.map((item: any) => {
+                    const itemId = Number(item.item_id);
+                    if (item.id && itemId) {
+                        originalProductIds.value[itemId] = item.id;
+                    }
+                    return {
+                        id: item.id,
+                        item_id: itemId,
+                        item_name: item.item_name || '',
+                        unit_id: item.unit_id,
+                        unit_name: item.unit_name || '',
+                        quantity: item.quantity,
+                        from_date: item.from_date || '',
+                        trip_no: item.trip_no || null
+                    };
+                });
             }
 
             // Populate logistics details (array)
@@ -287,6 +294,7 @@ const formData = ref({
 
 // Products table items (dynamically populated from dialog)
 const productTableItems = ref<ProductTableItem[]>([]);
+const originalProductIds = ref<Record<number, number>>({});
 
 // Logistics details (array - dynamically populated from dialog)
 const logisticsDetails = ref<LogisticsDetail[]>([]);
@@ -305,6 +313,7 @@ const summaryData = computed(() => ({
 
 
 const showAddProductDialog = ref(false);
+const showEditProductsDialog = ref(false);
 const editingProduct = ref<ProductTableItem | null>(null);
 
 const handleAddProduct = () => {
@@ -313,7 +322,27 @@ const handleAddProduct = () => {
 };
 
 const handleProductSaved = (products: ProductTableItem[]) => {
-    productTableItems.value = products;
+    const newItems: ProductTableItem[] = products.map(p => {
+        const restoredId = p.id ?? originalProductIds.value[p.item_id] ?? undefined;
+        return { ...p, id: restoredId };
+    });
+    productTableItems.value = newItems;
+};
+
+const handleEditProductsBulk = (updatedProducts: any[]) => {
+    productTableItems.value = updatedProducts.map((p: any) => ({
+        item_id: p.item_id,
+        item_name: p.item_name,
+        unit_id: p.unit_id,
+        unit_name: p.unit_name ?? '',
+        quantity: p.quantity,
+        from_date: p.from_date ?? '',
+        trip_no: p.trip_no ?? null,
+        id: productTableItems.value.find(x => x.item_id === p.item_id)?.id
+            ?? originalProductIds.value[p.item_id]
+            ?? p.id,
+        isAdded: true,
+    }));
 };
 
 const handleEditProduct = (item: any) => {
@@ -328,7 +357,10 @@ const handleEditProduct = (item: any) => {
 const handleProductUpdated = (updatedProduct: ProductTableItem) => {
     const index = productTableItems.value.findIndex(p => p.item_id === updatedProduct.item_id);
     if (index !== -1) {
-        productTableItems.value[index] = updatedProduct;
+        const preservedId = productTableItems.value[index].id
+            ?? originalProductIds.value[updatedProduct.item_id]
+            ?? updatedProduct.id;
+        productTableItems.value[index] = { ...updatedProduct, id: preservedId };
     }
     editingProduct.value = null;
 };
@@ -939,11 +971,20 @@ onMounted(async () => {
                         @edit="handleEditProduct" @delete="handleDeleteProduct" />
                 </div>
 
-                <!-- Add Product Button -->
-                <div class="flex justify-center">
-                    <ButtonWithIcon color="primary-100" variant="flat" class="!text-primary-900 font-bold w-75 mb-4"
+                <!-- Add / Edit Product Buttons -->
+                <div class="flex justify-center gap-3 mx-auto md:w-3/4 mb-4">
+                    <ButtonWithIcon color="primary-100" variant="flat" class="!text-primary-900 font-bold flex-1"
                         @click="handleAddProduct">
                         {{ t('purchases.shared.forms.common.actions.addProduct') }}
+                    </ButtonWithIcon>
+                    <ButtonWithIcon
+                        v-if="productTableItems.length > 0"
+                        color="primary-100"
+                        variant="flat"
+                        class="!text-primary-900 font-bold flex-1"
+                        @click="showEditProductsDialog = true"
+                    >
+                        {{ t('purchases.shared.forms.common.actions.editProducts') }}
                     </ButtonWithIcon>
                 </div>
             </div>
@@ -970,10 +1011,26 @@ onMounted(async () => {
             :address="String(currentMapType === 'target' ? (formData.target_location || '') : (formData.source_location || ''))"
             @location-selected="handleLocationSelected" />
 
-        <!-- Add Product Dialog -->
-        <AddProductDialog v-model="showAddProductDialog" :unit-items="unitItems" request-type="logistics"
-            :edit-product="editingProduct" :existing-products="productTableItems" @saved="handleProductSaved"
-            @product-updated="handleProductUpdated" />
+        <!-- Add Product Dialog (no supplier_id / material_type — all categories & items) -->
+        <AddProductDialog
+            v-model="showAddProductDialog"
+            request-type="logistics"
+            :unit-items="unitItems"
+            :transport-types="transportTypeItems"
+            :edit-product="editingProduct"
+            :existing-products="productTableItems"
+            @saved="handleProductSaved"
+            @product-updated="handleProductUpdated"
+        />
+
+        <EditProductsDialog
+            v-model="showEditProductsDialog"
+            request-type="logistics"
+            :products="productTableItems"
+            :transport-types="transportTypeItems"
+            :unit-items="unitItems"
+            @products-updated="handleEditProductsBulk"
+        />
 
         <!-- Add Logistics Detail Dialog -->
         <AddLogisticsDetailDialog v-model="showAddLogisticsDialog" :transport-types="transportTypeItems"

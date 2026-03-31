@@ -3,6 +3,7 @@ import { ref, computed, onMounted } from "vue";
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router';
 import AddProductDialogFuels, { type FuelProductToAdd } from '@/components/price-offers/AddProductDialogFuels.vue';
+import EditProductsDialog from '@/components/price-offers/EditProductsDialog.vue';
 import TopHeader from '@/components/price-offers/TopHeader.vue';
 import VoiceRecorder from '@/components/common/forms/VoiceRecorder.vue';
 import DatePickerInput from '@/components/common/forms/DatePickerInput.vue';
@@ -174,9 +175,13 @@ const fetchFormData = async () => {
             if (data.items && Array.isArray(data.items)) {
                 productTableItems.value = data.items.map((item: any) => {
                     const transportType = item.filling ?? item.transport_type;
+                    const itemId = Number(item.item_id);
+                    if (item.id && itemId) {
+                        originalProductIds.value[itemId] = item.id;
+                    }
                     return {
                         id: item.id,
-                        item_id: item.item_id,
+                        item_id: itemId,
                         item_name: item.item_name || '',
                         unit_id: item.unit_id,
                         unit_name: item.unit_name || '',
@@ -261,6 +266,7 @@ const formData = ref({
 
 // Products table items (dynamically populated from dialog)
 const productTableItems = ref<ProductTableItem[]>([]);
+const originalProductIds = ref<Record<number, number>>({});
 
 // Summary data
 const summaryData = computed(() => ({
@@ -281,14 +287,8 @@ import { required } from '@/utils/validators';
 const { success, warning, apiError } = useNotification();
 
 const showAddProductDialog = ref(false);
+const showEditProductsDialog = ref(false);
 const editingProduct = ref<ProductTableItem | null>(null);
-
-// Items endpoint for modal: same pattern as material-product (supplier items by supplier_id)
-const fuelsItemsEndpoint = computed(() =>
-    formData.value.supplier_id
-        ? `/items/supplier-items?supplier_id=${formData.value.supplier_id}&material_type=2`
-        : ''
-);
 
 const handleAddProduct = () => {
     if (!formData.value.supplier_id) {
@@ -300,21 +300,35 @@ const handleAddProduct = () => {
 };
 
 const handleProductSaved = (products: FuelProductToAdd[]) => {
-    const newItems: ProductTableItem[] = [];
-    products.forEach(p => {
-        const existing = productTableItems.value.find(existing => existing.item_id === p.item_id);
-        newItems.push({
+    const newItems: ProductTableItem[] = products.map(p => {
+        const existing = productTableItems.value.find(e => e.item_id === p.item_id);
+        const restoredId = p.id ?? originalProductIds.value[p.item_id] ?? undefined;
+        return {
             ...p,
-            // Recalculate names to ensure fresh data
-            transport_type_name: getFillingName(p.transport_type),
+            transport_type_name: getFillingName(p.transport_type) || getTransportTypeName(p.transport_type),
             supply_type_name: supplyTypeItems.value.find((s: any) => s.value === p.supply_type)?.title || '',
             trip_no: p.trip_no ?? null,
             unit_price: p.unit_price ?? null,
             discount: p.discount ?? null,
-            notes: existing?.notes || p.notes || ''
-        });
+            notes: existing?.notes || p.notes || '',
+            id: restoredId,
+        } as ProductTableItem;
     });
     productTableItems.value = newItems;
+};
+
+const handleEditProductsBulk = (updatedProducts: any[]) => {
+    productTableItems.value = updatedProducts.map((p: any) => ({
+        ...p,
+        transport_type_name: getFillingName(p.transport_type) || getTransportTypeName(p.transport_type),
+        supply_type_name: supplyTypeItems.value.find((s: any) => s.value === p.supply_type)?.title || p.supply_type_name || '',
+        trip_no: p.trip_no ?? null,
+        unit_price: p.unit_price ?? null,
+        discount: p.discount ?? null,
+        id: productTableItems.value.find(x => x.item_id === p.item_id)?.id
+            ?? originalProductIds.value[p.item_id]
+            ?? p.id,
+    }));
 };
 
 const handleEditProduct = (item: any) => {
@@ -330,15 +344,18 @@ const handleProductUpdated = (updatedProduct: FuelProductToAdd) => {
     const index = productTableItems.value.findIndex(p => p.item_id === updatedProduct.item_id);
     if (index !== -1) {
         const existingNotes = productTableItems.value[index].notes;
+        const preservedId = productTableItems.value[index].id
+            ?? originalProductIds.value[updatedProduct.item_id]
+            ?? updatedProduct.id;
         productTableItems.value[index] = {
             ...updatedProduct,
-            // Ensure names are correct using local lookup
-            transport_type_name: getFillingName(updatedProduct.transport_type),
+            transport_type_name: getFillingName(updatedProduct.transport_type) || getTransportTypeName(updatedProduct.transport_type),
             supply_type_name: supplyTypeItems.value.find((s: any) => s.value === updatedProduct.supply_type)?.title || '',
             trip_no: updatedProduct.trip_no ?? null,
             unit_price: updatedProduct.unit_price ?? null,
             discount: updatedProduct.discount ?? null,
-            notes: existingNotes || updatedProduct.notes || ''
+            notes: existingNotes || updatedProduct.notes || '',
+            id: preservedId,
         };
     }
     editingProduct.value = null;
@@ -723,11 +740,20 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
                     </DataTable>
                 </div>
 
-                <!-- Add Product Button -->
-                <div class="flex justify-center">
-                    <ButtonWithIcon color="primary-100" variant="flat" class="!text-primary-900 font-bold w-75"
+                <!-- Add / Edit Product Buttons -->
+                <div class="flex justify-center gap-3 mx-auto md:w-3/4">
+                    <ButtonWithIcon color="primary-100" variant="flat" class="!text-primary-900 font-bold flex-1"
                         @click="handleAddProduct">
                         {{ t('purchases.shared.forms.common.actions.addProduct') }}
+                    </ButtonWithIcon>
+                    <ButtonWithIcon
+                        v-if="productTableItems.length > 0"
+                        color="primary-100"
+                        variant="flat"
+                        class="!text-primary-900 font-bold flex-1"
+                        @click="showEditProductsDialog = true"
+                    >
+                        {{ t('purchases.shared.forms.common.actions.editProducts') }}
                     </ButtonWithIcon>
                 </div>
             </div>
@@ -812,17 +838,31 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
             :address="formData.source_location"
             @location-selected="handleSourceLocationSelected" />
 
-        <!-- Add Product Dialog (items based on supplier_id, same as material-product) -->
-        <AddProductDialogFuels v-model="showAddProductDialog"
+        <!-- Add Product Dialog: material_type=0, supplier_id on categories + supplier-items -->
+        <AddProductDialogFuels
+            v-model="showAddProductDialog"
+            :material-type="0"
+            :supplier-id="formData.supplier_id"
+            items-endpoint="/items/supplier-items"
             :fillings-options="fillingsItems"
             :unit-items="unitItems"
-
             :supply-type-options="supplyTypeItems"
-            :items-endpoint="fuelsItemsEndpoint"
             :edit-product="editingProduct"
             :existing-products="productTableItems"
             @saved="handleProductSaved"
-            @product-updated="handleProductUpdated" />
+            @product-updated="handleProductUpdated"
+        />
+
+        <EditProductsDialog
+            v-model="showEditProductsDialog"
+            request-type="fuel"
+            :products="productTableItems"
+            :transport-types="transportTypeItems"
+            :unit-items="unitItems"
+            :fillings-items="fillingsItems"
+            :supply-type-items="supplyTypeItems"
+            @products-updated="handleEditProductsBulk"
+        />
 
     </default-layout>
 </template>

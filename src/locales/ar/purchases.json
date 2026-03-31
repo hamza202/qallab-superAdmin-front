@@ -140,6 +140,7 @@
           "actions": {
             "importExcel": "استيراد من ملف إكسل",
             "addProduct": "+ إضافة منتج جديد",
+            "editProducts": "تعديل المنتجات",
             "submitRequest": "إرسال الطلب",
             "saveAndReturn": "حفظ والعودة للرئيسية",
             "saveAndCreateNew": "حفظ وانشاء جديد"

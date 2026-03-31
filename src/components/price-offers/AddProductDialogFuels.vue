@@ -23,15 +23,24 @@ export interface FuelProductToAdd {
   trip_no?: number | null;
   unit_price?: number | null;
   discount?: number | null;
+  discount_type?: number | null;
+  price_per_unit?: number | null;
+  discount_val?: number | null;
   _categoryId?: number;
 }
 
 const props = defineProps<{
   modelValue: boolean;
   materialType?: number;
+  supplierId?: number | null;
+  /** Base path without query; default /items/list. Use /items/supplier-items for supplier catalog. */
+  itemsEndpoint?: string;
   unitItems?: any[];
   fillingsOptions?: any[];
   supplyTypeOptions?: any[];
+  /** طلبات الشراء (طلبية وقود): عرض سعر الوحدة والخصم */
+  showUnitPriceAndDiscount?: boolean;
+  discountTypeItems?: any[];
   editProduct?: FuelProductToAdd | null;
   existingProducts?: FuelProductToAdd[];
 }>();
@@ -68,6 +77,16 @@ const manuallyUnchecked = ref<Set<number>>(new Set());
 const unitItemsList = computed(() => props.unitItems || []);
 const fillingsOptionsList = computed(() => props.fillingsOptions || []);
 const supplyTypeOptionsList = computed(() => props.supplyTypeOptions || []);
+const showPricingFields = computed(() => !!props.showUnitPriceAndDiscount);
+const discountTypeOptionsList = computed(() => {
+  if (props.discountTypeItems && props.discountTypeItems.length > 0) {
+    return props.discountTypeItems;
+  }
+  return [
+    { title: '%', value: 1 },
+    { title: 'ريال', value: 2 },
+  ];
+});
 
 const displayedTabs = computed(() => {
   if (showFullCategory.value) return categories.value;
@@ -95,8 +114,13 @@ const canAddProduct = (product: FuelProductToAdd): boolean => {
 const fetchCategories = async () => {
   categoriesLoading.value = true;
   try {
-    const mt = props.materialType ?? 2;
-    const res = await api.get<any>(`/categories/list?material_type=${mt}`);
+    const params = new URLSearchParams();
+    const mt = props.materialType ?? 0;
+    params.set('material_type', String(mt));
+    if (props.supplierId != null) {
+      params.set('supplier_id', String(props.supplierId));
+    }
+    const res = await api.get<any>(`/categories/list?${params.toString()}`);
     if (Array.isArray(res.data)) {
       categories.value = res.data;
       if (categories.value.length > 0) {
@@ -116,8 +140,15 @@ const fetchCategoryItems = async (categoryId: number) => {
 
   itemsLoading.value = true;
   try {
-    const mt = props.materialType ?? 2;
-    const res = await api.get<any>(`/items/list?material_type=${mt}&category_id=${categoryId}`);
+    const base = (props.itemsEndpoint || '/items/list').replace(/\/$/, '');
+    const params = new URLSearchParams();
+    params.set('category_id', String(categoryId));
+    const mt = props.materialType ?? 0;
+    params.set('material_type', String(mt));
+    if (props.supplierId != null) {
+      params.set('supplier_id', String(props.supplierId));
+    }
+    const res = await api.get<any>(`${base}?${params.toString()}`);
     if (Array.isArray(res.data)) {
       const newProducts: FuelProductToAdd[] = [];
       res.data.forEach((item: any) => {
@@ -140,6 +171,7 @@ const fetchCategoryItems = async (categoryId: number) => {
             trip_no: null,
             unit_price: null,
             discount: null,
+            discount_type: 1,
             _categoryId: categoryId,
           };
           newProducts.push(product);
@@ -161,16 +193,6 @@ const fetchCategoryItems = async (categoryId: number) => {
     itemsLoading.value = false;
   }
 };
-
-watch(() => props.modelValue, (newVal) => {
-  if (newVal) {
-    if (isEditMode.value && props.editProduct) {
-      editProductData.value = { ...props.editProduct };
-    } else {
-      fetchCategories();
-    }
-  }
-});
 
 watch(activeTabId, (newId) => {
   if (newId !== null && !isEditMode.value) {
@@ -247,6 +269,25 @@ const resetForm = () => {
   editProductData.value = null;
   loadedCategoryIds.value.clear();
 };
+
+watch(() => props.modelValue, (newVal) => {
+  if (!newVal) {
+    resetForm();
+    return;
+  }
+  if (isEditMode.value && props.editProduct) {
+    const ep = props.editProduct;
+    editProductData.value = {
+      ...ep,
+      unit_price: ep.unit_price ?? ep.price_per_unit ?? null,
+      discount: ep.discount ?? ep.discount_val ?? null,
+      discount_type: ep.discount_type ?? 1,
+    };
+  } else {
+    resetForm();
+    fetchCategories();
+  }
+});
 
 const closeDialog = () => {
   internalOpen.value = false;
@@ -345,6 +386,27 @@ const plusIconDisabled = `<svg width="16" height="16" viewBox="0 0 16 16" fill="
               class="min-w-[170px]"
               item-title="title"
               item-value="value"
+            />
+          </div>
+          <div v-if="showPricingFields">
+            <PriceInput
+              v-model="editProductData.unit_price"
+              placeholder="سعر الوحدة"
+              density="compact"
+              class="min-w-[170px]"
+            />
+          </div>
+          <div v-if="showPricingFields">
+            <TextInputWithSelect
+              v-model="editProductData.discount"
+              v-model:selectValue="editProductData.discount_type"
+              type="number"
+              placeholder="الخصم"
+              density="compact"
+              select-width="75px"
+              :select-items="discountTypeOptionsList"
+              select-placeholder="اختر"
+              class="min-w-[170px]"
             />
           </div>
         </div>
@@ -452,6 +514,27 @@ const plusIconDisabled = `<svg width="16" height="16" viewBox="0 0 16 16" fill="
                   class="min-w-[170px]"
                   item-title="title"
                   item-value="value"
+                />
+              </div>
+              <div v-if="showPricingFields">
+                <PriceInput
+                  v-model="product.unit_price"
+                  placeholder="سعر الوحدة"
+                  density="compact"
+                  class="min-w-[170px]"
+                />
+              </div>
+              <div v-if="showPricingFields">
+                <TextInputWithSelect
+                  v-model="product.discount"
+                  v-model:selectValue="product.discount_type"
+                  type="number"
+                  placeholder="الخصم"
+                  density="compact"
+                  select-width="75px"
+                  :select-items="discountTypeOptionsList"
+                  select-placeholder="اختر"
+                  class="min-w-[170px]"
                 />
               </div>
             </div>

@@ -3,6 +3,7 @@ import { ref, computed, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
 import AddProductDialog from "@/components/price-offers/AddProductDialog.vue";
+import EditProductsDialog from "@/components/price-offers/EditProductsDialog.vue";
 import EditSupplyDetailsDialog from "@/components/price-offers/EditSupplyDetailsDialog.vue";
 import TopHeader from "@/components/price-offers/TopHeader.vue";
 import { useApi } from "@/composables/useApi";
@@ -254,6 +255,12 @@ const fetchFormData = async () => {
         productTableItems.value = data.items.map((item: any) => {
           const itemId = Number(item.item_id);
           const log = logisticsByItemId[itemId];
+          if (item.id && itemId) {
+            originalProductIds.value[itemId] = item.id;
+          }
+          if (log?.id && itemId) {
+            originalLogisticsDetailIds.value[itemId] = log.id;
+          }
           const vehicleTypes = log?.transport_type
             ? Array.isArray(log.transport_type)
               ? log.transport_type.map((t: string | number) => Number(t))
@@ -594,6 +601,8 @@ const formData = ref({
 
 // Products table items (dynamically populated from dialog)
 const productTableItems = ref<ProductTableItem[]>([]);
+const originalProductIds = ref<Record<number, number>>({});
+const originalLogisticsDetailIds = ref<Record<number, number>>({});
 
 // API-driven calculations via composable
 const { vatRate, fetchCalculations: _fetchCalc, summaryTotals } = useCalculations(productTableItems);
@@ -627,6 +636,7 @@ import { required, numeric, positive } from "@/utils/validators";
 
 
 const showAddProductDialog = ref(false);
+const showEditProductsDialog = ref(false);
 const editingProduct = ref<ProductTableItem | null>(null);
 
 const handleAddProduct = () => {
@@ -639,30 +649,48 @@ const handleAddProduct = () => {
 };
 
 const handleProductSaved = async (products: any[]) => {
-  const existingItems = [...productTableItems.value];
-  
-  products.forEach((p) => {
-    const existingIndex = existingItems.findIndex(
-      (existing) => existing.item_id === p.item_id,
-    );
+  const newItems: ProductTableItem[] = [];
 
-    if (existingIndex !== -1) {
-      const existingNotes = existingItems[existingIndex].notes;
-      existingItems[existingIndex] = {
-        ...p,
-        notes: existingNotes || p.notes || "",
-        isAdded: true,
-      } as ProductTableItem;
-    } else {
-      existingItems.push({
-        ...p,
-        notes: p.notes || "",
-        isAdded: true,
-      } as ProductTableItem);
-    }
+  products.forEach((p) => {
+    const existing = productTableItems.value.find(
+      (e) => e.item_id === p.item_id,
+    );
+    const restoredId =
+      p.id ?? existing?.id ?? originalProductIds.value[p.item_id];
+    const restoredLogisticsId =
+      p.logistics_detail_id ??
+      existing?.logistics_detail_id ??
+      originalLogisticsDetailIds.value[p.item_id];
+
+    newItems.push({
+      ...p,
+      id: restoredId,
+      logistics_detail_id: restoredLogisticsId,
+      price_per_unit: p.unit_price ?? p.price_per_unit ?? existing?.price_per_unit ?? null,
+      discount_val: p.discount ?? p.discount_val ?? existing?.discount_val ?? null,
+      notes: existing?.notes || p.notes || "",
+    } as ProductTableItem);
   });
 
-  productTableItems.value = existingItems;
+  productTableItems.value = newItems;
+  await fetchCalculations();
+};
+
+const handleEditProductsBulk = async (updatedProducts: any[]) => {
+  productTableItems.value = updatedProducts.map((p) => ({
+    ...p,
+    price_per_unit: p.unit_price ?? p.price_per_unit ?? null,
+    discount_val: p.discount ?? p.discount_val ?? null,
+    id:
+      productTableItems.value.find((x) => x.item_id === p.item_id)?.id ??
+      originalProductIds.value[p.item_id] ??
+      p.id,
+    logistics_detail_id:
+      productTableItems.value.find((x) => x.item_id === p.item_id)
+        ?.logistics_detail_id ??
+      originalLogisticsDetailIds.value[p.item_id] ??
+      p.logistics_detail_id,
+  }));
   await fetchCalculations();
 };
 
@@ -687,11 +715,21 @@ const handleProductUpdated = async (updatedProduct: any) => {
   );
   if (index !== -1) {
     const existingNotes = productTableItems.value[index].notes;
+    const preservedId =
+      productTableItems.value[index].id ??
+      originalProductIds.value[updatedProduct.item_id] ??
+      updatedProduct.id;
+    const preservedLogisticsId =
+      productTableItems.value[index].logistics_detail_id ??
+      originalLogisticsDetailIds.value[updatedProduct.item_id] ??
+      updatedProduct.logistics_detail_id;
     productTableItems.value[index] = {
       ...updatedProduct,
       price_per_unit: updatedProduct.unit_price ?? updatedProduct.price_per_unit ?? null,
       discount_val: updatedProduct.discount ?? updatedProduct.discount_val ?? null,
       notes: existingNotes || updatedProduct.notes || "",
+      id: preservedId,
+      logistics_detail_id: preservedLogisticsId,
     } as ProductTableItem;
   }
   editingProduct.value = null;
@@ -1458,15 +1496,24 @@ const serviceTableItems = computed(() =>
           </template>
         </DataTable>
 
-        <!-- Add Product Button -->
-        <div class="flex justify-center my-6">
+        <!-- Add / Edit Product Buttons -->
+        <div class="flex justify-center gap-3 my-6 mx-auto md:w-3/4">
           <ButtonWithIcon
             color="primary-100"
             variant="flat"
-            class="!text-primary-900 font-bold w-75"
+            class="!text-primary-900 font-bold flex-1"
             @click="handleAddProduct"
           >
             {{ t('purchases.shared.forms.common.actions.addProduct') }}
+          </ButtonWithIcon>
+          <ButtonWithIcon
+            v-if="productTableItems.length > 0"
+            color="primary-100"
+            variant="flat"
+            class="!text-primary-900 font-bold flex-1"
+            @click="showEditProductsDialog = true"
+          >
+            {{ t('purchases.shared.forms.common.actions.editProducts') }}
           </ButtonWithIcon>
         </div>
       </div>
@@ -1822,19 +1869,30 @@ const serviceTableItems = computed(() =>
       @location-selected="handleLocationSelected"
     />
 
-    <!-- Add Product Dialog -->
+    <!-- Add Product Dialog: material_type=1 + supplier_id على التصنيفات و /items/supplier-items -->
     <AddProductDialog
       v-model="showAddProductDialog"
-      :items-query-params="{ material_type: 1 }"
       request-type="raw_materials"
       show-unit-price-and-discount
       :transport-types="transportTypeItems"
       :unit-items="unitItems"
       :supplier-id="formData.supplier_id"
+      items-endpoint="/items/supplier-items"
+      :items-query-params="{ material_type: 1, supplier_id: formData.supplier_id ?? '' }"
       :edit-product="editingProduct"
       :existing-products="productTableItems"
       @saved="handleProductSaved"
       @product-updated="handleProductUpdated"
+    />
+
+    <EditProductsDialog
+      v-model="showEditProductsDialog"
+      request-type="raw_materials"
+      :show-unit-price-and-discount="true"
+      :products="productTableItems"
+      :transport-types="transportTypeItems"
+      :unit-items="unitItems"
+      @products-updated="handleEditProductsBulk"
     />
 
     <!-- Edit Supply Details Dialog – تفاصيل التوريد لكل منتج (نفس لوجيك المبيعات) -->

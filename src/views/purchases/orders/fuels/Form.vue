@@ -2,7 +2,8 @@
 import { ref, computed, onMounted } from "vue";
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router';
-import AddProductDialog from '@/components/price-offers/AddProductDialog.vue';
+import AddProductDialogFuels, { type FuelProductToAdd } from '@/components/price-offers/AddProductDialogFuels.vue';
+import EditProductsDialog from '@/components/price-offers/EditProductsDialog.vue';
 import TopHeader from '@/components/price-offers/TopHeader.vue';
 import DatePickerInput from '@/components/common/forms/DatePickerInput.vue';
 import DateTimePickerInput from '@/components/common/forms/DateTimePickerInput.vue';
@@ -152,6 +153,12 @@ const getTransportTypeName = (transportTypeId: number | string | null): string =
     return item?.title || '';
 };
 
+const getFillingName = (key: number | string | null): string => {
+    if (key == null || key === '') return '';
+    const item = fillingsItems.value.find((i: any) => i.value === key || i.value === Number(key));
+    return item?.title || '';
+};
+
 // Fetch form data for edit mode
 const fetchFormData = async () => {
     if (!isEditMode.value || !routeId.value) return;
@@ -203,15 +210,22 @@ const fetchFormData = async () => {
             // Products table
             if (data.items && Array.isArray(data.items)) {
                 productTableItems.value = data.items.map((item: any) => {
+                    const filling = item.filling ?? item.transport_type;
+                    const itemId = Number(item.item_id);
+                    if (item.id && itemId) {
+                        originalProductIds.value[itemId] = item.id;
+                    }
                     return {
                         id: item.id,
-                        item_id: Number(item.item_id),
+                        item_id: itemId,
                         item_name: item.item_name || '',
                         unit_id: item.unit_id ?? null,
                         unit_name: item.unit_name || '',
                         quantity: item.quantity ?? null,
-                        transport_type: item.transport_type ?? null,
-                        transport_type_name: getTransportTypeName(item.transport_type),
+                        transport_type: filling ?? null,
+                        transport_type_name: getFillingName(filling) || getTransportTypeName(filling),
+                        supply_type: item.supply_type ?? null,
+                        supply_type_name: supplyTypeItems.value.find((s: any) => s.value === item.supply_type)?.title || '',
                         trip_no: item.trip_no ?? null,
                         notes: item.notes || '',
                         price_per_unit: item.price_per_unit ?? null,
@@ -311,6 +325,7 @@ const fetchQuotationForOrder = async () => {
                     const itemId = Number(item.item?.id || item.item_id);
                     const unitId = item.unit?.id || item.unit_id;
                     const unitName = item.unit?.name || item.unit_name || getUnitName(unitId);
+                    const filling = item.filling ?? item.transport_type;
 
                     return {
                         item_id: itemId,
@@ -318,8 +333,10 @@ const fetchQuotationForOrder = async () => {
                         unit_id: unitId ?? null,
                         unit_name: unitName,
                         quantity: item.quantity ?? null,
-                        transport_type: item.transport_type ?? null,
-                        transport_type_name: getTransportTypeName(item.transport_type),
+                        transport_type: filling ?? null,
+                        transport_type_name: getFillingName(filling) || getTransportTypeName(filling),
+                        supply_type: item.supply_type ?? null,
+                        supply_type_name: supplyTypeItems.value.find((s: any) => s.value === item.supply_type)?.title || '',
                         trip_no: item.trip_no ?? null,
                         notes: item.note || item.notes || '',
                         price_per_unit: item.price_per_unit ?? null,
@@ -376,6 +393,8 @@ interface ProductTableItem {
     quantity: number | null;
     transport_type?: number | null;
     transport_type_name?: string;
+    supply_type?: string | null;
+    supply_type_name?: string;
     trip_no?: number | null;
     notes: string;
     id?: number;
@@ -392,6 +411,7 @@ interface ProductTableItem {
 
 // For tracking logistics_detail id in edit mode
 const logisticsDetailId = ref<number | null>(null);
+const originalProductIds = ref<Record<number, number>>({});
 
 // Form data (matching JSON payload)
 const formData = ref({
@@ -461,6 +481,7 @@ import { required, numeric, positive } from '@/utils/validators';
 const { success, warning, apiError } = useNotification();
 
 const showAddProductDialog = ref(false);
+const showEditProductsDialog = ref(false);
 const editingProduct = ref<ProductTableItem | null>(null);
 
 const handleAddProduct = () => {
@@ -472,31 +493,50 @@ const handleAddProduct = () => {
     showAddProductDialog.value = true;
 };
 
-const handleProductSaved = async (products: any[]) => {
-    const existingItems = [...productTableItems.value];
-
-    products.forEach((p) => {
-        const existingIndex = existingItems.findIndex(
-            (existing) => existing.item_id === p.item_id,
-        );
-
-        if (existingIndex !== -1) {
-            const existingNotes = existingItems[existingIndex].notes;
-            existingItems[existingIndex] = {
-                ...p,
-                notes: existingNotes || p.notes || '',
-                isAdded: true,
-            } as ProductTableItem;
-        } else {
-            existingItems.push({
-                ...p,
-                notes: p.notes || '',
-                isAdded: true,
-            } as ProductTableItem);
-        }
+const handleProductSaved = async (products: FuelProductToAdd[]) => {
+    const newItems: ProductTableItem[] = products.map((p) => {
+        const existing = productTableItems.value.find((e) => e.item_id === p.item_id);
+        const restoredId = p.id ?? existing?.id ?? originalProductIds.value[p.item_id];
+        return {
+            ...p,
+            transport_type_name:
+                getFillingName(p.transport_type) || getTransportTypeName(p.transport_type),
+            supply_type_name:
+                supplyTypeItems.value.find((s: any) => s.value === p.supply_type)?.title ||
+                existing?.supply_type_name ||
+                '',
+            trip_no: p.trip_no ?? null,
+            price_per_unit: p.unit_price ?? p.price_per_unit ?? existing?.price_per_unit ?? null,
+            unit_price: p.unit_price ?? p.price_per_unit ?? existing?.unit_price ?? null,
+            discount_val: p.discount ?? p.discount_val ?? existing?.discount_val ?? null,
+            discount: p.discount ?? p.discount_val ?? existing?.discount ?? null,
+            discount_type: p.discount_type ?? existing?.discount_type ?? 1,
+            notes: existing?.notes || p.notes || '',
+            id: restoredId,
+            isAdded: true,
+        } as ProductTableItem;
     });
+    productTableItems.value = newItems;
+    await fetchCalculations();
+};
 
-    productTableItems.value = existingItems;
+const handleEditProductsBulk = async (updatedProducts: any[]) => {
+    productTableItems.value = updatedProducts.map((p: any) => ({
+        ...p,
+        transport_type_name:
+            getFillingName(p.transport_type) || getTransportTypeName(p.transport_type),
+        supply_type_name:
+            supplyTypeItems.value.find((s: any) => s.value === p.supply_type)?.title ||
+            p.supply_type_name ||
+            '',
+        price_per_unit: p.unit_price ?? p.price_per_unit ?? null,
+        discount_val: p.discount ?? p.discount_val ?? null,
+        discount: p.discount ?? p.discount_val ?? null,
+        id:
+            productTableItems.value.find((x) => x.item_id === p.item_id)?.id ??
+            originalProductIds.value[p.item_id] ??
+            p.id,
+    }));
     await fetchCalculations();
 };
 
@@ -509,23 +549,37 @@ const handleEditProduct = (item: any) => {
             ...productToEdit,
             unit_price: productToEdit.price_per_unit ?? productToEdit.unit_price ?? null,
             discount: productToEdit.discount_val ?? productToEdit.discount ?? null,
+            discount_type: productToEdit.discount_type ?? 1,
             isAdded: true,
-        } as any;
+        } as ProductTableItem;
         showAddProductDialog.value = true;
     }
 };
 
-const handleProductUpdated = async (updatedProduct: any) => {
+const handleProductUpdated = async (updatedProduct: FuelProductToAdd) => {
     const index = productTableItems.value.findIndex(
         (p) => p.item_id === updatedProduct.item_id,
     );
     if (index !== -1) {
         const existingNotes = productTableItems.value[index].notes;
+        const preservedId =
+            productTableItems.value[index].id ??
+            originalProductIds.value[updatedProduct.item_id] ??
+            updatedProduct.id;
         productTableItems.value[index] = {
             ...updatedProduct,
+            transport_type_name:
+                getFillingName(updatedProduct.transport_type) ||
+                getTransportTypeName(updatedProduct.transport_type),
+            supply_type_name:
+                supplyTypeItems.value.find((s: any) => s.value === updatedProduct.supply_type)?.title || '',
             price_per_unit: updatedProduct.unit_price ?? updatedProduct.price_per_unit ?? null,
+            unit_price: updatedProduct.unit_price ?? updatedProduct.price_per_unit ?? null,
             discount_val: updatedProduct.discount ?? updatedProduct.discount_val ?? null,
+            discount: updatedProduct.discount ?? updatedProduct.discount_val ?? null,
+            discount_type: updatedProduct.discount_type ?? productTableItems.value[index].discount_type ?? 1,
             notes: existingNotes || updatedProduct.notes || '',
+            id: preservedId,
         } as ProductTableItem;
     }
     editingProduct.value = null;
@@ -648,6 +702,12 @@ const buildFormData = (): FormData => {
         fd.append(`items[${index}][discount_val]`, String(discountVal));
         fd.append(`items[${index}][total_tax]`, String(taxAmount));
         fd.append(`items[${index}][notes]`, item.notes ?? '');
+        if (item.supply_type) {
+            fd.append(`items[${index}][supply_type]`, String(item.supply_type));
+        }
+        if (item.transport_type != null && String(item.transport_type).trim() !== '') {
+            fd.append(`items[${index}][filling]`, String(item.transport_type));
+        }
     });
 
     return fd;
@@ -685,6 +745,7 @@ const resetForm = () => {
         textNote: '',
     };
     productTableItems.value = [];
+    originalProductIds.value = {};
     logisticsDetailId.value = null;
     editingProduct.value = null;
     showAddProductDialog.value = false;
@@ -859,7 +920,8 @@ const tableItems = computed(() =>
                             <SelectInput v-model="formData.supplier_id" :items="[]" :placeholder="t('purchases.orders.shared.placeholders.selectSupplierPo')"
                                 :label="t('purchases.shared.forms.common.labels.supplierName')" :rules="[required()]" density="comfortable" item-title="title"
                                 item-value="value" :server-side="true" :fetch-function="fetchSuppliers"
-                                item-title-key="full_name" item-value-key="id" :debounce-time="500" />
+                                item-title-key="full_name" item-value-key="id" :debounce-time="500"
+                                :disabled="isFromQuotation" />
                         </div>
 
                         <!-- اسم المسؤول -->
@@ -983,10 +1045,19 @@ const tableItems = computed(() =>
                     </template>
                 </DataTable>
 
-                <div class="flex justify-center my-6">
-                    <ButtonWithIcon color="primary-100" variant="flat" class="!text-primary-900 font-bold w-75"
+                <div class="flex justify-center gap-3 my-6 mx-auto md:w-3/4">
+                    <ButtonWithIcon color="primary-100" variant="flat" class="!text-primary-900 font-bold flex-1"
                         @click="handleAddProduct">
                         {{ t('purchases.shared.forms.common.actions.addProduct') }}
+                    </ButtonWithIcon>
+                    <ButtonWithIcon
+                        v-if="productTableItems.length > 0"
+                        color="primary-100"
+                        variant="flat"
+                        class="!text-primary-900 font-bold flex-1"
+                        @click="showEditProductsDialog = true"
+                    >
+                        {{ t('purchases.shared.forms.common.actions.editProducts') }}
                     </ButtonWithIcon>
                 </div>
             </div>
@@ -1110,12 +1181,33 @@ const tableItems = computed(() =>
             :address="mapDialogMode === 'source' ? formData.source_location : formData.target_location"
             @location-selected="handleLocationSelected" />
 
-        <!-- Add Product Dialog (Material Type = 2 for Fuels) -->
-        <AddProductDialog v-model="showAddProductDialog" :items-query-params="{ material_type: 2 }"
-            request-type="raw_materials" show-unit-price-and-discount :transport-types="transportTypeItems"
-            :unit-items="unitItems" :supplier-id="formData.supplier_id" :edit-product="editingProduct"
-            :existing-products="productTableItems" @saved="handleProductSaved"
-            @product-updated="handleProductUpdated" />
+        <!-- إضافة منتجات وقود: material_type=0 + supplier_id على التصنيفات و /items/supplier-items -->
+        <AddProductDialogFuels
+            v-model="showAddProductDialog"
+            :material-type="0"
+            :supplier-id="formData.supplier_id"
+            items-endpoint="/items/supplier-items"
+            show-unit-price-and-discount
+            :fillings-options="fillingsItems"
+            :unit-items="unitItems"
+            :supply-type-options="supplyTypeItems"
+            :edit-product="editingProduct"
+            :existing-products="productTableItems"
+            @saved="handleProductSaved"
+            @product-updated="handleProductUpdated"
+        />
+
+        <EditProductsDialog
+            v-model="showEditProductsDialog"
+            request-type="fuel"
+            :show-unit-price-and-discount="true"
+            :products="productTableItems"
+            :transport-types="transportTypeItems"
+            :unit-items="unitItems"
+            :fillings-items="fillingsItems"
+            :supply-type-items="supplyTypeItems"
+            @products-updated="handleEditProductsBulk"
+        />
 
     </default-layout>
 </template>
