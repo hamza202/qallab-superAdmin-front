@@ -83,30 +83,7 @@ const fetchConstants = async () => {
   }
 };
 
-const waitForCustomerData = async () => {
-  if (!selectedCustomerId.value) return;
-
-  await new Promise(resolve => {
-    const checkInterval = setInterval(() => {
-      if (selectedCustomerId.value) {
-        clearInterval(checkInterval);
-        clearTimeout(timeoutId);
-        resolve(true);
-      }
-    }, 10);
-
-    const timeoutId = setTimeout(() => {
-      clearInterval(checkInterval);
-      resolve(true);
-    }, 5000);
-  });
-};
-
 const fetchCustomers = async (search = '', cursor?: string, perPage = 15) => {
-  if (isEditMode.value) {
-    await waitForCustomerData();
-  }
-
   const params: Record<string, any> = { per_page: perPage };
   if (search) {
     params.name = search;

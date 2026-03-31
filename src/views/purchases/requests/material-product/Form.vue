@@ -43,34 +43,7 @@ const fetchConstants = async () => {
     }
 }
 
-const waitForSupplierData = async () => {
-    if (!isEditMode.value) return;
-
-    if (isFormDataLoaded.value && formData.value.supplier_id) {
-        return;
-    }
-
-    await new Promise(resolve => {
-        const checkInterval = setInterval(() => {
-            if (isFormDataLoaded.value && formData.value.supplier_id) {
-                clearInterval(checkInterval);
-                clearTimeout(timeoutId);
-                resolve(true);
-            }
-        }, 10);
-
-        const timeoutId = setTimeout(() => {
-            clearInterval(checkInterval);
-            resolve(true);
-        }, 5000);
-    });
-};
-
 const fetchSuppliers = async (search: string = '', cursor?: string, perPage: number = 20) => {
-    if (isEditMode.value) {
-        await waitForSupplierData();
-    }
-
     try {
         const params: any = { per_page: perPage };
         if (search) {
