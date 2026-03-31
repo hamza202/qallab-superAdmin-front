@@ -129,9 +129,7 @@ const resetFilters = () => {
   filterStatus.value = null;
 };
 
-const applyFilters = () => {
-  fetchList();
-};
+const applyFilters = () => fetchList();
 
 // API: fetch list (append = true for infinite scroll)
 const fetchList = async (append = false) => {
@@ -202,20 +200,15 @@ const handleToggleHeader = async (headerKey: string) => {
 };
 
 // Handlers
+const resolveId = (item: { id?: string | number; uuid?: string }) =>
+  item.uuid ?? String(item.id);
+
 const handleEdit = (item: { id?: string | number; uuid?: string }) => {
-  const id = item.uuid ?? String(item.id);
-  router.push({
-    name: "DeliveryDocsLogisticsEdit",
-    params: { id },
-  });
+  router.push({ name: "DeliveryDocsLogisticsEdit", params: { id: resolveId(item) } });
 };
 
 const handleView = (item: { id?: string | number; uuid?: string }) => {
-  const id = item.uuid ?? String(item.id);
-  router.push({
-    name: "DeliveryDocsLogisticsView",
-    params: { id },
-  });
+  router.push({ name: "DeliveryDocsLogisticsView", params: { id: resolveId(item) } });
 };
 
 const showChangeStatusDialog = ref(false);
@@ -226,10 +219,10 @@ const openChangeStatusDialog = (item: DeliveryDoc | Record<string, unknown>) => 
   showChangeStatusDialog.value = true;
 };
 
-const confirmDelete = async (item: { id?: string | number }) => {
+const confirmDelete = async (item: { id?: string | number; uuid?: string }) => {
   try {
     deleteLoading.value = true;
-    await api.delete(`/sales/logistics/delivery-docs/${String(item.id)}`);
+    await api.delete(`/sales/logistics/delivery-docs/${resolveId(item)}`);
     success(t("sales.deliveryDocsLogistics.messages.deleteSuccess"));
     await fetchList();
   } catch (err: any) {
@@ -242,37 +235,27 @@ const confirmDelete = async (item: { id?: string | number }) => {
 
 const handleSelectItem = (item: { id: string | number }, selected: boolean) => {
   const id = String(item.id);
-  if (selected) {
-    selectedItems.value.push(id);
-  } else {
-    selectedItems.value = selectedItems.value.filter((x) => x !== id);
-  }
+  selectedItems.value = selected
+    ? [...selectedItems.value, id]
+    : selectedItems.value.filter((x) => x !== id);
 };
 
 const handleSelectAllItems = (checked: boolean) => {
-  if (checked) {
-    selectedItems.value = tableItemsWithId.value.map((i) => String(i.id));
-  } else {
-    selectedItems.value = [];
-  }
+  selectedItems.value = checked
+    ? tableItemsWithId.value.map((i) => String(i.id))
+    : [];
 };
 
-const getStatusClass = (status: string) => {
-  switch (status) {
-    case "مكتمل":
-      return "bg-[#ECFDF3] text-[#027A48]";
-    case "قيد المراجعة":
-      return "bg-[#FEF0C7] text-[#DC6803]";
-    case "تأكيد":
-      return "bg-[#ECFDF3] text-[#027A48]";
-    case "الغاء":
-      return "bg-[#FEE4E2] text-[#D92D20]";
-    case "مسودة":
-      return "bg-[#F2F4F7] text-[#344054]";
-    default:
-      return "bg-[#F2F4F7] text-[#344054]";
-  }
+const STATUS_CLASSES: Record<string, string> = {
+  "مكتمل": "bg-[#ECFDF3] text-[#027A48]",
+  "قيد المراجعة": "bg-[#FEF0C7] text-[#DC6803]",
+  "تأكيد": "bg-[#ECFDF3] text-[#027A48]",
+  "الغاء": "bg-[#FEE4E2] text-[#D92D20]",
+  "مسودة": "bg-[#F2F4F7] text-[#344054]",
 };
+const DEFAULT_STATUS_CLASS = "bg-[#F2F4F7] text-[#344054]";
+
+const getStatusClass = (status: string) => STATUS_CLASSES[status] ?? DEFAULT_STATUS_CLASS;
 
 const openCreate = () => {
   // Route can be added when Form is needed
@@ -425,7 +408,6 @@ onBeforeUnmount(() => {
 
 
         </DataTable>
-
         <div ref="loadMoreTrigger" class="h-4"></div>
         <div v-if="loadingMore" class="flex justify-center items-center py-4">
           <v-progress-circular indeterminate color="primary" size="32" />

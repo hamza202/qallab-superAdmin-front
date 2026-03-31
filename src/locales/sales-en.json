@@ -1,0 +1,1015 @@
+{
+  "deliveryDocs": {
+    "list": {
+      "title": "Delivery Documents Table",
+      "description": "Allows you to manage delivery documents"
+    },
+    "addReceivingDoc": "Add Receipt Document",
+    "search": "Search",
+    "filters": {
+      "code": "Receipt Code",
+      "purchaseOrderCode": "Purchase Order Code",
+      "receivingDate": "Receiving Date",
+      "status": "Status"
+    },
+    "bulkDelete": {
+      "title": "Delete Receipt Documents",
+      "message": "Are you sure you want to delete {count} receipt documents?"
+    },
+    "messages": {
+      "loadListError": "Failed to load receipt documents list",
+      "columnsUpdateError": "Failed to update columns",
+      "deleteSuccess": "Receipt document deleted successfully",
+      "deleteError": "Failed to delete receipt document",
+      "bulkDeleteSuccess": "{count} receipt documents deleted successfully",
+      "bulkDeleteError": "Bulk delete failed"
+    }
+  },
+  "deliveryDocsLogistics": {
+    "list": {
+      "title": "Logistics Delivery Documents Table",
+      "description": "Allows you to manage logistics delivery documents"
+    },
+    "addDoc": "Add Logistics Delivery Document",
+    "search": "Search",
+    "filters": {
+      "code": "Receipt Code",
+      "purchaseOrderCode": "Purchase Order Code",
+      "receivingDate": "Receiving Date",
+      "status": "Status"
+    },
+    "bulkDelete": {
+      "title": "Delete Logistics Delivery Documents",
+      "message": "Are you sure you want to delete {count} delivery documents?"
+    },
+    "messages": {
+      "loadListError": "Failed to load logistics delivery documents list",
+      "columnsUpdateError": "Failed to update columns",
+      "deleteSuccess": "Delivery document deleted successfully",
+      "deleteError": "Failed to delete delivery document",
+      "bulkDeleteSuccess": "{count} delivery documents deleted successfully",
+      "bulkDeleteError": "Bulk delete failed"
+    }
+  },
+  "invoices": {
+    "list": {
+      "title": "Sales Invoices Table",
+      "description": "Allows you to manage sales invoices"
+    },
+    "addInvoice": "Add Invoice",
+    "search": "Search",
+    "filters": {
+      "invoiceCode": "Invoice Code",
+      "customerName": "Customer Name",
+      "finalTotal": "Final Total",
+      "startDate": "Start Date",
+      "endDate": "End Date"
+    },
+    "bulkDelete": {
+      "title": "Delete Invoices",
+      "message": "Are you sure you want to delete {count} invoices?"
+    },
+    "whatsAppShareText": "Invoice link: {url}",
+    "messages": {
+      "loadListError": "Failed to load invoices list",
+      "columnsUpdateError": "Failed to update columns",
+      "deleteSuccess": "Invoice deleted successfully",
+      "deleteError": "Failed to delete invoice",
+      "bulkDeleteSuccess": "{count} invoices deleted successfully",
+      "bulkDeleteError": "Bulk delete failed"
+    }
+  },
+  "logisticsInvoices": {
+    "list": {
+      "title": "Logistics Sales Invoices Table",
+      "description": "Allows you to manage logistics sales invoices"
+    },
+    "addInvoice": "Add Invoice",
+    "search": "Search",
+    "filters": {
+      "invoiceCode": "Invoice Code",
+      "customerName": "Customer Name",
+      "finalTotal": "Final Total",
+      "startDate": "Start Date",
+      "endDate": "End Date"
+    },
+    "bulkDelete": {
+      "title": "Delete Invoices",
+      "message": "Are you sure you want to delete {count} invoices?"
+    },
+    "messages": {
+      "loadListError": "Failed to load logistics sales invoices list",
+      "columnsUpdateError": "Failed to update columns",
+      "deleteSuccess": "Invoice deleted successfully",
+      "deleteError": "Failed to delete invoice",
+      "bulkDeleteSuccess": "{count} invoices deleted successfully",
+      "bulkDeleteError": "Bulk delete failed"
+    }
+  },
+  "ordersFuels": {
+    "list": {
+      "title": "Fuels Sales Orders Table",
+      "description": "Allows you to manage fuels sales orders"
+    },
+    "addOrder": "Add Order",
+    "search": "Search",
+    "filters": {
+      "requestCode": "Request Code",
+      "supplierName": "Supplier Name",
+      "upfrontPayment": "Upfront Payment",
+      "projectLocation": "Project Location",
+      "requestDate": "Request Date"
+    },
+    "delete": {
+      "titleSingle": "Delete Order",
+      "titleBulk": "Delete Orders",
+      "messageSingle": "Are you sure you want to delete this order?",
+      "messageBulk": "Are you sure you want to delete {count} orders?"
+    },
+    "messages": {
+      "loadListError": "Failed to load orders list",
+      "columnsUpdateError": "Failed to update columns",
+      "deleteSuccess": "Order deleted successfully",
+      "deleteError": "Failed to delete order",
+      "bulkDeleteSuccess": "{count} orders deleted successfully",
+      "bulkDeleteError": "Bulk delete failed"
+    }
+  },
+  "ordersLogistics": {
+    "list": {
+      "title": "Logistics Orders Table",
+      "description": "Allows you to manage logistics orders"
+    },
+    "addOrder": "Add Order",
+    "search": "Search",
+    "filters": {
+      "orderCode": "Order Code",
+      "supplierName": "Supplier Name",
+      "dateFrom": "Order Date From",
+      "dateTo": "Order Date To"
+    },
+    "delete": {
+      "titleSingle": "Delete Order",
+      "titleBulk": "Delete Orders",
+      "messageSingle": "Are you sure you want to delete this order?",
+      "messageBulk": "Are you sure you want to delete {count} orders?"
+    },
+    "messages": {
+      "loadListError": "Failed to load orders list",
+      "columnsUpdateError": "Failed to update columns",
+      "deleteSuccess": "Order deleted successfully",
+      "deleteError": "Failed to delete order",
+      "bulkDeleteSuccess": "{count} orders deleted successfully",
+      "bulkDeleteError": "Bulk delete failed"
+    }
+  },
+  "ordersMaterialProduct": {
+    "list": {
+      "title": "Sales Orders Table",
+      "description": "Allows you to manage sales orders"
+    },
+    "addOrder": "Add Order",
+    "search": "Search",
+    "filters": {
+      "orderCode": "Order Code",
+      "supplierName": "Supplier Name",
+      "dateFrom": "Order Date From",
+      "dateTo": "Order Date To"
+    },
+    "delete": {
+      "titleSingle": "Delete Order",
+      "titleBulk": "Delete Orders",
+      "messageSingle": "Are you sure you want to delete this order?",
+      "messageBulk": "Are you sure you want to delete {count} orders?"
+    },
+    "messages": {
+      "loadListError": "Failed to load orders list",
+      "columnsUpdateError": "Failed to update columns",
+      "deleteSuccess": "Order deleted successfully",
+      "deleteError": "Failed to delete order",
+      "bulkDeleteSuccess": "{count} orders deleted successfully",
+      "bulkDeleteError": "Bulk delete failed"
+    }
+  },
+  "payments": {
+    "list": {
+      "title": "Sales Payments Table",
+      "description": "View sales payments"
+    },
+    "addPayment": "Add Payment",
+    "search": "Search",
+    "filters": {
+      "paymentCode": "Payment Code",
+      "customerName": "Customer Name",
+      "amount": "Amount",
+      "startDate": "Start Date",
+      "endDate": "End Date"
+    },
+    "bulkDelete": {
+      "title": "Delete Payments",
+      "message": "Are you sure you want to delete {count} payments?"
+    },
+    "messages": {
+      "loadListError": "Failed to load sales payments list",
+      "columnsUpdateError": "Failed to update columns",
+      "deleteSuccess": "Payment deleted successfully",
+      "deleteError": "Failed to delete payment",
+      "bulkDeleteSuccess": "{count} payments deleted successfully",
+      "bulkDeleteError": "Bulk delete failed"
+    }
+  },
+  "quotationsFuels": {
+    "list": {
+      "title": "Fuels Quotations",
+      "description": "Manage fuels quotations"
+    },
+    "addQuotation": "Add Quotation",
+    "search": "Search",
+    "filters": {
+      "quotationCode": "Quotation Code",
+      "customerName": "Customer Name",
+      "price": "Price",
+      "quotationDate": "Quotation Date"
+    },
+    "delete": {
+      "titleSingle": "Delete Quotation",
+      "titleBulk": "Delete Quotations",
+      "messageSingle": "Are you sure you want to delete this quotation?",
+      "messageBulk": "Are you sure you want to delete {count} quotations?"
+    },
+    "messages": {
+      "loadListError": "Failed to load quotations list",
+      "columnsUpdateError": "Failed to update columns",
+      "deleteSuccess": "Quotation deleted successfully",
+      "deleteError": "Failed to delete quotation",
+      "bulkDeleteSuccess": "{count} quotations deleted successfully",
+      "bulkDeleteError": "Bulk delete failed"
+    }
+  },
+  "quotationsLogistics": {
+    "list": {
+      "title": "Logistics Quotations",
+      "description": "Manage logistics quotations"
+    },
+    "addQuotation": "Add Quotation",
+    "search": "Search",
+    "filters": {
+      "quotationCode": "Quotation Code",
+      "customerName": "Customer Name",
+      "price": "Price",
+      "quotationDate": "Quotation Date"
+    },
+    "delete": {
+      "titleSingle": "Delete Quotation",
+      "titleBulk": "Delete Quotations",
+      "messageSingle": "Are you sure you want to delete this quotation?",
+      "messageBulk": "Are you sure you want to delete {count} quotations?"
+    },
+    "messages": {
+      "loadListError": "Failed to load quotations list",
+      "columnsUpdateError": "Failed to update columns",
+      "deleteSuccess": "Quotation deleted successfully",
+      "deleteError": "Failed to delete quotation",
+      "bulkDeleteSuccess": "{count} quotations deleted successfully",
+      "bulkDeleteError": "Bulk delete failed"
+    }
+  },
+  "quotationsMaterialProduct": {
+    "list": {
+      "title": "Raw Building Materials Quotations List",
+      "description": "You can view and manage raw building materials quotations"
+    },
+    "addQuotation": "Add Quotation",
+    "search": "Search",
+    "filters": {
+      "quotationCode": "Quotation Code",
+      "customerName": "Customer Name",
+      "price": "Price",
+      "quotationDate": "Quotation Date"
+    },
+    "bulkDelete": {
+      "title": "Delete Quotations",
+      "message": "Are you sure you want to delete {count} quotations?"
+    },
+    "messages": {
+      "loadListError": "Failed to load quotations list",
+      "columnsUpdateError": "Failed to update columns",
+      "deleteSuccess": "Quotation deleted successfully",
+      "deleteError": "Failed to delete quotation",
+      "bulkDeleteSuccess": "{count} quotations deleted successfully",
+      "bulkDeleteError": "Bulk delete failed"
+    }
+  },
+  "requestsFuels": {
+    "list": {
+      "title": "Fuels Quotation Requests",
+      "description": "Manage fuels quotation requests"
+    },
+    "addRequest": "Add Request",
+    "search": "Search",
+    "filters": {
+      "requestCode": "Request Code",
+      "customerName": "Customer Name",
+      "upfrontPayment": "Upfront Payment",
+      "projectLocation": "Project Location",
+      "requestDate": "Request Date"
+    },
+    "delete": {
+      "titleSingle": "Delete Request",
+      "titleBulk": "Delete Requests",
+      "messageSingle": "Are you sure you want to delete this request?",
+      "messageBulk": "Are you sure you want to delete {count} requests?"
+    },
+    "messages": {
+      "loadListError": "Failed to load requests list",
+      "columnsUpdateError": "Failed to update columns",
+      "deleteSuccess": "Request deleted successfully",
+      "deleteError": "Failed to delete request",
+      "bulkDeleteSuccess": "{count} requests deleted successfully",
+      "bulkDeleteError": "Bulk delete failed"
+    }
+  },
+  "requestsLogistics": {
+    "list": {
+      "title": "Logistics Quotation Requests",
+      "description": "Manage logistics quotation requests"
+    },
+    "addRequest": "Add Request",
+    "search": "Search",
+    "filters": {
+      "requestCode": "Request Code",
+      "supplierName": "Supplier Name",
+      "upfrontPayment": "Upfront Payment",
+      "projectLocation": "Project Location",
+      "requestDate": "Request Date"
+    },
+    "bulkDelete": {
+      "title": "Delete Requests",
+      "message": "Are you sure you want to delete {count} requests?"
+    },
+    "messages": {
+      "loadListError": "Failed to load requests list",
+      "columnsUpdateError": "Failed to update columns",
+      "deleteSuccess": "Request deleted successfully",
+      "deleteError": "Failed to delete request",
+      "bulkDeleteSuccess": "{count} requests deleted successfully",
+      "bulkDeleteError": "Bulk delete failed"
+    }
+  },
+  "requestsMaterialProduct": {
+    "list": {
+      "title": "Raw Building Materials Quotation Requests List",
+      "description": "You can view and manage raw building materials quotation requests"
+    },
+    "addRequest": "Add Request",
+    "search": "Search",
+    "filters": {
+      "requestCode": "Request Code",
+      "supplierName": "Supplier Name",
+      "upfrontPayment": "Upfront Payment",
+      "projectLocation": "Project Location",
+      "requestDate": "Request Date"
+    },
+    "bulkDelete": {
+      "title": "Delete Requests",
+      "message": "Are you sure you want to delete {count} requests?"
+    },
+    "messages": {
+      "loadListError": "Failed to load requests list",
+      "columnsUpdateError": "Failed to update columns",
+      "deleteSuccess": "Request deleted successfully",
+      "deleteError": "Failed to delete request",
+      "bulkDeleteSuccess": "{count} requests deleted successfully",
+      "bulkDeleteError": "Bulk delete failed"
+    }
+  },
+  "soPickups": {
+    "list": {
+      "title": "Delivery Reservations",
+      "description": "Manage delivery reservations"
+    },
+    "search": "Search",
+    "delete": {
+      "titleSingle": "Delete Delivery Reservation",
+      "titleBulk": "Delete Delivery Reservations",
+      "messageSingle": "Are you sure you want to delete this delivery reservation?",
+      "messageBulk": "Are you sure you want to delete {count} delivery reservations?"
+    },
+    "messages": {
+      "loadListError": "Failed to load delivery reservations list",
+      "columnsUpdateError": "Failed to update columns",
+      "deleteSuccess": "Delivery reservation deleted successfully",
+      "deleteError": "Failed to delete delivery reservation",
+      "bulkDeleteSuccess": "{count} delivery reservations deleted successfully",
+      "bulkDeleteError": "Bulk delete failed"
+    }
+  },
+  "trips": {
+    "list": {
+      "title": "Trips",
+      "description": "Allows you to manage trips"
+    },
+    "addTrip": "Add Trip",
+    "search": "Search",
+    "filters": {
+      "tripCode": "Trip Code",
+      "tripName": "Trip Name",
+      "dateFrom": "Trip Date From",
+      "dateTo": "Trip Date To"
+    },
+    "delete": {
+      "titleSingle": "Delete Trip",
+      "titleBulk": "Delete Trips",
+      "messageSingle": "Are you sure you want to delete this trip?",
+      "messageBulk": "Are you sure you want to delete {count} trips?"
+    },
+    "messages": {
+      "loadListError": "Failed to load trips list",
+      "columnsUpdateError": "Failed to update columns",
+      "deleteSuccess": "Trip deleted successfully",
+      "deleteError": "Failed to delete trip",
+      "bulkDeleteSuccess": "{count} trips deleted successfully",
+      "bulkDeleteError": "Bulk delete failed"
+    }
+  },
+  "forms": {
+    "common": {
+      "actions": {
+        "saveBackHome": "Save and Back to Home",
+        "saveCreateNew": "Save and Create New",
+        "saveBackDeliveryDocsList": "Save and Back to Delivery Documents List",
+        "saveBackSalesOrdersList": "Save and Back to Sales Orders List",
+        "saveBackPickupsList": "Save and Back to Reservations List",
+        "saveBackSalesOrdersTable": "Save and Back to Orders Table",
+        "saveBackTripsTable": "Save and Back to Trips Table",
+        "sendRequest": "Send Request",
+        "saveOnly": "Save",
+        "addTransportService": "Add Transport Service",
+        "addNewTransportData": "+ Add New Transport Data"
+      },
+      "sections": {
+        "basicData": "Basic Data",
+        "deliveryDocItemsTable": "Delivery Document Items Table",
+        "salesInvoiceItemsTable": "Sales Invoice Items Table",
+        "attachments": "Attachments",
+        "deliveryAndPickupLocation": "Delivery and Pickup Location",
+        "orderItemsTable": "Order Items Table",
+        "paymentData": "Payment Data",
+        "transportDetails": "Transport Details",
+        "productDetails": "Product Details",
+        "tripDetailsSection": "Trips Details",
+        "supplyDetails": "Supply Details",
+        "additionalSupplyData": "Additional Supply Data",
+        "orderSummaryAmounts": "Order Summary (Amounts Table)",
+        "quotationItemsTable": "Quotation Items Table",
+        "products": "Products",
+        "tripInfo": "Trip Info",
+        "transportService": "Transport Service",
+        "orderSummary": "Order Summary",
+        "textNote": "Text Note",
+        "productsTable": "Products Table",
+        "tripDetailsTipperCustomer": "Trip Details Between Tipper and Customer",
+        "tripDetailsTipperLogistics": "Trip Details Between Tipper and Logistics Company"
+      },
+      "locationLabels": {
+        "deliverySite": "Delivery Site",
+        "pickupSite": "Pickup Site"
+      },
+      "customerCard": {
+        "name": "Name:",
+        "commercialRegister": "Commercial Register:",
+        "address": "Address:"
+      },
+      "misc": {
+        "none": "None",
+        "orderRef": "Order #{id}",
+        "noNotes": "No notes",
+        "addNote": "Add Note",
+        "pickLocation": "Pick Location",
+        "pickDeparture": "Pick Departure Location",
+        "hintAddTransportService": "Click \"Add Transport Service\" to add new details",
+        "excelImportSoon": "Excel Import: Coming Soon",
+        "zeroPlaceholder": "0",
+        "demoBalanceLastUpdated": "Last Updated: Today 12:00",
+        "editProducts": "Edit Products",
+        "addProductLine": "+ Add New Product",
+        "editTrips": "Edit Trips",
+        "editSupplyDetailsBtn": "+ Edit Supply Details",
+        "vehicleUnit": "Vehicle",
+        "dayWord": "Day",
+        "pricesIncludeTransport": "** Prices include transport",
+        "addTransportServiceLink": "Add Transport Service",
+        "noTransportDetailsAdded": "No transport details added",
+        "excelImportFile": "Import from Excel file",
+        "addProductLineAlt": "+ Add new product",
+        "uploadProgressPercent": "{percent}% Uploaded",
+        "fileSizeBytes": "Bytes",
+        "fileSizeKb": "KB",
+        "fileSizeMb": "MB",
+        "fileSizeGb": "GB",
+        "listComma": ", "
+      },
+      "placeholders": {
+        "enter": "Enter",
+        "enterAmount": "Enter Amount",
+        "enterDays": "Enter Duration in Days",
+        "enterDuration": "Enter Duration",
+        "enterProjectName": "Enter Project Name",
+        "enterProjectNameAlt": "Enter Project Name",
+        "selectCustomer": "Select Customer",
+        "selectClient": "Select Client",
+        "selectSalesOrder": "Select Sales Order",
+        "selectDateTime": "Select Date and Time",
+        "selectDate": "Select Date",
+        "dateSample": "2024-03-01",
+        "selectPaymentMethod": "Select Payment Method",
+        "advancePaymentValue": "Enter Advance Payment Value",
+        "advancePaymentValueAdvance": "Enter Advance Payment Value",
+        "selectTreasury": "Select Treasury",
+        "paymentNotes": "Enter Payment Notes",
+        "selectCurrency": "Select Currency",
+        "selectBranch": "Select Branch",
+        "supplierAccountPlaceholder": "Supplier Account",
+        "voiceNotesFuelsRequest": "If you want to attach some notes, please write them here and they will be attached with the sent quotation request",
+        "transportAmount": "Enter Transport Amount",
+        "tripCount": "Enter Number of Trips",
+        "vehicleCount": "Enter Number of Vehicles",
+        "executionDays": "Enter Execution Duration in Days",
+        "notesHere": "Enter notes here",
+        "enterName": "Enter Name",
+        "cashPlaceholder": "Cash",
+        "selectSupplyType": "Select Supply Type",
+        "selectDeliveryMethod": "Select Delivery Method",
+        "enterTripAmount": "Enter Trip Amount",
+        "enterCoordinatesCount": "Enter Number of Coordinate Transmissions",
+        "enterBillOfLading": "Enter Bill of Lading Number",
+        "enterQtyTon": "Enter Quantity in Tons",
+        "enterQtyM3": "Enter Quantity in Cubic Meters",
+        "enterTripCount": "Enter Number of Trips",
+        "enterReference": "Enter Reference Number",
+        "enterPurchaseOrderRef": "Enter Purchase Order Reference",
+        "enterResponsibleName": "Enter Responsible Name",
+        "enterLoadingResponsible": "Enter Loading Officer Name",
+        "enterUnloadingResponsible": "Enter Unloading Officer Name",
+        "enterUnloadingResponsibleTrip": "Enter Unloading Officer Name",
+        "enterPaymentAmountValue": "Enter Amount Value",
+        "enterCount": "Enter Count",
+        "selectQuotationType": "Select Request Type",
+        "enterDurationGeneric": "Enter Duration",
+        "dateTimeSample": "2024-03-01 / 02:30 PM",
+        "selectLogisticsSaleOrder": "Select Logistics Order"
+      },
+      "labels": {
+        "purchaseOrderCode": "Purchase Order Code",
+        "deliveryNoteCode": "Delivery Note Code",
+        "deliveryDate": "Delivery Date",
+        "approvedQtyQallab": "Approved Quantities by Tipper",
+        "invoiceCreatedAt": "Invoice Creation Date",
+        "invoiceIssueDate": "Invoice Issue Date",
+        "invoiceDueDate": "Invoice Due Date",
+        "orderType": "Order Type",
+        "salesOrderCode": "Sales Order Code",
+        "customerName": "Customer Name",
+        "supplierName": "Supplier Name",
+        "project": "Project",
+        "statement": "Statement",
+        "statementHere": "Enter statement here",
+        "invoiceCode": "Invoice Code",
+        "quantity": "Quantity",
+        "unitCol": "Unit",
+        "unitPrice": "Unit Price",
+        "discount": "Discount",
+        "taxableAmount": "Taxable Amount",
+        "taxAmount": "Tax Amount",
+        "totalAmount": "Total Amount",
+        "usage": "Usage",
+        "packaging": "Packaging",
+        "supplyTypeCol": "Supply Type",
+        "tripCode": "Trip Code",
+        "loadingSite": "Loading Site",
+        "unloadingSite": "Unloading Site",
+        "count": "Count",
+        "tripPriceCol": "Trip Price",
+        "orderDate": "Order Date",
+        "responsibleName": "Responsible Name",
+        "responsiblePhone": "Responsible Phone",
+        "supplyType": "Supply Type",
+        "supplyDuration": "Supply Duration",
+        "deliveryDuration": "Delivery Duration",
+        "deliveryMethod": "Delivery Method",
+        "quotationCode": "Quotation Code",
+        "referenceNumber": "Reference Number",
+        "paymentMethod": "Payment Method",
+        "advancePayment": "Advance Payment",
+        "invoiceUploadInterval": "Invoice Upload Interval",
+        "invoiceUploadExtract": "Extract Upload Interval",
+        "paymentTerm": "Payment Term",
+        "lateFee": "Late Fee",
+        "cancelFee": "Cancellation Fee",
+        "paymentDate": "Payment Date",
+        "currency": "Currency",
+        "amount": "Amount",
+        "branch": "Branch",
+        "treasuries": "Treasuries",
+        "paymentNotes": "Payment Notes",
+        "collectedBy": "Collected By",
+        "operationCode": "Operation Code",
+        "quotationName": "Quotation Name",
+        "quotationValidity": "Quotation Validity",
+        "quotationValidityDate": "Quotation Validity Date",
+        "quotationDate": "Quotation Date",
+        "requestType": "Request Type",
+        "orderTypeLabel": "Order Type",
+        "transportStart": "Transport Start Date",
+        "transportEnd": "Transport End Date",
+        "executionDuration": "Execution Duration",
+        "transportVehicleType": "Transport Vehicle Type",
+        "transportVehicleCount": "Number of Transport Vehicles",
+        "totalTripsCount": "Total Number of Trips",
+        "loadingOfficer": "Loading Officer",
+        "unloadingOfficer": "Unloading Officer",
+        "tripTiming": "Trip Timing",
+        "transportTiming": "Transport Timing",
+        "product": "Product",
+        "quantityDisplay": "Quantity",
+        "carrierType": "Carrier Type",
+        "dailyTrips": "Daily Trips",
+        "requestDate": "Request Date",
+        "requestIssueDate": "Request Issue Date",
+        "vehicleTypes": "Vehicle Types",
+        "tripsCount": "Number of Trips",
+        "subtotalPrice": "Subtotal Price",
+        "transportServicesTotal": "Total Value of Transport Services",
+        "tripsTotalValue": "Total Value of Trips",
+        "purchaseOrderRef": "Purchase Order Reference",
+        "date": "Date",
+        "unloadingOfficerTrip": "Unloading Officer",
+        "coordSendCount": "Number of Coordinate Transmissions",
+        "billOfLading": "Bill of Lading Number",
+        "totalQtyTon": "Total Quantity / Ton",
+        "totalQtyM3": "Total Quantity / m³",
+        "customerTripAmount": "Customer Trip Amount",
+        "logisticsTripAmount": "Logistics Trip Amount",
+        "logisticsCompany": "Logistics Company",
+        "logisticsSalesOrder": "Logistics Sales Order",
+        "selectLogisticsOrder": "Select Logistics Order",
+        "customer": "Customer",
+        "customerSalesOrder": "Customer Sales Order",
+        "selectCustomerOrder": "Select Customer Order",
+        "loadingDateTime": "Loading Date / Time",
+        "unloadingDateTime": "Unloading Date / Time",
+        "receivedQty": "Received Quantity",
+        "vehiclesSent": "Dispatched Transport Vehicles",
+        "vehiclesReceived": "Received Transport Vehicles",
+        "itemVehicles": "Vehicles",
+        "itemPrice": "Price",
+        "materialTransportType": "Transport Material Type",
+        "transportAmount": "Transport Amount",
+        "projectName": "Project Name",
+        "reservationCode": "Reservation Code",
+        "notes": "Notes",
+        "deliveryStartDate": "Delivery Start Date",
+        "fromSupplier": "From Supplier",
+        "fromTransport": "From Logistics Company",
+        "fromCustomer": "From Customer",
+        "baseQuantityPh": "Base Quantity",
+        "sourceMaterialsMap": "Material Source Location",
+        "projectMap": "Project Location",
+        "materialMovedType": "Moved Material Type",
+        "cardUnloadingOfficer": "Unloading Officer",
+        "cardLoadingOfficer": "Loading Officer",
+        "pickupLocationBtn": "Pickup Location",
+        "deliveryLocationBtn": "Delivery Location",
+        "timingRequired": "Timing",
+        "requestInfoWithCode": "Request Info: {code}",
+        "customerBalance": "Customer Balance",
+        "availableBalanceForCustomer": "Available Balance for Customer",
+        "useAvailableBalance": "Use Available Balance",
+        "forPayingFullPayment": "To Pay Full Payment",
+        "amountUsedFromBalance": "Amount Used From Balance",
+        "customerDetailsSection": "Customer Details",
+        "materialSourceLocation": "Material Source Location",
+        "materialCarriedType": "Moved Material Type",
+        "pickupLocationShort": "Pickup Location",
+        "deliveryLocationShort": "Delivery Location",
+        "approvedOfferTotal": "Approved Total Amount in Offer",
+        "tripCapacity": "Trip Capacity",
+        "compensatoryOrderFlag": "Compensatory Order",
+        "totalAmountHeader": "Total Amount",
+        "summaryProducts": "Products",
+        "summaryServices": "Services",
+        "textNoteCaption": "Text Note",
+        "orderSummaryTitle": "Order Summary",
+        "productsSectionTitle": "Products",
+        "materialDeliveryLocation": "Material Delivery Location",
+        "departureLocation": "Departure Location",
+        "tripLoadingLocation": "Trip Loading Location",
+        "tripUnloadingLocation": "Trip Unloading Location",
+        "deliveryLogisticsDocumentCode": "Delivery Document Code",
+        "transportCompanyName": "Transport Company Name",
+        "orderCreatedDate": "Order Creation Date",
+        "requestStatus": "Request Status",
+        "tripTransportCount": "Number of Transports"
+      },
+      "validation": {
+        "atLeastOneLine": "At least one line must be added",
+        "atLeastOneProduct": "At least one product must be added",
+        "atLeastOneProductForInvoice": "The order must contain at least one product to complete the invoice",
+        "atLeastOneOrderProduct": "The order must contain at least one product",
+        "atLeastOneTransportService": "At least one transport service must be added",
+        "atLeastOneTripDetail": "At least one trip detail must be added",
+        "specifyProjectLocation": "Project location must be specified",
+        "specifyMaterialDeliveryLocation": "Material delivery location must be specified",
+        "sourceLocationRequired": "Departure location field is required.",
+        "specifyLoadingLocation": "Loading location must be specified",
+        "specifyUnloadingLocation": "Unloading location must be specified",
+        "pickupLocationForService": "Pickup location must be specified for transport service number {n}",
+        "deliveryLocationForService": "Delivery location must be specified for transport service number {n}",
+        "noTripsForInvoice": "There are no trips for this order to complete the invoice",
+        "selectAmPmTiming": "Timing must be selected (Morning / Evening / Both)",
+        "fillAllRequired": "Please fill all required fields",
+        "supplierLogisticRequired": "Transport company field is required.",
+        "supplierLogisticIdError": "Transport company is required.",
+        "deliveryLocationRequired": "Delivery location field is required.",
+        "deliveryLatRequired": "Delivery location latitude field is required.",
+        "deliveryLngRequired": "Delivery location longitude field is required.",
+        "sourceLocationRequiredShort": "Departure location field is required.",
+        "sourceLatRequired": "Departure location latitude field is required.",
+        "sourceLngRequired": "Departure location longitude field is required."
+      },
+      "intervals": {
+        "morning": "Morning",
+        "evening": "Evening",
+        "both": "Both",
+        "morningAndEvening": "Morning and Evening"
+      },
+      "messages": {
+        "loadDeliveryDocFailed": "Failed to load delivery document data",
+        "saveInvoiceError": "An error occurred while saving the invoice",
+        "saveOrderError": "An error occurred while saving the order",
+        "saveQuotationError": "An error occurred while saving the quotation",
+        "savePaymentError": "An error occurred while saving the payment",
+        "deliveryDocCreated": "Delivery document created successfully",
+        "deliveryDocUpdated": "Delivery document updated successfully",
+        "quotationCreated": "Quotation created successfully",
+        "quotationUpdated": "Quotation updated successfully",
+        "requestCreated": "Request created successfully",
+        "requestUpdated": "Request updated successfully",
+        "orderCreated": "Order created successfully",
+        "orderUpdated": "Order updated successfully",
+        "invoiceCreated": "Invoice created successfully",
+        "invoiceUpdated": "Invoice updated successfully",
+        "paymentCreated": "Payment created successfully",
+        "paymentUpdated": "Payment updated successfully",
+        "loadPickupFailed": "Failed to load delivery reservation data",
+        "pickupUpdated": "Reservation updated successfully",
+        "pickupCreated": "Reservation saved successfully",
+        "loadLogisticsOrderFailed": "Failed to load logistics order details",
+        "loadReceivingFailed": "Failed to load receipt request data",
+        "loadOrderDataFailed": "Failed to load order data",
+        "loadTripFailed": "Failed to load trip data",
+        "tripCreated": "Trip created successfully",
+        "tripUpdated": "Trip updated successfully",
+        "loadPaymentFailed": "Failed to load payment data",
+        "loadTransportRequestFailed": "Failed to load transport request data",
+        "loadMaterialProductRequestFailed": "Failed to load request data",
+        "loadInvoiceViewFailed": "Failed to load invoice data",
+        "loadDeliveryDocLogisticsFailed": "Failed to load delivery document data",
+        "loadSalesOrderViewFailed": "Failed to load order data",
+        "loadQuotationViewFailed": "Failed to load quotation data",
+        "loadFuelsOrderViewFailed": "Failed to load order data"
+      }
+    },
+    "tables": {
+      "deliveryDocStandard": {
+        "qtyFromSupplier": "Actual Quantity from Supplier",
+        "qtyFromTransport": "Actual Quantity from Logistics Company",
+        "qtyFromTransportShort": "Quantity from Logistics",
+        "qtyFromCustomer": "Actual Quantity from Customer",
+        "baseQuantity": "Base Quantity"
+      },
+      "deliveryDocLogistics": {
+        "receivedQuantity": "Received Quantity",
+        "vehiclesSent": "Dispatched Transport Vehicles",
+        "vehiclesReceived": "Received Transport Vehicles"
+      },
+      "invoiceLogistics": {
+        "taxAmount": "Tax Amount",
+        "totalAmount": "Total Amount"
+      },
+      "tripProducts": {
+        "itemName": "Product Name"
+      },
+      "invoiceSales": {
+        "pricePerUnit": "Unit Price",
+        "totalTax": "Total Tax Amount",
+        "totalOutTaxes": "Total Amount"
+      },
+      "viewPageFuels": {
+        "supplyDurationDaysCol": "Supply Duration (Days)",
+        "deliveryDurationDaysCol": "Delivery Duration (Days)"
+      }
+    },
+    "stats": {
+      "item": "Item",
+      "amount": "Amount",
+      "totalQuantities": "Total Quantities",
+      "tax": "Tax",
+      "taxPercent": "15%",
+      "taxTotal": "Total Tax",
+      "preDiscountSubtotal": "Subtotal before discount",
+      "discountTotal": "Discount",
+      "postDiscountSubtotal": "Subtotal after discount",
+      "vatTotalGross": "Total VAT",
+      "grandTotalFinal": "Final Total",
+      "transportValue": "Transport Value"
+    },
+    "logisticsDetailDialog": {
+      "titleAdd": "Add Transport Service",
+      "titleEdit": "Edit Transport Service",
+      "addService": "Add Service",
+      "transportTimes": "Transport Times",
+      "materialTypes": "Transport Material Type",
+      "tipperPlaceholder": "Tipper"
+    },
+    "tripsForm": {
+      "editDetailsCustomer": "Edit Trips Details for Customer",
+      "editDetailsLogistics": "Edit Trips Details for Logistics Company"
+    },
+    "viewPages": {
+      "breadcrumb": {
+        "sales": "Sales",
+        "purchases": "Purchases"
+      },
+      "lists": {
+        "logisticsQuotationRequests": "Logistics Quotation Requests",
+        "deliveryDocsLogistics": "Logistics Delivery Documents List",
+        "materialProductQuotationRequests": "Raw Building Materials Quotation Requests",
+        "salesInvoices": "Sales Invoices",
+        "logisticsSalesInvoices": "Logistics Sales Invoices",
+        "deliveryNotesList": "Delivery Notes List",
+        "tripsList": "Trips List",
+        "salesOrders": "Sales Orders",
+        "logisticsOrders": "Logistics Orders",
+        "fuelsOrders": "Fuels Orders",
+        "quotations": "Quotations",
+        "quotationsFuels": "Fuels Quotations",
+        "fuelsQuotationRequests": "Fuels Quotation Requests",
+        "quotationsLogisticsServices": "Logistics Services Quotations"
+      },
+      "subtitles": {
+        "requestDetail": "Request details and information",
+        "deliveryDocLogisticsDetail": "Delivery document details and information",
+        "materialProductRequestIntro": "Raw Building Materials Quotation Request",
+        "invoiceDetail": "Invoice details and information",
+        "deliveryNoteDetail": "Delivery note details and information",
+        "tripDetail": "Trip details and information",
+        "orderDetail": "Order details and information",
+        "quotationDetail": "Quotation details and information"
+      },
+      "sections": {
+        "movedMaterials": "Moved Materials",
+        "requestDetailsShort": "Request Details",
+        "orderRequestInfo": "Request Info",
+        "orderInfo": "Order Info",
+        "quotationInfo": "Quotation Info",
+        "invoiceInfo": "Invoice Info",
+        "fuelsLogisticsBlock": "Logistics Data",
+        "quotationSummary": "Quotation Summary",
+        "amountsTotal": "Total Amounts",
+        "supplyData": "Supply Data",
+        "tripsSection": "Trips",
+        "priceCode": "Price Code",
+        "contract": "Contract",
+        "workHours": "Work Hours",
+        "voiceNote": "Voice Note",
+        "textNoteHeading": "Text Note",
+        "attachmentsHeading": "Attachments",
+        "orderSummaryHeading": "Order Summary",
+        "transportType": "Transport Type",
+        "tripCountUnit": "Trip",
+        "vehicleCountUnit": "Vehicle",
+        "dayUnit": "Day",
+        "tripUnloadSite": "Unload Site",
+        "timeWindow": "Time Window",
+        "tripValue": "Trip Value",
+        "coordSendCountLabel": "Number of Coordinate Transmissions",
+        "deliveryStatus": "Delivery Status",
+        "receivingStatus": "Receiving Status",
+        "invoiceExtractInterval": "Extract Upload Interval",
+        "paymentTermDays": "Payment Term",
+        "lateFee": "Late Fee",
+        "cancelFee": "Cancellation Fee",
+        "quotationValidityDays": "Quotation Validity",
+        "noTransportDetails": "No transport details",
+        "totalPriceCol": "Total Price",
+        "paymentAt": "Payment Date",
+        "deliveryLogisticsDocItemsTable": "Delivery Document Items Table",
+        "summaryTableLineItem": "Item",
+        "amountsTableAmountCol": "Amount",
+        "dateFromCol": "From Date",
+        "dateToCol": "To Date",
+        "vehicleTypeCol": "Vehicle Type",
+        "materialTypeCol": "Material Type"
+      },
+      "paymentView": {
+        "paymentNoLabel": "Payment Number",
+        "grandTotal": "Grand Total",
+        "linkedInvoicesCount": "Linked Invoices Count",
+        "invoices": "Invoices",
+        "createdAt": "Creation Date",
+        "primaryInvoice": "Primary Invoice",
+        "attachedInvoice": "Attached Invoice",
+        "balance": "Balance",
+        "invoiceBank": "Invoice Bank",
+        "invoiceTypeCol": "Invoice Type",
+        "directionCol": "Direction"
+      },
+      "attachments": {
+        "view": "View",
+        "none": "No attachments to display",
+        "fallbackName": "Attachment {n}"
+      },
+      "requestKind": {
+        "withLogistics": "Request with Logistics Service",
+        "withoutLogistics": "Request without Logistics Service",
+        "purchaseWithLogistics": "Purchase Request with Logistics"
+      },
+      "orderKind": {
+        "logisticsOnly": "Transport",
+        "saleNoTransport": "Sale without Transport",
+        "saleWithTransport": "Sale with Transport",
+        "quotationWithoutService": "Sale without Logistics Service",
+        "quotationWithService": "Sale with Logistics Service"
+      },
+      "tabs": {
+        "logisticsRequestGeneral": "General Request Information",
+        "logisticsRequestTransport": "Transport Details",
+        "logisticsRequestMaterials": "Moved Materials",
+        "materialProductsGeneral": "General Request Information",
+        "addedProducts": "Added Products",
+        "transportData": "Transport Data",
+        "generalInfo": "General Information",
+        "supplyDataTab": "Supply Data",
+        "fuelsGeneral": "General Request Information",
+        "fuelsProducts": "Added Products",
+        "fuelsTransport": "Transport Data"
+      },
+      "na": "N/A"
+    },
+    "printInvoice": {
+      "printButton": "Print Invoice",
+      "titleAr": "Tax Sales Invoice",
+      "invoiceNumber": "Invoice number:",
+      "issued": "Issued:",
+      "vatNo": "VAT No.:",
+      "address": "Address:",
+      "projectName": "Project Name:",
+      "note": "Note:",
+      "colNatureAr": "Goods and Services Details",
+      "colUnitPriceAr": "Unit Price",
+      "colQtyAr": "Quantity",
+      "colTaxableAr": "Taxable Amount",
+      "colTaxAmountAr": "Tax Amount",
+      "colSubtotalAr": "Subtotal",
+      "totalQtyAr": "Total Quantities",
+      "totalExVatAr": "Total Excluding VAT",
+      "totalDiscountAr": "Total Discounts",
+      "totalTaxableExVatAr": "Total Taxable Amount Excluding VAT",
+      "totalVatAr": "Total VAT",
+      "totalDueAr": "Total Due",
+      "footerTaxNo": "VAT No.:",
+      "footerCr": "Commercial Register:",
+      "footerAddress": "Address:"
+    },
+    "paymentsDemo": {
+      "cash": "Cash",
+      "cashAlt": "Cash",
+      "deferred": "Deferred",
+      "network": "Network",
+      "bankTransfer": "Bank Transfer",
+      "check": "Check",
+      "creditCard": "Credit Card",
+      "branchMain": "Main Branch",
+      "branchRiyadh": "Riyadh Branch",
+      "branchJeddah": "Jeddah Branch",
+      "branchDammam": "Dammam Branch",
+      "customerFallback": "Customer",
+      "company1": "Modern Construction Company",
+      "company2": "Smart Construction Establishment",
+      "company3": "General Contracting Company",
+      "company4": "Real Estate Development Establishment",
+      "company5": "Gulf Construction Company",
+      "invoiceTypeSales": "Sales",
+      "invoiceTypePurchases": "Purchases",
+      "currencySar": "SAR",
+      "percentSign": "%",
+      "directionInbound": "Inbound",
+      "directionOutbound": "Outbound",
+      "noteAdvance": "Advance payment for invoice",
+      "demoAddress1": "King Fahd Road",
+      "demoCityCountry": "Riyadh, Saudi Arabia",
+      "demoCustomerDisplayName": "Abdulaziz Al-Iqbali"
+    }
+  }
+}
