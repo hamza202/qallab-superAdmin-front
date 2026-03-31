@@ -111,11 +111,11 @@ const saveIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xm
         <v-table v-if="documents.length > 0" class="bg-white rounded-lg mt-6">
             <thead>
                 <tr class="bg-gray-100">
-                    <th class="text-right font-semibold text-gray-700 py-3 px-4">{{ t('form.contractors.documents.table.attachmentName') }}</th>
-                    <th class="text-right font-semibold text-gray-700 py-3 px-4">{{ t('form.contractors.documents.table.attachmentDate') }}</th>
-                    <th class="text-right font-semibold text-gray-700 py-3 px-4">{{ t('form.contractors.documents.table.attachmentType') }}</th>
-                    <th class="text-right font-semibold text-gray-700 py-3 px-4">{{ t('form.contractors.documents.table.file') }}</th>
-                    <th class="text-right font-semibold text-gray-700 py-3 px-4">{{ t('form.contractors.documents.table.actions') }}</th>
+                    <th class="text-start font-semibold text-gray-700 py-3 px-4">{{ t('form.contractors.documents.table.attachmentName') }}</th>
+                    <th class="text-start font-semibold text-gray-700 py-3 px-4">{{ t('form.contractors.documents.table.attachmentDate') }}</th>
+                    <th class="text-start font-semibold text-gray-700 py-3 px-4">{{ t('form.contractors.documents.table.attachmentType') }}</th>
+                    <th class="text-start font-semibold text-gray-700 py-3 px-4">{{ t('form.contractors.documents.table.file') }}</th>
+                    <th class="text-start font-semibold text-gray-700 py-3 px-4">{{ t('form.contractors.documents.table.actions') }}</th>
                 </tr>
             </thead>
             <tbody>

@@ -413,16 +413,16 @@ const locationIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none
             <v-table class="bg-white rounded-lg">
               <thead>
                 <tr class="bg-gray-100">
-                  <th class="text-right font-semibold text-gray-700 py-3 px-4">
+                  <th class="text-start font-semibold text-gray-700 py-3 px-4">
                     <v-checkbox hide-details density="compact" />
                   </th>
-                  <th class="text-right font-semibold text-gray-700 py-3 px-4">الاسم بالانجليزية</th>
-                  <th class="text-right font-semibold text-gray-700 py-3 px-4">البريد الالكتروني</th>
-                  <th class="text-right font-semibold text-gray-700 py-3 px-4">رقم الهاتف</th>
-                  <th class="text-right font-semibold text-gray-700 py-3 px-4">المنصب</th>
-                  <th class="text-right font-semibold text-gray-700 py-3 px-4">اظهاره في عرض السعر</th>
-                  <th class="text-right font-semibold text-gray-700 py-3 px-4">العرض في التقارير</th>
-                  <th class="text-right font-semibold text-gray-700 py-3 px-4">الاجراءات</th>
+                  <th class="text-start font-semibold text-gray-700 py-3 px-4">الاسم بالانجليزية</th>
+                  <th class="text-start font-semibold text-gray-700 py-3 px-4">البريد الالكتروني</th>
+                  <th class="text-start font-semibold text-gray-700 py-3 px-4">رقم الهاتف</th>
+                  <th class="text-start font-semibold text-gray-700 py-3 px-4">المنصب</th>
+                  <th class="text-start font-semibold text-gray-700 py-3 px-4">اظهاره في عرض السعر</th>
+                  <th class="text-start font-semibold text-gray-700 py-3 px-4">العرض في التقارير</th>
+                  <th class="text-start font-semibold text-gray-700 py-3 px-4">الاجراءات</th>
                 </tr>
               </thead>
               <tbody>
@@ -465,12 +465,12 @@ const locationIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none
             <v-table class="bg-white rounded-lg">
               <thead>
                 <tr class="bg-gray-100">
-                  <th class="text-right font-semibold text-gray-700 py-3 px-4">
+                  <th class="text-start font-semibold text-gray-700 py-3 px-4">
                     <v-checkbox hide-details density="compact" />
                   </th>
-                  <th class="text-right font-semibold text-gray-700 py-3 px-4">اسم الملف</th>
-                  <th class="text-right font-semibold text-gray-700 py-3 px-4">الملف</th>
-                  <th class="text-right font-semibold text-gray-700 py-3 px-4">الاجراءات</th>
+                  <th class="text-start font-semibold text-gray-700 py-3 px-4">اسم الملف</th>
+                  <th class="text-start font-semibold text-gray-700 py-3 px-4">الملف</th>
+                  <th class="text-start font-semibold text-gray-700 py-3 px-4">الاجراءات</th>
                 </tr>
               </thead>
               <tbody>

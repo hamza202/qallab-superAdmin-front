@@ -9,54 +9,55 @@
         <div class="">
           <!-- Basic Information Section -->
           <div class="mb-3 bg-primary-50 border !border-gray-200 rounded-lg px-6 py-4">
-            <h2 class="text-lg font-bold text-primary-900 mb-4">المعلومات الأساسية</h2>
+            <h2 class="text-lg font-bold text-primary-900 mb-4">{{ t('pages.productVariables.form.sections.basicInfo') }}</h2>
 
             <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mb-4">
               <div class="mb-4">
-                <LanguageTabs :languages="availableLanguages" label="اسم متغير المنتج">
+                <LanguageTabs :languages="availableLanguages" :label="t('pages.productVariables.form.labels.variableName')">
                   <template #en>
-                    <TextInput v-model="formData.name_en" placeholder="Enter variable name in English"
+                    <TextInput v-model="formData.name_en" :placeholder="t('pages.productVariables.form.placeholders.variableNameEn')"
                       :rules="[required()]" :hide-details="false" :error-messages="formErrors['name.en']"
                       @input="delete formErrors['name.en']" />
                   </template>
                   <template #ar>
-                    <TextInput v-model="formData.name_ar" placeholder="ادخل اسم المتغير بالعربية" :rules="[required()]"
+                    <TextInput v-model="formData.name_ar" :placeholder="t('pages.productVariables.form.placeholders.variableNameAr')" :rules="[required()]"
                       :hide-details="false" :error-messages="formErrors['name.ar']"
                       @input="delete formErrors['name.ar']" />
                   </template>
                 </LanguageTabs>
               </div>
 
-              <SelectWithIconInput v-model="formData.category_ids" label="التصنيف" :items="categoryItems" showAddButton
-                placeholder="اختر الصنيف" :hide-details="false" multiple chips :loading="loadingCategories"
+              <SelectWithIconInput v-model="formData.category_ids" :label="t('common.form.category')" :items="categoryItems" showAddButton
+                :placeholder="t('pages.productVariables.form.placeholders.selectCategory')" :hide-details="false" multiple chips :loading="loadingCategories"
                 :error-messages="formErrors['category_ids']" @update:model-value="delete formErrors['category_ids']" />
 
-              <SelectInput v-model="formData.value_type" label="نوع العنصر" :items="classificationItems"
-                placeholder="اختر نوع العنصر" :hide-details="false" :loading="loadingConstants" :rules="[required()]"
+              <SelectInput v-model="formData.value_type" :label="t('pages.productVariables.form.labels.valueType')" :items="classificationItems"
+                :placeholder="t('pages.productVariables.form.placeholders.selectValueType')" :hide-details="false" :loading="loadingConstants" :rules="[required()]"
                 :error-messages="formErrors['value_type']" @update:model-value="delete formErrors['value_type']" />
 
               <div class="md:col-span-2">
                 <!-- Notes -->
-                <TextareaInput v-model="formData.notes" label="الملاحظات" placeholder="أدخل الملاحظات هنا..." rows="4"
+                <TextareaInput v-model="formData.notes" :label="t('pages.productVariables.form.labels.notes')" :placeholder="t('pages.productVariables.form.placeholders.notes')"
+                  rows="4"
                   :hide-details="false" />
               </div>
 
               <!-- Status Radio Buttons -->
               <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-3">الحالة</label>
+                <label class="block text-sm font-semibold text-gray-700 mb-3">{{ t('common.form.status') }}</label>
                 <div class="flex items-center gap-3 mt-1">
                   <v-radio-group v-model="formData.is_active" inline hide-details>
                     <v-radio :value="true" color="primary">
                       <template #label>
                         <span :class="formData.is_active ? 'text-primary font-semibold' : 'text-gray-600'">
-                          فعال
+                          {{ t('common.status.active') }}
                         </span>
                       </template>
                     </v-radio>
                     <v-radio :value="false" color="primary">
                       <template #label>
                         <span :class="!formData.is_active ? 'text-primary font-semibold' : 'text-gray-600'">
-                          غير فعال
+                          {{ t('common.status.inactive') }}
                         </span>
                       </template>
                     </v-radio>
@@ -64,7 +65,7 @@
                 </div>
               </div>
               <ButtonWithIcon variant="flat" color="primary" rounded="4" height="48" prepend-icon="mdi-plus"
-                custom-class="font-semibold text-base w-full md:col-span-2 mt-4" label="أضف جديد"
+                custom-class="font-semibold text-base w-full md:col-span-2 mt-4" :label="t('pages.productVariables.form.buttons.addValue')"
                 @click="addVariableValue" />
 
 
@@ -74,25 +75,25 @@
           <!-- Variable Values Section -->
           <div class="mb-3 bg-gray-50 border !border-gray-200 rounded-lg">
             <div class="border-b !border-gray-200 px-6 py-4">
-              <h2 class="text-lg font-bold text-primary-900">قيم المتغير</h2>
+              <h2 class="text-lg font-bold text-primary-900">{{ t('pages.productVariables.form.sections.values') }}</h2>
             </div>
 
             <!-- Variable Values Table with Editable Inputs -->
             <v-table v-if="formData.values.length > 0" class="bg-white rounded-none">
               <thead>
                 <tr class="bg-gray-100">
-                  <th class="text-right font-semibold text-gray-700 py-3 px-4">{{ formData.name_ar || formData.name_en
-                    || 'القيمة'
+                  <th class="text-start font-semibold text-gray-700 py-3 px-4">{{ formData.name_ar || formData.name_en
+                    || t('pages.productVariables.form.defaults.value')
                   }}</th>
-                  <th class="text-right font-semibold text-gray-700 py-3 px-4">الحالة</th>
-                  <th class="text-right font-semibold text-gray-700 py-3 px-4">الإجراءات</th>
+                  <th class="text-start font-semibold text-gray-700 py-3 px-4">{{ t('common.form.status') }}</th>
+                  <th class="text-start font-semibold text-gray-700 py-3 px-4">{{ t('common.table.actions') }}</th>
                 </tr>
               </thead>
               <tbody>
                 <tr v-for="(value, index) in formData.values" :key="index" class="border-b !border-gray-200">
                   <td class="py-3 px-4">
                     <TextInput v-model="value.name" density="compact" variant="outlined" hide-details
-                      placeholder="أدخل القيمة" />
+                      :placeholder="t('pages.productVariables.form.placeholders.value')" />
                   </td>
                   <td class="py-3 px-4">
                     <v-switch v-model="value.is_active" hide-details inset density="compact" color="primary"
@@ -112,19 +113,19 @@
             <div v-if="formData.values.length === 0"
               class="text-center py-12 bg-white rounded-lg border !border-gray-200 m-4">
               <v-icon size="48" color="grey-lighten-1">mdi-package-variant-closed</v-icon>
-              <p class="mt-3 text-gray-600 text-sm">لا توجد قيم متغيرات</p>
-              <p class="text-gray-500 text-xs">اضغط على "أضف جديد" لإضافة قيمة جديدة</p>
+              <p class="mt-3 text-gray-600 text-sm">{{ t('pages.productVariables.form.emptyState.title') }}</p>
+              <p class="text-gray-500 text-xs">{{ t('pages.productVariables.form.emptyState.description') }}</p>
             </div>
           </div>
 
           <!-- Form Actions -->
           <div class="flex flex-col sm:flex-row gap-3 sm:justify-center mt-6 px-6">
             <ButtonWithIcon variant="flat" rounded="4" color="primary" height="44"
-              custom-class="font-semibold text-base sm:min-w-[200px]" :prepend-icon="saveIcon" :label="t('common.save')"
+              custom-class="font-semibold text-base sm:min-w-[200px]" :prepend-icon="saveIcon" :label="t('common.actions.save')"
               @click="handleSaveAndReturn" />
 
             <ButtonWithIcon variant="flat" prepend-icon="mdi-close" rounded="4" color="primary-50" height="44"
-              custom-class="font-semibold text-base text-primary-700 sm:min-w-[200px]" :label="t('common.close')"
+              custom-class="font-semibold text-base text-primary-700 sm:min-w-[200px]" :label="t('common.actions.close')"
               @click="handleBack">
             </ButtonWithIcon>
           </div>
@@ -269,7 +270,7 @@ const handleSaveAndReturn = async () => {
     // Validate form
     const valid = await validate()
     if (!valid) {
-      toast.error('يرجى تصحيح الأخطاء في النموذج')
+      toast.error(t('pages.productVariables.form.messages.validationError'))
       return
     }
 
@@ -297,11 +298,11 @@ const handleSaveAndReturn = async () => {
     if (isEditMode.value) {
       // Update existing aspect
       response = await api.put(`/aspects/${route.params.id}`, payload)
-      toast.success(response.message || 'تم تحديث المتغير بنجاح')
+      toast.success(response.message || t('pages.productVariables.form.messages.updateSuccess'))
     } else {
       // Create new aspect
       response = await api.post('/aspects', payload)
-      toast.success(response.message || 'تم إضافة المتغير بنجاح')
+      toast.success(response.message || t('pages.productVariables.form.messages.createSuccess'))
     }
 
     handleBack()
@@ -314,9 +315,9 @@ const handleSaveAndReturn = async () => {
       Object.keys(apiErrors).forEach(key => {
         formErrors[key] = apiErrors[key][0]
       })
-      toast.error(err?.response?.data?.message || 'يرجى تصحيح الأخطاء في النموذج')
+      toast.error(err?.response?.data?.message || t('pages.productVariables.form.messages.validationError'))
     } else {
-      toast.error(err?.response?.data?.message || 'فشل حفظ البيانات')
+      toast.error(err?.response?.data?.message || t('pages.productVariables.form.messages.saveError'))
     }
   } finally {
     loading.value = false
@@ -345,7 +346,7 @@ const fetchConstants = async () => {
     }
   } catch (err: any) {
     console.error('Fetch constants error:', err)
-    toast.error(err?.response?.data?.message || 'فشل تحميل الثوابت')
+    toast.error(err?.response?.data?.message || t('pages.productVariables.form.messages.loadConstantsError'))
   } finally {
     loadingConstants.value = false
   }
@@ -371,7 +372,7 @@ const fetchCategories = async () => {
     }
   } catch (err: any) {
     console.error('Fetch categories error:', err)
-    toast.error(err?.response?.data?.message || 'فشل تحميل الفئات')
+    toast.error(err?.response?.data?.message || t('pages.productVariables.form.messages.loadCategoriesError'))
   } finally {
     loadingCategories.value = false
   }
@@ -403,7 +404,7 @@ const fetchAspect = async () => {
     }
   } catch (err: any) {
     console.error('Fetch aspect error:', err)
-    toast.error(err?.response?.data?.message || 'فشل تحميل بيانات المتغير')
+    toast.error(err?.response?.data?.message || t('pages.productVariables.form.messages.fetchError'))
   } finally {
     loading.value = false
   }

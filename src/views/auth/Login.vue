@@ -72,8 +72,8 @@ const handleCreateAccount = () => {
       </div>
 
       <!-- Header -->
-      <div class="mb-8" :class="localeStore.isRtl ? 'text-right' : 'text-left'">
-        <h1 class="text-[28px] font-semibold mb-3" :class="localeStore.isRtl ? 'text-right' : 'text-left'">
+      <div class="mb-8" :class="localeStore.isRtl ? 'text-start' : 'text-left'">
+        <h1 class="text-[28px] font-semibold mb-3" :class="localeStore.isRtl ? 'text-start' : 'text-left'">
           <span class="text-[#121926]">{{ t('auth.loginText') }}&nbsp;</span>
           <span class="text-[#1570ef] font-bold inline-block"> {{ t('auth.supplierDashboardText') }}</span>
         </h1>

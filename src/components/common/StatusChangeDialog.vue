@@ -105,7 +105,7 @@ const infoIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none" xm
           
           <!-- Select Dropdown -->
           <div v-if="showSelect" class="mt-4 w-75 mx-auto mb-4">
-            <label v-if="selectLabel" class="block text-sm font-semibold text-gray-900 mb-2 text-right">
+            <label v-if="selectLabel" class="block text-sm font-semibold text-gray-900 mb-2 text-start">
               {{ selectLabel }}
             </label>
             <SelectInput

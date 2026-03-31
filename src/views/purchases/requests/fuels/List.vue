@@ -115,12 +115,16 @@ const isDeleteDialogOpen = computed({
   },
 });
 const deleteDialogTitle = computed(() =>
-  showBulkDeleteDialog.value ? 'حذف الطلبات' : 'حذف الطلب'
+  showBulkDeleteDialog.value
+    ? t('purchases.shared.lists.purchaseRequest.dialogs.deleteBulk.title')
+    : t('purchases.shared.lists.purchaseRequest.dialogs.deleteSingle.title')
 );
 const deleteDialogMessage = computed(() =>
   showBulkDeleteDialog.value
-    ? `هل أنت متأكد من حذف ${selectedRequests.value.length} طلب؟`
-    : 'هل أنت متأكد من حذف هذا الطلب؟'
+    ? t('purchases.shared.lists.purchaseRequest.dialogs.deleteBulk.message', {
+        count: selectedRequests.value.length,
+      })
+    : t('purchases.shared.lists.purchaseRequest.dialogs.deleteSingle.message')
 );
 const onDeleteConfirm = () => {
   if (showBulkDeleteDialog.value) confirmBulkDelete();
@@ -167,7 +171,7 @@ const fetchList = async () => {
     initHeaders(res.headers || [], res.shownHeaders || []);
   } catch (err: any) {
     console.error('Error fetching building materials list:', err);
-    error(err?.response?.data?.message || 'فشل تحميل قائمة الطلبات');
+    error(err?.response?.data?.message || t('purchases.shared.lists.purchaseRequest.messages.fetchError'));
   } finally {
     loading.value = false;
   }
@@ -176,7 +180,7 @@ const fetchList = async () => {
 // Toggle column and persist
 const handleToggleHeader = async (headerKey: string) => {
   await toggleHeader(headerKey).catch((err: any) => {
-    error(err?.response?.data?.message || 'فشل تحديث الأعمدة');
+    error(err?.response?.data?.message || t('purchases.shared.messages.columnsUpdateError'));
   });
 };
 
@@ -202,11 +206,11 @@ const confirmDelete = async () => {
   try {
     deleteLoading.value = true;
     await api.delete(`/purchases/fuels/${uuid}`);
-    success('تم حذف الطلب بنجاح');
+    success(t('purchases.shared.lists.purchaseRequest.messages.deleteSuccess'));
     await fetchList();
   } catch (err: any) {
     console.error('Error deleting request:', err);
-    error(err?.response?.data?.message || 'فشل حذف الطلب');
+    error(err?.response?.data?.message || t('purchases.shared.lists.purchaseRequest.messages.deleteError'));
   } finally {
     deleteLoading.value = false;
   }
@@ -287,12 +291,16 @@ const confirmBulkDelete = async () => {
     await api.post('/purchases/fuels/bulk-delete', {
       ids: selectedRequests.value,
     });
-    success(`تم حذف ${selectedRequests.value.length} طلب بنجاح`);
+    success(
+      t('purchases.shared.lists.purchaseRequest.messages.bulkDeleteSuccess', {
+        count: selectedRequests.value.length,
+      })
+    );
     selectedRequests.value = [];
     await fetchList();
   } catch (err: any) {
     console.error('Error bulk deleting:', err);
-    error(err?.response?.data?.message || 'فشل الحذف الجماعي');
+    error(err?.response?.data?.message || t('purchases.shared.messages.bulkDeleteError'));
   } finally {
     deleteLoading.value = false;
     showBulkDeleteDialog.value = false;
@@ -322,7 +330,7 @@ onMounted(() => {
           rounded="0"
           custom-class="font-semibold text-base border-gray-300 bg-primary-100 !text-primary-900"
           :prepend-icon="importIcon"
-          :label="t('common.import')"
+          :label="t('common.actions.import')"
         />
         <ButtonWithIcon
           variant="flat"
@@ -330,7 +338,7 @@ onMounted(() => {
           rounded="0"
           custom-class="font-semibold text-base border-gray-300 bg-primary-50 !text-primary-900"
           :prepend-icon="exportIcon"
-          :label="t('common.export')"
+          :label="t('common.actions.export')"
         />
       </div>
 
@@ -351,7 +359,7 @@ onMounted(() => {
               custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
               :prepend-icon="trash_1_icon"
               color="white"
-              :label="t('common.delete')"
+              :label="t('common.actions.delete')"
               @click="handleBulkDelete"
             />
             <div class="w-px bg-gray-200"></div>
@@ -362,7 +370,7 @@ onMounted(() => {
               custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
               :prepend-icon="trash_2_icon"
               color="white"
-              :label="t('common.deleteAll')"
+              :label="t('common.table.deleteAll')"
               @click="handleBulkDelete"
             />
           </div>
@@ -380,7 +388,7 @@ onMounted(() => {
                   height="40"
                   custom-class="font-semibold text-base border-gray-400"
                   :prepend-icon="columnIcon"
-                  :label="t('common.columns')"
+                  :label="t('common.table.columns')"
                 />
               </template>
               <v-list>
@@ -408,7 +416,7 @@ onMounted(() => {
               rounded="4"
               custom-class="px-7 font-semibold text-base text-white border !border-primary-200"
               :prepend-icon="searchIcon"
-              :label="t('common.advancedSearch')"
+              :label="t('common.table.advancedSearch')"
               @click="toggleAdvancedFilters"
             />
 
@@ -420,7 +428,7 @@ onMounted(() => {
               rounded="4"
               custom-class="px-7 font-semibold text-base !text-primary-800 border !border-primary-200"
               :prepend-icon="plusIcon"
-              label="أضف طلب"
+              :label="t('purchases.shared.lists.purchaseRequest.buttons.add')"
               @click="openCreateRequest"
             />
           </div>
@@ -437,7 +445,6 @@ onMounted(() => {
               density="comfortable"
               variant="outlined"
               hide-details
-              placeholder="كود الطلب"
               class="w-full sm:w-40 bg-white"
             />
             <TextInput
@@ -445,7 +452,6 @@ onMounted(() => {
               density="comfortable"
               variant="outlined"
               hide-details
-              placeholder="اسم المورد"
               class="w-full sm:w-40 bg-white"
             />
             <TextInput
@@ -453,23 +459,20 @@ onMounted(() => {
               density="comfortable"
               variant="outlined"
               hide-details
-              placeholder="دفعة مقدمة"
               class="w-full sm:w-40 bg-white"
             />
             <SelectInput
-              :items="['الموقع', 'الموقع']"
+              :items="[]"
               v-model="filterNameArabic"
               density="comfortable"
               variant="outlined"
               hide-details
-              placeholder="موقع المشروع"
               class="w-full sm:w-40 bg-white"
             />
             <DatePickerInput
               v-model="filterStartDateMin"
               density="comfortable"
               hide-details
-              placeholder="تاريخ الطلب"
               class="w-full sm:w-40 bg-white"
             />
           </div>
@@ -481,7 +484,7 @@ onMounted(() => {
               height="40"
               custom-class="px-5 font-semibold !text-white text-sm sm:text-base"
               :prepend-icon="searchIcon"
-              label="ابحث"
+              :label="t('purchases.shared.actions.search')"
               @click="applyFilters"
             />
             <ButtonWithIcon
@@ -492,7 +495,7 @@ onMounted(() => {
               border="sm"
               custom-class="px-5 font-semibold text-sm sm:text-base !text-primary-800 !border-primary-200"
               prepend-icon="mdi-refresh"
-              label="إعادة تعيين"
+              :label="t('common.actions.reset')"
               @click="resetFilters"
             />
           </div>
@@ -554,6 +557,8 @@ onMounted(() => {
       v-model="showChangeStatusDialog"
       :item="itemToChangeStatus"
       :change-status-url="`/purchases/fuels/${itemToChangeStatus?.uuid}/change-status`"
+      :title="t('purchases.shared.statusChange.title')"
+      :message="t('purchases.shared.statusChange.message')"
       @success="fetchList"
     />
   </default-layout>

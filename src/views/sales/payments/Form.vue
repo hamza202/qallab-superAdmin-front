@@ -408,8 +408,8 @@ onMounted(async () => {
                         <!-- Available Balance Card -->
                         <div
                             class="bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg p-4 text-white relative overflow-hidden">
-                            <div class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
-                            <div class="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full -ml-12 -mb-12">
+                            <div class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -ms-16 -mt-16"></div>
+                            <div class="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full -me-12 -mb-12">
                             </div>
 
                             <div class="relative z-10">

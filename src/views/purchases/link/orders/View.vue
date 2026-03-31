@@ -10,7 +10,7 @@
                     </router-link>
                     <span class="text-lg text-gray-300">/</span>
                     <router-link to="/settings" class="text-gray-600 hover:text-primary-600">
-                        المشتريات
+                        {{ t('purchases.link.view.shared.purchasesBreadcrumb') }}
                     </router-link>
                     <span class="text-lg text-gray-300">/</span>
                     <router-link :to="listPath"
@@ -23,7 +23,7 @@
                         }}</span>
                     <span class="text-lg text-gray-300">/</span>
                     <span class="text-primary-700 font-medium bg-primary-50 px-2 py-1 rounded-md">
-                        الربط مع طلبيات العملاء
+                        {{ t('purchases.link.orders.form.pageTitle') }}
                     </span>
 
                 </div>
@@ -40,7 +40,7 @@
                                 </h1>
                                 <p class="text-sm text-gray-600">
                                     {{ purchaseOrderData?.customer?.type === 'admin' ?
-                                        'مدير النظام' : purchaseOrderData?.customer?.type === 'contractor' ? 'مقاول' : '' }}
+                                        t('purchases.link.view.orders.customerAdmin') : purchaseOrderData?.customer?.type === 'contractor' ? t('purchases.link.view.orders.customerContractor') : '' }}
                                 </p>
                             </div>
                         </div>
@@ -58,12 +58,12 @@
                                     :class="linkedOrder.type === 'purchase' ? 'mt-1' : ''"></span>
                                 <div>
                                     <h2 class="text-base font-bold">
-                                        {{ linkedOrder.type === 'purchase' ? 'كود طلبية مشتريات قلاب'
-                                            : 'كود طلبية مبيعات العميل' }}
+                                        {{ linkedOrder.type === 'purchase' ? t('purchases.link.view.orders.headerPurchaseOrderCode')
+                                            : t('purchases.link.view.orders.headerSalesOrderCode') }}
                                         {{ linkedOrder.code }}
                                     </h2>
                                     <p class="text-slate-600 text-sm font-bold" v-if="linkedOrder.type === 'purchase'">
-                                        المورد / {{ linkedOrder.supplier_name }}
+                                        {{ t('purchases.link.view.orders.supplierWithName', { name: linkedOrder.supplier_name }) }}
                                     </p>
                                 </div>
                             </div>
@@ -75,7 +75,7 @@
                         <div class="bg-primary-50 px-6 py-3">
                             <div class="flex items-center gap-2 text-primary-900">
                                 <span v-html="packageIcon"></span>
-                                <h2 class="text-base font-bold">المنتجات</h2>
+                                <h2 class="text-base font-bold">{{ t('purchases.link.shared.labels.productsSection') }}</h2>
                             </div>
                         </div>
                         <div>
@@ -95,7 +95,7 @@
                 <div v-if="linkedOrders.length === 0 && !isLoading"
                     class="flex flex-col items-center justify-center py-16">
                     <span v-html="documentIcon" class="text-gray-300 mb-4"></span>
-                    <p class="text-gray-500 text-lg">لا توجد طلبيات مرتبطة</p>
+                    <p class="text-gray-500 text-lg">{{ t('purchases.link.view.orders.emptyLinked') }}</p>
                 </div>
             </div>
         </div>
@@ -110,6 +110,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useApi } from '@/composables/useApi'
 import { useNotification } from '@/composables/useNotification'
 import { homeIcon, archiveIcon, documentIcon } from '@/components/icons/globalIcons'
@@ -121,6 +122,7 @@ const route = useRoute()
 const router = useRouter()
 const api = useApi()
 const { error } = useNotification()
+const { t } = useI18n()
 
 const isLoading = ref(false)
 const salesOrderData = ref<any>(null)
@@ -142,7 +144,7 @@ const listPath = computed(() =>
         : '/purchases/orders/material-product/list'
 )
 const listLabel = computed(() =>
-    category.value === 'fuel' ? 'طلبيات المحروقات' : 'طلبيات مواد بناء أولية'
+    category.value === 'fuel' ? t('purchases.link.view.orders.listFuels') : t('purchases.link.view.orders.listMaterials')
 )
 const sall_orders_code_from_index = computed(() => route.query.sall_orders_code_from_index as string)
 const po_datetime = computed(() => route.query.po_datetime as string)
@@ -159,7 +161,7 @@ const fetchSalesOrder = async () => {
         salesOrderData.value = Array.isArray(res.data) && res.data.length > 0 ? res.data[0] : null
     } catch (e: any) {
         console.error('Error fetching sales order:', e)
-        error(e?.response?.data?.message || 'فشل تحميل بيانات طلبية المبيعات')
+        error(e?.response?.data?.message || t('purchases.link.view.orders.loadSalesError'))
     }
 }
 
@@ -174,7 +176,7 @@ const fetchPurchaseOrder = async () => {
         purchaseOrderData.value = res.data || null
     } catch (e: any) {
         console.error('Error fetching purchase order:', e)
-        error(e?.response?.data?.message || 'فشل تحميل بيانات طلبية المشتريات')
+        error(e?.response?.data?.message || t('purchases.link.view.orders.loadPurchaseError'))
     }
 }
 
@@ -247,15 +249,15 @@ const linkedOrders = computed(() => {
 })
 
 // Table headers
-const productHeaders = [
-    { title: 'اسم المنتج', key: 'item_name' },
-    { title: 'الوحدة', key: 'unit_name' },
-    { title: 'الكمية', key: 'quantity' },
-    { title: 'سعر الوحدة', key: 'unit_price' },
-    { title: 'الخصم', key: 'discount' },
-    { title: 'الضريبة', key: 'tax' },
-    { title: 'إجمالي المبلغ', key: 'subtotal' },
-]
+const productHeaders = computed(() => [
+    { title: t('purchases.link.shared.table.productName'), key: 'item_name' },
+    { title: t('purchases.shared.forms.common.tableHeaders.unit'), key: 'unit_name' },
+    { title: t('purchases.link.shared.table.quantity'), key: 'quantity' },
+    { title: t('purchases.link.shared.table.unitPrice'), key: 'unit_price' },
+    { title: t('purchases.orders.shared.tableHeaders.discount'), key: 'discount' },
+    { title: t('purchases.link.view.shared.taxShort'), key: 'tax' },
+    { title: t('purchases.link.shared.table.totalAmount'), key: 'subtotal' },
+])
 
 // ── Navigation ───────────────────────────────────────────────────
 const goBackToForm = () => {

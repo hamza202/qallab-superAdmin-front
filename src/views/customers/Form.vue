@@ -4,6 +4,7 @@ import { useRoute, useRouter } from "vue-router";
 import { useApi } from "@/composables/useApi";
 import { useNotification } from "@/composables/useNotification";
 import { infoCircleIcon } from "@/components/icons/globalIcons";
+import { useI18n } from "vue-i18n";
 
 // Available languages
 const availableLanguages = ref([
@@ -15,6 +16,7 @@ const route = useRoute();
 const router = useRouter();
 const api = useApi();
 const { success, error } = useNotification();
+const { t } = useI18n();
 
 // TypeScript Interfaces
 interface ConstantItem {
@@ -108,7 +110,7 @@ interface CustomerResponse {
 
 // Check if editing
 const isEditing = computed(() => !!route.params.id);
-const pageTitle = computed(() => isEditing.value ? 'تعديل عميل' : 'إضافة عميل');
+const pageTitle = computed(() => isEditing.value ? t('pages.customers.edit') : t('pages.customers.create'));
 
 // Loading states
 const loading = ref(false);
@@ -130,17 +132,17 @@ const pageLoading = ref(false);
 
 // Tabs
 const activeTab = ref(0);
-const tabs = [
+const tabs = computed(() => [
   {
-    title: "المعلومات الاساسية", value: 0, icon: `<svg width="19" height="22" viewBox="0 0 19 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+    title: t('pages.customers.form.tabs.basicInfo'), value: 0, icon: `<svg width="19" height="22" viewBox="0 0 19 22" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M17 11.5V5.8C17 4.11984 17 3.27976 16.673 2.63803C16.3854 2.07354 15.9265 1.6146 15.362 1.32698C14.7202 1 13.8802 1 12.2 1H5.8C4.11984 1 3.27976 1 2.63803 1.32698C2.07354 1.6146 1.6146 2.07354 1.32698 2.63803C1 3.27976 1 4.11984 1 5.8V16.2C1 17.8802 1 18.7202 1.32698 19.362C1.6146 19.9265 2.07354 20.3854 2.63803 20.673C3.27976 21 4.11984 21 5.8 21H9M11 10H5M7 14H5M13 6H5M11.5 18L13.5 20L18 15.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>` },
   {
-    title: "المعلومات المحاسبية", value: 1, icon: `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+    title: t('pages.customers.form.tabs.accountingInfo'), value: 1, icon: `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M15.5 4.5L4.5 15.5M6.5 8.5V4.5M4.5 6.5H8.5M11.5 13.5H15.5M5.8 19H14.2C15.8802 19 16.7202 19 17.362 18.673C17.9265 18.3854 18.3854 17.9265 18.673 17.362C19 16.7202 19 15.8802 19 14.2V5.8C19 4.11984 19 3.27976 18.673 2.63803C18.3854 2.07354 17.9265 1.6146 17.362 1.32698C16.7202 1 15.8802 1 14.2 1H5.8C4.11984 1 3.27976 1 2.63803 1.32698C2.07354 1.6146 1.6146 2.07354 1.32698 2.63803C1 3.27976 1 4.11984 1 5.8V14.2C1 15.8802 1 16.7202 1.32698 17.362C1.6146 17.9265 2.07354 18.3854 2.63803 18.673C3.27976 19 4.11984 19 5.8 19Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
 ` },
-];
+]);
 
 const isTabActive = (value: number) => activeTab.value === value;
 const isTabCompleted = (value: number) => {
@@ -154,7 +156,7 @@ const handleTabChange = (newTab: number, event?: Event) => {
   // Validate when creating (not editing) and trying to move to step 2
   if (!isEditing.value && newTab === 1 && activeTab.value === 0) {
     if (!basicInfoCompleted.value) {
-      error('يجب إكمال المعلومات الأساسية أولاً');
+      error(t('pages.customers.form.messages.completeBasicInfo'));
       if (event) {
         event.preventDefault();
         event.stopPropagation();
@@ -406,7 +408,7 @@ const fetchCustomerData = async () => {
     await fetchRelatedCustomers();
   } catch (err: any) {
     console.error('Error fetching customer data:', err);
-    error(err?.response?.data?.message || 'Failed to fetch customer data');
+    error(err?.response?.data?.message || t('pages.customers.form.messages.fetchError'));
   } finally {
     loading.value = false;
   }
@@ -486,7 +488,7 @@ const saveStep = async (step: number) => {
       customerId.value = response.data.customer_id;
     }
 
-    success(response.message || 'تم حفظ العميل بنجاح');
+    success(response.message || t('pages.customers.form.messages.saveSuccess'));
     return true;
   } catch (err: any) {
     console.error('Error saving customer:', err);
@@ -497,9 +499,9 @@ const saveStep = async (step: number) => {
       Object.keys(apiErrors).forEach(key => {
         formErrors[key] = apiErrors[key][0];
       });
-      error(err?.response?.data?.message || 'يرجى تصحيح الأخطاء في النموذج');
+      error(err?.response?.data?.message || t('pages.customers.form.messages.validationError'));
     } else {
-      error(err?.response?.data?.message || 'فشل حفظ العميل');
+      error(err?.response?.data?.message || t('pages.customers.form.messages.saveError'));
     }
     return false;
   } finally {
@@ -538,7 +540,7 @@ const handleSave = async () => {
   if (formRef.value && typeof formRef.value.validate === 'function') {
     const { valid } = await formRef.value.validate();
     if (!valid) {
-      error('يرجى تصحيح الأخطاء في النموذج');
+      error(t('pages.customers.form.messages.validationError'));
       return;
     }
   }
@@ -651,11 +653,11 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
           <v-form ref="formRef" v-model="isFormValid" @submit.prevent>
             <!-- Customer Data Section -->
             <div class="mb-6 bg-gray-50 rounded-lg p-6">
-              <h2 class="text-lg font-bold text-primary-900 mb-4">بيانات العميل</h2>
+              <h2 class="text-lg font-bold text-primary-900 mb-4">{{ t('pages.customers.form.sections.customerData') }}</h2>
 
               <!-- Account Type -->
               <div class="mb-4">
-                <span class="text-sm font-semibold text-gray-700 mb-1 block">نوع حساب العميل</span>
+                <span class="text-sm font-semibold text-gray-700 mb-1 block">{{ t('pages.customers.form.labels.accountType') }}</span>
                 <v-radio-group v-model="accountType" inline hide-details
                   @update:model-value="delete formErrors['customer_type']">
                   <v-radio :label="item.title" :value="item.value" color="primary" v-for="item in customerTypeItems" :key="item.value" />
@@ -667,56 +669,56 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
               <!-- Row 1: Full Name, Customer Code -->
               <div class="grid grid-cols-1 md:grid-cols-3 gap-4 gap-y-6 mb-4">
                 <div class="md:col-span-2">
-                  <LanguageTabs :languages="availableLanguages" label="الاسم كامل">
+                  <LanguageTabs :languages="availableLanguages" :label="t('pages.customers.form.labels.fullName')">
                     <template #en>
-                      <TextInput v-model="fullNameEn" placeholder="Full name (English)" :rules="[required()]"
+                      <TextInput v-model="fullNameEn" :placeholder="t('pages.customers.form.labels.fullNamePlaceholderEn')" :rules="[required()]"
                         :hide-details="false" :error-messages="formErrors['full_name.en']"
                         @input="delete formErrors['full_name.en']" />
                     </template>
                     <template #ar>
-                      <TextInput v-model="fullNameAr" placeholder="الاسم الكامل بالعربية" :rules="[required()]"
+                      <TextInput v-model="fullNameAr" :placeholder="t('pages.customers.form.labels.fullNamePlaceholderAr')" :rules="[required()]"
                         :hide-details="false" :error-messages="formErrors['full_name.ar']"
                         @input="delete formErrors['full_name.ar']" />
                     </template>
                   </LanguageTabs>
                 </div>
                 <div>
-                  <div class="mb-[7px] text-sm font-semibold text-gray-700">الكود</div>
+                  <div class="mb-[7px] text-sm font-semibold text-gray-700">{{ t('pages.customers.form.labels.code') }}</div>
                   <div class="bg-gray-200 text-primary-900 rounded-lg px-4 py-2.5 font-bold text-end">
                     {{ customerCode }}
                   </div>
                 </div>
 
-                <TelInput v-model="mobile" label="الجوال" :rules="[required(), saudiPhone()]"
+                <TelInput v-model="mobile" :label="t('pages.customers.form.labels.mobile')" :rules="[required(), saudiPhone()]"
                   :error-messages="formErrors['mobile']" @input="delete formErrors['mobile']" />
-                <TelInput v-model="phone" label="الهاتف" :error-messages="formErrors['phone']"
+                <TelInput v-model="phone" :label="t('pages.customers.form.labels.phone')" :error-messages="formErrors['phone']"
                   @input="delete formErrors['phone']" :rules="[saudiPhone()]" />
 
-                <TextInput v-model="email" dir="ltr" label="البريد الالكتروني" placeholder="مثال: name@domain.com"
+                <TextInput v-model="email" dir="ltr" :label="t('pages.customers.form.labels.email')" :placeholder="t('pages.customers.form.labels.emailPlaceholder')"
                   :rules="[required()]" :hide-details="false" :error-messages="formErrors['email']"
                   @input="delete formErrors['email']" />
 
-                <LanguageTabs :languages="availableLanguages" label="الاسم التجاري">
+                <LanguageTabs :languages="availableLanguages" :label="t('pages.customers.form.labels.commercialName')">
                   <template #en>
-                    <TextInput v-model="commercialNameEn" placeholder="Trade name (English)"
+                    <TextInput v-model="commercialNameEn" :placeholder="t('pages.customers.form.labels.commercialNamePlaceholderEn')"
                       :rules="[required()]" :hide-details="false" :error-messages="formErrors['trade_name.en']"
                       @input="delete formErrors['trade_name.en']" />
                   </template>
                   <template #ar>
-                    <TextInput v-model="commercialNameAr" placeholder="الاسم التجاري بالعربية"
+                    <TextInput v-model="commercialNameAr" :placeholder="t('pages.customers.form.labels.commercialNamePlaceholderAr')"
                       :rules="[required()]" :hide-details="false" :error-messages="formErrors['trade_name.ar']"
                       @input="delete formErrors['trade_name.ar']" />
                   </template>
                 </LanguageTabs>
 
-                <TextInput v-model="legalName" label="الاسم القانوني" placeholder="ادخل الاسم القانوني"
+                <TextInput v-model="legalName" :label="t('pages.customers.form.labels.legalName')" :placeholder="t('pages.customers.form.labels.legalNamePlaceholder')"
                   :hide-details="false" :error-messages="formErrors['legal_name']"
                   @input="delete formErrors['legal_name']" />
-                <SelectWithIconInput show-add-button v-model="entityType" label="نوع الكيان" placeholder="اختر نوع الكيان"
+                <SelectWithIconInput show-add-button v-model="entityType" :label="t('pages.customers.form.labels.entityType')" :placeholder="t('pages.customers.form.labels.entityTypePlaceholder')"
                   :items="entityTypeItems" :hide-details="false" :error-messages="formErrors['entity_type']"
                   @update:model-value="delete formErrors['entity_type']" />
 
-                <TextInput v-model="taxNumber" label="السجل التجاري" placeholder="ادخل رقم السجل التجاري" :hide-details="false"
+                <TextInput v-model="taxNumber" :label="t('pages.customers.form.labels.taxNumber')" :placeholder="t('pages.customers.form.labels.taxNumberPlaceholder')" :hide-details="false"
                   :error-messages="formErrors['commercial_register']"
                   @input="delete formErrors['commercial_register']" />
               </div>
@@ -732,7 +734,7 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
                     : 'text-gray-400 hover:bg-gray-50',
                 ]">
                   <span v-html="locationIcon"></span>
-                  <span class="text-base font-semibold whitespace-nowrap"> معلومات العنوان </span>
+                  <span class="text-base font-semibold whitespace-nowrap">{{ t('pages.customers.form.subTabs.addressInfo') }}</span>
                 </button>
                 <button @click="basicInfoSubTab = 1" :class="[
                   'flex items-center gap-2 px-3.5 py-2.5 rounded-md transition-all',
@@ -741,7 +743,7 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
                     : 'text-gray-400 hover:bg-gray-50',
                 ]">
                   <span v-html="listIcon"></span>
-                  <span class="text-base font-semibold whitespace-nowrap"> قائمة الاتصال </span>
+                  <span class="text-base font-semibold whitespace-nowrap">{{ t('pages.customers.form.subTabs.contactList') }}</span>
                 </button>
               </div>
 
@@ -749,25 +751,25 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
               <div v-if="basicInfoSubTab === 0" class="bg-gray-50 rounded-lg p-6 mt-4">
                 <!-- Row 1: Country, City, Postal Code -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                  <SelectInput v-model="country" label="الدولة" placeholder="اختر الدولة" :items="countryItems" clearable
+                  <SelectInput v-model="country" :label="t('pages.customers.form.labels.country')" :placeholder="t('pages.customers.form.labels.countryPlaceholder')" :items="countryItems" clearable
                     :hide-details="false" :error-messages="formErrors['address.country_id']"
                     @update:model-value="delete formErrors['address.country_id']" />
-                  <SelectInput v-model="city" label="المدينة" placeholder="اختر المدينة" :items="cityItems" clearable
+                  <SelectInput v-model="city" :label="t('pages.customers.form.labels.city')" :placeholder="t('pages.customers.form.labels.cityPlaceholder')" :items="cityItems" clearable
                     :hide-details="false" :error-messages="formErrors['address.city_id']"
                     @update:model-value="delete formErrors['address.city_id']" />
-                  <TextInput v-model="postalCode" label="الرمز البريدي" placeholder="مثال: 12345" :hide-details="false"
+                  <TextInput v-model="postalCode" :label="t('pages.customers.form.labels.postalCode')" :placeholder="t('pages.customers.form.labels.postalCodePlaceholder')" :hide-details="false"
                     :error-messages="formErrors['address.postal_code']"
                     @input="delete formErrors['address.postal_code']" />
-                  <TextInput v-model="district" label="اسم الحي" placeholder="ادخل اسم الحي" :hide-details="false"
+                  <TextInput v-model="district" :label="t('pages.customers.form.labels.district')" :placeholder="t('pages.customers.form.labels.districtPlaceholder')" :hide-details="false"
                     :error-messages="formErrors['address.neighborhood']"
                     @input="delete formErrors['address.neighborhood']" />
-                  <TextInput v-model="streetName" label="اسم الشارع" placeholder="ادخل اسم الشارع" :hide-details="false"
+                  <TextInput v-model="streetName" :label="t('pages.customers.form.labels.streetName')" :placeholder="t('pages.customers.form.labels.streetNamePlaceholder')" :hide-details="false"
                     :error-messages="formErrors['address.street_name']"
                     @input="delete formErrors['address.street_name']" />
-                  <TextInput v-model="buildingNumber" label="رقم المبنى" placeholder="ادخل رقم المبنى" :hide-details="false"
+                  <TextInput v-model="buildingNumber" :label="t('pages.customers.form.labels.buildingNumber')" :placeholder="t('pages.customers.form.labels.buildingNumberPlaceholder')" :hide-details="false"
                     :error-messages="formErrors['address.building_number']"
                     @input="delete formErrors['address.building_number']" />
-                  <TextInput v-model="nationalAddress" label="العنوان الوطني" placeholder="اكتب العنوان الوطني الكامل"
+                  <TextInput v-model="nationalAddress" :label="t('pages.customers.form.labels.nationalAddress')" :placeholder="t('pages.customers.form.labels.nationalAddressPlaceholder')"
                     :hide-details="false" :error-messages="formErrors['address.address_1']"
                     @input="delete formErrors['address.address_1']">
                     <template #append-inner>
@@ -777,49 +779,49 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
                             :prepend-icon="infoCircleIcon" v-bind="tooltipProps" />
                         </template>
                         <div>
-                          العنوان الوطني
+                          {{ t('pages.customers.form.labels.nationalAddressTooltip') }}
                         </div>
                       </v-tooltip>
                     </template>
                   </TextInput>
-                  <TextInput v-model="address2" label="عنوان 2" placeholder="تفاصيل عنوان إضافية" :hide-details="false"
+                  <TextInput v-model="address2" :label="t('pages.customers.form.labels.address2')" :placeholder="t('pages.customers.form.labels.address2Placeholder')" :hide-details="false"
                     :error-messages="formErrors['address.address_2']" @input="delete formErrors['address.address_2']" />
                 </div>
               </div>
               <!-- Contact List Sub-tab -->
               <div v-if="basicInfoSubTab === 1" class="bg-gray-50 -mx-6">
                 <div class="flex justify-between items-center px-6 border-y border-gray-200 py-3">
-                  <h2 class="text-lg font-bold text-primary-900">قائمة عملاء العميل</h2>
+                  <h2 class="text-lg font-bold text-primary-900">{{ t('pages.customers.form.contacts.title') }}</h2>
                   <ButtonWithIcon variant="flat" color="primary-500" border="sm" height="40"
                     custom-class="font-semibold px-6 !text-white !border-primary-200" :prepend-icon="plusIcon"
-                    label="أضف عميل" @click="addContact" />
+                    :label="t('pages.customers.form.contacts.addButton')" @click="addContact" />
                 </div>
 
                 <!-- Contacts Table with Editable Inputs -->
                 <v-table v-if="contacts.length > 0" class="bg-white">
                   <thead>
                     <tr class="bg-gray-100">
-                      <th class="text-right font-semibold text-gray-700 py-3 px-4">الاسم الاول</th>
-                      <th class="text-right font-semibold text-gray-700 py-3 px-4">الاسم الاخير</th>
-                      <th class="text-right font-semibold text-gray-700 py-3 px-4">البريد الالكتروني</th>
-                      <th class="text-right font-semibold text-gray-700 py-3 px-4">الهاتف</th>
-                      <th class="text-right font-semibold text-gray-700 py-3 px-4">الجوال</th>
-                      <th class="text-right font-semibold text-gray-700 py-3 px-4">الاجراءات</th>
+                      <th class="text-start font-semibold text-gray-700 py-3 px-4">{{ t('pages.customers.form.contacts.firstName') }}</th>
+                      <th class="text-start font-semibold text-gray-700 py-3 px-4">{{ t('pages.customers.form.contacts.lastName') }}</th>
+                      <th class="text-start font-semibold text-gray-700 py-3 px-4">{{ t('pages.customers.form.contacts.email') }}</th>
+                      <th class="text-start font-semibold text-gray-700 py-3 px-4">{{ t('pages.customers.form.contacts.telephone') }}</th>
+                      <th class="text-start font-semibold text-gray-700 py-3 px-4">{{ t('pages.customers.form.contacts.mobile') }}</th>
+                      <th class="text-start font-semibold text-gray-700 py-3 px-4">{{ t('pages.customers.form.contacts.actions') }}</th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr v-for="(contact, index) in contacts" :key="index" class="border-b border-gray-200">
                       <td class="py-3 px-4">
                         <TextInput v-model="contact.first_name" density="compact" variant="outlined" hide-details
-                          placeholder="اكتب الاسم الأول" :input-props="{ class: '!min-w-[160px]' }" />
+                          :placeholder="t('pages.customers.form.contacts.firstNamePlaceholder')" :input-props="{ class: '!min-w-[160px]' }" />
                       </td>
                       <td class="py-3 px-4">
                         <TextInput v-model="contact.last_name" density="compact" variant="outlined" hide-details
-                          placeholder="اكتب الاسم الأخير" :input-props="{ class: '!min-w-[160px]' }" />
+                          :placeholder="t('pages.customers.form.contacts.lastNamePlaceholder')" :input-props="{ class: '!min-w-[160px]' }" />
                       </td>
                       <td class="py-3 px-4">
                         <TextInput v-model="contact.email" density="compact" variant="outlined" hide-details
-                          placeholder="اكتب البريد الإلكتروني" :input-props="{ class: '!min-w-[200px]' }" />
+                          :placeholder="t('pages.customers.form.contacts.emailPlaceholder')" :input-props="{ class: '!min-w-[200px]' }" />
 
                       </td>
                       <td class="py-3 px-4">
@@ -842,7 +844,7 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
                   </tbody>
                 </v-table>
                 <div v-else class="text-center py-8 text-gray-500">
-                  لا توجد جهات اتصال. انقر على "اضف" لإضافة جهة اتصال جديدة.
+                  {{ t('pages.customers.form.contacts.emptyState') }}
                 </div>
               </div>
             </div>
@@ -854,60 +856,60 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
           <div class="mb-6 bg-gray-50 rounded-lg p-6">
             <!-- Row 1: Price Type, Price List, Customer Classification -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-              <SelectInput v-model="priceType" label="نوع السعر" placeholder="اختر نوع السعر" :items="priceTypeItems"
+              <SelectInput v-model="priceType" :label="t('pages.customers.form.accounting.priceType')" :placeholder="t('pages.customers.form.accounting.priceTypePlaceholder')" :items="priceTypeItems"
                 :hide-details="false" :error-messages="formErrors['price_type']"
                 @update:model-value="delete formErrors['price_type']" />
               <!-- <SelectWithIconInput v-model="priceList" label="قائمة الاسعار" placeholder="قائمة الاسعار"
                 :items="priceListItems" :hide-details="false"  @add-click="handleAddPriceList" /> -->
-              <SelectWithIconInput show-add-button v-model="customerClassification" label="تصنيف العميل"
-                placeholder="اختر تصنيف العميل" :items="customerClassificationItems" :hide-details="false"
+              <SelectWithIconInput show-add-button v-model="customerClassification" :label="t('pages.customers.form.accounting.customerClassification')"
+                :placeholder="t('pages.customers.form.accounting.customerClassificationPlaceholder')" :items="customerClassificationItems" :hide-details="false"
                 :error-messages="formErrors['customer_classification_id']" @add-click="handleAddClassification"
                 @update:model-value="delete formErrors['customer_classification_id']" />
-              <SelectWithIconInput show-add-button v-model="salesRepresentative" label="مندوب المبيعات"
-                placeholder="اختر مندوب المبيعات" :items="salesRepresentativeItems" :hide-details="false"
+              <SelectWithIconInput show-add-button v-model="salesRepresentative" :label="t('pages.customers.form.accounting.salesRepresentative')"
+                :placeholder="t('pages.customers.form.accounting.salesRepresentativePlaceholder')" :items="salesRepresentativeItems" :hide-details="false"
                 :error-messages="formErrors['sales_man_id']" @add-click="handleAddSalesRep"
                 @update:model-value="delete formErrors['sales_man_id']" />
               <div>
-                <span class="text-sm font-semibold text-gray-700 mb-1 block">انشاء حساب خاص في شجرة المحاسبة</span>
+                <span class="text-sm font-semibold text-gray-700 mb-1 block">{{ t('pages.customers.form.accounting.createAccountInTree') }}</span>
                 <v-radio-group v-model="createAccountInTree" inline hide-details>
-                  <v-radio label="نعم" :value="true" color="primary" />
-                  <v-radio label="لا" :value="false" color="primary" />
+                  <v-radio :label="t('common.yes')" :value="true" color="primary" />
+                  <v-radio :label="t('common.no')" :value="false" color="primary" />
                 </v-radio-group>
               </div>
-              <SelectWithIconInput v-model="account" label="الحساب" placeholder="اختر الحساب" :items="accountItems"
+              <SelectWithIconInput v-model="account" :label="t('pages.customers.form.accounting.account')" :placeholder="t('pages.customers.form.accounting.accountPlaceholder')" :items="accountItems"
                 :hide-details="false" :error-messages="formErrors['tree_chart_card_id']" @add-click="handleAddAccount"
                 @update:model-value="delete formErrors['tree_chart_card_id']" />
-              <SelectInput v-model="relatedCustomers" label="العملاء المرتبطين" placeholder="اختر العملاء المرتبطين"
+              <SelectInput v-model="relatedCustomers" :label="t('pages.customers.form.accounting.relatedCustomers')" :placeholder="t('pages.customers.form.accounting.relatedCustomersPlaceholder')"
                 :items="relatedCustomersItems" :hide-details="false" multiple
                 :error-messages="formErrors['related_customers']"
                 @update:model-value="delete formErrors['related_customers']" />
-              <PriceInput v-model="minimumCredit" label="الحد الادنى (دائن)" placeholder="اكتب الحد الأدنى للدائن" 
+              <PriceInput v-model="minimumCredit" :label="t('pages.customers.form.labels.minimumCredit')" :placeholder="t('pages.customers.form.labels.minimumCreditPlaceholder')" 
                 :hide-details="false" :error-messages="formErrors['minimum_credit']"
                 @input="delete formErrors['minimum_credit']" />
-              <PriceInput v-model="maximumCredit" label="الحد الاعلى (دائن)" placeholder="اكتب الحد الأعلى للدائن" 
+              <PriceInput v-model="maximumCredit" :label="t('pages.customers.form.labels.maximumCredit')" :placeholder="t('pages.customers.form.labels.maximumCreditPlaceholder')" 
                 :hide-details="false" :error-messages="formErrors['maximum_credit']"
                 @input="delete formErrors['maximum_credit']" />
-              <PriceInput v-model="minimumDebit" label="الحد الادنى (مدين)" placeholder="اكتب الحد الأدنى للمدين" 
+              <PriceInput v-model="minimumDebit" :label="t('pages.customers.form.labels.minimumDebit')" :placeholder="t('pages.customers.form.labels.minimumDebitPlaceholder')" 
                 :hide-details="false" :error-messages="formErrors['minimum_debit']"
                 @input="delete formErrors['minimum_debit']" />
-              <PriceInput v-model="maximumDebit" label="الحد الاعلى (مدين)" placeholder="اكتب الحد الأعلى للمدين" 
+              <PriceInput v-model="maximumDebit" :label="t('pages.customers.form.labels.maximumDebit')" :placeholder="t('pages.customers.form.labels.maximumDebitPlaceholder')" 
                 :hide-details="false" :error-messages="formErrors['maximum_debit']"
                 @input="delete formErrors['maximum_debit']" />
               <div>
-                <span class="text-sm font-semibold text-gray-700 mb-1 block">الحالة الافتراضية</span>
+                <span class="text-sm font-semibold text-gray-700 mb-1 block">{{ t('pages.customers.form.accounting.defaultStatus') }}</span>
                 <div class="flex items-center gap-3 mt-1">
                   <v-radio-group v-model="defaultStatus" inline hide-details>
                     <v-radio :value="true" color="primary">
                       <template #label>
                         <span :class="defaultStatus ? 'text-primary font-semibold' : 'text-gray-600'">
-                          فعال
+                          {{ t('common.active') }}
                         </span>
                       </template>
                     </v-radio>
                     <v-radio :value="false" color="primary">
                       <template #label>
                         <span :class="!defaultStatus ? 'text-primary font-semibold' : 'text-gray-600'">
-                          غير فعال
+                          {{ t('common.inactive') }}
                         </span>
                       </template>
                     </v-radio>
@@ -923,10 +925,10 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
 
           <!-- Balances Section -->
           <div class="bg-gray-50 rounded-lg p-6">
-            <h2 class="text-lg font-bold text-primary-900 mb-4">الارصدة</h2>
+            <h2 class="text-lg font-bold text-primary-900 mb-4">{{ t('pages.customers.form.balance.title') }}</h2>
 
             <div v-if="customerBalances.length === 0" class="text-center text-gray-500 py-4">
-              لا توجد أرصدة متاحة
+              {{ t('pages.customers.form.balance.emptyState') }}
             </div>
 
             <div v-else class="space-y-6">
@@ -936,24 +938,24 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
 
                 <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
                   <div class="text-center">
-                    <div class="text-xs font-semibold text-gray-600 mb-1">دائن</div>
+                    <div class="text-xs font-semibold text-gray-600 mb-1">{{ t('pages.customers.form.balance.debit') }}</div>
                     <div class="text-base font-bold text-gray-900">{{ parseFloat(balance.debit).toFixed(2) }}</div>
                   </div>
                   <div class="text-center">
-                    <div class="text-xs font-semibold text-gray-600 mb-1">مدين</div>
+                    <div class="text-xs font-semibold text-gray-600 mb-1">{{ t('pages.customers.form.balance.credit') }}</div>
                     <div class="text-base font-bold text-gray-900">{{ parseFloat(balance.credit).toFixed(2) }}</div>
                   </div>
                   <div class="text-center">
-                    <div class="text-xs font-semibold text-gray-600 mb-1">الرصيد</div>
+                    <div class="text-xs font-semibold text-gray-600 mb-1">{{ t('pages.customers.form.balance.balance') }}</div>
                     <div class="text-base font-bold text-primary-700">{{ parseFloat(balance.balance).toFixed(2) }}</div>
                   </div>
                   <div class="text-center">
-                    <div class="text-xs font-semibold text-gray-600 mb-1">آخر مبلغ</div>
+                    <div class="text-xs font-semibold text-gray-600 mb-1">{{ t('pages.customers.form.balance.lastAmount') }}</div>
                     <div class="text-base font-bold text-gray-900">{{ parseFloat(balance.last_amount).toFixed(2) }}
                     </div>
                   </div>
                   <div class="text-center">
-                    <div class="text-xs font-semibold text-gray-600 mb-1">آخر تحديث</div>
+                    <div class="text-xs font-semibold text-gray-600 mb-1">{{ t('pages.customers.form.balance.lastUpdate') }}</div>
                     <div class="text-sm font-medium text-gray-700">{{ new
                       Date(balance.last_validated_date).toLocaleDateString('en-US') }}</div>
                   </div>
@@ -967,10 +969,10 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
       <!-- Action Buttons -->
       <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col">
         <ButtonWithIcon variant="flat" color="primary" rounded="4" height="48" custom-class="min-w-56"
-          :prepend-icon="saveIcon" label="حفظ" @click="handleSave" :loading="saving" />
+          :prepend-icon="saveIcon" :label="t('pages.customers.form.buttons.save')" @click="handleSave" :loading="saving" />
 
         <ButtonWithIcon prepend-icon="mdi-close" variant="flat" color="primary-50" rounded="4" height="48"
-          :disabled="saving" custom-class="font-semibold text-base text-primary-700 px-6 min-w-56" label="إغلاق"
+          :disabled="saving" custom-class="font-semibold text-base text-primary-700 px-6 min-w-56" :label="t('pages.customers.form.buttons.close')"
           @click="handleClose" />
       </div>
     </div>

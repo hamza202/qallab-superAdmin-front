@@ -2,6 +2,7 @@
 import { ref, computed, onMounted, watch, reactive } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useApi } from "@/composables/useApi";
+import { useI18n } from "vue-i18n";
 
 // Available languages
 const availableLanguages = ref([
@@ -12,6 +13,7 @@ const availableLanguages = ref([
 const route = useRoute();
 const router = useRouter();
 const api = useApi();
+const { t } = useI18n();
 
 // TypeScript Interfaces
 interface ListItem {
@@ -90,7 +92,7 @@ interface SupplierResponse {
 
 // Check if editing
 const isEditing = computed(() => !!route.params.id);
-const pageTitle = computed(() => isEditing.value ? 'تعديل مورد' : 'إضافة مورد');
+const pageTitle = computed(() => isEditing.value ? t('pages.suppliers.edit') : t('pages.suppliers.create'));
 
 // Loading states
 const loading = ref(false);
@@ -108,17 +110,17 @@ const formErrors = reactive<Record<string, string>>({});
 
 // Tabs
 const activeTab = ref(0);
-const tabs = [
+const tabs = computed(() => [
   {
-    title: "المعلومات الاساسية", value: 0, icon: `<svg width="19" height="22" viewBox="0 0 19 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+    title: t('pages.suppliers.form.tabs.basicInfo'), value: 0, icon: `<svg width="19" height="22" viewBox="0 0 19 22" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M17 11.5V5.8C17 4.11984 17 3.27976 16.673 2.63803C16.3854 2.07354 15.9265 1.6146 15.362 1.32698C14.7202 1 13.8802 1 12.2 1H5.8C4.11984 1 3.27976 1 2.63803 1.32698C2.07354 1.6146 1.6146 2.07354 1.32698 2.63803C1 3.27976 1 4.11984 1 5.8V16.2C1 17.8802 1 18.7202 1.32698 19.362C1.6146 19.9265 2.07354 20.3854 2.63803 20.673C3.27976 21 4.11984 21 5.8 21H9M11 10H5M7 14H5M13 6H5M11.5 18L13.5 20L18 15.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>` },
   {
-    title: "المعلومات المحاسبية", value: 1, icon: `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+    title: t('pages.suppliers.form.tabs.accountingInfo'), value: 1, icon: `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M15.5 4.5L4.5 15.5M6.5 8.5V4.5M4.5 6.5H8.5M11.5 13.5H15.5M5.8 19H14.2C15.8802 19 16.7202 19 17.362 18.673C17.9265 18.3854 18.3854 17.9265 18.673 17.362C19 16.7202 19 15.8802 19 14.2V5.8C19 4.11984 19 3.27976 18.673 2.63803C18.3854 2.07354 17.9265 1.6146 17.362 1.32698C16.7202 1 15.8802 1 14.2 1H5.8C4.11984 1 3.27976 1 2.63803 1.32698C2.07354 1.6146 1.6146 2.07354 1.32698 2.63803C1 3.27976 1 4.11984 1 5.8V14.2C1 15.8802 1 16.7202 1.32698 17.362C1.6146 17.9265 2.07354 18.3854 2.63803 18.673C3.27976 19 4.11984 19 5.8 19Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
 ` },
-];
+]);
 
 const isTabActive = (value: number) => activeTab.value === value;
 
@@ -272,7 +274,7 @@ const fetchSupplierData = async () => {
     account.value = data.tree_chart_card_id;
   } catch (err: any) {
     console.error('Error fetching supplier data:', err);
-    toast.error(err?.response?.data?.message || 'Failed to fetch supplier data');
+    toast.error(err?.response?.data?.message || t('pages.suppliers.form.messages.fetchError'));
   } finally {
     loading.value = false;
   }
@@ -361,7 +363,7 @@ const saveStep = async (step: number) => {
       supplierId.value = response.data.supplier_id;
     }
 
-    toast.success(response.message || 'تم حفظ المورد بنجاح');
+    toast.success(response.message || t('pages.suppliers.form.messages.saveSuccess'));
     return true;
   } catch (err: any) {
     console.error('Error saving supplier:', err);
@@ -372,9 +374,9 @@ const saveStep = async (step: number) => {
       Object.keys(apiErrors).forEach(key => {
         formErrors[key] = apiErrors[key][0];
       });
-      toast.error(err?.response?.data?.message || 'يرجى تصحيح الأخطاء في النموذج');
+      toast.error(err?.response?.data?.message || t('pages.suppliers.form.messages.validationError'));
     } else {
-      toast.error(err?.response?.data?.message || 'فشل حفظ المورد');
+      toast.error(err?.response?.data?.message || t('pages.suppliers.form.messages.saveError'));
     }
     return false;
   } finally {
@@ -406,7 +408,7 @@ const handleSave = async () => {
   if (formRef.value && typeof formRef.value.validate === 'function') {
     const { valid } = await formRef.value.validate();
     if (!valid) {
-      toast.error('يرجى تصحيح الأخطاء في النموذج');
+      toast.error(t('pages.suppliers.form.messages.validationError'));
       return;
     }
   }
@@ -540,69 +542,80 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
           <v-form ref="formRef" v-model="isFormValid" @submit.prevent>
             <!-- Supplier Data Section -->
             <div class="mb-6 bg-gray-50 rounded-lg p-6">
-              <h2 class="text-lg font-bold text-primary-900 mb-4">{{ pageTitle }} - بيانات المورد</h2>
+              <h2 class="text-lg font-bold text-primary-900 mb-4">{{ pageTitle }} - {{
+                t('pages.suppliers.form.sections.supplierData') }}</h2>
 
               <!-- Row 1: Business Name, First Name, Last Name with Language Tabs -->
               <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3  gap-4 mb-4">
-                <LanguageTabs :languages="availableLanguages" label="الاسم التجاري">
+                <LanguageTabs :languages="availableLanguages" :label="t('pages.suppliers.form.labels.businessName')">
                   <template #en>
-                    <TextInput v-model="businessNameEn" placeholder="Enter business name in English"
-                      :rules="[required()]" :hide-details="false" :error-messages="formErrors['business_name.en']"
+                    <TextInput v-model="businessNameEn"
+                      :placeholder="t('pages.suppliers.form.labels.businessNamePlaceholderEn')" :rules="[required()]"
+                      :hide-details="false" :error-messages="formErrors['business_name.en']"
                       @input="delete formErrors['business_name.en']" />
                   </template>
                   <template #ar>
-                    <TextInput v-model="businessNameAr" placeholder="ادخل الاسم التجاري بالعربية" :rules="[required()]"
+                    <TextInput v-model="businessNameAr"
+                      :placeholder="t('pages.suppliers.form.labels.businessNamePlaceholderAr')" :rules="[required()]"
                       :hide-details="false" :error-messages="formErrors['business_name.ar']"
                       @input="delete formErrors['business_name.ar']" />
                   </template>
                 </LanguageTabs>
 
-                <LanguageTabs :languages="availableLanguages" label="الاسم الأول">
+                <LanguageTabs :languages="availableLanguages" :label="t('pages.suppliers.form.labels.firstName')">
                   <template #en>
-                    <TextInput v-model="firstNameEn" placeholder="Enter first name in English" :rules="[required()]"
+                    <TextInput v-model="firstNameEn"
+                      :placeholder="t('pages.suppliers.form.labels.firstNamePlaceholderEn')" :rules="[required()]"
                       :hide-details="false" :error-messages="formErrors['first_name.en']"
                       @input="delete formErrors['first_name.en']" />
                   </template>
                   <template #ar>
-                    <TextInput v-model="firstNameAr" placeholder="ادخل الاسم الأول بالعربية" :rules="[required()]"
+                    <TextInput v-model="firstNameAr"
+                      :placeholder="t('pages.suppliers.form.labels.firstNamePlaceholderAr')" :rules="[required()]"
                       :hide-details="false" :error-messages="formErrors['first_name.ar']"
                       @input="delete formErrors['first_name.ar']" />
                   </template>
                 </LanguageTabs>
 
-                <LanguageTabs :languages="availableLanguages" label="الاسم الأخير">
+                <LanguageTabs :languages="availableLanguages" :label="t('pages.suppliers.form.labels.lastName')">
                   <template #en>
-                    <TextInput v-model="lastNameEn" placeholder="Enter last name in English" :rules="[required()]"
+                    <TextInput v-model="lastNameEn"
+                      :placeholder="t('pages.suppliers.form.labels.lastNamePlaceholderEn')" :rules="[required()]"
                       :hide-details="false" :error-messages="formErrors['last_name.en']"
                       @input="delete formErrors['last_name.en']" />
                   </template>
                   <template #ar>
-                    <TextInput v-model="lastNameAr" placeholder="ادخل الاسم الأخير بالعربية" :rules="[required()]"
+                    <TextInput v-model="lastNameAr"
+                      :placeholder="t('pages.suppliers.form.labels.lastNamePlaceholderAr')" :rules="[required()]"
                       :hide-details="false" :error-messages="formErrors['last_name.ar']"
                       @input="delete formErrors['last_name.ar']" />
                   </template>
                 </LanguageTabs>
 
                 <div v-if="isEditing">
-                  <div class="mb-[7px] text-sm font-semibold text-gray-700">كود المورد</div>
+                  <div class="mb-[7px] text-sm font-semibold text-gray-700">{{
+                    t('pages.suppliers.form.labels.supplierCode') }}</div>
                   <div class="bg-gray-200 text-primary-900 rounded-lg px-4 py-2.5 font-bold text-end">
                     {{ supplierCode }}
                   </div>
                 </div>
-                <SelectInput v-model="defaultCurrency" clearable label="العملة الافتراضية" placeholder="ريال سعودي"
-                  :items="currencyItems" :rules="[required()]" :hide-details="false"
-                  :error-messages="formErrors['default_currency_id']"
+                <SelectInput v-model="defaultCurrency" clearable
+                  :label="t('pages.suppliers.form.labels.defaultCurrency')"
+                  :placeholder="t('pages.suppliers.form.labels.defaultCurrencyPlaceholder')" :items="currencyItems"
+                  :rules="[required()]" :hide-details="false" :error-messages="formErrors['default_currency_id']"
                   @update:model-value="delete formErrors['default_currency_id']" />
-                <TelInput v-model="mobile" label="الجوال" :rules="[required(), saudiPhone()]"
-                  :error-messages="formErrors['mobile']" @input="delete formErrors['mobile']" />
-                <TelInput v-model="phone" label="الهاتف" :rules="[saudiPhone()]" :error-messages="formErrors['phone']"
-                  @input="delete formErrors['phone']" />
+                <TelInput v-model="mobile" :label="t('pages.suppliers.form.labels.mobile')"
+                  :rules="[required(), saudiPhone()]" :error-messages="formErrors['mobile']"
+                  @input="delete formErrors['mobile']" />
+                <TelInput v-model="phone" :label="t('pages.suppliers.form.labels.phone')" :rules="[saudiPhone()]"
+                  :error-messages="formErrors['phone']" @input="delete formErrors['phone']" />
 
-                <TextInput v-model="email" dir="ltr" label="البريد الالكتروني" placeholder="example@gmail.com"
+                <TextInput v-model="email" dir="ltr" :label="t('pages.suppliers.form.labels.email')"
+                  :placeholder="t('pages.suppliers.form.labels.emailPlaceholder', { email: 'example@gmail.com' })"
                   :rules="[required()]" :hide-details="false" :error-messages="formErrors['email']"
                   @input="delete formErrors['email']" />
-                <TextInput v-model="businessNumber" label="رقم السجل التجاري" placeholder="ادخل الرقم"
-                  :hide-details="false">
+                <TextInput v-model="businessNumber" :label="t('pages.suppliers.form.labels.businessNumber')"
+                  :placeholder="t('pages.suppliers.form.labels.businessNumberPlaceholder')" :hide-details="false">
                   <template #append-inner>
                     <v-tooltip location="top" content-class="custom-tooltip">
                       <template #activator="{ props: tooltipProps }">
@@ -610,12 +623,13 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
                           :prepend-icon="infoIcon" v-bind="tooltipProps" />
                       </template>
                       <div>
-                        رقم السجل التجاري للمورد
+                        {{ t('pages.suppliers.form.labels.businessNumberTooltip') }}
                       </div>
                     </v-tooltip>
                   </template>
                 </TextInput>
-                <TextInput v-model="taxNumber" label="الرقم الضريبي" placeholder="ادخل الرقم" :hide-details="false">
+                <TextInput v-model="taxNumber" :label="t('pages.suppliers.form.labels.taxNumber')"
+                  :placeholder="t('pages.suppliers.form.labels.taxNumberPlaceholder')" :hide-details="false">
                   <template #append-inner>
                     <v-tooltip location="top" content-class="custom-tooltip">
                       <template #activator="{ props: tooltipProps }">
@@ -623,26 +637,27 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
                           :prepend-icon="infoIcon" v-bind="tooltipProps" />
                       </template>
                       <div>
-                        الرقم الضريبي للمورد
+                        {{ t('pages.suppliers.form.labels.taxNumberTooltip') }}
                       </div>
                     </v-tooltip>
                   </template>
                 </TextInput>
                 <div>
-                  <div class="mb-[7px] text-sm font-semibold text-gray-700">الحالة</div>
+                  <div class="mb-[7px] text-sm font-semibold text-gray-700">{{ t('pages.suppliers.form.labels.status')
+                    }}</div>
                   <div class="flex items-center gap-3 mt-1">
                     <v-radio-group v-model="status" inline hide-details>
                       <v-radio :value="true" color="primary">
                         <template #label>
                           <span :class="status ? 'text-primary font-semibold' : 'text-gray-600'">
-                            فعال
+                            {{ t('common.status.active') }}
                           </span>
                         </template>
                       </v-radio>
                       <v-radio :value="false" color="primary">
                         <template #label>
                           <span :class="!status ? 'text-primary font-semibold' : 'text-gray-600'">
-                            غير فعال
+                            {{ t('common.status.inactive') }}
                           </span>
                         </template>
                       </v-radio>
@@ -662,7 +677,8 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
                     : 'text-gray-400 hover:bg-gray-50',
                 ]">
                   <span v-html="locationIcon"></span>
-                  <span class="text-base font-semibold whitespace-nowrap"> معلومات العنوان </span>
+                  <span class="text-base font-semibold whitespace-nowrap">{{
+                    t('pages.suppliers.form.subTabs.addressInfo') }}</span>
                 </button>
                 <button @click="basicInfoSubTab = 1" :class="[
                   'flex items-center gap-2 px-3.5 py-2.5 rounded-md transition-all',
@@ -671,29 +687,36 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
                     : 'text-gray-400 hover:bg-gray-50',
                 ]">
                   <span v-html="listIcon"></span>
-                  <span class="text-base font-semibold whitespace-nowrap"> قائمة الاتصال </span>
+                  <span class="text-base font-semibold whitespace-nowrap">{{
+                    t('pages.suppliers.form.subTabs.contactList') }}</span>
                 </button>
               </div>
 
               <!-- Address Info Sub-tab -->
               <div v-if="basicInfoSubTab === 0" class="bg-gray-50 rounded-lg p-6 mt-4">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                  <SelectInput v-model="country" label="الدولة" placeholder="الدولة" :items="countryItems"
+                  <SelectInput v-model="country" :label="t('pages.suppliers.form.labels.country')"
+                    :placeholder="t('pages.suppliers.form.labels.countryPlaceholder')" :items="countryItems"
                     :rules="[required()]" :hide-details="false" clearable :error-messages="formErrors['country_code']"
                     @update:model-value="delete formErrors['country_code']" />
-                  <SelectInput v-model="city" label="المدينة" placeholder="المدينة" :items="cityItems"
+                  <SelectInput v-model="city" :label="t('pages.suppliers.form.labels.city')"
+                    :placeholder="t('pages.suppliers.form.labels.cityPlaceholder')" :items="cityItems"
                     :rules="[required()]" :hide-details="false" :disabled="!country" clearable
                     :error-messages="formErrors['city_id']" @update:model-value="delete formErrors['city_id']" />
-                  <TextInput v-model="postalCode" label="الرمز البريدي" placeholder="الرمز البريدي"
-                    :hide-details="false" />
-                  <TextInput v-model="district" label="اسم الحي" placeholder="اسم الحي" :hide-details="false" />
-                  <TextInput v-model="streetName" label="اسم الشارع" placeholder="اسم الشارع" :hide-details="false" />
-                  <TextInput v-model="buildingNumber" label="رقم المبنى" placeholder="رقم المبنى"
-                    :hide-details="false" />
-                  <TextInput v-model="nationalAddress" label="أدخل العنوان الوطني" placeholder="العنوان الوطني"
-                    :rules="[required()]" :hide-details="false" :error-messages="formErrors['address_1']"
+                  <TextInput v-model="postalCode" :label="t('pages.suppliers.form.labels.postalCode')"
+                    :placeholder="t('pages.suppliers.form.labels.postalCodePlaceholder')" :hide-details="false" />
+                  <TextInput v-model="district" :label="t('pages.suppliers.form.labels.district')"
+                    :placeholder="t('pages.suppliers.form.labels.districtPlaceholder')" :hide-details="false" />
+                  <TextInput v-model="streetName" :label="t('pages.suppliers.form.labels.streetName')"
+                    :placeholder="t('pages.suppliers.form.labels.streetNamePlaceholder')" :hide-details="false" />
+                  <TextInput v-model="buildingNumber" :label="t('pages.suppliers.form.labels.buildingNumber')"
+                    :placeholder="t('pages.suppliers.form.labels.buildingNumberPlaceholder')" :hide-details="false" />
+                  <TextInput v-model="nationalAddress" :label="t('pages.suppliers.form.labels.nationalAddress')"
+                    :placeholder="t('pages.suppliers.form.labels.nationalAddressPlaceholder')" :rules="[required()]"
+                    :hide-details="false" :error-messages="formErrors['address_1']"
                     @input="delete formErrors['address_1']" />
-                  <TextInput v-model="address2" label="العنوان 2" placeholder="العنوان الإضافي" :hide-details="false" />
+                  <TextInput v-model="address2" :label="t('pages.suppliers.form.labels.address2')"
+                    :placeholder="t('pages.suppliers.form.labels.address2Placeholder')" :hide-details="false" />
                 </div>
               </div>
 
@@ -701,45 +724,60 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
               <div v-if="basicInfoSubTab === 1" class="bg-gray-50 -mx-6">
                 <!-- Add Contact Form -->
                 <div class="flex items-center justify-between flex-wrap gap-4 px-6 border-y border-gray-200 py-3">
-                  <h3 class="text-lg font-bold text-gray-600">قائمة جهات الاتصال</h3>
+                  <h3 class="text-lg font-bold text-gray-600">{{ t('pages.suppliers.form.contacts.title') }}</h3>
                   <ButtonWithIcon variant="flat" color="primary-500" border="sm" height="40"
                     custom-class="font-semibold px-6 !text-white !border-primary-200" :prepend-icon="plusIcon"
-                    label="أضف جهة اتصال" @click="addContact" />
+                    :label="t('pages.suppliers.form.contacts.addButton')" @click="addContact" />
                 </div>
 
                 <!-- Contacts Table -->
                 <v-table v-if="contacts.length > 0" class="bg-white">
                   <thead>
                     <tr class="bg-gray-100">
-                      <th class="text-right font-semibold text-gray-700 py-3 px-4">الاسم الاول</th>
-                      <th class="text-right font-semibold text-gray-700 py-3 px-4">الاسم الاخر</th>
-                      <th class="text-right font-semibold text-gray-700 py-3 px-4">البريد الالكتروني</th>
-                      <th class="text-right font-semibold text-gray-700 py-3 px-4">الهاتف</th>
-                      <th class="text-right font-semibold text-gray-700 py-3 px-4">الجوال</th>
-                      <th class="text-right font-semibold text-gray-700 py-3 px-4">إجراءات</th>
+                      <th class="text-start font-semibold text-gray-700 py-3 px-4">{{
+                        t('pages.suppliers.form.contacts.firstName')
+                        }}</th>
+                      <th class="text-start font-semibold text-gray-700 py-3 px-4">{{
+                        t('pages.suppliers.form.contacts.lastName') }}
+                      </th>
+                      <th class="text-start font-semibold text-gray-700 py-3 px-4">{{
+                        t('pages.suppliers.form.contacts.email') }}
+                      </th>
+                      <th class="text-start font-semibold text-gray-700 py-3 px-4">{{
+                        t('pages.suppliers.form.contacts.telephone')
+                        }}</th>
+                      <th class="text-start font-semibold text-gray-700 py-3 px-4">{{
+                        t('pages.suppliers.form.contacts.mobile') }}
+                      </th>
+                      <th class="text-start font-semibold text-gray-700 py-3 px-4">{{
+                        t('pages.suppliers.form.contacts.actions') }}
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr v-for="(contact, index) in contacts" :key="index" class="border-b border-gray-200">
                       <td class="py-3 px-4">
-                        <TextInput v-model="contact.first_name" placeholder="الاسم الاول" :hide-details="true"
+                        <TextInput v-model="contact.first_name"
+                          :placeholder="t('pages.suppliers.form.contacts.firstNamePlaceholder')" :hide-details="true"
                           density="compact" :input-props="{ class: 'min-w-[150px]' }" />
                       </td>
                       <td class="py-3 px-4">
-                        <TextInput v-model="contact.last_name" placeholder="الاسم الاخر" :hide-details="true"
+                        <TextInput v-model="contact.last_name"
+                          :placeholder="t('pages.suppliers.form.contacts.lastNamePlaceholder')" :hide-details="true"
                           density="compact" :input-props="{ class: 'min-w-[150px]' }" />
                       </td>
                       <td class="py-3 px-4">
-                        <TextInput v-model="contact.email" placeholder="example@gmail.com" dir="ltr" :hide-details="true"
-                          density="compact" :input-props="{ class: 'min-w-[180px]' }" />
+                        <TextInput v-model="contact.email"
+                          :placeholder="t('pages.suppliers.form.contacts.emailPlaceholder', { email: 'example@gmail.com' })"
+                          dir="ltr" :hide-details="true" density="compact" :input-props="{ class: 'min-w-[180px]' }" />
                       </td>
                       <td class="py-3 px-4">
                         <TelInput v-model="contact.telephone" :hide-details="true" density="compact"
                           :input-props="{ class: 'min-w-[200px]' }" />
                       </td>
                       <td class="py-3 px-4">
-                        <TelInput :input-props="{ class: 'min-w-[200px]' }" v-model="contact.mobile" :hide-details="true"
-                          density="compact" />
+                        <TelInput :input-props="{ class: 'min-w-[200px]' }" v-model="contact.mobile"
+                          :hide-details="true" density="compact" />
                       </td>
                       <td class="py-3 px-4">
                         <ButtonWithIcon :icon="trashIcon" icon-only size="small" variant="text" color="error"
@@ -749,7 +787,7 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
                   </tbody>
                 </v-table>
                 <div v-else class="text-center py-8 text-gray-500">
-                  لا توجد جهات اتصال. انقر على "اضف" لإضافة جهة اتصال جديدة.
+                  {{ t('pages.suppliers.form.contacts.emptyState') }}
                 </div>
 
               </div>
@@ -785,7 +823,8 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
                   </v-radio-group>
                 </div> -->
 
-                <SelectWithIconInput v-model="account" label="الحساب" placeholder="الحساب" :items="accountItems"
+                <SelectWithIconInput v-model="account" :label="t('pages.suppliers.form.labels.account')"
+                  :placeholder="t('pages.suppliers.form.labels.accountPlaceholder')" :items="accountItems"
                   :hide-details="false" @add-click="handleAddAccount" />
               </div>
             </div>
@@ -793,21 +832,25 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
             <!-- Balances Section -->
             <div v-if="isEditing" class="bg-white">
               <div class="px-6 py-4 border border-gray-200">
-                <h2 class="text-lg font-bold text-gray-900">الارصدة</h2>
+                <h2 class="text-lg font-bold text-gray-900">{{ t('pages.suppliers.form.balances.label') }}</h2>
               </div>
 
               <div v-if="supplierBalances.length === 0" class="text-center py-8">
-                <p class="text-gray-500">لا توجد أرصدة متاحة</p>
+                <p class="text-gray-500">{{ t('pages.suppliers.form.balances.noBalances') }}</p>
               </div>
 
               <div v-else class="overflow-x-auto">
                 <table class="w-full">
                   <thead>
                     <tr class="bg-gray-50 border-b border-gray-200">
-                      <th class="px-6 py-3 text-sm font-semibold text-gray-700">الرصيد</th>
-                      <th class="px-6 py-3 text-sm font-semibold text-gray-700">المبلغ المستحق</th>
-                      <th class="px-6 py-3 text-sm font-semibold text-gray-700">العملة</th>
-                      <th class="px-6 py-3 text-sm font-semibold text-gray-700">تاريخ التدقيق الأخير</th>
+                      <th class="px-6 py-3 text-sm font-semibold text-gray-700">{{
+                        t('pages.suppliers.form.balances.headers.balance') }}</th>
+                      <th class="px-6 py-3 text-sm font-semibold text-gray-700">{{
+                        t('pages.suppliers.form.balances.headers.dueAmount') }}</th>
+                      <th class="px-6 py-3 text-sm font-semibold text-gray-700">{{
+                        t('pages.suppliers.form.balances.headers.currency') }}</th>
+                      <th class="px-6 py-3 text-sm font-semibold text-gray-700">{{
+                        t('pages.suppliers.form.balances.headers.lastValidationDate') }}</th>
                     </tr>
                   </thead>
                   <tbody class="text-center">
@@ -831,11 +874,12 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
       <!-- Action Buttons -->
       <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col">
         <ButtonWithIcon variant="flat" color="primary" rounded="4" height="48" custom-class="min-w-56"
-          :prepend-icon="saveIcon" label="حفظ" @click="handleSave" :loading="saving" />
+          :prepend-icon="saveIcon" :label="t('pages.suppliers.form.buttons.save')" @click="handleSave"
+          :loading="saving" />
 
         <ButtonWithIcon prepend-icon="mdi-close" variant="flat" color="primary-50" rounded="4" :disabled="saving"
-          height="48" custom-class="font-semibold text-base text-primary-700 px-6 min-w-56" label="إغلاق"
-          @click="handleClose" />
+          height="48" custom-class="font-semibold text-base text-primary-700 px-6 min-w-56"
+          :label="t('pages.suppliers.form.buttons.close')" @click="handleClose" />
       </div>
     </div>
 

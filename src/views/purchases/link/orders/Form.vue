@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
 import { useApi } from "@/composables/useApi";
 import { useNotification } from "@/composables/useNotification";
 import {
@@ -18,6 +19,7 @@ const route = useRoute();
 const router = useRouter();
 const api = useApi();
 const { success, error } = useNotification();
+const { t } = useI18n();
 
 // ── Route params ────────────────────────────────────────────────
 const purchaseUuid = computed(() => route.params.id as string);
@@ -170,11 +172,11 @@ const handleAdd = async () => {
       `/purchases/orders/${categorySlug.value}/link/${purchaseUuid.value}`,
       { uuids }
     );
-    success("تم الربط بنجاح");
+    success(t("purchases.link.shared.messages.linkSuccess"));
     resetFormSelections();
   } catch (e: any) {
     console.error("handleAdd error:", e);
-    error(e?.response?.data?.message ?? "فشل الربط");
+    error(e?.response?.data?.message ?? t("purchases.link.shared.messages.linkFailed"));
   } finally {
     submitting.value = false;
   }
@@ -188,10 +190,10 @@ const removeLinkedItem = async (uuid: string) => {
       `/purchases/orders/building-materials/link/${purchaseUuid.value}`,
       { uuids }
     );
-    success("تم الحذف بنجاح");
+    success(t("purchases.link.shared.messages.deleteSuccess"));
   } catch (e: any) {
     console.error("removeLinkedItem error:", e);
-    error(e?.response?.data?.message ?? "فشل الحذف");
+    error(e?.response?.data?.message ?? t("purchases.link.shared.messages.deleteFailed"));
   }
 };
 
@@ -284,10 +286,10 @@ const linkedTableItems = computed(() =>
       <!-- ── Page Header ─────────────────────────────────────────── -->
       <TopHeader
         :icon="linkIcon"
-        title-key="الربط مع طلبيات العملاء"
-        description-key="تساعدك في الربط بين طللبيات المنتجات بين البائع والمشتري"
+        title-key="purchases.link.orders.form.pageTitle"
+        description-key="purchases.link.orders.form.pageDescription"
         :code="sall_orders_code_from_index || ''"
-        code-label="كود الطلبية"
+        code-label-key="purchases.link.orders.form.codeLabel"
         :show-action="false"
       />
 
@@ -295,7 +297,7 @@ const linkedTableItems = computed(() =>
       <div class="bg-white rounded-3xl border border-gray-100 mx-6 p-6">
         <div class="flex items-center gap-2 mb-6 text-primary-600">
           <span v-html="fileCheckIcon" style="width:24px;height:24px;display:inline-flex;"></span>
-          <h2 class="text-base font-bold">معلومات الطلبية</h2>
+          <h2 class="text-base font-bold">{{ t('purchases.link.orders.form.sectionInfo') }}</h2>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
@@ -304,18 +306,18 @@ const linkedTableItems = computed(() =>
             <SelectInput
               v-model="selectedCustomerId"
               :items="customerItems"
-              label="اسم العميل"
+              :label="t('purchases.link.shared.labels.customerName')"
               item-title="title"
               item-value="value"
               density="comfortable"
-              placeholder="اختر اسم العميل"
+              :placeholder="t('purchases.link.shared.labels.selectCustomerPlaceholder')"
               :loading="loadingCustomers"
             />
           </div>
 
           <!-- نوع الطلبية (disabled) -->
           <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-2">نوع الطلبية</label>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">{{ t('purchases.link.orders.form.documentType') }}</label>
             <v-text-field
               :model-value="categoryLabel || categoryKey"
               density="comfortable"
@@ -332,11 +334,11 @@ const linkedTableItems = computed(() =>
             <SelectInput
               v-model="selectedSalesCode"
               :items="salesCodeItems"
-              label="كود طلبية المبيعات"
+              :label="t('purchases.link.orders.form.salesDocumentCode')"
               item-title="title"
               item-value="value"
               density="comfortable"
-              placeholder="اختر"
+              :placeholder="t('purchases.link.shared.labels.selectPlaceholder')"
               :loading="loadingSalesCodes"
               :disabled="!selectedCustomerId"
             />
@@ -351,7 +353,7 @@ const linkedTableItems = computed(() =>
         <div class="px-6 pt-6 pb-4 flex items-center gap-2">
           <span v-html="documentIcon" style="width:24px;height:24px;display:inline-flex;color:#1570ef;"></span>
           <h2 class="text-base font-bold text-primary-600">
-            تفاصيل الطلبية
+            {{ t('purchases.link.orders.form.sectionDetails') }}
             <span v-if="orderDetails" class="ms-1">{{ orderDetails.code }}</span>
           </h2>
         </div>
@@ -366,34 +368,34 @@ const linkedTableItems = computed(() =>
           <div class="border-y border-primary-100 px-6 py-4 flex flex-wrap gap-x-8 gap-y-3">
             <!-- حالة الطلبية (rightmost) -->
             <div>
-              <p class="text-xs font-semibold text-gray-600">حالة الطلبية:</p>
+              <p class="text-xs font-semibold text-gray-600">{{ t('purchases.link.orders.form.documentStatus') }}</p>
               <p class="text-sm font-bold text-gray-900 mt-0.5">{{ orderDetails.status_name || '—' }}</p>
             </div>
             <!-- كود عرض مبيعات -->
             <div>
-              <p class="text-xs font-semibold text-gray-600">كود عرض مبيعات :</p>
+              <p class="text-xs font-semibold text-gray-600">{{ t('purchases.link.orders.form.salesOfferCode') }}</p>
               <p class="text-sm font-bold text-gray-900 mt-0.5">{{ orderDetails.sq_code || '—' }}</p>
             </div>
             <!-- كود عرض مشتريات -->
             <div>
-              <p class="text-xs font-semibold text-gray-600">كود عرض مشتريات :</p>
+              <p class="text-xs font-semibold text-gray-600">{{ t('purchases.link.orders.form.purchaseOfferCode') }}</p>
               <p class="text-sm font-bold text-gray-900 mt-0.5">{{ orderDetails.pq_code || '—' }}</p>
             </div>
             <!-- تاريخ الطلبية -->
             <div>
-              <p class="text-xs font-semibold text-gray-600">تاريخ الطلبية :</p>
+              <p class="text-xs font-semibold text-gray-600">{{ t('purchases.link.orders.form.documentDate') }}</p>
               <p class="text-sm font-medium text-gray-900 mt-0.5">{{ formatDate(orderDetails.so_datetime) }}</p>
             </div>
             <!-- موقع المشروع -->
             <div>
-              <p class="text-xs font-semibold text-gray-600">موقع المشروع :</p>
+              <p class="text-xs font-semibold text-gray-600">{{ t('purchases.link.shared.labels.projectLocation') }}</p>
               <p class="text-sm font-medium text-gray-900 mt-0.5 md:max-w-[400px] max-w-[200px]" :title="orderDetails.target_location">
                 {{ orderDetails.target_location || '—' }}
               </p>
             </div>
             <!-- عدد المنتجات (leftmost) -->
             <div>
-              <p class="text-xs font-semibold text-gray-600">عدد المنتجات :</p>
+              <p class="text-xs font-semibold text-gray-600">{{ t('purchases.link.shared.labels.productCount') }}</p>
               <p class="text-sm font-medium text-gray-900 mt-0.5">{{ orderDetails.items?.length ?? 0 }}</p>
             </div>
           </div>
@@ -401,7 +403,7 @@ const linkedTableItems = computed(() =>
           <!-- Products sub-header — RTL: icon on right, text next to it -->
           <div class="px-6 py-4 bg-primary-50 flex items-center gap-2 border-b border-gray-200">
             <span v-html="productIcon" style="width:22px;height:22px;display:inline-flex;color:#194185;"></span>
-            <h3 class="text-base font-bold text-primary-900">المنتجات</h3>
+            <h3 class="text-base font-bold text-primary-900">{{ t('purchases.link.shared.labels.productsSection') }}</h3>
           </div>
 
           <!-- Products table — columns ordered RTL (first in HTML = rightmost) -->
@@ -410,12 +412,12 @@ const linkedTableItems = computed(() =>
               <thead>
                 <tr class="bg-gray-50 border-b border-gray-200">
                   <!-- rightmost → leftmost -->
-                  <th class="px-6 py-3 text-xs font-bold text-gray-500 whitespace-nowrap text-right">اسم المنتج</th>
-                  <th class="px-6 py-3 text-xs font-bold text-gray-500 whitespace-nowrap text-center">الكمية</th>
-                  <th class="px-6 py-3 text-xs font-bold text-gray-500 whitespace-nowrap text-center">سعر الوحدة</th>
-                  <th class="px-6 py-3 text-xs font-bold text-gray-500 whitespace-nowrap text-center">خصم</th>
-                  <th class="px-6 py-3 text-xs font-bold text-gray-500 whitespace-nowrap text-center">مبلغ الضريبة</th>
-                  <th class="px-6 py-3 text-xs font-bold text-gray-500 whitespace-nowrap text-center">إجمالي المبلغ</th>
+                  <th class="px-6 py-3 text-xs font-bold text-gray-500 whitespace-nowrap text-start">{{ t('purchases.link.shared.table.productName') }}</th>
+                  <th class="px-6 py-3 text-xs font-bold text-gray-500 whitespace-nowrap text-center">{{ t('purchases.link.shared.table.quantity') }}</th>
+                  <th class="px-6 py-3 text-xs font-bold text-gray-500 whitespace-nowrap text-center">{{ t('purchases.link.shared.table.unitPrice') }}</th>
+                  <th class="px-6 py-3 text-xs font-bold text-gray-500 whitespace-nowrap text-center">{{ t('purchases.link.shared.table.discount') }}</th>
+                  <th class="px-6 py-3 text-xs font-bold text-gray-500 whitespace-nowrap text-center">{{ t('purchases.link.shared.table.taxAmount') }}</th>
+                  <th class="px-6 py-3 text-xs font-bold text-gray-500 whitespace-nowrap text-center">{{ t('purchases.link.shared.table.totalAmount') }}</th>
                 </tr>
               </thead>
               <tbody>
@@ -424,7 +426,7 @@ const linkedTableItems = computed(() =>
                   :key="item.id"
                   class="border-b border-gray-100 hover:bg-gray-50/50"
                 >
-                  <td class="px-6 py-4 text-right text-gray-900 font-medium whitespace-nowrap">{{ item.name }}</td>
+                  <td class="px-6 py-4 text-start text-gray-900 font-medium whitespace-nowrap">{{ item.name }}</td>
                   <td class="px-6 py-4 text-center text-gray-900 font-medium whitespace-nowrap">{{ item.quantity }}</td>
                   <td class="px-6 py-4 text-center text-gray-500 whitespace-nowrap">{{ item.price_per_unit }}</td>
                   <td class="px-6 py-4 text-center whitespace-nowrap">
@@ -437,7 +439,7 @@ const linkedTableItems = computed(() =>
                   <td class="px-6 py-4 text-center text-gray-900 font-medium whitespace-nowrap">{{ item.subtotal_after_tax }}</td>
                 </tr>
                 <tr v-if="productTableItems.length === 0">
-                  <td colspan="6" class="py-8 text-center text-gray-400 text-sm">لا توجد منتجات</td>
+                  <td colspan="6" class="py-8 text-center text-gray-400 text-sm">{{ t('purchases.link.shared.table.emptyProducts') }}</td>
                 </tr>
               </tbody>
             </table>
@@ -452,7 +454,7 @@ const linkedTableItems = computed(() =>
               :loading="submitting"
               @click="handleAdd"
             >
-              + &nbsp; اضافة
+              {{ t('purchases.link.shared.labels.addButton') }}
             </v-btn>
           </div>
         </template>
@@ -463,7 +465,7 @@ const linkedTableItems = computed(() =>
         <!-- Section header -->
         <div class="px-6 py-5 flex items-center gap-2">
           <span v-html="linkIcon" style="width:22px;height:22px;display:inline-flex;color:#1570ef;"></span>
-          <h2 class="text-base font-bold text-primary-600">قائمة الطلبيات المرتبطة</h2>
+          <h2 class="text-base font-bold text-primary-600">{{ t('purchases.link.orders.form.linkedListTitle') }}</h2>
         </div>
 
         <!-- Table — columns ordered RTL (first in HTML = rightmost) -->
@@ -472,11 +474,11 @@ const linkedTableItems = computed(() =>
             <thead>
               <tr class="bg-gray-50 border-y border-gray-200">
                 <!-- rightmost → leftmost -->
-                <th class="px-6 py-3 text-xs font-bold text-gray-500 whitespace-nowrap text-right">الرقم</th>
-                <th class="px-6 py-3 text-xs font-bold text-gray-500 whitespace-nowrap text-center">العميل / نوع العميل</th>
-                <th class="px-6 py-3 text-xs font-bold text-gray-500 whitespace-nowrap text-center">كود طلب مبيعات العميل / التاريخ</th>
-                <th class="px-6 py-3 text-xs font-bold text-gray-500 whitespace-nowrap text-center">كود طلبية مشتريات قلاب / التاريخ</th>
-                <th class="px-6 py-3 text-xs font-bold text-gray-500 whitespace-nowrap text-center">الإجراءات</th>
+                <th class="px-6 py-3 text-xs font-bold text-gray-500 whitespace-nowrap text-start">{{ t('purchases.link.shared.labels.number') }}</th>
+                <th class="px-6 py-3 text-xs font-bold text-gray-500 whitespace-nowrap text-center">{{ t('purchases.link.shared.labels.customerAndType') }}</th>
+                <th class="px-6 py-3 text-xs font-bold text-gray-500 whitespace-nowrap text-center">{{ t('purchases.link.orders.form.colSalesCodeDate') }}</th>
+                <th class="px-6 py-3 text-xs font-bold text-gray-500 whitespace-nowrap text-center">{{ t('purchases.link.orders.form.colPurchaseCodeDate') }}</th>
+                <th class="px-6 py-3 text-xs font-bold text-gray-500 whitespace-nowrap text-center">{{ t('purchases.link.shared.labels.actions') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -485,7 +487,7 @@ const linkedTableItems = computed(() =>
                 :key="row.id"
                 class="border-b border-gray-100 hover:bg-gray-50/50"
               >
-                <td class="px-6 py-4 text-right text-gray-900 font-medium whitespace-nowrap">{{ row.index }}</td>
+                <td class="px-6 py-4 text-start text-gray-900 font-medium whitespace-nowrap">{{ row.index }}</td>
                 <td class="px-6 py-4 text-center text-gray-900 font-medium whitespace-nowrap">{{ row.customer }}</td>
                 <td class="px-6 py-4 text-center text-gray-500 whitespace-nowrap">{{ row.sales_code_date }}</td>
                 <td class="px-6 py-4 text-center text-gray-500 whitespace-nowrap">{{ row.purchase_code_date }}</td>
@@ -501,7 +503,7 @@ const linkedTableItems = computed(() =>
                 </td>
               </tr>
               <tr v-if="linkedTableItems.length === 0">
-                <td colspan="5" class="py-10 text-center text-gray-400 text-sm">لا توجد عروض مرتبطة</td>
+                <td colspan="5" class="py-10 text-center text-gray-400 text-sm">{{ t('purchases.link.orders.form.emptyLinked') }}</td>
               </tr>
             </tbody>
           </table>

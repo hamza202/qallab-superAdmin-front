@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 // Available languages
 const availableLanguages = ref([
@@ -32,10 +35,10 @@ const updateFormData = () => {
 }
 
 // Convert API data to select items format
-const StatusList = [
-  { title: 'فعال', value: true },
-  { title: 'غير فعال', value: false }
-]
+const StatusList = computed(() => [
+  { title: t('common.status.active'), value: true },
+  { title: t('common.status.inactive'), value: false }
+])
 
 
 const typeItems = computed(() =>
@@ -84,16 +87,16 @@ watch(() => formData.value.is_taxable, (isTaxable) => {
     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
       <!-- Row 1 - Name with Language Tabs -->
       <div class="md:col-span-2">
-        <LanguageTabs :languages="availableLanguages" label="الإسم">
+        <LanguageTabs :languages="availableLanguages" :label="t('pages.services.form.basicInfo.name')">
           <template #en>
             <TextInput v-model="formData.name_en" variant="outlined" density="comfortable"
-              placeholder="Enter name in English" :rules="[required()]" :hide-details="false"
+              :placeholder="t('pages.services.form.basicInfo.namePlaceholderEn')" :rules="[required()]" :hide-details="false"
               :error-messages="props.formErrors['name.en']" @update:model-value="updateFormData"
               @input="delete props.formErrors['name.en']" />
           </template>
           <template #ar>
             <TextInput v-model="formData.name_ar" variant="outlined" density="comfortable"
-              placeholder="ادخل الاسم بالعربية" :rules="[required()]" :hide-details="false"
+              :placeholder="t('pages.services.form.basicInfo.namePlaceholderAr')" :rules="[required()]" :hide-details="false"
               :error-messages="props.formErrors['name.ar']" @update:model-value="updateFormData"
               @input="delete props.formErrors['name.ar']" />
           </template>
@@ -101,38 +104,38 @@ watch(() => formData.value.is_taxable, (isTaxable) => {
       </div>
 
       <div v-if="isEditing">
-        <TextInput v-model="formData.service_code" variant="outlined" density="comfortable" label="رمز الخدمة"
-          placeholder="ادخل رمز الخدمة" :rules="[required()]" :hide-details="false"
+        <TextInput v-model="formData.service_code" variant="outlined" density="comfortable" :label="t('pages.services.form.basicInfo.serviceCode')"
+          :placeholder="t('pages.services.form.basicInfo.serviceCodePlaceholder')" :rules="[required()]" :hide-details="false"
           :error-messages="props.formErrors['service_code']" @update:model-value="updateFormData"
           @input="delete props.formErrors['service_code']" disabled />
       </div>
 
       <div>
         <selectInput v-model="formData.service_category_id" :items="serviceCategoryItems" variant="outlined"
-          label="فئة الخدمة" density="comfortable" clearable placeholder="اختر الفئة"
+          :label="t('pages.services.form.basicInfo.serviceCategory')" density="comfortable" clearable :placeholder="t('pages.services.form.basicInfo.serviceCategoryPlaceholder')"
           :error-messages="props.formErrors['service_category_id']" @update:model-value="() => { updateFormData(); delete props.formErrors['service_category_id']; }" />
       </div>
 
       <div>
         <selectWithIconInput show-add-button v-model="formData.service_type" :items="typeItems" variant="outlined"
-          label="نوع الخدمة" :hide-details="false" density="comfortable" clearable placeholder="اختر نوع الخدمة" :rules="[required()]"
+          :label="t('pages.services.form.basicInfo.serviceType')" :hide-details="false" density="comfortable" clearable :placeholder="t('pages.services.form.basicInfo.serviceTypePlaceholder')" :rules="[required()]"
           :error-messages="props.formErrors['service_type']" @update:model-value="() => { updateFormData(); delete props.formErrors['service_type']; }" />
       </div>
 
       <div>
-        <selectInput v-model="formData.is_active" :items="StatusList" variant="outlined" label="حالة الخدمة"
-          density="comfortable" placeholder="اختر الحالة" clearable hide-details @update:model-value="updateFormData" />
+        <selectInput v-model="formData.is_active" :items="StatusList" variant="outlined" :label="t('pages.services.form.basicInfo.serviceStatus')"
+          density="comfortable" :placeholder="t('pages.services.form.basicInfo.serviceStatusPlaceholder')" clearable hide-details @update:model-value="updateFormData" />
       </div>
 
       <!-- Row 3 - Description with Language Tabs -->
       <div class="md:col-span-2 md:row-span-2">
-        <LanguageTabs :languages="availableLanguages" label="الوصف">
+        <LanguageTabs :languages="availableLanguages" :label="t('pages.services.form.basicInfo.description')">
           <template #en>
-            <TextareaInput v-model="formData.description_en" placeholder="Enter description in English"
+            <TextareaInput v-model="formData.description_en" :placeholder="t('pages.services.form.basicInfo.descriptionPlaceholderEn')"
               min-height="120px" hide-details @update:model-value="updateFormData" />
           </template>
           <template #ar>
-            <TextareaInput v-model="formData.description_ar" placeholder="ادخل الوصف بالعربية" min-height="120px"
+            <TextareaInput v-model="formData.description_ar" :placeholder="t('pages.services.form.basicInfo.descriptionPlaceholderAr')" min-height="120px"
               hide-details @update:model-value="updateFormData" />
           </template>
         </LanguageTabs>
@@ -140,58 +143,58 @@ watch(() => formData.value.is_taxable, (isTaxable) => {
 
       <div>
         <selectInput v-model="formData.unit_id" :items="unitItems" variant="outlined" density="comfortable"
-          label="وحدة القياس" clearable placeholder="اختر الوحدة" :rules="[required()]" :hide-details="false"
+          :label="t('pages.services.form.basicInfo.unit')" clearable :placeholder="t('pages.services.form.basicInfo.unitPlaceholder')" :rules="[required()]" :hide-details="false"
           :error-messages="props.formErrors['unit_id']" @update:model-value="() => { updateFormData(); delete props.formErrors['unit_id']; }" />
       </div>
 
 
       <div>
         <TextInput v-model="formData.unit_price" type="number" variant="outlined" density="comfortable" :rules="[numeric(), positive()]"
-          label="سعر الوحدة" placeholder="ادخل سعر الوحدة" hide-details @update:model-value="updateFormData" />
+          :label="t('pages.services.form.basicInfo.unitPrice')" :placeholder="t('pages.services.form.basicInfo.unitPricePlaceholder')" hide-details @update:model-value="updateFormData" />
       </div>
 
 
       <!-- Row 6 -->
       <div>
         <selectInput v-model="formData.pricing_method_id" :items="pricingMethodItems" variant="outlined"
-          density="comfortable" label="طريقة التسعير" placeholder="اختر الطريقة" :rules="[required()]" :hide-details="false"
+          density="comfortable" :label="t('pages.services.form.basicInfo.pricingMethod')" :placeholder="t('pages.services.form.basicInfo.pricingMethodPlaceholder')" :rules="[required()]" :hide-details="false"
           @update:model-value="() => { updateFormData(); delete props.formErrors['pricing_method_id']; }" clearable :error-messages="props.formErrors['pricing_method_id']" />
       </div>
 
       <div>
         <TextInput v-model="formData.min_quantity" type="number" variant="outlined" density="comfortable"
-          label="حد أدنى للطلب" placeholder="0" :rules="[minValue(1), numeric(), positive()]" :hide-details="false"
+          :label="t('pages.services.form.basicInfo.minQuantity')" :placeholder="t('pages.services.form.basicInfo.minQuantityPlaceholder')" :rules="[minValue(1), numeric(), positive()]" :hide-details="false"
           :error-messages="props.formErrors['min_quantity']" @update:model-value="updateFormData"
           @input="delete props.formErrors['min_quantity']" />
       </div>
 
       <div>
         <selectInput v-model="formData.tax_id" :items="taxItems" variant="outlined" density="comfortable" :hide-details="false"
-          label="الضريبة" placeholder="اختر الضريبة" @update:model-value="() => { updateFormData(); delete props.formErrors['tax_id']; }"
+          :label="t('pages.services.form.basicInfo.tax')" :placeholder="t('pages.services.form.basicInfo.taxPlaceholder')" @update:model-value="() => { updateFormData(); delete props.formErrors['tax_id']; }"
           :disabled="!formData.is_taxable" clearable :rules="formData.is_taxable ? [required()] : []"
           :error-messages="props.formErrors['tax_id']" />
       </div>
 
       <div>
-        <TextInput v-model="formData.tax_percentage" type="number" variant="outlined" label="نسبة الضريبة"
-          density="comfortable" placeholder="0" hide-details readonly
+        <TextInput v-model="formData.tax_percentage" type="number" variant="outlined" :label="t('pages.services.form.basicInfo.taxPercentage')"
+          density="comfortable" :placeholder="t('pages.services.form.basicInfo.taxPercentagePlaceholder')" hide-details readonly
           disabled />
       </div>
 
       <div>
-        <label class="block text-sm font-semibold text-gray-900 mb-2">خاضعة للضريبة</label>
+        <label class="block text-sm font-semibold text-gray-900 mb-2">{{ t('pages.services.form.basicInfo.isTaxable') }}</label>
         <v-radio-group v-model="formData.is_taxable" inline hide-details @update:model-value="updateFormData">
           <v-radio :value="true" color="primary">
             <template #label>
               <span :class="formData.is_taxable ? 'text-primary font-semibold' : 'text-gray-600'">
-                نعم
+                {{ t('pages.services.form.basicInfo.yes') }}
               </span>
             </template>
           </v-radio>
           <v-radio :value="false" color="primary">
             <template #label>
               <span :class="!formData.is_taxable ? 'text-primary font-semibold' : 'text-gray-600'">
-                لا
+                {{ t('pages.services.form.basicInfo.no') }}
               </span>
             </template>
           </v-radio>

@@ -9,6 +9,7 @@ import { useApi } from "@/composables/useApi";
 import { useForm } from "@/composables/useForm";
 import { useRoute, useRouter } from "vue-router";
 import { onMounted, watch, reactive, ref, computed } from "vue";
+import { useI18n } from "vue-i18n";
 import TestFormDialog from "@/views/products/simple-products/components/TestFormDialog.vue";
 import {
   packageIcon as gridIcon,
@@ -23,6 +24,7 @@ import {
 const route = useRoute();
 const router = useRouter();
 const api = useApi();
+const { t } = useI18n();
 
 // Edit mode detection
 const isEditMode = computed(() => !!route.params.id);
@@ -185,17 +187,17 @@ const handleAddBrand = () => {
 };
 
 // Tax table headers
-const taxTableHeaders = [
-  { key: "taxName", title: "الضريبة", width: "370px" },
-  { key: "percentage", title: "النسبة", width: "176px" },
-  { key: "minValue", title: "أقل قيمة", width: "176px" },
-  { key: "priorityLabel", title: "الأولوية", width: "176px" },
-];
+const taxTableHeaders = computed(() => [
+  { key: "taxName", title: t('pages.simpleProducts.form.taxTable.tax'), width: "370px" },
+  { key: "percentage", title: t('pages.simpleProducts.form.taxTable.percentage'), width: "176px" },
+  { key: "minValue", title: t('pages.simpleProducts.form.taxTable.minValue'), width: "176px" },
+  { key: "priorityLabel", title: t('pages.simpleProducts.form.taxTable.priority'), width: "176px" },
+]);
 
 // Handle add/update tax to table
 const handleAddTax = () => {
   if (!taxType.value || !taxPriority.value) {
-    toast.error('يرجى اختيار نوع الضريبة والأولوية');
+    toast.error(t('pages.simpleProducts.form.messages.selectTaxAndPriority'));
     return;
   }
 
@@ -321,33 +323,33 @@ const testItems = [
   { title: "اختبار 3", value: "test3" },
 ];
 
-const testsTableHeaders = [
-  { key: "testName", title: "الاختبار", width: "200px" },
-  { key: "testsCount", title: "عدد الاختبارات", width: "150px" },
-  { key: "samplesCount", title: "عدد العينات", width: "150px" },
-  { key: "sampleQuantity", title: "كمية العينات", width: "150px" },
-  { key: "status", title: "الحالة", width: "120px" },
-];
+const testsTableHeaders = computed(() => [
+  { key: "testName", title: t('pages.simpleProducts.form.testsTable.test'), width: "200px" },
+  { key: "testsCount", title: t('pages.simpleProducts.form.testsTable.testsCount'), width: "150px" },
+  { key: "samplesCount", title: t('pages.simpleProducts.form.testsTable.samplesCount'), width: "150px" },
+  { key: "sampleQuantity", title: t('pages.simpleProducts.form.testsTable.sampleQuantity'), width: "150px" },
+  { key: "status", title: t('pages.simpleProducts.form.testsTable.status'), width: "120px" },
+]);
 
 // Tabs
 const activeTab = ref(0);
-const tabs = [
+const tabs = computed(() => [
   {
-    title: "البيانات الأساسية",
+    title: t('pages.simpleProducts.form.tabs.basicData'),
     value: 0,
     icon: `<svg width="19" height="22" viewBox="0 0 19 22" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M17 11.5V5.8C17 4.11984 17 3.27976 16.673 2.63803C16.3854 2.07354 15.9265 1.6146 15.362 1.32698C14.7202 1 13.8802 1 12.2 1H5.8C4.11984 1 3.27976 1 2.63803 1.32698C2.07354 1.6146 1.6146 2.07354 1.32698 2.63803C1 3.27976 1 4.11984 1 5.8V16.2C1 17.8802 1 18.7202 1.32698 19.362C1.6146 19.9265 2.07354 20.3854 2.63803 20.673C3.27976 21 4.11984 21 5.8 21H9M11 10H5M7 14H5M13 6H5M11.5 18L13.5 20L18 15.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`,
   },
   {
-    title: "بيانات الضرائب",
+    title: t('pages.simpleProducts.form.tabs.taxData'),
     value: 1,
     icon: `<svg width="22" height="21" viewBox="0 0 22 21" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M11 15C11 17.7614 13.2386 20 16 20C18.7614 20 21 17.7614 21 15C21 12.2386 18.7614 10 16 10C13.2386 10 11 12.2386 11 15ZM11 15C11 13.8742 11.3721 12.8353 12 11.9995V3M11 15C11 15.8254 11.2 16.604 11.5541 17.2901C10.7117 18.0018 8.76584 18.5 6.5 18.5C3.46243 18.5 1 17.6046 1 16.5V3M12 3C12 4.10457 9.53757 5 6.5 5C3.46243 5 1 4.10457 1 3M12 3C12 1.89543 9.53757 1 6.5 1C3.46243 1 1 1.89543 1 3M1 12C1 13.1046 3.46243 14 6.5 14C8.689 14 10.5793 13.535 11.4646 12.8618M12 7.5C12 8.60457 9.53757 9.5 6.5 9.5C3.46243 9.5 1 8.60457 1 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`,
   },
   {
-    title: "بيانات اضافية",
+    title: t('pages.simpleProducts.form.tabs.additionalData'),
     value: 2,
     icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M20.5 7.27783L12 12.0001M12 12.0001L3.49997 7.27783M12 12.0001L12 21.5001M21 16.0586V7.94153C21 7.59889 21 7.42757 20.9495 7.27477C20.9049 7.13959 20.8318 7.01551 20.7354 6.91082C20.6263 6.79248 20.4766 6.70928 20.177 6.54288L12.777 2.43177C12.4934 2.27421 12.3516 2.19543 12.2015 2.16454C12.0685 2.13721 11.9315 2.13721 11.7986 2.16454C11.6484 2.19543 11.5066 2.27421 11.223 2.43177L3.82297 6.54288C3.52345 6.70928 3.37369 6.79248 3.26463 6.91082C3.16816 7.01551 3.09515 7.13959 3.05048 7.27477C3 7.42757 3 7.59889 3 7.94153V16.0586C3 16.4013 3 16.5726 3.05048 16.7254C3.09515 16.8606 3.16816 16.9847 3.26463 17.0893C3.37369 17.2077 3.52345 17.2909 3.82297 17.4573L11.223 21.5684C11.5066 21.726 11.6484 21.8047 11.7986 21.8356C11.9315 21.863 12.0685 21.863 12.2015 21.8356C12.3516 21.8047 12.4934 21.726 12.777 21.5684L20.177 17.4573C20.4766 17.2909 20.6263 17.2077 20.7354 17.0893C20.8318 16.9847 20.9049 16.8606 20.9495 16.7254C21 16.5726 21 16.4013 21 16.0586Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -356,14 +358,14 @@ const tabs = [
 `,
   },
   {
-    title: "قائمة الاختبارات",
+    title: t('pages.simpleProducts.form.tabs.testsList'),
     value: 3,
     icon: `<svg width="18" height="22" viewBox="0 0 18 22" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M11 1.26953V5.40007C11 5.96012 11 6.24015 11.109 6.45406C11.2049 6.64222 11.3578 6.7952 11.546 6.89108C11.7599 7.00007 12.0399 7.00007 12.6 7.00007H16.7305M13 12H5M13 16H5M7 8H5M11 1H5.8C4.11984 1 3.27976 1 2.63803 1.32698C2.07354 1.6146 1.6146 2.07354 1.32698 2.63803C1 3.27976 1 4.11984 1 5.8V16.2C1 17.8802 1 18.7202 1.32698 19.362C1.6146 19.9265 2.07354 20.3854 2.63803 20.673C3.27976 21 4.11984 21 5.8 21H12.2C13.8802 21 14.7202 21 15.362 20.673C15.9265 20.3854 16.3854 19.9265 16.673 19.362C17 18.7202 17 17.8802 17 16.2V7L11 1Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
 `,
   },
-];
+]);
 
 // Tab helpers
 const isTabActive = (tabValue: number) => activeTab.value === tabValue;
@@ -382,7 +384,7 @@ const displayApiErrors = (err: any) => {
     });
   } else {
     // Fallback to general message
-    toast.error(err?.response?.data?.message || 'حدث خطأ أثناء الحفظ');
+    toast.error(err?.response?.data?.message || t('pages.simpleProducts.form.messages.saveError'));
   }
 };
 
@@ -390,7 +392,7 @@ const displayApiErrors = (err: any) => {
 const copyProductCode = async () => {
   try {
     await navigator.clipboard.writeText(productCode.value);
-    toast.success("تم نسخ كود المنتج بنجاح");
+    toast.success(t('pages.simpleProducts.form.messages.codeCopied'));
   } catch (err) {
     console.error("Failed to copy:", err);
     // Fallback for older browsers
@@ -400,7 +402,7 @@ const copyProductCode = async () => {
     textArea.select();
     document.execCommand("copy");
     document.body.removeChild(textArea);
-    toast.success("تم نسخ كود المنتج بنجاح");
+    toast.success(t('pages.simpleProducts.form.messages.codeCopied'));
   }
 };
 
@@ -768,7 +770,7 @@ const handleSaveAndReturn = async () => {
           productCode.value = response.data.code;
         }
         isStep1Completed.value = true;
-        toast.success(productItemId.value ? "تم التعديل بنجاح" : "تم الإنشاء بنجاح");
+        toast.success(productItemId.value ? t('pages.simpleProducts.form.messages.editSuccess') : t('pages.simpleProducts.form.messages.createSuccess'));
         router.push({ name: 'SimpleProductsList' });
       }
     } catch (err: any) {
@@ -792,7 +794,7 @@ const handleSaveAndCreate = async () => {
       const response = await api.post<CreateItemResponse>(endpoint, formData);
 
       if (response.status === 200) {
-        toast.success(productItemId.value ? "تم التعديل بنجاح" : "تم الإنشاء بنجاح");
+        toast.success(productItemId.value ? t('pages.simpleProducts.form.messages.editSuccess') : t('pages.simpleProducts.form.messages.createSuccess'));
         resetFormFields();
       }
     } catch (err: any) {
@@ -824,7 +826,7 @@ const handleSaveAndContinue = async () => {
           productCode.value = response.data.code;
         }
         isStep1Completed.value = true;
-        toast.success(productItemId.value ? "تم التعديل بنجاح" : "تم الحفظ بنجاح");
+        toast.success(productItemId.value ? t('pages.simpleProducts.form.messages.editSuccess') : t('pages.simpleProducts.form.messages.saveSuccess'));
         // Move to next tab (Tax data)
         activeTab.value = 1;
       }
@@ -865,7 +867,7 @@ const buildStep2Data = () => {
 // Step 2 Save Handlers
 const handleStep2SaveAndReturn = async () => {
   if (!productItemId.value) {
-    toast.error('يرجى إتمام الخطوة الأولى أولاً');
+    toast.error(t('pages.simpleProducts.form.messages.completeStep1'));
     return;
   }
 
@@ -876,7 +878,7 @@ const handleStep2SaveAndReturn = async () => {
     const response = await api.post<CreateItemResponse>(endpoint, formData);
 
     if (response.status === 200) {
-      toast.success("تم حفظ بيانات الضرائب بنجاح");
+      toast.success(t('pages.simpleProducts.form.messages.taxSaveSuccess'));
       router.push({ name: 'SimpleProductsList' });
     }
   } catch (err: any) {
@@ -889,7 +891,7 @@ const handleStep2SaveAndReturn = async () => {
 
 const handleStep2SaveAndCreate = async () => {
   if (!productItemId.value) {
-    toast.error('يرجى إتمام الخطوة الأولى أولاً');
+    toast.error(t('pages.simpleProducts.form.messages.completeStep1'));
     return;
   }
 
@@ -900,7 +902,7 @@ const handleStep2SaveAndCreate = async () => {
     const response = await api.post<CreateItemResponse>(endpoint, formData);
 
     if (response.status === 200) {
-      toast.success("تم حفظ بيانات الضرائب بنجاح");
+      toast.success(t('pages.simpleProducts.form.messages.taxSaveSuccess'));
       resetFormFields();
     }
   } catch (err: any) {
@@ -913,7 +915,7 @@ const handleStep2SaveAndCreate = async () => {
 
 const handleStep2SaveAndContinue = async () => {
   if (!productItemId.value) {
-    toast.error('يرجى إتمام الخطوة الأولى أولاً');
+    toast.error(t('pages.simpleProducts.form.messages.completeStep1'));
     return;
   }
 
@@ -924,7 +926,7 @@ const handleStep2SaveAndContinue = async () => {
     const response = await api.post<CreateItemResponse>(endpoint, formData);
 
     if (response.status === 200) {
-      toast.success("تم حفظ بيانات الضرائب بنجاح");
+      toast.success(t('pages.simpleProducts.form.messages.taxSaveSuccess'));
       // Fetch items list for step 3 dropdowns
       await fetchItemsList();
       // Move to next tab (Additional data)
@@ -990,7 +992,7 @@ const buildStep3Data = () => {
 // Step 3 Save Handlers
 const handleStep3SaveAndReturn = async () => {
   if (!productItemId.value) {
-    toast.error('يرجى إتمام الخطوة الأولى أولاً');
+    toast.error(t('pages.simpleProducts.form.messages.completeStep1'));
     return;
   }
 
@@ -1001,7 +1003,7 @@ const handleStep3SaveAndReturn = async () => {
     const response = await api.post<CreateItemResponse>(endpoint, formData);
 
     if (response.status === 200) {
-      toast.success("تم حفظ البيانات الإضافية بنجاح");
+      toast.success(t('pages.simpleProducts.form.messages.additionalDataSaveSuccess'));
       router.push({ name: 'SimpleProductsList' });
     }
   } catch (err: any) {
@@ -1014,7 +1016,7 @@ const handleStep3SaveAndReturn = async () => {
 
 const handleStep3SaveAndCreate = async () => {
   if (!productItemId.value) {
-    toast.error('يرجى إتمام الخطوة الأولى أولاً');
+    toast.error(t('pages.simpleProducts.form.messages.completeStep1'));
     return;
   }
 
@@ -1025,7 +1027,7 @@ const handleStep3SaveAndCreate = async () => {
     const response = await api.post<CreateItemResponse>(endpoint, formData);
 
     if (response.status === 200) {
-      toast.success("تم حفظ البيانات الإضافية بنجاح");
+      toast.success(t('pages.simpleProducts.form.messages.additionalDataSaveSuccess'));
       resetFormFields();
     }
   } catch (err: any) {
@@ -1038,7 +1040,7 @@ const handleStep3SaveAndCreate = async () => {
 
 const handleStep3SaveAndContinue = async () => {
   if (!productItemId.value) {
-    toast.error('يرجى إتمام الخطوة الأولى أولاً');
+    toast.error(t('pages.simpleProducts.form.messages.completeStep1'));
     return;
   }
 
@@ -1049,7 +1051,7 @@ const handleStep3SaveAndContinue = async () => {
     const response = await api.post<CreateItemResponse>(endpoint, formData);
 
     if (response.status === 200) {
-      toast.success("تم حفظ البيانات الإضافية بنجاح");
+      toast.success(t('pages.simpleProducts.form.messages.additionalDataSaveSuccess'));
       // Move to next tab (Tests list)
       activeTab.value = 3;
       // Fetch items list for step 3 dropdowns with ignore_id
@@ -1199,7 +1201,7 @@ const fetchProduct = async (id: number) => {
     }
   } catch (err: any) {
     console.error('Error fetching product:', err);
-    toast.error('فشل في جلب بيانات المنتج');
+    toast.error(t('pages.simpleProducts.form.messages.fetchError'));
   }
 };
 
@@ -1282,7 +1284,7 @@ watch(activeTab, async (newTab) => {
         <!-- Product Code Badge - Only show in edit mode or after step 1 completion -->
         <div v-if="isEditMode || isStep1Completed" class="flex items-center lg:gap-3 gap-2">
           <!-- Label -->
-          <span class="text-sm font-semibold text-gray-700">كود المنتج</span>
+          <span class="text-sm font-semibold text-gray-700">{{ t('pages.simpleProducts.form.labels.productCode') }}</span>
           <!-- Product Code Badge -->
           <div class="flex items-center gap-2 px-2.5 py-1.5 bg-primary-100 border border-primary-300 rounded shadow-xs">
             <button @click="copyProductCode" class="cursor-pointer hover:opacity-80 transition-opacity">
@@ -1326,39 +1328,39 @@ watch(activeTab, async (newTab) => {
                         </svg>
                       </div>
                       <h2 class="text-lg font-bold text-primary-900">
-                        الأسعار
+                        {{ t('pages.simpleProducts.form.sections.prices') }}
                       </h2>
                     </div>
 
                     <!-- Price Fields -->
                     <div class="flex flex-col gap-[20px]">
-                      <PriceInput v-model="purchasePrice" label="سعر الشراء" placeholder="ادخل السعر"
+                      <PriceInput v-model="purchasePrice" :label="t('pages.simpleProducts.form.labels.purchasePrice')" :placeholder="t('pages.simpleProducts.form.labels.pricePlaceholder')"
                         :rules="[required(), numeric(), positive()]" :hide-details="false" />
-                      <PriceInput v-model="salePrice" label="سعر البيع" placeholder="ادخل السعر"
+                      <PriceInput v-model="salePrice" :label="t('pages.simpleProducts.form.labels.salePrice')" :placeholder="t('pages.simpleProducts.form.labels.pricePlaceholder')"
                         :rules="[required(), numeric(), positive()]" :hide-details="false" />
                       <div class="grid grid-cols-2 gap-[14px]">
-                        <PriceInput v-model="minSalePrice" label="أقل سعر بيع" placeholder="ادخل السعر"
+                        <PriceInput v-model="minSalePrice" :label="t('pages.simpleProducts.form.labels.minSalePrice')" :placeholder="t('pages.simpleProducts.form.labels.pricePlaceholder')"
                           :rules="[numeric(), positive()]" :hide-details="false" />
-                        <PriceInput v-model="maxSalePrice" label="أعلى سعر بيع" placeholder="ادخل السعر"
+                        <PriceInput v-model="maxSalePrice" :label="t('pages.simpleProducts.form.labels.maxSalePrice')" :placeholder="t('pages.simpleProducts.form.labels.pricePlaceholder')"
                           :rules="[numeric(), positive()]" :hide-details="false" />
                       </div>
                       <div class="grid grid-cols-2 gap-[14px]">
-                        <PriceInput v-model="wholesalePrice" label="سعر الجملة" placeholder="سعر الجملة"
+                        <PriceInput v-model="wholesalePrice" :label="t('pages.simpleProducts.form.labels.wholesalePrice')" :placeholder="t('pages.simpleProducts.form.labels.wholesalePrice')"
                           :rules="[numeric(), positive()]" :hide-details="false" />
-                        <PriceInput v-model="halfWholesalePrice" label="سعر نصف الجملة" placeholder="سعر نصف الجملة"
+                        <PriceInput v-model="halfWholesalePrice" :label="t('pages.simpleProducts.form.labels.halfWholesalePrice')" :placeholder="t('pages.simpleProducts.form.labels.halfWholesalePrice')"
                           :rules="[numeric(), positive()]" :hide-details="false" />
                       </div>
                       <!-- Discount Section -->
                       <div>
-                        <SelectInput v-model="discountType" label="نوع الخصم" placeholder="اختر نوع الخصم"
+                        <SelectInput v-model="discountType" :label="t('pages.simpleProducts.form.labels.discountType')" :placeholder="t('pages.simpleProducts.form.labels.discountTypePlaceholder')"
                           :items="discountTypeItems" />
                       </div>
                       <div>
-                        <PriceInput v-model="discountValue" label="قيمة الخصم" placeholder="ادخل قيمة الخصم"
+                        <PriceInput v-model="discountValue" :label="t('pages.simpleProducts.form.labels.discountValue')" :placeholder="t('pages.simpleProducts.form.labels.discountValuePlaceholder')"
                           :rules="[numeric(), positive()]" :hide-details="false" />
                       </div>
                       <div>
-                        <PriceInput v-model="profitMargin" label="هامش الربح" placeholder="ادخل هامش الربح"
+                        <PriceInput v-model="profitMargin" :label="t('pages.simpleProducts.form.labels.profitMargin')" :placeholder="t('pages.simpleProducts.form.labels.profitMarginPlaceholder')"
                           :rules="[numeric(), positive()]" :hide-details="false" />
                       </div>
                     </div>
@@ -1380,27 +1382,27 @@ watch(activeTab, async (newTab) => {
                           </svg>
                         </div>
                         <h2 class="text-lg font-bold text-primary-900">
-                          المعلومات العامة للمنتج
+                          {{ t('pages.simpleProducts.form.sections.productInfo') }}
                         </h2>
                       </div>
                       <div class="flex items-center gap-4">
                         <ButtonWithIcon variant="flat" color="primary-700" height="40"
-                          custom-class="font-semibold text-base" :prepend-icon="langIcon" label="أضف لغة جديدة"
+                          custom-class="font-semibold text-base" :prepend-icon="langIcon" :label="t('pages.simpleProducts.form.buttons.addLanguage')"
                           @click="handleAddLanguage" />
                       </div>
                     </div>
 
                     <!-- Name Fields with Language Tabs -->
-                    <LanguageTabs :languages="availableLanguages" label="الإسم" class="mb-[20px]">
+                    <LanguageTabs :languages="availableLanguages" :label="t('pages.simpleProducts.form.labels.name')" class="mb-[20px]">
                       <template #en>
-                        <TextInput v-model="englishName" placeholder="Enter name in English" :rules="[
+                        <TextInput v-model="englishName" :placeholder="t('pages.simpleProducts.form.labels.namePlaceholderEn')" :rules="[
                           required('englishNameRequired'),
                           minLength(2),
                           maxLength(100),
                         ]" :hide-details="false" />
                       </template>
                       <template #ar>
-                        <TextInput v-model="arabicName" placeholder="ادخل الاسم بالعربية" :rules="[
+                        <TextInput v-model="arabicName" :placeholder="t('pages.simpleProducts.form.labels.namePlaceholderAr')" :rules="[
                           required('arabicNameRequired'),
                           minLength(2),
                           maxLength(100),
@@ -1410,41 +1412,41 @@ watch(activeTab, async (newTab) => {
 
                     <!-- Category and Unit -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-[25px]">
-                      <SelectWithIconInput v-model="category" label="التصنيف" placeholder="اختر التصنيف"
+                      <SelectWithIconInput v-model="category" :label="t('pages.simpleProducts.form.labels.category')" :placeholder="t('pages.simpleProducts.form.labels.categoryPlaceholder')"
                         :items="categoryItems" :rules="[required()]" :hide-details="false" show-add-button
                         @add-click="handleAddCategory" />
                       <div class="flex flex-col">
-                        <SelectWithIconInput v-model="unit" label="الوحدة" placeholder="اختر الوحدة" :items="unitItems"
+                        <SelectWithIconInput v-model="unit" :label="t('pages.simpleProducts.form.labels.unit')" :placeholder="t('pages.simpleProducts.form.labels.unitPlaceholder')" :items="unitItems"
                           :rules="[required()]" :hide-details="false" show-add-button @add-click="handleAddUnit" />
-                        <CheckboxInput v-model="isMinUnit" label="اقل وحدة" color="primary" classes="mt-2" />
+                        <CheckboxInput v-model="isMinUnit" :label="t('pages.simpleProducts.form.labels.minUnit')" color="primary" classes="mt-2" />
                       </div>
                       <div>
-                        <SelectWithIconInput :rules="[required()]" clearable v-model="materialType" label="نوع المادة"
-                          placeholder="اختر نوع المادة" :items="MaterialTypeItems" :hide-details="false" />
+                        <SelectWithIconInput :rules="[required()]" clearable v-model="materialType" :label="t('pages.simpleProducts.form.labels.materialType')"
+                          :placeholder="t('pages.simpleProducts.form.labels.materialTypePlaceholder')" :items="MaterialTypeItems" :hide-details="false" />
                       </div>
 
                       <div>
-                        <TextInput type="number" :rules="[required(), numeric(), positive()]" v-model="minQuantity" label="حد أدنى للكمية"
-                          placeholder="أدخل الحد الأدنى" :hide-details="false" />
+                        <TextInput type="number" :rules="[required(), numeric(), positive()]" v-model="minQuantity" :label="t('pages.simpleProducts.form.labels.minQuantity')"
+                          :placeholder="t('pages.simpleProducts.form.labels.minQuantityPlaceholder')" :hide-details="false" />
                       </div>
                     </div>
 
                     <!-- Description with Language Tabs -->
-                    <LanguageTabs :languages="availableLanguages" label="الوصف" class="mb-[20px]">
+                    <LanguageTabs :languages="availableLanguages" :label="t('pages.simpleProducts.form.labels.description')" class="mb-[20px]">
                       <template #en>
                         <TextareaInput :rules="[required()]" v-model="englishDescription"
-                          placeholder="Enter description in English" min-height="120px" :hide-details="false" />
+                          :placeholder="t('pages.simpleProducts.form.labels.descriptionPlaceholderEn')" min-height="120px" :hide-details="false" />
                       </template>
                       <template #ar>
                         <TextareaInput :rules="[required()]" v-model="arabicDescription"
-                          placeholder="ادخل الوصف بالعربية" min-height="120px" :hide-details="false" />
+                          :placeholder="t('pages.simpleProducts.form.labels.descriptionPlaceholderAr')" min-height="120px" :hide-details="false" />
                       </template>
                     </LanguageTabs>
 
                     <!-- Product Image Section -->
                     <div>
-                      <FileUploadInput v-model="productImages" label="صورة المنتج"
-                        hint="PNG, JPG or GIF (max. 400x400px)" :max-files="4" layout="horizontal" />
+                      <FileUploadInput v-model="productImages" :label="t('pages.simpleProducts.form.labels.productImage')"
+                        :hint="t('pages.simpleProducts.form.labels.productImageHint')" :max-files="4" layout="horizontal" />
                     </div>
                   </div>
                 </div>
@@ -1454,15 +1456,15 @@ watch(activeTab, async (newTab) => {
             <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col">
               <ButtonWithIcon variant="flat" color="primary" height="48" rounded="4"
                 custom-class="font-semibold text-base px-6 md:!px-10" :prepend-icon="returnIcon"
-                label="حفظ والعودة للرئيسية" @click="handleSaveAndReturn" />
+                :label="t('pages.simpleProducts.form.buttons.saveAndReturn')" @click="handleSaveAndReturn" />
 
               <ButtonWithIcon variant="flat" color="primary-50" height="48" rounded="4"
                 custom-class="font-semibold text-base text-primary-700 px-6 md:!px-10" :prepend-icon="saveIcon"
-                label="حفظ وإنشاء جديد" @click="handleSaveAndCreate" />
+                :label="t('pages.simpleProducts.form.buttons.saveAndCreate')" @click="handleSaveAndCreate" />
 
               <ButtonWithIcon variant="flat" color="primary-50" height="48" rounded="4"
                 custom-class="font-semibold text-base text-primary-700 px-6 md:!px-10" :prepend-icon="arrowLeftIcon"
-                label="حفظ والمتابعة" @click="handleSaveAndContinue" />
+                :label="t('pages.simpleProducts.form.buttons.saveAndContinue')" @click="handleSaveAndContinue" />
             </div>
           </v-form>
         </v-tabs-window-item>
@@ -1472,23 +1474,23 @@ watch(activeTab, async (newTab) => {
           <div class="mx-auto">
             <div class="-mx-6">
               <h3 class="text-lg font-bold text-gray-900 bg-gray-25 border-t-gray-300 border-t px-6 py-3">
-                الضرائب المطبقة على المنتج
+                {{ t('pages.simpleProducts.form.sections.taxesApplied') }}
               </h3>
               <!-- Tax Fields Row -->
               <div
                 class="grid grid-cols-1 xl:grid-cols-6 md:grid-cols-3 gap-4 items-center px-6 bg-primary-50 py-3 border-t border-t-gray-300">
-                <SelectWithIconInput v-model="taxType" placeholder="اختر النوع" :items="taxTypeItems"
+                <SelectWithIconInput v-model="taxType" :placeholder="t('pages.simpleProducts.form.labels.taxType')" :items="taxTypeItems"
                   :hide-details="false" show-add-button @add-click="handleAddTaxType"
                   @update:model-value="handleTaxChange" />
-                <TextInput v-model="taxPercentage" placeholder="النسبة" :hide-details="false" disabled />
-                <TextInput v-model="taxMinValue" placeholder="الحد الأدنى للضريبة" :hide-details="false" disabled />
-                <SelectInput v-model="taxPriority" placeholder="اختر الأولوية" :items="taxPriorityItems"
+                <TextInput v-model="taxPercentage" :placeholder="t('pages.simpleProducts.form.labels.taxPercentage')" :hide-details="false" disabled />
+                <TextInput v-model="taxMinValue" :placeholder="t('pages.simpleProducts.form.labels.taxMinValue')" :hide-details="false" disabled />
+                <SelectInput v-model="taxPriority" :placeholder="t('pages.simpleProducts.form.labels.taxPriority')" :items="taxPriorityItems"
                   :hide-details="false" />
                 <ButtonWithIcon variant="flat" color="primary-500" border="sm" rounded="4" height="44"
                   custom-class="font-semibold !text-white text-sm !border-primary-200" :prepend-icon="plusIcon"
-                  :label="isEditingTax ? 'تعديل ضريبة' : 'أضف ضريبة'" @click="handleAddTax" />
+                  :label="isEditingTax ? t('pages.simpleProducts.form.buttons.editTax') : t('pages.simpleProducts.form.buttons.addTax')" @click="handleAddTax" />
                 <ButtonWithIcon v-if="isEditingTax" variant="flat" color="gray-200" border="sm" rounded="4" height="44"
-                  custom-class="font-semibold text-gray-700 text-sm" label="إلغاء" @click="handleCancelTaxEdit" />
+                  custom-class="font-semibold text-gray-700 text-sm" :label="t('pages.simpleProducts.form.buttons.cancelTax')" @click="handleCancelTaxEdit" />
               </div>
 
               <!-- Tax Table -->
@@ -1500,15 +1502,15 @@ watch(activeTab, async (newTab) => {
             <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col px-6">
               <ButtonWithIcon variant="flat" color="primary" height="48" rounded="4"
                 custom-class="font-semibold text-base px-6 md:!px-10" :prepend-icon="returnIcon"
-                label="حفظ والعودة للرئيسية" @click="handleStep2SaveAndReturn" />
+                :label="t('pages.simpleProducts.form.buttons.saveAndReturn')" @click="handleStep2SaveAndReturn" />
 
               <ButtonWithIcon variant="flat" color="primary-50" height="48" rounded="4"
                 custom-class="font-semibold text-base text-primary-700 px-6 md:!px-10" :prepend-icon="saveIcon"
-                label="حفظ وإنشاء جديد" @click="handleStep2SaveAndCreate" />
+                :label="t('pages.simpleProducts.form.buttons.saveAndCreate')" @click="handleStep2SaveAndCreate" />
 
               <ButtonWithIcon variant="flat" color="primary-50" height="48" rounded="4"
                 custom-class="font-semibold text-base text-primary-700 px-6 md:!px-10" :prepend-icon="arrowLeftIcon"
-                label="حفظ والمتابعة" @click="handleStep2SaveAndContinue" />
+                :label="t('pages.simpleProducts.form.buttons.saveAndContinue')" @click="handleStep2SaveAndContinue" />
             </div>
           </div>
         </v-tabs-window-item>
@@ -1517,68 +1519,68 @@ watch(activeTab, async (newTab) => {
         <v-tabs-window-item :value="2">
           <!-- Supply and Internal Relations Section -->
           <div class="bg-gray-50 rounded-lg p-6 mb-6">
-            <h2 class="text-lg font-bold text-primary-900 mb-6 text-right">
-              التوريد والعلاقات الداخلية للمنتج
+            <h2 class="text-lg font-bold text-primary-900 mb-6 text-start">
+              {{ t('pages.simpleProducts.form.sections.supplyRelations') }}
             </h2>
 
             <!-- Row 1: Country, Manufacturer, Brand -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-10 mb-6">
-              <SelectWithIconInput v-model="originCountry" label="بلد المنشأ" placeholder="اختر البلد"
+              <SelectWithIconInput v-model="originCountry" :label="t('pages.simpleProducts.form.labels.originCountry')" :placeholder="t('pages.simpleProducts.form.labels.originCountryPlaceholder')"
                 :items="countryItems" :hide-details="false" show-add-button @add-click="handleAddCountry" />
-              <SelectWithIconInput v-model="manufacturer" label="المصنع" placeholder="اختر المصنع"
+              <SelectWithIconInput v-model="manufacturer" :label="t('pages.simpleProducts.form.labels.manufacturer')" :placeholder="t('pages.simpleProducts.form.labels.manufacturerPlaceholder')"
                 :items="manufacturerItems" :hide-details="false" show-add-button @add-click="handleAddManufacturer" />
-              <SelectWithIconInput v-model="brand" label="العلامة التجارية" placeholder="ادخل العلامة التجارية"
+              <SelectWithIconInput v-model="brand" :label="t('pages.simpleProducts.form.labels.brand')" :placeholder="t('pages.simpleProducts.form.labels.brandPlaceholder')"
                 :items="brandItems" :hide-details="false" show-add-button @add-click="handleAddBrand" />
             </div>
 
             <!-- Row 2: Related, Attached, Alternative Products -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-10 mb-6">
-              <MultipleSelectInput v-model="relatedProducts" label="المنتجات المرتبطة" placeholder="اختر المنتج"
+              <MultipleSelectInput v-model="relatedProducts" :label="t('pages.simpleProducts.form.labels.relatedProducts')" :placeholder="t('pages.simpleProducts.form.labels.relatedProductsPlaceholder')"
                 :items="productItems" :hide-details="false" />
-              <MultipleSelectInput v-model="attachedProducts" label="المنتجات الملحقة" placeholder="اختر المنتج"
+              <MultipleSelectInput v-model="attachedProducts" :label="t('pages.simpleProducts.form.labels.attachedProducts')" :placeholder="t('pages.simpleProducts.form.labels.attachedProductsPlaceholder')"
                 :items="productItems" :hide-details="false" />
-              <MultipleSelectInput v-model="alternativeProducts" label="المنتجات البديلة" placeholder="اختر المنتج"
+              <MultipleSelectInput v-model="alternativeProducts" :label="t('pages.simpleProducts.form.labels.alternativeProducts')" :placeholder="t('pages.simpleProducts.form.labels.alternativeProductsPlaceholder')"
                 :items="productItems" :hide-details="false" />
             </div>
 
             <!-- Row 3: Best Suppliers -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
-              <MultipleSelectInput v-model="bestSuppliers" label="افضل الموردين" placeholder="اختر المورد"
+              <MultipleSelectInput v-model="bestSuppliers" :label="t('pages.simpleProducts.form.labels.bestSuppliers')" :placeholder="t('pages.simpleProducts.form.labels.bestSuppliersPlaceholder')"
                 :items="supplierItems" :hide-details="false" />
             </div>
           </div>
 
           <!-- Advanced Product Attributes Section -->
           <div class="bg-gray-50 rounded-lg p-6">
-            <h2 class="text-lg font-bold text-primary-900 mb-6 text-right">
-              سمات/خصائص المنتج المتقدمة
+            <h2 class="text-lg font-bold text-primary-900 mb-6 text-start">
+              {{ t('pages.simpleProducts.form.sections.advancedAttributes') }}
             </h2>
 
             <div class="flex flex-wrap gap-8 gap-y-2">
-              <CheckboxInput v-model="isManufacturingProduct" label="منتج تصنيع" color="primary" hide-details/>
-              <CheckboxInput v-model="sellNegative" label="البيع بالسالب" color="primary" hide-details/>
-              <CheckboxInput v-model="isAvailableForRent" label="قابل للإيجار" color="primary" hide-details/>
-              <CheckboxInput v-model="isAvailableForReturn" label="قابل للمقايضة" color="primary" hide-details/>
-              <CheckboxInput v-model="isAvailableForRefund" label="قابل للارجاع" color="primary" hide-details/>
-              <CheckboxInput v-model="isAvailableForOffset" label="قابل للمقاصة" color="primary" hide-details/>
-              <CheckboxInput v-model="isAvailableForSelling" label="متاح للبيع" color="primary" hide-details/>
-              <CheckboxInput v-model="isAvailableForBuying" label="متاح للشراء" color="primary" hide-details/>
-              <CheckboxInput v-model="isAvailableForPurchase" label="متاح للمشاريع" color="primary" hide-details/>
+              <CheckboxInput v-model="isManufacturingProduct" :label="t('pages.simpleProducts.form.attributes.manufacturingProduct')" color="primary" hide-details/>
+              <CheckboxInput v-model="sellNegative" :label="t('pages.simpleProducts.form.attributes.sellNegative')" color="primary" hide-details/>
+              <CheckboxInput v-model="isAvailableForRent" :label="t('pages.simpleProducts.form.attributes.availableForRent')" color="primary" hide-details/>
+              <CheckboxInput v-model="isAvailableForReturn" :label="t('pages.simpleProducts.form.attributes.availableForReturn')" color="primary" hide-details/>
+              <CheckboxInput v-model="isAvailableForRefund" :label="t('pages.simpleProducts.form.attributes.availableForRefund')" color="primary" hide-details/>
+              <CheckboxInput v-model="isAvailableForOffset" :label="t('pages.simpleProducts.form.attributes.availableForOffset')" color="primary" hide-details/>
+              <CheckboxInput v-model="isAvailableForSelling" :label="t('pages.simpleProducts.form.attributes.availableForSelling')" color="primary" hide-details/>
+              <CheckboxInput v-model="isAvailableForBuying" :label="t('pages.simpleProducts.form.attributes.availableForBuying')" color="primary" hide-details/>
+              <CheckboxInput v-model="isAvailableForPurchase" :label="t('pages.simpleProducts.form.attributes.availableForPurchase')" color="primary" hide-details/>
             </div>
           </div>
           <!-- Action Buttons for Step 3 -->
           <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col px-6">
             <ButtonWithIcon variant="flat" color="primary" height="48" rounded="4"
               custom-class="font-semibold text-base px-6 md:!px-10" :prepend-icon="returnIcon"
-              label="حفظ والعودة للرئيسية" @click="handleStep3SaveAndReturn" />
+              :label="t('pages.simpleProducts.form.buttons.saveAndReturn')" @click="handleStep3SaveAndReturn" />
 
             <ButtonWithIcon variant="flat" color="primary-50" height="48" rounded="4"
               custom-class="font-semibold text-base text-primary-700 px-6 md:!px-10" :prepend-icon="saveIcon"
-              label="حفظ وإنشاء جديد" @click="handleStep3SaveAndCreate" />
+              :label="t('pages.simpleProducts.form.buttons.saveAndCreate')" @click="handleStep3SaveAndCreate" />
 
             <ButtonWithIcon variant="flat" color="primary-50" height="48" rounded="4"
               custom-class="font-semibold text-base text-primary-700 px-6 md:!px-10" :prepend-icon="arrowLeftIcon"
-              label="حفظ والمتابعة" @click="handleStep3SaveAndContinue" />
+              :label="t('pages.simpleProducts.form.buttons.saveAndContinue')" @click="handleStep3SaveAndContinue" />
           </div>
         </v-tabs-window-item>
 
@@ -1587,45 +1589,45 @@ watch(activeTab, async (newTab) => {
           <div class="mx-auto">
             <!-- Form Section (Separate from table) -->
             <div class="bg-white rounded-lg p-6 mb-6">
-              <h3 class="text-lg font-bold text-gray-900 mb-4">قائمة الاختبارات</h3>
+              <h3 class="text-lg font-bold text-gray-900 mb-4">{{ t('pages.simpleProducts.form.sections.testsList') }}</h3>
 
               <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                 <div>
-                  <label class="block text-sm font-semibold text-gray-700 mb-2">الاختبار</label>
-                  <SelectInput v-model="testForm.testName" placeholder="اختر" :items="testItems"
+                  <label class="block text-sm font-semibold text-gray-700 mb-2">{{ t('pages.simpleProducts.form.tests.test') }}</label>
+                  <SelectInput v-model="testForm.testName" :placeholder="t('pages.simpleProducts.form.tests.testPlaceholder')" :items="testItems"
                     :hide-details="false" />
                 </div>
                 <div>
-                  <label class="block text-sm font-semibold text-gray-700 mb-2">عدد الاختبارات</label>
-                  <TextInput v-model="testForm.testsCount" placeholder="عدد الاختبارات" :hide-details="false"
+                  <label class="block text-sm font-semibold text-gray-700 mb-2">{{ t('pages.simpleProducts.form.tests.testsCount') }}</label>
+                  <TextInput v-model="testForm.testsCount" :placeholder="t('pages.simpleProducts.form.tests.testsCountPlaceholder')" :hide-details="false"
                     type="number" />
                 </div>
                 <div>
-                  <label class="block text-sm font-semibold text-gray-700 mb-2">عدد العينات</label>
-                  <TextInput v-model="testForm.samplesCount" placeholder="عدد العينات" :hide-details="false"
+                  <label class="block text-sm font-semibold text-gray-700 mb-2">{{ t('pages.simpleProducts.form.tests.samplesCount') }}</label>
+                  <TextInput v-model="testForm.samplesCount" :placeholder="t('pages.simpleProducts.form.tests.samplesCountPlaceholder')" :hide-details="false"
                     type="number" />
                 </div>
 
                 <div>
-                  <label class="block text-sm font-semibold text-gray-700 mb-2">كمية العينات</label>
-                  <TextInput v-model="testForm.sampleQuantity" placeholder="كمية العينات" :hide-details="false"
+                  <label class="block text-sm font-semibold text-gray-700 mb-2">{{ t('pages.simpleProducts.form.tests.sampleQuantity') }}</label>
+                  <TextInput v-model="testForm.sampleQuantity" :placeholder="t('pages.simpleProducts.form.tests.sampleQuantityPlaceholder')" :hide-details="false"
                     type="number" />
                 </div>
                 <div>
-                  <label class="block text-sm font-semibold text-gray-700 mb-2">الحالة</label>
+                  <label class="block text-sm font-semibold text-gray-700 mb-2">{{ t('pages.simpleProducts.form.tests.status') }}</label>
                   <div class="flex items-center gap-3 mt-1">
                     <v-radio-group v-model="testForm.status" inline hide-details>
                       <v-radio :value="true" color="primary">
                         <template #label>
                           <span :class="testForm.status ? 'text-primary font-semibold' : 'text-gray-600'">
-                            فعال
+                            {{ t('common.status.active') }}
                           </span>
                         </template>
                       </v-radio>
                       <v-radio :value="false" color="primary">
                         <template #label>
                           <span :class="!testForm.status ? 'text-primary font-semibold' : 'text-gray-600'">
-                            غير فعال
+                            {{ t('common.status.inactive') }}
                           </span>
                         </template>
                       </v-radio>
@@ -1633,7 +1635,7 @@ watch(activeTab, async (newTab) => {
                   </div>
                 </div>
                 <ButtonWithIcon variant="flat" color="primary" rounded="4" height="48"
-                  custom-class="font-semibold text-base w-full md:col-span-2" :prepend-icon="plusIcon" label="أضف جديد"
+                  custom-class="font-semibold text-base w-full md:col-span-2" :prepend-icon="plusIcon" :label="t('pages.simpleProducts.form.buttons.addTest')"
                   @click="handleAddTest" />
 
               </div>
@@ -1651,14 +1653,14 @@ watch(activeTab, async (newTab) => {
             <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col">
               <ButtonWithIcon variant="flat" color="primary" height="48" rounded="4"
                 custom-class="font-semibold text-base px-6 md:!px-10" :prepend-icon="returnIcon"
-                label="حفظ والعودة للرئيسية" @click="handleSaveAndReturn" />
+                :label="t('pages.simpleProducts.form.buttons.saveAndReturn')" @click="handleSaveAndReturn" />
 
               <ButtonWithIcon variant="flat" color="primary-50" height="48" rounded="4"
                 custom-class="font-semibold text-base text-primary-700 px-6 md:!px-10" :prepend-icon="saveIcon"
-                label="حفظ وإنشاء جديد" @click="handleSaveAndCreate" />
+                :label="t('pages.simpleProducts.form.buttons.saveAndCreate')" @click="handleSaveAndCreate" />
 
               <ButtonWithIcon variant="flat" color="primary-50" rounded="4" height="48" prepend-icon="mdi-close"
-                custom-class="font-semibold text-base text-primary-700 px-6 min-w-56" label="إغلاق"
+                custom-class="font-semibold text-base text-primary-700 px-6 min-w-56" :label="t('pages.simpleProducts.form.buttons.close')"
                 @click="handleSaveAndContinue" />
             </div>
           </div>

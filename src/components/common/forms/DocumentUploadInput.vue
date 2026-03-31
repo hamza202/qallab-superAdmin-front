@@ -154,7 +154,7 @@ const uploadCloudIcon = `<svg width="24" height="24" viewBox="0 0 24 24" fill="n
                 </div>
                 
                 <!-- File Info (Middle) -->
-                <div class="flex-1 min-w-0 flex flex-col justify-center text-left">
+                <div class="flex-1 min-w-0 flex flex-col justify-center text-end">
                     <p class="text-sm font-semibold text-gray-800 truncate" :title="getFileName(file)">{{ getFileName(file) }}</p>
                     <p class="text-xs text-gray-500 mt-1" v-if="typeof file !== 'string'">{{ formatSize((file as File).size) }}</p>
                 </div>

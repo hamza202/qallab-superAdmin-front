@@ -21,19 +21,60 @@
         "placeholder": "الرمز"
       },
       "type": {
-        "label": "النوع"
+        "label": "النوع",
+        "placeholder": "اختر النوع"
       },
       "description": {
         "label": "الوصف"
       },
       "descriptionArabic": {
-        "label": "الوصف عربي"
+        "label": "الوصف عربي",
+        "placeholder": "أدخل الوصف بالعربية "
       },
       "descriptionEnglish": {
-        "label": "الوصف بالانجليزي"
+        "label": "الوصف بالانجليزي",
+        "placeholder": "أدخل الوصف بالانجليزية "
       },
       "notes": {
-        "label": "ملاحظات"
+        "label": "ملاحظات",
+        "placeholder": "ملاحظات"
+      },
+      "name": {
+        "label": "الإسم"
+      },
+      "unitCode": {
+        "label": "كود الوحدة",
+        "placeholder": "كود الوحدة"
+      },
+      "parentUnit": {
+        "label": "الوحدة الأساسية ذات الصلة",
+        "placeholder": "اختر الوحدة الأساسية"
+      },
+      "taxRule": {
+        "label": "قاعدة الضريبة",
+        "placeholder": "اختر قاعدة الضريبة"
+      },
+      "calculationMethod": {
+        "label": "طريقة الاحتساب",
+        "placeholder": "اختر طريقة الاحتساب"
+      },
+      "amountIncludesTax": {
+        "label": "المبلغ شامل الضريبة"
+      },
+      "code2": {
+        "label": "الرمز 2",
+        "placeholder": "ادخل الرمز"
+      },
+      "code3": {
+        "label": "الرمز 3",
+        "placeholder": "ادخل الرمز"
+      },
+      "phoneCode": {
+        "label": "كود الهاتف",
+        "placeholder": "ادخل كود الهاتف"
+      },
+      "isDefault": {
+        "label": "افتراضي"
       },
       "textNote": {
         "label": "ملاحظة نصية",
@@ -192,11 +233,13 @@
       },
       "licenseIssueDate": {
         "label": "تاريخ إصدار الرخصة",
-        "placeholder": "اختر التاريخ"
+        "placeholder": "اختر التاريخ",
+        "info": "تاريخ إصدار صلاحية الرخصة"
       },
       "licenseExpiryDate": {
         "label": "تاريخ انتهاء الرخصة",
-        "placeholder": "اختر التاريخ"
+        "placeholder": "اختر التاريخ",
+        "info": "تاريخ انتهاء صلاحية الرخصة"
       }
     },
     "address": {
@@ -500,55 +543,88 @@
     },
     "factory": {
       "commercialInfo": {
-        "contractorClassification": {
-          "label": "تصنيف المقاول",
-          "placeholder": "اختر"
+        "licenseType": {
+          "label": "نوع الرخصة",
+          "placeholder": "اختر نوع الرخصة"
         },
-        "classificationGrade": {
-          "label": "درجة تصنيف المقاول",
-          "placeholder": "اختر"
+        "issuingAuthority": {
+          "label": "الجهة المانحة",
+          "placeholder": "اختر الجهة المانحة"
         },
-        "scopeOfWork": {
-          "label": "نطاق الأعمال",
-          "placeholder": "اختر"
+        "licenseStatus": {
+          "label": "حالة الرخصة"
         },
-        "municipalLicenseNumber": {
-          "label": "رقم رخصة البلدية",
-          "placeholder": "ادخل الرقم"
+        "licensedActivity": {
+          "label": "النشاط المرخص",
+          "placeholder": "اختر النشاط المرخص"
         },
-        "municipalLicenseExpiry": {
-          "label": "تاريخ انتهاء رخصة البلدية",
-          "placeholder": "اختر التاريخ",
-          "tooltip": "تاريخ انتهاء صلاحية رخصة البلدية"
+        "activityTypes": {
+          "label": "نوع المواد",
+          "placeholder": "اختر نوع النشاط"
         },
-        "municipalLicenseStatus": {
-          "label": "حالة رخصة البلدية",
-          "placeholder": "اختر"
+        "productTypes": {
+          "label": "أنواع المنتجات",
+          "placeholder": "اختر أنواع المنتجات"
         },
-        "safetyCertification": {
-          "label": "شهادات السلامة المهنية",
-          "placeholder": "اختر"
+        "rawMaterialTypes": {
+          "label": "نوع المواد الخام",
+          "placeholder": "اختر نوع المواد الخام"
         },
-        "environmentalCertification": {
-          "label": "شهادات البيئة",
-          "placeholder": "اختر"
+        "rawMaterialSource": {
+          "label": "مصدر المواد الخام",
+          "placeholder": "اختر مصدر المواد الخام"
         },
-        "civilDefenseApproval": {
-          "label": "موافقة الدفاع المدني"
+        "licensedCapacity": {
+          "label": "الطاقة المرخصة",
+          "placeholder": "ادخل الطاقة المرخصة"
         }
       },
       "operationalInfo": {
-        "ongoingProjects": {
-          "label": "عدد المشاريع الجارية",
-          "placeholder": "ادخل العدد"
+        "productionLinesCount": {
+          "label": "عدد خطوط الإنتاج",
+          "placeholder": "ادخل عدد خطوط الإنتاج"
         },
-        "completedProjects": {
-          "label": "عدد المشاريع المكتملة",
-          "placeholder": "ادخل العدد"
+        "operationalStatus": {
+          "label": "حالة التشغيل",
+          "placeholder": "اختر حالة التشغيل"
         },
-        "employeesCount": {
-          "label": "إجمالي عدد الموظفين",
-          "placeholder": "ادخل العدد"
+        "totalWorkers": {
+          "label": "عدد العمال",
+          "placeholder": "ادخل عدد العمال"
+        },
+        "qualityControlSystem": {
+          "label": "نظام ضبط الجودة",
+          "placeholder": "اختر نظام الجودة"
+        },
+        "workingHours": {
+          "label": "اوقات العمل",
+          "placeholder": "اختر أوقات العمل"
+        },
+        "safetySystem": {
+          "label": "نظام السلامة",
+          "placeholder": "اختر نظام السلامة"
+        },
+        "equipmentType": {
+          "label": "نوع المعدات",
+          "placeholder": "اختر نوع المعدات"
+        },
+        "maintenanceSystem": {
+          "label": "نظام الصيانة",
+          "placeholder": "اختر نظام الصيانة"
+        },
+        "operationMode": {
+          "label": "طريقة التشغيل",
+          "placeholder": "اختر طريقة التشغيل"
+        },
+        "weighbridgeType": {
+          "label": "نوع الميزان",
+          "placeholder": "اختر نوع الميزان"
+        },
+        "weighbridgeAvailability": {
+          "label": "وجود ميزان"
+        },
+        "qualityLabAvailability": {
+          "label": "وجود مختبر جودة"
         },
         "engineersCount": {
           "label": "عدد المهندسين",
@@ -557,24 +633,6 @@
         "techniciansCount": {
           "label": "عدد الفنيين",
           "placeholder": "ادخل العدد"
-        },
-        "operationalCapacity": {
-          "label": "القدرة التشغيلية للمقاول",
-          "placeholder": "اختر"
-        },
-        "specialization": {
-          "label": "التخصص الرئيسي المقاول",
-          "placeholder": "اختر"
-        },
-        "siteReadiness": {
-          "label": "جاهزية مواقع العمل",
-          "placeholder": "اختر"
-        },
-        "safetyManagementSystem": {
-          "label": "نظام إدارة السلامة"
-        },
-        "environmentalCompliance": {
-          "label": "الالتزام بالأنظمة البيئية"
         }
       }
     },
@@ -1538,6 +1596,11 @@
       "addList": "أضف قائمة",
       "addTest": "إضافة اختبار",
       "addUnit": "إضافة وحدة",
+      "addBrand": "إضافة علامة تجارية",
+      "addFactory": "إضافة مصنع",
+      "addTax": "إضافة ضريبة",
+      "addCountry": "إضافة دولة",
+      "addCity": "إضافة مدينة",
       "addReceiptVoucher": "اضافة سند قبض",
       "addPaymentVoucher": "اضافة سند صرف",
       "apply": "تطبيق",

@@ -249,12 +249,38 @@
       "title": "Document and Status Management",
       "description": "Enables you to manage documents and statuses",
       "FormTitle": "Documents Workflow Management",
-      "FormDescription": "Enables you to add status and transitions",
-      "statusTransitionsTitle": "Status Transitions Management"
+      "FormDescription": "Enables you to add statuses and transitions",
+      "statusTransitionsTitle": "Status Transition Management",
+      "form": {
+        "basicData": "Basic Data",
+        "documentName": "Document Name",
+        "documentId": "Document ID",
+        "statusLevel": "Status Level",
+        "statusName": "Status Name",
+        "otherOptions": "Other Options",
+        "required": "Required",
+        "autoAction": "Apply Auto Action",
+        "requiresApproval": "Requires Approval",
+        "selectDocument": "Select Document",
+        "selectDocumentPlaceholder": "Please select document",
+        "selectStatusLevel": "Select Status Level",
+        "selectStatusName": "Select Status Name"
+      },
+      "workflow": {
+        "transitionInfo": "Transition Information",
+        "currentStatus": "Current",
+        "previousStatuses": "Previous Statuses",
+        "nextStatuses": "Next Statuses",
+        "rollbackStatuses": "Rollback Statuses",
+        "selectStatuses": "Select Statuses"
+      }
     },
     "factories": {
       "title": "Factories",
       "description": "Enables you to manage factories",
+      "editDescription": "You can edit factory details here",
+      "addTitle": "Add Factory",
+      "editTitle": "Edit Factory",
       "list": {
         "filters": {
           "productionLines": "Number of Production Lines",
@@ -264,7 +290,7 @@
         },
         "deleteDialog": {
           "title": "Delete Factories",
-          "message": "Are you sure you want to delete {count} factory?"
+          "message": "Are you sure you want to delete {count} factory(s)?"
         },
         "messages": {
           "loadingConstantsError": "Failed to load constants",
@@ -275,6 +301,28 @@
           "deleteError": "Failed to delete factory",
           "statusChangeSuccess": "Factory {status} successfully",
           "statusChangeError": "Failed to change factory status"
+        }
+      },
+      "form": {
+        "editTitle": "Edit Factory",
+        "addTitle": "Add Factory",
+        "tabs": {
+          "basicInfo": "Basic Info",
+          "financialInfo": "Financial Info",
+          "commercialInfo": "Commercial Info",
+          "operationalInfo": "Operational Info",
+          "documents": "Documents"
+        },
+        "messages": {
+          "saveBasicFirst": "Basic info must be saved first",
+          "basicInfoSaved": "Basic info saved successfully",
+          "financialInfoSaved": "Financial info saved successfully",
+          "commercialInfoSaved": "Commercial info saved successfully",
+          "operationalInfoSaved": "Operational info saved successfully",
+          "documentsSaved": "Documents saved successfully",
+          "validationError": "Please correct the errors in the form",
+          "saveError": "Failed to save factory",
+          "loadError": "Failed to load factory data"
         }
       }
     },
@@ -290,7 +338,15 @@
       "title": "Geographical Regions",
       "description": "Enables you to manage geographical regions",
       "FormTitle": "Geographical Regions",
-      "FormDescription": "Enables you to add geographical regions"
+      "FormDescription": "Enables you to add geographical regions",
+      "form": {
+        "basicData": "Basic Data",
+        "zoneType": "Zone Type",
+        "selectZoneType": "Select Zone Type",
+        "parentZone": "Parent Zone",
+        "selectParentZone": "Select Parent Zone",
+        "autoFilledFromMap": "Auto-filled from map"
+      }
     },
     "geoSegments": {
       "title": "Geographic Segments",
@@ -302,7 +358,146 @@
       "description": "Enables you to manage added group products and add other group products",
       "list": "Group Products List",
       "create": "Add Group Product",
-      "edit": "Edit Group Product"
+      "edit": "Edit Group Product",
+      "form": {
+        "tabs": {
+          "basicData": "Basic Data",
+          "taxData": "Tax Data",
+          "additionalData": "Additional Data",
+          "testsList": "Tests List"
+        },
+        "sections": {
+          "prices": "Prices",
+          "productInfo": "Product Information",
+          "taxData": "Tax Data",
+          "supplyRelations": "Supply and Internal Relations",
+          "advancedAttributes": "Advanced Product Attributes",
+          "tests": "Tests List",
+          "subProducts": "Sub Products",
+          "productVariants": "Product Variants"
+        },
+        "labels": {
+          "productCode": "Product Code",
+          "copyProductCode": "Copy code",
+          "description": "Description",
+          "category": "Category",
+          "unit": "Unit",
+          "isMinUnit": "Minimum Unit",
+          "materialType": "Material Type",
+          "minQuantity": "Minimum Quantity",
+          "purchasePrice": "Purchase Price",
+          "sellPrice": "Sell Price",
+          "minSellPrice": "Minimum Sell Price",
+          "maxSellPrice": "Maximum Sell Price",
+          "wholesalePrice": "Wholesale Price",
+          "semiWholesalePrice": "Semi-Wholesale Price",
+          "discountType": "Discount Type",
+          "discountValue": "Discount Value",
+          "profitMargin": "Profit Margin",
+          "productImage": "Product Image",
+          "productImageHint": "Max size: 10MB - Supported formats: JPG, PNG",
+          "nameAr": "Arabic Name",
+          "nameEn": "English Name",
+          "descriptionAr": "Arabic Description",
+          "descriptionEn": "English Description",
+          "taxType": "Tax Type",
+          "taxPercentage": "Percentage",
+          "taxMinValue": "Minimum Value",
+          "taxPriority": "Priority",
+          "brand": "Brand",
+          "manufacturer": "Manufacturer",
+          "originCountry": "Country of Origin",
+          "relatedProducts": "Related Products",
+          "attachedProducts": "Attached Products",
+          "alternativeProducts": "Alternative Products",
+          "bestSuppliers": "Best Suppliers",
+          "attributes": {
+            "returnable": "Returnable",
+            "rentable": "Rentable",
+            "sellNegative": "Allow Negative Sales",
+            "manufacturingProduct": "Manufacturable",
+            "availableForPurchase": "Available for Projects",
+            "availableForRent": "Available for Rent",
+            "availableForReturn": "Available for Return",
+            "availableForSelling": "Available for Sale",
+            "availableForBuying": "Available for Purchase",
+            "availableForManufacturing": "Available for Manufacturing",
+            "availableForRefund": "Refundable",
+            "availableForOffset": "Offsettable"
+          },
+          "tests": {
+            "testName": "Test",
+            "testsCount": "Tests Count",
+            "samplesCount": "Samples Count",
+            "sampleQuantity": "Sample Quantity",
+            "status": "Status"
+          }
+        },
+        "placeholders": {
+          "selectPrefix": "Select",
+          "enterPrice": "Enter price",
+          "enterNameEn": "Enter name in English",
+          "enterNameAr": "Enter name in Arabic",
+          "selectCategory": "Select category",
+          "selectUnit": "Select unit",
+          "selectMaterialType": "Select material type",
+          "enterMinQuantity": "Enter minimum",
+          "enterDescriptionEn": "Enter description in English",
+          "enterDescriptionAr": "Enter description in Arabic",
+          "selectCountry": "Select country",
+          "selectManufacturer": "Select manufacturer",
+          "selectBrand": "Select brand",
+          "selectProduct": "Select product",
+          "selectSupplier": "Select supplier"
+        },
+        "table": {
+          "tax": {
+            "taxName": "Tax",
+            "percentage": "Percentage",
+            "minValue": "Minimum Value",
+            "priority": "Priority"
+          },
+          "tests": {
+            "testName": "Test",
+            "testsCount": "Tests Count",
+            "samplesCount": "Samples Count",
+            "sampleQuantity": "Sample Quantity",
+            "status": "Status"
+          },
+          "subProducts": {
+            "name": "Sub Product Name",
+            "sku": "Code",
+            "sellPrice": "Sell Price",
+            "purchasePrice": "Purchase Price"
+          }
+        },
+        "buttons": {
+          "saveAndReturn": "Save & Return",
+          "saveAndCreate": "Save & Create New",
+          "saveAndContinue": "Save & Continue",
+          "addLanguage": "Add new language",
+          "add": "Add",
+          "update": "Update",
+          "cancel": "Cancel",
+          "generateSubProducts": "Generate sub products"
+        },
+        "messages": {
+          "copySuccess": "Product code copied successfully",
+          "selectCategoryFirst": "You must select a category to add a group product",
+          "selectAspectsFirst": "Please select variable values first",
+          "noSubProductNamesReturned": "No sub product names were returned",
+          "subProductsGenerated": "Sub products generated successfully",
+          "subProductsGenerateFailed": "Failed to generate sub products",
+          "selectTaxTypeAndPriority": "Please select tax type and priority",
+          "saveError": "Error while saving",
+          "completeStep1": "Please complete the first step first",
+          "fetchError": "Failed to fetch product data"
+        },
+        "defaults": {
+          "product": "Product",
+          "test": "Test"
+        }
+      }
     },
     "logistics": {
       "title": "Logistics Companies",
@@ -437,11 +632,82 @@
           "title": "Delete Categories",
           "message": "Are you sure you want to delete {count} category?"
         }
+      },
+      "view": {
+        "generalInfo": "General Category Information",
+        "addedTaxes": "Added Taxes",
+        "attachments": "Attachments",
+        "attachedDocuments": "Attached Documents",
+        "noAttachments": "No attachments",
+        "uploading": "Uploading",
+        "uploaded": "uploaded",
+        "high": "High"
       }
     },
     "productVariables": {
       "title": "Product Variables",
-      "description": "Enables you to manage product variables"
+      "description": "Enables you to manage product variables",
+      "list": {
+        "filters": {
+          "variableName": "Variable name"
+        },
+        "buttons": {
+          "deleteSelected": "Delete selected",
+          "deleteAll": "Delete all"
+        },
+        "deleteDialog": {
+          "title": "Delete variables",
+          "message": "Are you sure you want to delete {count} variable(s)?"
+        },
+        "messages": {
+          "fetchError": "Failed to load data",
+          "deleteSuccess": "Variable deleted successfully",
+          "deleteError": "Failed to delete variable",
+          "bulkDeleteSuccess": "{count} variable(s) deleted successfully",
+          "bulkDeleteError": "Failed to delete variables",
+          "statusChangeSuccess": "Variable {status} successfully",
+          "statusChangeError": "Failed to change variable status",
+          "columnsUpdateError": "Failed to update columns"
+        }
+      },
+      "form": {
+        "sections": {
+          "basicInfo": "Basic information",
+          "values": "Variable values"
+        },
+        "labels": {
+          "variableName": "Product variable name",
+          "valueType": "Value type",
+          "notes": "Notes"
+        },
+        "placeholders": {
+          "variableNameEn": "Enter variable name in English",
+          "variableNameAr": "Enter variable name in Arabic",
+          "selectCategory": "Select category",
+          "selectValueType": "Select value type",
+          "notes": "Write notes here...",
+          "value": "Enter value"
+        },
+        "buttons": {
+          "addValue": "Add new"
+        },
+        "emptyState": {
+          "title": "No variable values",
+          "description": "Click \"Add new\" to add a new value"
+        },
+        "defaults": {
+          "value": "Value"
+        },
+        "messages": {
+          "validationError": "Please correct the errors in the form",
+          "createSuccess": "Variable created successfully",
+          "updateSuccess": "Variable updated successfully",
+          "saveError": "Failed to save data",
+          "loadConstantsError": "Failed to load constants",
+          "loadCategoriesError": "Failed to load categories",
+          "fetchError": "Failed to load variable data"
+        }
+      }
     },
     "profile": {
       "title": "Profile Settings",
@@ -595,7 +861,34 @@
         }
       },
       "create": "Add Role",
-      "edit": "Edit Role"
+      "edit": "Edit Role",
+      "form": {
+        "addRole": "Add Role",
+        "editRole": "Edit Role",
+        "addNewRole": "Add New Role",
+        "fillBasicData": "Fill in the basic data and select roles",
+        "basicData": "Basic Data",
+        "roleName": "Role Name",
+        "namePlaceholder": "Name",
+        "permissions": "Permissions",
+        "allPermissions": "All Permissions",
+        "saveChanges": "Save Changes",
+        "addNewRoleButton": "Add New Role",
+        "cancel": "Cancel",
+        "messages": {
+          "fetchPermissionsError": "An error occurred while fetching permissions",
+          "fetchRoleError": "An error occurred while fetching role data",
+          "updateSuccess": "Role updated successfully",
+          "createSuccess": "Role added successfully",
+          "saveError": "An error occurred while saving data"
+        }
+      },
+      "filters": {
+        "roleName": "Role Name",
+        "status": "Status",
+        "searchNow": "Search Now",
+        "reset": "Reset"
+      }
     },
     "SalesInvoices": {
       "title": "Sales Invoices Table",
@@ -738,7 +1031,13 @@
     },
     "sampleTypes": {
       "title": "Sample Types",
-      "description": "Enables you to manage sample types"
+      "description": "Enables you to manage sample types",
+      "form": {
+        "add": "New Sample Type",
+        "edit": "Edit Sample Type",
+        "addDescription": "Add a new sample type",
+        "editDescription": "Edit sample type data"
+      }
     },
     "servicePricesList": {
       "title": "Service Prices List",
@@ -759,6 +1058,125 @@
           "statusChangeSuccess": "Service {status} successfully",
           "statusChangeError": "Failed to change service status"
         }
+      },
+      "form": {
+        "tabs": {
+          "basicInfo": "Basic Information",
+          "operationalData": "Operational Data"
+        },
+        "basicInfo": {
+          "name": "Name",
+          "namePlaceholderEn": "Enter name in English",
+          "namePlaceholderAr": "ادخل الاسم بالعربية",
+          "serviceCode": "Service Code",
+          "serviceCodePlaceholder": "Enter service code",
+          "serviceCategory": "Service Category",
+          "serviceCategoryPlaceholder": "Select category",
+          "serviceType": "Service Type",
+          "serviceTypePlaceholder": "Select service type",
+          "serviceStatus": "Service Status",
+          "serviceStatusPlaceholder": "Select status",
+          "description": "Description",
+          "descriptionPlaceholderEn": "Enter description in English",
+          "descriptionPlaceholderAr": "ادخل الوصف بالعربية",
+          "unit": "Unit of Measurement",
+          "unitPlaceholder": "Select unit",
+          "unitPrice": "Unit Price",
+          "unitPricePlaceholder": "Enter unit price",
+          "pricingMethod": "Pricing Method",
+          "pricingMethodPlaceholder": "Select method",
+          "minQuantity": "Minimum Order",
+          "minQuantityPlaceholder": "0",
+          "tax": "Tax",
+          "taxPlaceholder": "Select tax",
+          "taxPercentage": "Tax Percentage",
+          "taxPercentagePlaceholder": "0",
+          "isTaxable": "Taxable",
+          "yes": "Yes",
+          "no": "No"
+        },
+        "operationalData": {
+          "appointmentSection": "Appointment and Duration?",
+          "requiresScheduling": "Requires Appointment?",
+          "serviceDuration": "Service Duration",
+          "serviceDurationPlaceholder": "Enter duration",
+          "durationUnitPlaceholder": "Select",
+          "serviceStatusSection": "Service Status?",
+          "requiresApproval": "Requires Approval",
+          "isBarter": "Barterable",
+          "isPartialAllowed": "Partial Allowed",
+          "salesEnabled": "Available for Sale",
+          "purchaseEnabled": "Available for Purchase",
+          "projectEnabled": "Available for Projects",
+          "visibilityLevel": "Visibility Level",
+          "visibilityPlaceholder": "Public",
+          "additionalDataSection": "Additional Data",
+          "notes": "Notes",
+          "notesPlaceholder": "Notes",
+          "activationDate": "Activation Date",
+          "activationDatePlaceholder": "2024-03-01"
+        },
+        "buttons": {
+          "save": "Save"
+        },
+        "messages": {
+          "saveSuccess": "Service saved successfully",
+          "saveError": "Failed to save service",
+          "validationError": "Please correct the errors in the form",
+          "fetchError": "Failed to fetch service data"
+        }
+      },
+      "view": {
+        "loading": "Loading service data...",
+        "breadcrumbs": {
+          "services": "Services",
+          "servicesList": "Services List"
+        },
+        "sections": {
+          "generalInfo": "General Information",
+          "appointmentDuration": "Appointment and Duration",
+          "serviceStatus": "Service Status",
+          "additionalData": "Additional Data"
+        },
+        "labels": {
+          "arabicName": "Arabic Name",
+          "englishName": "English Name",
+          "serviceCode": "Service Code",
+          "status": "Service Status",
+          "category": "Service Category",
+          "serviceType": "Service Type",
+          "englishDescription": "English Description",
+          "arabicDescription": "Arabic Description",
+          "requiresScheduling": "Requires Appointment",
+          "serviceDuration": "Service Duration",
+          "activationDate": "Activation Date",
+          "requiresApproval": "Requires Approval",
+          "isBarter": "Barterable",
+          "isPartialAllowed": "Partial Allowed",
+          "salesEnabled": "Available for Sale",
+          "purchaseEnabled": "Available for Purchase",
+          "projectEnabled": "Available for Projects",
+          "visibilityLevel": "Visibility Level",
+          "notes": "Notes"
+        },
+        "values": {
+          "active": "Active",
+          "inactive": "Inactive",
+          "notSpecified": "Not Specified",
+          "internal": "Internal",
+          "external": "External",
+          "fixed": "Fixed",
+          "variable": "Variable",
+          "public": "Public",
+          "private": "Private",
+          "minute": "Minute",
+          "hour": "Hour",
+          "day": "Day",
+          "week": "Week"
+        },
+        "messages": {
+          "fetchError": "Failed to fetch service details"
+        }
       }
     },
     "ServicesCategories": {
@@ -769,6 +1187,16 @@
           "title": "Delete Service Categories",
           "message": "Are you sure you want to delete {count} Service Category?"
         }
+      },
+      "view": {
+        "generalInfo": "General Category Information",
+        "addedTaxes": "Added Taxes",
+        "attachments": "Attachments",
+        "attachedDocuments": "Attached Documents",
+        "noAttachments": "No attachments",
+        "uploading": "Uploading",
+        "uploaded": "uploaded",
+        "high": "High"
       }
     },
     "servicesPricesList": {
@@ -834,6 +1262,11 @@
           "title": "Delete System Statuses",
           "message": "Are you sure you want to delete {count} system status?"
         }
+      },
+      "form": {
+        "add": "Add New Status",
+        "edit": "Edit Status",
+        "color": "Color"
       }
     },
     "taxes": {
@@ -857,7 +1290,15 @@
     "testGroup": {
       "title": "Test Groups",
       "description": "Enables you to manage test groups",
-      "tableTitle": "Test Groups Table"
+      "tableTitle": "Test Groups Table",
+      "form": {
+        "add": "Add Test Group",
+        "edit": "Edit Test Group",
+        "addDescription": "Add a new test group",
+        "editDescription": "Edit test group data",
+        "generalInfo": "General Group Information",
+        "mainTestGroup": "Main Test Group"
+      }
     },
     "testMethodology": {
       "title": "Test Methodologies",
@@ -868,6 +1309,13 @@
           "title": "Delete Test Methodologies",
           "message": "Are you sure you want to delete {count} methodology?"
         }
+      },
+      "form": {
+        "add": "Add Test Methodology",
+        "edit": "Edit Test Methodology",
+        "addDescription": "Add a new test methodology",
+        "editDescription": "Edit test methodology data",
+        "generalInfo": "General Methodology Information"
       }
     },
     "tests": {
@@ -934,7 +1382,41 @@
         }
       },
       "create": "Add User",
-      "edit": "Edit User"
+      "edit": "Edit User",
+      "form": {
+        "addUser": "Add New User",
+        "editUser": "Edit User",
+        "fillBasicData": "Fill in the basic data and select roles for the user",
+        "basicData": "Basic Data",
+        "userName": "Name",
+        "namePlaceholder": "Enter name",
+        "phone": "Phone",
+        "email": "Email",
+        "emailPlaceholder": "{email}",
+        "password": "Password",
+        "passwordPlaceholder": "Password",
+        "confirmPassword": "Confirm Password",
+        "confirmPasswordPlaceholder": "Confirm Password",
+        "roles": "Roles",
+        "rolesPlaceholder": "Select Roles",
+        "status": "Status",
+        "saveChanges": "Save Changes",
+        "addNewUserButton": "Add New User",
+        "cancel": "Cancel",
+        "messages": {
+          "fetchUserError": "An error occurred while fetching user data",
+          "updateSuccess": "User updated successfully",
+          "createSuccess": "User added successfully",
+          "saveError": "An error occurred while saving data"
+        }
+      },
+      "filters": {
+        "userName": "User Name",
+        "roles": "Roles",
+        "status": "Status",
+        "searchNow": "Search Now",
+        "reset": "Reset"
+      }
     },
     "vouchers": {
       "title": "Financial Dashboard",

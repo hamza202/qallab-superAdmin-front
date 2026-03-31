@@ -67,7 +67,9 @@
     "addProduct": "Add product",
     "createdAt": "Created at",
     "name": "Name",
-    "noDescription": "No description"
+    "noDescription": "No description",
+    "choose": "Choose",
+    "settings": "Settings"
   },
   "dialogs": {
     "confirmStatusChange": "Confirm status change",

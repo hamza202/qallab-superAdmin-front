@@ -9,13 +9,13 @@
                         <span v-html="homeIcon"></span>
                     </router-link>
                     <span class="text-lg text-gray-300">/</span>
-                    <router-link to="/settings" class="text-gray-600 hover:text-primary-600">
-                        المشتريات
+                    <router-link to="/purchases" class="text-gray-600 hover:text-primary-600">
+                        {{ t('purchases.views.shared.purchasesBreadcrumb') }}
                     </router-link>
                     <span class="text-lg text-gray-300">/</span>
                     <router-link to="/purchases/quotations/material-product/list"
                         class="text-gray-600 hover:text-primary-600">
-                        عروض الأسعار
+                        {{ t('purchases.views.shared.listQuotationsMaterial') }}
                     </router-link>
                     <span class="text-lg text-gray-300">/</span>
                     <span class="text-primary-700 font-medium bg-primary-50 px-2 py-1 rounded-md">{{ QuotationName ||
@@ -31,7 +31,7 @@
                             </div>
                             <div>
                                 <h1 class="text-lg font-bold text-gray-900 mb-1">{{ QuotationName || '--' }}</h1>
-                                <p class="text-sm text-gray-600">تفاصيل عرض السعر والمعلومات الخاصة به</p>
+                                <p class="text-sm text-gray-600">{{ t('purchases.views.shared.quotationSubtitle') }}</p>
                             </div>
                         </div>
                     </div>
@@ -40,42 +40,42 @@
                 <!-- Main Content -->
                 <!-- Quotation Information Section -->
                 <div class="p-6 border-b !border-gray-200">
-                    <h2 class="text-lg font-bold text-primary-900 mb-6">معلومات عرض السعر</h2>
+                    <h2 class="text-lg font-bold text-primary-900 mb-6">{{ t('purchases.views.shared.quotationInfoSection') }}</h2>
 
                     <div class="flex flex-wrap gap-4">
                         <div class="info-item-bordered flex-1 px-6 py-4">
-                            <label class="font-semibold text-sm text-gray-500 mb-2 block">اسم المورد</label>
+                            <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('purchases.shared.forms.common.labels.supplierName') }}</label>
                             <p class="text-base font-semibold text-gray-900">{{ supplierName }}</p>
                         </div>
                         <v-divider vertical class="my-6"></v-divider>
                         <div class="info-item-bordered flex-1 px-6 py-4">
-                            <label class="font-semibold text-sm text-gray-500 mb-2 block">الفئة</label>
+                            <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('purchases.views.shared.category') }}</label>
                             <p class="text-base font-semibold text-gray-900">{{ categoryLabel }}</p>
                         </div>
                         <v-divider vertical class="my-6"></v-divider>
                         <div class="info-item-bordered flex-1 px-6 py-4">
-                            <label class="font-semibold text-sm text-gray-500 mb-2 block">تاريخ عرض السعر</label>
+                            <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('purchases.views.shared.quotationDate') }}</label>
                             <p class="text-base font-semibold text-gray-900">{{ quotationDateTime }}</p>
                         </div>
                         <v-divider vertical class="my-6"></v-divider>
                         <div class="info-item-bordered flex-1 px-6 py-4">
-                            <label class="font-semibold text-sm text-gray-500 mb-2 block">المشروع</label>
+                            <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('purchases.orders.shared.labels.project') }}</label>
                             <p class="text-base font-semibold text-gray-900">{{ projectName }}</p>
                         </div>
                     </div>
                     <div class="flex flex-wrap gap-4 mt-4">
                         <div class="info-item-bordered flex-1 px-6 py-4">
-                            <label class="font-semibold text-sm text-gray-500 mb-2 block">موقع المشروع</label>
+                            <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('purchases.requests.materialProduct.form.labels.projectLocation') }}</label>
                             <p class="text-base font-semibold text-gray-900">{{ targetLocation }}</p>
                         </div>
                         <v-divider vertical class="my-6"></v-divider>
                         <div class="info-item-bordered flex-1 px-6 py-4">
-                            <label class="font-semibold text-sm text-gray-500 mb-2 block">طريقة الدفع</label>
+                            <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('purchases.shared.forms.common.labels.paymentMethod') }}</label>
                             <p class="text-base font-semibold text-gray-900">{{ paymentMethodLabel }}</p>
                         </div>
                         <v-divider vertical class="my-6"></v-divider>
                         <div class="info-item-bordered flex-1 px-6 py-4">
-                            <label class="font-semibold text-sm text-gray-500 mb-2 block">الدفعة المقدمة</label>
+                            <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('purchases.views.shared.advancePaymentWording') }}</label>
                             <p class="text-sm text-gray-700 leading-relaxed flex gap-1 items-center">{{ upfrontPayment
                                 }} <span v-html="rialIcon"></span></p>
                         </div>
@@ -87,7 +87,7 @@
                     <div class="bg-primary-50 px-6 py-3">
                         <div class="flex items-center gap-2 text-primary-600">
                             <span v-html="packageIcon"></span>
-                            <h2 class="text-base font-bold">جدول عناصر عرض السعر</h2>
+                            <h2 class="text-base font-bold">{{ t('purchases.views.shared.itemsTableQuotation') }}</h2>
                         </div>
                     </div>
                     <div>
@@ -100,7 +100,7 @@
                     <div class="bg-primary-50 px-6 py-3">
                         <div class="flex items-center gap-2 text-primary-600">
                             <span v-html="busIcon"></span>
-                            <h2 class="text-base font-bold">تفاصيل التوريد</h2>
+                            <h2 class="text-base font-bold">{{ t('purchases.orders.shared.labels.supplyDetailsSection') }}</h2>
                         </div>
                     </div>
                     <div>
@@ -113,52 +113,52 @@
                     <div class="bg-primary-50 px-6 py-3">
                         <div class="flex items-center gap-2 text-primary-600">
                             <span v-html="truckIcon"></span>
-                            <h2 class="text-base font-bold">بيانات التوريد الإضافية</h2>
+                            <h2 class="text-base font-bold">{{ t('purchases.orders.shared.labels.extraLogisticsSection') }}</h2>
                         </div>
                     </div>
                     <div class="p-6">
                         <div class="flex flex-wrap gap-4">
                             <div class="info-item-bordered px-6 py-4">
-                                <label class="font-semibold text-sm text-gray-500 mb-2 block">تاريخ بدء النقل</label>
+                                <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('purchases.requests.logistics.form.detailCard.fromDate') }}</label>
                                 <p class="text-base font-semibold text-gray-900">{{ additionalLogistics.from_date }}</p>
                             </div>
                             <v-divider vertical class="my-6"></v-divider>
                             <div class="info-item-bordered px-6 py-4">
-                                <label class="font-semibold text-sm text-gray-500 mb-2 block">تاريخ انتهاء النقل</label>
+                                <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('purchases.requests.logistics.form.detailCard.toDate') }}</label>
                                 <p class="text-base font-semibold text-gray-900">{{ additionalLogistics.to_date }}</p>
                             </div>
                             <v-divider vertical class="my-6"></v-divider>
                             <div class="info-item-bordered px-6 py-4">
-                                <label class="font-semibold text-sm text-gray-500 mb-2 block">مدة التنفيذ</label>
+                                <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('purchases.requests.logistics.form.detailCard.executionDuration') }}</label>
                                 <p class="text-base font-semibold text-gray-900">{{
-                                    additionalLogistics.actual_execution_duration }} يوم</p>
+                                    t('purchases.views.shared.daysWithUnit', { n: additionalLogistics.actual_execution_duration }) }}</p>
                             </div>
                             <v-divider vertical class="my-6"></v-divider>
                             <div class="info-item-bordered px-6 py-4">
-                                <label class="font-semibold text-sm text-gray-500 mb-2 block">نوع مركبة النقل</label>
+                                <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('purchases.requests.logistics.form.detailCard.vehicleType') }}</label>
                                 <p class="text-base font-semibold text-gray-900">{{ additionalLogistics.vehicle_type }}
                                 </p>
                             </div>
                             <v-divider vertical class="my-6"></v-divider>
                             <div class="info-item-bordered px-6 py-4">
-                                <label class="font-semibold text-sm text-gray-500 mb-2 block">عدد مركبات النقل</label>
+                                <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('purchases.views.shared.vehicleCountSingular') }}</label>
                                 <p class="text-base font-semibold text-gray-900">{{ additionalLogistics.transport_no }}
                                 </p>
                             </div>
                             <v-divider vertical class="my-6"></v-divider>
                             <div class="info-item-bordered px-6 py-4">
-                                <label class="font-semibold text-sm text-gray-500 mb-2 block">عدد الرحلات الكلي</label>
+                                <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('purchases.orders.shared.tableHeaders.totalTripsCount') }}</label>
                                 <p class="text-base font-semibold text-gray-900">{{ additionalLogistics.trip_no }}</p>
                             </div>
                             <v-divider vertical class="my-6"></v-divider>
                             <div class="info-item-bordered px-6 py-4">
-                                <label class="font-semibold text-sm text-gray-500 mb-2 block">مسؤول التحميل</label>
+                                <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('purchases.requests.logistics.form.detailCard.loadingResponsible') }}</label>
                                 <p class="text-base font-semibold text-gray-900">{{
                                     additionalLogistics.loading_responsible }}</p>
                             </div>
                             <v-divider vertical class="my-6"></v-divider>
                             <div class="info-item-bordered px-6 py-4">
-                                <label class="font-semibold text-sm text-gray-500 mb-2 block">مسؤول التنزيل</label>
+                                <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('purchases.views.shared.unloadingResponsibleAlt') }}</label>
                                 <p class="text-base font-semibold text-gray-900">{{
                                     additionalLogistics.downloading_responsible }}</p>
                             </div>
@@ -178,6 +178,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useApi } from '@/composables/useApi'
 import { useNotification } from '@/composables/useNotification'
 import { rialIcon, archiveIcon, homeIcon } from '@/components/icons/globalIcons'
@@ -185,6 +186,7 @@ import { busIcon, truckIcon, packageIcon } from '@/components/icons/priceOffersI
 const route = useRoute()
 const api = useApi()
 const { error } = useNotification()
+const { t } = useI18n()
 
 const isLoading = ref(false)
 const quotationData = ref<any>(null)
@@ -202,7 +204,7 @@ const fetchQuotationData = async () => {
         quotationData.value = res.data
     } catch (e: any) {
         console.error('Error fetching quotation data:', e)
-        error(e?.response?.data?.message || 'فشل تحميل بيانات عرض السعر')
+        error(e?.response?.data?.message || t('purchases.views.shared.loadQuotationError'))
     } finally {
         isLoading.value = false
     }
@@ -275,33 +277,33 @@ const additionalLogistics = computed(() => {
 
 // Helper functions
 const getAmPmIntervalName = (interval: any) => {
-    if (interval === 'am') return 'صباحاً'
-    if (interval === 'pm') return 'مساءً'
-    if (interval === 'both') return 'صباحاً ومساءً'
+    if (interval === 'am') return t('purchases.views.shared.timeInterval.am')
+    if (interval === 'pm') return t('purchases.views.shared.timeInterval.pm')
+    if (interval === 'both') return t('purchases.views.shared.timeInterval.both')
     return interval || '—'
 }
 
 
 // Table headers
-const productHeaders = [
-    { title: 'اسم المنتج', key: 'item_name' },
-    { title: 'الوحدة', key: 'unit' },
-    { title: 'الكمية', key: 'quantity' },
-    { title: 'سعر الوحدة', key: 'unit_price' },
-    { title: 'الخصم', key: 'discount' },
-    { title: 'الضريبة', key: 'tax' },
-    { title: 'إجمالي المبلغ', key: 'subtotal' },
-]
+const productHeaders = computed(() => [
+    { title: t('purchases.link.shared.table.productName'), key: 'item_name' },
+    { title: t('purchases.shared.forms.common.tableHeaders.unit'), key: 'unit' },
+    { title: t('purchases.link.shared.table.quantity'), key: 'quantity' },
+    { title: t('purchases.orders.shared.tableHeaders.unitPrice'), key: 'unit_price' },
+    { title: t('purchases.orders.shared.tableHeaders.discount'), key: 'discount' },
+    { title: t('purchases.link.view.shared.taxShort'), key: 'tax' },
+    { title: t('purchases.orders.shared.tableHeaders.totalAmount'), key: 'subtotal' },
+])
 
-const transportHeaders = [
-    { title: 'المنتج', key: 'item_name' },
-    { title: 'الكمية', key: 'quantity' },
-    { title: 'تاريخ بداية النقل', key: 'trip_start' },
-    { title: 'عدد الرحلات', key: 'number_of_trips' },
-    { title: 'نوع مركبة النقل', key: 'vehicle_type' },
-    { title: 'سعة الرحلة', key: 'trip_capacity' },
-    { title: 'توقيت الرحلة', key: 'trip_time' },
-]
+const transportHeaders = computed(() => [
+    { title: t('purchases.orders.shared.tableHeaders.product'), key: 'item_name' },
+    { title: t('purchases.link.shared.table.quantity'), key: 'quantity' },
+    { title: t('purchases.orders.shared.tableHeaders.transportStartDate'), key: 'trip_start' },
+    { title: t('purchases.orders.shared.tableHeaders.tripCount'), key: 'number_of_trips' },
+    { title: t('purchases.orders.shared.tableHeaders.vehicleType'), key: 'vehicle_type' },
+    { title: t('purchases.orders.shared.tableHeaders.tripCapacity'), key: 'trip_capacity' },
+    { title: t('purchases.orders.shared.tableHeaders.tripTiming'), key: 'trip_time' },
+])
 
 </script>
 

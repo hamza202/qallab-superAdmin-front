@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted, watch, nextTick } from "vue";
 import { useRoute, useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import TopHeader from '@/components/price-offers/TopHeader.vue';
 import { useApi } from '@/composables/useApi';
 import { returnIcon, saveIcon, fileCheckIcon, fileIcon_2 } from '@/components/icons/globalIcons';
@@ -13,6 +14,7 @@ const { success, warning, apiError } = useNotification();
 const api = useApi();
 const route = useRoute();
 const router = useRouter();
+const { t } = useI18n();
 
 // Check if we're in edit mode
 const isEditMode = computed(() => !!route.params.id);
@@ -274,7 +276,7 @@ const fetchSalesInvoicesByPurchaseOrder = async (
         const rawData = Array.isArray(res.data) ? res.data : res.data?.data;
         const list = Array.isArray(rawData) ? rawData : [];
         salesInvoicesItems.value = list.map((invoice: any) => ({
-            title: invoice.code || `فاتورة #${invoice.id ?? invoice.uuid ?? ''}`,
+            title: invoice.code || t('purchases.invoices.form.fallbacks.invoiceTitle', { id: String(invoice.id ?? invoice.uuid ?? '') }),
             value: invoice.id ?? invoice.uuid ?? invoice.code,
             items: invoice.logistic_items || [],
             summary: {
@@ -364,7 +366,7 @@ const fetchFormData = async () => {
                     const exists = ordersItems.value.some(order => order.value === data.purchase_order_id);
                     if (!exists) {
                         ordersItems.value.push({
-                            title: data.purchase_order_code || `طلبية #${data.purchase_order_id}`,
+                            title: data.purchase_order_code || t('purchases.invoices.form.fallbacks.poById', { id: String(data.purchase_order_id) }),
                             value: data.purchase_order_id,
                         });
                     }
@@ -449,7 +451,7 @@ const handleSubmit = async (type: any) => {
     if (!await validate()) return;
 
     if (productTableItems.value.length === 0) {
-        warning('يجب أن تحتوي الفاتورة على منتج واحد على الأقل');
+        warning(t('purchases.invoices.form.messages.atLeastOneProduct'));
         return;
     }
 
@@ -467,7 +469,7 @@ const handleSubmit = async (type: any) => {
             });
         }
 
-        success(isEditMode.value ? 'تم تحديث الفاتورة بنجاح' : 'تم إنشاء الفاتورة بنجاح');
+        success(isEditMode.value ? t('purchases.invoices.form.messages.updated') : t('purchases.invoices.form.messages.created'));
 
         // Post-submit handling
         if (type === 'createNew') {
@@ -479,22 +481,22 @@ const handleSubmit = async (type: any) => {
     } catch (e: any) {
         console.error('Error submitting form:', e);
         assignFieldErrors(e);
-        apiError(e, 'حدث خطأ أثناء حفظ الفاتورة');
+        apiError(e, t('purchases.invoices.form.messages.saveError'));
     } finally {
         isSubmitting.value = false;
     }
 };
 
-const headers = [
-    { title: 'كود الرحلة', key: 'code' },
-    { title: 'موقع الإستلام', key: 'source_location' },
-    { title: 'موقع التسليم', key: 'target_location' },
-    { title: 'عدد الرحلات', key: 'quantity' },
-    { title: 'سعر الرحلة', key: 'price_per_unit' },
-    { title: 'المبلغ الخاضع للضريبة', key: 'taxable_amount' },
-    { title: 'مبلغ الضريبة', key: 'total_tax' },
-    { title: 'إجمالي المبلغ', key: 'subtotal_after_tax' },
-]
+const headers = computed(() => [
+    { title: t('purchases.invoices.logistics.form.tripTableHeaders.tripCode'), key: 'code' },
+    { title: t('purchases.invoices.logistics.form.tripTableHeaders.pickupLocation'), key: 'source_location' },
+    { title: t('purchases.invoices.logistics.form.tripTableHeaders.deliveryLocation'), key: 'target_location' },
+    { title: t('purchases.invoices.logistics.form.tripTableHeaders.tripCount'), key: 'quantity' },
+    { title: t('purchases.invoices.logistics.form.tripTableHeaders.tripPrice'), key: 'price_per_unit' },
+    { title: t('purchases.invoices.logistics.form.tripTableHeaders.taxableAmount'), key: 'taxable_amount' },
+    { title: t('purchases.invoices.logistics.form.tripTableHeaders.taxAmount'), key: 'total_tax' },
+    { title: t('purchases.invoices.logistics.form.tripTableHeaders.totalAmount'), key: 'subtotal_after_tax' },
+]);
 
 // Computed items for the DataTable (mapped from productTableItems)
 const tableItems = computed(() => productTableItems.value.map((item, index) => ({
@@ -616,21 +618,21 @@ onMounted(async () => {
     <default-layout>
         <div class="-mx-6 bg-qallab-dashboard-bg space-y-4">
             <TopHeader :icon="fileCheckIcon" title-key="pages.PurchaseInvoicesLogistics.FormTitle"
-                description-key="pages.PurchaseInvoicesLogistics.FormDescription" :code="InvoiceCode" code-label="كود الفاتورة"
+                description-key="pages.PurchaseInvoicesLogistics.FormDescription" :code="InvoiceCode" code-label-key="purchases.invoices.form.codeLabel"
                 :show-action="false" />
 
             <!-- Request Information Section -->
             <div class="p-6 bg-white rounded-3xl border !border-gray-100 ">
                 <div class="flex items-center mb-6 gap-2 text-primary-600">
                     <span class="w-4" v-html="fileIcon_2"></span>
-                    <h2 class="text-base font-bold">البيانات الأساسية</h2>
+                    <h2 class="text-base font-bold">{{ t('purchases.invoices.form.sections.basicInfo') }}</h2>
                 </div>
 
                 <v-form ref="formRef" v-model="isFormValid" @submit.prevent>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 gap-y-6">
                         <div>
-                            <SelectInput v-model="formData.supplier_id" :items="[]" placeholder="اختر المورد"
-                                label="اسم المورد" :rules="[required()]" density="comfortable" item-title="title"
+                            <SelectInput v-model="formData.supplier_id" :items="[]" :placeholder="t('purchases.shared.forms.common.placeholders.selectSupplier')"
+                                :label="t('purchases.invoices.form.labels.supplierName')" :rules="[required()]" density="comfortable" item-title="title"
                                 item-value="value" :server-side="true" :fetch-function="fetchSuppliers"
                                 item-title-key="full_name" item-value-key="id" :debounce-time="500"
                                 :error-messages="formErrors['supplier_id']"
@@ -638,7 +640,7 @@ onMounted(async () => {
                         </div>
 
                         <div class="lg:col-span-2 xl:col-span-3">
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">سحب المنتجات</label>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">{{ t('purchases.invoices.form.labels.pullProducts') }}</label>
                             <div class="mt-1">
                                 <v-radio-group v-model="formData.fetch_item" inline hide-details
                                     :error-messages="formErrors['fetch_item']"
@@ -658,8 +660,8 @@ onMounted(async () => {
 
                         <!-- Purchase Order Code -->
                         <div>
-                            <SelectInput v-model="formData.purchase_order_id" placeholder="اختر الطلبية"
-                                label="كود طلبية المشتريات" :items="ordersItems" density="comfortable"
+                            <SelectInput v-model="formData.purchase_order_id" :placeholder="t('purchases.invoices.form.placeholders.selectOrder')"
+                                :label="t('purchases.invoices.form.labels.purchaseOrderCode')" :items="ordersItems" density="comfortable"
                                 :rules="[required()]" :error-messages="formErrors['purchase_order_id']"
                                 @update:model-value="clearFieldError('purchase_order_id')" clearable
                                 :disabled="!formData.category" />
@@ -667,8 +669,8 @@ onMounted(async () => {
 
                         <!-- Sales Invoices Multi-Select -->
                         <div v-if="formData.purchase_order_id">
-                            <MultipleSelectInput v-model="formData.sales_ids" placeholder="اختر فواتير المبيعات"
-                                label="فواتير المبيعات" :items="salesInvoicesItems" density="comfortable"
+                            <MultipleSelectInput v-model="formData.sales_ids" :placeholder="t('purchases.invoices.form.placeholders.selectSalesInvoices')"
+                                :label="t('purchases.invoices.form.labels.salesInvoices')" :items="salesInvoicesItems" density="comfortable"
                                 :error-messages="formErrors['sales_ids']"
                                 @update:model-value="clearFieldError('sales_ids')" multiple chips clearable />
                         </div>
@@ -676,7 +678,7 @@ onMounted(async () => {
                         <!-- Invoice Creation Date -->
                         <div v-if="formData.invoice_creation_date">
                             <DatePickerInput v-model="formData.invoice_creation_date" type="date" density="comfortable"
-                                placeholder="2024-03-01" label="تاريخ إنشاء الفاتورة" />
+                                :placeholder="t('purchases.invoices.form.placeholders.dateSample')" :label="t('purchases.invoices.form.labels.invoiceCreatedAt')" />
                         </div>
 
                         <!-- Invoice Date -->
@@ -684,25 +686,25 @@ onMounted(async () => {
                             <DateTimePickerInput v-model="formData.invoice_issues_datetime" type="date"
                                 :error-messages="formErrors['invoice_issues_datetime']"
                                 @update:model-value="clearFieldError('invoice_issues_datetime')" density="comfortable"
-                                placeholder="2024-03-01" label="تاريخ إصدار الفاتورة" />
+                                :placeholder="t('purchases.invoices.form.placeholders.dateSample')" :label="t('purchases.invoices.form.labels.invoiceIssueDate')" />
                         </div>
 
                         <!-- Invoice Recipient Date -->
                         <div>
                             <DateTimePickerInput v-model="formData.invoice_due_datetime" :error-messages="formErrors['invoice_due_datetime']"
                                 @update:model-value="clearFieldError('invoice_due_datetime')" type="date"
-                                density="comfortable" placeholder="2024-03-01" label="تاريخ استحقاق الفاتورة" />
+                                density="comfortable" :placeholder="t('purchases.invoices.form.placeholders.dateSample')" :label="t('purchases.invoices.form.labels.invoiceDueDate')" />
                         </div>
 
                         <!-- Project -->
                         <div>
-                            <TextInput v-model="formData.project_name" placeholder="أدخل اسم المشروع" label="المشروع"
+                            <TextInput v-model="formData.project_name" :placeholder="t('purchases.invoices.form.placeholders.projectName')" :label="t('purchases.invoices.form.labels.project')"
                                 density="comfortable" />
                         </div>
 
                         <!-- Statement (Full width) -->
                         <div class="lg:col-span-2">
-                            <TextInput v-model="formData.notes" placeholder="أدخل البيان هنا" label="البيان"
+                            <TextInput v-model="formData.notes" :placeholder="t('purchases.invoices.form.placeholders.notes')" :label="t('purchases.invoices.form.labels.statement')"
                                 density="comfortable" rows="3" />
                         </div>
                     </div>
@@ -714,7 +716,7 @@ onMounted(async () => {
                 <div class="p-6">
                     <div class="flex items-center gap-2 text-primary-600">
                         <span class="w-4" v-html="fileCheckIcon"></span>
-                        <h2 class="text-base font-bold ">جدول عناصر فاتورة المشتريات</h2>
+                        <h2 class="text-base font-bold ">{{ t('purchases.invoices.form.sections.itemsTable') }}</h2>
                     </div>
                 </div>
 
@@ -732,10 +734,10 @@ onMounted(async () => {
                             <tr class="bg-primary-400">
                                 <th
                                     class="text-white font-semibold text-base py-3 px-4 text-center border-l !border-gray-200">
-                                    العنصر
+                                    {{ t('purchases.invoices.form.summary.item') }}
                                 </th>
                                 <th class="text-white font-semibold text-base py-3 px-4 text-center">
-                                    المبلغ
+                                    {{ t('purchases.invoices.form.summary.amount') }}
                                 </th>
                             </tr>
                         </thead>
@@ -744,7 +746,7 @@ onMounted(async () => {
                             <!-- Total Quantities -->
                             <tr class="border-b !border-gray-200">
                                 <td class="py-4 px-4 text-center font-bold text-gray-900 border-l !border-gray-200">
-                                    إجمالي الكميات
+                                    {{ t('purchases.invoices.form.summary.totalQty') }}
                                 </td>
                                 <td class="py-4 px-4 text-center text-gray-600">
                                     {{ summaryTotalQuantities }}
@@ -754,7 +756,7 @@ onMounted(async () => {
                             <!-- Total (Excluding Tax) -->
                             <tr class="border-b !border-gray-200">
                                 <td class="py-4 px-4 text-center font-bold text-gray-900 border-l !border-gray-200">
-                                    الإجمالي (غير شامل الضريبة)
+                                    {{ t('purchases.invoices.form.summary.totalExclTax') }}
                                 </td>
                                 <td class="py-4 px-4 text-center text-gray-600">
                                     {{ summaryTotalExcludingTax }}
@@ -764,7 +766,7 @@ onMounted(async () => {
                             <!-- Total Discounts -->
                             <tr class="border-b !border-gray-200">
                                 <td class="py-4 px-4 text-center font-bold text-gray-900 border-l !border-gray-200">
-                                    مجموع الخصومات
+                                    {{ t('purchases.invoices.form.summary.totalDiscounts') }}
                                 </td>
                                 <td class="py-4 px-4 text-center text-gray-600">
                                     {{ summaryTotalDiscounts }}
@@ -774,7 +776,7 @@ onMounted(async () => {
                             <!-- Total Tax Amount -->
                             <tr class="border-b !border-gray-200">
                                 <td class="py-4 px-4 text-center font-bold text-gray-900 border-l !border-gray-200">
-                                    الإجمالي الخاضع للضريبة
+                                    {{ t('purchases.invoices.form.summary.totalTaxable') }}
                                 </td>
                                 <td class="py-4 px-4 text-center text-gray-600">
                                     {{ summaryTotalTaxable }}
@@ -794,7 +796,7 @@ onMounted(async () => {
                             <!-- Tax Total -->
                             <tr class="border-b !border-gray-200">
                                 <td class="py-4 px-4 text-center font-bold text-gray-900 border-l !border-gray-200">
-                                    مجموع الضريبة
+                                    {{ t('purchases.invoices.form.summary.totalTax') }}
                                 </td>
                                 <td class="py-4 px-4 text-center text-gray-600">
                                     {{ summaryTotalTax }}
@@ -804,7 +806,7 @@ onMounted(async () => {
                             <!-- Total Due Amount -->
                             <tr class="border-b !border-gray-200">
                                 <td class="py-4 px-4 text-center font-bold text-gray-900 border-l !border-gray-200">
-                                    إجمالي المبلغ المستحق
+                                    {{ t('purchases.invoices.form.summary.totalDue') }}
                                 </td>
                                 <td class="py-4 px-4 text-center text-gray-600">
                                     {{ summaryTotalDue }}
@@ -828,11 +830,11 @@ onMounted(async () => {
                 <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col">
                     <ButtonWithIcon variant="flat" color="primary" height="48" rounded="4" :loading="isSubmitting"
                         custom-class="font-semibold text-base px-6 md:!px-10" :prepend-icon="returnIcon"
-                        label="حفظ والعودة للرئيسية" @click="handleSubmit('backToList')" />
+                        :label="t('purchases.invoices.form.actions.saveReturnMain')" @click="handleSubmit('backToList')" />
 
                     <ButtonWithIcon variant="flat" color="primary-50" height="48" rounded="4" :loading="isSubmitting"
                         custom-class="font-semibold text-base text-primary-700 px-6 md:!px-10" :prepend-icon="saveIcon"
-                        label="حفظ وإنشاء جديد" @click="handleSubmit('createNew')" />
+                        :label="t('purchases.invoices.form.actions.saveCreateNew')" @click="handleSubmit('createNew')" />
                 </div>
             </div>
         </div>

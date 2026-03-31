@@ -10,11 +10,11 @@
                     </router-link>
                     <span class="text-lg text-gray-300">/</span>
                     <router-link to="/users/list" class="text-gray-600 hover:text-primary-600">
-                        المستخدمين
+                        {{ t('pages.users.title') }}
                     </router-link>
                     <span class="text-lg text-gray-300">/</span>
                     <router-link to="/users/list" class="text-gray-600 hover:text-primary-600">
-                        المستخدمين والأدوار
+                        {{ t('pages.roles.list.pageTitle') }}
                     </router-link>
                 </div>
 
@@ -25,8 +25,8 @@
                             <span v-html="usersIcon_2" class="text-primary-600"></span>
                         </div>
                         <div>
-                            <h1 class="text-lg font-semibold text-gray-900 mb-1">المستخدمين والأدوار</h1>
-                            <p class="text-sm text-gray-600">تمكنك من عرض وتعديل المستخدمين وادوارهم</p>
+                            <h1 class="text-lg font-semibold text-gray-900 mb-1">{{ t('pages.roles.list.pageTitle') }}</h1>
+                            <p class="text-sm text-gray-600">{{ t('pages.roles.list.pageDescription') }}</p>
                         </div>
                     </div>
                 </div>
@@ -35,10 +35,10 @@
                 <div
                     class="flex lg:items-center lg:justify-between py-4 border-b border-gray-200 flex-col lg:flex-row gap-3 px-6">
                     <div class="flex gap-2 overflow-y-auto">
-                        <ButtonWithIcon to="/users/list" variant="flat" size="large" label="المستخدمين" color="white"
+                        <ButtonWithIcon to="/users/list" variant="flat" size="large" :label="t('pages.roles.list.tabs.users')" color="white"
                             :rounded="'md'" :prepend-icon="usersIcon_1" custom-class="!text-gray-400">
                         </ButtonWithIcon>
-                        <ButtonWithIcon to="/roles/list" variant="flat" size="large" label="الأدوار" color="primary-500"
+                        <ButtonWithIcon to="/roles/list" variant="flat" size="large" :label="t('pages.roles.list.tabs.roles')" color="primary-500"
                             :rounded="'md'" :prepend-icon="checksIcon" custom-class="text-white">
                         </ButtonWithIcon>
                     </div>
@@ -52,18 +52,18 @@
                                 <!-- Right Side: Donut Chart -->
                                 <div class="md:col-span-2">
                                     <div class="d-flex flex-column bg-gray-50 rounded-3xl h-100 p-5">
-                                        <h3 class="text-lg font-bold text-gray-900 mb-4">الأدوار الفعّالة :
+                                        <h3 class="text-lg font-bold text-gray-900 mb-4">{{ t('pages.roles.list.activeRoles') }}
                                         </h3>
                                         <v-divider length="250" class="mb-5"></v-divider>
                                         <div class="position-relative mb-4 d-flex justify-center flex-1 flex-wrap gap-3">
                                             <div class="space-y-3">
                                                 <div class="d-flex align-center gap-2">
                                                     <div class="rounded-circle w-[8px] h-[8px] bg-primary-600"></div>
-                                                    <span class="text-gray-600 text-sm">فعال</span>
+                                                    <span class="text-gray-600 text-sm">{{ t('common.status.active') }}</span>
                                                 </div>
                                                 <div class="d-flex align-center gap-2">
                                                     <div class="rounded-circle w-[8px] h-[8px] bg-primary-100"></div>
-                                                    <span class="text-gray-600 text-sm">غير فعال</span>
+                                                    <span class="text-gray-600 text-sm">{{ t('common.status.inactive') }}</span>
                                                 </div>
                                             </div>
                                             <div class="flex-1 flex justify-center items-center flex-col gap-4">
@@ -87,7 +87,7 @@
                                 <!-- Left Side: Role Stats -->
                                 <div class="md:col-span-3">
                                     <div class="bg-gray-50 !rounded-3xl p-5">
-                                        <h3 class="text-lg font-bold text-gray-900 mb-4">الأدوار والصلاحيات :
+                                        <h3 class="text-lg font-bold text-gray-900 mb-4">{{ t('pages.roles.list.rolesAndPermissions') }}
                                         </h3>
                                         <v-divider length="250" class="mb-5"></v-divider>
                                         <div class="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-20">
@@ -98,7 +98,7 @@
                                                             <span v-html="gridIcon"></span>
                                                         </v-avatar>
                                                         <span
-                                                            class="text-body-1 font-semibold text-gray-900">المنتجات</span>
+                                                            class="text-body-1 font-semibold text-gray-900">{{ t('pages.roles.list.modules.products') }}</span>
                                                     </div>
                                                     <span class="text-base font-bold text-gray-900">56</span>
                                                 </div>
@@ -108,7 +108,7 @@
                                                             <span v-html="servicesIcon"></span>
                                                         </v-avatar>
                                                         <span
-                                                            class="text-body-1 font-semibold text-gray-900">الخدمات</span>
+                                                            class="text-body-1 font-semibold text-gray-900">{{ t('pages.roles.list.modules.services') }}</span>
                                                     </div>
                                                     <span class="text-base font-bold text-gray-900">23</span>
                                                 </div>
@@ -118,7 +118,7 @@
                                                             <span v-html="shoppingCart"></span>
                                                         </v-avatar>
                                                         <span
-                                                            class="text-body-1 font-semibold text-gray-900">المشتريات</span>
+                                                            class="text-body-1 font-semibold text-gray-900">{{ t('pages.roles.list.modules.purchases') }}</span>
                                                     </div>
                                                     <span class="text-base font-bold text-gray-900">44</span>
                                                 </div>
@@ -128,7 +128,7 @@
                                                             <span v-html="brandIcon"></span>
                                                         </v-avatar>
                                                         <span
-                                                            class="text-body-1 font-semibold text-gray-900">المالية</span>
+                                                            class="text-body-1 font-semibold text-gray-900">{{ t('pages.roles.list.modules.finance') }}</span>
                                                     </div>
                                                     <span class="text-base font-bold text-gray-900">12</span>
                                                 </div>
@@ -139,7 +139,7 @@
                                                         <v-avatar color="#1570EF" size="42">
                                                             <span v-html="refreshIcon"></span>
                                                         </v-avatar>
-                                                        <span class="text-body-1 font-semibold text-gray-900">المقاصة</span>
+                                                        <span class="text-body-1 font-semibold text-gray-900">{{ t('pages.roles.list.modules.clearing') }}</span>
                                                     </div>
                                                     <span class="text-base font-bold text-gray-900">65</span>
                                                 </div>
@@ -149,7 +149,7 @@
                                                             <span v-html="walletIcon"></span>
                                                         </v-avatar>
                                                         <span
-                                                            class="text-body-1 font-semibold text-gray-900">التمويل</span>
+                                                            class="text-body-1 font-semibold text-gray-900">{{ t('pages.roles.list.modules.funding') }}</span>
                                                     </div>
                                                     <span class="text-base font-bold text-gray-900">21</span>
                                                 </div>
@@ -159,7 +159,7 @@
                                                             <span v-html="usersIcon"></span>
                                                         </v-avatar>
                                                         <span
-                                                            class="text-body-1 font-semibold text-gray-900">المستخدمين</span>
+                                                            class="text-body-1 font-semibold text-gray-900">{{ t('pages.roles.list.modules.users') }}</span>
                                                     </div>
                                                     <span class="text-base font-bold text-gray-900">33</span>
                                                 </div>
@@ -169,7 +169,7 @@
                                                             <span v-html="fileIcon"></span>
                                                         </v-avatar>
                                                         <span
-                                                            class="text-body-1 font-semibold text-gray-900">التقارير</span>
+                                                            class="text-body-1 font-semibold text-gray-900">{{ t('pages.roles.list.modules.reports') }}</span>
                                                     </div>
                                                     <span class="text-base font-bold text-gray-900">43</span>
                                                 </div>
@@ -188,22 +188,22 @@
                     <div class="flex flex-wrap xl:!flex-nowrap gap-3 items-center">
                         <div class="flex flex-wrap gap-3 flex-1">
                             <TextInput v-model="nameFilter" density="comfortable" variant="outlined" hide-details
-                                placeholder="اسم الدور" class="w-full sm:w-60 bg-white" />
+                                :placeholder="t('pages.roles.filters.roleName')" class="w-full sm:w-60 bg-white" />
 
                             <SelectInput v-model="statusFilter" :items="statusOptions" item-title="title"
                                 item-value="value" density="comfortable" variant="outlined" hide-details
-                                placeholder="الحالة" class="w-full sm:w-40 bg-white" />
+                                :placeholder="t('pages.roles.filters.status')" class="w-full sm:w-40 bg-white" />
                         </div>
 
                         <!-- Search Button -->
                         <div class="flex gap-2 items-center">
                             <ButtonWithIcon variant="flat" color="primary-500" rounded="4" height="40"
                                 custom-class="px-5 font-semibold !text-white text-sm sm:text-base"
-                                :prepend-icon="searchIcon" label="ابحث الأن" @click="fetchRoles" />
+                                :prepend-icon="searchIcon" :label="t('pages.roles.filters.searchNow')" @click="fetchRoles" />
 
                             <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4" border="sm"
                                 custom-class="px-5 font-semibold text-sm sm:text-base !text-primary-800 !border-primary-200"
-                                prepend-icon="mdi-refresh" label="إعادة تعيين" @click="resetFilters" />
+                                prepend-icon="mdi-refresh" :label="t('pages.roles.filters.reset')" @click="resetFilters" />
                         </div>
                     </div>
                 </div>
@@ -212,7 +212,7 @@
                 <div class="p-6">
                     <!-- Add Role Button -->
                     <div class="flex mb-6" v-if="canCreate">
-                        <ButtonWithIcon @click="handleAddRole" variant="flat" size="large" label="اضافة دور جديد" color="primary-500"
+                        <ButtonWithIcon @click="handleAddRole" variant="flat" size="large" :label="t('pages.roles.list.addNewRole')" color="primary-500"
                             :rounded="'md'" :prepend-icon="plusIcon" custom-class="text-white">
                         </ButtonWithIcon>
                     </div>
@@ -232,8 +232,8 @@
                     <!-- Empty State -->
                     <div v-else class="flex flex-col items-center justify-center py-12 text-gray-500">
                         <span v-html="checksIcon" class="text-gray-300 mb-4"></span>
-                        <p class="text-lg font-medium">لا يوجد أدوار</p>
-                        <p class="text-sm">لم يتم العثور على أدوار مطابقة للبحث</p>
+                        <p class="text-lg font-medium">{{ t('pages.roles.list.emptyState.title') }}</p>
+                        <p class="text-sm">{{ t('pages.roles.list.emptyState.description') }}</p>
                     </div>
                 </div>
 
@@ -249,11 +249,13 @@ import ApexCharts from 'vue3-apexcharts'
 import RoleCard from '../component/RoleCard.vue'
 import { useApi } from '@/composables/useApi'
 import { useNotification } from '@/composables/useNotification'
+import { useI18n } from 'vue-i18n'
 
 // Composables
 const api = useApi()
 const { success, error: errorNotification } = useNotification()
 const router = useRouter()
+const { t } = useI18n()
 
 // === TypeScript Interfaces ===
 interface Group {
@@ -297,9 +299,9 @@ const statusLoadingId = ref<number | null>(null)
 const nameFilter = ref("")
 const statusFilter = ref<number | null>(null)
 
-const statusOptions = ref([
-    { title: 'فعال', value: 1 },
-    { title: 'غير فعال', value: 0 }
+const statusOptions = computed(() => [
+    { title: t('common.status.active'), value: 1 },
+    { title: t('common.status.inactive'), value: 0 }
 ])
 
 // === Computed ===
@@ -308,7 +310,7 @@ const inactiveRolesCount = computed(() => roles.value.filter(r => !r.is_active).
 const series = computed(() => [activeRolesCount.value, inactiveRolesCount.value])
 
 const chartOptions = computed(() => ({
-    labels: ['فعال', 'غير فعال'],
+    labels: [t('common.status.active'), t('common.status.inactive')],
     colors: ['#1570EF', '#D1E9FF'],
     legend: {
         show: false,
@@ -363,7 +365,7 @@ const fetchRoles = async () => {
         canBulkDelete.value = response.actions?.can_bulk_delete ?? false
     } catch (err: any) {
         console.error('Error fetching roles:', err)
-        errorNotification(err?.response?.data?.message || 'حدث خطأ أثناء جلب البيانات')
+        errorNotification(err?.response?.data?.message || t('pages.roles.list.messages.fetchError'))
     } finally {
         rolesLoading.value = false
     }
@@ -383,10 +385,10 @@ const handleStatusChange = async (role: Role, newStatus: boolean) => {
             roles.value[roleIndex].is_active = newStatus
         }
         
-        success(newStatus ? 'تم تفعيل الدور بنجاح' : 'تم تعطيل الدور بنجاح')
+        success(t('pages.roles.list.messages.statusChangeSuccess', { status: newStatus ? t('common.actions.activate') : t('common.actions.deactivate') }))
     } catch (err: any) {
         console.error('Error changing status:', err)
-        errorNotification(err?.response?.data?.message || 'حدث خطأ أثناء تغيير الحالة')
+        errorNotification(err?.response?.data?.message || t('pages.roles.list.messages.statusChangeError'))
         // Revert the switch state by refreshing data
         await fetchRoles()
     } finally {

@@ -9,9 +9,9 @@
             <!-- Error State -->
             <div v-else-if="error" class="flex flex-col items-center justify-center min-h-[400px] px-6">
                 <v-icon size="64" class="text-red-500 mb-4">mdi-alert-circle-outline</v-icon>
-                <h3 class="text-xl font-bold text-gray-900 mb-2">حدث خطأ في تحميل البيانات</h3>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">{{ t('pages.simpleProducts.view.errors.loadError') }}</h3>
                 <p class="text-gray-600 mb-4">{{ error }}</p>
-                <ButtonWithIcon color="primary" label="إعادة المحاولة" @click="fetchProduct" />
+                <ButtonWithIcon color="primary" :label="t('pages.simpleProducts.view.errors.retry')" @click="fetchProduct" />
             </div>
 
             <!-- Content -->
@@ -23,11 +23,11 @@
                     </router-link>
                     <span class="text-lg text-gray-300">/</span>
                     <router-link to="/simple-products/list" class="text-gray-600 hover:text-primary-600">
-                        المنتجات
+                        {{ t('pages.simpleProducts.view.breadcrumb.products') }}
                     </router-link>
                     <span class="text-lg text-gray-300">/</span>
                     <router-link to="/simple-products/list" class="text-gray-600 hover:text-primary-600">
-                        جدول المنتجات
+                        {{ t('pages.simpleProducts.view.breadcrumb.productsList') }}
                     </router-link>
                     <span class="text-lg text-gray-300">/</span>
 
@@ -75,51 +75,51 @@
                     <v-tabs-window-item :value="0">
                         <!-- General Information Section -->
                         <div class="p-6 border-b border-gray-200">
-                            <h2 class="text-xl font-bold text-primary-900 mb-6">المعلومات العامة</h2>
+                            <h2 class="text-xl font-bold text-primary-900 mb-6">{{ t('pages.simpleProducts.view.sections.generalInfo') }}</h2>
 
                             <div class="flex flex-wrap gap-4">
                                 <div class="info-item-bordered flex-1 px-6 py-4">
-                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">الاسم بالعربية</label>
+                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('pages.simpleProducts.view.labels.nameAr') }}</label>
                                     <p class="text-base font-semibold text-gray-900">{{ product.name_translations?.ar || product.name || '-' }}</p>
                                 </div>
                                 <v-divider vertical class="my-6"></v-divider>
                                 <div class="info-item-bordered flex-1 px-6 py-4">
-                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">الاسم بالانجليزية</label>
+                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('pages.simpleProducts.view.labels.nameEn') }}</label>
                                     <p class="text-base font-semibold text-gray-900">{{ product.name_translations?.en || product.name || '-' }}</p>
                                 </div>
                                 <v-divider vertical class="my-6"></v-divider>
                                 <div class="info-item-bordered flex-1 px-6 py-4">
-                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">كود المنتج</label>
+                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('pages.simpleProducts.view.labels.productCode') }}</label>
                                     <p class="text-base font-semibold text-gray-900">{{ product.code || '-' }}</p>
                                 </div>
                                 <v-divider vertical class="my-6"></v-divider>
                                 <div class="info-item-bordered flex-1 px-6 py-4">
-                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">حالة المنتج</label>
+                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('pages.simpleProducts.view.labels.productStatus') }}</label>
                                     <p class="text-base font-semibold text-gray-900">
                                         <span :class="product.is_active ? 'text-green-600' : 'text-red-600'">
-                                            {{ product.is_active ? 'فعالة' : 'غير فعال' }}
+                                            {{ product.is_active ? t('pages.simpleProducts.view.values.active') : t('pages.simpleProducts.view.values.inactive') }}
                                         </span>
                                     </p>
                                 </div>
                                 <v-divider vertical class="my-6"></v-divider>
                                 <div class="info-item-bordered flex-1 px-6 py-4">
-                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">المنتج الأب</label>
+                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('pages.simpleProducts.view.labels.parentProduct') }}</label>
                                     <p class="text-base font-semibold text-gray-900">{{ product.parent?.name || '-' }}</p>
                                 </div>
                                 <v-divider vertical class="my-6"></v-divider>
                                 <div class="info-item-bordered flex-1 px-6 py-4">
-                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">له منتجات فرعية</label>
-                                    <p class="text-base font-semibold text-gray-900">{{ product.has_children ? 'نعم' : 'لا' }}</p>
+                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('pages.simpleProducts.view.labels.hasChildren') }}</label>
+                                    <p class="text-base font-semibold text-gray-900">{{ product.has_children ? t('pages.simpleProducts.view.values.yes') : t('pages.simpleProducts.view.values.no') }}</p>
                                 </div>
                             </div>
                             <div class="flex gap-4">
                                 <div class="info-item-bordered flex-1 px-6 py-4">
-                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">الوصف بالانجليزي</label>
+                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('pages.simpleProducts.view.labels.descriptionEn') }}</label>
                                     <p class="text-sm text-gray-700 leading-relaxed"><span v-html="product.description_translations?.en || product.description || '-'"></span></p>
                                 </div>
                                 <v-divider vertical class="my-6"></v-divider>
                                 <div class="info-item-bordered flex-1 px-6 py-4">
-                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">الوصف عربي</label>
+                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('pages.simpleProducts.view.labels.descriptionAr') }}</label>
                                     <p class="text-sm text-gray-700 leading-relaxed"><span v-html="product.description_translations?.ar || product.description || '-'"></span></p>
                                 </div>
 
@@ -128,49 +128,49 @@
 
                         <!-- Tax Section -->
                         <div class="p-6 border-b border-gray-200">
-                            <h2 class="text-xl font-bold text-primary-900 mb-6">معلومات الضريبة</h2>
+                            <h2 class="text-xl font-bold text-primary-900 mb-6">{{ t('pages.simpleProducts.view.sections.taxInfo') }}</h2>
                             <div v-if="product.taxes && product.taxes.length > 0" class="flex flex-col gap-4">
                                 <div v-for="tax in product.taxes" :key="tax.id" class="flex flex-wrap gap-4 border-b border-gray-100 pb-4 last:border-0 last:pb-0">
                                     <div class="info-item-bordered flex-1 px-6 py-4">
-                                        <label class="font-semibold text-sm text-gray-500 mb-2 block">اسم الضريبة</label>
+                                        <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('pages.simpleProducts.view.labels.taxName') }}</label>
                                         <p class="text-base font-semibold text-gray-900">{{ tax.tax_name || '-' }}</p>
                                     </div>
                                     <v-divider vertical class="my-6"></v-divider>
                                     <div class="info-item-bordered flex-1 px-6 py-4">
-                                        <label class="font-semibold text-sm text-gray-500 mb-2 block">نسبة الضريبة</label>
+                                        <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('pages.simpleProducts.view.labels.taxPercentage') }}</label>
                                         <p class="text-base font-semibold text-gray-900">{{ tax.percentage ? tax.percentage + '%' : '-' }}</p>
                                     </div>
                                     <v-divider vertical class="my-6"></v-divider>
                                     <div class="info-item-bordered flex-1 px-6 py-4">
-                                        <label class="font-semibold text-sm text-gray-500 mb-2 block">الحد الأدنى للضريبة</label>
+                                        <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('pages.simpleProducts.view.labels.taxMinimum') }}</label>
                                         <p class="text-base font-semibold text-gray-900">{{ tax.minimum || '-' }}</p>
                                     </div>
                                     <v-divider vertical class="my-6"></v-divider>
                                     <div class="info-item-bordered flex-1 px-6 py-4">
-                                        <label class="font-semibold text-sm text-gray-500 mb-2 block">الأولوية</label>
+                                        <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('pages.simpleProducts.view.labels.taxPriority') }}</label>
                                         <p class="text-base font-semibold text-gray-900">{{ tax.priority || '-' }}</p>
                                     </div>
                                 </div>
                             </div>
-                            <div v-else class="text-gray-500 text-center py-4">لا توجد معلومات ضريبية</div>
+                            <div v-else class="text-gray-500 text-center py-4">{{ t('pages.simpleProducts.view.sections.noTaxInfo') }}</div>
                         </div>
 
                         <!-- Product Relations Section -->
                         <div class="p-6 border-b border-gray-200">
-                            <h2 class="text-xl font-bold text-primary-900 mb-6">التوريد والعلاقات الداخلية للمنتج</h2>
+                            <h2 class="text-xl font-bold text-primary-900 mb-6">{{ t('pages.simpleProducts.view.sections.productRelations') }}</h2>
                             <div class="flex flex-wrap gap-4">
                                 <div class="info-item-bordered flex-1 px-4 py-4">
-                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">العلامة التجارية</label>
+                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('pages.simpleProducts.view.labels.brand') }}</label>
                                     <p class="text-base font-semibold text-gray-900">{{ product.brand?.name || '-' }}</p>
                                 </div>
                                 <v-divider vertical class="my-6"></v-divider>
                                 <div class="info-item-bordered flex-1 px-4 py-4">
-                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">بلد المنشأ</label>
+                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('pages.simpleProducts.view.labels.countryOfOrigin') }}</label>
                                     <p class="text-base font-semibold text-gray-900">{{ product.country_of_origin?.name || '-' }}</p>
                                 </div>
                                 <v-divider vertical class="my-6"></v-divider>
                                 <div class="info-item-bordered flex-1 px-4 py-4">
-                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">المنتجات الفرعية</label>
+                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('pages.simpleProducts.view.labels.childrenCount') }}</label>
                                     <p class="text-base font-semibold text-gray-900">{{ product.children?.length || 0 }}</p>
                                 </div>
                             </div>
@@ -181,82 +181,80 @@
                         <div class="p-6 border-b border-gray-200">
                             <div class="flex gap-6 flex-wrap flex-column sm:!flex-row">
                                 <div class="flex-1">
-                                    <h2 class="text-xl font-bold text-primary-900 mb-6">سمات / خصائص المنتج المتقدمة </h2>
+                                    <h2 class="text-xl font-bold text-primary-900 mb-6">{{ t('pages.simpleProducts.view.sections.additionalInfo') }}</h2>
                                     <div class="flex flex-wrap gap-4 text-center">
                                         <div v-if="product.is_manufacturable" class="info-item-bordered">
-                                            <p class="text-base font-semibold text-gray-900 py-4">منتج تصنيع</p>
+                                            <p class="text-base font-semibold text-gray-900 py-4">{{ t('pages.simpleProducts.view.values.manufacturable') }}</p>
                                         </div>
                                         <v-divider v-if="product.is_manufacturable" vertical class="my-2"></v-divider>
                                         <div v-if="product.allow_negative_sales" class="info-item-bordered">
-                                            <p class="text-base font-semibold text-gray-900 py-4">البيع بالسالب</p>
+                                            <p class="text-base font-semibold text-gray-900 py-4">{{ t('pages.simpleProducts.view.values.allowNegativeSales') }}</p>
                                         </div>
                                         <v-divider v-if="product.allow_negative_sales" vertical class="my-2"></v-divider>
                                         <div v-if="product.is_rentable" class="info-item-bordered">
-                                            <p class="text-base font-semibold text-gray-900 py-4">قابل للايجار</p>
+                                            <p class="text-base font-semibold text-gray-900 py-4">{{ t('pages.simpleProducts.view.values.rentable') }}</p>
                                         </div>
                                     </div>
 
                                 </div>
                                 <v-divider vertical class="hidden sm:block"></v-divider>
                                 <div class="flex-1">
-                                    <h2 class="text-xl font-bold text-primary-900 mb-6">صورة المنتج</h2>
+                                    <h2 class="text-xl font-bold text-primary-900 mb-6">{{ t('pages.simpleProducts.view.sections.productImage') }}</h2>
                                     <div v-if="product.image">
                                         <img :src="product.image" :alt="product.name" class="w-full max-w-xs rounded-lg shadow-md" />
                                     </div>
-                                    <div v-else class="text-gray-500 text-sm">
-                                        لا توجد صورة
-                                    </div>
+                                    <div v-else class="text-gray-500 text-sm">{{ t('pages.simpleProducts.view.sections.noProductImage') }}</div>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Pricing Section -->
                         <div class="p-6 border-b border-gray-200">
-                            <h2 class="text-xl font-bold text-primary-900 mb-6">معلومات الأسعار</h2>
+                            <h2 class="text-xl font-bold text-primary-900 mb-6">{{ t('pages.simpleProducts.view.sections.pricingInfo') }}</h2>
                             <div class="flex flex-wrap gap-4">
                                 <div class="info-item-bordered flex-1 px-6 py-4">
-                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">سعر الشراء</label>
+                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('pages.simpleProducts.view.labels.purchasePrice') }}</label>
                                     <p class="text-base font-semibold text-gray-900">{{ product.purchase_price || '-' }}</p>
                                 </div>
                                 <v-divider vertical class="my-6"></v-divider>
                                 <div class="info-item-bordered flex-1 px-6 py-4">
-                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">سعر البيع</label>
+                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('pages.simpleProducts.view.labels.sellPrice') }}</label>
                                     <p class="text-base font-semibold text-gray-900">{{ product.sell_price || '-' }}</p>
                                 </div>
                                 <v-divider vertical class="my-6"></v-divider>
                                 <div class="info-item-bordered flex-1 px-6 py-4">
-                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">الحد الأدنى لسعر البيع</label>
+                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('pages.simpleProducts.view.labels.minSellPrice') }}</label>
                                     <p class="text-base font-semibold text-gray-900">{{ product.min_sell_price || '-' }}</p>
                                 </div>
                                 <v-divider vertical class="my-6"></v-divider>
                                 <div class="info-item-bordered flex-1 px-6 py-4">
-                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">الحد الأقصى لسعر البيع</label>
+                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('pages.simpleProducts.view.labels.maxSellPrice') }}</label>
                                     <p class="text-base font-semibold text-gray-900">{{ product.max_sell_price || '-' }}</p>
                                 </div>
                             </div>
                             <div class="flex flex-wrap gap-4 mt-4">
                                 <div class="info-item-bordered flex-1 px-6 py-4">
-                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">سعر الفرع</label>
+                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('pages.simpleProducts.view.labels.branchPrice') }}</label>
                                     <p class="text-base font-semibold text-gray-900">{{ product.branch_price || '-' }}</p>
                                 </div>
                                 <v-divider vertical class="my-6"></v-divider>
                                 <div class="info-item-bordered flex-1 px-6 py-4">
-                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">سعر الجملة</label>
+                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('pages.simpleProducts.view.labels.wholesalePrice') }}</label>
                                     <p class="text-base font-semibold text-gray-900">{{ product.wholesale_price || '-' }}</p>
                                 </div>
                                 <v-divider vertical class="my-6"></v-divider>
                                 <div class="info-item-bordered flex-1 px-6 py-4">
-                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">سعر نصف الجملة</label>
+                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('pages.simpleProducts.view.labels.semiWholesalePrice') }}</label>
                                     <p class="text-base font-semibold text-gray-900">{{ product.semi_wholesale_price || '-' }}</p>
                                 </div>
                                 <v-divider vertical class="my-6"></v-divider>
                                 <div class="info-item-bordered flex-1 px-6 py-4">
-                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">نوع الخصم</label>
+                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('pages.simpleProducts.view.labels.discountType') }}</label>
                                     <p class="text-base font-semibold text-gray-900">{{ product.discount_type || '-' }}</p>
                                 </div>
                                 <v-divider vertical class="my-6"></v-divider>
                                 <div class="info-item-bordered flex-1 px-6 py-4">
-                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">قيمة الخصم</label>
+                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('pages.simpleProducts.view.labels.discountValue') }}</label>
                                     <p class="text-base font-semibold text-gray-900">{{ product.discount_value || '-' }}</p>
                                 </div>
                             </div>
@@ -271,15 +269,15 @@
                                     <h3 class="text-lg font-bold text-primary-900 mb-4">{{ test.name }}</h3>
                                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                                         <div class="text-center">
-                                            <label class="block text-sm font-medium text-gray-500 mb-2">عدد الاختبارات</label>
-                                            <p class="text-2xl font-bold text-gray-900">{{ test.testsCount }} اختبارات</p>
+                                            <label class="block text-sm font-medium text-gray-500 mb-2">{{ t('pages.simpleProducts.view.labels.testsCount') }}</label>
+                                            <p class="text-2xl font-bold text-gray-900">{{ test.testsCount }} {{ t('pages.simpleProducts.view.values.tests') }}</p>
                                         </div>
                                         <div class="text-center">
-                                            <label class="block text-sm font-medium text-gray-500 mb-2">عدد العينات</label>
-                                            <p class="text-2xl font-bold text-gray-900">{{ test.samplesCount }} عينات</p>
+                                            <label class="block text-sm font-medium text-gray-500 mb-2">{{ t('pages.simpleProducts.view.labels.samplesCount') }}</label>
+                                            <p class="text-2xl font-bold text-gray-900">{{ test.samplesCount }} {{ t('pages.simpleProducts.view.values.samples') }}</p>
                                         </div>
                                         <div class="text-center">
-                                            <label class="block text-sm font-medium text-gray-500 mb-2">كمية العينات</label>
+                                            <label class="block text-sm font-medium text-gray-500 mb-2">{{ t('pages.simpleProducts.view.labels.sampleQuantity') }}</label>
                                             <p class="text-2xl font-bold text-gray-900">{{ test.sampleQuantity }}</p>
                                         </div>
                                     </div>
@@ -294,10 +292,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useApi } from '@/composables/useApi'
 import { useNotification } from '@/composables/useNotification'
+import { useI18n } from 'vue-i18n'
 
 interface ProductData {
     id: number
@@ -306,15 +305,15 @@ interface ProductData {
         ar: string
         en: string
     }
-    code: string
     description: string | null
     description_translations: {
         ar: string
         en: string
     }
-    image: string | null
+    code: string
+    brand: { name: string } | null
     country_of_origin: { name: string } | null
-    is_active: boolean
+    image: string | null
     allow_negative_sales: boolean
     is_rentable: boolean
     is_manufacturable: boolean
@@ -327,7 +326,6 @@ interface ProductData {
     semi_wholesale_price: string | null
     discount_type: string | null
     discount_value: string | null
-    brand: { name: string } | null
     category: { name: string } | null
     manufacturer: { name: string } | null
     unit: { name: string } | null
@@ -349,28 +347,29 @@ interface ProductData {
 const route = useRoute()
 const api = useApi()
 const { showError } = useNotification()
+const { t } = useI18n()
 
 const loading = ref(false)
 const error = ref<string | null>(null)
 const activeTab = ref(0)
 
 // Tabs configuration
-const tabs = [
+const tabs = computed(() => [
     {
-        title: 'المعلومات العامة',
+        title: t('pages.simpleProducts.view.tabs.generalInfo'),
         value: 0,
         icon: `<svg width="19" height="22" viewBox="0 0 19 22" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M17 11.5V5.8C17 4.11984 17 3.27976 16.673 2.63803C16.3854 2.07354 15.9265 1.6146 15.362 1.32698C14.7202 1 13.8802 1 12.2 1H5.8C4.11984 1 3.27976 1 2.63803 1.32698C2.07354 1.6146 1.6146 2.07354 1.32698 2.63803C1 3.27976 1 4.11984 1 5.8V16.2C1 17.8802 1 18.7202 1.32698 19.362C1.6146 19.9265 2.07354 20.3854 2.63803 20.673C3.27976 21 4.11984 21 5.8 21H9M11 10H5M7 14H5M13 6H5M11.5 18L13.5 20L18 15.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`,
     },
     {
-        title: 'الاختبارات',
+        title: t('pages.simpleProducts.view.tabs.tests'),
         value: 1,
         icon: `<svg width="18" height="22" viewBox="0 0 18 22" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M11 1.26953V5.40007C11 5.96012 11 6.24015 11.109 6.45406C11.2049 6.64222 11.3578 6.7952 11.546 6.89108C11.7599 7.00007 12.0399 7.00007 12.6 7.00007H16.7305M13 12H5M13 16H5M7 8H5M11 1H5.8C4.11984 1 3.27976 1 2.63803 1.32698C2.07354 1.6146 1.6146 2.07354 1.32698 2.63803C1 3.27976 1 4.11984 1 5.8V16.2C1 17.8802 1 18.7202 1.32698 19.362C1.6146 19.9265 2.07354 20.3854 2.63803 20.673C3.27976 21 4.11984 21 5.8 21H12.2C13.8802 21 14.7202 21 15.362 20.673C15.9265 20.3854 16.3854 19.9265 16.673 19.362C17 18.7202 17 17.8802 17 16.2V7L11 1Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`,
     },
-]
+])
 
 // Tab helpers
 const isTabActive = (tabValue: number) => activeTab.value === tabValue
@@ -379,21 +378,21 @@ const isTabActive = (tabValue: number) => activeTab.value === tabValue
 const testsData = ref([
     {
         id: 1,
-        name: 'اختبار التدرج الحبيبي',
+        name: t('pages.simpleProducts.view.tests.test1'),
         testsCount: 5,
         samplesCount: 10,
         sampleQuantity: '50 كجم تقريبا للعينة الواحدة'
     },
     {
         id: 2,
-        name: 'اختبار الصلبة',
+        name: t('pages.simpleProducts.view.tests.test2'),
         testsCount: 5,
         samplesCount: 10,
         sampleQuantity: '50 كجم تقريبا للعينة الواحدة'
     },
     {
         id: 3,
-        name: 'اختبار التحمل',
+        name: t('pages.simpleProducts.view.tests.test3'),
         testsCount: 5,
         samplesCount: 10,
         sampleQuantity: '50 كجم تقريبا للعينة الواحدة'
@@ -464,7 +463,7 @@ const fetchProduct = async () => {
             throw new Error(response.message || 'فشل في تحميل بيانات المنتج')
         }
     } catch (err: any) {
-        error.value = err.response?.data?.message || err.message || 'حدث خطأ أثناء تحميل البيانات'
+        error.value = err.response?.data?.message || err.message || t('pages.simpleProducts.view.errors.generalError')
         showError(error.value)
     } finally {
         loading.value = false

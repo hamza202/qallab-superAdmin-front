@@ -9,6 +9,9 @@ import OperationalInfoTab from "./components/OperationalInfoTab.vue";
 import { toast } from 'vue3-toastify';
 import 'vue3-toastify/dist/index.css';
 import { saveIcon } from "@/components/icons/globalIcons";
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const router = useRouter();
 const route = useRoute();
@@ -27,12 +30,12 @@ const formErrors = reactive<Record<string, string>>({});
 const hasValidationErrors = ref(false);
 
 const activeTab = ref(0);
-const tabs = [
-    { title: "البيانات الأساسية", value: 0 },
-    { title: "البيانات المالية", value: 1 },
-    { title: "البيانات التجارية", value: 2 },
-    { title: "المعلومات التشغيلية", value: 3 },
-];
+const tabs = computed(() => [
+    { title: t('pages.factories.form.tabs.basicInfo'), value: 0 },
+    { title: t('pages.factories.form.tabs.financialInfo'), value: 1 },
+    { title: t('pages.factories.form.tabs.commercialInfo'), value: 2 },
+    { title: t('pages.factories.form.tabs.operationalInfo'), value: 3 },
+]);
 
 const isTabActive = (value: number) => activeTab.value === value;
 
@@ -251,10 +254,10 @@ const handleSave = async () => {
         const response: any = await api.post(`/factories/${factoryId.value}`, payload);
 
         const stepMessages: Record<number, string> = {
-            1: 'تم حفظ البيانات الأساسية بنجاح',
-            2: 'تم حفظ البيانات المالية بنجاح',
-            3: 'تم حفظ البيانات التجارية بنجاح',
-            4: 'تم حفظ المعلومات التشغيلية بنجاح'
+            1: t('pages.factories.form.messages.basicInfoSaved'),
+            2: t('pages.factories.form.messages.financialInfoSaved'),
+            3: t('pages.factories.form.messages.commercialInfoSaved'),
+            4: t('pages.factories.form.messages.operationalInfoSaved')
         };
 
         hasValidationErrors.value = false;
@@ -277,7 +280,7 @@ const handleSave = async () => {
                 formErrors[key] = apiErrors[key][0];
             });
         } else {
-            toast.error(err?.response?.data?.message || 'فشل حفظ البيانات');
+            toast.error(err?.response?.data?.message || t('pages.factories.form.messages.saveError'));
         }
     } finally {
         saving.value = false;
@@ -362,7 +365,7 @@ const fetchFactoryData = async () => {
     try {
         const routeFactoryId = route.params.id;
         if (!routeFactoryId) {
-            toast.error('معرّف المصنع غير موجود');
+            toast.error(t('pages.factories.form.messages.loadError'));
             return;
         }
 
@@ -431,7 +434,7 @@ const fetchFactoryData = async () => {
         weighbridgeType.value = data.weighbridge_type || null;
     } catch (err: any) {
         console.error('Error fetching factory:', err);
-        toast.error(err?.response?.data?.message || 'فشل تحميل بيانات المصنع');
+        toast.error(err?.response?.data?.message || t('pages.factories.form.messages.loadError'));
     }
 };
 
@@ -536,8 +539,8 @@ onMounted(async () => {
 <template>
     <default-layout>
         <div class="logistic-form-page">
-            <PageHeader :icon="factoryIcon" title-key="pages.factoryProfile.title"
-                description-key="pages.factoryProfile.description" />
+            <PageHeader :icon="factoryIcon" title-key="pages.factories.title"
+                description-key="pages.factories.description" />
 
             <div class="py-3 border-y border-gray-200 mb-6 px-6 -mx-6">
                 <v-tabs v-model="activeTab" class="custom-tabs" hide-slider>
@@ -637,10 +640,10 @@ onMounted(async () => {
 
             <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col">
                 <ButtonWithIcon variant="flat" color="primary" rounded="4" height="48" custom-class="min-w-56"
-                    :prepend-icon="saveIcon" label="حفظ" @click="handleSave" :loading="saving" />
+                    :prepend-icon="saveIcon" :label="t('common.actions.save')" @click="handleSave" :loading="saving" />
 
                 <ButtonWithIcon prepend-icon="mdi-close" variant="flat" color="primary-50" rounded="4" height="48"
-                    custom-class="font-semibold text-base text-primary-700 px-6 min-w-56" label="إغلاق"
+                    custom-class="font-semibold text-base text-primary-700 px-6 min-w-56" :label="t('common.actions.close')"
                     :disabled="saving" @click="handleCancel" />
             </div>
         </div>

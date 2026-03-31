@@ -41,7 +41,7 @@
                 <span v-html="orderIcon" class="text-primary-600"></span>
               </div>
               <div>
-                <h1 class="text-lg font-bold text-gray-900 mb-1 rtl:text-right ltr:text-left" dir="ltr">#{{ detail?.code
+                <h1 class="text-lg font-bold text-gray-900 mb-1 rtl:text-start ltr:text-left" dir="ltr">#{{ detail?.code
                   ?? pickupId }}</h1>
                 <p class="text-sm text-gray-900">{{ t('pages.SalesSoPickups.viewPage.headerSubtitle') }}</p>
               </div>

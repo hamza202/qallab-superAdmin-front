@@ -25,6 +25,7 @@ import {
   rialIcon,
 } from "@/components/icons/globalIcons";
 
+const { t } = useI18n();
 
 const api = useApi();
 const route = useRoute();
@@ -630,7 +631,7 @@ const editingProduct = ref<ProductTableItem | null>(null);
 
 const handleAddProduct = () => {
   if (!formData.value.supplier_id) {
-    warning("يجب عليك اختيار اسم المورد أولاً");
+    warning(t("purchases.shared.forms.common.warnings.selectSupplierFirst"));
     return;
   }
   editingProduct.value = null; // Reset edit mode
@@ -975,7 +976,7 @@ const handleSubmit = async (options?: { redirectToList?: boolean }) => {
   if (!(await validate())) return;
 
   if (productTableItems.value.length === 0) {
-    warning("يجب إضافة منتج واحد على الأقل");
+    warning(t("purchases.shared.forms.common.warnings.atLeastOneProduct"));
     return;
   }
 
@@ -1002,7 +1003,11 @@ const handleSubmit = async (options?: { redirectToList?: boolean }) => {
       });
     }
 
-    success(isEditMode.value ? "تم تحديث الطلب بنجاح" : "تم إنشاء الطلب بنجاح");
+    success(
+      isEditMode.value
+        ? t("purchases.orders.shared.success.poUpdated")
+        : t("purchases.orders.shared.success.poCreated"),
+    );
 
     if (options?.redirectToList) {
       router.push({ name: "OrdersMaterialProductList" });
@@ -1131,16 +1136,16 @@ const openMapDialog = (mode: "target" | "source") => {
 };
 
 // نفس أعمدة جدول المنتجات في فورم المبيعات: اسم المنتج، الوحدة، الكمية، سعر الوحدة، خصم، مبلغ الضريبة، إجمالي المبلغ، ملاحظات
-const headers = [
-  { title: "اسم المنتج", key: "name" },
-  { title: "الوحدة", key: "unit" },
-  { title: "الكمية", key: "quantity" },
-  { title: "سعر الوحدة", key: "unit_price" },
-  { title: "خصم", key: "discount_display" },
-  { title: "مبلغ الضريبة", key: "tax_amount" },
-  { title: "إجمالي المبلغ", key: "total_amount" },
-  { title: "ملاحظات", key: "notes" },
-];
+const headers = computed(() => [
+  { title: t("purchases.shared.forms.common.tableHeaders.productName"), key: "name" },
+  { title: t("purchases.shared.forms.common.tableHeaders.unit"), key: "unit" },
+  { title: t("purchases.shared.forms.common.tableHeaders.quantity"), key: "quantity" },
+  { title: t("purchases.orders.shared.tableHeaders.unitPrice"), key: "unit_price" },
+  { title: t("purchases.orders.shared.tableHeaders.discount"), key: "discount_display" },
+  { title: t("purchases.orders.shared.tableHeaders.taxAmount"), key: "tax_amount" },
+  { title: t("purchases.orders.shared.tableHeaders.totalAmount"), key: "total_amount" },
+  { title: t("purchases.shared.forms.common.tableHeaders.notes"), key: "notes" },
+]);
 
 // Computed items for the DataTable (مطابق لجدول المبيعات)
 const tableItems = computed(() =>
@@ -1161,15 +1166,15 @@ const tableItems = computed(() =>
 );
 
 // جدول تفاصيل التوريد: يعكس المنتجات المضافة أعلاه (المنتج، الكمية، تاريخ بداية النقل، نوع المركبة، عدد الرحلات، سعة الرحلة، توقيت الرحلة)
-const ServicesHeaders = [
-  { title: "المنتج", key: "product_name" },
-  { title: "الكمية", key: "quantity_display" },
-  { title: "تاريخ بداية النقل", key: "transport_start_date" },
-  { title: "نوع مركبة النقل", key: "transport_type_name" },
-  { title: "عدد الرحلات", key: "trip_no" },
-  { title: "سعة الرحلة", key: "trip_capacity" },
-  { title: "توقيت الرحلة", key: "am_pm_interval_label" },
-];
+const ServicesHeaders = computed(() => [
+  { title: t("purchases.orders.shared.tableHeaders.product"), key: "product_name" },
+  { title: t("purchases.shared.forms.common.tableHeaders.quantity"), key: "quantity_display" },
+  { title: t("purchases.orders.shared.tableHeaders.transportStartDate"), key: "transport_start_date" },
+  { title: t("purchases.orders.shared.tableHeaders.vehicleType"), key: "transport_type_name" },
+  { title: t("purchases.requests.logistics.form.productsTable.tripNo"), key: "trip_no" },
+  { title: t("purchases.orders.shared.tableHeaders.tripCapacity"), key: "trip_capacity" },
+  { title: t("purchases.orders.shared.tableHeaders.tripTiming"), key: "am_pm_interval_label" },
+]);
 
 // عناصر الجدول مبنية على جدول المنتجات: كل منتج = صف واحد (زر التعديل فقط، بدون حذف)
 const serviceTableItems = computed(() =>
@@ -1209,6 +1214,7 @@ const serviceTableItems = computed(() =>
         title-key="pages.OrdersMaterialProduct.FormTitle"
         description-key="pages.OrdersMaterialProduct.FormDescription"
         :show-action="false"
+        code-label-key="purchases.orders.shared.labels.purchaseOrderCode"
         :code="isEditMode ? formData.code : ''"
         :code-icon="fileIcon"
         @action="handleNewRequest"
@@ -1218,7 +1224,7 @@ const serviceTableItems = computed(() =>
       <div class="p-6 bg-white rounded-3xl border !border-gray-100">
         <div class="flex items-center mb-6 gap-2 text-primary-600">
           <span v-html="fileCheckIcon"></span>
-          <h2 class="text-base font-bold">البيانات الأساسية</h2>
+          <h2 class="text-base font-bold">{{ t('purchases.shared.forms.common.sections.basicInfo') }}</h2>
         </div>
 
         <v-form ref="formRef" v-model="isFormValid" @submit.prevent>
@@ -1231,8 +1237,8 @@ const serviceTableItems = computed(() =>
                 v-model="formData.supplier_id"
                 :disabled="isFromQuotation"
                 :items="[]"
-                placeholder="اختر المورد"
-                label="اسم المورد"
+                :placeholder="t('purchases.orders.shared.placeholders.selectSupplierPo')"
+                :label="t('purchases.shared.forms.common.labels.supplierName')"
                 :rules="[required()]"
                 density="comfortable"
                 item-title="title"
@@ -1250,8 +1256,8 @@ const serviceTableItems = computed(() =>
               <DateTimePickerInput
                 v-model="formData.po_datetime"
                 density="comfortable"
-                placeholder="اختر التاريخ والوقت"
-                label="تاريخ الطلبية"
+                :placeholder="t('purchases.shared.forms.common.placeholders.selectDateTime')"
+                :label="t('purchases.orders.shared.labels.poDate')"
               />
             </div>
 
@@ -1260,16 +1266,16 @@ const serviceTableItems = computed(() =>
               <SelectInput
                 v-model="formData.po_type"
                 :items="requestTypeItems"
-                label="نوع الطلبية"
+                :label="t('purchases.orders.shared.labels.poType')"
                 density="comfortable"
-                placeholder="اختر"
+                :placeholder="t('purchases.shared.forms.common.select')"
               />
             </div>
 
             <!-- موقع المشروع → target_location (مثل فورم عروض الأسعار) -->
             <div class="relative">
               <label class="text-sm font-medium text-gray-700 mb-2 block"
-                >موقع المشروع</label
+                >{{ t('purchases.requests.logistics.form.labels.projectLocation') }}</label
               >
               <div
                 @click="openMapDialog('target')"
@@ -1278,7 +1284,7 @@ const serviceTableItems = computed(() =>
                 <span
                   class="text-base font-medium text-blue-900 whitespace-nowrap overflow-hidden text-ellipsis"
                 >
-                  {{ formData.target_location || "حدد الموقع" }}
+                  {{ formData.target_location || t('purchases.shared.forms.common.pickLocation') }}
                 </span>
                 <div class="flex items-center gap-2">
                   <span v-html="mapMarkerIcon"></span>
@@ -1289,7 +1295,7 @@ const serviceTableItems = computed(() =>
             <!-- موقع مصدر المواد → source_location -->
             <div class="relative">
               <label class="text-sm font-medium text-gray-700 mb-2 block"
-                >موقع مصدر المواد</label
+                >{{ t('purchases.requests.logistics.form.labels.sourceMaterialsLocation') }}</label
               >
               <div
                 @click="openMapDialog('source')"
@@ -1298,7 +1304,7 @@ const serviceTableItems = computed(() =>
                 <span
                   class="text-base font-medium text-blue-900 whitespace-nowrap overflow-hidden text-ellipsis"
                 >
-                  {{ formData.source_location || "حدد الموقع" }}
+                  {{ formData.source_location || t('purchases.shared.forms.common.pickLocation') }}
                 </span>
                 <div class="flex items-center gap-2">
                   <span v-html="mapMarkerIcon"></span>
@@ -1310,10 +1316,10 @@ const serviceTableItems = computed(() =>
             <div>
               <TextInput
                 v-model="formData.project_name"
-                label="المشروع"
+                :label="t('purchases.orders.shared.labels.project')"
                 :rules="[required()]"
                 density="comfortable"
-                placeholder="ادخل اسم المشروع"
+                :placeholder="t('purchases.orders.shared.placeholders.enterProjectNameAlt')"
               />
             </div>
 
@@ -1336,7 +1342,7 @@ const serviceTableItems = computed(() =>
               v-model="formData.purchase_quotation_code"
               v-if="formData.purchase_quotation_code"
               readonly
-              label="كود عرض السعر"
+              :label="t('purchases.orders.shared.labels.quotationCode')"
               density="comfortable"
               :hide-details="true"
             >
@@ -1352,7 +1358,7 @@ const serviceTableItems = computed(() =>
                       v-bind="tooltipProps"
                     />
                   </template>
-                  <div>كود عرض السعر</div>
+                  <div>{{ t('purchases.orders.shared.labels.quotationCode') }}</div>
                 </v-tooltip>
               </template>
             </TextInput>
@@ -1366,11 +1372,11 @@ const serviceTableItems = computed(() =>
           <div class="flex items-center gap-2 mb-2">
             <span v-html="listIcon"></span>
             <h2 class="text-base font-bold text-primary-600">
-              جدول عناصر الطللبية
+              {{ t('purchases.orders.shared.labels.itemsTableTitle') }}
             </h2>
           </div>
           <p class="text-emerald-500 text-sm font-bold ms-7">
-            ** الأسعار شاملة للنقل
+            {{ t('purchases.orders.shared.labels.pricesIncludeTransport') }}
           </p>
         </div>
 
@@ -1412,7 +1418,7 @@ const serviceTableItems = computed(() =>
                     v-html="messagePlusIcon"
                   ></v-icon>
                   <span class="text-gray-900">{{
-                    item.notes || "أضف ملاحظة"
+                    item.notes || t('purchases.shared.forms.common.placeholders.addNote')
                   }}</span>
                 </div>
               </template>
@@ -1433,7 +1439,7 @@ const serviceTableItems = computed(() =>
                         )
                       ].notes
                     "
-                    placeholder="أضف ملاحظة"
+                    :placeholder="t('purchases.shared.forms.common.placeholders.addNote')"
                     variant="outlined"
                     density="comfortable"
                     hide-details
@@ -1460,7 +1466,7 @@ const serviceTableItems = computed(() =>
             class="!text-primary-900 font-bold w-75"
             @click="handleAddProduct"
           >
-            + إضافة منتج جديد
+            {{ t('purchases.shared.forms.common.actions.addProduct') }}
           </ButtonWithIcon>
         </div>
       </div>
@@ -1470,7 +1476,7 @@ const serviceTableItems = computed(() =>
         <div class="px-6 py-6">
           <div class="flex items-center gap-2">
             <span v-html="busIcon"></span>
-            <h2 class="text-base font-bold text-primary-600">تفاصيل التوريد</h2>
+            <h2 class="text-base font-bold text-primary-600">{{ t('purchases.orders.shared.labels.supplyDetailsSection') }}</h2>
           </div>
         </div>
 
@@ -1490,7 +1496,7 @@ const serviceTableItems = computed(() =>
             :disabled="productTableItems.length === 0"
             @click="handleAddSupply"
           >
-            + تعديل تفاصيل التوريد
+            {{ t('purchases.orders.shared.labels.editSupplyDetails') }}
           </ButtonWithIcon>
         </div>
       </div>
@@ -1499,7 +1505,7 @@ const serviceTableItems = computed(() =>
       <div class="p-6 bg-white rounded-3xl border !border-gray-100">
         <div class="flex items-center mb-6 gap-2 text-primary-600">
           <span v-html="truckIcon"></span>
-          <h2 class="text-base font-bold">بيانات التوريد الإضافية</h2>
+          <h2 class="text-base font-bold">{{ t('purchases.orders.shared.labels.extraLogisticsSection') }}</h2>
         </div>
 
         <v-form ref="formRef" v-model="isFormValid" @submit.prevent>
@@ -1512,8 +1518,8 @@ const serviceTableItems = computed(() =>
                 v-model="formData.transport_start_date"
                 type="date"
                 density="comfortable"
-                placeholder="اختر"
-                label="تاريخ بدء النقل"
+                :placeholder="t('purchases.shared.forms.common.select')"
+                :label="t('purchases.requests.logistics.addDetailDialog.labels.fromDate')"
               />
             </div>
 
@@ -1523,8 +1529,8 @@ const serviceTableItems = computed(() =>
                 v-model="formData.transport_end_date"
                 type="date"
                 density="comfortable"
-                placeholder="اختر"
-                label="تاريخ انتهاء النقل"
+                :placeholder="t('purchases.shared.forms.common.select')"
+                :label="t('purchases.requests.logistics.addDetailDialog.labels.toDate')"
                 :rules="[required()]"
               />
             </div>
@@ -1533,13 +1539,13 @@ const serviceTableItems = computed(() =>
             <div>
               <PriceInput
                 v-model="formData.execution_period"
-                label="مدة التنفيذ"
-                placeholder="أدخل المدة بالأيام"
+                :label="t('purchases.requests.logistics.form.detailCard.executionDuration')"
+                :placeholder="t('purchases.orders.shared.placeholders.enterDurationDays')"
                 :rules="[required()]"
                 density="comfortable"
               >
                 <template #append-inner>
-                  <span class="text-gray-500 text-sm"> يوم </span>
+                  <span class="text-gray-500 text-sm"> {{ t('purchases.shared.forms.common.day') }} </span>
                 </template>
               </PriceInput>
             </div>
@@ -1549,9 +1555,9 @@ const serviceTableItems = computed(() =>
               <MultipleSelectInput
                 v-model="formData.transport_vehicle_type"
                 :items="transportTypeItems"
-                label="نوع مركبة النقل"
+                :label="t('purchases.orders.shared.tableHeaders.vehicleType')"
                 density="comfortable"
-                placeholder="اختر"
+                :placeholder="t('purchases.shared.forms.common.select')"
                 item-title="title"
                 item-value="value"
               />
@@ -1560,8 +1566,8 @@ const serviceTableItems = computed(() =>
             <div>
               <PriceInput
                 v-model="formData.transport_movements"
-                placeholder="أدخل العدد"
-                label="عدد مركبات النقل"
+                :placeholder="t('purchases.orders.shared.placeholders.enterCount')"
+                :label="t('purchases.orders.shared.tableHeaders.vehicleCount')"
                 density="comfortable"
               />
             </div>
@@ -1570,8 +1576,8 @@ const serviceTableItems = computed(() =>
             <div>
               <PriceInput
                 v-model="formData.daily_trips"
-                placeholder="أدخل العدد"
-                label="عدد الرحلات الكلي"
+                :placeholder="t('purchases.orders.shared.placeholders.enterCount')"
+                :label="t('purchases.orders.shared.tableHeaders.totalTripsCount')"
                 :rules="[required()]"
                 density="comfortable"
               />
@@ -1581,8 +1587,8 @@ const serviceTableItems = computed(() =>
             <div>
               <TextInput
                 v-model="formData.loading_responsible"
-                placeholder="أدخل اسم مسؤول التحميل"
-                label="مسؤول التحميل"
+                :placeholder="t('purchases.requests.logistics.addDetailDialog.labels.loadingResponsiblePlaceholder')"
+                :label="t('purchases.requests.logistics.addDetailDialog.labels.loadingResponsible')"
                 density="comfortable"
               />
             </div>
@@ -1591,8 +1597,8 @@ const serviceTableItems = computed(() =>
             <div>
               <TextInput
                 v-model="formData.unloading_responsible"
-                placeholder="أدخل اسم مسؤول التفريغ"
-                label="مسؤول التفريغ"
+                :placeholder="t('purchases.requests.logistics.addDetailDialog.labels.unloadingResponsiblePlaceholder')"
+                :label="t('purchases.requests.logistics.addDetailDialog.labels.unloadingResponsible')"
                 density="comfortable"
               />
             </div>
@@ -1607,7 +1613,7 @@ const serviceTableItems = computed(() =>
         <div class="bg-white rounded-2xl xl:col-span-2">
           <div class="flex items-center gap-2 p-6 border-b !border-gray-200">
             <span v-html="CoinHandIcon"></span>
-            <h2 class="text-base font-bold text-primary-600">بيانات الدفع</h2>
+            <h2 class="text-base font-bold text-primary-600">{{ t('purchases.orders.shared.labels.paymentData') }}</h2>
           </div>
           <div class="p-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1615,37 +1621,37 @@ const serviceTableItems = computed(() =>
                 v-model="formData.paymentMethod"
                 :items="paymentMethodItems"
                 density="comfortable"
-                placeholder="حدد طريقة الدفع"
-                label="طريقة الدفع"
+                :placeholder="t('purchases.shared.forms.common.placeholders.selectPaymentMethod')"
+                :label="t('purchases.shared.forms.common.labels.paymentMethod')"
               />
               <PriceInput
                 showRialIcon
                 v-model="formData.advancePayment"
                 density="comfortable"
-                label="دفعة مقدمة"
-                placeholder="أدخل قيمة الدفعة"
+                :label="t('purchases.shared.forms.common.labels.advancePayment')"
+                :placeholder="t('purchases.shared.forms.common.placeholders.enterAdvanceAmount')"
               />
 
               <TextInput
-                label="مدة رفع المستخلص"
+                :label="t('purchases.orders.shared.labels.invoiceUploadDuration')"
                 v-model="formData.invoice_interval"
-                placeholder="أدخل المدة بالأيام"
+                :placeholder="t('purchases.orders.shared.placeholders.enterDurationDays')"
                 :rules="[required(), numeric()]"
                 density="comfortable"
               >
                 <template #append-inner>
-                  <span class="text-gray-500 text-sm"> يوم </span>
+                  <span class="text-gray-500 text-sm"> {{ t('purchases.shared.forms.common.day') }} </span>
                 </template>
               </TextInput>
               <TextInput
-                label="مدة السداد"
+                :label="t('purchases.orders.shared.labels.paymentDuration')"
                 v-model="formData.payment_term_no"
-                placeholder="أدخل المدة بالأيام"
+                :placeholder="t('purchases.orders.shared.placeholders.enterDurationDays')"
                 :rules="[required(), numeric()]"
                 density="comfortable"
               >
                 <template #append-inner>
-                  <span class="text-gray-500 text-sm"> يوم </span>
+                  <span class="text-gray-500 text-sm"> {{ t('purchases.shared.forms.common.day') }} </span>
                 </template>
               </TextInput>
 
@@ -1653,26 +1659,26 @@ const serviceTableItems = computed(() =>
               <TextInputWithSelect
                 v-model="formData.late_fee"
                 v-model:selectValue="formData.late_fee_type"
-                label="غرامة التأخير"
-                placeholder="أدخل المبلغ"
+                :label="t('purchases.orders.shared.labels.lateFee')"
+                :placeholder="t('purchases.orders.shared.placeholders.enterFeeAmount')"
                 type="number"
                 :rules="[numeric(), positive()]"
                 select-width="110px"
                 :select-items="feeTypeItems"
-                select-placeholder="اختر"
+                :select-placeholder="t('purchases.shared.forms.common.select')"
               />
 
               <!-- cancel_fee / cancel_fee_type: غرامة الإلغاء -->
               <TextInputWithSelect
                 v-model="formData.cancel_fee"
                 v-model:selectValue="formData.cancel_fee_type"
-                label="غرامة الإلغاء"
-                placeholder="أدخل المبلغ"
+                :label="t('purchases.orders.shared.labels.cancelFee')"
+                :placeholder="t('purchases.orders.shared.placeholders.enterFeeAmount')"
                 type="number"
                 :rules="[numeric(), positive()]"
                 select-width="110px"
                 :select-items="feeTypeItems"
-                select-placeholder="اختر"
+                :select-placeholder="t('purchases.shared.forms.common.select')"
               />
 
               <!-- <SelectInput v-model="formData.account" :items="supplierItems" label="الحساب"
@@ -1691,12 +1697,12 @@ const serviceTableItems = computed(() =>
                 <th
                   class="text-white font-semibold text-base py-3 px-4 text-center border-l !border-gray-200"
                 >
-                  العنصر
+                  {{ t('purchases.orders.shared.labels.summaryItem') }}
                 </th>
                 <th
                   class="text-white font-semibold text-base py-3 px-4 text-center"
                 >
-                  المبلغ
+                  {{ t('purchases.orders.shared.labels.summaryAmount') }}
                 </th>
               </tr>
             </thead>
@@ -1707,7 +1713,7 @@ const serviceTableItems = computed(() =>
                 <td
                   class="py-6 px-4 text-center font-bold text-gray-900 border-l !border-gray-200"
                 >
-                  المجموع قبل الخصم
+                  {{ t('purchases.orders.shared.labels.subtotalBeforeDiscount') }}
                 </td>
                 <td class="py-6 px-4 text-center text-gray-600">
                   {{ summaryTotals.subtotalBeforeDiscount }}
@@ -1719,7 +1725,7 @@ const serviceTableItems = computed(() =>
                 <td
                   class="py-6 px-4 text-center font-bold text-gray-900 border-l !border-gray-200"
                 >
-                  الخصم
+                  {{ t('purchases.orders.shared.labels.discountRow') }}
                 </td>
                 <td class="py-6 px-4 text-center text-gray-600">
                   {{ summaryTotals.totalDiscount }}
@@ -1731,7 +1737,7 @@ const serviceTableItems = computed(() =>
                 <td
                   class="py-6 px-4 text-center font-bold text-gray-900 border-l !border-gray-200"
                 >
-                  المجموع بعد الخصم
+                  {{ t('purchases.orders.shared.labels.subtotalAfterDiscount') }}
                 </td>
                 <td class="py-6 px-4 text-center text-gray-600">
                   {{ summaryTotals.subtotalAfterDiscount }}
@@ -1743,7 +1749,7 @@ const serviceTableItems = computed(() =>
                 <td
                   class="py-6 px-4 text-center font-bold text-gray-900 border-l !border-gray-200"
                 >
-                  الضريبة
+                  {{ t('purchases.orders.shared.labels.taxRow') }}
                 </td>
                 <td class="py-6 px-4 text-center text-gray-600">{{ vatRate != null ? `${vatRate * 100}%` : '—' }}</td>
               </tr>
@@ -1753,7 +1759,7 @@ const serviceTableItems = computed(() =>
                 <td
                   class="py-6 px-4 text-center font-bold text-gray-900 border-l !border-gray-200"
                 >
-                  اجمالي الضريبة
+                  {{ t('purchases.orders.shared.labels.totalTaxRow') }}
                 </td>
                 <td class="py-6 px-4 text-center text-gray-600">
                   {{ summaryTotals.totalTaxAmount }}
@@ -1765,7 +1771,7 @@ const serviceTableItems = computed(() =>
                 <td
                   class="py-6 px-4 text-center font-bold text-gray-900 border-l !border-gray-200"
                 >
-                  الإجمالي النهائي
+                  {{ t('purchases.orders.shared.labels.finalTotalRow') }}
                 </td>
                 <td class="py-6 px-4 font-bold text-center text-gray-900">
                   {{ summaryTotals.finalTotal }}
@@ -1786,7 +1792,7 @@ const serviceTableItems = computed(() =>
             rounded="4"
             custom-class="font-semibold text-base px-6 md:!px-10"
             :prepend-icon="returnIcon"
-            label="حفظ والعودة للرئيسية"
+            :label="t('purchases.orders.shared.labels.saveReturnToMain')"
             :loading="isSubmitting"
             :disabled="isSubmitting"
             @click="handleSubmit({ redirectToList: true })"
@@ -1799,7 +1805,7 @@ const serviceTableItems = computed(() =>
             rounded="4"
             custom-class="font-semibold text-base text-primary-700 px-6 md:!px-10"
             :prepend-icon="saveIcon"
-            label="حفظ وإنشاء جديد"
+            :label="t('purchases.orders.shared.labels.saveAndCreateNewPo')"
             :loading="isSubmitting"
             :disabled="isSubmitting"
             @click="handleSubmit({ redirectToList: false })"

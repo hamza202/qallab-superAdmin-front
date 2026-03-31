@@ -92,11 +92,11 @@ const eyeIcon = `<svg width="20" height="14" viewBox="0 0 20 14" fill="none" xml
       <v-table class="bg-white rounded-lg">
         <thead>
           <tr class="bg-gray-100">
-            <th class="text-right font-semibold text-gray-700 py-3 px-4">{{ t('form.contractor.documents.tableHeaders.attachmentName') }}</th>
-            <th class="text-right font-semibold text-gray-700 py-3 px-4">{{ t('form.contractor.documents.tableHeaders.attachmentDate') }}</th>
-            <th class="text-right font-semibold text-gray-700 py-3 px-4">{{ t('form.contractor.documents.tableHeaders.attachmentType') }}</th>
-            <th class="text-right font-semibold text-gray-700 py-3 px-4">{{ t('form.contractor.documents.tableHeaders.file') }}</th>
-            <th class="text-right font-semibold text-gray-700 py-3 px-4">{{ t('form.contractor.documents.tableHeaders.actions') }}</th>
+            <th class="text-start font-semibold text-gray-700 py-3 px-4">{{ t('form.contractor.documents.tableHeaders.attachmentName') }}</th>
+            <th class="text-start font-semibold text-gray-700 py-3 px-4">{{ t('form.contractor.documents.tableHeaders.attachmentDate') }}</th>
+            <th class="text-start font-semibold text-gray-700 py-3 px-4">{{ t('form.contractor.documents.tableHeaders.attachmentType') }}</th>
+            <th class="text-start font-semibold text-gray-700 py-3 px-4">{{ t('form.contractor.documents.tableHeaders.file') }}</th>
+            <th class="text-start font-semibold text-gray-700 py-3 px-4">{{ t('form.contractor.documents.tableHeaders.actions') }}</th>
           </tr>
         </thead>
         <tbody>

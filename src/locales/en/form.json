@@ -21,19 +21,60 @@
         "placeholder": "Code"
       },
       "type": {
-        "label": "Type"
+        "label": "Type",
+        "placeholder": "Choose type"
       },
       "description": {
         "label": "Description"
       },
       "descriptionArabic": {
-        "label": "Arabic Description"
+        "label": "Arabic Description",
+        "placeholder": "Enter Description in Arabic"
       },
       "descriptionEnglish": {
-        "label": "English Description"
+        "label": "English Description",
+        "placeholder": "Enter Description in English"
       },
       "notes": {
-        "label": "Notes"
+        "label": "Notes",
+        "placeholder": "Notes"
+      },
+      "name": {
+        "label": "Name"
+      },
+      "unitCode": {
+        "label": "Unit Code",
+        "placeholder": "Unit Code"
+      },
+      "parentUnit": {
+        "label": "Related Parent Unit",
+        "placeholder": "Choose parent unit"
+      },
+      "taxRule": {
+        "label": "Tax Rule",
+        "placeholder": "Choose tax rule"
+      },
+      "calculationMethod": {
+        "label": "Calculation Method",
+        "placeholder": "Choose calculation method"
+      },
+      "amountIncludesTax": {
+        "label": "Amount Includes Tax"
+      },
+      "code2": {
+        "label": "Code 2",
+        "placeholder": "Enter code"
+      },
+      "code3": {
+        "label": "Code 3",
+        "placeholder": "Enter code"
+      },
+      "phoneCode": {
+        "label": "Phone Code",
+        "placeholder": "Enter phone code"
+      },
+      "isDefault": {
+        "label": "Default"
       },
       "textNote": {
         "label": "Text Note",
@@ -494,6 +535,51 @@
     },
     "factory": {
       "commercialInfo": {
+        "licenseType": {
+          "label": "License Type",
+          "placeholder": "Select license type"
+        },
+        "issuingAuthority": {
+          "label": "Issuing Authority",
+          "placeholder": "Select issuing authority"
+        },
+        "issueDate": {
+          "label": "License Issue Date",
+          "placeholder": "Select issue date",
+          "info": "License issue date"
+        },
+        "expiryDate": {
+          "label": "License Expiry Date",
+          "placeholder": "Select expiry date",
+          "info": "License expiration date"
+        },
+        "licenseStatus": {
+          "label": "License Status"
+        },
+        "licensedActivity": {
+          "label": "Licensed Activity",
+          "placeholder": "Select licensed activity"
+        },
+        "activityTypes": {
+          "label": "Material Types",
+          "placeholder": "Select activity type"
+        },
+        "productTypes": {
+          "label": "Product Types",
+          "placeholder": "Select product types"
+        },
+        "rawMaterialTypes": {
+          "label": "Raw Material Types",
+          "placeholder": "Select raw material types"
+        },
+        "rawMaterialSource": {
+          "label": "Raw Material Source",
+          "placeholder": "Select raw material source"
+        },
+        "licensedCapacity": {
+          "label": "Licensed Capacity",
+          "placeholder": "Enter licensed capacity"
+        },
         "contractorClassification": {
           "label": "Contractor Classification",
           "placeholder": "Select"
@@ -532,6 +618,52 @@
         }
       },
       "operationalInfo": {
+        "productionLinesCount": {
+          "label": "Number of Production Lines",
+          "placeholder": "Enter number of production lines"
+        },
+        "operationalStatus": {
+          "label": "Operational Status",
+          "placeholder": "Select operational status"
+        },
+        "totalWorkers": {
+          "label": "Number of Workers",
+          "placeholder": "Enter number of workers"
+        },
+        "qualityControlSystem": {
+          "label": "Quality Control System",
+          "placeholder": "Select quality system"
+        },
+        "workingHours": {
+          "label": "Working Hours",
+          "placeholder": "Select working hours"
+        },
+        "safetySystem": {
+          "label": "Safety System",
+          "placeholder": "Select safety system"
+        },
+        "equipmentType": {
+          "label": "Equipment Type",
+          "placeholder": "Select equipment type"
+        },
+        "maintenanceSystem": {
+          "label": "Maintenance System",
+          "placeholder": "Select maintenance system"
+        },
+        "operationMode": {
+          "label": "Operation Mode",
+          "placeholder": "Select operation mode"
+        },
+        "weighbridgeType": {
+          "label": "Weighbridge Type",
+          "placeholder": "Select weighbridge type"
+        },
+        "weighbridgeAvailability": {
+          "label": "Weighbridge Availability"
+        },
+        "qualityLabAvailability": {
+          "label": "Quality Lab Availability"
+        },
         "ongoingProjects": {
           "label": "Number of Ongoing Projects",
           "placeholder": "Enter Number"
@@ -860,8 +992,8 @@
       },
       "categoryDetails": {
         "label": "Category Details",
-        "placeholder": "Enter Category Details in English",
-        "placeholderEn": "أدخل تفاصيل التصنيف بالعربية"
+        "placeholderEn": "Enter Category Details in English",
+        "placeholder": "أدخل تفاصيل التصنيف بالعربية"
       },
       "hasSubProducts": {
         "label": "Has Sub-products"
@@ -1531,6 +1663,11 @@
       "addList": "Add List",
       "addTest": "Add Test",
       "addUnit": "Add Unit",
+      "addBrand": "Add Brand",
+      "addFactory": "Add Factory",
+      "addTax": "Add Tax",
+      "addCountry": "Add Country",
+      "addCity": "Add City",
       "addReceiptVoucher": "Add Receipt Voucher",
       "addPaymentVoucher": "Add Payment Voucher",
       "apply": "Apply",

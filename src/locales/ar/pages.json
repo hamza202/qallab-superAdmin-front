@@ -196,6 +196,10 @@
         }
       },
       "form": {
+        "tabs": {
+          "basicInfo": "المعلومات الاساسية",
+          "accountingInfo": "المعلومات المحاسبية"
+        },
         "subTabs": {
           "addressInfo": "معلومات العنوان",
           "contactList": "قائمة الاتصال"
@@ -204,29 +208,98 @@
           "customerData": "بيانات العميل",
           "balances": "الارصدة"
         },
-        "contacts": {
-          "firstName": "الاسم الاول",
-          "lastName": "الاسم الاخير",
+        "labels": {
+          "accountType": "نوع حساب العميل",
+          "fullName": "الاسم كامل",
+          "fullNamePlaceholderEn": "Full name (English)",
+          "fullNamePlaceholderAr": "الاسم الكامل بالعربية",
+          "code": "الكود",
+          "mobile": "الجوال",
+          "phone": "الهاتف",
           "email": "البريد الالكتروني",
+          "emailPlaceholder": "مثال: {email}",
+          "commercialName": "الاسم التجاري",
+          "commercialNamePlaceholderEn": "Trade name (English)",
+          "commercialNamePlaceholderAr": "الاسم التجاري بالعربية",
+          "legalName": "الاسم القانوني",
+          "legalNamePlaceholder": "ادخل الاسم القانوني",
+          "entityType": "نوع الكيان",
+          "entityTypePlaceholder": "اختر نوع الكيان",
+          "taxNumber": "السجل التجاري",
+          "taxNumberPlaceholder": "ادخل رقم السجل التجاري",
+          "country": "الدولة",
+          "countryPlaceholder": "اختر الدولة",
+          "city": "المدينة",
+          "cityPlaceholder": "اختر المدينة",
+          "postalCode": "الرمز البريدي",
+          "postalCodePlaceholder": "مثال: 12345",
+          "district": "اسم الحي",
+          "districtPlaceholder": "ادخل اسم الحي",
+          "streetName": "اسم الشارع",
+          "streetNamePlaceholder": "ادخل اسم الشارع",
+          "buildingNumber": "رقم المبنى",
+          "buildingNumberPlaceholder": "ادخل رقم المبنى",
+          "nationalAddress": "العنوان الوطني",
+          "nationalAddressPlaceholder": "اكتب العنوان الوطني الكامل",
+          "nationalAddressTooltip": "العنوان الوطني",
+          "address2": "عنوان 2",
+          "address2Placeholder": "تفاصيل عنوان إضافية",
+          "minimumCredit": "الحد الادنى (دائن)",
+          "minimumCreditPlaceholder": "اكتب الحد الأدنى للدائن",
+          "maximumCredit": "الحد الاعلى (دائن)",
+          "maximumCreditPlaceholder": "اكتب الحد الأعلى للدائن",
+          "minimumDebit": "الحد الادنى (مدين)",
+          "minimumDebitPlaceholder": "اكتب الحد الأدنى للمدين",
+          "maximumDebit": "الحد الاعلى (مدين)",
+          "maximumDebitPlaceholder": "اكتب الحد الأعلى للمدين"
+        },
+        "contacts": {
+          "title": "قائمة عملاء العميل",
+          "addButton": "أضف عميل",
+          "firstName": "الاسم الاول",
+          "firstNamePlaceholder": "اكتب الاسم الأول",
+          "lastName": "الاسم الاخير",
+          "lastNamePlaceholder": "اكتب الاسم الأخير",
+          "email": "البريد الالكتروني",
+          "emailPlaceholder": "اكتب البريد الإلكتروني",
           "telephone": "الهاتف",
           "mobile": "الجوال",
-          "actions": "الاجراءات"
+          "actions": "الاجراءات",
+          "emptyState": "لا توجد جهات اتصال. انقر على \"اضف\" لإضافة جهة اتصال جديدة."
         },
         "accounting": {
           "priceType": "نوع السعر",
+          "priceTypePlaceholder": "اختر نوع السعر",
           "customerClassification": "تصنيف العميل",
+          "customerClassificationPlaceholder": "اختر تصنيف العميل",
           "salesRepresentative": "مندوب المبيعات",
+          "salesRepresentativePlaceholder": "اختر مندوب المبيعات",
           "createAccountInTree": "انشاء حساب خاص في شجرة المحاسبة",
           "account": "الحساب",
+          "accountPlaceholder": "اختر الحساب",
           "relatedCustomers": "العملاء المرتبطين",
+          "relatedCustomersPlaceholder": "اختر العملاء المرتبطين",
           "defaultStatus": "الحالة الافتراضية"
         },
         "balance": {
+          "title": "الارصدة",
+          "emptyState": "لا توجد أرصدة متاحة",
           "debit": "دائن",
           "credit": "مدين",
           "balance": "الرصيد",
           "lastAmount": "آخر مبلغ",
           "lastUpdate": "آخر تحديث"
+        },
+        "buttons": {
+          "save": "حفظ",
+          "close": "إغلاق"
+        },
+        "messages": {
+          "saveSuccess": "تم حفظ العميل بنجاح",
+          "saveError": "فشل حفظ العميل",
+          "validationError": "يرجى تصحيح الأخطاء في النموذج",
+          "completeBasicInfo": "يجب إكمال المعلومات الأساسية أولاً",
+          "fetchError": "Failed to fetch customer data"
         }
       },
       "create": "إضافة عميل",
@@ -250,11 +323,37 @@
       "description": "تمكنك من إدارة الوثائق والحالات",
       "FormTitle": "ادارة مسار عمل المستندات",
       "FormDescription": "تمكنك من اضافة الحالة والتنقلات",
-      "statusTransitionsTitle": "ادارة انتقال الحالة"
+      "statusTransitionsTitle": "ادارة انتقال الحالة",
+      "form": {
+        "basicData": "البيانات الأساسية",
+        "documentName": "اسم المستند",
+        "documentId": "معرف المستند",
+        "statusLevel": "مستوى الحالة",
+        "statusName": "اسم الحالة",
+        "otherOptions": "خيارات أخرى",
+        "required": "مطلوب",
+        "autoAction": "تطبيق إجراء تلقائي",
+        "requiresApproval": "يحتاج موافقة",
+        "selectDocument": "اختر المستند",
+        "selectDocumentPlaceholder": "قم باختيار المستند",
+        "selectStatusLevel": "اختر مستوى الحالة",
+        "selectStatusName": "اختر اسم الحالة"
+      },
+      "workflow": {
+        "transitionInfo": "معلومات الانتقال",
+        "currentStatus": "الحالية",
+        "previousStatuses": "الحالات السابقة",
+        "nextStatuses": "الحالات التالية",
+        "rollbackStatuses": "حالات التراجع",
+        "selectStatuses": "اختر الحالات"
+      }
     },
     "factories": {
       "title": "المصانع",
-      "description": "تمكنك من ادارة  المصانع",
+      "description": "تمكنك من إدارة المصانع",
+      "editDescription": "تستطيع تعديل بيانات المصانع من هنا",
+      "addTitle": "إضافة مصنع",
+      "editTitle": "تعديل المصنع",
       "list": {
         "filters": {
           "productionLines": "عدد خطوط الإنتاج",
@@ -269,25 +368,103 @@
         "messages": {
           "loadingConstantsError": "فشل تحميل الثوابت",
           "bulkDeleteSuccess": "تم حذف {count} مصنع بنجاح",
+          "bulkDeleteError": "فشل حذف المصانع",
+          "loadingError": "فشل تحميل المصانع",
           "deleteSuccess": "تم حذف المصنع بنجاح",
+          "deleteError": "فشل حذف المصنع",
           "statusChangeSuccess": "تم {status} المصنع بنجاح",
           "statusChangeError": "فشل تغيير حالة المصنع"
+        }
+      },
+      "form": {
+        "editTitle": "تعديل المصنع",
+        "addTitle": "إضافة مصنع",
+        "tabs": {
+          "basicInfo": "البيانات الأساسية",
+          "financialInfo": "البيانات المالية",
+          "commercialInfo": "البيانات التجارية",
+          "operationalInfo": "المعلومات التشغيلية",
+          "documents": "المستندات"
+        },
+        "messages": {
+          "saveBasicFirst": "يجب حفظ البيانات الأساسية أولاً",
+          "basicInfoSaved": "تم حفظ البيانات الأساسية بنجاح",
+          "financialInfoSaved": "تم حفظ البيانات المالية بنجاح",
+          "commercialInfoSaved": "تم حفظ البيانات التجارية بنجاح",
+          "operationalInfoSaved": "تم حفظ المعلومات التشغيلية بنجاح",
+          "documentsSaved": "تم حفظ المستندات بنجاح",
+          "validationError": "يرجى تصحيح الأخطاء في النموذج",
+          "saveError": "فشل حفظ المصنع",
+          "loadError": "فشل تحميل بيانات المصنع"
         }
       }
     },
     "GeneralProductPriceList": {
       "title": "قائمة أسعار المنتجات العامة",
-      "description": "تمكنك من ادارة اسعار المنتجات العامة"
+      "description": "تمكنك من ادارة اسعار المنتجات العامة",
+      "form": {
+        "sections": {
+          "bulkEdit": "تعديل الكل",
+          "pageTitle": "قائمة اسعار المنتجات العامة"
+        },
+        "bulkEdit": {
+          "modes": {
+            "percentage": "نسبة",
+            "value": "قيمة"
+          },
+          "directions": {
+            "increase": "زيادة",
+            "decrease": "نقصان"
+          }
+        },
+        "placeholders": {
+          "searchByCode": "ابحث بالكود",
+          "filterByCategory": "جلب المنتجات عن طريق تصنيف محدد"
+        },
+        "table": {
+          "product": "المنتج",
+          "minPrice": "أدنى سعر",
+          "maxPrice": "أعلى سعر"
+        },
+        "messages": {
+          "fetchCategoriesError": "فشل في جلب التصنيفات",
+          "fetchItemsError": "فشل في جلب عناصر قائمة الأسعار",
+          "selectProductsFirst": "الرجاء تحديد منتجات لتطبيق التعديل",
+          "enterValidValue": "الرجاء إدخال قيمة صحيحة",
+          "bulkEditApplied": "تم تطبيق التعديل على {count} منتج",
+          "saveSuccess": "تم حفظ القائمة بنجاح",
+          "saveError": "فشل في حفظ قائمة الأسعار"
+        }
+      }
     },
     "GeneralProductsPriceLists": {
       "title": "قوائم أسعار المنتجات العامة",
-      "description": "تمكنك من ادارة اسعار المنتجات العامة"
+      "description": "تمكنك من ادارة اسعار المنتجات العامة",
+      "list": {
+        "filters": {
+          "listName": "اسم القائمة"
+        },
+        "messages": {
+          "fetchError": "فشل تحميل البيانات",
+          "statusChangeSuccess": "تم {status} قائمة الأسعار بنجاح",
+          "statusChangeError": "فشل تغيير حالة قائمة الأسعار",
+          "columnsUpdateError": "فشل تحديث الأعمدة"
+        }
+      }
     },
     "geoAreas": {
       "title": "تقسيمات المناطق الجغرافية",
       "description": "تمكنك من ادارة تقسيمات المناطق الجغرافية",
       "FormTitle": "تقسيمات المناطق الجغرافية",
-      "FormDescription": "تمكنك من إضافة تقسيمات المناطق الجغرافية"
+      "FormDescription": "تمكنك من إضافة تقسيمات المناطق الجغرافية",
+      "form": {
+        "basicData": "البيانات الأساسية",
+        "zoneType": "نوع التقسيم",
+        "selectZoneType": "اختر نوع التقسيم",
+        "parentZone": "التقسيم الأساسي",
+        "selectParentZone": "اختر التقسيم الأساسي",
+        "autoFilledFromMap": "يتم التحديد من الخريطة"
+      }
     },
     "geoSegments": {
       "title": "تقسيم النطاقات الجغرافية",
@@ -299,7 +476,294 @@
       "description": "تمكنك من ادرة المنتجات المجموعة المضافة واضافة منتجات مجموعة اخرى",
       "list": "قائمة المنتجات المجموعة",
       "create": "إضافة منتج مجموعة",
-      "edit": "تعديل منتج مجموعة"
+      "edit": "تعديل منتج مجموعة",
+      "form": {
+        "tabs": {
+          "basicData": "البيانات الأساسية",
+          "taxData": "بيانات الضرائب",
+          "additionalData": "بيانات اضافية",
+          "testsList": "قائمة الاختبارات"
+        },
+        "sections": {
+          "prices": "الأسعار",
+          "productInfo": "بيانات المنتج",
+          "taxData": "بيانات الضرائب",
+          "supplyRelations": "التوريد والعلاقات الداخلية للمنتج",
+          "advancedAttributes": "سمات / خصائص المنتج المتقدمة",
+          "tests": "قائمة الاختبارات",
+          "subProducts": "المنتجات الفرعية"
+        },
+        "labels": {
+          "productCode": "كود المنتج",
+          "copyProductCode": "نسخ الكود",
+          "description": "الوصف",
+          "category": "التصنيف",
+          "unit": "الوحدة",
+          "isMinUnit": "وحدة حد أدنى",
+          "materialType": "نوع الخامة",
+          "minQuantity": "الحد الأدنى للكمية",
+          "purchasePrice": "سعر الشراء",
+          "sellPrice": "سعر البيع",
+          "minSellPrice": "أقل سعر بيع",
+          "maxSellPrice": "أعلى سعر بيع",
+          "wholesalePrice": "سعر الجملة",
+          "semiWholesalePrice": "سعر نصف الجملة",
+          "discountType": "نوع الخصم",
+          "discountValue": "قيمة الخصم",
+          "profitMargin": "هامش الربح",
+          "productImage": "صورة المنتج",
+          "productImageHint": "اقصى حجم: 10MB - الصيغ المدعومة: JPG, PNG",
+          "nameAr": "الاسم بالعربية",
+          "nameEn": "الاسم بالإنجليزية",
+          "descriptionAr": "الوصف عربي",
+          "descriptionEn": "الوصف بالإنجليزي",
+          "taxType": "نوع الضريبة",
+          "taxPercentage": "النسبة",
+          "taxMinValue": "أقل قيمة",
+          "taxPriority": "الأولوية",
+          "brand": "العلامة التجارية",
+          "manufacturer": "المصنع",
+          "originCountry": "بلد المنشأ",
+          "relatedProducts": "المنتجات المرتبطة",
+          "attachedProducts": "المنتجات الملحقة",
+          "alternativeProducts": "المنتجات البديلة",
+          "bestSuppliers": "أفضل الموردين",
+          "attributes": {
+            "returnable": "قابل للإرجاع",
+            "rentable": "قابل للإيجار",
+            "sellNegative": "البيع بالسالب",
+            "manufacturingProduct": "منتج تصنيع",
+            "availableForPurchase": "متاح للشراء",
+            "availableForRent": "متاح للإيجار",
+            "availableForReturn": "متاح للإرجاع",
+            "availableForSelling": "متاح للبيع",
+            "availableForBuying": "متاح للشراء",
+            "availableForManufacturing": "متاح للتصنيع",
+            "availableForRefund": "متاح للاسترداد",
+            "availableForOffset": "متاح للمقاصة"
+          },
+          "tests": {
+            "testName": "الاختبار",
+            "testsCount": "عدد الاختبارات",
+            "samplesCount": "عدد العينات",
+            "sampleQuantity": "كمية العينات",
+            "status": "الحالة"
+          }
+        },
+        "placeholders": {
+          "selectPrefix": "اختر",
+          "enterPrice": "ادخل السعر",
+          "enterNameEn": "Enter name in English",
+          "enterNameAr": "ادخل الاسم بالعربية",
+          "selectCategory": "اختر التصنيف",
+          "selectUnit": "اختر الوحدة",
+          "selectMaterialType": "اختر نوع المادة",
+          "enterMinQuantity": "أدخل الحد الأدنى",
+          "enterDescriptionEn": "Enter description in English",
+          "enterDescriptionAr": "ادخل الوصف بالعربية",
+          "selectCountry": "اختر البلد",
+          "selectManufacturer": "اختر المصنع",
+          "selectBrand": "اختر العلامة التجارية",
+          "selectProduct": "اختر المنتج",
+          "selectSupplier": "اختر المورد"
+        },
+        "table": {
+          "tax": {
+            "taxName": "الضريبة",
+            "percentage": "النسبة",
+            "minValue": "أقل قيمة",
+            "priority": "الأولوية"
+          },
+          "tests": {
+            "testName": "الاختبار",
+            "testsCount": "عدد الاختبارات",
+            "samplesCount": "عدد العينات",
+            "sampleQuantity": "كمية العينات",
+            "status": "الحالة"
+          },
+          "subProducts": {
+            "name": "اسم المنتج الفرعي",
+            "sku": "الكود",
+            "sellPrice": "سعر البيع",
+            "purchasePrice": "سعر الشراء"
+          }
+        },
+        "buttons": {
+          "saveAndReturn": "حفظ والعودة للرئيسية",
+          "saveAndCreate": "حفظ وإنشاء جديد",
+          "saveAndContinue": "حفظ ومتابعة",
+          "addLanguage": "أضف لغة جديدة",
+          "add": "إضافة",
+          "update": "تعديل",
+          "cancel": "إلغاء",
+          "generateSubProducts": "إنشاء المنتجات الفرعية"
+        },
+        "messages": {
+          "copySuccess": "تم نسخ كود المنتج بنجاح",
+          "selectCategoryFirst": "يجب عليك اختيار التصنيف لاضافة مجموعة منتجات",
+          "selectAspectsFirst": "يرجى اختيار قيم المتغيرات أولاً",
+          "noSubProductNamesReturned": "لم يتم إرجاع أسماء منتجات فرعية",
+          "subProductsGenerated": "تم إنشاء المنتجات الفرعية بنجاح",
+          "subProductsGenerateFailed": "فشل في إنشاء المنتجات الفرعية",
+          "selectTaxTypeAndPriority": "يرجى اختيار نوع الضريبة والأولوية",
+          "saveError": "حدث خطأ أثناء الحفظ"
+        },
+        "defaults": {
+          "product": "منتج",
+          "test": "اختبار"
+        }
+      },
+      "view": {
+        "breadcrumb": {
+          "products": "المنتجات",
+          "productsList": "جدول المنتجات المجموعة"
+        },
+        "tabs": {
+          "general": "المعلومات العامة للمنتج",
+          "tests": "الاختبارات على المنتج"
+        },
+        "sections": {
+          "generalInfo": "المعلومات العامة",
+          "prices": "الأسعار",
+          "addedTaxes": "الضرائب المضافة",
+          "supplyRelations": "التوريد والعلاقات الداخلية للمنتج",
+          "advancedAttributes": "سمات / خصائص المنتج المتقدمة",
+          "attachments": "المرفقات"
+        },
+        "subSections": {
+          "taxNumber": "ضريبة {number}"
+        },
+        "labels": {
+          "nameAr": "الاسم بالعربية",
+          "nameEn": "الاسم بالإنجليزية",
+          "productCode": "كود المنتج",
+          "productStatus": "حالة المنتج",
+          "productType": "نوع المنتج",
+          "productCategory": "فئة المنتج",
+          "descriptionAr": "الوصف عربي",
+          "descriptionEn": "الوصف بالإنجليزي",
+          "sellPrice": "سعر البيع",
+          "maxSellPrice": "اعلى سعر بيع",
+          "minSellPrice": "اقل سعر بيع",
+          "wholesalePrice": "سعر الجملة",
+          "semiWholesalePrice": "سعر نصف الجملة",
+          "discountType": "نوع الخصم",
+          "discountValue": "قيمة الخصم",
+          "tax": "ضريبة",
+          "taxName": "اسم الضريبة المضافة",
+          "taxValue": "قيمة الضريبة",
+          "taxPriority": "الأولوية",
+          "taxMinimum": "الحد الأدنى",
+          "brand": "العلامة التجارية",
+          "manufacturer": "المصنع",
+          "originCountry": "بلد المنشأ",
+          "alternativeProducts": "المنتجات البديلة",
+          "attachedProducts": "المنتجات الملحقة",
+          "relatedProducts": "المنتجات المرتبطة",
+          "bestSuppliers": "أفضل الموردين",
+          "testsCount": "عدد الاختبارات",
+          "samplesCount": "عدد العينات",
+          "sampleQuantity": "كمية العينات"
+        },
+        "attachments": {
+          "fileName": "ملف مشروع البيوت",
+          "fileMeta": "200 KB - 100% uploaded"
+        },
+        "tests": {
+          "gradation": "اختبار التدرج الحبيبي",
+          "hardness": "اختبار الصلابة",
+          "endurance": "اختبار التحمل"
+        },
+        "mock": {
+          "product": {
+            "name": "منتج مواد بناء",
+            "description": "منتج مواد بناء خاص بقلاب",
+            "descriptionAr": "يُدرج في مشروع \"تطوير بنية تحتية\" أحدث البناء مواد البناء المختلفة بصيغ للتناسب المتطلبة المعمارية والبنائية المتنوعة والمتطلبات البيئية الحديثة أيضاً",
+            "productType": "طوب",
+            "category": "مواد بناء",
+            "purchasePrice": "1200 ريال",
+            "sellPrice": "100 ريال",
+            "discountType": "نسبة",
+            "tax1Name": "ضريبة القيمة المضافة",
+            "tax1Priority": "عليه",
+            "tax2Name": "اسم الضريبة المضافة",
+            "tax2Value": "ضريبة القيمة",
+            "tax2Priority": "الأولوية",
+            "brand": "بناء مكة",
+            "manufacturer": "مصنع مكة",
+            "originCountry": "السعودية",
+            "alternativeProducts": "طوب",
+            "accessoryProducts": "حديد",
+            "relatedProducts": "حديد، حصمة",
+            "bestSuppliers": "قلاب"
+          },
+          "tests": {
+            "testCount": "5 اختبارات",
+            "sampleCount": "10 عينات",
+            "sampleQuantity": "50 كجم تقريباً للعينة الواحدة"
+          }
+        },
+        "values": {
+          "active": "فعال",
+          "inactive": "غير فعال",
+          "manufacturable": "منتج تصنيع",
+          "sellable": "متاح للبيع",
+          "purchasable": "متاح للشراء",
+          "barterable": "قابل للمقايضة",
+          "clearable": "قابل للمقاصة",
+          "rentable": "قابل للإيجار",
+          "allowNegativeSales": "البيع بالسالب",
+          "noDescription": "لا يوجد وصف"
+        }
+      },
+      "listPage": {
+        "deleteDialog": {
+          "titleSingle": "حذف المنتج",
+          "titleBulk": "حذف المنتجات",
+          "messageSingle": "هل أنت متأكد من حذف {name}؟",
+          "messageBulk": "هل أنت متأكد من حذف {count} منتج؟"
+        },
+        "buttons": {
+          "bulkDelete": "حذف المحدد",
+          "deleteAll": "حذف الجميع",
+          "searchNow": "ابحث الآن",
+          "reset": "إعادة تعيين"
+        },
+        "messages": {
+          "deleteSuccess": "تم حذف المنتج بنجاح",
+          "bulkDeleteSuccess": "تم حذف المنتجات المحددة بنجاح",
+          "deleteError": "حدث خطأ أثناء الحذف",
+          "fetchError": "حدث خطأ أثناء جلب البيانات",
+          "statusChangeSuccess": "تم {status} المنتج بنجاح",
+          "subItemStatusChangeSuccess": "تم {status} المنتج الفرعي بنجاح",
+          "activate": "تفعيل",
+          "deactivate": "تعطيل",
+          "statusChangeError": "حدث خطأ أثناء تغيير الحالة",
+          "subItemStatusChangeError": "حدث خطأ أثناء تغيير حالة المنتج الفرعي",
+          "loadingMore": "جاري تحميل المزيد..."
+        },
+        "table": {
+          "name": "الاسم",
+          "code": "الكود",
+          "unit": "الوحدة",
+          "category": "التصنيف",
+          "purchasePrice": "سعر الشراء",
+          "sellPrice": "سعر البيع",
+          "status": "الحالة"
+        },
+        "subItemsTable": {
+          "name": "اسم المنتج الفرعي",
+          "code": "الكود",
+          "sellPrice": "سعر البيع",
+          "purchasePrice": "سعر الشراء",
+          "quantity": "الكمية",
+          "totalAmount": "المبلغ الإجمالي"
+        },
+        "filters": {
+          "active": "فعال",
+          "inactive": "غير فعال"
+        }
+      }
     },
     "logistics": {
       "title": "شركات اللوجستيات",
@@ -412,19 +876,108 @@
     },
     "productionCapacityList": {
       "title": "قائمة  القدرة الانتاجية",
-      "description": "تمكنك من إدارة القدرة الإنتاجية للمنتجات"
+      "description": "تمكنك من إدارة القدرة الإنتاجية للمنتجات",
+      "form": {
+        "placeholders": {
+          "filterByCategory": "جلب المنتجات عن طريق تصنيف محدد"
+        },
+        "labels": {
+          "productsCount": "عدد المنتجات: {count}"
+        },
+        "table": {
+          "product": "المنتج",
+          "min": "أدنى",
+          "max": "أعلى",
+          "tonPerHour": {
+            "title": "كمية الإنتاج بالطن / ساعة"
+          },
+          "tonPerDay": {
+            "title": "كمية الإنتاج بالطن / باليوم"
+          },
+          "tonPerWeek": {
+            "title": "كمية الإنتاج بالطن / بالاسبوع"
+          },
+          "tonPerMonth": {
+            "title": "كمية الإنتاج بالطن / بالشهر"
+          }
+        },
+        "messages": {
+          "fetchItemsError": "فشل في جلب عناصر القدرة الإنتاجية",
+          "fetchCategoriesError": "فشل في جلب التصنيفات",
+          "missingId": "معرف الطاقة الإنتاجية غير موجود",
+          "noChanges": "لم يتم تعديل أي عنصر",
+          "saveSuccess": "تم حفظ التغييرات بنجاح",
+          "saveError": "فشل في حفظ القدرة الإنتاجية"
+        }
+      }
     },
     "productionCapacityLists": {
       "title": "قوائم  القدرة الانتاجية",
-      "description": "تمكنك من إدارة القدرة الإنتاجية للمنتجات"
+      "description": "تمكنك من إدارة القدرة الإنتاجية للمنتجات",
+      "list": {
+        "columns": {
+          "supplier": "المورد"
+        },
+        "messages": {
+          "fetchError": "حدث خطأ أثناء جلب البيانات",
+          "generalError": "حدث خطأ",
+          "statusChangeSuccess": "تم {status} القدرة الإنتاجية بنجاح",
+          "statusChangeError": "حدث خطأ أثناء تغيير الحالة",
+          "loadingMore": "جاري تحميل المزيد..."
+        }
+      }
     },
     "ProductsBuildingMaterialPriceList": {
       "title": "قائمة أسعار منتجات مواد البناء الأولية",
-      "description": "تمكنك من ادارة أسعار منتجات مواد البناء الأولية"
+      "description": "تمكنك من ادارة أسعار منتجات مواد البناء الأولية",
+      "form": {
+        "sections": {
+          "bulkEdit": "تعديل الكل",
+          "pageTitle": "قائمة اسعار منتجات مواد البناء"
+        },
+        "bulkEdit": {
+          "modes": {
+            "percentage": "نسبة",
+            "value": "قيمة"
+          },
+          "directions": {
+            "increase": "زيادة",
+            "decrease": "نقصان"
+          }
+        },
+        "placeholders": {
+          "searchByCode": "ابحث بالكود",
+          "filterByCategory": "جلب المنتجات عن طريق تصنيف محدد"
+        },
+        "table": {
+          "product": "المنتج",
+          "salePrice": "سعر البيع"
+        },
+        "messages": {
+          "fetchCategoriesError": "فشل في جلب التصنيفات",
+          "fetchItemsError": "فشل في جلب عناصر قائمة الأسعار",
+          "selectProductsFirst": "الرجاء تحديد منتجات لتطبيق التعديل",
+          "enterValidValue": "الرجاء إدخال قيمة صحيحة",
+          "bulkEditApplied": "تم تطبيق التعديل على {count} منتج",
+          "saveSuccess": "تم حفظ القائمة بنجاح",
+          "saveError": "فشل في حفظ قائمة الأسعار"
+        }
+      }
     },
     "ProductsBuildingMaterialPriceLists": {
       "title": "قوائم أسعار منتجات مواد البناء الأولية",
-      "description": "تمكنك من ادارة أسعار منتجات مواد البناء الأولية"
+      "description": "تمكنك من ادارة أسعار منتجات مواد البناء الأولية",
+      "list": {
+        "filters": {
+          "listName": "اسم القائمة"
+        },
+        "messages": {
+          "fetchError": "فشل تحميل البيانات",
+          "statusChangeSuccess": "تم {status} قائمة الأسعار بنجاح",
+          "statusChangeError": "فشل تغيير حالة قائمة الأسعار",
+          "columnsUpdateError": "فشل تحديث الأعمدة"
+        }
+      }
     },
     "ProductsCategories": {
       "title": "تصنيفات المنتجات",
@@ -434,11 +987,82 @@
           "title": "حذف التصنيفات",
           "message": "هل أنت متأكد من حذف {count} تصنيف؟"
         }
+      },
+      "view": {
+        "generalInfo": "المعلومات العامة للتصنيف",
+        "addedTaxes": "الضرائب المضافة",
+        "attachments": "المرفقات",
+        "attachedDocuments": "مستندات مرفقة",
+        "noAttachments": "لا توجد مرفقات",
+        "uploading": "جاري الرفع",
+        "uploaded": "uploaded",
+        "high": "عالية"
       }
     },
     "productVariables": {
       "title": "متغيرات المنتج",
-      "description": "تمكنك من ادارة متغيرات المنتجات"
+      "description": "تمكنك من ادارة متغيرات المنتجات",
+      "list": {
+        "filters": {
+          "variableName": "اسم المتغير"
+        },
+        "buttons": {
+          "deleteSelected": "حذف المحدد",
+          "deleteAll": "حذف الجميع"
+        },
+        "deleteDialog": {
+          "title": "حذف المتغيرات",
+          "message": "هل أنت متأكد من حذف {count} متغير؟"
+        },
+        "messages": {
+          "fetchError": "فشل تحميل البيانات",
+          "deleteSuccess": "تم حذف المتغير بنجاح",
+          "deleteError": "فشل حذف المتغير",
+          "bulkDeleteSuccess": "تم حذف {count} متغير بنجاح",
+          "bulkDeleteError": "فشل حذف المتغيرات",
+          "statusChangeSuccess": "تم {status} المتغير بنجاح",
+          "statusChangeError": "فشل تغيير حالة المتغير",
+          "columnsUpdateError": "فشل تحديث الأعمدة"
+        }
+      },
+      "form": {
+        "sections": {
+          "basicInfo": "المعلومات الأساسية",
+          "values": "قيم المتغير"
+        },
+        "labels": {
+          "variableName": "اسم متغير المنتج",
+          "valueType": "نوع العنصر",
+          "notes": "الملاحظات"
+        },
+        "placeholders": {
+          "variableNameEn": "Enter variable name in English",
+          "variableNameAr": "ادخل اسم المتغير بالعربية",
+          "selectCategory": "اختر التصنيف",
+          "selectValueType": "اختر نوع العنصر",
+          "notes": "أدخل الملاحظات هنا...",
+          "value": "أدخل القيمة"
+        },
+        "buttons": {
+          "addValue": "أضف جديد"
+        },
+        "emptyState": {
+          "title": "لا توجد قيم متغيرات",
+          "description": "اضغط على \"أضف جديد\" لإضافة قيمة جديدة"
+        },
+        "defaults": {
+          "value": "القيمة"
+        },
+        "messages": {
+          "validationError": "يرجى تصحيح الأخطاء في النموذج",
+          "createSuccess": "تم إضافة المتغير بنجاح",
+          "updateSuccess": "تم تحديث المتغير بنجاح",
+          "saveError": "فشل حفظ البيانات",
+          "loadConstantsError": "فشل تحميل الثوابت",
+          "loadCategoriesError": "فشل تحميل الفئات",
+          "fetchError": "فشل تحميل بيانات المتغير"
+        }
+      }
     },
     "profile": {
       "title": "إعدادات الملف الشخصي",
@@ -592,7 +1216,34 @@
         }
       },
       "create": "إضافة دور",
-      "edit": "تعديل دور"
+      "edit": "تعديل دور",
+      "form": {
+        "addRole": "اضافة دور",
+        "editRole": "تعديل الدور",
+        "addNewRole": "اضافة دور جديد",
+        "fillBasicData": "قم بملئ البيانات الأساسية واختيار الأدوار",
+        "basicData": "البيانات الأساسية",
+        "roleName": "اسم الدور",
+        "namePlaceholder": "الاسم",
+        "permissions": "الصلاحيات",
+        "allPermissions": "جميع الصلاحيات",
+        "saveChanges": "حفظ التعديلات",
+        "addNewRoleButton": "أضف دور جديد",
+        "cancel": "الغاء",
+        "messages": {
+          "fetchPermissionsError": "حدث خطأ أثناء جلب الصلاحيات",
+          "fetchRoleError": "حدث خطأ أثناء جلب بيانات الدور",
+          "updateSuccess": "تم تحديث الدور بنجاح",
+          "createSuccess": "تم إضافة الدور بنجاح",
+          "saveError": "حدث خطأ أثناء حفظ البيانات"
+        }
+      },
+      "filters": {
+        "roleName": "اسم الدور",
+        "status": "الحالة",
+        "searchNow": "ابحث الأن",
+        "reset": "إعادة تعيين"
+      }
     },
     "SalesInvoices": {
       "title": "جدول فواتير المبيعات",
@@ -655,6 +1306,14 @@
       "FormDescription": "إنشاء عرض سعر خدمة النقل جديد",
       "edit": "تعديل عرض سعر خدمة النقل",
       "view": "عرض عرض سعر خدمة النقل"
+    },
+    "QuotationsFuels": {
+      "title": "عروض أسعار المحروقات",
+      "description": "إدارة عروض أسعار المحروقات",
+      "FormTitle": "عرض سعر محروقات",
+      "FormDescription": "إنشاء عرض سعر محروقات جديد",
+      "edit": "تعديل عرض سعر محروقات",
+      "view": "عرض عرض سعر محروقات"
     },
     "SalesRequests": {
       "title": "جدول طلبيات المبيعات",
@@ -735,7 +1394,13 @@
     },
     "sampleTypes": {
       "title": "أنواع العينات",
-      "description": "تمكنك من إدارة أنواع العينات"
+      "description": "تمكنك من إدارة أنواع العينات",
+      "form": {
+        "add": "نوع عينة جديد",
+        "edit": "تعديل نوع العينة",
+        "addDescription": "إضافة نوع عينة جديد",
+        "editDescription": "تعديل بيانات نوع العينة"
+      }
     },
     "servicePricesList": {
       "title": "قائمة أسعار الخدمات",
@@ -756,6 +1421,125 @@
           "statusChangeSuccess": "تم {status} الخدمة بنجاح",
           "statusChangeError": "فشل تغيير حالة الخدمة"
         }
+      },
+      "form": {
+        "tabs": {
+          "basicInfo": "البيانات الأساسية",
+          "operationalData": "البيانات التشغيلية"
+        },
+        "basicInfo": {
+          "name": "الإسم",
+          "namePlaceholderEn": "Enter name in English",
+          "namePlaceholderAr": "ادخل الاسم بالعربية",
+          "serviceCode": "رمز الخدمة",
+          "serviceCodePlaceholder": "ادخل رمز الخدمة",
+          "serviceCategory": "فئة الخدمة",
+          "serviceCategoryPlaceholder": "اختر الفئة",
+          "serviceType": "نوع الخدمة",
+          "serviceTypePlaceholder": "اختر نوع الخدمة",
+          "serviceStatus": "حالة الخدمة",
+          "serviceStatusPlaceholder": "اختر الحالة",
+          "description": "الوصف",
+          "descriptionPlaceholderEn": "Enter description in English",
+          "descriptionPlaceholderAr": "ادخل الوصف بالعربية",
+          "unit": "وحدة القياس",
+          "unitPlaceholder": "اختر الوحدة",
+          "unitPrice": "سعر الوحدة",
+          "unitPricePlaceholder": "ادخل سعر الوحدة",
+          "pricingMethod": "طريقة التسعير",
+          "pricingMethodPlaceholder": "اختر الطريقة",
+          "minQuantity": "حد أدنى للطلب",
+          "minQuantityPlaceholder": "0",
+          "tax": "الضريبة",
+          "taxPlaceholder": "اختر الضريبة",
+          "taxPercentage": "نسبة الضريبة",
+          "taxPercentagePlaceholder": "0",
+          "isTaxable": "خاضعة للضريبة",
+          "yes": "نعم",
+          "no": "لا"
+        },
+        "operationalData": {
+          "appointmentSection": "الموعد والمدة ؟",
+          "requiresScheduling": "هل تحتاج موعد؟",
+          "serviceDuration": "مدة الخدمة",
+          "serviceDurationPlaceholder": "أدخل المدة",
+          "durationUnitPlaceholder": "اختر",
+          "serviceStatusSection": "حالة الخدمة ؟",
+          "requiresApproval": "تتطلب موافقة",
+          "isBarter": "قابلة للمقايضة",
+          "isPartialAllowed": "قابلة للتجزئة",
+          "salesEnabled": "متاحة للبيع",
+          "purchaseEnabled": "متاحة للشراء",
+          "projectEnabled": "متاحة للمشاريع",
+          "visibilityLevel": "مستوى الرؤية",
+          "visibilityPlaceholder": "عام",
+          "additionalDataSection": "بيانات إضافية",
+          "notes": "ملاحظات",
+          "notesPlaceholder": "ملاحظات",
+          "activationDate": "تاريخ التفعيل",
+          "activationDatePlaceholder": "2024-03-01"
+        },
+        "buttons": {
+          "save": "حفظ"
+        },
+        "messages": {
+          "saveSuccess": "تم حفظ الخدمة بنجاح",
+          "saveError": "فشل في حفظ الخدمة",
+          "validationError": "يرجى تصحيح الأخطاء في النموذج",
+          "fetchError": "Failed to fetch service data"
+        }
+      },
+      "view": {
+        "loading": "جاري تحميل بيانات الخدمة...",
+        "breadcrumbs": {
+          "services": "الخدمات",
+          "servicesList": "جدول الخدمات"
+        },
+        "sections": {
+          "generalInfo": "المعلومات العامة",
+          "appointmentDuration": "الموعد والمدة",
+          "serviceStatus": "حالة الخدمة",
+          "additionalData": "بيانات اضافية"
+        },
+        "labels": {
+          "arabicName": "الاسم بالعربية",
+          "englishName": "الاسم بالانجليزية",
+          "serviceCode": "كود الخدمة",
+          "status": "حالة الخدمة",
+          "category": "فئة الخدمة",
+          "serviceType": "نوع الخدمة",
+          "englishDescription": "الوصف بالانجليزي",
+          "arabicDescription": "الوصف عربي",
+          "requiresScheduling": "هل تحتاج موعد",
+          "serviceDuration": "مدة الخدمة",
+          "activationDate": "تاريخ التفعيل",
+          "requiresApproval": "تتطلب موافقة",
+          "isBarter": "قابلة للمقايضة",
+          "isPartialAllowed": "قابلة للتجزئة",
+          "salesEnabled": "متاحة للبيع",
+          "purchaseEnabled": "متاحة للشراء",
+          "projectEnabled": "متاحة للمشاريع",
+          "visibilityLevel": "مستوى الرؤية",
+          "notes": "ملاحظات"
+        },
+        "values": {
+          "active": "فعالة",
+          "inactive": "غير فعالة",
+          "notSpecified": "غير محدد",
+          "internal": "داخلية",
+          "external": "خارجية",
+          "fixed": "ثابت",
+          "variable": "متغير",
+          "public": "عام",
+          "private": "خاص",
+          "minute": "دقيقة",
+          "hour": "ساعة",
+          "day": "يوم",
+          "week": "أسبوع"
+        },
+        "messages": {
+          "fetchError": "Failed to fetch service details"
+        }
       }
     },
     "ServicesCategories": {
@@ -766,6 +1550,16 @@
           "title": "حذف تصنيفات الخدمات",
           "message": "هل أنت متأكد من حذف {count} التصنيف"
         }
+      },
+      "view": {
+        "generalInfo": "المعلومات العامة للتصنيف",
+        "addedTaxes": "الضرائب المضافة",
+        "attachments": "المرفقات",
+        "attachedDocuments": "مستندات مرفقة",
+        "noAttachments": "لا توجد مرفقات",
+        "uploading": "جاري الرفع",
+        "uploaded": "uploaded",
+        "high": "عالية"
       }
     },
     "servicesPricesList": {
@@ -787,9 +1581,247 @@
     "simpleProducts": {
       "title": "المنتجات البسيطة",
       "description": "تمكنك من ادرة المنتجات البسيطة المضافة واضافة منتجات بسيطة اخرى",
-      "list": "قائمة المنتجات البسيطة",
       "create": "إضافة منتج بسيط",
-      "edit": "تعديل منتج بسيط"
+      "edit": "تعديل منتج بسيط",
+      "form": {
+        "tabs": {
+          "basicData": "البيانات الأساسية",
+          "taxData": "بيانات الضرائب",
+          "additionalData": "بيانات اضافية",
+          "testsList": "قائمة الاختبارات"
+        },
+        "sections": {
+          "prices": "الأسعار",
+          "productInfo": "المعلومات العامة للمنتج",
+          "taxesApplied": "الضرائب المطبقة على المنتج",
+          "supplyRelations": "التوريد والعلاقات الداخلية للمنتج",
+          "advancedAttributes": "سمات/خصائص المنتج المتقدمة",
+          "testsList": "قائمة الاختبارات"
+        },
+        "labels": {
+          "productCode": "كود المنتج",
+          "name": "الإسم",
+          "namePlaceholderEn": "Enter name in English",
+          "namePlaceholderAr": "ادخل الاسم بالعربية",
+          "category": "التصنيف",
+          "categoryPlaceholder": "اختر التصنيف",
+          "unit": "الوحدة",
+          "unitPlaceholder": "اختر الوحدة",
+          "minUnit": "اقل وحدة",
+          "materialType": "نوع المادة",
+          "materialTypePlaceholder": "اختر نوع المادة",
+          "minQuantity": "حد أدنى للكمية",
+          "minQuantityPlaceholder": "أدخل الحد الأدنى",
+          "description": "الوصف",
+          "descriptionPlaceholderEn": "Enter description in English",
+          "descriptionPlaceholderAr": "ادخل الوصف بالعربية",
+          "productImage": "صورة المنتج",
+          "productImageHint": "PNG, JPG or GIF (max. 400x400px)",
+          "purchasePrice": "سعر الشراء",
+          "salePrice": "سعر البيع",
+          "minSalePrice": "أقل سعر بيع",
+          "maxSalePrice": "أعلى سعر بيع",
+          "wholesalePrice": "سعر الجملة",
+          "halfWholesalePrice": "سعر نصف الجملة",
+          "discountType": "نوع الخصم",
+          "discountTypePlaceholder": "اختر نوع الخصم",
+          "discountValue": "قيمة الخصم",
+          "discountValuePlaceholder": "ادخل قيمة الخصم",
+          "profitMargin": "هامش الربح",
+          "profitMarginPlaceholder": "ادخل هامش الربح",
+          "pricePlaceholder": "ادخل السعر",
+          "taxType": "اختر النوع",
+          "taxPercentage": "النسبة",
+          "taxMinValue": "الحد الأدنى للضريبة",
+          "taxPriority": "اختر الأولوية",
+          "originCountry": "بلد المنشأ",
+          "originCountryPlaceholder": "اختر البلد",
+          "manufacturer": "المصنع",
+          "manufacturerPlaceholder": "اختر المصنع",
+          "brand": "العلامة التجارية",
+          "brandPlaceholder": "ادخل العلامة التجارية",
+          "relatedProducts": "المنتجات المرتبطة",
+          "relatedProductsPlaceholder": "اختر المنتج",
+          "attachedProducts": "المنتجات الملحقة",
+          "attachedProductsPlaceholder": "اختر المنتج",
+          "alternativeProducts": "المنتجات البديلة",
+          "alternativeProductsPlaceholder": "اختر المنتج",
+          "bestSuppliers": "افضل الموردين",
+          "bestSuppliersPlaceholder": "اختر المورد"
+        },
+        "attributes": {
+          "manufacturingProduct": "منتج تصنيع",
+          "sellNegative": "البيع بالسالب",
+          "availableForRent": "قابل للإيجار",
+          "availableForReturn": "قابل للمقايضة",
+          "availableForRefund": "قابل للارجاع",
+          "availableForOffset": "قابل للمقاصة",
+          "availableForSelling": "متاح للبيع",
+          "availableForBuying": "متاح للشراء",
+          "availableForPurchase": "متاح للمشاريع"
+        },
+        "tests": {
+          "test": "الاختبار",
+          "testPlaceholder": "اختر",
+          "testsCount": "عدد الاختبارات",
+          "testsCountPlaceholder": "عدد الاختبارات",
+          "samplesCount": "عدد العينات",
+          "samplesCountPlaceholder": "عدد العينات",
+          "sampleQuantity": "كمية العينات",
+          "sampleQuantityPlaceholder": "كمية العينات",
+          "status": "الحالة"
+        },
+        "taxTable": {
+          "tax": "الضريبة",
+          "percentage": "النسبة",
+          "minValue": "أقل قيمة",
+          "priority": "الأولوية"
+        },
+        "testsTable": {
+          "test": "الاختبار",
+          "testsCount": "عدد الاختبارات",
+          "samplesCount": "عدد العينات",
+          "sampleQuantity": "كمية العينات",
+          "status": "الحالة"
+        },
+        "buttons": {
+          "addLanguage": "أضف لغة جديدة",
+          "addTax": "أضف ضريبة",
+          "editTax": "تعديل ضريبة",
+          "cancelTax": "إلغاء",
+          "addTest": "أضف جديد",
+          "saveAndReturn": "حفظ والعودة للرئيسية",
+          "saveAndCreate": "حفظ وإنشاء جديد",
+          "saveAndContinue": "حفظ والمتابعة",
+          "close": "إغلاق",
+          "copyCode": "نسخ الكود"
+        },
+        "messages": {
+          "selectTaxAndPriority": "يرجى اختيار نوع الضريبة والأولوية",
+          "codeCopied": "تم نسخ كود المنتج بنجاح",
+          "saveError": "حدث خطأ أثناء الحفظ",
+          "editSuccess": "تم التعديل بنجاح",
+          "createSuccess": "تم الإنشاء بنجاح",
+          "saveSuccess": "تم الحفظ بنجاح",
+          "taxSaveSuccess": "تم حفظ بيانات الضرائب بنجاح",
+          "additionalDataSaveSuccess": "تم حفظ البيانات الإضافية بنجاح",
+          "completeStep1": "يرجى إتمام الخطوة الأولى أولاً",
+          "fetchError": "فشل في جلب بيانات المنتج"
+        }
+      },
+      "view": {
+        "tabs": {
+          "generalInfo": "المعلومات العامة",
+          "tests": "الاختبارات"
+        },
+        "sections": {
+          "generalInfo": "المعلومات العامة",
+          "taxInfo": "معلومات الضريبة",
+          "productRelations": "التوريد والعلاقات الداخلية للمنتج",
+          "supplyRelations": "التوريد والعلاقات الداخلية للمنتج",
+          "advancedAttributes": "سمات / خصائص المنتج المتقدمة",
+          "additionalInfo": "معلومات إضافية",
+          "productImage": "صورة المنتج",
+          "noProductImage": "لا توجد صورة",
+          "pricingInfo": "معلومات الأسعار",
+          "priceInfo": "معلومات الأسعار",
+          "noTaxInfo": "لا توجد معلومات ضريبية"
+        },
+        "labels": {
+          "nameAr": "الاسم بالعربية",
+          "nameEn": "الاسم بالانجليزية",
+          "productCode": "كود المنتج",
+          "productStatus": "حالة المنتج",
+          "parentProduct": "المنتج الأب",
+          "hasChildren": "له منتجات فرعية",
+          "descriptionEn": "الوصف بالانجليزي",
+          "descriptionAr": "الوصف عربي",
+          "taxName": "اسم الضريبة",
+          "taxPercentage": "نسبة الضريبة",
+          "taxMinimum": "الحد الأدنى للضريبة",
+          "taxPriority": "الأولوية",
+          "priority": "الأولوية",
+          "brand": "العلامة التجارية",
+          "originCountry": "بلد المنشأ",
+          "countryOfOrigin": "بلد المنشأ",
+          "childProducts": "المنتجات الفرعية",
+          "childrenCount": "عدد المنتجات الفرعية",
+          "purchasePrice": "سعر الشراء",
+          "sellPrice": "سعر البيع",
+          "minSellPrice": "الحد الأدنى لسعر البيع",
+          "maxSellPrice": "الحد الأقصى لسعر البيع",
+          "branchPrice": "سعر الفرع",
+          "wholesalePrice": "سعر الجملة",
+          "semiWholesalePrice": "سعر نصف الجملة",
+          "halfWholesalePrice": "سعر نصف الجملة",
+          "discountType": "نوع الخصم",
+          "discountValue": "قيمة الخصم",
+          "testsCount": "عدد الاختبارات",
+          "samplesCount": "عدد العينات",
+          "sampleQuantity": "كمية العينات"
+        },
+        "values": {
+          "active": "فعالة",
+          "inactive": "غير فعال",
+          "yes": "نعم",
+          "no": "لا",
+          "noDescription": "لا يوجد وصف",
+          "noTaxInfo": "لا توجد معلومات ضريبية",
+          "noImage": "لا توجد صورة",
+          "tests": "اختبارات",
+          "samples": "عينات",
+          "approxPerSample": "كجم تقريبا للعينة الواحدة",
+          "manufacturable": "منتج تصنيع",
+          "allowNegativeSales": "البيع بالسالب",
+          "rentable": "قابل للإيجار"
+        },
+        "breadcrumb": {
+          "products": "المنتجات",
+          "productsList": "جدول المنتجات"
+        },
+        "errors": {
+          "loadError": "حدث خطأ في تحميل البيانات",
+          "fetchError": "فشل في تحميل بيانات المنتج",
+          "generalError": "حدث خطأ أثناء تحميل البيانات",
+          "retry": "إعادة المحاولة"
+        }
+      },
+      "list": {
+        "deleteDialog": {
+          "titleSingle": "حذف المنتج",
+          "titleBulk": "حذف المنتجات",
+          "messageSingle": "هل أنت متأكد من حذف {name}؟",
+          "messageBulk": "هل أنت متأكد من حذف {count} منتج؟"
+        },
+        "buttons": {
+          "bulkDelete": "حذف المحدد",
+          "deleteAll": "حذف الجميع",
+          "searchNow": "ابحث الآن",
+          "reset": "إعادة تعيين"
+        },
+        "messages": {
+          "deleteSuccess": "تم حذف المنتج بنجاح",
+          "bulkDeleteSuccess": "تم حذف المنتجات المحددة بنجاح",
+          "statusChangeSuccess": "تم {status} المنتج بنجاح",
+          "activateSuccess": "تفعيل",
+          "deactivateSuccess": "تعطيل",
+          "fetchError": "حدث خطأ أثناء جلب البيانات",
+          "deleteError": "حدث خطأ أثناء الحذف",
+          "statusChangeError": "حدث خطأ أثناء تغيير الحالة",
+          "loadingMore": "جاري تحميل المزيد..."
+        },
+        "table": {
+          "name": "الاسم",
+          "code": "الكود",
+          "unit": "الوحدة",
+          "category": "التصنيف",
+          "purchasePrice": "سعر الشراء",
+          "sellPrice": "سعر البيع",
+          "minQuantity": "الحد الأدنى للكمية",
+          "updatedAt": "تاريخ التحديث",
+          "status": "الحالة"
+        }
+      }
     },
     "suppliers": {
       "title": "الموردين",
@@ -809,6 +1841,74 @@
         }
       },
       "form": {
+        "tabs": {
+          "basicInfo": "المعلومات الاساسية",
+          "accountingInfo": "المعلومات المحاسبية"
+        },
+        "subTabs": {
+          "addressInfo": "معلومات العنوان",
+          "contactList": "قائمة الاتصال"
+        },
+        "sections": {
+          "supplierData": "بيانات المورد"
+        },
+        "labels": {
+          "businessName": "الاسم التجاري",
+          "businessNamePlaceholderEn": "Enter business name in English",
+          "businessNamePlaceholderAr": "ادخل الاسم التجاري بالعربية",
+          "firstName": "الاسم الأول",
+          "firstNamePlaceholderEn": "Enter first name in English",
+          "firstNamePlaceholderAr": "ادخل الاسم الأول بالعربية",
+          "lastName": "الاسم الأخير",
+          "lastNamePlaceholderEn": "Enter last name in English",
+          "lastNamePlaceholderAr": "ادخل الاسم الأخير بالعربية",
+          "supplierCode": "كود المورد",
+          "defaultCurrency": "العملة الافتراضية",
+          "defaultCurrencyPlaceholder": "ريال سعودي",
+          "mobile": "الجوال",
+          "phone": "الهاتف",
+          "email": "البريد الالكتروني",
+          "emailPlaceholder": "{email}",
+          "businessNumber": "رقم السجل التجاري",
+          "businessNumberPlaceholder": "ادخل الرقم",
+          "businessNumberTooltip": "رقم السجل التجاري للمورد",
+          "taxNumber": "الرقم الضريبي",
+          "taxNumberPlaceholder": "ادخل الرقم",
+          "taxNumberTooltip": "الرقم الضريبي للمورد",
+          "status": "الحالة",
+          "country": "الدولة",
+          "countryPlaceholder": "الدولة",
+          "city": "المدينة",
+          "cityPlaceholder": "المدينة",
+          "postalCode": "الرمز البريدي",
+          "postalCodePlaceholder": "الرمز البريدي",
+          "district": "اسم الحي",
+          "districtPlaceholder": "اسم الحي",
+          "streetName": "اسم الشارع",
+          "streetNamePlaceholder": "اسم الشارع",
+          "buildingNumber": "رقم المبنى",
+          "buildingNumberPlaceholder": "رقم المبنى",
+          "nationalAddress": "أدخل العنوان الوطني",
+          "nationalAddressPlaceholder": "العنوان الوطني",
+          "address2": "العنوان 2",
+          "address2Placeholder": "العنوان الإضافي",
+          "account": "الحساب",
+          "accountPlaceholder": "الحساب"
+        },
+        "contacts": {
+          "title": "قائمة جهات الاتصال",
+          "addButton": "أضف جهة اتصال",
+          "firstName": "الاسم الاول",
+          "firstNamePlaceholder": "الاسم الاول",
+          "lastName": "الاسم الاخر",
+          "lastNamePlaceholder": "الاسم الاخر",
+          "email": "البريد الالكتروني",
+          "emailPlaceholder": "{email}",
+          "telephone": "الهاتف",
+          "mobile": "الجوال",
+          "actions": "إجراءات",
+          "emptyState": "لا توجد جهات اتصال. انقر على \"اضف\" لإضافة جهة اتصال جديدة."
+        },
         "balances": {
           "label": "الارصدة",
           "noBalances": "لا توجد أرصدة متاحة",
@@ -818,6 +1918,16 @@
             "currency": "العملة",
             "lastValidationDate": "تاريخ التدقيق الأخير"
           }
+        },
+        "buttons": {
+          "save": "حفظ",
+          "close": "إغلاق"
+        },
+        "messages": {
+          "saveSuccess": "تم حفظ المورد بنجاح",
+          "saveError": "فشل حفظ المورد",
+          "validationError": "يرجى تصحيح الأخطاء في النموذج",
+          "fetchError": "Failed to fetch supplier data"
         }
       },
       "create": "إضافة مورد",
@@ -831,6 +1941,11 @@
           "title": "حذف حالات النظام",
           "message": "هل أنت متأكد من حذف {count} حالة نظام؟"
         }
+      },
+      "form": {
+        "add": "إضافة حالة جديدة",
+        "edit": "تعديل الحالة",
+        "color": "اللون"
       }
     },
     "taxes": {
@@ -854,7 +1969,15 @@
     "testGroup": {
       "title": "مجموعات الاختبارات",
       "description": "تمكنك من ادارة مجموعات الاختبارات",
-      "tableTitle": "جدول مجموعات الاختبار"
+      "tableTitle": "جدول مجموعات الاختبار",
+      "form": {
+        "add": "إضافة مجموعة الاختبارات",
+        "edit": "تعديل مجموعة الاختبارات",
+        "addDescription": "إضافة مجموعة اختبارات جديدة",
+        "editDescription": "تعديل بيانات مجموعة الاختبارات",
+        "generalInfo": "المعلومات العامة للمجموعة",
+        "mainTestGroup": "مجموعة الاختبار الرئيسية"
+      }
     },
     "testMethodology": {
       "title": "منهجية الاختبارات",
@@ -865,6 +1988,13 @@
           "title": "حذف منهجيات الاختبار",
           "message": "هل أنت متأكد من حذف {count} منهجية؟"
         }
+      },
+      "form": {
+        "add": "إضافة منهجية اختبار",
+        "edit": "تعديل منهجية الاختبار",
+        "addDescription": "إضافة منهجية اختبار جديدة",
+        "editDescription": "تعديل بيانات منهجية الاختبار",
+        "generalInfo": "المعلومات العامة للمنهجية"
       }
     },
     "tests": {
@@ -931,7 +2061,41 @@
         }
       },
       "create": "إضافة مستخدم",
-      "edit": "تعديل مستخدم"
+      "edit": "تعديل مستخدم",
+      "form": {
+        "addUser": "اضافة مستخدم جديد",
+        "editUser": "تعديل المستخدم",
+        "fillBasicData": "قم بملئ البيانات الأساسية واختيار الأدوار للمستخدم",
+        "basicData": "البيانات الأساسية",
+        "userName": "الاسم",
+        "namePlaceholder": "ادخل الاسم",
+        "phone": "الهاتف",
+        "email": "البريد الإلكتروني",
+        "emailPlaceholder": "{email}",
+        "password": "كلمة المرور",
+        "passwordPlaceholder": "كلمة المرور",
+        "confirmPassword": "تأكيد كلمة المرور",
+        "confirmPasswordPlaceholder": "تأكيد كلمة المرور",
+        "roles": "الأدوار",
+        "rolesPlaceholder": "اختر الأدوار",
+        "status": "الحالة",
+        "saveChanges": "حفظ التعديلات",
+        "addNewUserButton": "أضف مستخدم جديد",
+        "cancel": "الغاء",
+        "messages": {
+          "fetchUserError": "حدث خطأ أثناء جلب بيانات المستخدم",
+          "updateSuccess": "تم تحديث المستخدم بنجاح",
+          "createSuccess": "تم إضافة المستخدم بنجاح",
+          "saveError": "حدث خطأ أثناء حفظ البيانات"
+        }
+      },
+      "filters": {
+        "userName": "اسم المستخدم",
+        "roles": "الأدوار",
+        "status": "الحالة",
+        "searchNow": "ابحث الأن",
+        "reset": "إعادة تعيين"
+      }
     },
     "vouchers": {
       "title": "لوحة التحكم المالية",

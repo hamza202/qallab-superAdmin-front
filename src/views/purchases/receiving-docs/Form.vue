@@ -51,19 +51,19 @@ const attachments = ref<(File | string)[]>([]);
 // Receipt items table
 const receiptItems = ref<ReceiptItem[]>([]);
 
-const headers: Array<{
+const headers = computed(() => [
+    { title: t('purchases.receivingDocs.form.tableHeaders.productName'), key: 'item_name', width: '200px' },
+    { title: t('purchases.receivingDocs.form.tableHeaders.baseQty'), key: 'base_quantity', width: '150px' },
+    { title: t('purchases.receivingDocs.form.tableHeaders.qtyFromSupplier'), key: 'quantity_from_supplier', width: '180px' },
+    { title: t('purchases.receivingDocs.form.tableHeaders.qtyFromTransport'), key: 'quantity_from_transport', width: '180px' },
+    { title: t('purchases.receivingDocs.form.tableHeaders.qtyFromCustomer'), key: 'quantity_from_customer', width: '180px' },
+] as Array<{
     key: string;
     title: string;
     align?: "start" | "center" | "end";
     sortable?: boolean;
     width?: string;
-}> = [
-    { title: 'اسم المنتج', key: 'item_name', width: '200px' },
-    { title: 'الكمية الأساسية', key: 'base_quantity', width: '150px' },
-    { title: 'الكمية الفعلية من المورد', key: 'quantity_from_supplier', width: '180px' },
-    { title: 'الكمية الفعلية من شركة النقل', key: 'quantity_from_transport', width: '180px' },
-    { title: 'الكمية الفعلية من العميل', key: 'quantity_from_customer', width: '180px' },
-]
+}>)
 
 // Computed items for the DataTable
 const tableItems = computed(() => receiptItems.value.map((item, index) => ({
@@ -114,7 +114,7 @@ const fetchFormData = async () => {
         }
     } catch (e) {
         console.error('Error fetching form data:', e);
-        error('فشل تحميل بيانات سند الاستلام');
+        error(t('purchases.receivingDocs.form.messages.loadError'));
     } finally {
         isLoading.value = false;
     }
@@ -203,7 +203,7 @@ const handleSubmitToReceivingDocs = async () => {
     if (!await validateAllForms()) return;
 
     if (receiptItems.value.length === 0) {
-        warning('يجب إضافة عنصر واحد على الأقل');
+        warning(t('purchases.receivingDocs.form.messages.atLeastOneItem'));
         return;
     }
 
@@ -226,7 +226,7 @@ const handleSubmitToReceivingDocs = async () => {
             });
         }
 
-        success(isEditMode.value ? 'تم تحديث سند الاستلام بنجاح' : 'تم إنشاء سند الاستلام بنجاح');
+        success(isEditMode.value ? t('purchases.receivingDocs.form.messages.updated') : t('purchases.receivingDocs.form.messages.created'));
         router.push({ name: 'ReceivingDocsList' });
 
     } catch (e: any) {
@@ -242,7 +242,7 @@ const handleSubmitToOrdersList = async () => {
     if (!await validateAllForms()) return;
 
     if (receiptItems.value.length === 0) {
-        warning('يجب إضافة عنصر واحد على الأقل');
+        warning(t('purchases.receivingDocs.form.messages.atLeastOneItem'));
         return;
     }
 
@@ -265,7 +265,7 @@ const handleSubmitToOrdersList = async () => {
             });
         }
 
-        success(isEditMode.value ? 'تم تحديث سند الاستلام بنجاح' : 'تم إنشاء سند الاستلام بنجاح');
+        success(isEditMode.value ? t('purchases.receivingDocs.form.messages.updated') : t('purchases.receivingDocs.form.messages.created'));
         router.push({ name: 'OrdersMaterialProductList' });
 
     } catch (e: any) {
@@ -296,39 +296,39 @@ const handleSubmitToOrdersList = async () => {
                 <div class="p-6 bg-white rounded-3xl border !border-gray-100 ">
                     <div class="flex items-center mb-6 gap-2 text-primary-600">
                         <span class="w-4" v-html="fileIcon_2"></span>
-                        <h2 class="text-base font-bold">البيانات الأساسية</h2>
+                        <h2 class="text-base font-bold">{{ t('purchases.receivingDocs.form.sections.basicInfo') }}</h2>
                     </div>
 
                     <v-form ref="formRef" v-model="isFormValid" @submit.prevent>
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                             <!-- Purchase Order Code -->
                             <div>
-                                <TextInput v-model="formData.purchase_order_code" placeholder="كود طلبية المشتريات"
-                                    label="كود طلبية المشتريات" density="comfortable" disabled />
+                                <TextInput v-model="formData.purchase_order_code" :placeholder="t('purchases.receivingDocs.form.placeholders.purchaseOrderCode')"
+                                    :label="t('purchases.receivingDocs.form.labels.purchaseOrderCode')" density="comfortable" disabled />
                             </div>
 
                             <!-- Receiving Doc Code -->
                             <div>
-                                <TextInput v-model="formData.code" placeholder="كود سند الاستلام" label="كود سند الاستلام"
+                                <TextInput v-model="formData.code" :placeholder="t('purchases.receivingDocs.form.placeholders.docCode')" :label="t('purchases.receivingDocs.form.labels.docCode')"
                                     density="comfortable" disabled />
                             </div>
 
                             <!-- Receiving Date -->
                             <div>
                                 <DatePickerInput v-model="formData.receiving_date" type="date" density="comfortable"
-                                    placeholder="اختر" label="تاريخ الاستلام" :rules="[required()]" />
+                                    :placeholder="t('purchases.receivingDocs.form.placeholders.select')" :label="t('purchases.receivingDocs.form.labels.receivedAt')" :rules="[required()]" />
                             </div>
 
                             <!-- Created At (display only) -->
                             <div v-if="isEditMode">
-                                <TextInput v-model="formData.created_at" label="تاريخ الإنشاء"
+                                <TextInput v-model="formData.created_at" :label="t('purchases.receivingDocs.form.labels.createdAt')"
                                     density="comfortable" disabled />
                             </div>
                         </div>
 
                         <!-- Attachments Row -->
                         <div class="mt-6">
-                            <h3 class="text-sm font-semibold text-gray-700 mb-3 tracking-wide">المرفقات</h3>
+                            <h3 class="text-sm font-semibold text-gray-700 mb-3 tracking-wide">{{ t('purchases.receivingDocs.form.sections.attachments') }}</h3>
                             <DocumentUploadInput v-model="attachments" 
                                 hint="PNG, JPG , PDF, XLS" 
                                 :max-files="5" 
@@ -342,7 +342,7 @@ const handleSubmitToOrdersList = async () => {
                     <div class="px-6 py-6">
                         <div class="flex items-center gap-2 text-primary-600">
                             <span class="w-5" v-html="fileCheckIcon"></span>
-                            <h2 class="text-base font-bold">جدول عناصر سند الاستلام</h2>
+                            <h2 class="text-base font-bold">{{ t('purchases.receivingDocs.form.sections.itemsTable') }}</h2>
                         </div>
                     </div>
 
@@ -359,7 +359,7 @@ const handleSubmitToOrdersList = async () => {
                             <template #item.base_quantity="{ item }">
                                 <PriceInput
                                     v-model="receiptItems[getItemIndex(item)].base_quantity"
-                                    placeholder="الكمية الأساسية" density="comfortable"
+                                    :placeholder="t('purchases.receivingDocs.form.placeholders.baseQty')" density="comfortable"
                                     class="w-32" :input-props="{ class: '!text-center' }"
                                     :rules="[required()]" />
                             </template>
@@ -368,7 +368,7 @@ const handleSubmitToOrdersList = async () => {
                             <template #item.quantity_from_supplier="{ item }">
                                 <PriceInput
                                     v-model="receiptItems[getItemIndex(item)].quantity_from_supplier"
-                                    placeholder="من المورد" density="comfortable" disabled
+                                    :placeholder="t('purchases.receivingDocs.form.placeholders.fromSupplier')" density="comfortable" disabled
                                     class="w-32" :input-props="{ class: '!text-center' }"
                                     :rules="[required()]" />
                             </template>
@@ -377,7 +377,7 @@ const handleSubmitToOrdersList = async () => {
                             <template #item.quantity_from_transport="{ item }">
                                 <PriceInput
                                     v-model="receiptItems[getItemIndex(item)].quantity_from_transport"
-                                    placeholder="من شركة النقل" density="comfortable" disabled
+                                    :placeholder="t('purchases.receivingDocs.form.placeholders.fromTransport')" density="comfortable" disabled
                                     class="w-32" :input-props="{ class: '!text-center' }"
                                     :rules="[required()]" />
                             </template>
@@ -386,7 +386,7 @@ const handleSubmitToOrdersList = async () => {
                             <template #item.quantity_from_customer="{ item }">
                                 <PriceInput
                                     v-model="receiptItems[getItemIndex(item)].quantity_from_customer"
-                                    placeholder="من العميل" density="comfortable"
+                                    :placeholder="t('purchases.receivingDocs.form.placeholders.fromCustomer')" density="comfortable"
                                     class="w-32" :input-props="{ class: '!text-center' }"
                                     :rules="[required()]" />
                             </template>
@@ -399,11 +399,11 @@ const handleSubmitToOrdersList = async () => {
                     <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col">
                         <ButtonWithIcon variant="flat" color="primary" height="48" rounded="4"
                             custom-class="font-semibold text-base px-6 md:!px-10" :prepend-icon="returnIcon"
-                            label="حفظ والعودة لقائمة سندات الاستلام" :loading="isSubmitting" @click="handleSubmitToReceivingDocs" />
+                            :label="t('purchases.receivingDocs.form.actions.saveToReceivingList')" :loading="isSubmitting" @click="handleSubmitToReceivingDocs" />
 
                         <ButtonWithIcon variant="flat" color="primary-50" height="48" rounded="4"
                             custom-class="font-semibold text-base text-primary-700 px-6 md:!px-10" :prepend-icon="saveIcon"
-                            label="حفظ والعودة لقائمة المشتريات" :loading="isSubmitting" @click="handleSubmitToOrdersList" />
+                            :label="t('purchases.receivingDocs.form.actions.saveToPurchasesList')" :loading="isSubmitting" @click="handleSubmitToOrdersList" />
                     </div>
                 </div>
             </template>

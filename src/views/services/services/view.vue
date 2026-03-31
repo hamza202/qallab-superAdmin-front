@@ -4,7 +4,7 @@
         <div v-if="loading" class="flex items-center justify-center min-h-[400px]">
             <div class="text-center">
                 <v-progress-circular indeterminate color="primary" size="64"></v-progress-circular>
-                <p class="mt-4 text-gray-600">جاري تحميل بيانات الخدمة...</p>
+                <p class="mt-4 text-gray-600">{{ t('pages.services.view.loading') }}</p>
             </div>
         </div>
 
@@ -25,11 +25,11 @@
                 </router-link>
                 <span class="text-lg text-gray-300">/</span>
                 <router-link to="/simple-products/list" class="text-gray-600 hover:text-primary-600">
-                    الخدمات
+                    {{ t('pages.services.view.breadcrumbs.services') }}
                 </router-link>
                 <span class="text-lg text-gray-300">/</span>
                 <router-link to="/simple-products/list" class="text-gray-600 hover:text-primary-600">
-                    جدول الخدمات
+                    {{ t('pages.services.view.breadcrumbs.servicesList') }}
                 </router-link>
                 <span class="text-lg text-gray-300">/</span>
 
@@ -55,49 +55,49 @@
 
             <!-- General Information Section -->
             <div class="p-6 border-b border-gray-200">
-                <h2 class="text-xl font-bold text-primary-900 mb-6">المعلومات العامة</h2>
+                <h2 class="text-xl font-bold text-primary-900 mb-6">{{ t('pages.services.view.sections.generalInfo') }}</h2>
 
                 <div class="flex flex-wrap gap-4">
                     <div class="info-item-bordered flex-1 px-6 py-4">
-                        <label class="font-semibold text-sm text-gray-500 mb-2 block">الاسم بالعربية</label>
+                        <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('pages.services.view.labels.arabicName') }}</label>
                         <p class="text-base font-semibold text-gray-900">{{ service.arabicName || '--' }}</p>
                     </div>
                     <v-divider vertical class="my-6"></v-divider>
                     <div class="info-item-bordered flex-1 px-6 py-4">
-                        <label class="font-semibold text-sm text-gray-500 mb-2 block">الاسم بالانجليزية</label>
+                        <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('pages.services.view.labels.englishName') }}</label>
                         <p class="text-base font-semibold text-gray-900">{{ service.englishName || '--' }}</p>
                     </div>
                     <v-divider vertical class="my-6"></v-divider>
                     <div class="info-item-bordered flex-1 px-6 py-4">
-                        <label class="font-semibold text-sm text-gray-500 mb-2 block">كود الخدمة</label>
+                        <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('pages.services.view.labels.serviceCode') }}</label>
                         <p class="text-base font-semibold text-gray-900">{{ service.serviceCode || '--' }}</p>
                     </div>
                     <v-divider vertical class="my-6"></v-divider>
                     <div class="info-item-bordered flex-1 px-6 py-4">
-                        <label class="font-semibold text-sm text-gray-500 mb-2 block">حالة الخدمة</label>
+                        <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('pages.services.view.labels.status') }}</label>
                         <p class="text-base font-semibold text-gray-900">{{ service.status || '--' }}</p>
                     </div>
                     <v-divider vertical class="my-6"></v-divider>
                     <div class="info-item-bordered flex-1 px-6 py-4">
-                        <label class="font-semibold text-sm text-gray-500 mb-2 block">فئة الخدمة</label>
+                        <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('pages.services.view.labels.category') }}</label>
                         <p class="text-base font-semibold text-gray-900">{{ service.category || '--' }}</p>
                     </div>
                     <v-divider vertical class="my-6"></v-divider>
                     <div class="info-item-bordered flex-1 px-6 py-4">
-                        <label class="font-semibold text-sm text-gray-500 mb-2 block">نوع الخدمة</label>
+                        <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('pages.services.view.labels.serviceType') }}</label>
                         <p class="text-base font-semibold text-gray-900">{{ service.serviceType || '--' }}</p>
                     </div>
                 </div>
                 <div class="flex gap-4">
                     <div class="info-item-bordered flex-1 px-6 py-4">
-                        <label class="font-semibold text-sm text-gray-500 mb-2 block">الوصف بالانجليزي</label>
+                        <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('pages.services.view.labels.englishDescription') }}</label>
                         <p class="text-sm text-gray-700 leading-relaxed" v-if="service.englishDescription"
                             v-html="service.englishDescription"></p>
                         <p class="text-sm text-gray-700 leading-relaxed" v-else>--</p>
                     </div>
                     <v-divider vertical class="my-6"></v-divider>
                     <div class="info-item-bordered flex-1 px-6 py-4">
-                        <label class="font-semibold text-sm text-gray-500 mb-2 block">الوصف عربي</label>
+                        <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('pages.services.view.labels.arabicDescription') }}</label>
                         <p class="text-sm text-gray-700 leading-relaxed" v-if="service.arabicDescription"
                             v-html="service.arabicDescription"></p>
                         <p class="text-sm text-gray-700 leading-relaxed" v-else>--</p>
@@ -109,21 +109,21 @@
 
             <!-- Tax Section -->
             <div class="p-6 border-b border-gray-200">
-                <h2 class="text-xl font-bold text-primary-900 mb-6">الموعد والمدة</h2>
+                <h2 class="text-xl font-bold text-primary-900 mb-6">{{ t('pages.services.view.sections.appointmentDuration') }}</h2>
                 <div class="flex flex-wrap gap-4">
                     <div class="info-item-bordered flex-1 px-6 py-4">
-                        <label class="font-semibold text-sm text-gray-500 mb-2 block">هل تحتاج موعد</label>
-                        <p class="text-base font-semibold text-gray-900">{{ service.requiresScheduling ? 'نعم' : 'لا' }}
+                        <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('pages.services.view.labels.requiresScheduling') }}</label>
+                        <p class="text-base font-semibold text-gray-900">{{ service.requiresScheduling ? t('pages.services.form.basicInfo.yes') : t('pages.services.form.basicInfo.no') }}
                         </p>
                     </div>
                     <v-divider vertical class="my-6"></v-divider>
                     <div class="info-item-bordered px-6 py-4">
-                        <label class="font-semibold text-sm text-gray-500 mb-2 block">مدة الخدمة</label>
+                        <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('pages.services.view.labels.serviceDuration') }}</label>
                         <p class="text-base font-semibold text-gray-900">{{ service.serviceDuration || '--' }}</p>
                     </div>
                     <v-divider vertical class="my-6"></v-divider>
                     <div class="info-item-bordered px-6 py-4">
-                        <label class="font-semibold text-sm text-gray-500 mb-2 block">تاريخ التفعيل</label>
+                        <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('pages.services.view.labels.activationDate') }}</label>
                         <p class="text-base font-semibold text-gray-900">{{ service.activationDate || '--' }}</p>
                     </div>
                 </div>
@@ -131,43 +131,43 @@
 
             <!-- Service Status Section -->
             <div class="p-6 border-b border-gray-200">
-                <h2 class="text-xl font-bold text-primary-900 mb-6">حالة الخدمة</h2>
+                <h2 class="text-xl font-bold text-primary-900 mb-6">{{ t('pages.services.view.sections.serviceStatus') }}</h2>
                 <div class="flex flex-wrap gap-4">
                     <div class="info-item-bordered flex-1 px-4 py-4">
-                        <label class="font-semibold text-sm text-gray-500 mb-2 block">تتطلب موافقة</label>
-                        <p class="text-base font-semibold text-gray-900">{{ service.requiresApproval ? 'نعم' : 'لا' }}
+                        <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('pages.services.view.labels.requiresApproval') }}</label>
+                        <p class="text-base font-semibold text-gray-900">{{ service.requiresApproval ? t('pages.services.form.basicInfo.yes') : t('pages.services.form.basicInfo.no') }}
                         </p>
                     </div>
                     <v-divider vertical class="my-6"></v-divider>
                     <div class="info-item-bordered flex-1 px-4 py-4">
-                        <label class="font-semibold text-sm text-gray-500 mb-2 block">قابلة للمقايضة</label>
-                        <p class="text-base font-semibold text-gray-900">{{ service.isBarter ? 'نعم' : 'لا' }}</p>
+                        <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('pages.services.view.labels.isBarter') }}</label>
+                        <p class="text-base font-semibold text-gray-900">{{ service.isBarter ? t('pages.services.form.basicInfo.yes') : t('pages.services.form.basicInfo.no') }}</p>
                     </div>
                     <v-divider vertical class="my-6"></v-divider>
                     <div class="info-item-bordered flex-1 px-4 py-4">
-                        <label class="font-semibold text-sm text-gray-500 mb-2 block">قابلة للتجزئة</label>
-                        <p class="text-base font-semibold text-gray-900">{{ service.isPartialAllowed ? 'نعم' : 'لا' }}
+                        <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('pages.services.view.labels.isPartialAllowed') }}</label>
+                        <p class="text-base font-semibold text-gray-900">{{ service.isPartialAllowed ? t('pages.services.form.basicInfo.yes') : t('pages.services.form.basicInfo.no') }}
                         </p>
                     </div>
                     <v-divider vertical class="my-6"></v-divider>
                     <div class="info-item-bordered flex-1 px-4 py-4">
-                        <label class="font-semibold text-sm text-gray-500 mb-2 block">متاحة للبيع</label>
-                        <p class="text-base font-semibold text-gray-900">{{ service.salesEnabled ? 'نعم' : 'لا' }}</p>
+                        <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('pages.services.view.labels.salesEnabled') }}</label>
+                        <p class="text-base font-semibold text-gray-900">{{ service.salesEnabled ? t('pages.services.form.basicInfo.yes') : t('pages.services.form.basicInfo.no') }}</p>
                     </div>
                     <v-divider vertical class="my-6"></v-divider>
                     <div class="info-item-bordered flex-1 px-4 py-4">
-                        <label class="font-semibold text-sm text-gray-500 mb-2 block">متاحة للشراء</label>
-                        <p class="text-base font-semibold text-gray-900">{{ service.purchaseEnabled ? 'نعم' : 'لا' }}
+                        <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('pages.services.view.labels.purchaseEnabled') }}</label>
+                        <p class="text-base font-semibold text-gray-900">{{ service.purchaseEnabled ? t('pages.services.form.basicInfo.yes') : t('pages.services.form.basicInfo.no') }}
                         </p>
                     </div>
                     <v-divider vertical class="my-6"></v-divider>
                     <div class="info-item-bordered flex-1 px-4 py-4">
-                        <label class="font-semibold text-sm text-gray-500 mb-2 block">متاحة للمشاريع</label>
-                        <p class="text-base font-semibold text-gray-900">{{ service.projectEnabled ? 'نعم' : 'لا' }}</p>
+                        <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('pages.services.view.labels.projectEnabled') }}</label>
+                        <p class="text-base font-semibold text-gray-900">{{ service.projectEnabled ? t('pages.services.form.basicInfo.yes') : t('pages.services.form.basicInfo.no') }}</p>
                     </div>
                     <v-divider vertical class="my-6"></v-divider>
                     <div class="info-item-bordered flex-1 px-4 py-4">
-                        <label class="font-semibold text-sm text-gray-500 mb-2 block">مستوى الرؤية</label>
+                        <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('pages.services.view.labels.visibilityLevel') }}</label>
                         <p class="text-base font-semibold text-gray-900">{{ service.visibilityLevel || '--' }}</p>
                     </div>
                 </div>
@@ -175,10 +175,10 @@
 
             <!-- Additional Information Section -->
             <div class="p-6 border-b border-gray-200">
-                <h2 class="text-xl font-bold text-primary-900 mb-6">بيانات اضافية </h2>
+                <h2 class="text-xl font-bold text-primary-900 mb-6">{{ t('pages.services.view.sections.additionalData') }}</h2>
                 <div class="flex gap-6 flex-wrap flex-column sm:!flex-row">
                     <div class="flex-1">
-                        <label class="font-semibold text-sm text-gray-500 mb-2 block">ملاحظات</label>
+                        <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('pages.services.view.labels.notes') }}</label>
                         <p class="text-sm font-semibold text-gray-900" v-html="service.notes" v-if="service.notes">
                         </p>
                         <p class="text-sm font-semibold text-gray-900" v-else>
@@ -215,9 +215,11 @@
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useApi } from '@/composables/useApi'
+import { useI18n } from 'vue-i18n'
 
 const route = useRoute()
 const { get } = useApi()
+const { t } = useI18n()
 
 interface ServiceResponse {
     status: number
@@ -327,34 +329,34 @@ const fetchServiceDetails = async () => {
             arabicName: data.name_translations.ar,
             englishName: data.name_translations.en,
             serviceCode: data.service_code,
-            status: data.is_active ? 'فعالة' : 'غير فعالة',
-            category: data.service_category || 'غير محدد',
-            serviceType: data.service_type === 'internal' ? 'داخلية' : 'خارجية',
+            status: data.is_active ? t('pages.services.view.values.active') : t('pages.services.view.values.inactive'),
+            category: data.service_category || t('pages.services.view.values.notSpecified'),
+            serviceType: data.service_type === 'internal' ? t('pages.services.view.values.internal') : t('pages.services.view.values.external'),
             englishDescription: data.description_translations.en,
             arabicDescription: data.description_translations.ar,
             unit: data.unit,
-            pricingMethod: data.pricing_method === 'fixed' ? 'ثابت' : 'متغير',
+            pricingMethod: data.pricing_method === 'fixed' ? t('pages.services.view.values.fixed') : t('pages.services.view.values.variable'),
             unitPrice: data.unit_price,
             minQuantity: data.min_quantity,
             isTaxable: data.is_taxable,
             tax: data.tax,
             taxPercentage: data.tax_percentage,
             requiresScheduling: data.requires_scheduling,
-            serviceDuration: `${data.service_duration} ${data.service_duration_unit === 'minute' ? 'دقيقة' : data.service_duration_unit === 'hour' ? 'ساعة' : data.service_duration_unit === 'day' ? 'يوم' : data.service_duration_unit === 'week' ? 'أسبوع' : ''}`,
+            serviceDuration: `${data.service_duration} ${data.service_duration_unit === 'minute' ? t('pages.services.view.values.minute') : data.service_duration_unit === 'hour' ? t('pages.services.view.values.hour') : data.service_duration_unit === 'day' ? t('pages.services.view.values.day') : data.service_duration_unit === 'week' ? t('pages.services.view.values.week') : ''}`,
             serviceDurationUnit: data.service_duration_unit,
-            activationDate: data.activation_date || 'غير محدد',
+            activationDate: data.activation_date || t('pages.services.view.values.notSpecified'),
             requiresApproval: data.requires_approval,
             isBarter: data.is_barter,
             isPartialAllowed: data.is_partial_allowed,
             salesEnabled: data.sales_enabled,
             purchaseEnabled: data.purchase_enabled,
             projectEnabled: data.project_enabled,
-            visibilityLevel: data.visibility_level === 'public' ? 'عام' : 'خاص',
+            visibilityLevel: data.visibility_level === 'public' ? t('pages.services.view.values.public') : t('pages.services.view.values.private'),
             isActive: data.is_active,
             notes: data.notes
         }
     } catch (err: any) {
-        error.value = err.response?.data?.message || 'Failed to fetch service details'
+        error.value = err.response?.data?.message || t('pages.services.view.messages.fetchError')
         console.error('Error fetching service details:', err)
     } finally {
         loading.value = false

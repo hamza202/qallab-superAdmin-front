@@ -11,14 +11,14 @@
           to="/group-products/list"
           class="text-gray-600 hover:text-primary-600"
         >
-          المنتجات
+          {{ t('pages.groupProducts.view.breadcrumb.products') }}
         </router-link>
         <span class="text-lg text-gray-300">/</span>
         <router-link
           to="/group-products/list"
           class="text-gray-600 hover:text-primary-600"
         >
-          جدول المنتجات المجموعة
+          {{ t('pages.groupProducts.view.breadcrumb.productsList') }}
         </router-link>
         <span class="text-lg text-gray-300">/</span>
         <span
@@ -39,7 +39,7 @@
                 {{ product.name }}
               </h1>
               <p class="text-sm text-gray-600">
-                {{ product.description || "لا يوجد وصف" }}
+                {{ product.description || t('pages.groupProducts.view.values.noDescription') }}
               </p>
             </div>
           </div>
@@ -59,7 +59,7 @@
             class="flex items-center gap-2 px-4 py-2.5 rounded-md font-semibold text-base transition-colors whitespace-nowrap"
           >
             <span v-html="fileIcon"></span>
-            المعلومات العامة للمنتج
+            {{ t('pages.groupProducts.view.tabs.general') }}
           </button>
           <button
             @click="activeTab = 'tests'"
@@ -71,7 +71,7 @@
             class="flex items-center gap-2 px-4 py-2.5 rounded-md font-semibold text-base transition-colors whitespace-nowrap"
           >
             <span v-html="fileCheckIcon"></span>
-            الاختبارات على المنتج
+            {{ t('pages.groupProducts.view.tabs.tests') }}
           </button>
         </div>
       </div>
@@ -81,12 +81,12 @@
         <!-- General Information Section -->
         <div class="p-6 border-b border-gray-200">
           <h2 class="text-xl font-bold text-primary-900 mb-6">
-            المعلومات العامة
+            {{ t('pages.groupProducts.view.sections.generalInfo') }}
           </h2>
           <div class="flex flex-wrap gap-4 -mx-6">
             <div class="info-item-bordered  px-6 py-4 ">
               <label class="font-semibold text-sm text-gray-500 mb-2 block"
-                >الاسم بالعربية</label
+                >{{ t('pages.groupProducts.view.labels.nameAr') }}</label
               >
               <p class="text-base font-semibold text-gray-900">
                 {{ product.name_ar || "-" }}
@@ -95,7 +95,7 @@
             <v-divider vertical class="my-6 border-gray-300"></v-divider>
             <div class="info-item-bordered  px-6 py-4 ">
               <label class="font-semibold text-sm text-gray-500 mb-2 block"
-                >الاسم بالإنجليزية</label
+                >{{ t('pages.groupProducts.view.labels.nameEn') }}</label
               >
               <p class="text-base font-semibold text-gray-900">
                 {{ product.name_en || "-" }}
@@ -104,7 +104,7 @@
             <v-divider vertical class="my-6 border-gray-300"></v-divider>
             <div class="info-item-bordered  px-6 py-4 ">
               <label class="font-semibold text-sm text-gray-500 mb-2 block"
-                >كود المنتج</label
+                >{{ t('pages.groupProducts.view.labels.productCode') }}</label
               >
               <p class="text-base font-semibold text-gray-900">
                 {{ product.code || "-" }}
@@ -113,20 +113,20 @@
             <v-divider vertical class="my-6 border-gray-300"></v-divider>
             <div class="info-item-bordered  px-6 py-4 ">
               <label class="font-semibold text-sm text-gray-500 mb-2 block"
-                >حالة المنتج</label
+                >{{ t('pages.groupProducts.view.labels.productStatus') }}</label
               >
               <p class="text-base font-semibold text-gray-900">
                 <span
                   :class="product.is_active ? 'text-green-600' : 'text-red-600'"
                 >
-                  {{ product.is_active ? "فعال" : "غير فعال" }}
+                  {{ product.is_active ? t('pages.groupProducts.view.values.active') : t('pages.groupProducts.view.values.inactive') }}
                 </span>
               </p>
             </div>
             <v-divider vertical class="my-6 border-gray-300"></v-divider>
             <div class="info-item-bordered  px-6 py-4 ">
               <label class="font-semibold text-sm text-gray-500 mb-2 block"
-                >نوع المنتج</label
+                >{{ t('pages.groupProducts.view.labels.productType') }}</label
               >
               <p class="text-base font-semibold text-gray-900">
                 {{ product.product_type || "-" }}
@@ -135,7 +135,7 @@
             <v-divider vertical class="my-6 border-gray-300"></v-divider>
             <div class="info-item-bordered  px-6 py-4 ">
               <label class="font-semibold text-sm text-gray-500 mb-2 block"
-                >فئة المنتج</label
+                >{{ t('pages.groupProducts.view.labels.productCategory') }}</label
               >
               <p class="text-base font-semibold text-gray-900">
                 {{ product.category || "-" }}
@@ -145,7 +145,7 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-0 py-4 -mx-6">
             <div class="info-item-bordered px-6">
               <label class="font-semibold text-sm text-gray-500 mb-2 block"
-                >الوصف عربي</label
+                >{{ t('pages.groupProducts.view.labels.descriptionAr') }}</label
               >
               <p class="text-sm text-gray-700 leading-relaxed">
                 {{ product.description_ar || "-" }}
@@ -154,7 +154,7 @@
 
             <div class="info-item-bordered px-6 md:border-s md:border-gray-300">
               <label class="font-semibold text-sm text-gray-500 mb-2 block"
-                >الوصف بالإنجليزي</label
+                >{{ t('pages.groupProducts.view.labels.descriptionEn') }}</label
               >
               <p class="text-sm text-gray-700 leading-relaxed">
                 {{ product.description_en || "-" }}
@@ -165,11 +165,11 @@
 
         <!-- Pricing Section -->
         <div class="p-6 border-b border-gray-200">
-          <h2 class="text-xl font-bold text-primary-900 mb-6">الأسعار</h2>
+          <h2 class="text-xl font-bold text-primary-900 mb-6">{{ t('pages.groupProducts.view.sections.prices') }}</h2>
           <div class="flex flex-wrap gap-4 -mx-6">
             <div class="info-item-bordered  px-6 py-4 ">
               <label class="font-semibold text-sm text-gray-500 mb-2 block"
-                >سعر البيع</label
+                >{{ t('pages.groupProducts.view.labels.sellPrice') }}</label
               >
               <p class="text-base font-semibold text-gray-900">
                 {{ product.sell_price || "-" }}
@@ -178,7 +178,7 @@
             <v-divider vertical class="my-6 border-gray-300"></v-divider>
             <div class="info-item-bordered  px-6 py-4 ">
               <label class="font-semibold text-sm text-gray-500 mb-2 block"
-                >اعلى سعر بيع</label
+                >{{ t('pages.groupProducts.view.labels.maxSellPrice') }}</label
               >
               <p class="text-base font-semibold text-gray-900">
                 {{ product.max_sell_price || "-" }}
@@ -187,7 +187,7 @@
             <v-divider vertical class="my-6 border-gray-300"></v-divider>
             <div class="info-item-bordered  px-6 py-4 ">
               <label class="font-semibold text-sm text-gray-500 mb-2 block"
-                >اقل سعر بيع</label
+                >{{ t('pages.groupProducts.view.labels.minSellPrice') }}</label
               >
               <p class="text-base font-semibold text-gray-900">
                 {{ product.min_sell_price || "-" }}
@@ -196,7 +196,7 @@
             <v-divider vertical class="my-6 border-gray-300"></v-divider>
             <div class="info-item-bordered  px-6 py-4 ">
               <label class="font-semibold text-sm text-gray-500 mb-2 block"
-                >سعر الجملة</label
+                >{{ t('pages.groupProducts.view.labels.wholesalePrice') }}</label
               >
               <p class="text-base font-semibold text-gray-900">
                 {{ product.wholesale_price || "-" }}
@@ -206,7 +206,7 @@
           <div class="flex flex-wrap gap-4 mt-4 -mx-6">
             <div class="info-item-bordered  px-6 py-4 ">
               <label class="font-semibold text-sm text-gray-500 mb-2 block"
-                >سعر نصف الجملة</label
+                >{{ t('pages.groupProducts.view.labels.semiWholesalePrice') }}</label
               >
               <p class="text-base font-semibold text-gray-900">
                 {{ product.semi_wholesale_price || "-" }}
@@ -215,7 +215,7 @@
             <v-divider vertical class="my-6 border-gray-300"></v-divider>
             <div class="info-item-bordered  px-6 py-4 ">
               <label class="font-semibold text-sm text-gray-500 mb-2 block"
-                >نوع الخصم</label
+                >{{ t('pages.groupProducts.view.labels.discountType') }}</label
               >
               <p class="text-base font-semibold text-gray-900">
                 {{ product.discount_type || "-" }}
@@ -224,7 +224,7 @@
             <v-divider vertical class="my-6 border-gray-300"></v-divider>
             <div class="info-item-bordered  px-6 py-4 ">
               <label class="font-semibold text-sm text-gray-500 mb-2 block"
-                >قيمة الخصم</label
+                >{{ t('pages.groupProducts.view.labels.discountValue') }}</label
               >
               <p class="text-base font-semibold text-gray-900">
                 {{ product.discount_value || "-" }}
@@ -233,7 +233,7 @@
             <v-divider vertical class="my-6 border-gray-300"></v-divider>
             <div class="info-item-bordered  px-6 py-4 ">
               <label class="font-semibold text-sm text-gray-500 mb-2 block"
-                >ضريبة</label
+                >{{ t('pages.groupProducts.view.labels.tax') }}</label
               >
               <p class="text-base font-semibold text-gray-900">
                 {{
@@ -247,16 +247,18 @@
         <!-- الضرائب المضافة -->
         <div class="p-6 border-b border-gray-200">
           <h2 class="text-xl font-bold text-primary-900 mb-6">
-            الضرائب المضافة
+            {{ t('pages.groupProducts.view.sections.addedTaxes') }}
           </h2>
 
           <!-- ضريبة 1 -->
           <div class="mb-6">
-            <h3 class="text-base font-bold text-primary-600 mb-4">ضريبة 1</h3>
+            <h3 class="text-base font-bold text-primary-600 mb-4">
+              {{ t('pages.groupProducts.view.subSections.taxNumber', { number: 1 }) }}
+            </h3>
             <div class="flex flex-wrap gap-4 -mx-6">
               <div class="info-item-bordered  px-6 py-4 ">
                 <label class="font-semibold text-sm text-gray-500 mb-2 block"
-                  >اسم الضريبة المضافة</label
+                  >{{ t('pages.groupProducts.view.labels.taxName') }}</label
                 >
                 <p class="text-base font-semibold text-gray-900">
                   {{ product.tax1_name || "-" }}
@@ -265,7 +267,7 @@
               <v-divider vertical class="my-6 border-gray-300"></v-divider>
               <div class="info-item-bordered  px-6 py-4 ">
                 <label class="font-semibold text-sm text-gray-500 mb-2 block"
-                  >قيمة الضريبة</label
+                  >{{ t('pages.groupProducts.view.labels.taxValue') }}</label
                 >
                 <p class="text-base font-semibold text-gray-900">
                   {{ product.tax1_value || "-" }}
@@ -274,7 +276,7 @@
               <v-divider vertical class="my-6 border-gray-300"></v-divider>
               <div class="info-item-bordered  px-6 py-4 ">
                 <label class="font-semibold text-sm text-gray-500 mb-2 block"
-                  >الأولوية</label
+                  >{{ t('pages.groupProducts.view.labels.taxPriority') }}</label
                 >
                 <p class="text-base font-semibold text-gray-900">
                   {{ product.tax1_priority || "-" }}
@@ -283,7 +285,7 @@
               <v-divider vertical class="my-6 border-gray-300"></v-divider>
               <div class="info-item-bordered  px-6 py-4 ">
                 <label class="font-semibold text-sm text-gray-500 mb-2 block"
-                  >الحد الأدنى</label
+                  >{{ t('pages.groupProducts.view.labels.taxMinimum') }}</label
                 >
                 <p class="text-base font-semibold text-gray-900">
                   {{ product.tax1_min || "-" }}
@@ -294,11 +296,13 @@
 
           <!-- ضريبة 2 -->
           <div>
-            <h3 class="text-base font-bold text-primary-600 mb-4">ضريبة 2</h3>
+            <h3 class="text-base font-bold text-primary-600 mb-4">
+              {{ t('pages.groupProducts.view.subSections.taxNumber', { number: 2 }) }}
+            </h3>
             <div class="flex flex-wrap gap-4 -mx-6">
               <div class="info-item-bordered  px-6 py-4 ">
                 <label class="font-semibold text-sm text-gray-500 mb-2 block"
-                  >اسم الضريبة المضافة</label
+                  >{{ t('pages.groupProducts.view.labels.taxName') }}</label
                 >
                 <p class="text-base font-semibold text-gray-900">
                   {{ product.tax2_name || "-" }}
@@ -307,7 +311,7 @@
               <v-divider vertical class="my-6 border-gray-300"></v-divider>
               <div class="info-item-bordered  px-6 py-4 ">
                 <label class="font-semibold text-sm text-gray-500 mb-2 block"
-                  >قيمة الضريبة</label
+                  >{{ t('pages.groupProducts.view.labels.taxValue') }}</label
                 >
                 <p class="text-base font-semibold text-gray-900">
                   {{ product.tax2_value || "-" }}
@@ -316,7 +320,7 @@
               <v-divider vertical class="my-6 border-gray-300"></v-divider>
               <div class="info-item-bordered  px-6 py-4 ">
                 <label class="font-semibold text-sm text-gray-500 mb-2 block"
-                  >الأولوية</label
+                  >{{ t('pages.groupProducts.view.labels.taxPriority') }}</label
                 >
                 <p class="text-base font-semibold text-gray-900">
                   {{ product.tax2_priority || "-" }}
@@ -325,7 +329,7 @@
               <v-divider vertical class="my-6 border-gray-300"></v-divider>
               <div class="info-item-bordered  px-6 py-4 ">
                 <label class="font-semibold text-sm text-gray-500 mb-2 block"
-                  >الحد الأدنى</label
+                  >{{ t('pages.groupProducts.view.labels.taxMinimum') }}</label
                 >
                 <p class="text-base font-semibold text-gray-900">
                   {{ product.tax2_min || "-" }}
@@ -338,12 +342,12 @@
         <!-- التوريد والعلاقات الداخلية للمنتج -->
         <div class="p-6 border-b border-gray-200">
           <h2 class="text-xl font-bold text-primary-900 mb-6">
-            التوريد والعلاقات الداخلية للمنتج
+            {{ t('pages.groupProducts.view.sections.supplyRelations') }}
           </h2>
           <div class="flex flex-wrap gap-4 -mx-4">
             <div class="info-item-bordered  px-4 py-4 min-w-[120px]">
               <label class="font-semibold text-sm text-gray-500 mb-2 block"
-                >العلامة التجارية</label
+                >{{ t('pages.groupProducts.view.labels.brand') }}</label
               >
               <p class="text-base font-semibold text-gray-900">
                 {{ product.brand || "-" }}
@@ -352,7 +356,7 @@
             <v-divider vertical class="my-6 border-gray-300"></v-divider>
             <div class="info-item-bordered  px-4 py-4 min-w-[120px]">
               <label class="font-semibold text-sm text-gray-500 mb-2 block"
-                >المصنع</label
+                >{{ t('pages.groupProducts.view.labels.manufacturer') }}</label
               >
               <p class="text-base font-semibold text-gray-900">
                 {{ product.manufacturer || "-" }}
@@ -361,7 +365,7 @@
             <v-divider vertical class="my-6 border-gray-300"></v-divider>
             <div class="info-item-bordered  px-4 py-4 min-w-[120px]">
               <label class="font-semibold text-sm text-gray-500 mb-2 block"
-                >بلد المنشأ</label
+                >{{ t('pages.groupProducts.view.labels.originCountry') }}</label
               >
               <p class="text-base font-semibold text-gray-900">
                 {{ product.country_of_origin || "-" }}
@@ -370,7 +374,7 @@
             <v-divider vertical class="my-6 border-gray-300"></v-divider>
             <div class="info-item-bordered  px-4 py-4 min-w-[120px]">
               <label class="font-semibold text-sm text-gray-500 mb-2 block"
-                >المنتجات البديلة</label
+                >{{ t('pages.groupProducts.view.labels.alternativeProducts') }}</label
               >
               <p class="text-base font-semibold text-gray-900">
                 {{ product.alternative_products || "-" }}
@@ -379,7 +383,7 @@
             <v-divider vertical class="my-6 border-gray-300"></v-divider>
             <div class="info-item-bordered  px-4 py-4 min-w-[120px]">
               <label class="font-semibold text-sm text-gray-500 mb-2 block"
-                >المنتجات الملحقة</label
+                >{{ t('pages.groupProducts.view.labels.attachedProducts') }}</label
               >
               <p class="text-base font-semibold text-gray-900">
                 {{ product.accessory_products || "-" }}
@@ -388,7 +392,7 @@
             <v-divider vertical class="my-6 border-gray-300"></v-divider>
             <div class="info-item-bordered  px-4 py-4 min-w-[120px]">
               <label class="font-semibold text-sm text-gray-500 mb-2 block"
-                >المنتجات المرتبطة</label
+                >{{ t('pages.groupProducts.view.labels.relatedProducts') }}</label
               >
               <p class="text-base font-semibold text-gray-900">
                 {{ product.related_products || "-" }}
@@ -397,7 +401,7 @@
             <v-divider vertical class="my-6 border-gray-300"></v-divider>
             <div class="info-item-bordered  px-4 py-4 min-w-[120px]">
               <label class="font-semibold text-sm text-gray-500 mb-2 block"
-                >أفضل الموردين</label
+                >{{ t('pages.groupProducts.view.labels.bestSuppliers') }}</label
               >
               <p class="text-base font-semibold text-gray-900">
                 {{ product.best_suppliers || "-" }}
@@ -409,7 +413,7 @@
         <!-- سمات / خصائص المنتج المتقدمة -->
         <div class="p-6 border-b border-gray-200">
           <h2 class="text-xl font-bold text-primary-900 mb-6">
-            سمات / خصائص المنتج المتقدمة
+            {{ t('pages.groupProducts.view.sections.advancedAttributes') }}
           </h2>
           <div class="flex flex-wrap gap-4 items-center">
             <div
@@ -417,7 +421,7 @@
               class="flex items-center gap-3"
             >
               <p class="text-base text-gray-900 py-2">
-                منتج تصنيع
+                {{ t('pages.groupProducts.view.values.manufacturable') }}
               </p>
             </div>
             <v-divider
@@ -427,7 +431,7 @@
             ></v-divider>
             <div v-if="product.is_sellable" class="flex items-center gap-3">
               <p class="text-base text-gray-900 py-2">
-                متاح للبيع
+                {{ t('pages.groupProducts.view.values.sellable') }}
               </p>
             </div>
             <v-divider
@@ -437,7 +441,7 @@
             ></v-divider>
             <div v-if="product.is_purchasable" class="flex items-center gap-3">
               <p class="text-base text-gray-900 py-2">
-                متاح للشراء
+                {{ t('pages.groupProducts.view.values.purchasable') }}
               </p>
             </div>
             <v-divider
@@ -447,7 +451,7 @@
             ></v-divider>
             <div v-if="product.is_barterable" class="flex items-center gap-3">
               <p class="text-base text-gray-900 py-2">
-                قابل للمقايضة
+                {{ t('pages.groupProducts.view.values.barterable') }}
               </p>
             </div>
             <v-divider
@@ -457,7 +461,7 @@
             ></v-divider>
             <div v-if="product.is_clearable" class="flex items-center gap-3">
               <p class="text-base text-gray-900 py-2">
-                قابل للمقاصة
+                {{ t('pages.groupProducts.view.values.clearable') }}
               </p>
             </div>
             <v-divider
@@ -467,7 +471,7 @@
             ></v-divider>
             <div v-if="product.is_rentable" class="flex items-center gap-3">
               <p class="text-base text-gray-900 py-2">
-                قابل للإيجار
+                {{ t('pages.groupProducts.view.values.rentable') }}
               </p>
             </div>
             <v-divider
@@ -480,7 +484,7 @@
               class="flex items-center gap-3"
             >
               <p class="text-base text-gray-900 py-2">
-                البيع بالسالب
+                {{ t('pages.groupProducts.view.values.allowNegativeSales') }}
               </p>
             </div>
           </div>
@@ -488,7 +492,7 @@
 
         <!-- المرفقات -->
         <div class="p-6 border-b border-primary-600 ">
-          <h2 class="text-xl font-bold text-primary-900 mb-6">المرفقات</h2>
+          <h2 class="text-xl font-bold text-primary-900 mb-6">{{ t('pages.groupProducts.view.sections.attachments') }}</h2>
           <div
             class="border border-primary-200 rounded-lg p-4 bg-primary-50/30 inline-block cursor-pointer group transition-all hover:shadow-md shadow-none duration-300"
           >
@@ -499,11 +503,11 @@
                 >
                   <span v-html="fileIcon2" class="text-primary-600 relative z-10"></span>
                 </div>
-                <div class="text-right">
+                <div class="text-start">
                   <p class="text-sm font-semibold text-gray-900">
-                    ملف مشروع البيوت
+                    {{ t('pages.groupProducts.view.attachments.fileName') }}
                   </p>
-                  <p class="text-xs text-gray-500">200 KB - 100% uploaded</p>
+                  <p class="text-xs text-gray-500">{{ t('pages.groupProducts.view.attachments.fileMeta') }}</p>
                 </div>
               </div>
             </div>
@@ -516,12 +520,12 @@
         <!-- Test 1: اختبار التدرج الحبيبي -->
         <div class="p-6 border-b border-gray-200">
           <h2 class="text-xl font-bold text-primary-900 mb-4">
-            اختبار التدرج الحبيبي
+            {{ t('pages.groupProducts.view.tests.gradation') }}
           </h2>
           <div class="flex flex-wrap gap-4 -mx-6">
             <div class="info-item-bordered  px-6 py-4">
               <label class="font-semibold text-sm text-gray-500 mb-2 block"
-                >عدد الاختبارات</label
+                >{{ t('pages.groupProducts.view.labels.testsCount') }}</label
               >
               <p class="text-base font-semibold text-gray-900">
                 {{ tests.gradation.test_count }}
@@ -530,7 +534,7 @@
             <v-divider vertical class="my-6 border-gray-300"></v-divider>
             <div class="info-item-bordered  px-6 py-4">
               <label class="font-semibold text-sm text-gray-500 mb-2 block"
-                >عدد العينات</label
+                >{{ t('pages.groupProducts.view.labels.samplesCount') }}</label
               >
               <p class="text-base font-semibold text-gray-900">
                 {{ tests.gradation.sample_count }}
@@ -539,7 +543,7 @@
             <v-divider vertical class="my-6 border-gray-300"></v-divider>
             <div class="info-item-bordered  px-6 py-4">
               <label class="font-semibold text-sm text-gray-500 mb-2 block"
-                >كمية العينات</label
+                >{{ t('pages.groupProducts.view.labels.sampleQuantity') }}</label
               >
               <p class="text-base font-semibold text-gray-900">
                 {{ tests.gradation.sample_quantity }}
@@ -551,12 +555,12 @@
         <!-- Test 2: اختبار الصلابة -->
         <div class="p-6 border-b border-gray-200">
           <h2 class="text-xl font-bold text-primary-900 mb-4">
-            اختبار الصلابة
+            {{ t('pages.groupProducts.view.tests.hardness') }}
           </h2>
           <div class="flex flex-wrap gap-4 -mx-6">
             <div class="info-item-bordered  px-6 py-4">
               <label class="font-semibold text-sm text-gray-500 mb-2 block"
-                >عدد الاختبارات</label
+                >{{ t('pages.groupProducts.view.labels.testsCount') }}</label
               >
               <p class="text-base font-semibold text-gray-900">
                 {{ tests.hardness.test_count }}
@@ -565,7 +569,7 @@
             <v-divider vertical class="my-6 border-gray-300"></v-divider>
             <div class="info-item-bordered  px-6 py-4">
               <label class="font-semibold text-sm text-gray-500 mb-2 block"
-                >عدد العينات</label
+                >{{ t('pages.groupProducts.view.labels.samplesCount') }}</label
               >
               <p class="text-base font-semibold text-gray-900">
                 {{ tests.hardness.sample_count }}
@@ -574,7 +578,7 @@
             <v-divider vertical class="my-6 border-gray-300"></v-divider>
             <div class="info-item-bordered  px-6 py-4">
               <label class="font-semibold text-sm text-gray-500 mb-2 block"
-                >كمية العينات</label
+                >{{ t('pages.groupProducts.view.labels.sampleQuantity') }}</label
               >
               <p class="text-base font-semibold text-gray-900">
                 {{ tests.hardness.sample_quantity }}
@@ -585,11 +589,11 @@
 
         <!-- Test 3: اختبار التحمل -->
         <div class="p-6 border-b border-gray-200">
-          <h2 class="text-xl font-bold text-primary-900 mb-4">اختبار التحمل</h2>
+          <h2 class="text-xl font-bold text-primary-900 mb-4">{{ t('pages.groupProducts.view.tests.endurance') }}</h2>
           <div class="flex flex-wrap gap-4 -mx-6">
             <div class="info-item-bordered  px-6 py-4">
               <label class="font-semibold text-sm text-gray-500 mb-2 block"
-                >عدد الاختبارات</label
+                >{{ t('pages.groupProducts.view.labels.testsCount') }}</label
               >
               <p class="text-base font-semibold text-gray-900">
                 {{ tests.endurance.test_count }}
@@ -598,7 +602,7 @@
             <v-divider vertical class="my-6 border-gray-300"></v-divider>
             <div class="info-item-bordered  px-6 py-4">
               <label class="font-semibold text-sm text-gray-500 mb-2 block"
-                >عدد العينات</label
+                >{{ t('pages.groupProducts.view.labels.samplesCount') }}</label
               >
               <p class="text-base font-semibold text-gray-900">
                 {{ tests.endurance.sample_count }}
@@ -607,7 +611,7 @@
             <v-divider vertical class="my-6 border-gray-300"></v-divider>
             <div class="info-item-bordered  px-6 py-4">
               <label class="font-semibold text-sm text-gray-500 mb-2 block"
-                >كمية العينات</label
+                >{{ t('pages.groupProducts.view.labels.sampleQuantity') }}</label
               >
               <p class="text-base font-semibold text-gray-900">
                 {{ tests.endurance.sample_quantity }}
@@ -622,6 +626,10 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
+import { useI18n } from "vue-i18n";
+
+const { t: i18nT } = useI18n();
+const t = i18nT;
 
 const activeTab = ref("general");
 
@@ -647,42 +655,42 @@ const fileIcon2 = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" x
 </svg>`;
 
 const product = ref({
-  name: "منتج مواد بناء",
-  name_ar: "منتج مواد بناء",
+  name: t("pages.groupProducts.view.mock.product.name"),
+  name_ar: t("pages.groupProducts.view.mock.product.name"),
   name_en: "Building Materials Product",
   code: "#112445",
-  description: "منتج مواد بناء خاص بقلاب",
+  description: t("pages.groupProducts.view.mock.product.description"),
   description_ar:
-    'يُدرج في مشروع "تطوير بنية تحتية" أحدث البناء مواد البناء المختلفة بصيغ للتناسب المتطلبة المعمارية والبنائية المتنوعة والمتطلبات البيئية الحديثة أيضاً',
+    t("pages.groupProducts.view.mock.product.descriptionAr"),
   description_en:
     "Porttitor mi at pellentesque eu eros. Bibendum venenatis facilisis tempus pulvinar. Et imperdiet amet morbi adipiscing pulvinar condimentum.",
   is_active: true,
-  product_type: "طوب",
-  category: "مواد بناء",
-  purchase_price: "1200 ريال",
-  sell_price: "100 ريال",
+  product_type: t("pages.groupProducts.view.mock.product.productType"),
+  category: t("pages.groupProducts.view.mock.product.category"),
+  purchase_price: t("pages.groupProducts.view.mock.product.purchasePrice"),
+  sell_price: t("pages.groupProducts.view.mock.product.sellPrice"),
   min_sell_price: "100 ريال",
   max_sell_price: "100 ريال",
   wholesale_price: "100 ريال",
   semi_wholesale_price: "100 ريال",
-  discount_type: "نسبة",
+  discount_type: t("pages.groupProducts.view.mock.product.discountType"),
   discount_value: "25%",
   tax_percentage: "25",
-  tax1_name: "ضريبة القيمة المضافة",
+  tax1_name: t("pages.groupProducts.view.mock.product.tax1Name"),
   tax1_value: "% 25",
-  tax1_priority: "عليه",
+  tax1_priority: t("pages.groupProducts.view.mock.product.tax1Priority"),
   tax1_min: "% 25",
-  tax2_name: "اسم الضريبة المضافة",
-  tax2_value: "ضريبة القيمة",
-  tax2_priority: "الأولوية",
+  tax2_name: t("pages.groupProducts.view.mock.product.tax2Name"),
+  tax2_value: t("pages.groupProducts.view.mock.product.tax2Value"),
+  tax2_priority: t("pages.groupProducts.view.mock.product.tax2Priority"),
   tax2_min: "% 25",
-  brand: "بناء مكة",
-  manufacturer: "مصنع مكة",
-  country_of_origin: "السعودية",
-  alternative_products: "طوب",
-  accessory_products: "حديد",
-  related_products: "حديد، حصمة",
-  best_suppliers: "قلاب",
+  brand: t("pages.groupProducts.view.mock.product.brand"),
+  manufacturer: t("pages.groupProducts.view.mock.product.manufacturer"),
+  country_of_origin: t("pages.groupProducts.view.mock.product.originCountry"),
+  alternative_products: t("pages.groupProducts.view.mock.product.alternativeProducts"),
+  accessory_products: t("pages.groupProducts.view.mock.product.accessoryProducts"),
+  related_products: t("pages.groupProducts.view.mock.product.relatedProducts"),
+  best_suppliers: t("pages.groupProducts.view.mock.product.bestSuppliers"),
   is_manufacturable: true,
   is_rentable: true,
   is_clearable: true,
@@ -695,19 +703,19 @@ const product = ref({
 
 const tests = ref({
   gradation: {
-    test_count: "5 اختبارات",
-    sample_count: "10 عينات",
-    sample_quantity: "50 كجم تقريباً للعينة الواحدة",
+    test_count: t("pages.groupProducts.view.mock.tests.testCount"),
+    sample_count: t("pages.groupProducts.view.mock.tests.sampleCount"),
+    sample_quantity: t("pages.groupProducts.view.mock.tests.sampleQuantity"),
   },
   hardness: {
-    test_count: "5 اختبارات",
-    sample_count: "10 عينات",
-    sample_quantity: "50 كجم تقريباً للعينة الواحدة",
+    test_count: t("pages.groupProducts.view.mock.tests.testCount"),
+    sample_count: t("pages.groupProducts.view.mock.tests.sampleCount"),
+    sample_quantity: t("pages.groupProducts.view.mock.tests.sampleQuantity"),
   },
   endurance: {
-    test_count: "5 اختبارات",
-    sample_count: "10 عينات",
-    sample_quantity: "50 كجم تقريباً للعينة الواحدة",
+    test_count: t("pages.groupProducts.view.mock.tests.testCount"),
+    sample_count: t("pages.groupProducts.view.mock.tests.sampleCount"),
+    sample_quantity: t("pages.groupProducts.view.mock.tests.sampleQuantity"),
   },
 });
 </script>

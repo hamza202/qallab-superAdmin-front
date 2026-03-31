@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
 import { useApi } from "@/composables/useApi";
 import { useNotification } from "@/composables/useNotification";
 import {
@@ -15,6 +16,7 @@ const route = useRoute();
 const router = useRouter();
 const api = useApi();
 const { error } = useNotification();
+const { t } = useI18n();
 
 // ── Route query params ───────────────────────────────────────────
 const purchaseCode = computed(() => route.query.purchase_code as string);
@@ -41,7 +43,7 @@ const categoryListPath = computed(() =>
     : "/purchases/quotations/material-product/list"
 );
 const categoryListLabel = computed(() =>
-  categoryKey.value === "fuel" ? "عروض أسعار المحروقات" : "عروض أسعار مواد أولية"
+  categoryKey.value === "fuel" ? t("purchases.link.view.quotations.listFuels") : t("purchases.link.view.quotations.listMaterials")
 );
 
 // ── State ────────────────────────────────────────────────────────
@@ -61,7 +63,7 @@ const fetchData = async () => {
       quotations.value = res.data;
     }
   } catch (e: any) {
-    error(e?.response?.data?.message || "فشل تحميل بيانات العرض");
+    error(e?.response?.data?.message || t("purchases.link.view.quotations.loadError"));
   } finally {
     isLoading.value = false;
   }
@@ -124,7 +126,7 @@ const goBackToForm = () => {
           to="/purchases/quotations/material-product/list"
           class="text-gray-600 hover:text-primary-600"
         >
-          المشتريات
+          {{ t('purchases.link.view.shared.purchasesBreadcrumb') }}
         </router-link>
         <span class="text-lg text-gray-300">/</span>
         <router-link
@@ -142,7 +144,7 @@ const goBackToForm = () => {
         </span>
         <span class="text-lg text-gray-300">/</span>
         <span class="text-primary-700 font-medium bg-primary-50 px-2 py-1 rounded-md">
-          الربط مع عروض العملاء
+          {{ t('purchases.link.view.quotations.pageTitleCrumb') }}
         </span>
       </div>
 
@@ -175,7 +177,7 @@ const goBackToForm = () => {
               style="width: 18px; height: 22px; display: inline-flex"
             ></span>
             <h2 class="text-base font-bold">
-              كود المشتريات &nbsp; {{ purchaseQuotation?.code ?? purchaseCode ?? "—" }}
+              {{ t('purchases.link.view.quotations.purchaseCodeLabel') }} &nbsp; {{ purchaseQuotation?.code ?? purchaseCode ?? "—" }}
             </h2>
           </div>
         </div>
@@ -187,7 +189,7 @@ const goBackToForm = () => {
               v-html="productIcon"
               style="width: 20px; height: 22px; display: inline-flex"
             ></span>
-            <h2 class="text-base font-bold">المنتجات</h2>
+            <h2 class="text-base font-bold">{{ t('purchases.link.view.shared.products') }}</h2>
           </div>
         </div>
 
@@ -196,23 +198,23 @@ const goBackToForm = () => {
           <table class="w-full text-sm" dir="rtl">
             <thead>
               <tr class="bg-primary-25 border-y border-gray-200">
-                <th class="px-6 py-3 text-xs font-semibold text-gray-600 whitespace-nowrap text-right">
-                  اسم المنتج
+                <th class="px-6 py-3 text-xs font-semibold text-gray-600 whitespace-nowrap text-start">
+                  {{ t('purchases.link.shared.table.productName') }}
                 </th>
                 <th class="px-6 py-3 text-xs font-semibold text-gray-600 whitespace-nowrap text-center">
-                  الكمية
+                  {{ t('purchases.link.shared.table.quantity') }}
                 </th>
                 <th class="px-6 py-3 text-xs font-semibold text-gray-600 whitespace-nowrap text-center">
-                  سعر الوحدة
+                  {{ t('purchases.link.shared.table.unitPrice') }}
                 </th>
                 <th class="px-6 py-3 text-xs font-semibold text-gray-600 whitespace-nowrap text-center">
-                  خصم
+                  {{ t('purchases.link.shared.table.discount') }}
                 </th>
                 <th class="px-6 py-3 text-xs font-semibold text-gray-600 whitespace-nowrap text-center">
-                  مبلغ الضريبة
+                  {{ t('purchases.link.shared.table.taxAmount') }}
                 </th>
                 <th class="px-6 py-3 text-xs font-semibold text-gray-600 whitespace-nowrap text-center">
-                  إجمالي المبلغ
+                  {{ t('purchases.link.shared.table.totalAmount') }}
                 </th>
               </tr>
             </thead>
@@ -222,7 +224,7 @@ const goBackToForm = () => {
                 :key="item.id"
                 class="border-b border-gray-100 hover:bg-gray-50"
               >
-                <td class="px-6 py-4 text-right text-gray-900 font-medium whitespace-nowrap">
+                <td class="px-6 py-4 text-start text-gray-900 font-medium whitespace-nowrap">
                   {{ item.name }}
                 </td>
                 <td class="px-6 py-4 text-center text-gray-700 whitespace-nowrap">
@@ -246,7 +248,7 @@ const goBackToForm = () => {
               </tr>
               <tr v-if="purchaseItems.length === 0 && !isLoading">
                 <td colspan="6" class="py-8 text-center text-gray-400 text-sm">
-                  لا توجد منتجات
+                  {{ t('purchases.link.shared.table.emptyProducts') }}
                 </td>
               </tr>
             </tbody>
@@ -264,7 +266,7 @@ const goBackToForm = () => {
               style="width: 18px; height: 22px; display: inline-flex"
             ></span>
             <h2 class="text-base font-bold">
-              كود المبيعات &nbsp; {{ salesQuotation?.code ?? salesCode ?? "—" }}
+              {{ t('purchases.link.view.quotations.salesCodeLabel') }} &nbsp; {{ salesQuotation?.code ?? salesCode ?? "—" }}
             </h2>
           </div>
         </div>
@@ -276,7 +278,7 @@ const goBackToForm = () => {
               v-html="productIcon"
               style="width: 20px; height: 22px; display: inline-flex"
             ></span>
-            <h2 class="text-base font-bold">المنتجات</h2>
+            <h2 class="text-base font-bold">{{ t('purchases.link.shared.labels.productsSection') }}</h2>
           </div>
         </div>
 
@@ -285,23 +287,23 @@ const goBackToForm = () => {
           <table class="w-full text-sm" dir="rtl">
             <thead>
               <tr class="bg-primary-25 border-y border-gray-200">
-                <th class="px-6 py-3 text-xs font-semibold text-gray-600 whitespace-nowrap text-right">
-                  اسم المنتج
+                <th class="px-6 py-3 text-xs font-semibold text-gray-600 whitespace-nowrap text-start">
+                  {{ t('purchases.link.shared.table.productName') }}
                 </th>
                 <th class="px-6 py-3 text-xs font-semibold text-gray-600 whitespace-nowrap text-center">
-                  الكمية
+                  {{ t('purchases.link.shared.table.quantity') }}
                 </th>
                 <th class="px-6 py-3 text-xs font-semibold text-gray-600 whitespace-nowrap text-center">
-                  سعر الوحدة
+                  {{ t('purchases.link.shared.table.unitPrice') }}
                 </th>
                 <th class="px-6 py-3 text-xs font-semibold text-gray-600 whitespace-nowrap text-center">
-                  خصم
+                  {{ t('purchases.link.shared.table.discount') }}
                 </th>
                 <th class="px-6 py-3 text-xs font-semibold text-gray-600 whitespace-nowrap text-center">
-                  مبلغ الضريبة
+                  {{ t('purchases.link.shared.table.taxAmount') }}
                 </th>
                 <th class="px-6 py-3 text-xs font-semibold text-gray-600 whitespace-nowrap text-center">
-                  إجمالي المبلغ
+                  {{ t('purchases.link.shared.table.totalAmount') }}
                 </th>
               </tr>
             </thead>
@@ -311,7 +313,7 @@ const goBackToForm = () => {
                 :key="item.id"
                 class="border-b border-gray-100 hover:bg-gray-50"
               >
-                <td class="px-6 py-4 text-right text-gray-900 font-medium whitespace-nowrap">
+                <td class="px-6 py-4 text-start text-gray-900 font-medium whitespace-nowrap">
                   {{ item.name }}
                 </td>
                 <td class="px-6 py-4 text-center text-gray-700 whitespace-nowrap">
@@ -335,7 +337,7 @@ const goBackToForm = () => {
               </tr>
               <tr v-if="salesItems.length === 0 && !isLoading">
                 <td colspan="6" class="py-8 text-center text-gray-400 text-sm">
-                  لا توجد منتجات
+                  {{ t('purchases.link.shared.table.emptyProducts') }}
                 </td>
               </tr>
             </tbody>

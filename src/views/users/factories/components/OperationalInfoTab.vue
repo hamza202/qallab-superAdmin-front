@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { reactive, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 interface Props {
   productionLinesCount: number | null;
@@ -88,69 +91,69 @@ const handleFieldUpdate = (field: string) => {
 
 <template>
   <div class="mb-6 bg-gray-50 rounded-lg p-6">
-    <h2 class="text-lg font-bold text-primary-900 mb-4">المعلومات التشغيلية</h2>
+    <h2 class="text-lg font-bold text-primary-900 mb-4">{{ t('pages.factories.form.tabs.operationalInfo') }}</h2>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
       <PriceInput v-model="formData.productionLinesCount" @update:model-value="() => handleFieldUpdate('production_lines_count')"
-        label="عدد خطوط الإنتاج" placeholder="ادخل عدد خطوط الإنتاج مثل: 5"
+        :label="t('form.factory.operationalInfo.productionLinesCount.label')" :placeholder="t('form.factory.operationalInfo.productionLinesCount.placeholder')"
         :error-messages="formErrors?.production_lines_count" />
 
       <SelectWithIconInput clearable v-model="formData.operationalStatus" @update:model-value="() => handleFieldUpdate('operational_status')"
-        label="حالة التشغيل" placeholder="اختر حالة التشغيل مثل: نشط" :items="operationalStatusItems" 
+        :label="t('form.factory.operationalInfo.operationalStatus.label')" :placeholder="t('form.factory.operationalInfo.operationalStatus.placeholder')" :items="operationalStatusItems" 
         :error-messages="formErrors?.operational_status" />
 
-      <PriceInput v-model="formData.totalWorkers" @update:model-value="() => handleFieldUpdate('total_workers')" label="عدد العمال"
-        placeholder="ادخل عدد العمال مثل: 200" :error-messages="formErrors?.total_workers" />
+      <PriceInput v-model="formData.totalWorkers" @update:model-value="() => handleFieldUpdate('total_workers')" :label="t('form.factory.operationalInfo.totalWorkers.label')"
+        :placeholder="t('form.factory.operationalInfo.totalWorkers.placeholder')" :error-messages="formErrors?.total_workers" />
 
-      <PriceInput v-model="formData.engineersCount" @update:model-value="() => handleFieldUpdate('engineers_count')" label="عدد المهندسين" 
-        placeholder="ادخل عدد المهندسين مثل: 30" :error-messages="formErrors?.engineers_count" />
+      <PriceInput v-model="formData.engineersCount" @update:model-value="() => handleFieldUpdate('engineers_count')" :label="t('form.factory.operationalInfo.engineersCount.label')" 
+        :placeholder="t('form.factory.operationalInfo.engineersCount.placeholder')" :error-messages="formErrors?.engineers_count" />
 
-      <PriceInput v-model="formData.techniciansCount" @update:model-value="() => handleFieldUpdate('technicians_count')" label="عدد الفنيين" 
-        placeholder="ادخل عدد الفنيين مثل: 50" :error-messages="formErrors?.technicians_count" />
+      <PriceInput v-model="formData.techniciansCount" @update:model-value="() => handleFieldUpdate('technicians_count')" :label="t('form.factory.operationalInfo.techniciansCount.label')" 
+        :placeholder="t('form.factory.operationalInfo.techniciansCount.placeholder')" :error-messages="formErrors?.technicians_count" />
 
       <SelectWithIconInput clearable v-model="formData.qualityControlSystem" @update:model-value="() => handleFieldUpdate('quality_control_system')"
-        label="نظام ضبط الجودة" placeholder="اختر نظام الجودة مثل: ISO 9001" :items="qualityControlSystemItems" 
+        :label="t('form.factory.operationalInfo.qualityControlSystem.label')" :placeholder="t('form.factory.operationalInfo.qualityControlSystem.placeholder')" :items="qualityControlSystemItems" 
         :error-messages="formErrors?.quality_control_system" />
 
       <SelectWithIconInput clearable v-model="formData.workingHours" @update:model-value="() => handleFieldUpdate('working_hours')"
-        label="اوقات العمل" placeholder="اختر أوقات العمل مثل: 8:00 am - 5:00 pm" :items="workingHoursItems" 
+        :label="t('form.factory.operationalInfo.workingHours.label')" :placeholder="t('form.factory.operationalInfo.workingHours.placeholder')" :items="workingHoursItems" 
         :error-messages="formErrors?.working_hours" />
 
       <SelectWithIconInput clearable v-model="formData.safetySystem" @update:model-value="() => handleFieldUpdate('safety_system')"
-        label="نظام السلامة" placeholder="اختر نظام السلامة مثل: متكامل" :items="safetySystemItems" 
+        :label="t('form.factory.operationalInfo.safetySystem.label')" :placeholder="t('form.factory.operationalInfo.safetySystem.placeholder')" :items="safetySystemItems" 
         :error-messages="formErrors?.safety_system" />
 
       <MultipleSelectInput v-model="formData.equipmentType" @update:model-value="() => handleFieldUpdate('equipment_type')"
-        label="نوع المعدات" placeholder="اختر نوع المعدات مثل: أوتوماتيكي" :items="equipmentTypesItems"
+        :label="t('form.factory.operationalInfo.equipmentType.label')" :placeholder="t('form.factory.operationalInfo.equipmentType.placeholder')" :items="equipmentTypesItems"
         :input-props="{ clearable: true }" :error-messages="formErrors?.equipment_type" />
 
       <SelectWithIconInput clearable v-model="formData.maintenanceSystem" @update:model-value="() => handleFieldUpdate('maintenance_system')"
-        label="نظام الصيانة" placeholder="اختر نظام الصيانة مثل: وقائي" :items="maintenanceSystemItems" 
+        :label="t('form.factory.operationalInfo.maintenanceSystem.label')" :placeholder="t('form.factory.operationalInfo.maintenanceSystem.placeholder')" :items="maintenanceSystemItems" 
         :error-messages="formErrors?.maintenance_system" />
 
       <SelectWithIconInput clearable v-model="formData.operationMode" @update:model-value="() => handleFieldUpdate('operation_mode')"
-        label="طريقة التشغيل" placeholder="اختر طريقة التشغيل مثل: متواصل" :items="operationModeItems" 
+        :label="t('form.factory.operationalInfo.operationMode.label')" :placeholder="t('form.factory.operationalInfo.operationMode.placeholder')" :items="operationModeItems" 
         :error-messages="formErrors?.operation_mode" />
 
       <SelectWithIconInput clearable v-model="formData.weighbridgeType" @update:model-value="() => handleFieldUpdate('weighbridge_type')"
-        label="نوع الميزان" placeholder="اختر نوع الميزان مثل: إلكتروني" :items="weighbridgeTypeItems" 
+        :label="t('form.factory.operationalInfo.weighbridgeType.label')" :placeholder="t('form.factory.operationalInfo.weighbridgeType.placeholder')" :items="weighbridgeTypeItems" 
         :error-messages="formErrors?.weighbridge_type" />
 
       <div>
-        <span class="text-gray-700 text-sm font-semibold mb-2 block">وجود ميزان</span>
+        <span class="text-gray-700 text-sm font-semibold mb-2 block">{{ t('form.factory.operationalInfo.weighbridgeAvailability.label') }}</span>
         <div class="flex gap-4">
           <v-radio-group v-model="formData.weighbridgeAvailability" @update:model-value="() => handleFieldUpdate('weighbridge_availability')" inline hide-details>
             <v-radio :value="true" color="primary">
               <template #label>
                 <span :class="formData.weighbridgeAvailability ? 'text-primary font-semibold' : 'text-gray-600'">
-                  نعم
+                  {{ t('common.options.yes') }}
                 </span>
               </template>
             </v-radio>
             <v-radio :value="false" color="primary">
               <template #label>
                 <span :class="!formData.weighbridgeAvailability ? 'text-primary font-semibold' : 'text-gray-600'">
-                  لا
+                  {{ t('common.options.no') }}
                 </span>
               </template>
             </v-radio>
@@ -159,20 +162,20 @@ const handleFieldUpdate = (field: string) => {
       </div>
 
       <div>
-        <span class="text-gray-700 text-sm font-semibold mb-2 block">وجود مختبر جودة</span>
+        <span class="text-gray-700 text-sm font-semibold mb-2 block">{{ t('form.factory.operationalInfo.qualityLabAvailability.label') }}</span>
         <div class="flex gap-4">
           <v-radio-group v-model="formData.qualityLabAvailability" @update:model-value="() => handleFieldUpdate('quality_lab_availability')" inline hide-details>
             <v-radio :value="true" color="primary">
               <template #label>
                 <span :class="formData.qualityLabAvailability ? 'text-primary font-semibold' : 'text-gray-600'">
-                  نعم
+                  {{ t('common.options.yes') }}
                 </span>
               </template>
             </v-radio>
             <v-radio :value="false" color="primary">
               <template #label>
                 <span :class="!formData.qualityLabAvailability ? 'text-primary font-semibold' : 'text-gray-600'">
-                  لا
+                  {{ t('common.options.no') }}
                 </span>
               </template>
             </v-radio>

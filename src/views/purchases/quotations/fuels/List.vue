@@ -147,7 +147,7 @@ const fetchList = async (append = false) => {
     nextCursor.value = body?.pagination?.next_cursor ?? null;
   } catch (err: any) {
     console.error('Error fetching quotations list:', err);
-    error(err?.response?.data?.message || 'فشل تحميل قائمة عروض السعر');
+    error(err?.response?.data?.message || t('purchases.shared.lists.quotation.messages.fetchError'));
   } finally {
     loading.value = false;
     loadingMore.value = false;
@@ -177,7 +177,7 @@ const cleanupInfiniteScroll = () => {
 
 const handleToggleHeader = async (headerKey: string) => {
   await toggleHeader(headerKey).catch((err: any) => {
-    error(err?.response?.data?.message || 'فشل تحديث الأعمدة');
+    error(err?.response?.data?.message || t('purchases.shared.messages.columnsUpdateError'));
   });
 };
 
@@ -201,13 +201,13 @@ const confirmDelete = async () => {
   try {
     deleteLoading.value = true;
     await api.delete(`/purchases/quotations/fuels/${uuid}`);
-    success('تم حذف عرض السعر بنجاح');
+    success(t('purchases.shared.lists.quotation.messages.deleteSuccess'));
     showDeleteDialog.value = false;
     itemToDelete.value = null;
     await fetchList();
   } catch (err: any) {
     console.error('Error deleting quotation:', err);
-    error(err?.response?.data?.message || 'فشل حذف عرض السعر');
+    error(err?.response?.data?.message || t('purchases.shared.lists.quotation.messages.deleteError'));
   } finally {
     deleteLoading.value = false;
   }
@@ -292,12 +292,16 @@ const confirmBulkDelete = async () => {
     await api.post('/purchases/quotations/fuels/bulk-delete', {
       ids: selectedRequests.value,
     });
-    success(`تم حذف ${selectedRequests.value.length} عرض بنجاح`);
+    success(
+      t('purchases.shared.lists.quotation.messages.bulkDeleteSuccess', {
+        count: selectedRequests.value.length,
+      })
+    );
     selectedRequests.value = [];
     await fetchList();
   } catch (err: any) {
     console.error('Error bulk deleting:', err);
-    error(err?.response?.data?.message || 'فشل الحذف الجماعي');
+    error(err?.response?.data?.message || t('purchases.shared.messages.bulkDeleteError'));
   } finally {
     deleteLoading.value = false;
     showBulkDeleteDialog.value = false;
@@ -324,10 +328,10 @@ onBeforeUnmount(() => {
         class="flex justify-end items-stretch rounded border border-gray-300 w-fit ms-auto mb-4 overflow-hidden bg-white text-sm">
         <ButtonWithIcon variant="flat" height="40" rounded="0"
           custom-class="font-semibold text-base border-gray-300 bg-primary-100 !text-primary-900"
-          :prepend-icon="importIcon" :label="t('common.import')" />
+          :prepend-icon="importIcon" :label="t('common.actions.import')" />
         <ButtonWithIcon variant="flat" height="40" rounded="0"
           custom-class="font-semibold text-base border-gray-300 bg-primary-50 !text-primary-900"
-          :prepend-icon="exportIcon" :label="t('common.export')" />
+          :prepend-icon="exportIcon" :label="t('common.actions.export')" />
       </div>
 
       <div class="bg-gray-50 rounded-md -mx-6">
@@ -337,11 +341,11 @@ onBeforeUnmount(() => {
             class="flex flex-wrap items-stretch rounded overflow-hidden border border-gray-200 bg-white text-sm">
             <ButtonWithIcon variant="flat" height="40" rounded="0"
               custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-              :prepend-icon="trash_1_icon" color="white" :label="t('common.delete')" @click="handleBulkDelete" />
+              :prepend-icon="trash_1_icon" color="white" :label="t('common.actions.delete')" @click="handleBulkDelete" />
             <div class="w-px bg-gray-200"></div>
             <ButtonWithIcon variant="flat" height="40" rounded="0"
               custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-              :prepend-icon="trash_2_icon" color="white" :label="t('common.deleteAll')" @click="handleBulkDelete" />
+              :prepend-icon="trash_2_icon" color="white" :label="t('common.table.deleteAll')" @click="handleBulkDelete" />
           </div>
 
           <div class="flex flex-wrap gap-3">
@@ -349,7 +353,7 @@ onBeforeUnmount(() => {
               <template #activator="{ props: menuProps }">
                 <ButtonWithIcon v-bind="menuProps" variant="outlined" append-icon="mdi-chevron-down" rounded="4"
                   color="gray-500" height="40" custom-class="font-semibold text-base border-gray-400"
-                  :prepend-icon="columnIcon" :label="t('common.columns')" />
+                  :prepend-icon="columnIcon" :label="t('common.table.columns')" />
               </template>
               <v-list>
                 <v-list-item v-for="header in allHeaders" :key="header.key" @click="handleToggleHeader(header.key)">
@@ -364,7 +368,7 @@ onBeforeUnmount(() => {
 
             <ButtonWithIcon variant="flat" color="primary-500" height="40" rounded="4"
               custom-class="px-7 font-semibold text-base text-white border !border-primary-200"
-              :prepend-icon="searchIcon" :label="t('common.advancedSearch')" @click="toggleAdvancedFilters" />
+              :prepend-icon="searchIcon" :label="t('common.table.advancedSearch')" @click="toggleAdvancedFilters" />
           </div>
         </div>
 
@@ -372,21 +376,21 @@ onBeforeUnmount(() => {
           class="border-y border-y-primary-100 bg-primary-50 px-4 sm:px-6 py-3 gap-3 flex justify-between flex-wrap">
           <div class="flex flex-wrap gap-3 items-end">
             <TextInput v-model="filterRequestNumber" density="comfortable" variant="outlined" hide-details
-              placeholder="كود العرض" class="w-full sm:w-40 bg-white" />
+              class="w-full sm:w-40 bg-white" />
             <TextInput v-model="filterNameEnglish" density="comfortable" variant="outlined" hide-details
-              placeholder="اسم العميل" class="w-full sm:w-40 bg-white" />
+              class="w-full sm:w-40 bg-white" />
             <TextInput v-model="filterNameArabic" density="comfortable" variant="outlined" hide-details
-              placeholder="السعر" class="w-full sm:w-40 bg-white" />
+              class="w-full sm:w-40 bg-white" />
             <DatePickerInput v-model="filterStartDateMin" density="comfortable" hide-details
-              placeholder="تاريخ العرض" class="w-full sm:w-40 bg-white" />
+              class="w-full sm:w-40 bg-white" />
           </div>
           <div class="flex gap-2 items-center">
             <ButtonWithIcon variant="flat" color="primary-500" rounded="4" height="40"
               custom-class="px-5 font-semibold !text-white text-sm sm:text-base"
-              :prepend-icon="searchIcon" label="ابحث" @click="applyFilters" />
+              :prepend-icon="searchIcon" :label="t('purchases.shared.actions.search')" @click="applyFilters" />
             <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4" border="sm"
               custom-class="px-5 font-semibold text-sm sm:text-base !text-primary-800 !border-primary-200"
-              prepend-icon="mdi-refresh" label="إعادة تعيين" @click="resetFilters" />
+              prepend-icon="mdi-refresh" :label="t('common.actions.reset')" @click="resetFilters" />
           </div>
         </div>
 
@@ -427,7 +431,7 @@ onBeforeUnmount(() => {
         <div ref="loadMoreTrigger" class="h-4"></div>
         <div v-if="loadingMore" class="flex justify-center items-center py-4">
           <v-progress-circular indeterminate color="primary" size="32" />
-          <span class="ms-2 text-gray-600">جاري تحميل المزيد...</span>
+          <span class="ms-2 text-gray-600">{{ t('purchases.shared.messages.loadingMore') }}</span>
         </div>
       </div>
     </div>
@@ -436,13 +440,25 @@ onBeforeUnmount(() => {
       v-model="showChangeStatusDialog"
       :item="itemToChangeStatus"
       :change-status-url="`/purchases/quotations/fuels/${itemToChangeStatus?.uuid}/change-status`"
+      :title="t('purchases.shared.statusChange.title')"
+      :message="t('purchases.shared.statusChange.message')"
       @success="fetchList"
     />
 
-    <DeleteConfirmDialog v-model="showDeleteDialog" :loading="deleteLoading" title="حذف عرض السعر"
-      message="هل أنت متأكد من حذف هذا العرض؟" @confirm="confirmDelete" />
+    <DeleteConfirmDialog
+      v-model="showDeleteDialog"
+      :loading="deleteLoading"
+      :title="t('purchases.shared.lists.quotation.dialogs.delete.title')"
+      :message="t('purchases.shared.lists.quotation.dialogs.delete.message')"
+      @confirm="confirmDelete"
+    />
 
-    <DeleteConfirmDialog v-model="showBulkDeleteDialog" :loading="deleteLoading" title="حذف عروض السعر"
-      :message="`هل أنت متأكد من حذف ${selectedRequests.length} عرض؟`" @confirm="confirmBulkDelete" />
+    <DeleteConfirmDialog
+      v-model="showBulkDeleteDialog"
+      :loading="deleteLoading"
+      :title="t('purchases.shared.lists.quotation.dialogs.bulkDelete.title')"
+      :message="t('purchases.shared.lists.quotation.dialogs.bulkDelete.message', { count: selectedRequests.length })"
+      @confirm="confirmBulkDelete"
+    />
   </default-layout>
 </template>

@@ -117,10 +117,10 @@ const itemToDelete = ref<GroupProduct | null>(null)
 // Filters
 const showAdvancedFilters = ref(false)
 const filterStatus = ref<string | null>(null)
-const statusOptions = [
-  { title: 'فعال', value: 'فعال' },
-  { title: 'غير فعال', value: 'غير فعال' }
-]
+const statusOptions = computed(() => [
+  { title: t('pages.groupProducts.listPage.filters.active'), value: t('pages.groupProducts.listPage.filters.active') },
+  { title: t('pages.groupProducts.listPage.filters.inactive'), value: t('pages.groupProducts.listPage.filters.inactive') },
+])
 const filterUpdatedAt = ref('')
 const filterProductName = ref('')
 const filterSkuCode = ref('')
@@ -169,24 +169,24 @@ const plusIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
 </svg>`
 
 // Default headers (fallback)
-const defaultTableHeaders: TableHeader[] = [
-  { key: 'name', title: 'الاسم', width: '180px' },
-  { key: 'code', title: 'الكود', width: '120px' },
-  { key: 'unit', title: 'الوحدة', width: '100px' },
-  { key: 'category', title: 'التصنيف', width: '100px' },
-  { key: 'purchase_price', title: 'سعر الشراء', width: '100px' },
-  { key: 'sell_price', title: 'سعر البيع', width: '100px' },
-  { key: 'is_active', title: 'الحالة', width: '100px' },
-]
+const defaultTableHeaders = computed<TableHeader[]>(() => [
+  { key: 'name', title: t('pages.groupProducts.listPage.table.name'), width: '180px' },
+  { key: 'code', title: t('pages.groupProducts.listPage.table.code'), width: '120px' },
+  { key: 'unit', title: t('pages.groupProducts.listPage.table.unit'), width: '100px' },
+  { key: 'category', title: t('pages.groupProducts.listPage.table.category'), width: '100px' },
+  { key: 'purchase_price', title: t('pages.groupProducts.listPage.table.purchasePrice'), width: '100px' },
+  { key: 'sell_price', title: t('pages.groupProducts.listPage.table.sellPrice'), width: '100px' },
+  { key: 'is_active', title: t('pages.groupProducts.listPage.table.status'), width: '100px' },
+])
 
-const defaultSubItemHeaders: TableHeader[] = [
-  { key: 'name', title: 'اسم المنتج الفرعي', width: '218px' },
-  { key: 'code', title: 'الكود', width: '150px' },
-  { key: 'sell_price', title: 'سعر البيع', width: '150px' },
-  { key: 'purchase_price', title: 'سعر الشراء', width: '150px' },
-  { key: 'quantity', title: 'الكمية', width: '150px' },
-  { key: 'total_amount', title: 'المبلغ الإجمالي', width: '150px' },
-]
+const defaultSubItemHeaders = computed<TableHeader[]>(() => [
+  { key: 'name', title: t('pages.groupProducts.listPage.subItemsTable.name'), width: '218px' },
+  { key: 'code', title: t('pages.groupProducts.listPage.subItemsTable.code'), width: '150px' },
+  { key: 'sell_price', title: t('pages.groupProducts.listPage.subItemsTable.sellPrice'), width: '150px' },
+  { key: 'purchase_price', title: t('pages.groupProducts.listPage.subItemsTable.purchasePrice'), width: '150px' },
+  { key: 'quantity', title: t('pages.groupProducts.listPage.subItemsTable.quantity'), width: '150px' },
+  { key: 'total_amount', title: t('pages.groupProducts.listPage.subItemsTable.totalAmount'), width: '150px' },
+])
 
 // === Computed ===
 const tableHeaders = computed(() => {
@@ -197,7 +197,7 @@ const tableHeaders = computed(() => {
       width: '140px',
     }))
   }
-  return defaultTableHeaders
+  return defaultTableHeaders.value
 })
 
 const computedSubItemHeaders = computed(() => {
@@ -208,7 +208,7 @@ const computedSubItemHeaders = computed(() => {
       width: '150px',
     }))
   }
-  return defaultSubItemHeaders
+  return defaultSubItemHeaders.value
 })
 
 // === API Functions ===
@@ -230,7 +230,10 @@ const fetchData = async (cursor?: string | null, append = false) => {
     if (filterUnit.value) params.append('unit', filterUnit.value)
     if (filterCategory.value) params.append('category', filterCategory.value)
     if (filterStatus.value) {
-      params.append('status', filterStatus.value === 'فعال' ? '1' : '0')
+      params.append(
+        'status',
+        filterStatus.value === t('pages.groupProducts.listPage.filters.active') ? '1' : '0'
+      )
     }
 
     const response = await api.get<ApiResponse>(`/grouped-items?${params}`)
@@ -262,8 +265,8 @@ const fetchData = async (cursor?: string | null, append = false) => {
 
     nextCursor.value = response.pagination.next_cursor
   } catch (err: any) {
-    errorMessage.value = err?.response?.data?.message || 'حدث خطأ أثناء جلب البيانات'
-    showError(errorMessage.value || 'حدث خطأ')
+    errorMessage.value = err?.response?.data?.message || t('pages.groupProducts.listPage.messages.fetchError')
+    showError(errorMessage.value || t('pages.groupProducts.listPage.messages.fetchError'))
     console.error('Error fetching grouped items:', err)
   } finally {
     isLoading.value = false
@@ -304,17 +307,17 @@ const confirmDelete = async () => {
       if (!itemToDelete.value) return
       await api.delete(`/grouped-items/${itemToDelete.value.id}`)
       tableItems.value = tableItems.value.filter(t => t.id !== itemToDelete.value!.id)
-      success('تم حذف المنتج بنجاح')
+      success(t('pages.groupProducts.listPage.messages.deleteSuccess'))
     } else {
       // Bulk delete
       if (selectedRows.value.length === 0) return
       await Promise.all(selectedRows.value.map(id => api.delete(`/grouped-items/${id}`)))
       tableItems.value = tableItems.value.filter(t => !selectedRows.value.includes(t.id))
       selectedRows.value = []
-      success('تم حذف المنتجات المحددة بنجاح')
+      success(t('pages.groupProducts.listPage.messages.bulkDeleteSuccess'))
     }
   } catch (err: any) {
-    showError(err?.response?.data?.message || 'حدث خطأ أثناء الحذف')
+    showError(err?.response?.data?.message || t('pages.groupProducts.listPage.messages.deleteError'))
     console.error('Error deleting grouped items:', err)
   } finally {
     deleteLoading.value = false
@@ -338,7 +341,13 @@ const confirmStatusChange = async () => {
     const newStatus = !itemToChangeStatus.value.status
 
     await api.patch(`/grouped-items/${itemToChangeStatus.value.id}/change-status`, { is_active: newStatus })
-    success(`تم ${newStatus ? 'تفعيل' : 'تعطيل'} المنتج بنجاح`)
+    success(
+      t('pages.groupProducts.listPage.messages.statusChangeSuccess', {
+        status: newStatus
+          ? t('pages.groupProducts.listPage.messages.activate')
+          : t('pages.groupProducts.listPage.messages.deactivate'),
+      })
+    )
 
     // Update local state
     const index = tableItems.value.findIndex(t => t.id === itemToChangeStatus.value!.id)
@@ -346,7 +355,7 @@ const confirmStatusChange = async () => {
       tableItems.value[index].status = newStatus
     }
   } catch (err: any) {
-    showError(err?.response?.data?.message || 'حدث خطأ أثناء تغيير الحالة')
+    showError(err?.response?.data?.message || t('pages.groupProducts.listPage.messages.statusChangeError'))
     console.error('Error changing status:', err)
   } finally {
     statusChangeLoading.value = false
@@ -377,7 +386,13 @@ const confirmSubItemStatusChange = async () => {
     const newStatus = !subItemToChangeStatus.value.is_active
 
     await api.patch(`/grouped-items/${subItemToChangeStatus.value.id}/change-status`, { is_active: newStatus })
-    success(`تم ${newStatus ? 'تفعيل' : 'تعطيل'} المنتج الفرعي بنجاح`)
+    success(
+      t('pages.groupProducts.listPage.messages.subItemStatusChangeSuccess', {
+        status: newStatus
+          ? t('pages.groupProducts.listPage.messages.activate')
+          : t('pages.groupProducts.listPage.messages.deactivate'),
+      })
+    )
 
     // Update local state - find the sub_item in the parent
     if (parentItemId.value) {
@@ -392,7 +407,9 @@ const confirmSubItemStatusChange = async () => {
       }
     }
   } catch (err: any) {
-    showError(err?.response?.data?.message || 'حدث خطأ أثناء تغيير حالة المنتج الفرعي')
+    showError(
+      err?.response?.data?.message || t('pages.groupProducts.listPage.messages.subItemStatusChangeError')
+    )
     console.error('Error changing sub_item status:', err)
   } finally {
     subItemStatusChangeLoading.value = false
@@ -484,10 +501,10 @@ onBeforeUnmount(() => {
         class="flex justify-end items-stretch rounded border border-gray-300 w-fit ms-auto mb-4 overflow-hidden bg-white text-sm">
         <ButtonWithIcon variant="flat" height="40" rounded="0"
           custom-class="font-semibold text-base border-gray-300 bg-primary-100 !text-primary-900"
-          :prepend-icon="importIcon" :label="t('common.import')" />
+          :prepend-icon="importIcon" :label="t('common.actions.import')" />
         <ButtonWithIcon variant="flat" height="40" rounded="0"
           custom-class="font-semibold text-base border-gray-300 bg-primary-50 !text-primary-900"
-          :prepend-icon="exportIcon" :label="t('common.export')" />
+          :prepend-icon="exportIcon" :label="t('common.actions.export')" />
       </div>
 
       <div class="bg-gray-50 rounded-md -mx-6">
@@ -498,11 +515,11 @@ onBeforeUnmount(() => {
             class="flex flex-wrap items-stretch rounded overflow-hidden border border-gray-200 bg-white text-sm">
             <ButtonWithIcon variant="flat" height="40" rounded="0"
               custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-              :prepend-icon="trash_1_icon" color="white" label="حذف المحدد" @click="handleBulkDelete" />
+              :prepend-icon="trash_1_icon" color="white" :label="t('pages.groupProducts.listPage.buttons.bulkDelete')" @click="handleBulkDelete" />
             <div class="w-px bg-gray-200"></div>
             <ButtonWithIcon variant="flat" height="40" rounded="0"
               custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-              :prepend-icon="trash_2_icon" color="white" label="حذف الجميع" @click="handleBulkDelete" />
+              :prepend-icon="trash_2_icon" color="white" :label="t('pages.groupProducts.listPage.buttons.deleteAll')" @click="handleBulkDelete" />
           </div>
 
           <!-- Main header controls -->
@@ -512,7 +529,7 @@ onBeforeUnmount(() => {
               <template v-slot:activator="{ props }">
                 <ButtonWithIcon v-bind="props" variant="outlined" rounded="4" color="gray-500" height="40"
                   custom-class="font-semibold text-base border-gray-400"
-                  :prepend-icon="columnIcon" :label="t('common.columns')" append-icon="mdi-chevron-down" />
+                  :prepend-icon="columnIcon" :label="t('common.table.columns')" append-icon="mdi-chevron-down" />
               </template>
               <v-list>
                 <v-list-item v-for="header in allHeaders" :key="header.key" @click="toggleHeader(header.key)">
@@ -527,10 +544,10 @@ onBeforeUnmount(() => {
 
             <ButtonWithIcon variant="flat" color="primary-500" height="40" rounded="4"
               custom-class="px-7 font-semibold text-base text-white border !border-primary-200"
-              :prepend-icon="searchIcon" :label="t('common.advancedSearch')" @click="toggleAdvancedFilters" />
+              :prepend-icon="searchIcon" :label="t('common.table.advancedSearch')" @click="toggleAdvancedFilters" />
             <ButtonWithIcon v-if="canCreate" variant="flat" color="primary-100" height="40" rounded="4"
               custom-class="px-7 font-semibold text-base !text-primary-800 border !border-primary-200"
-              :prepend-icon="plusIcon" :label="t('common.addProduct')" @click="openCreate" />
+              :prepend-icon="plusIcon" :label="t('common.form.addProduct')" @click="openCreate" />
           </div>
         </div>
 
@@ -554,10 +571,10 @@ onBeforeUnmount(() => {
             <div class="flex gap-2 items-center">
               <ButtonWithIcon variant="flat" color="primary-500" rounded="4" height="40"
                 custom-class="px-5 font-semibold !text-white text-sm sm:text-base"
-                :prepend-icon="searchIcon" label="ابحث الآن" @click="handleSearch" />
+                :prepend-icon="searchIcon" :label="t('pages.groupProducts.listPage.buttons.searchNow')" @click="handleSearch" />
               <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4" border="sm"
                 custom-class="px-5 font-semibold text-sm sm:text-base !text-primary-800 !border-primary-200"
-                prepend-icon="mdi-refresh" label="إعادة تعيين" @click="resetFilters" />
+                prepend-icon="mdi-refresh" :label="t('pages.groupProducts.listPage.buttons.reset')" @click="resetFilters" />
             </div>
 
           </div>
@@ -581,15 +598,17 @@ onBeforeUnmount(() => {
         <!-- Loading more indicator -->
         <div v-if="loadingMore" class="flex justify-center items-center py-4">
           <v-progress-circular indeterminate color="primary" size="32" />
-          <span class="ms-2 text-gray-600">جاري تحميل المزيد...</span>
+          <span class="ms-2 text-gray-600">{{ t('pages.groupProducts.listPage.messages.loadingMore') }}</span>
         </div>
       </div>
     </div>
 
     <!-- Unified Delete Confirmation Dialog -->
     <DeleteConfirmDialog v-model="showDeleteDialog" :loading="deleteLoading" 
-      :title="deleteMode === 'single' ? 'حذف المنتج' : 'حذف المنتجات'"
-      :message="deleteMode === 'single' ? `هل أنت متأكد من حذف ${itemToDelete?.name}؟` : `هل أنت متأكد من حذف ${selectedRows.length} منتج؟`" 
+      :title="deleteMode === 'single' ? t('pages.groupProducts.listPage.deleteDialog.titleSingle') : t('pages.groupProducts.listPage.deleteDialog.titleBulk')"
+      :message="deleteMode === 'single'
+        ? t('pages.groupProducts.listPage.deleteDialog.messageSingle', { name: itemToDelete?.name })
+        : t('pages.groupProducts.listPage.deleteDialog.messageBulk', { count: selectedRows.length })" 
       @confirm="confirmDelete" />
 
     <!-- Status Change Confirmation Dialog (Main Item) -->

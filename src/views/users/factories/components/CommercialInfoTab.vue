@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { reactive, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 interface Props {
   licenseType: string | null;
@@ -95,22 +98,22 @@ const datepickerInput = `<svg width="16" height="16" viewBox="0 0 16 16" fill="n
 
 <template>
   <div class="mb-6 bg-gray-50 rounded-lg p-6">
-    <h2 class="text-lg font-bold text-primary-900 mb-4">البيانات التجارية</h2>
+    <h2 class="text-lg font-bold text-primary-900 mb-4">{{ t('pages.factories.form.tabs.commercialInfo') }}</h2>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
       <SelectWithIconInput clearable v-model="formData.licenseType" @update:model-value="() => handleFieldUpdate('license_type')"
-        label="نوع الرخصة" placeholder="اختر نوع الرخصة مثل: صناعية" :items="licenseTypeItems" 
+        :label="t('form.factory.commercialInfo.licenseType.label')" :placeholder="t('form.factory.commercialInfo.licenseType.placeholder')" :items="licenseTypeItems" 
         :error-messages="formErrors?.license_type" />
 
-      <TextInput v-model="formData.licenseNumber" @input="() => handleFieldUpdate('license_number')" label="رقم الرخصة"
-        placeholder="ادخل رقم الرخصة مثل: FAC-LIC-2024-001" :error-messages="formErrors?.license_number" />
+      <TextInput v-model="formData.licenseNumber" @input="() => handleFieldUpdate('license_number')" :label="t('form.identity.licenseNumber.label')"
+        :placeholder="t('form.identity.licenseNumber.placeholder')" :error-messages="formErrors?.license_number" />
 
       <SelectWithIconInput clearable v-model="formData.issuingAuthority" @update:model-value="() => handleFieldUpdate('issuing_authority')"
-        label="الجهة المانحة" placeholder="اختر الجهة المانحة مثل: الهيئة السعودية للمواصفات" :items="issuingAuthorityItems" 
+        :label="t('form.factory.commercialInfo.issuingAuthority.label')" :placeholder="t('form.factory.commercialInfo.issuingAuthority.placeholder')" :items="issuingAuthorityItems" 
         :error-messages="formErrors?.issuing_authority" />
 
-      <DatePickerInput v-model="formData.issueDate" @update:model-value="() => handleFieldUpdate('issue_date')" label="تاريخ اصدار الرخصة"
-        placeholder="اختر تاريخ الاصدار مثل: 01-01-2024" :error-messages="formErrors?.issue_date">
+      <DatePickerInput v-model="formData.issueDate" @update:model-value="() => handleFieldUpdate('issue_date')" :label="t('form.identity.licenseIssueDate.label')"
+        :placeholder="t('form.identity.licenseIssueDate.placeholder')" :error-messages="formErrors?.issue_date">
         <template #append-inner>
           <v-tooltip location="top" content-class="custom-tooltip">
             <template #activator="{ props: tooltipProps }">
@@ -118,7 +121,7 @@ const datepickerInput = `<svg width="16" height="16" viewBox="0 0 16 16" fill="n
                 custom-class="!min-w-0 p-0" :prepend-icon="infoIcon" v-bind="tooltipProps" />
             </template>
             <div>
-              تاريخ إصدار الرخصة
+              {{ t('form.identity.licenseIssueDate.info') }}
             </div>
           </v-tooltip>
         </template>
@@ -127,8 +130,8 @@ const datepickerInput = `<svg width="16" height="16" viewBox="0 0 16 16" fill="n
         </template>
       </DatePickerInput>
 
-      <DatePickerInput v-model="formData.expiryDate" @update:model-value="() => handleFieldUpdate('expiry_date')" label="تاريخ انتهاء الرخصة"
-        placeholder="اختر تاريخ الانتهاء مثل: 31-12-2024" :error-messages="formErrors?.expiry_date">
+      <DatePickerInput v-model="formData.expiryDate" @update:model-value="() => handleFieldUpdate('expiry_date')" :label="t('form.identity.licenseExpiryDate.label')"
+        :placeholder="t('form.identity.licenseExpiryDate.placeholder')" :error-messages="formErrors?.expiry_date">
         <template #append-inner>
           <v-tooltip location="top" content-class="custom-tooltip">
             <template #activator="{ props: tooltipProps }">
@@ -136,7 +139,7 @@ const datepickerInput = `<svg width="16" height="16" viewBox="0 0 16 16" fill="n
                 custom-class="!min-w-0 p-0" :prepend-icon="infoIcon" v-bind="tooltipProps" />
             </template>
             <div>
-              تاريخ انتهاء صلاحية الرخصة
+              {{ t('form.identity.licenseExpiryDate.info') }}
             </div>
           </v-tooltip>
         </template>
@@ -146,20 +149,20 @@ const datepickerInput = `<svg width="16" height="16" viewBox="0 0 16 16" fill="n
       </DatePickerInput>
 
       <div>
-        <span class="text-gray-700 text-sm font-semibold mb-2 block">حالة الرخصة</span>
+        <span class="text-gray-700 text-sm font-semibold mb-2 block">{{ t('form.factory.commercialInfo.licenseStatus.label') }}</span>
         <div class="flex gap-4">
           <v-radio-group v-model="formData.licenseStatus" @update:model-value="() => handleFieldUpdate('license_status')" inline hide-details>
             <v-radio value="active" color="primary">
               <template #label>
                 <span :class="formData.licenseStatus === 'active' ? 'text-primary font-semibold' : 'text-gray-600'">
-                  فعال
+                  {{ t('common.status.active') }}
                 </span>
               </template>
             </v-radio>
             <v-radio value="inactive" color="primary">
               <template #label>
                 <span :class="formData.licenseStatus === 'inactive' ? 'text-primary font-semibold' : 'text-gray-600'">
-                  غير فعال
+                  {{ t('common.status.inactive') }}
                 </span>
               </template>
             </v-radio>
@@ -167,27 +170,27 @@ const datepickerInput = `<svg width="16" height="16" viewBox="0 0 16 16" fill="n
         </div>
       </div>
 
-      <SelectWithIconInput clearable v-model="formData.licensedActivity" @update:model-value="() => handleFieldUpdate('licensed_activity')" label="النشاط المرخص"
-        placeholder="اختر النشاط المرخص مثل: تصنيع مواد البناء"  :items="licensedActivityItems"  :error-messages="formErrors?.licensed_activity"/>
+      <SelectWithIconInput clearable v-model="formData.licensedActivity" @update:model-value="() => handleFieldUpdate('licensed_activity')" :label="t('form.factory.commercialInfo.licensedActivity.label')"
+        :placeholder="t('form.factory.commercialInfo.licensedActivity.placeholder')"  :items="licensedActivityItems"  :error-messages="formErrors?.licensed_activity"/>
 
       <MultipleSelectInput v-model="formData.activityTypes" @update:model-value="() => handleFieldUpdate('activity_types')"
-        label="نوع المواد" placeholder="اختر نوع النشاط مثل: تصنيع مواد" :items="activityTypesItems"
+        :label="t('form.factory.commercialInfo.activityTypes.label')" :placeholder="t('form.factory.commercialInfo.activityTypes.placeholder')" :items="activityTypesItems"
         :input-props="{ clearable: true }" :error-messages="formErrors?.activity_types" />
 
       <MultipleSelectInput v-model="formData.productTypes" @update:model-value="() => handleFieldUpdate('product_types')"
-        label="أنواع المنتجات" placeholder="اختر أنواع المنتجات مثل: اسمنت، رمل" :items="productTypesItems"
+        :label="t('form.factory.commercialInfo.productTypes.label')" :placeholder="t('form.factory.commercialInfo.productTypes.placeholder')" :items="productTypesItems"
         :input-props="{ clearable: true }" :error-messages="formErrors?.product_types" />
 
       <MultipleSelectInput v-model="formData.rawMaterialTypes" @update:model-value="() => handleFieldUpdate('raw_material_types')"
-        label="نوع المواد الخام" placeholder="اختر نوع المواد الخام مثل: حجر جيري" :items="rawMaterialTypesItems"
+        :label="t('form.factory.commercialInfo.rawMaterialTypes.label')" :placeholder="t('form.factory.commercialInfo.rawMaterialTypes.placeholder')" :items="rawMaterialTypesItems"
         :input-props="{ clearable: true }" :error-messages="formErrors?.raw_material_types" />
 
       <SelectWithIconInput clearable v-model="formData.rawMaterialSource" @update:model-value="() => handleFieldUpdate('raw_material_source')"
-        label="مصدر المواد الخام" placeholder="اختر مصدر المواد الخام مثل: محلي" :items="rawMaterialSourceItems" 
+        :label="t('form.factory.commercialInfo.rawMaterialSource.label')" :placeholder="t('form.factory.commercialInfo.rawMaterialSource.placeholder')" :items="rawMaterialSourceItems" 
         :error-messages="formErrors?.raw_material_source" />
 
-      <TextInput v-model="formData.licensedCapacity" @input="() => handleFieldUpdate('licensed_capacity')" label="الطاقة المرخصة"
-        placeholder="ادخل الطاقة المرخصة مثل: 1000 طن/يوم" type="number" :error-messages="formErrors?.licensed_capacity" />
+      <TextInput v-model="formData.licensedCapacity" @input="() => handleFieldUpdate('licensed_capacity')" :label="t('form.factory.commercialInfo.licensedCapacity.label')"
+        :placeholder="t('form.factory.commercialInfo.licensedCapacity.placeholder')" type="number" :error-messages="formErrors?.licensed_capacity" />
     </div>
   </div>
 </template>
