@@ -2,6 +2,7 @@
 import { ref, computed, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import TopHeader from "@/components/price-offers/TopHeader.vue";
+import AppFormBreadcrumb from "@/components/common/AppFormBreadcrumb.vue";
 import DatePickerInput from "@/components/common/forms/DatePickerInput.vue";
 import TextareaInput from "@/components/common/forms/TextareaInput.vue";
 import { useApi } from "@/composables/useApi";
@@ -321,6 +322,15 @@ const handleSubmit = async (option: SubmitOption) => {
 <template>
   <default-layout>
     <div class="pickup-form-page -mx-6 bg-qallab-dashboard-bg space-y-4" :class="{ 'opacity-60 pointer-events-none': isLoading }">
+      <AppFormBreadcrumb
+        list-path="/sales/so-pickups/list"
+        module-root-key="breadcrumb.sales.root"
+        list-label-key="breadcrumb.sales.soPickups.list"
+        create-label-key="breadcrumb.sales.soPickups.create"
+        edit-label-key="breadcrumb.sales.soPickups.edit"
+        :is-edit-mode="isEditMode"
+        :code="offerCode"
+      />
       <!-- Page Header -->
       <TopHeader
         :icon="filePlusIcon"

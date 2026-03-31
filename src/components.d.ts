@@ -12,6 +12,7 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     AppDialog: typeof import('./components/common/AppDialog.vue')['default']
+    AppFormBreadcrumb: typeof import('./components/common/AppFormBreadcrumb.vue')['default']
     AuthLayout: typeof import('./layouts/AuthLayout.vue')['default']
     ButtonWithIcon: typeof import('./components/common/buttons/ButtonWithIcon.vue')['default']
     CheckboxInput: typeof import('./components/common/forms/checkboxInput.vue')['default']

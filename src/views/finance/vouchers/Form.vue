@@ -49,6 +49,7 @@ const saving = ref(false);
 const voucherCode = ref<string>("");
 const existingAttachmentUrl = ref<string | null>(null);
 const isAttachmentChanged = ref(false);
+const isFormDataLoaded = ref(false);
 
 const existingAttachmentIsImage = computed(() => {
     if (!existingAttachmentUrl.value) return false;
@@ -161,31 +162,113 @@ watch(() => formData.value.method_type, (newMethodType) => {
     }
 });
 
+// Wait for customer data in edit mode
+const waitForCustomerData = async () => {
+    if (!isEditing.value) return;
+
+    if (isFormDataLoaded.value && formData.value.customer_id) {
+        return;
+    }
+
+    await new Promise(resolve => {
+        const checkInterval = setInterval(() => {
+            if (isFormDataLoaded.value && formData.value.customer_id) {
+                clearInterval(checkInterval);
+                clearTimeout(timeoutId);
+                resolve(true);
+            }
+        }, 10);
+
+        const timeoutId = setTimeout(() => {
+            clearInterval(checkInterval);
+            resolve(true);
+        }, 5000);
+    });
+};
+
+// Wait for supplier data in edit mode
+const waitForSupplierData = async () => {
+    if (!isEditing.value) return;
+
+    if (isFormDataLoaded.value && formData.value.supplier_id) {
+        return;
+    }
+
+    await new Promise(resolve => {
+        const checkInterval = setInterval(() => {
+            if (isFormDataLoaded.value && formData.value.supplier_id) {
+                clearInterval(checkInterval);
+                clearTimeout(timeoutId);
+                resolve(true);
+            }
+        }, 10);
+
+        const timeoutId = setTimeout(() => {
+            clearInterval(checkInterval);
+            resolve(true);
+        }, 5000);
+    });
+};
+
 // Fetch customers
-const fetchCustomers = async () => {
+const fetchCustomers = async (search: string = '', cursor?: string, perPage: number = 20) => {
+    if (isEditing.value) {
+        await waitForCustomerData();
+    }
+
     try {
-        const res = await api.get<any>("/customers/list");
-        if (Array.isArray(res.data)) {
-            customerItems.value = res.data.map((i: any) => ({ title: i.full_name, value: i.id }));
+        const params: any = { per_page: perPage };
+        if (search) {
+            params.name = search;
         }
+        if (cursor) {
+            params.cursor = cursor;
+        }
+        if (formData.value.customer_id) {
+            params.order_by_id = formData.value.customer_id;
+        }
+
+        const res = await api.get<any>('/customers/list', { params });
+
+        return {
+            data: res.data || [],
+            next_cursor: res.pagination?.next_cursor || null,
+            pagination: res.pagination
+        };
     } catch (e) {
-        console.error("Error fetching customers:", e);
+        console.error('Error fetching customers:', e);
+        return { data: [], next_cursor: null };
     }
 };
 
 // Fetch suppliers
-const fetchSuppliers = async () => {
+const fetchSuppliers = async (search: string = '', cursor?: string, perPage: number = 20) => {
+    if (isEditing.value) {
+        await waitForSupplierData();
+    }
+
     try {
-        const res = await api.get<any>('/suppliers/list', {
-            params: {
-                service_type: 'logistic_company'
-            }
-        });
-        if (Array.isArray(res.data)) {
-            supplierItems.value = res.data.map((i: any) => ({ title: i.full_name, value: i.id }));
+        const params: any = { per_page: perPage };
+        if (search) {
+            params.name = search;
         }
+        if (cursor) {
+            params.cursor = cursor;
+        }
+        if (formData.value.supplier_id) {
+            params.order_by_id = formData.value.supplier_id;
+        }
+
+        const res = await api.get<any>('/suppliers/list', { params });
+
+        return {
+            data: res.data || [],
+            next_cursor: res.pagination?.next_cursor || null,
+            pagination: res.pagination
+        };
     } catch (e) {
         console.error('Error fetching suppliers:', e);
+        return { data: [], next_cursor: null };
     }
 };
 
@@ -225,6 +308,7 @@ const fetchVoucher = async () => {
             }
             suppressMethodWatcher.value = false;
             suppressTypeWatcher.value = false;
+            isFormDataLoaded.value = true;
         }
     } catch (err: any) {
         console.error('Error fetching voucher:', err);
@@ -296,10 +380,26 @@ watch(() => formData.value.attachment, (newVal) => {
     }
 });
 
+// Watch for type changes - only used to trigger SelectInput remount via key change
+// The selected value is preserved through typeId computed property
+watch(() => formData.value.type, (newType, oldType) => {
+    if (suppressTypeWatcher.value) return;
+    // Only react to actual user changes, not initial load
+    if (!oldType || newType === oldType) return;
+    
+    // The key change will remount the SelectInput component
+    // The typeId computed property will automatically show the correct value
+});
+
+// Computed property for dynamic fetch function based on type
+const fetchFunction = computed(() => {
+    return formData.value.type === 'customer' ? fetchCustomers : fetchSuppliers;
+});
+
 // Lifecycle
 onMounted(async () => {
     pageLoading.value = true
-    await Promise.all([fetchCustomers(), fetchSuppliers(), fetchConstants()]);
+    await fetchConstants();
     if (isEditing.value) {
         await fetchVoucher();
     }
@@ -363,10 +463,23 @@ const saveIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xm
 
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 gap-y-6">
                             <!-- Client/Supplier Name -->
-                            <SelectWithIconInput show-add-button v-model="typeId" :label="`اسم ال${entityLabel} *`"
-                                :placeholder="`اختر ال${entityLabel}`" :rules="[required()]" clearable
-                                :items="clientItems" :hide-details="false" :error-messages="formErrors['type_id']"
-                                @update:model-value="delete formErrors['type_id']" />
+                            <SelectInput 
+                                :key="`select-${formData.type}`"
+                                show-add-button 
+                                v-model="typeId" 
+                                :label="`اسم ال${entityLabel} *`"
+                                :placeholder="`اختر ال${entityLabel}`" 
+                                :rules="[required()]" 
+                                clearable
+                                :items="[]" 
+                                :hide-details="false" 
+                                :error-messages="formErrors['type_id']"
+                                @update:model-value="delete formErrors['type_id']"
+                                :server-side="true"
+                                :fetch-function="fetchFunction"
+                                item-title-key="full_name"
+                                item-value-key="id"
+                                :debounce-time="500" />
 
                             <!-- Voucher Date -->
                             <DatePickerInput v-model="formData.expenses_date" label="تاريخ السند" :rules="[required()]"

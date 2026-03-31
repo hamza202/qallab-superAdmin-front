@@ -122,7 +122,11 @@ const fetchData = async (search: string = "", reset: boolean = true) => {
             if (reset) {
                 serverItems.value = mappedItems;
             } else {
-                serverItems.value = [...serverItems.value, ...mappedItems];
+                // Filter out duplicates by checking if the value already exists
+                const valueKey = props.itemValueKey || 'value';
+                const existingValues = new Set(serverItems.value.map((item: any) => item[valueKey]));
+                const uniqueNewItems = mappedItems.filter((item: any) => !existingValues.has(item[valueKey]));
+                serverItems.value = [...serverItems.value, ...uniqueNewItems];
             }
 
             // Update selectedItem if the current selection is in the new results

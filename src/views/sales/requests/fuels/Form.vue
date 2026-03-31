@@ -10,6 +10,7 @@ import DatePickerInput from '@/components/common/forms/DatePickerInput.vue';
 import DateTimePickerInput from '@/components/common/forms/DateTimePickerInput.vue';
 import TelInput from '@/components/common/forms/TelInput.vue';
 import { useApi } from '@/composables/useApi';
+import AppFormBreadcrumb from '@/components/common/AppFormBreadcrumb.vue';
 import { fileIcon, fileCheckIcon, mapMarkerIcon, downloadIcon, packageIcon, UploadedFileIcon, fileQuestionIcon, messagePlusIcon } from '@/components/icons/priceOffersIcons';
 
 useI18n()
@@ -555,6 +556,15 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
 <template>
     <default-layout>
         <div class="request-material-product-page -mx-6">
+            <AppFormBreadcrumb
+                list-path="/sales/requests/fuels/list"
+                module-root-key="breadcrumb.sales.root"
+                list-label-key="breadcrumb.sales.requests.fuels.list"
+                create-label-key="breadcrumb.sales.requests.fuels.create"
+                edit-label-key="breadcrumb.sales.requests.fuels.edit"
+                :is-edit-mode="isEditMode"
+                :code="isEditMode ? (formData.code ? '#' + formData.code : '') : ''"
+            />
             <!-- Page Header (كود العرض #124098) -->
             <TopHeader :icon="fileQuestionIcon" title-key="pages.SalesRequestsFuels.FormTitle"
                 description-key="pages.SalesRequestsFuels.FormDescription" :show-action="false"

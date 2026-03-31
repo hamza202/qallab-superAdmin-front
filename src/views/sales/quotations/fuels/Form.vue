@@ -5,6 +5,7 @@ import { useRoute, useRouter } from 'vue-router';
 import AddProductDialogFuelsQuotation, { type FuelQuotationProductToAdd } from '@/components/price-offers/AddProductDialogFuelsQuotation.vue';
 import EditProductsDialog from '@/components/price-offers/EditProductsDialog.vue';
 import TopHeader from '@/components/price-offers/TopHeader.vue';
+import AppFormBreadcrumb from '@/components/common/AppFormBreadcrumb.vue';
 import DatePickerInput from '@/components/common/forms/DatePickerInput.vue';
 import DateTimePickerInput from '@/components/common/forms/DateTimePickerInput.vue';
 import TelInput from '@/components/common/forms/TelInput.vue';
@@ -693,6 +694,15 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
 <template>
     <default-layout>
         <div class="request-material-product-page -mx-6 bg-qallab-dashboard-bg space-y-4">
+            <AppFormBreadcrumb
+                list-path="/sales/quotations/fuels/list"
+                module-root-key="breadcrumb.sales.root"
+                list-label-key="breadcrumb.sales.quotations.fuels.list"
+                create-label-key="breadcrumb.sales.quotations.fuels.create"
+                edit-label-key="breadcrumb.sales.quotations.fuels.edit"
+                :is-edit-mode="isEditMode"
+                :code="isEditMode ? (formData.code || '') : ''"
+            />
             <!-- Page Header -->
             <TopHeader :icon="filePlusIcon" title-key="pages.SalesQuotationsFuels.FormTitle"
                 description-key="pages.SalesQuotationsFuels.FormDescription" :show-action="false"

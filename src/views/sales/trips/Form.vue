@@ -5,6 +5,7 @@ import { useApi } from '@/composables/useApi';
 import { useNotification } from '@/composables/useNotification';
 import { useForm } from '@/composables/useForm';
 import TopHeader from '@/components/price-offers/TopHeader.vue';
+import AppFormBreadcrumb from '@/components/common/AppFormBreadcrumb.vue';
 import AddProductDialog from '@/components/price-offers/AddProductDialog.vue';
 import EditProductsDialog from '@/components/price-offers/EditProductsDialog.vue';
 import Map from '@/components/common/Map.vue';
@@ -1269,6 +1270,15 @@ onMounted(async () => {
   <default-layout>
     <div class="trips-form-page -mx-6 bg-qallab-dashboard-bg space-y-4"
       :class="{ 'opacity-60 pointer-events-none': isLoading }">
+      <AppFormBreadcrumb
+        list-path="/sales/trips/list"
+        module-root-key="breadcrumb.sales.root"
+        list-label-key="breadcrumb.sales.trips.list"
+        create-label-key="breadcrumb.sales.trips.create"
+        edit-label-key="breadcrumb.sales.trips.edit"
+        :is-edit-mode="isEditMode"
+        :code="tripCode"
+      />
       <!-- Page Header -->
       <TopHeader :icon="fileCheckIcon" title-key="pages.SalesTrips.create"
         description-key="pages.SalesTrips.createDescription" :show-action="false" code-label="كود الرحلة"

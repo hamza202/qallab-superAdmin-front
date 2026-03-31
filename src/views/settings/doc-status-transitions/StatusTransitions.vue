@@ -8,6 +8,7 @@ import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 import { SaveDoubleIcon, fileCheckIcon } from "@/components/icons/globalIcons";
 import TopHeader from "@/components/price-offers/TopHeader.vue";
+import AppFormBreadcrumb from "@/components/common/AppFormBreadcrumb.vue";
 
 const api = useApi();
 const route = useRoute();
@@ -170,6 +171,16 @@ onMounted(async () => {
 <template>
     <default-layout>
         <div class="doc-status-transitions-form-page -mx-6">
+            <AppFormBreadcrumb
+                list-path="/settings/doc-status-transitions/list"
+                module-root-key="breadcrumb.settings.root"
+                list-label-key="breadcrumb.settings.docStatusTransitions.list"
+                create-label-key="breadcrumb.settings.docStatusTransitions.workflow"
+                edit-label-key="breadcrumb.settings.docStatusTransitions.workflow"
+                :is-edit-mode="false"
+                action-label-key="breadcrumb.settings.docStatusTransitions.workflow"
+                :code="String(status_label || '')"
+            />
             <!-- Page Header -->
             <TopHeader :icon="fileCheckIcon" title-key="pages.docStatusTransitions.statusTransitionsTitle"
                 description-key="pages.docStatusTransitions.FormDescription" :show-action="false" />

@@ -25,6 +25,7 @@ import {
   HelpCircleIcon,
   rialIcon,
 } from '@/components/icons/globalIcons';
+import AppFormBreadcrumb from '@/components/common/AppFormBreadcrumb.vue';
 
 useI18n()
 const api = useApi();
@@ -700,6 +701,15 @@ const tableItems = computed(() =>
 <template>
     <default-layout>
         <div class="request-material-product-page -mx-6 bg-qallab-dashboard-bg space-y-4">
+            <AppFormBreadcrumb
+                list-path="/sales/orders/fuels/list"
+                module-root-key="breadcrumb.sales.root"
+                list-label-key="breadcrumb.sales.orders.fuels.list"
+                create-label-key="breadcrumb.sales.orders.fuels.create"
+                edit-label-key="breadcrumb.sales.orders.fuels.edit"
+                :is-edit-mode="isEditMode"
+                :code="isEditMode ? (formData.code ? '#' + formData.code : '') : ''"
+            />
             <!-- Page Header -->
             <TopHeader
                 :icon="filePlusIcon"

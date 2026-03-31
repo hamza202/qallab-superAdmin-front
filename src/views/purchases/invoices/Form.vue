@@ -3,6 +3,7 @@ import { ref, computed, onMounted, watch, nextTick, reactive } from "vue";
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import TopHeader from '@/components/price-offers/TopHeader.vue';
+import AppFormBreadcrumb from '@/components/common/AppFormBreadcrumb.vue';
 import { useApi } from '@/composables/useApi';
 import { returnIcon, saveIcon, fileCheckIcon, fileIcon_2, rialIcon } from '@/components/icons/globalIcons';
 import { useForm } from '@/composables/useForm';
@@ -699,6 +700,15 @@ onMounted(async () => {
 <template>
     <default-layout>
         <div class="-mx-6 bg-qallab-dashboard-bg space-y-4">
+            <AppFormBreadcrumb
+                list-path="/purchases/invoices/list"
+                module-root-key="breadcrumb.purchases.root"
+                list-label-key="breadcrumb.purchases.invoices.buildingMaterials.list"
+                create-label-key="breadcrumb.purchases.invoices.buildingMaterials.create"
+                edit-label-key="breadcrumb.purchases.invoices.buildingMaterials.edit"
+                :is-edit-mode="isEditMode"
+                :code="InvoiceCode"
+            />
             <TopHeader :icon="fileCheckIcon" title-key="pages.PurchaseInvoices.FormTitle"
                 description-key="pages.PurchaseInvoices.FormDescription" :code="InvoiceCode" code-label-key="purchases.invoices.form.codeLabel"
                 :show-action="false" />
