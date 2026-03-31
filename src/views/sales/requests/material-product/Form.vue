@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
-
+import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from 'vue-router';
 import AddProductDialog from '@/components/price-offers/AddProductDialog.vue';
 import EditProductsDialog from '@/components/price-offers/EditProductsDialog.vue';
@@ -11,6 +11,7 @@ import AppFormBreadcrumb from '@/components/common/AppFormBreadcrumb.vue';
 import { useApi } from '@/composables/useApi';
 
 
+const { t } = useI18n();
 const api = useApi();
 const route = useRoute();
 const router = useRouter();
@@ -521,7 +522,7 @@ const handleSubmit = async () => {
     if (!await validate()) return;
     
     if (productTableItems.value.length === 0) {
-        warning('يجب إضافة منتج واحد على الأقل');
+        warning(t('sales.forms.common.validation.atLeastOneProduct'));
         return;
     }
     
@@ -546,7 +547,7 @@ const handleSubmit = async () => {
             });
         }
         
-        success(isEditMode.value ? 'تم تحديث الطلب بنجاح' : 'تم إنشاء الطلب بنجاح');
+        success(isEditMode.value ? t('sales.forms.common.messages.requestUpdated') : t('sales.forms.common.messages.requestCreated'));
         
         // Navigate back to list or stay on page based on your preference
         router.push({ name: 'SalesRequestsMaterialProductList' });
@@ -574,14 +575,14 @@ const openMapDialog = () => {
     showMapDialog.value = true;
 };
 
-const headers = [
-    { title: 'اسم المنتج', key: 'name' },
-    { title: 'الكمية', key: 'quantity' },
-    { title: 'الوحدة', key: 'unit' },
-    { title: 'نوع الناقلة', key: 'transport_type' },
-    { title: 'عدد الرحلات اليومية', key: 'daily_trips' },
-    { title: 'ملاحظات', key: 'notes' },
-]
+const headers = computed(() => [
+    { title: t('common.form.productName'), key: 'name' },
+    { title: t('sales.forms.common.labels.quantity'), key: 'quantity' },
+    { title: t('common.form.unit'), key: 'unit' },
+    { title: t('sales.forms.common.labels.carrierType'), key: 'transport_type' },
+    { title: t('sales.forms.common.labels.dailyTrips'), key: 'daily_trips' },
+    { title: t('sales.forms.common.labels.notes'), key: 'notes' },
+]);
 
 // Computed items for the DataTable (mapped from productTableItems)
 const tableItems = computed(() => productTableItems.value.map(item => ({
@@ -595,13 +596,13 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
     notes: item.notes,
 })));
 
-const ServicesHeaders = [
-    { title: 'تاريخ بدء النقل', key: 'from_date' },
-    { title: 'تاريخ انتهاء النقل', key: 'to_date' },
-    { title: 'نوع المركبات', key: 'vehicle_types_labels' },
-    { title: 'توقيت النقل', key: 'am_pm_interval_label' },
-    { title: 'ملاحظات', key: 'notes' },
-]
+const ServicesHeaders = computed(() => [
+    { title: t('sales.forms.common.labels.transportStart'), key: 'from_date' },
+    { title: t('sales.forms.common.labels.transportEnd'), key: 'to_date' },
+    { title: t('sales.forms.common.labels.vehicleTypes'), key: 'vehicle_types_labels' },
+    { title: t('sales.forms.common.labels.transportTiming'), key: 'am_pm_interval_label' },
+    { title: t('sales.forms.common.labels.notes'), key: 'notes' },
+]);
 
 // Computed items for the Services DataTable
 const serviceTableItems = computed(() => {
@@ -693,27 +694,27 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
             <!-- Request Information Section -->
             <div class="p-6">
                 <div class="flex items-center justify-between mb-6">
-                    <h2 class="text-lg font-bold text-primary-900">معلومات الطلب : {{ formData.code }}</h2>
+                    <h2 class="text-lg font-bold text-primary-900">{{ t('sales.forms.common.labels.requestInfoWithCode', { code: formData.code }) }}</h2>
                 </div>
 
                 <v-form ref="formRef" v-model="isFormValid" @submit.prevent>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                         <!-- Request Type -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">نوع الطلب</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('sales.forms.common.labels.requestType') }}</label>
                             <SelectInput v-model="formData.requestType"
-                                :items="requestTypeItems" placeholder="حدد نوع الطلب"
+                                :items="requestTypeItems" :placeholder="t('sales.forms.common.placeholders.selectQuotationType')"
                                 :rules="[required()]"
                                 item-title="title" item-value="value" density="comfortable" />
                         </div>
 
                         <!-- Supplier Name -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">اسم العميل</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('sales.forms.common.labels.customerName') }}</label>
                             <SelectInput v-model="formData.customer_id"
                                 :items="[]" item-title="title"
                                 :rules="[required()]" disabled
-                                item-value="value" density="comfortable" placeholder="حدد العميل"
+                                item-value="value" density="comfortable" :placeholder="t('sales.forms.common.placeholders.selectCustomer')"
                                 :server-side="true" :fetch-function="fetchCustomers"
                                 item-title-key="full_name" item-value-key="id"
                                 :debounce-time="500" />
@@ -722,7 +723,7 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
                         <!-- تاريخ إصدار الطلب: يظهر في التعديل فقط (عرض فقط)، ويُرسل تلقائياً عند الحفظ -->
                         <div v-if="isEditMode">
                             <TextInput :model-value="formData.request_datetime" type="text" disabled
-                                label="تاريخ إصدار الطلب" density="comfortable" hide-details
+                                :label="t('sales.forms.common.labels.requestIssueDate')" density="comfortable" hide-details
                                 :input-props="{ readonly: true }">
                                 <template #prepend-inner>
                                     <span class="text-gray-500" v-html="dateIconSvg"></span>
@@ -732,11 +733,11 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
 
                         <!-- Project Location -->
                         <div class="relative">
-                            <label class="text-sm font-medium text-gray-700 mb-2 block">موقع المشروع</label>
+                            <label class="text-sm font-medium text-gray-700 mb-2 block">{{ t('sales.forms.common.labels.projectMap') }}</label>
                             <div @click="openMapDialog"
                                 class="flex items-center justify-between px-4 py-2 min-h-[48px] border !border-blue-400 rounded-lg cursor-pointer hover:bg-blue-100 transition-colors">
                                 <span class="text-base font-medium text-blue-900 whitespace-nowrap overflow-hidden text-ellipsis ">
-                                    {{ formData.target_location || 'حدد الموقع' }}
+                                    {{ formData.target_location || t('sales.forms.common.misc.pickLocation') }}
                                 </span>
                                 <div class="flex items-center gap-2">
                                     <span v-html="mapMarkerIcon"></span>
@@ -746,19 +747,19 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
 
                         <!-- Payment Method -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">طريقة الدفع</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('sales.forms.common.labels.paymentMethod') }}</label>
                             <SelectInput v-model="formData.paymentMethod"
-                                :items="paymentMethodItems" item-title="title" placeholder="حدد طريقة الدفع"
+                                :items="paymentMethodItems" item-title="title" :placeholder="t('sales.forms.common.placeholders.selectPaymentMethod')"
                                 :rules="[required()]"
                                 item-value="value" density="comfortable" />
                         </div>
 
                         <!-- Advance Payment -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">دفعة مقدمة</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('sales.forms.common.labels.advancePayment') }}</label>
                             <div class="flex items-center gap-2">
                                 <PriceInput showRialIcon v-model="formData.advancePayment" density="comfortable"
-                                    class="flex-1" placeholder="أدخل قيمة الدفعة" />
+                                    class="flex-1" :placeholder="t('sales.forms.common.placeholders.advancePaymentValue')" />
                             </div>
                         </div>
                     </div>
@@ -770,11 +771,11 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
                 <div class="flex flex-wrap gap-3 items-center justify-between bg-primary-50 px-6 py-3">
                     <div class="flex items-center gap-2">
                         <span v-html="packageIcon"></span>
-                        <h2 class="text-xl font-bold text-primary-900">المنتجات</h2>
+                        <h2 class="text-xl font-bold text-primary-900">{{ t('sales.forms.common.sections.products') }}</h2>
                     </div>
                     <ButtonWithIcon color="primary-100" variant="flat" :prepend-icon="downloadIcon"
                         class="!text-primary-900 font-bold">
-                        استيراد من ملف إكسل
+                        {{ t('sales.forms.common.misc.excelImportFile') }}
                     </ButtonWithIcon>
                 </div>
 
@@ -789,7 +790,7 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
                                 <template #activator="{ props }">
                                     <div class="flex items-center gap-2 cursor-pointer" v-bind="props">
                                         <v-icon size="20" color="primary" v-html="messagePlusIcon"></v-icon>
-                                        <span class="text-gray-900">{{ item.notes || 'أضف ملاحظة' }}</span>
+                                        <span class="text-gray-900">{{ item.notes || t('sales.forms.common.misc.addNote') }}</span>
                                     </div>
                                 </template>
 
@@ -799,7 +800,7 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
                                     color="white" rounded="lg" width="300">
                                     <div class="!flex flex-nowrap items-center gap-3">
                                         <TextInput v-model="productTableItems[productTableItems.findIndex(p => p.item_id === item.item_id)].notes" 
-                                            placeholder="أضف ملاحظة" variant="outlined"
+                                            :placeholder="t('sales.forms.common.misc.addNote')" variant="outlined"
                                             density="comfortable" hide-details autofocus class="flex-1" />
                                         <ButtonWithIcon :icon="messagePlusIcon" color="primary" icon-only
                                             size="x-small" />
@@ -815,12 +816,12 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
                 <div class="flex justify-center gap-3 mx-auto md:w-3/4">
                     <ButtonWithIcon color="primary-100" variant="flat" class="!text-primary-900 font-bold flex-1"
                         @click="handleAddProduct">
-                        + إضافة منتج جديد
+                        {{ t('sales.forms.common.misc.addProductLine') }}
                     </ButtonWithIcon>
                     <ButtonWithIcon v-if="productTableItems.length > 0" color="primary-100" variant="flat"
                         class="!text-primary-900 font-bold flex-1"
                         @click="showEditProductsDialog = true">
-                        تعديل المنتجات
+                        {{ t('sales.forms.common.misc.editProducts') }}
                     </ButtonWithIcon>
                 </div>
             </div>
@@ -830,11 +831,11 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
                 <div class="flex flex-wrap gap-3 items-center justify-between bg-primary-50 px-6 py-3">
                     <div class="flex items-center gap-2">
                         <span v-html="truckIcon"></span>
-                        <h2 class="text-xl font-bold text-primary-900">خدمة النقل</h2>
+                        <h2 class="text-xl font-bold text-primary-900">{{ t('sales.forms.common.sections.transportService') }}</h2>
                     </div>
                     <ButtonWithIcon color="primary-100" variant="flat" :prepend-icon="downloadIcon"
                         class="!text-primary-900 font-bold">
-                        استيراد من ملف إكسل
+                        {{ t('sales.forms.common.misc.excelImportFile') }}
                     </ButtonWithIcon>
                 </div>
 
@@ -850,7 +851,7 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
                 <div class="flex justify-center" v-if="!hasTransportService">
                     <ButtonWithIcon color="primary-100" variant="flat" class="!text-primary-900 font-bold md:w-4/3"
                         @click="handleAddTransportService">
-                        + إضافة بيانات نقل جديدة
+                        {{ t('sales.forms.common.actions.addNewTransportData') }}
                     </ButtonWithIcon>
                 </div>
 
@@ -862,7 +863,7 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
                 <div class=" p-6">
                     <div class="flex items-center gap-2 mb-6 px-6 py-4 bg-primary-500 rounded-lg text-white">
                         <span v-html="UploadedFileIcon"></span>
-                        <h3 class="text-lg font-bold">مرفقات</h3>
+                        <h3 class="text-lg font-bold">{{ t('sales.forms.common.sections.attachments') }}</h3>
                     </div>
 
                     <!-- Voice Message -->
@@ -873,10 +874,10 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-2">
                         <!-- Text Note -->
                         <div class="rounded-xl bg-white lg:col-span-2">
-                            <p class="text-primary-600 font-bold text-sm mb-2 px-4 mt-2">ملاحظة نصية</p>
+                            <p class="text-primary-600 font-bold text-sm mb-2 px-4 mt-2">{{ t('sales.forms.common.sections.textNote') }}</p>
                             <TextareaInput v-model="formData.textNote" density="comfortable"
                                 :input-props="{ class: '!rounded-none' }"
-                                placeholder="هل تود إرفاق بعض الملاحظات، قم بكتابتها هنا من فضلك وسيتم إرفاقها مع طلب عرض السعر المرسل" />
+                                :placeholder="t('sales.forms.common.placeholders.voiceNotesFuelsRequest')" />
                         </div>
 
                         <FileUploadInput v-model="formData.image" :multiple="false" class="!mb-0 h-full"
@@ -888,12 +889,12 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
                 <div class=" p-6">
                     <div class="flex items-center gap-2 mb-2 px-6 py-4 bg-primary-500 rounded-lg text-white">
                         <span v-html="fileCheckIcon"></span>
-                        <h3 class="text-lg font-bold">ملخص الطلب</h3>
+                        <h3 class="text-lg font-bold">{{ t('sales.forms.common.sections.orderSummary') }}</h3>
                     </div>
 
                     <div class="space-y-0 bg-white border border-slate-100 rounded-lg !text-blue-900 text-lg font-bold">
                         <div class="flex justify-between items-center py-4 px-6 border-b border-gray-200 ">
-                            <span class="">المنتجات</span>
+                            <span class="">{{ t('sales.forms.common.sections.products') }}</span>
                             <span class="">{{ summaryData.productsCount }}</span>
                         </div>
                         <!-- <div class="flex justify-between items-center py-4 px-6 border-b border-gray-200">
@@ -901,11 +902,11 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
                             <span class="">{{ summaryData.servicesCount }}</span>
                         </div> -->
                         <div class="flex justify-between items-center py-4 px-6 border-b border-gray-200">
-                            <span class="">طريقة الدفع</span>
+                            <span class="">{{ t('sales.forms.common.labels.paymentMethod') }}</span>
                             <span class="">{{ summaryData.paymentMethod }}</span>
                         </div>
                         <div class="flex justify-between items-center py-4 px-6">
-                            <span class="">دفعة مقدمة</span>
+                            <span class="">{{ t('sales.forms.common.labels.advancePayment') }}</span>
                             <span class="">{{ summaryData.advancePayment }}</span>
                         </div>
                     </div>
@@ -914,7 +915,7 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
                     <div class="mt-3 flex items-center gap-3">
                         <!-- <ButtonWithIcon color="primary-50" class="flex-1 text-primary-700" height="48" size="large"
                             @click="handleConvertToPrice" label="تحويل إلى عرض سعر" /> -->
-                        <ButtonWithIcon color="primary" class="flex-1" label="حفظ" height="48" size="large"
+                        <ButtonWithIcon color="primary" class="flex-1" :label="t('sales.forms.common.actions.saveOnly')" height="48" size="large"
                             @click="handleSubmit" />
                     </div>
                 </div>

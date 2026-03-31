@@ -3,7 +3,7 @@
         <!-- Print button (hidden when printing) -->
         <div class="print-actions no-print">
             <button class="print-btn" @click="handlePrint">
-                طباعة الفاتورة
+                {{ t('sales.forms.printInvoice.printButton') }}
             </button>
         </div>
 
@@ -21,7 +21,7 @@
                     <div class="header-content">
                         <div class="title-block">
                             <h1 class="title-en">Tax Invoice</h1>
-                            <h2 class="title-ar">فاتورة مبيعات ضريبية</h2>
+                            <h2 class="title-ar">{{ t('sales.forms.printInvoice.titleAr') }}</h2>
                         </div>
                         <img :src="logoImg" alt="Qallab" class="header-logo" />
                     </div>
@@ -33,11 +33,11 @@
                     <div class="info-block">
                         <h3 class="info-title">Invoice Details:</h3>
                         <div class="info-row">
-                            <span class="info-label">Invoice number (رقم الفاتورة):</span>
+                            <span class="info-label">{{ t('sales.forms.printInvoice.invoiceNumber') }}</span>
                             <span class="info-value">N°: {{ invoiceData.code }}</span>
                         </div>
                         <div class="info-row">
-                            <span class="info-label">Issued (تاريخ الفاتورة):</span>
+                            <span class="info-label">{{ t('sales.forms.printInvoice.issued') }}</span>
                             <span class="info-value">{{ formatDate(invoiceData.invoice_issues_datetime) }}</span>
                         </div>
                         <div class="info-row">
@@ -50,11 +50,11 @@
                     <div class="info-block">
                         <h3 class="info-title info-title--blue">Qallab Company</h3>
                         <div class="info-row">
-                            <span class="info-label">VAT No. (الرقم الضريبي):</span>
+                            <span class="info-label">{{ t('sales.forms.printInvoice.vatNo') }}</span>
                             <span class="info-value">{{ supplier?.tax_no ?? '—' }}</span>
                         </div>
                         <div class="info-row">
-                            <span class="info-label">Address (العنوان):</span>
+                            <span class="info-label">{{ t('sales.forms.printInvoice.address') }}</span>
                             <span class="info-value">{{ supplier?.address ?? '—' }}</span>
                         </div>
                     </div>
@@ -64,11 +64,11 @@
                         <h3 class="info-title info-title--blue">Invoice To:</h3>
                         <p class="recipient-name">{{ customer?.name ?? invoiceData.customer_name ?? '—' }}</p>
                         <div class="info-row">
-                            <span class="info-label">Address (العنوان):</span>
+                            <span class="info-label">{{ t('sales.forms.printInvoice.address') }}</span>
                             <span class="info-value">{{ customer?.address ?? '—' }}</span>
                         </div>
                         <div class="info-row">
-                            <span class="info-label">VAT No. (الرقم الضريبي):</span>
+                            <span class="info-label">{{ t('sales.forms.printInvoice.vatNo') }}</span>
                             <span class="info-value">{{ customer?.tax_no ?? '—' }}</span>
                         </div>
                     </div>
@@ -79,11 +79,11 @@
             <div class="project-section">
                 <p>
                     <span class="project-value">{{ invoiceData.project_name ?? '—' }}</span>
-                    <span class="project-label">: (اسم المشروع) Project Name</span>
+                    <span class="project-label">{{ t('sales.forms.printInvoice.projectName') }}</span>
                 </p>
                 <p>
                     <span class="note-value">{{ invoiceData.notes ?? '—' }}</span>
-                    <span class="note-label">: (البيان) Note</span>
+                    <span class="note-label">{{ t('sales.forms.printInvoice.note') }}</span>
                 </p>
             </div>
 
@@ -94,27 +94,27 @@
                         <tr>
                             <th class="th-first">
                                 <span class="th-en">Nature of goods or services</span>
-                                <span class="th-ar">تفاصيل السلع والخدمات</span>
+                                <span class="th-ar">{{ t('sales.forms.printInvoice.colNatureAr') }}</span>
                             </th>
                             <th>
                                 <span class="th-en">Unit Price</span>
-                                <span class="th-ar">سعر الوحدة</span>
+                                <span class="th-ar">{{ t('sales.forms.printInvoice.colUnitPriceAr') }}</span>
                             </th>
                             <th>
                                 <span class="th-en">Qty</span>
-                                <span class="th-ar">الكمية</span>
+                                <span class="th-ar">{{ t('sales.forms.printInvoice.colQtyAr') }}</span>
                             </th>
                             <th>
                                 <span class="th-en">Taxable Amount</span>
-                                <span class="th-ar">المبلغ الخاضع للضريبة</span>
+                                <span class="th-ar">{{ t('sales.forms.printInvoice.colTaxableAr') }}</span>
                             </th>
                             <th>
                                 <span class="th-en">Tax Amount</span>
-                                <span class="th-ar">مبلغ الضريبة</span>
+                                <span class="th-ar">{{ t('sales.forms.printInvoice.colTaxAmountAr') }}</span>
                             </th>
                             <th class="th-last">
                                 <span class="th-en">Subtotal</span>
-                                <span class="th-ar">المجموع الكلي</span>
+                                <span class="th-ar">{{ t('sales.forms.printInvoice.colSubtotalAr') }}</span>
                             </th>
                         </tr>
                     </thead>
@@ -150,7 +150,7 @@
                     <div class="total-row">
                         <div class="total-labels">
                             <span class="total-label-en">Total QTY</span>
-                            <span class="total-label-ar">إجمالي الكميات</span>
+                            <span class="total-label-ar">{{ t('sales.forms.printInvoice.totalQtyAr') }}</span>
                         </div>
                         <span class="total-val">{{ formatCurrency(invoiceData.total_quantity) }} <span v-html="rialIcon" class="sar-icon"></span></span>
                     </div>
@@ -158,7 +158,7 @@
                     <div class="total-row">
                         <div class="total-labels">
                             <span class="total-label-en">Total (Excluding VAT)</span>
-                            <span class="total-label-ar">الإجمالي غير شامل الضريبة</span>
+                            <span class="total-label-ar">{{ t('sales.forms.printInvoice.totalExVatAr') }}</span>
                         </div>
                         <span class="total-val">{{ formatCurrency(totalExcludingVat) }} <span v-html="rialIcon" class="sar-icon"></span></span>
                     </div>
@@ -166,7 +166,7 @@
                     <div class="total-row">
                         <div class="total-labels">
                             <span class="total-label-en">Total Discount</span>
-                            <span class="total-label-ar">مجموع الخصومات</span>
+                            <span class="total-label-ar">{{ t('sales.forms.printInvoice.totalDiscountAr') }}</span>
                         </div>
                         <span class="total-val">{{ formatCurrency(invoiceData.total_discount) }} <span v-html="rialIcon" class="sar-icon"></span></span>
                     </div>
@@ -174,7 +174,7 @@
                     <div class="total-row">
                         <div class="total-labels">
                             <span class="total-label-en">Total Taxable Amount (Excluding VAT)</span>
-                            <span class="total-label-ar">الإجمالي الخاضع للضريبة غير شامل ضريبة القيمة المضافة</span>
+                            <span class="total-label-ar">{{ t('sales.forms.printInvoice.totalTaxableExVatAr') }}</span>
                         </div>
                         <span class="total-val">{{ formatCurrency(totalTaxableAmount) }} <span v-html="rialIcon" class="sar-icon"></span></span>
                     </div>
@@ -182,7 +182,7 @@
                     <div class="total-row">
                         <div class="total-labels">
                             <span class="total-label-en">Total VAT</span>
-                            <span class="total-label-ar">مجموع ضريبة القيمة المضافة</span>
+                            <span class="total-label-ar">{{ t('sales.forms.printInvoice.totalVatAr') }}</span>
                         </div>
                         <span class="total-val">{{ formatCurrency(invoiceData.total_taxes) }} <span v-html="rialIcon" class="sar-icon"></span></span>
                     </div>
@@ -190,7 +190,7 @@
                     <div class="total-due-box">
                         <div class="total-due-labels">
                             <span class="total-due-en">Total Amount Due</span>
-                            <span class="total-due-ar">الإجمالي المستحق</span>
+                            <span class="total-due-ar">{{ t('sales.forms.printInvoice.totalDueAr') }}</span>
                         </div>
                         <span class="total-due-val">{{ formatCurrency(invoiceData.final_total) }} <span v-html="rialIcon" class="sar-icon sar-icon--white"></span></span>
                     </div>
@@ -205,11 +205,11 @@
                         <span class="footer-sep">|</span>
                         <span>Phone No: +966 599 1454323  ·  Email: Info@qallab.sa</span>
                         <span class="footer-sep">|</span>
-                        <span>الرقم الضريبي: {{ supplier?.tax_no || 'N/A' }}</span>
+                        <span>{{ t('sales.forms.printInvoice.footerTaxNo') }} {{ supplier?.tax_no || t('sales.forms.viewPages.na') }}</span>
                         <span class="footer-sep">|</span>
-                        <span>السجل التجاري: {{ supplier?.commercial_register || 'N/A' }}</span>
+                        <span>{{ t('sales.forms.printInvoice.footerCr') }} {{ supplier?.commercial_register || t('sales.forms.viewPages.na') }}</span>
                         <span class="footer-sep">|</span>
-                        <span>العنوان: {{ supplier?.address || 'N/A' }}</span>
+                        <span>{{ t('sales.forms.printInvoice.footerAddress') }} {{ supplier?.address || t('sales.forms.viewPages.na') }}</span>
                     </div>
                     <img :src="logoLightImg" alt="Qallab" class="footer-logo" />
                 </div>
@@ -221,9 +221,12 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, nextTick } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import { useApi } from '@/composables/useApi'
 import { useNotification } from '@/composables/useNotification'
+
+const { t } = useI18n()
 import { rialIcon } from '@/components/icons/globalIcons'
 import logoSvgRaw from '@/assets/logo.svg?raw'
 import logoLightSvgRaw from '@/assets/logo-light.svg?raw'
@@ -251,8 +254,7 @@ const customer = computed(() => invoiceData.value?.customer ?? null)
 const payTypeLabel = computed(() => {
     const so = invoiceData.value?.so_type
     if (!so) return '—'
-    if (so === 'so_without_logistics') return 'آجل'
-    if (so === 'so_with_logistics') return 'آجل'
+    if (so === 'so_without_logistics' || so === 'so_with_logistics') return t('sales.forms.paymentsDemo.deferred')
     return so
 })
 
@@ -297,7 +299,7 @@ const fetchInvoiceData = async () => {
         }
     } catch (e: any) {
         console.error('Error fetching invoice data:', e)
-        error(e?.response?.data?.message || 'فشل تحميل بيانات الفاتورة')
+        error(e?.response?.data?.message || t('sales.forms.common.messages.loadInvoiceViewFailed'))
     } finally {
         isLoading.value = false
     }

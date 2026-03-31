@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch, nextTick, reactive } from "vue";
+import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import TopHeader from '@/components/price-offers/TopHeader.vue';
 import AppFormBreadcrumb from '@/components/common/AppFormBreadcrumb.vue';
@@ -8,6 +9,7 @@ import { returnIcon, saveIcon, fileCheckIcon, fileIcon_2, rialIcon } from '@/com
 import { useForm } from '@/composables/useForm';
 import { useNotification as useNotify } from '@/composables/useNotification';
 
+const { t } = useI18n();
 const { formRef, isFormValid, validate } = useForm();
 const { success, warning, apiError } = useNotify();
 
@@ -124,7 +126,7 @@ const fetchOrderItems = async (saleOrderId: number | string | null) => {
         const firstOrder = Array.isArray(orders) ? orders[0] : null;
         const items = firstOrder?.items || [];
         if (items.length <= 0) {
-            warning('يجب أن تحتوي الطلبية على منتج واحد على الأقل لإتمام الفاتورة')
+            warning(t('sales.forms.common.validation.atLeastOneProductForInvoice'))
         } else {
             if (firstOrder?.customer_id != null) {
                 formData.value.customer_id = firstOrder.customer_id;
@@ -243,7 +245,7 @@ const fetchOrdersByCustomerAndType = async (
         const rawData = Array.isArray(res.data) ? res.data : res.data?.data;
         const list = Array.isArray(rawData) ? rawData : [];
         ordersItems.value = list.map((order: any) => ({
-            title: order.code || `طلب #${order.id ?? order.uuid ?? ''}`,
+            title: order.code || t('sales.forms.common.misc.orderRef', { id: order.id ?? order.uuid ?? '' }),
             value: order.id ?? order.uuid ?? order.code,
         }));
     } catch (e) {
@@ -339,7 +341,7 @@ const fetchFormData = async () => {
                     const exists = ordersItems.value.some(order => order.value === data.sale_order_id);
                     if (!exists) {
                         ordersItems.value.push({
-                            title: data.sale_order_code || `طلب #${data.sale_order_id}`,
+                            title: data.sale_order_code || t('sales.forms.common.misc.orderRef', { id: data.sale_order_id }),
                             value: data.sale_order_id,
                         });
                     }
@@ -422,7 +424,7 @@ const handleSubmit = async (type: any) => {
     if (!await validate()) return;
 
     if (productTableItems.value.length === 0) {
-        warning('يجب أن تكون الطلبية تحتوي على منتج واحد على الأقل');
+        warning(t('sales.forms.common.validation.atLeastOneOrderProduct'));
         return;
     }
 
@@ -438,7 +440,7 @@ const handleSubmit = async (type: any) => {
             await api.post('/sales/invoices', fd);
         }
 
-        success(isEditMode.value ? 'تم تحديث الفاتورة بنجاح' : 'تم إنشاء الفاتورة بنجاح');
+        success(isEditMode.value ? t('sales.forms.common.messages.invoiceUpdated') : t('sales.forms.common.messages.invoiceCreated'));
 
         // Post-submit handling
         if (type === 'createNew') {
@@ -449,7 +451,7 @@ const handleSubmit = async (type: any) => {
 
     } catch (e: any) {
         console.error('Error submitting form:', e);
-        apiError(e, 'حدث خطأ أثناء حفظ الفاتورة');
+        apiError(e, t('sales.forms.common.messages.saveInvoiceError'));
     } finally {
         isSubmitting.value = false;
     }
@@ -467,16 +469,16 @@ const handleEditProduct = (item: any) => {
     }
 };
 
-const headers = [
-    { title: 'اسم المنتج', key: 'name' },
-    { title: 'الوحدة', key: 'unit' },
-    { title: 'الكمية', key: 'quantity' },
-    { title: 'سعر الوحدة', key: 'price_per_unit' },
-    { title: "خصم", key: "discount_display" },
-    { title: 'المبلغ الخاضع للضريبة', key: 'taxable_amount' },
-    { title: 'مبلغ الضريبة', key: 'total_tax' },
-    { title: 'إجمالي المبلغ', key: 'total_out_taxes' },
-]
+const headers = computed(() => [
+    { title: t('common.form.productName'), key: 'name' },
+    { title: t('common.form.unit'), key: 'unit' },
+    { title: t('sales.forms.common.labels.quantity'), key: 'quantity' },
+    { title: t('sales.forms.tables.invoiceSales.pricePerUnit'), key: 'price_per_unit' },
+    { title: t('sales.forms.common.labels.discount'), key: 'discount_display' },
+    { title: t('sales.forms.common.labels.taxableAmount'), key: 'taxable_amount' },
+    { title: t('sales.forms.tables.invoiceSales.totalTax'), key: 'total_tax' },
+    { title: t('sales.forms.tables.invoiceSales.totalOutTaxes'), key: 'total_out_taxes' },
+]);
 
 // Computed items for the DataTable (mapped from productTableItems)
 const tableItems = computed(() => productTableItems.value.map(item => ({
@@ -582,38 +584,38 @@ onMounted(async () => {
                 :code="InvoiceCode"
             />
             <TopHeader :icon="fileCheckIcon" title-key="pages.SalesInvoices.FormTitle"
-                description-key="pages.SalesInvoices.FormDescription" :code="InvoiceCode" code-label="كود الفاتورة"
+                description-key="pages.SalesInvoices.FormDescription" :code="InvoiceCode" :code-label="t('sales.forms.common.labels.invoiceCode')"
                 :show-action="false" />
 
             <!-- Request Information Section -->
             <div class="p-6 bg-white rounded-3xl border !border-gray-100 ">
                 <div class="flex items-center mb-6 gap-2 text-primary-600">
                     <span class="w-4" v-html="fileIcon_2"></span>
-                    <h2 class="text-base font-bold">البيانات الأساسية</h2>
+                    <h2 class="text-base font-bold">{{ t('sales.forms.common.sections.basicData') }}</h2>
                 </div>
 
                 <v-form ref="formRef" v-model="isFormValid" @submit.prevent>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 gap-y-6">
                         <!-- اسم العميل -->
                         <div>
-                            <SelectInput v-model="formData.customer_id" :items="[]" placeholder="اختر العميل"
-                                label="اسم العميل" density="comfortable" :rules="[required()]"
+                            <SelectInput v-model="formData.customer_id" :items="[]" :placeholder="t('sales.forms.common.placeholders.selectClient')"
+                                :label="t('sales.forms.common.labels.customerName')" density="comfortable" :rules="[required()]"
                                 item-title="title" item-value="value" :server-side="true"
                                 :fetch-function="fetchCustomers" item-title-key="full_name"
                                 item-value-key="id" :debounce-time="500" />
                         </div>
 
                         <div>
-                            <SelectInput v-model="formData.so_type" :items="orderTypes" placeholder="اختر"
-                                label="نوع الطلبية" density="comfortable" :rules="[required()]"
+                            <SelectInput v-model="formData.so_type" :items="orderTypes" :placeholder="t('common.form.choose')"
+                                :label="t('sales.forms.common.labels.orderType')" density="comfortable" :rules="[required()]"
                                 :error-messages="formErrors['so_type']"
                                 @update:model-value="clearFieldError('so_type')" clearable />
                         </div>
 
                         <!-- Purchase Request Code -->
                         <div>
-                            <SelectInput v-model="formData.sale_order_id" placeholder="اختر الطلبية"
-                                label="كود طلبية المبيعات" :items="ordersItems" density="comfortable"
+                            <SelectInput v-model="formData.sale_order_id" :placeholder="t('sales.forms.common.placeholders.selectSalesOrder')"
+                                :label="t('sales.forms.common.labels.salesOrderCode')" :items="ordersItems" density="comfortable"
                                 :rules="[required()]" :error-messages="formErrors['sale_order_id']" 
                                 @update:model-value="clearFieldError('sale_order_id')" clearable :disabled="!formData.so_type" />
                         </div>
@@ -621,26 +623,26 @@ onMounted(async () => {
                         <!-- Invoice Creation Date -->
                         <div v-if="formData.invoice_creation_date">
                             <DatePickerInput v-model="formData.invoice_creation_date" type="date" density="comfortable"
-                                placeholder="2024-03-01" label="تاريخ إنشاء الفاتورة" />
+                                :placeholder="t('sales.forms.common.placeholders.dateSample')" :label="t('sales.forms.common.labels.invoiceCreatedAt')" />
                         </div>
 
                         <div v-if="customerData"
                             class="bg-gray-50 rounded-2xl p-6 md:col-span-2 lg:col-span-3 xl:col-span-4 gap-4 text-gray-700 text-xs border border-gray-300 border-dashed grid grid-cols-1  md:grid-cols-3">
                             <!-- Name (Read-only) -->
                             <div>
-                                <p class="mb-2 font-semibold mb-1">الاسم:</p>
+                                <p class="mb-2 font-semibold mb-1">{{ t('sales.forms.common.customerCard.name') }}</p>
                                 <p class="font-bold">{{ customerName }}</p>
                             </div>
 
                             <!-- Tax Number (Read-only) -->
                             <div>
-                                <p class="mb-2 font-semibold">السجل التجاري:</p>
+                                <p class="mb-2 font-semibold">{{ t('sales.forms.common.customerCard.commercialRegister') }}</p>
                                 <p class=" font-bold">{{ customerCommercialRegister }}</p>
                             </div>
 
                             <!-- Address (Read-only) -->
                             <div>
-                                <p class="mb-2 font-semibold ">العنوان:</p>
+                                <p class="mb-2 font-semibold ">{{ t('sales.forms.common.customerCard.address') }}</p>
                                 <p class=" font-bold">{{ (customerAddress?.address_1 || '') + '—' +
                                     (customerAddress?.address_2 || '') }}</p>
                             </div>
@@ -649,25 +651,25 @@ onMounted(async () => {
                         <!-- Invoice Date -->
                         <div>
                             <DateTimePickerInput v-model="formData.invoice_issues_datetime" type="date"
-                                density="comfortable" placeholder="2024-03-01" label="تاريخ إصدار الفاتورة" />
+                                density="comfortable" :placeholder="t('sales.forms.common.placeholders.dateSample')" :label="t('sales.forms.common.labels.invoiceIssueDate')" />
                         </div>
 
                         <!-- Invoice Recipient Date -->
                         <div>
                             <DateTimePickerInput v-model="formData.invoice_due_datetime" type="date"
-                                density="comfortable" placeholder="2024-03-01" label="تاريخ استحقاق الفاتورة" />
+                                density="comfortable" :placeholder="t('sales.forms.common.placeholders.dateSample')" :label="t('sales.forms.common.labels.invoiceDueDate')" />
                         </div>
 
 
                         <!-- Project -->
                         <div>
-                            <TextInput v-model="formData.project_name" placeholder="أدخل اسم المشروع" label="المشروع"
+                            <TextInput v-model="formData.project_name" :placeholder="t('sales.forms.common.placeholders.enterProjectName')" :label="t('sales.forms.common.labels.project')"
                                 density="comfortable" />
                         </div>
 
                         <!-- Statement (Full width) -->
                         <div class="lg:col-span-2">
-                            <TextareaInput v-model="formData.notes" placeholder="أدخل البيان هنا" label="البيان"
+                            <TextareaInput v-model="formData.notes" :placeholder="t('sales.forms.common.labels.statementHere')" :label="t('sales.forms.common.labels.statement')"
                                 density="comfortable" rows="3" />
                         </div>
                     </div>
@@ -679,7 +681,7 @@ onMounted(async () => {
                 <div class="p-6">
                     <div class="flex items-center gap-2 text-primary-600">
                         <span class="w-4" v-html="fileCheckIcon"></span>
-                        <h2 class="text-base font-bold ">جدول عناصر فاتورة المبيعات</h2>
+                        <h2 class="text-base font-bold ">{{ t('sales.forms.common.sections.salesInvoiceItemsTable') }}</h2>
                     </div>
                 </div>
 
@@ -706,10 +708,10 @@ onMounted(async () => {
                             <tr class="bg-primary-400">
                                 <th
                                     class="text-white font-semibold text-base py-3 px-4 text-center border-l !border-gray-200">
-                                    العنصر
+                                    {{ t('sales.forms.stats.item') }}
                                 </th>
                                 <th class="text-white font-semibold text-base py-3 px-4 text-center">
-                                    المبلغ
+                                    {{ t('sales.forms.stats.amount') }}
                                 </th>
                             </tr>
                         </thead>
@@ -718,7 +720,7 @@ onMounted(async () => {
                             <!-- Total Quantities -->
                             <tr class="border-b !border-gray-200">
                                 <td class="py-4 px-4 text-center font-bold text-gray-900 border-l !border-gray-200">
-                                    إجمالي الكميات
+                                    {{ t('sales.forms.stats.totalQuantities') }}
                                 </td>
                                 <td class="py-4 px-4 text-center text-gray-600">
                                     {{ summaryTotalQuantities }}
@@ -728,7 +730,7 @@ onMounted(async () => {
                             <!-- Total (Excluding Tax) -->
                             <tr class="border-b !border-gray-200">
                                 <td class="py-4 px-4 text-center font-bold text-gray-900 border-l !border-gray-200">
-                                    الإجمالي (غير شامل الضريبة)
+                                    {{ t('common.financial.totalExcludingTax') }}
                                 </td>
                                 <td class="py-4 px-4 text-center text-gray-600">
                                     {{ summaryTotalExcludingTax }}
@@ -738,7 +740,7 @@ onMounted(async () => {
                             <!-- Total Discounts -->
                             <tr class="border-b !border-gray-200">
                                 <td class="py-4 px-4 text-center font-bold text-gray-900 border-l !border-gray-200">
-                                    مجموع الخصومات
+                                    {{ t('common.financial.totalDiscounts') }}
                                 </td>
                                 <td class="py-4 px-4 text-center text-gray-600">
                                     {{ summaryTotalDiscounts }}
@@ -748,7 +750,7 @@ onMounted(async () => {
                             <!-- Total Tax Amount -->
                             <tr class="border-b !border-gray-200">
                                 <td class="py-4 px-4 text-center font-bold text-gray-900 border-l !border-gray-200">
-                                    الإجمالي الخاضع للضريبة
+                                    {{ t('common.financial.totalTaxable') }}
                                 </td>
                                 <td class="py-4 px-4 text-center text-gray-600">
                                     {{ summaryTotalTaxable }}
@@ -758,17 +760,17 @@ onMounted(async () => {
                             <!-- Tax Total -->
                             <tr class="border-b !border-gray-200">
                                 <td class="py-4 px-4 text-center font-bold text-gray-900 border-l !border-gray-200">
-                                    الضريبة
+                                    {{ t('sales.forms.stats.tax') }}
                                 </td>
                                 <td class="py-4 px-4 text-center text-gray-600">
-                                    15%
+                                    {{ t('sales.forms.stats.taxPercent') }}
                                 </td>
                             </tr>
 
                             <!-- Tax Total -->
                             <tr class="border-b !border-gray-200">
                                 <td class="py-4 px-4 text-center font-bold text-gray-900 border-l !border-gray-200">
-                                    مجموع الضريبة
+                                    {{ t('sales.forms.stats.taxTotal') }}
                                 </td>
                                 <td class="py-4 px-4 text-center text-gray-600">
                                     {{ summaryTotalTax }}
@@ -778,7 +780,7 @@ onMounted(async () => {
                             <!-- Total Due Amount -->
                             <tr class="border-b !border-gray-200">
                                 <td class="py-4 px-4 text-center font-bold text-gray-900 border-l !border-gray-200">
-                                    إجمالي المبلغ المستحق
+                                    {{ t('common.financial.totalAmountDue') }}
                                 </td>
                                 <td class="py-4 px-4 text-center text-gray-900 font-bold">
                                     {{ summaryTotalDue }}
@@ -794,11 +796,11 @@ onMounted(async () => {
                 <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col">
                     <ButtonWithIcon variant="flat" color="primary" height="48" rounded="4" :loading="isSubmitting"
                         custom-class="font-semibold text-base px-6 md:!px-10" :prepend-icon="returnIcon"
-                        label="حفظ والعودة للرئيسية" @click="handleSubmit('backToList')" />
+                        :label="t('sales.forms.common.actions.saveBackHome')" @click="handleSubmit('backToList')" />
 
                     <ButtonWithIcon variant="flat" color="primary-50" height="48" rounded="4" :loading="isSubmitting"
                         custom-class="font-semibold text-base text-primary-700 px-6 md:!px-10" :prepend-icon="saveIcon"
-                        label="حفظ وإنشاء جديد" @click="handleSubmit('createNew')" />
+                        :label="t('sales.forms.common.actions.saveCreateNew')" @click="handleSubmit('createNew')" />
                 </div>
             </div>
         </div>

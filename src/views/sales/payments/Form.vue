@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from "vue";
+import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import TopHeader from '@/components/price-offers/TopHeader.vue';
 import AppFormBreadcrumb from '@/components/common/AppFormBreadcrumb.vue';
@@ -12,6 +13,7 @@ import SarIcon from "@/components/icons/SarIcon.vue";
 const { formRef, isFormValid, validate } = useForm();
 const { success, warning, apiError } = useNotify();
 
+const { t } = useI18n();
 const api = useApi();
 const route = useRoute();
 const router = useRouter();
@@ -69,17 +71,17 @@ const fetchConstants = async () => {
     try {
         // Demo data for payment methods and branches
         paymentMethodItems.value = [
-            { title: 'نقدي', value: 'cash' },
-            { title: 'تحويل بنكي', value: 'bank_transfer' },
-            { title: 'شيك', value: 'check' },
-            { title: 'بطاقة ائتمان', value: 'credit_card' }
+            { title: t('sales.forms.paymentsDemo.cash'), value: 'cash' },
+            { title: t('sales.forms.paymentsDemo.bankTransfer'), value: 'bank_transfer' },
+            { title: t('sales.forms.paymentsDemo.check'), value: 'check' },
+            { title: t('sales.forms.paymentsDemo.creditCard'), value: 'credit_card' }
         ];
 
         branchItems.value = [
-            { title: 'الفرع الرئيسي', value: 'main' },
-            { title: 'فرع الرياض', value: 'riyadh' },
-            { title: 'فرع جدة', value: 'jeddah' },
-            { title: 'فرع الدمام', value: 'dammam' }
+            { title: t('sales.forms.paymentsDemo.branchMain'), value: 'main' },
+            { title: t('sales.forms.paymentsDemo.branchRiyadh'), value: 'riyadh' },
+            { title: t('sales.forms.paymentsDemo.branchJeddah'), value: 'jeddah' },
+            { title: t('sales.forms.paymentsDemo.branchDammam'), value: 'dammam' }
         ];
     } catch (e) {
         console.error('Error fetching constants:', e);
@@ -90,11 +92,11 @@ const fetchCustomers = async () => {
     try {
         // Demo customers data
         customerItems.value = [
-            { title: 'شركة البناء الحديث', value: 1 },
-            { title: 'مؤسسة الإنشاءات الذكية', value: 2 },
-            { title: 'شركة المقاولات العامة', value: 3 },
-            { title: 'مؤسسة التطوير العقاري', value: 4 },
-            { title: 'شركة الخليج للإنشاءات', value: 5 }
+            { title: t('sales.forms.paymentsDemo.company1'), value: 1 },
+            { title: t('sales.forms.paymentsDemo.company2'), value: 2 },
+            { title: t('sales.forms.paymentsDemo.company3'), value: 3 },
+            { title: t('sales.forms.paymentsDemo.company4'), value: 4 },
+            { title: t('sales.forms.paymentsDemo.company5'), value: 5 }
         ];
     } catch (e) {
         console.error('Error fetching customers:', e);
@@ -112,12 +114,12 @@ const fetchCustomerDetails = async (customerId: number | string | null) => {
         // Demo customer data
         customerData.value = {
             id: customerId,
-            full_name: customerItems.value.find(c => c.value === customerId)?.title || 'عميل',
+            full_name: customerItems.value.find(c => c.value === customerId)?.title || t('sales.forms.paymentsDemo.customerFallback'),
             balance: 150000,
             commercial_register: 'CR-2024-' + customerId,
             address: {
-                address_1: 'شارع الملك فهد',
-                address_2: 'الرياض، المملكة العربية السعودية'
+                address_1: t('sales.forms.paymentsDemo.demoAddress1'),
+                address_2: t('sales.forms.paymentsDemo.demoCityCountry')
             }
         };
         await fetchInvoicesByCustomer(customerId);
@@ -169,17 +171,17 @@ const fetchInvoiceDetails = async (invoiceId: number | string | null) => {
             {
                 invoice_id: '1',
                 invoice_code: 'INV-2024-001',
-                invoice_type: 'مبيعات',
+                invoice_type: t('sales.forms.paymentsDemo.invoiceTypeSales'),
                 amount: 50000,
-                currency: 'ريال',
+                currency: t('sales.forms.paymentsDemo.currencySar'),
                 payment_amount: 50000
             },
             {
                 invoice_id: '2',
                 invoice_code: 'INV-2024-002',
-                invoice_type: 'مبيعات',
+                invoice_type: t('sales.forms.paymentsDemo.invoiceTypeSales'),
                 amount: 35000,
-                currency: 'ريال',
+                currency: t('sales.forms.paymentsDemo.currencySar'),
                 payment_amount: 35000
             }
         ];
@@ -188,21 +190,21 @@ const fetchInvoiceDetails = async (invoiceId: number | string | null) => {
         balanceTableItems.value = [
             {
                 payment_datetime: '2024-03-10 14:30:00',
-                currency: 'ريال',
+                currency: t('sales.forms.paymentsDemo.currencySar'),
                 amount: 25000,
-                direction: 'وارد'
+                direction: t('sales.forms.paymentsDemo.directionInbound')
             },
             {
                 payment_datetime: '2024-03-08 10:15:00',
-                currency: 'ريال',
+                currency: t('sales.forms.paymentsDemo.currencySar'),
                 amount: 15000,
-                direction: 'صادر'
+                direction: t('sales.forms.paymentsDemo.directionOutbound')
             },
             {
                 payment_datetime: '2024-03-05 16:45:00',
-                currency: 'ريال',
+                currency: t('sales.forms.paymentsDemo.currencySar'),
                 amount: 35000,
-                direction: 'وارد'
+                direction: t('sales.forms.paymentsDemo.directionInbound')
             }
         ];
     } catch (e) {
@@ -223,7 +225,7 @@ const fetchFormData = async () => {
             payment_method: 'bank_transfer',
             payment_datetime: '2024-03-10 14:30:00',
             branch: 'main',
-            notes: 'دفعة مقدمة للفاتورة',
+            notes: t('sales.forms.paymentsDemo.noteAdvance'),
             amount: 50000,
             code: 'PAY-2024-001'
         };
@@ -275,7 +277,7 @@ const handleSubmit = async (type: any) => {
             await api.post('/sales/invoice-payments', payload);
         }
 
-        success(isEditMode.value ? 'تم تحديث الدفعة بنجاح' : 'تم إنشاء الدفعة بنجاح');
+        success(isEditMode.value ? t('sales.forms.common.messages.paymentUpdated') : t('sales.forms.common.messages.paymentCreated'));
 
         if (type === 'createNew') {
             formData.value = getDefaultFormData();
@@ -291,7 +293,7 @@ const handleSubmit = async (type: any) => {
 
     } catch (e: any) {
         console.error('Error submitting form:', e);
-        apiError(e, 'حدث خطأ أثناء حفظ الدفعة');
+        apiError(e, t('sales.forms.common.messages.savePaymentError'));
     } finally {
         isSubmitting.value = false;
     }
@@ -342,7 +344,7 @@ onMounted(async () => {
                     <div class="flex items-center lg:gap-3 gap-2">
 
                         <!-- Label -->
-                        <span class="text-sm font-semibold text-white">اجمالي المبلغ</span>
+                        <span class="text-sm font-semibold text-white">{{ t('sales.forms.common.labels.totalAmountHeader') }}</span>
                         <!-- Code Badge -->
                         <div
                             class="flex items-center !text-primary-800 gap-2 px-2.5 py-1.5 bg-primary-100 border border-primary-300 rounded shadow-xs">
@@ -359,47 +361,47 @@ onMounted(async () => {
             <div class="p-6 bg-white rounded-3xl border !border-gray-100">
                 <div class="flex items-center mb-6 gap-2 text-primary-600">
                     <span class="w-4" v-html="fileIcon_2"></span>
-                    <h2 class="text-base font-bold">البيانات الأساسية</h2>
+                    <h2 class="text-base font-bold">{{ t('sales.forms.common.sections.basicData') }}</h2>
                 </div>
 
                 <v-form ref="formRef" v-model="isFormValid" @submit.prevent>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 gap-y-6">
                         <div>
-                            <priceInput showRialIcon v-model="formData.amount" placeholder="أدخل قيمة المبلغ"
-                                label="المبلغ" density="comfortable" :rules="[required()]" />
+                            <priceInput showRialIcon v-model="formData.amount" :placeholder="t('sales.forms.common.placeholders.enterPaymentAmountValue')"
+                                :label="t('sales.forms.common.labels.amount')" density="comfortable" :rules="[required()]" />
                         </div>
 
                         <div>
                             <DateTimePickerInput v-model="formData.payment_datetime" type="date" density="comfortable"
-                                placeholder="2024-03-01" label="تاريخ الدفعة" :rules="[required()]" />
+                                :placeholder="t('sales.forms.common.placeholders.dateSample')" :label="t('sales.forms.common.labels.paymentDate')" :rules="[required()]" />
                         </div>
 
                         <div>
                             <SelectInput v-model="formData.payment_method" :items="paymentMethodItems"
-                                placeholder="اختر عملة الدفع" label="العملة" density="comfortable"
+                                :placeholder="t('sales.forms.common.placeholders.selectCurrency')" :label="t('sales.forms.common.labels.currency')" density="comfortable"
                                 :rules="[required()]" />
                         </div>
 
 
                         <div>
                             <SelectInput v-model="formData.payment_method" :items="paymentMethodItems"
-                                placeholder="حدد طريقة الدفع" label="طريقة الدفع" density="comfortable"
+                                :placeholder="t('sales.forms.common.placeholders.selectPaymentMethod')" :label="t('sales.forms.common.labels.paymentMethod')" density="comfortable"
                                 :rules="[required()]" />
                         </div>
 
                         <div>
-                            <SelectInput v-model="formData.branch" :items="branchItems" placeholder="اختر الفرع"
-                                label="الفرع" density="comfortable" />
+                            <SelectInput v-model="formData.branch" :items="branchItems" :placeholder="t('sales.forms.common.placeholders.selectBranch')"
+                                :label="t('sales.forms.common.labels.branch')" density="comfortable" />
                         </div>
 
                         <div>
                             <SelectInput v-model="formData.customer_id" :items="customerItems"
-                                placeholder="ادخل الخزينة" label="الخزائن" density="comfortable"
+                                :placeholder="t('sales.forms.common.placeholders.selectTreasury')" :label="t('sales.forms.common.labels.treasuries')" density="comfortable"
                                 :rules="[required()]" />
                         </div>
 
                         <div class="lg:col-span-2">
-                            <TextInput v-model="formData.notes" placeholder="أدخل ملاحظات الدفع" label="ملاحظات الدفع"
+                            <TextInput v-model="formData.notes" :placeholder="t('sales.forms.common.placeholders.paymentNotes')" :label="t('sales.forms.common.labels.paymentNotes')"
                                 density="comfortable" />
                         </div>
 
@@ -412,7 +414,7 @@ onMounted(async () => {
                 <div class="bg-white rounded-3xl border !border-gray-100">
                     <div class="flex  p-6 items-center gap-2 text-primary-600 border-b !border-gray-200">
                         <span v-html="creditCard"></span>
-                        <h2 class="text-base font-bold">رصيد العميل</h2>
+                        <h2 class="text-base font-bold">{{ t('sales.forms.common.labels.customerBalance') }}</h2>
                     </div>
                     <div class="p-4 space-y-4">
                         <!-- Available Balance Card -->
@@ -424,7 +426,7 @@ onMounted(async () => {
 
                             <div class="relative z-10">
                                 <div class="flex items-center justify-between mb-2">
-                                    <h3 class="text-lg font-semibold">الرصيد المتاح للعميل</h3>
+                                    <h3 class="text-lg font-semibold">{{ t('sales.forms.common.labels.availableBalanceForCustomer') }}</h3>
                                 </div>
 
                                 <div class="flex items-baseline gap-2 mb-4">
@@ -432,15 +434,15 @@ onMounted(async () => {
                                     <SarIcon :width="20" :height="20" color="white" />
                                 </div>
 
-                                <p class="text-gray-300">آخر تحديث: اليوم 12:00</p>
+                                <p class="text-gray-300">{{ t('sales.forms.common.misc.demoBalanceLastUpdated') }}</p>
                             </div>
                         </div>
 
                         <div>
                             <div class="flex items-center gap-2 justify-between">
                                 <div>
-                                    <p class="font-bold text-gray-700">استخدام الرصيد المتاح</p>
-                                    <p class=" text-gray-500">لدفع إجمالي الدفعة</p>
+                                    <p class="font-bold text-gray-700">{{ t('sales.forms.common.labels.useAvailableBalance') }}</p>
+                                    <p class=" text-gray-500">{{ t('sales.forms.common.labels.forPayingFullPayment') }}</p>
                                 </div>
                                 <v-switch hide-details inset density="compact" color="primary" class="small-switch" />
 
@@ -449,7 +451,7 @@ onMounted(async () => {
 
                         <div v-if="useAvailableBalance"
                             class="mt-4 bg-warning-100 border !border-warning-600 rounded-2xl px-4 py-3 flex items-center gap-2 justify-between">
-                            <p class="text-base font-semibold text-warning-600">المبلغ المستخدم من الرصيد</p>
+                            <p class="text-base font-semibold text-warning-600">{{ t('sales.forms.common.labels.amountUsedFromBalance') }}</p>
                             <div class="flex items-baseline gap-2">
                                 <span class="text-lg font-bold text-warning-600">500</span>
                                 <SarIcon :width="15" :height="15" color="#DC6803" />
@@ -463,22 +465,22 @@ onMounted(async () => {
                 <div class="bg-white rounded-3xl border !border-gray-100">
                     <div class="flex items-center gap-2 text-primary-600 p-6 border-b !border-gray-200">
                         <span class="w-5" v-html="fileIcon"></span>
-                        <h2 class="text-base font-bold">بيانات العميل</h2>
+                        <h2 class="text-base font-bold">{{ t('sales.forms.common.labels.customerDetailsSection') }}</h2>
                     </div>
                     <div class="p-4">
                         <div class="!bg-primary-100 rounded-2xl px-5 py-3 border !border-primary-300 mb-4">
                             <div>
-                                <p class="text-lg font-semibold text-gray-900 mb-1">عبد العزيز الإقبالي</p>
+                                <p class="text-lg font-semibold text-gray-900 mb-1">{{ t('sales.forms.paymentsDemo.demoCustomerDisplayName') }}</p>
                                 <p class="text-lg text-primary-600 font-bold">CUST_1211</p>
                             </div>
                         </div>
 
                         <div class="space-y-3">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 gap-y-6">
-                                <SelectInput v-model="formData.payment_method" label="تم الجمع بواسطة"
-                                    :items="paymentMethodItems" placeholder="حساب موردين" density="compact"
+                                <SelectInput v-model="formData.payment_method" :label="t('sales.forms.common.labels.collectedBy')"
+                                    :items="paymentMethodItems" :placeholder="t('sales.forms.common.placeholders.supplierAccountPlaceholder')" density="compact"
                                      />
-                                <TextInput v-model="queryCode" label="كود العملية"
+                                <TextInput v-model="queryCode" :label="t('sales.forms.common.labels.operationCode')"
                                      disabled density="compact"
                                      />
                             </div>
@@ -491,14 +493,14 @@ onMounted(async () => {
                 <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col">
                     <ButtonWithIcon variant="flat" color="primary" height="48" rounded="4" :loading="isSubmitting"
                         custom-class="font-semibold text-base px-6 md:!px-10" :prepend-icon="returnIcon"
-                        label="حفظ والعودة للرئيسية" @click="handleSubmit('backToList')" />
+                        :label="t('sales.forms.common.actions.saveBackHome')" @click="handleSubmit('backToList')" />
 
                     <ButtonWithIcon variant="flat" color="primary-50" height="48" rounded="4" :loading="isSubmitting"
                         custom-class="font-semibold text-base text-primary-700 px-6 md:!px-10" :prepend-icon="saveIcon"
-                        label="حفظ وإنشاء جديد" @click="handleSubmit('createNew')" />
+                        :label="t('sales.forms.common.actions.saveCreateNew')" @click="handleSubmit('createNew')" />
 
                     <ButtonWithIcon variant="flat" color="gray-100" rounded="4" height="48" prepend-icon="mdi-close"
-                        custom-class="font-semibold text-base text-primary-700 px-6 min-w-56" label="إغلاق"
+                        custom-class="font-semibold text-base text-primary-700 px-6 min-w-56" :label="t('common.actions.close')"
                         @click="handleCancel" />
 
                 </div>

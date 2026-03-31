@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
+import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
 import TopHeader from "@/components/price-offers/TopHeader.vue";
 import AppFormBreadcrumb from "@/components/common/AppFormBreadcrumb.vue";
@@ -13,6 +14,7 @@ import type { PickupProductToAdd } from "@/components/sales/AddPickupProductDial
 import { useForm } from "@/composables/useForm";
 import { useNotification } from "@/composables/useNotification";
 
+const { t } = useI18n();
 const api = useApi();
 const route = useRoute();
 const router = useRouter();
@@ -148,7 +150,7 @@ const fetchPickupForEdit = async () => {
     }
   } catch (e: any) {
     console.error("Error fetching pickup for edit:", e);
-    error(e?.response?.data?.message ?? "فشل تحميل بيانات حجز التسليم");
+    error(e?.response?.data?.message ?? t("sales.forms.common.messages.loadPickupFailed"));
   } finally {
     isLoading.value = false;
   }
@@ -163,18 +165,18 @@ onMounted(async () => {
   }
 });
 
-const timeOptions = [
-  { title: "صباحاً", value: "am" },
-  { title: "مساءً", value: "pm" },
-  { title: "كلاهما", value: "both" },
-];
+const timeOptions = computed(() => [
+  { title: t("sales.forms.common.intervals.morning"), value: "am" },
+  { title: t("sales.forms.common.intervals.evening"), value: "pm" },
+  { title: t("sales.forms.common.intervals.both"), value: "both" },
+]);
 
-const headers = [
-  { title: "اسم المنتج", key: "name" },
-  { title: "الكمية", key: "quantity" },
-  { title: "الوحدة", key: "unit" },
-  { title: "ملاحظات", key: "notes" },
-];
+const headers = computed(() => [
+  { title: t("common.form.productName"), key: "name" },
+  { title: t("sales.forms.common.labels.quantity"), key: "quantity" },
+  { title: t("common.form.unit"), key: "unit" },
+  { title: t("sales.forms.common.labels.notes"), key: "notes" },
+]);
 
 const tableItems = computed(() =>
   productTableItems.value.map((item) => ({
@@ -252,7 +254,7 @@ const downloadIcon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none
 
 const handleImportExcel = () => {
   // Placeholder: wire to file input when API is available
-  warning("استيراد من إكسل: قريباً");
+  warning(t("sales.forms.common.misc.excelImportSoon"));
 };
 
 const buildPayload = () => ({
@@ -276,11 +278,11 @@ type SubmitOption = "appointments_list" | "orders_list" | "create_new";
 const handleSubmit = async (option: SubmitOption) => {
   if (!(await validate())) return;
   if (!formData.value.am_pm_interval) {
-    warning("يجب اختيار التوقيت (صباحاً / مساءً / كلاهما)");
+    warning(t("sales.forms.common.validation.selectAmPmTiming"));
     return;
   }
   if (productTableItems.value.length === 0) {
-    warning("يجب إضافة منتج واحد على الأقل");
+    warning(t("sales.forms.common.validation.atLeastOneProduct"));
     return;
   }
 
@@ -289,10 +291,10 @@ const handleSubmit = async (option: SubmitOption) => {
     const payload = buildPayload();
     if (isEditMode.value && routeId.value) {
       await api.put(`/sales/so-pickups/${routeId.value}`, payload);
-      success("تم تحديث حجز الموعد بنجاح");
+      success(t("sales.forms.common.messages.pickupUpdated"));
     } else {
       await api.post(`/sales/so-pickups`, payload);
-      success("تم حفظ حجز الموعد بنجاح");
+      success(t("sales.forms.common.messages.pickupCreated"));
     }
 
     if (option === "appointments_list") {
@@ -337,7 +339,7 @@ const handleSubmit = async (option: SubmitOption) => {
         title-key="pages.SalesOrdersMaterialProduct.pickupTitle"
         description-key="pages.SalesOrdersMaterialProduct.pickupDescr"
         :show-action="false"
-        code-label="كود الحجز"
+        :code-label="t('sales.forms.common.labels.reservationCode')"
         :code="offerCode"
       />
 
@@ -345,7 +347,7 @@ const handleSubmit = async (option: SubmitOption) => {
       <div class="p-6 bg-white rounded-3xl border !border-gray-100">
         <div class="flex items-center mb-6 gap-2 text-primary-600">
           <span v-html="fileCheckIcon"></span>
-          <h2 class="text-base font-bold">البيانات الأساسية</h2>
+          <h2 class="text-base font-bold">{{ t('sales.forms.common.sections.basicData') }}</h2>
         </div>
 
         <v-form ref="formRef" v-model="isFormValid" @submit.prevent>
@@ -355,8 +357,8 @@ const handleSubmit = async (option: SubmitOption) => {
                 v-model="formData.so_pickup_date"
                 type="date"
                 density="comfortable"
-                placeholder="اختر التاريخ"
-                label="التاريخ"
+                :placeholder="t('sales.forms.common.placeholders.selectDate')"
+                :label="t('sales.forms.common.labels.date')"
               />
             </div>
             <!-- مرجع أمر الشراء - مخفي حالياً -->
@@ -371,22 +373,22 @@ const handleSubmit = async (option: SubmitOption) => {
             <div>
               <TextInput
                 v-model="formData.loading_responsible_party"
-                label="مسؤول التحميل"
+                :label="t('sales.forms.common.labels.loadingOfficer')"
                 density="comfortable"
-                placeholder="أدخل اسم مسؤول التحميل"
+                :placeholder="t('sales.forms.common.placeholders.enterLoadingResponsible')"
               />
             </div>
             <div>
               <TextInput
                 v-model="formData.downloading_responsible_party"
-                label="مسؤول التفريغ"
+                :label="t('sales.forms.common.labels.unloadingOfficer')"
                 density="comfortable"
-                placeholder="أدخل اسم مسؤول التفريغ"
+                :placeholder="t('sales.forms.common.placeholders.enterUnloadingResponsible')"
               />
             </div>
             <div>
               <label class="text-sm font-medium text-gray-700 mb-2 block">
-                التوقيت <span class="text-red-500">*</span>
+                {{ t('sales.forms.common.labels.timingRequired') }} <span class="text-red-500">*</span>
               </label>
               <v-radio-group
                 v-model="formData.am_pm_interval"
@@ -406,9 +408,9 @@ const handleSubmit = async (option: SubmitOption) => {
             <div class="md:col-span-2">
               <TextareaInput
                 v-model="formData.notes"
-                label="الملاحظات"
+                :label="t('sales.forms.common.labels.notes')"
                 density="comfortable"
-                placeholder="ادخل الملاحظات هنا"
+                :placeholder="t('sales.forms.common.placeholders.notesHere')"
               />
             </div>
           </div>
@@ -421,7 +423,7 @@ const handleSubmit = async (option: SubmitOption) => {
           <div class="flex items-center justify-between gap-4 flex-wrap">
             <div class="flex items-center gap-2">
               <span v-html="listIcon"></span>
-              <h2 class="text-base font-bold text-primary-600">جدول المنتجات</h2>
+              <h2 class="text-base font-bold text-primary-600">{{ t('sales.forms.common.sections.productsTable') }}</h2>
             </div>
             <ButtonWithIcon
               color="primary-100"
@@ -430,7 +432,7 @@ const handleSubmit = async (option: SubmitOption) => {
               class="!text-primary-900 font-bold"
               @click="handleImportExcel"
             >
-              استيراد من ملف إكسل
+              {{ t('sales.forms.common.misc.excelImportFile') }}
             </ButtonWithIcon>
             
           </div>
@@ -456,7 +458,7 @@ const handleSubmit = async (option: SubmitOption) => {
               <template #activator="{ props: menuProps }">
                 <div class="flex items-center gap-2 cursor-pointer" v-bind="menuProps">
                   <span v-html="messagePlusIcon" class="shrink-0"></span>
-                  <span class="text-gray-900">{{ item.notes || "أضف ملاحظة" }}</span>
+                  <span class="text-gray-900">{{ item.notes || t('sales.forms.common.misc.addNote') }}</span>
                 </div>
               </template>
               <v-card
@@ -469,7 +471,7 @@ const handleSubmit = async (option: SubmitOption) => {
                   <TextInput
                     :model-value="productTableItems.find((p) => p.item_id === item.item_id)?.notes ?? null"
                     @update:model-value="(v: string | number | null) => { const r = productTableItems.find((p) => p.item_id === item.item_id); if (r) r.notes = v != null ? String(v) : ''; }"
-                    placeholder="أضف ملاحظة"
+                    :placeholder="t('sales.forms.common.misc.addNote')"
                     variant="outlined"
                     density="comfortable"
                     hide-details
@@ -490,7 +492,7 @@ const handleSubmit = async (option: SubmitOption) => {
             class="!text-primary-900 font-bold w-75"
             @click="handleAddProduct"
           >
-            + اضافة منتج جديد
+            {{ t('sales.forms.common.misc.addProductLineAlt') }}
           </ButtonWithIcon>
         </div>
       </div>
@@ -505,7 +507,7 @@ const handleSubmit = async (option: SubmitOption) => {
             rounded="4"
             custom-class="font-semibold text-base px-6 md:!px-10"
             :prepend-icon="returnIcon"
-            label="حفظ والعودة الى قائمة الحجوزات"
+            :label="t('sales.forms.common.actions.saveBackPickupsList')"
             :loading="isSubmitting"
             :disabled="isSubmitting"
             @click="handleSubmit('appointments_list')"
@@ -517,7 +519,7 @@ const handleSubmit = async (option: SubmitOption) => {
             rounded="4"
             custom-class="font-semibold text-base text-primary-700 px-6 md:!px-10"
             :prepend-icon="returnIcon"
-            label="حفظ والعودة لجدول الطلبيات"
+            :label="t('sales.forms.common.actions.saveBackSalesOrdersTable')"
             :loading="isSubmitting"
             :disabled="isSubmitting"
             @click="handleSubmit('orders_list')"
@@ -529,7 +531,7 @@ const handleSubmit = async (option: SubmitOption) => {
             rounded="4"
             custom-class="font-semibold text-base text-primary-700 px-6 md:!px-10"
             :prepend-icon="saveIcon"
-            label="حفظ وانشاء جديد"
+            :label="t('sales.forms.common.actions.saveCreateNew')"
             :loading="isSubmitting"
             :disabled="isSubmitting"
             @click="handleSubmit('create_new')"

@@ -1,24 +1,22 @@
 <template>
   <default-layout>
     <div class="logistics-order-view-page -mx-6 bg-qallab-dashboard-bg">
-      <!-- Breadcrumb -->
       <div class="flex flex-wrap items-center gap-3 mb-3 text-sm px-6 pt-4">
         <router-link to="/" class="text-gray-500 hover:text-primary-600">
           <span v-html="homeIcon"></span>
         </router-link>
         <span class="text-lg text-gray-300">/</span>
         <router-link to="/sales" class="text-gray-600 hover:text-primary-600">
-          المبيعات
+          {{ t('sales.forms.viewPages.breadcrumb.sales') }}
         </router-link>
         <span class="text-lg text-gray-300">/</span>
         <router-link to="/sales/orders/logistics/list" class="text-gray-600 hover:text-primary-600">
-          طلبيات خدمة النقل
+          {{ t('sales.forms.viewPages.lists.logisticsOrders') }}
         </router-link>
         <span class="text-lg text-gray-300">/</span>
         <span class="text-primary-700 font-medium bg-primary-50 px-2 py-1 rounded-md">{{ orderCode }}</span>
       </div>
 
-      <!-- Page Header -->
       <div class="bg-white px-6 py-4 border-y border-gray-200">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-4">
@@ -27,76 +25,75 @@
             </div>
             <div>
               <h1 class="text-lg font-bold text-gray-900 mb-1">{{ orderCode }}</h1>
-              <p class="text-sm text-gray-600">تفاصيل الطلب والمعلومات الخاصة به</p>
+              <p class="text-sm text-gray-600">{{ t('sales.forms.viewPages.subtitles.orderDetail') }}</p>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- 1. البيانات الأساسية -->
       <div class="p-6 bg-white rounded-3xl border !border-gray-100 mb-6 mt-3">
         <div class="flex items-center mb-6 gap-2 text-primary-600">
           <span v-html="fileCheckIcon"></span>
-          <h2 class="text-base font-bold">البيانات الأساسية</h2>
+          <h2 class="text-base font-bold">{{ t('sales.forms.common.sections.basicData') }}</h2>
         </div>
         <div class="flex flex-wrap gap-x-2 gap-y-4">
           <div class="info-item-bordered px-4 py-2">
-            <label class="font-semibold text-sm text-gray-500 mb-2 block">اسم شركة النقل</label>
+            <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('sales.forms.common.labels.transportCompanyName') }}</label>
             <p class="text-base font-semibold text-gray-900">{{ customerName }}</p>
           </div>
           <v-divider vertical class="my-6"></v-divider>
           <div class="info-item-bordered px-4 py-2">
-            <label class="font-semibold text-sm text-gray-500 mb-2 block">تاريخ الطلبية</label>
+            <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('sales.forms.common.labels.orderDate') }}</label>
             <p class="text-base font-semibold text-gray-900">{{ orderDateTime }}</p>
           </div>
           <v-divider vertical class="my-6"></v-divider>
           <div class="info-item-bordered px-4 py-2">
-            <label class="font-semibold text-sm text-gray-500 mb-2 block">اسم المسؤول</label>
+            <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('sales.forms.common.labels.responsibleName') }}</label>
             <p class="text-base font-semibold text-gray-900">{{ responsiblePerson }}</p>
           </div>
           <v-divider vertical class="my-6"></v-divider>
           <div class="info-item-bordered px-4 py-2">
-            <label class="font-semibold text-sm text-gray-500 mb-2 block">تاريخ انشاء الطلبية</label>
+            <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('sales.forms.common.labels.orderCreatedDate') }}</label>
             <p class="text-base font-semibold text-gray-900">{{ orderCreationDate }}</p>
           </div>
           <v-divider vertical class="my-6"></v-divider>
           <div class="info-item-bordered px-4 py-2">
-            <label class="font-semibold text-sm text-gray-500 mb-2 block">هاتف المسؤول</label>
+            <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('sales.forms.common.labels.responsiblePhone') }}</label>
             <p class="text-base font-semibold text-gray-900">{{ responsiblePhone }}</p>
           </div>
           <v-divider vertical class="my-6"></v-divider>
           <div class="info-item-bordered px-4 py-2">
-            <label class="font-semibold text-sm text-gray-500 mb-2 block">نوع الطلبية</label>
+            <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('sales.forms.common.labels.orderTypeLabel') }}</label>
             <p class="text-base font-semibold text-gray-900">{{ orderTypeLabel }}</p>
           </div>
           <v-divider vertical class="my-6"></v-divider>
           <div class="info-item-bordered px-4 py-2">
-            <label class="font-semibold text-sm text-gray-500 mb-2 block">موقع التحميل</label>
+            <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('sales.forms.common.labels.tripLoadingLocation') }}</label>
             <p class="text-base font-semibold text-gray-900">{{ sourceLocation }}</p>
           </div>
           <v-divider vertical class="my-6"></v-divider>
           <div class="info-item-bordered px-4 py-2">
-            <label class="font-semibold text-sm text-gray-500 mb-2 block">موقع التنزيل</label>
+            <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('sales.forms.common.labels.tripUnloadingLocation') }}</label>
             <p class="text-base font-semibold text-gray-900">{{ targetLocation }}</p>
           </div>
           <v-divider vertical class="my-6"></v-divider>
           <div class="info-item-bordered px-4 py-2">
-            <label class="font-semibold text-sm text-gray-500 mb-2 block">اسم المشروع</label>
+            <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('sales.forms.common.labels.projectName') }}</label>
             <p class="text-base font-semibold text-gray-900">{{ projectName }}</p>
           </div>
           <v-divider vertical class="my-6"></v-divider>
           <div class="info-item-bordered px-4 py-2">
-            <label class="font-semibold text-sm text-gray-500 mb-2 block">كود السعر</label>
+            <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('sales.forms.viewPages.sections.priceCode') }}</label>
             <p class="text-base font-semibold text-gray-900">{{ priceCode }}</p>
           </div>
           <v-divider vertical class="my-6"></v-divider>
           <div class="info-item-bordered px-4 py-2">
-            <label class="font-semibold text-sm text-gray-500 mb-2 block">طريقة الدفع</label>
+            <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('sales.forms.common.labels.paymentMethod') }}</label>
             <p class="text-base font-semibold text-gray-900">{{ paymentMethodLabel }}</p>
           </div>
           <v-divider vertical class="my-6"></v-divider>
           <div class="info-item-bordered px-4 py-2">
-            <label class="font-semibold text-sm text-gray-500 mb-2 block">دفعة مقدمة</label>
+            <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('sales.forms.common.labels.advancePayment') }}</label>
             <p class="text-base font-semibold text-gray-900 flex items-center gap-1">
               {{ upfrontPaymentFormatted }} <span v-html="rialIcon"></span>
             </p>
@@ -104,11 +101,10 @@
         </div>
       </div>
 
-      <!-- 2. تفاصيل النقل -->
       <div class="mb-6 bg-white rounded-3xl border !border-gray-100">
         <div class="flex items-center gap-2 px-6 py-3 text-primary-600">
           <span v-html="busIcon"></span>
-          <h2 class="text-base font-bold">تفاصيل النقل</h2>
+          <h2 class="text-base font-bold">{{ t('sales.forms.viewPages.tabs.logisticsRequestTransport') }}</h2>
         </div>
         <div class="px-6 pb-6 space-y-4">
           <div
@@ -118,96 +114,94 @@
           >
             <div class="flex flex-wrap gap-x-2 gap-y-0">
               <div class="info-item-bordered px-4 py-2">
-                <label class="font-semibold text-sm text-gray-500 mb-2 block">نوع المواد المنقولة</label>
+                <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('sales.forms.common.labels.materialCarriedType') }}</label>
                 <p class="text-base font-semibold text-gray-900">{{ detail.material_type_display }}</p>
               </div>
               <v-divider vertical class="my-6"></v-divider>
               <div class="info-item-bordered px-4 py-2">
-                <label class="font-semibold text-sm text-gray-500 mb-2 block">عدد الرحلات</label>
+                <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('sales.forms.common.labels.tripsCount') }}</label>
                 <p class="text-base font-semibold text-gray-900">{{ detail.trip_no ?? '—' }}</p>
               </div>
               <v-divider vertical class="my-6"></v-divider>
               <div class="info-item-bordered px-4 py-2">
-                <label class="font-semibold text-sm text-gray-500 mb-2 block">مدة التنفيذ</label>
+                <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('sales.forms.common.labels.executionDuration') }}</label>
                 <p class="text-base font-semibold text-gray-900">{{ detail.actual_execution_display }}</p>
               </div>
               <v-divider vertical class="my-6"></v-divider>
               <div class="info-item-bordered px-4 py-2">
-                <label class="font-semibold text-sm text-gray-500 mb-2 block">اوقات العمل</label>
+                <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('sales.forms.viewPages.sections.workHours') }}</label>
                 <p class="text-base font-semibold text-gray-900">{{ detail.am_pm_display }}</p>
               </div>
               <v-divider vertical class="my-6"></v-divider>
               <div class="info-item-bordered px-4 py-2">
-                <label class="font-semibold text-sm text-gray-500 mb-2 block">تاريخ بدء النقل</label>
+                <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('sales.forms.common.labels.transportStart') }}</label>
                 <p class="text-base font-semibold text-gray-900">{{ detail.from_date_formatted }}</p>
               </div>
               <v-divider vertical class="my-6"></v-divider>
               <div class="info-item-bordered px-4 py-2">
-                <label class="font-semibold text-sm text-gray-500 mb-2 block">تاريخ انتهاء النقل</label>
+                <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('sales.forms.common.labels.transportEnd') }}</label>
                 <p class="text-base font-semibold text-gray-900">{{ detail.to_date_formatted }}</p>
               </div>
               <v-divider vertical class="my-6"></v-divider>
               <div class="info-item-bordered px-4 py-2">
-                <label class="font-semibold text-sm text-gray-500 mb-2 block">مبلغ النقل</label>
+                <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('sales.forms.common.labels.transportAmount') }}</label>
                 <p class="text-base font-semibold text-gray-900 flex items-center gap-1">
                   {{ detail.transport_amount_formatted }} <span v-html="rialIcon"></span>
                 </p>
               </div>
               <v-divider vertical class="my-6"></v-divider>
               <div class="info-item-bordered px-4 py-2">
-                <label class="font-semibold text-sm text-gray-500 mb-2 block">عدد مركبات النقل</label>
+                <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('sales.forms.common.labels.transportVehicleCount') }}</label>
                 <p class="text-base font-semibold text-gray-900">{{ detail.transport_no_display }}</p>
               </div>
               <v-divider vertical class="my-6"></v-divider>
               <div class="info-item-bordered px-4 py-2">
-                <label class="font-semibold text-sm text-gray-500 mb-2 block">نوع مركبة النقل</label>
+                <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('sales.forms.common.labels.transportVehicleType') }}</label>
                 <p class="text-base font-semibold text-gray-900">{{ detail.transport_type_display }}</p>
               </div>
               <v-divider vertical class="my-6"></v-divider>
               <div class="info-item-bordered px-4 py-2">
-                <label class="font-semibold text-sm text-gray-500 mb-2 block">مسؤول التحميل</label>
+                <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('sales.forms.common.labels.loadingOfficer') }}</label>
                 <p class="text-base font-semibold text-gray-900">{{ detail.loading_responsible_party || '—' }}</p>
               </div>
               <v-divider vertical class="my-6"></v-divider>
               <div class="info-item-bordered px-4 py-2">
-                <label class="font-semibold text-sm text-gray-500 mb-2 block">مسؤول التفريغ</label>
+                <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('sales.forms.common.labels.unloadingOfficer') }}</label>
                 <p class="text-base font-semibold text-gray-900">{{ detail.downloading_responsible_party || '—' }}</p>
               </div>
               <v-divider vertical class="my-6" v-if="detail.source_location"></v-divider>
               <div class="info-item-bordered px-4 py-2" v-if="detail.source_location">
-                <label class="font-semibold text-sm text-gray-500 mb-2 block">موقع الاستلام</label>
+                <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('sales.forms.common.labels.pickupLocationShort') }}</label>
                 <p class="text-base font-semibold text-gray-900">{{ detail.source_location }}</p>
               </div>
               <v-divider vertical class="my-6" v-if="detail.target_location"></v-divider>
               <div class="info-item-bordered px-4 py-2" v-if="detail.target_location">
-                <label class="font-semibold text-sm text-gray-500 mb-2 block">موقع التسليم</label>
+                <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('sales.forms.common.labels.deliveryLocationShort') }}</label>
                 <p class="text-base font-semibold text-gray-900">{{ detail.target_location }}</p>
               </div>
             </div>
           </div>
           <div v-if="logisticsDetailsList.length === 0" class="text-center py-8 text-gray-500">
-            لا توجد تفاصيل نقل
+            {{ t('sales.forms.viewPages.sections.noTransportDetails') }}
           </div>
         </div>
       </div>
 
-      <!-- 3. المنتجات -->
       <div class="mb-6 bg-white rounded-3xl border !border-gray-100">
         <div class="px-6 py-4">
           <div class="flex items-center gap-2 text-primary-600">
             <span v-html="packageIcon"></span>
-            <h2 class="text-base font-bold">المنتجات</h2>
+            <h2 class="text-base font-bold">{{ t('sales.forms.common.sections.products') }}</h2>
           </div>
         </div>
         <DataTable :headers="productHeaders" :items="productItems" />
       </div>
 
-      <!-- 4. الرحلات -->
       <div class="mb-6 bg-white rounded-3xl border !border-gray-100">
         <div class="px-6 py-4">
           <div class="flex items-center gap-2 text-primary-600">
             <span v-html="busIcon"></span>
-            <h2 class="text-base font-bold">الرحلات</h2>
+            <h2 class="text-base font-bold">{{ t('sales.forms.viewPages.sections.tripsSection') }}</h2>
           </div>
         </div>
         <DataTable :headers="tripHeaders" :items="tripItems" />
@@ -222,6 +216,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import { useApi } from '@/composables/useApi'
 import { useNotification } from '@/composables/useNotification'
@@ -229,6 +224,7 @@ import DataTable from '@/components/common/tables/DataTable.vue'
 import { homeIcon, rialIcon } from '@/components/icons/globalIcons'
 import { busIcon, packageIcon, fileCheckIcon } from '@/components/icons/priceOffersIcons'
 
+const { t } = useI18n()
 const route = useRoute()
 const api = useApi()
 const { error } = useNotification()
@@ -246,7 +242,7 @@ const fetchOrderData = async () => {
     orderData.value = res?.data ?? res
   } catch (e: any) {
     console.error('Error fetching order data:', e)
-    error(e?.response?.data?.message || 'فشل تحميل بيانات الطلبية')
+    error(e?.response?.data?.message || t('sales.forms.common.messages.loadSalesOrderViewFailed'))
   } finally {
     isLoading.value = false
   }
@@ -256,7 +252,6 @@ onMounted(() => {
   fetchOrderData()
 })
 
-// Date format DD/MM/YYYY
 const formatDate = (dateStr: string | null | undefined): string => {
   if (!dateStr) return '—'
   const d = new Date(dateStr)
@@ -267,7 +262,6 @@ const formatDate = (dateStr: string | null | undefined): string => {
   return `${day}/${month}/${year}`
 }
 
-// Basic info
 const orderCode = computed(() => orderData.value?.code || '—')
 const customerName = computed(() => orderData.value?.customer_name ?? '—')
 const projectName = computed(() => orderData.value?.project_name || '—')
@@ -283,17 +277,17 @@ const priceCode = computed(() => {
 })
 
 const orderTypeLabel = computed(() => {
-  const t = orderData.value?.so_type
-  if (t === 'so_with_logistics') return 'نقل'
-  if (t === 'so_without_logistics') return 'بيع بدون نقل'
-  return t || '—'
+  const soType = orderData.value?.so_type
+  if (soType === 'so_with_logistics') return t('sales.forms.viewPages.orderKind.logisticsOnly')
+  if (soType === 'so_without_logistics') return t('sales.forms.viewPages.orderKind.saleNoTransport')
+  return soType || '—'
 })
 
 const paymentMethodLabel = computed(() => {
   const m = orderData.value?.payment_method
-  if (m === 'cash') return 'نقدي'
-  if (m === 'deferred') return 'آجل'
-  if (m === 'network') return 'شبكة'
+  if (m === 'cash') return t('sales.forms.paymentsDemo.cash')
+  if (m === 'deferred') return t('sales.forms.paymentsDemo.deferred')
+  if (m === 'network') return t('sales.forms.paymentsDemo.network')
   return m || '—'
 })
 
@@ -304,13 +298,12 @@ const upfrontPaymentFormatted = computed(() => {
 })
 
 const getAmPmLabel = (val: string | null | undefined): string => {
-  if (val === 'am') return 'صباحاً'
-  if (val === 'pm') return 'مساءً'
-  if (val === 'both') return 'صباحاً ومساءً'
+  if (val === 'am') return t('sales.forms.common.intervals.morning')
+  if (val === 'pm') return t('sales.forms.common.intervals.evening')
+  if (val === 'both') return t('sales.forms.common.intervals.morningAndEvening')
   return val || '—'
 }
 
-// تفاصيل النقل من so_logistics_details
 const logisticsDetailsList = computed(() => {
   const list = orderData.value?.so_logistics_details
   if (!Array.isArray(list)) return []
@@ -324,7 +317,9 @@ const logisticsDetailsList = computed(() => {
         : materialType.join(', ') || '—',
       trip_no: d.trip_no,
       actual_execution_interval: d.actual_execution_interval,
-      actual_execution_display: d.actual_execution_interval != null ? `${d.actual_execution_interval} يوم` : '—',
+      actual_execution_display: d.actual_execution_interval != null
+        ? `${d.actual_execution_interval} ${t('sales.forms.viewPages.sections.dayUnit')}`
+        : '—',
       am_pm_interval: d.am_pm_interval,
       am_pm_display: getAmPmLabel(d.am_pm_interval),
       from_date: d.from_date,
@@ -336,7 +331,7 @@ const logisticsDetailsList = computed(() => {
         ? (Array.isArray(d.transport_type_label) ? d.transport_type_label.join(', ') : d.transport_type_label)
         : transportType.join(', ') || '—',
       transport_no: d.transport_no,
-      transport_no_display: d.transport_no != null ? `${d.transport_no} مركبة` : '—',
+      transport_no_display: d.transport_no != null ? `${d.transport_no} ${t('sales.forms.viewPages.sections.vehicleCountUnit')}` : '—',
       loading_responsible_party: d.loading_responsible_party,
       downloading_responsible_party: d.downloading_responsible_party,
       source_location: d.source_location,
@@ -350,15 +345,14 @@ const logisticsDetailsList = computed(() => {
   })
 })
 
-// المنتجات من so_product_details
-const productHeaders = [
-  { title: 'اسم المنتج', key: 'item_name' },
-  { title: 'الوحدة', key: 'unit_name' },
-  { title: 'الكمية', key: 'quantity' },
-  { title: 'تاريخ بداية النقل', key: 'from_date_formatted' },
-  { title: 'عدد الرحلات اليومية', key: 'trip_no' },
-  { title: 'نوع مركبة النقل', key: 'transport_type_display' },
-]
+const productHeaders = computed(() => [
+  { title: t('sales.forms.tables.tripProducts.itemName'), key: 'item_name' },
+  { title: t('sales.forms.common.labels.unitCol'), key: 'unit_name' },
+  { title: t('sales.forms.common.labels.quantityDisplay'), key: 'quantity' },
+  { title: t('sales.forms.common.labels.transportStart'), key: 'from_date_formatted' },
+  { title: t('sales.forms.common.labels.dailyTrips'), key: 'trip_no' },
+  { title: t('sales.forms.common.labels.transportVehicleType'), key: 'transport_type_display' },
+])
 
 const productItems = computed(() => {
   const items = orderData.value?.so_product_details ?? orderData.value?.items
@@ -379,15 +373,14 @@ const productItems = computed(() => {
   })
 })
 
-// الرحلات من so_trip_details
-const tripHeaders = [
-  { title: 'المنتج', key: 'item_name' },
-  { title: 'الكمية', key: 'quantity_display' },
-  { title: 'تاريخ الرحلة', key: 'trip_date_formatted' },
-  { title: 'نوع مركبة النقل', key: 'transport_type_display' },
-  { title: 'سعر الرحلة', key: 'trip_price_formatted' },
-  { title: 'السعر الاجمالي', key: 'trip_price_formatted' },
-]
+const tripHeaders = computed(() => [
+  { title: t('sales.forms.common.labels.product'), key: 'item_name' },
+  { title: t('sales.forms.common.labels.quantityDisplay'), key: 'quantity_display' },
+  { title: t('sales.forms.common.labels.date'), key: 'trip_date_formatted' },
+  { title: t('sales.forms.common.labels.transportVehicleType'), key: 'transport_type_display' },
+  { title: t('sales.forms.common.labels.tripPriceCol'), key: 'trip_price_formatted' },
+  { title: t('sales.forms.viewPages.sections.totalPriceCol'), key: 'trip_price_formatted' },
+])
 
 const tripItems = computed(() => {
   const items = orderData.value?.so_trip_details
@@ -395,7 +388,7 @@ const tripItems = computed(() => {
   return items.map((item: any) => {
     const transportType = Array.isArray(item.transport_type) ? item.transport_type : [item.transport_type].filter(Boolean)
     const price = item.trip_price != null ? Number(item.trip_price) : 0
-    const priceFormatted = price.toLocaleString('ar-SA', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ريال'
+    const priceFormatted = price.toLocaleString('ar-SA', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ' + t('sales.forms.paymentsDemo.currencySar')
     return {
       id: item.id,
       item_id: item.item_id,

@@ -61,19 +61,13 @@ const attachments = ref<(File | string)[]>([]);
 // Receipt items table
 const receiptItems = ref<ReceiptItem[]>([]);
 
-const headers: Array<{
-    key: string;
-    title: string;
-    align?: "start" | "center" | "end";
-    sortable?: boolean;
-    width?: string;
-}> = [
-        { title: 'اسم المنتج', key: 'item_name', width: '200px', align: 'center' },
-        { title: 'الكمية الأساسية', key: 'base_quantity', width: '150px', align: 'center' },
-        { title: 'الكمية المستلمة', key: 'received_quantity', width: '180px', align: 'center' },
-        { title: 'المركبات الناقلة المرسلة', key: 'vehicle_type_no_from_transport_label', width: '400px', align: 'center' },
-        { title: 'المركبات الناقلة المستلمة', key: 'vehicle_type_no_from_customer_label', width: '400px', align: 'center' },
-    ]
+const headers = computed(() => [
+        { title: t('common.form.productName'), key: 'item_name', width: '200px', align: 'center' as const },
+        { title: t('sales.forms.tables.deliveryDocStandard.baseQuantity'), key: 'base_quantity', width: '150px', align: 'center' as const },
+        { title: t('sales.forms.tables.deliveryDocLogistics.receivedQuantity'), key: 'received_quantity', width: '180px', align: 'center' as const },
+        { title: t('sales.forms.tables.deliveryDocLogistics.vehiclesSent'), key: 'vehicle_type_no_from_transport_label', width: '400px', align: 'center' as const },
+        { title: t('sales.forms.tables.deliveryDocLogistics.vehiclesReceived'), key: 'vehicle_type_no_from_customer_label', width: '400px', align: 'center' as const },
+    ]);
 
 // Computed items for the DataTable
 const tableItems = computed(() => receiptItems.value.map((item, index) => ({
@@ -126,7 +120,7 @@ const fetchFormData = async () => {
         }
     } catch (e) {
         console.error('Error fetching form data:', e);
-        error('فشل تحميل بيانات سند التسليم');
+        error(t('sales.forms.common.messages.loadDeliveryDocFailed'));
     } finally {
         isLoading.value = false;
     }
@@ -227,7 +221,7 @@ const handleSubmitToDeliveryDocs = async () => {
     if (!await validateAllForms()) return;
 
     if (receiptItems.value.length === 0) {
-        warning('يجب إضافة عنصر واحد على الأقل');
+        warning(t('sales.forms.common.validation.atLeastOneLine'));
         return;
     }
 
@@ -250,7 +244,7 @@ const handleSubmitToDeliveryDocs = async () => {
             });
         }
 
-        success(isEditMode.value ? 'تم تحديث سند التسليم بنجاح' : 'تم إنشاء سند التسليم بنجاح');
+        success(isEditMode.value ? t('sales.forms.common.messages.deliveryDocUpdated') : t('sales.forms.common.messages.deliveryDocCreated'));
         router.push({ name: 'DeliveryDocsLogisticsList' });
 
     } catch (e: any) {
@@ -266,7 +260,7 @@ const handleSubmitToOrdersList = async () => {
     if (!await validateAllForms()) return;
 
     if (receiptItems.value.length === 0) {
-        warning('يجب إضافة عنصر واحد على الأقل');
+        warning(t('sales.forms.common.validation.atLeastOneLine'));
         return;
     }
 
@@ -289,7 +283,7 @@ const handleSubmitToOrdersList = async () => {
             });
         }
 
-        success(isEditMode.value ? 'تم تحديث سند التسليم بنجاح' : 'تم إنشاء سند التسليم بنجاح');
+        success(isEditMode.value ? t('sales.forms.common.messages.deliveryDocUpdated') : t('sales.forms.common.messages.deliveryDocCreated'));
         router.push({ name: 'SalesOrdersMaterialProductList' });
 
     } catch (e: any) {
@@ -329,38 +323,41 @@ const handleSubmitToOrdersList = async () => {
                 <div class="p-6 bg-white rounded-3xl border !border-gray-100">
                     <div class="flex items-center mb-6 gap-2 text-primary-600">
                         <span class="w-4" v-html="fileIcon_2"></span>
-                        <h2 class="text-base font-bold">البيانات الأساسية</h2>
+                        <h2 class="text-base font-bold">{{ t('sales.forms.common.sections.basicData') }}</h2>
                     </div>
 
                     <v-form ref="formRef" v-model="isFormValid" @submit.prevent>
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                             <!-- Purchase Order Code -->
                             <div>
-                                <TextInput v-model="formData.purchase_order_code" placeholder="كود طلبية المشتريات"
-                                    label="كود طلبية المشتريات" density="comfortable" disabled />
+                                <TextInput v-model="formData.purchase_order_code"
+                                    :placeholder="t('sales.forms.common.labels.purchaseOrderCode')"
+                                    :label="t('sales.forms.common.labels.purchaseOrderCode')" density="comfortable" disabled />
                             </div>
 
                             <!-- Delivery Doc Code -->
                             <div>
-                                <TextInput v-model="formData.code" placeholder="كود سند التسليم" label="كود سند التسليم"
+                                <TextInput v-model="formData.code"
+                                    :placeholder="t('sales.forms.common.labels.deliveryNoteCode')"
+                                    :label="t('sales.forms.common.labels.deliveryNoteCode')"
                                     density="comfortable" disabled />
                             </div>
 
                             <!-- Delivery Date -->
                             <div>
                                 <DatePickerInput v-model="formData.receiving_date" type="date" density="comfortable"
-                                    placeholder="اختر" label="تاريخ التسليم" :rules="[required()]" />
+                                    :placeholder="t('common.form.choose')" :label="t('sales.forms.common.labels.deliveryDate')" :rules="[required()]" />
                             </div>
 
                             <!-- Created At (display only) -->
                             <div v-if="isEditMode">
-                                <TextInput v-model="formData.created_at" label="تاريخ الإنشاء" density="comfortable"
+                                <TextInput v-model="formData.created_at" :label="t('common.form.createdAt')" density="comfortable"
                                     disabled />
                             </div>
                         </div>
                         <!-- Attachments Row -->
                         <div class="mt-6">
-                            <h3 class="text-sm font-semibold text-gray-700 mb-3 tracking-wide">المرفقات</h3>
+                            <h3 class="text-sm font-semibold text-gray-700 mb-3 tracking-wide">{{ t('sales.forms.common.sections.attachments') }}</h3>
                             <DocumentUploadInput v-model="attachments" hint="PNG, JPG , PDF, XLS" :max-files="5"
                                 :multiple="true" />
                         </div>
@@ -370,16 +367,16 @@ const handleSubmitToOrdersList = async () => {
                 <div class="p-6 bg-white rounded-3xl border !border-gray-100 ">
                     <div class="flex items-center gap-2 text-primary-600 mb-2">
                         <span v-html="globeIcon"></span>
-                        <h2 class="text-base font-bold">موقع التسليم والإستلام</h2>
+                        <h2 class="text-base font-bold">{{ t('sales.forms.common.sections.deliveryAndPickupLocation') }}</h2>
                     </div>
                     <div class="flex flex-wrap gap-4">
                         <div class="info-item-bordered flex-1 px-6 py-4 md:max-w-[400px]">
-                            <label class="font-semibold text-sm  text-gray-900 mb-2 block">موقع التسليم</label>
+                            <label class="font-semibold text-sm  text-gray-900 mb-2 block">{{ t('sales.forms.common.locationLabels.deliverySite') }}</label>
                             <p class="text-base font-semibold text-gray-500">{{ formData.target_location || '--' }}</p>
                         </div>
                         <v-divider vertical class="my-6"></v-divider>
                         <div class="info-item-bordered flex-1 px-6 py-4 md:max-w-[400px]">
-                            <label class="font-semibold text-sm  text-gray-900 mb-2 block">موقع الإستلام</label>
+                            <label class="font-semibold text-sm  text-gray-900 mb-2 block">{{ t('sales.forms.common.locationLabels.pickupSite') }}</label>
                             <p class="text-base font-semibold text-gray-500 ">{{ formData.source_location || '--' }}</p>
                         </div>
                     </div>
@@ -392,7 +389,7 @@ const handleSubmitToOrdersList = async () => {
                     <div class="px-6 py-6">
                         <div class="flex items-center gap-2 text-primary-600">
                             <span class="w-5" v-html="fileCheckIcon"></span>
-                            <h2 class="text-base font-bold">جدول عناصر سند التسليم</h2>
+                            <h2 class="text-base font-bold">{{ t('sales.forms.common.sections.deliveryDocItemsTable') }}</h2>
                         </div>
                     </div>
 
@@ -408,14 +405,14 @@ const handleSubmitToOrdersList = async () => {
                             <!-- Base Quantity - Input -->
                             <template #item.base_quantity="{ item }">
                                 <PriceInput v-model="receiptItems[getItemIndex(item)].base_quantity" disabled
-                                    placeholder="الكمية الأساسية" density="comfortable" class="w-32 text-center"
+                                    :placeholder="t('sales.forms.common.labels.baseQuantityPh')" density="comfortable" class="w-32 text-center"
                                     :input-props="{ class: 'text-center' }" :rules="[required()]" />
                             </template>
 
                             <!-- Received Quantity -->
                             <template #item.received_quantity="{ item }">
                                 <PriceInput v-model="receiptItems[getItemIndex(item)].received_quantity"
-                                    placeholder="الكمية المستلمة" density="comfortable" class="w-32 text-center"
+                                    :placeholder="t('sales.forms.common.labels.receivedQty')" density="comfortable" class="w-32 text-center"
                                     :input-props="{ class: 'text-center' }" :rules="[required()]" />
                             </template>
 
@@ -431,7 +428,7 @@ const handleSubmitToOrdersList = async () => {
                                                 vehicle.transport_type_label }}</span>
                                         </div>
                                         <div class="bg-white col-span-3 h-full flex items-center">
-                                            <PriceInput v-model="vehicle.transport_no" placeholder="أدخل"
+                                            <PriceInput v-model="vehicle.transport_no" :placeholder="t('sales.forms.common.placeholders.enter')"
                                                 density="comfortable" variant="solo" hide-details class="text-center"
                                                 :input-props="{ class: 'text-center shadow-none' }" />
                                         </div>
@@ -451,7 +448,7 @@ const handleSubmitToOrdersList = async () => {
                                                 vehicle.transport_type_label }}</span>
                                         </div>
                                         <div class="bg-white col-span-3 h-full flex items-center">
-                                            <PriceInput v-model="vehicle.transport_no" placeholder="أدخل"
+                                            <PriceInput v-model="vehicle.transport_no" :placeholder="t('sales.forms.common.placeholders.enter')"
                                                 density="comfortable" variant="solo" hide-details class="text-center"
                                                 :input-props="{ class: 'text-center shadow-none' }" />
                                         </div>
@@ -467,12 +464,12 @@ const handleSubmitToOrdersList = async () => {
                     <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col">
                         <ButtonWithIcon variant="flat" color="primary" height="48" rounded="4"
                             custom-class="font-semibold text-base px-6 md:!px-10" :prepend-icon="returnIcon"
-                            label="حفظ والعودة لقائمة سندات التسليم" :loading="isSubmitting"
+                            :label="t('sales.forms.common.actions.saveBackDeliveryDocsList')" :loading="isSubmitting"
                             @click="handleSubmitToDeliveryDocs" />
 
                         <ButtonWithIcon variant="flat" color="primary-50" height="48" rounded="4"
                             custom-class="font-semibold text-base text-primary-700 px-6 md:!px-10"
-                            :prepend-icon="saveIcon" label="حفظ والعودة لقائمة طلبيات المبيعات" :loading="isSubmitting"
+                            :prepend-icon="saveIcon" :label="t('sales.forms.common.actions.saveBackSalesOrdersList')" :loading="isSubmitting"
                             @click="handleSubmitToOrdersList" />
                     </div>
                 </div>

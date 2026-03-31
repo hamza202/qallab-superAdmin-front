@@ -14,8 +14,8 @@ import { useForm } from '@/composables/useForm';
 import { useNotification as useNotify } from '@/composables/useNotification';
 import AddLogisticsDetailDialog from './components/AddLogisticsDetailDialog.vue';
 import { useNotification } from '@/composables/useNotification';
-import { tr } from "vuetify/locale";
 
+const { t } = useI18n();
 const { warning } = useNotification();
 const { formRef, isFormValid, validate } = useForm();
 const { success, apiError } = useNotify();
@@ -43,7 +43,6 @@ interface LogisticsDetail {
     discount_type: number | string | null;
 }
 
-useI18n()
 const api = useApi();
 const route = useRoute();
 const router = useRouter();
@@ -1182,23 +1181,24 @@ const handleSubmit = async (afterSuccess?: 'reset' | 'navigate') => {
 
     locationError.value = null;
     if (!formData.value.target_location?.trim()) {
-        locationError.value = 'يجب تحديد موقع المشروع';
-        warning('يجب تحديد موقع المشروع');
+        const locMsg = t('sales.forms.common.validation.specifyProjectLocation');
+        locationError.value = locMsg;
+        warning(locMsg);
         return;
     }
 
     if (productTableItems.value.length === 0) {
-        warning('يجب إضافة منتج واحد على الأقل');
+        warning(t('sales.forms.common.validation.atLeastOneProduct'));
         return;
     }
 
     if (logisticsDetails.value.length === 0) {
-        warning('يجب إضافة خدمة نقل واحدة على الأقل');
+        warning(t('sales.forms.common.validation.atLeastOneTransportService'));
         return;
     }
 
     if (tripTableItems.value.length === 0) {
-        warning('يجب إضافة تفاصيل رحلة واحدة على الأقل');
+        warning(t('sales.forms.common.validation.atLeastOneTripDetail'));
         return;
     }
 
@@ -1206,11 +1206,11 @@ const handleSubmit = async (afterSuccess?: 'reset' | 'navigate') => {
     for (let i = 0; i < logisticsDetails.value.length; i++) {
         const detail = logisticsDetails.value[i];
         if (!detail.source_location?.trim()) {
-            warning(`يجب تحديد موقع الاستلام لخدمة النقل رقم ${i + 1}`);
+            warning(t('sales.forms.common.validation.pickupLocationForService', { n: i + 1 }));
             return;
         }
         if (!detail.target_location?.trim()) {
-            warning(`يجب تحديد موقع التسليم لخدمة النقل رقم ${i + 1}`);
+            warning(t('sales.forms.common.validation.deliveryLocationForService', { n: i + 1 }));
             return;
         }
     }
@@ -1229,7 +1229,7 @@ const handleSubmit = async (afterSuccess?: 'reset' | 'navigate') => {
             }
         });
 
-        success(isEditMode.value ? 'تم تحديث عرض السعر بنجاح' : 'تم إنشاء عرض السعر بنجاح');
+        success(isEditMode.value ? t('sales.forms.common.messages.quotationUpdated') : t('sales.forms.common.messages.quotationCreated'));
 
         if (afterSuccess === 'reset') {
             resetForm();
@@ -1238,21 +1238,21 @@ const handleSubmit = async (afterSuccess?: 'reset' | 'navigate') => {
         }
     } catch (e: any) {
         console.error('Error submitting form:', e);
-        apiError(e, 'حدث خطأ أثناء حفظ عرض السعر');
+        apiError(e, t('sales.forms.common.messages.saveQuotationError'));
     } finally {
         isSubmitting.value = false;
     }
 };
 
 
-const headers = [
-    { title: 'اسم المنتج', key: 'name' },
-    { title: 'الكمية', key: 'quantity' },
-    { title: 'الوحدة', key: 'unit' },
-    { title: 'تاريخ بدء النقل', key: 'from_date' },
-    { title: 'عدد الرحلات', key: 'trip_no' },
-    { title: 'ملاحظات', key: 'notes' },
-]
+const headers = computed(() => [
+    { title: t('common.form.productName'), key: 'name' },
+    { title: t('sales.forms.common.labels.quantity'), key: 'quantity' },
+    { title: t('common.form.unit'), key: 'unit' },
+    { title: t('sales.forms.common.labels.transportStart'), key: 'from_date' },
+    { title: t('sales.forms.common.labels.tripsCount'), key: 'trip_no' },
+    { title: t('sales.forms.common.labels.notes'), key: 'notes' },
+])
 
 // Computed items for the DataTable
 const tableItems = computed(() => productTableItems.value.map(item => ({
@@ -1267,17 +1267,17 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
 })));
 
 // Trip details table headers and items
-const tripHeaders = [
-    { title: 'اسم المنتج', key: 'name' },
-    { title: 'الوحدة', key: 'unit' },
-    { title: 'الكمية', key: 'quantity' },
-    { title: 'تاريخ بدء النقل', key: 'trip_date' },
-    { title: 'نوع المركبات', key: 'transport_type_names' },
-    { title: 'عدد الرحلات', key: 'trip_no' },
-    { title: 'سعر الرحلة', key: 'trip_price' },
-    { title: 'الخصم', key: 'discount_display' },
-    { title: 'السعر الإجمالي', key: 'sub_total' },
-]
+const tripHeaders = computed(() => [
+    { title: t('common.form.productName'), key: 'name' },
+    { title: t('common.form.unit'), key: 'unit' },
+    { title: t('sales.forms.common.labels.quantity'), key: 'quantity' },
+    { title: t('sales.forms.common.labels.transportStart'), key: 'trip_date' },
+    { title: t('sales.forms.common.labels.vehicleTypes'), key: 'transport_type_names' },
+    { title: t('sales.forms.common.labels.tripsCount'), key: 'trip_no' },
+    { title: t('sales.forms.common.labels.tripPriceCol'), key: 'trip_price' },
+    { title: t('sales.forms.common.labels.discount'), key: 'discount_display' },
+    { title: t('sales.forms.common.labels.subtotalPrice'), key: 'sub_total' },
+])
 
 const tripItems = computed(() => tripTableItems.value.map(item => {
     return {
@@ -1339,62 +1339,62 @@ onMounted(async () => {
             <div class="p-6 bg-white rounded-3xl border !border-gray-100">
                 <div class="flex items-center mb-6 gap-2 text-primary-600">
                     <span v-html="fileCheckIcon"></span>
-                    <h2 class="text-base font-bold">البيانات الأساسية</h2>
+                    <h2 class="text-base font-bold">{{ t('sales.forms.common.sections.basicData') }}</h2>
                 </div>
 
                 <v-form ref="formRef" v-model="isFormValid" @submit.prevent>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 items-end">
                         <!-- Customer Name -->
                         <div>
-                            <SelectInput v-model="formData.customer_id" :items="[]" label="اسم العميل"
+                            <SelectInput v-model="formData.customer_id" :items="[]" :label="t('sales.forms.common.labels.customerName')"
                                 item-title="title" :rules="[required()]" item-value="value" density="comfortable"
-                                placeholder="حدد العميل" :server-side="true" :fetch-function="fetchCustomers"
+                                :placeholder="t('sales.forms.common.placeholders.selectCustomer')" :server-side="true" :fetch-function="fetchCustomers"
                                 item-title-key="full_name" item-value-key="id" :debounce-time="500" />
                         </div>
 
                         <!-- Responsible Person -->
                         <div>
-                            <TextInput v-model="formData.responsible_person" placeholder="أدخل اسم المسؤول"
-                                label="اسم المسؤول" :rules="[required()]" density="comfortable" />
+                            <TextInput v-model="formData.responsible_person" :placeholder="t('sales.forms.common.placeholders.enterResponsibleName')"
+                                :label="t('sales.forms.common.labels.responsibleName')" :rules="[required()]" density="comfortable" />
                         </div>
 
                         <!-- Responsible Phone -->
                         <div>
-                            <TelInput label="هاتف المسؤول" v-model="formData.responsible_phone"
+                            <TelInput :label="t('sales.forms.common.labels.responsiblePhone')" v-model="formData.responsible_phone"
                                 placeholder="5XX XXX XXXX" density="comfortable" :rules="[required(), saudiPhone()]" />
                         </div>
 
                         <!-- Quotation Name -->
                         <div>
-                            <TextInput v-model="formData.quotation_name" placeholder="أدخل الإسم" label="اسم عرض السعر"
+                            <TextInput v-model="formData.quotation_name" :placeholder="t('sales.forms.common.placeholders.enterName')" :label="t('sales.forms.common.labels.quotationName')"
                                 :rules="[required()]" density="comfortable" />
                         </div>
 
                         <!-- Quotation Date -->
                         <div>
                             <DateTimePickerInput v-model="formData.quotations_datetime" density="comfortable"
-                                placeholder="اختر التاريخ" label="تاريخ العرض" />
+                                :placeholder="t('sales.forms.common.placeholders.selectDate')" :label="t('sales.forms.common.labels.quotationDate')" />
                         </div>
 
                         <!-- Quotation Validity -->
                         <div>
-                            <PriceInput v-model="formData.quotation_validity_no" placeholder="أدخل المدة بالأيام"
-                                label="صلاحية عرض السعر" :rules="[required()]" density="comfortable">
+                            <PriceInput v-model="formData.quotation_validity_no" :placeholder="t('sales.forms.common.placeholders.enterDays')"
+                                :label="t('sales.forms.common.labels.quotationValidity')" :rules="[required()]" density="comfortable">
                                 <template #append-inner>
-                                    <span class="text-gray-500 text-sm">يوم</span>
+                                    <span class="text-gray-500 text-sm">{{ t('sales.forms.common.misc.dayWord') }}</span>
                                 </template>
                             </PriceInput>
                         </div>
 
                         <!-- Source Material Location -->
                         <div class="relative">
-                            <label class="text-sm font-medium text-gray-700 mb-2 block">موقع مصدر المواد <span
+                            <label class="text-sm font-medium text-gray-700 mb-2 block">{{ t('sales.forms.common.labels.materialSourceLocation') }} <span
                                     class="text-red-500">*</span></label>
                             <div @click="openMapDialog('source')"
                                 class="flex items-center justify-between px-4 py-2 min-h-[48px] border !border-blue-400 rounded-lg cursor-pointer hover:bg-blue-100 transition-colors">
                                 <span
                                     class="text-base font-medium text-blue-900 whitespace-nowrap overflow-hidden text-ellipsis ">
-                                    {{ formData.source_location || 'حدد الموقع' }}
+                                    {{ formData.source_location || t('sales.forms.common.misc.pickLocation') }}
                                 </span>
                                 <div class="flex items-center gap-2">
                                     <span v-html="mapMarkerIcon"></span>
@@ -1404,14 +1404,14 @@ onMounted(async () => {
 
                         <!-- Project Location -->
                         <div class="relative">
-                            <label class="text-sm font-medium text-gray-700 mb-2 block">موقع المشروع <span
+                            <label class="text-sm font-medium text-gray-700 mb-2 block">{{ t('sales.ordersFuels.filters.projectLocation') }} <span
                                     class="text-error-600">*</span></label>
                             <div @click="openMapDialog('main')"
                                 class="flex items-center justify-between px-4 py-2 min-h-[48px] border rounded-lg cursor-pointer transition-colors"
                                 :class="locationError ? '!border-error-500 bg-error-50' : '!border-blue-400 hover:bg-blue-100'">
                                 <span class="text-base font-medium whitespace-nowrap overflow-hidden text-ellipsis"
                                     :class="locationError ? 'text-error-700' : 'text-blue-900'">
-                                    {{ formData.target_location || 'حدد الموقع' }}
+                                    {{ formData.target_location || t('sales.forms.common.misc.pickLocation') }}
                                 </span>
                                 <div class="flex items-center gap-2">
                                     <span v-html="mapMarkerIcon"></span>
@@ -1422,7 +1422,7 @@ onMounted(async () => {
 
                         <!-- Project Name -->
                         <div>
-                            <TextInput v-model="formData.project_name" label="اسم المشروع" placeholder="أدخل الإسم"
+                            <TextInput v-model="formData.project_name" :label="t('sales.forms.common.labels.projectName')" :placeholder="t('sales.forms.common.placeholders.enterName')"
                                 density="comfortable" />
                         </div>
                     </div>
@@ -1434,10 +1434,10 @@ onMounted(async () => {
                 <div class="flex flex-wrap gap-3 items-center justify-between px-6 py-3">
                     <div class="flex items-center gap-2 text-primary-600">
                         <span v-html="busIcon"></span>
-                        <h2 class="text-base font-bold ">تفاصيل النقل</h2>
+                        <h2 class="text-base font-bold ">{{ t('sales.forms.common.sections.transportDetails') }}</h2>
                     </div>
                     <ButtonWithIcon color="primary-600" variant="flat" rounded="lg" @click="handleAddLogisticsDetail">
-                        أضف خدمة نقل
+                        {{ t('sales.forms.common.misc.addTransportServiceLink') }}
                     </ButtonWithIcon>
                 </div>
 
@@ -1449,78 +1449,72 @@ onMounted(async () => {
                             <!-- Card Content Grid -->
                             <div class="flex flex-wrap gap-x-2 gap-y-0">
                                 <div class="info-item-bordered px-4 py-2">
-                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">نوع المواد
-                                        المنقولة</label>
+                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('sales.forms.common.labels.materialCarriedType') }}</label>
                                     <p class="text-base font-semibold text-gray-900">{{
                                         getCategoriesNames(detail.material_type) }}</p>
                                 </div>
                                 <v-divider vertical class="my-6"></v-divider>
                                 <div class="info-item-bordered  px-4 py-2">
-                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">عدد الرحلات</label>
+                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('sales.forms.common.labels.tripsCount') }}</label>
                                     <p class="text-base font-semibold text-gray-900">{{ detail.trip_no }}</p>
                                 </div>
                                 <v-divider vertical class="my-6"></v-divider>
                                 <div class="info-item-bordered  px-4 py-2">
-                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">مدة التنفيذ</label>
+                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('sales.forms.common.labels.executionDuration') }}</label>
                                     <p class="text-base font-semibold text-gray-900">{{ detail.actual_execution_interval
                                         }}
                                     </p>
                                 </div>
                                 <v-divider vertical class="my-6"></v-divider>
                                 <div class="info-item-bordered  px-4 py-2">
-                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">أوقات النقل</label>
+                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('sales.forms.logisticsDetailDialog.transportTimes') }}</label>
                                     <p class="text-base font-semibold text-gray-900">{{ detail.am_pm_interval === 'am' ?
-                                        'صباحاً' : detail.am_pm_interval === 'pm' ? 'مساءً' : 'كلاهما' }}</p>
+                                        t('sales.forms.common.intervals.morning') : detail.am_pm_interval === 'pm' ? t('sales.forms.common.intervals.evening') : t('sales.forms.common.intervals.both') }}</p>
                                 </div>
                                 <v-divider vertical class="my-6"></v-divider>
                                 <div class="info-item-bordered  px-4 py-2">
-                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">تاريخ بدء
-                                        النقل</label>
+                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('sales.forms.common.labels.transportStart') }}</label>
                                     <p class="text-base font-semibold text-gray-900">{{ detail.from_date }}</p>
                                 </div>
                                 <v-divider vertical class="my-6"></v-divider>
                                 <div class="info-item-bordered  px-4 py-2">
-                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">تاريخ انتهاء
-                                        النقل</label>
+                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('sales.forms.common.labels.transportEnd') }}</label>
                                     <p class="text-base font-semibold text-gray-900">{{ detail.to_date }}</p>
                                 </div>
                                 <v-divider vertical class="my-6"></v-divider>
                                 <div class="info-item-bordered  px-4 py-2">
-                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">نوع مركبة
-                                        النقل</label>
+                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('sales.forms.common.labels.transportVehicleType') }}</label>
                                     <p class="text-base font-semibold text-gray-900">{{
                                         getTransportTypeNames(detail.transport_type) }}</p>
                                 </div>
                                 <v-divider vertical class="my-6"></v-divider>
                                 <div class="info-item-bordered px-4 py-2">
-                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">عدد مركبات
-                                        النقل</label>
-                                    <p class="text-base font-semibold text-gray-900">{{ detail.transport_no }} مركبة</p>
+                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('sales.forms.common.labels.transportVehicleCount') }}</label>
+                                    <p class="text-base font-semibold text-gray-900">{{ detail.transport_no }} {{ t('sales.forms.common.misc.vehicleUnit') }}</p>
                                 </div>
                                 <v-divider vertical class="my-6"></v-divider>
                                 <div class="info-item-bordered px-4 py-2">
-                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">مسؤول التفريغ
+                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('sales.forms.common.labels.unloadingOfficer') }}
                                     </label>
                                     <p class="text-base font-semibold text-gray-900">{{ detail.loading_responsible_party
                                         }} </p>
                                 </div>
                                 <v-divider vertical class="my-6"></v-divider>
                                 <div class="info-item-bordered px-4 py-2">
-                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">مسؤول التحميل
+                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('sales.forms.common.labels.loadingOfficer') }}
                                     </label>
                                     <p class="text-base font-semibold text-gray-900">{{
                                         detail.downloading_responsible_party }} </p>
                                 </div>
                                 <v-divider vertical class="my-6" v-if="detail.target_location"></v-divider>
                                 <div class="info-item-bordered px-4 py-2">
-                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">مبلغ
-                                        النقل</label>
+                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('sales.forms.common.labels.transportAmount') }}</label>
                                     <p class="text-base font-semibold text-gray-900 flex items-center gap-2">{{
                                         detail.transport_amount }} <span v-html="rialIcon"> </span></p>
                                 </div>
                                 <v-divider vertical class="my-6" v-if="detail.discount_val"></v-divider>
                                 <div class="info-item-bordered px-4 py-2" v-if="detail.discount_val">
-                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">الخصم</label>
+                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('sales.forms.common.labels.discount') }}</label>
                                     <p class="text-base font-semibold text-gray-900 flex items-center gap-1">{{
                                         detail.discount_val
                                         }} <span v-if="detail.discount_type == 1">%</span><span v-else
@@ -1528,14 +1522,14 @@ onMounted(async () => {
                                 </div>
                                 <v-divider vertical class="my-6"></v-divider>
                                 <div class="info-item-bordered px-4 py-2" v-if="detail.target_location">
-                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">موقع التسليم
+                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('sales.forms.common.locationLabels.deliverySite') }}
                                     </label>
                                     <p class="text-base font-semibold text-gray-900">{{
                                         detail.target_location }} </p>
                                 </div>
                                 <v-divider vertical class="my-6" v-if="detail.source_location"></v-divider>
                                 <div class="info-item-bordered px-4 py-2" v-if="detail.source_location">
-                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">موقع الإستلام
+                                    <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('sales.forms.common.locationLabels.pickupSite') }}
                                     </label>
                                     <p class="text-base font-semibold text-gray-900">{{
                                         detail.source_location }} </p>
@@ -1550,11 +1544,11 @@ onMounted(async () => {
                         <div class="flex justify-end gap-2">
                             <ButtonWithIcon color="primary-800" variant="flat" class="text-white" rounded="lg"
                                 :prepend-icon="globeIcon" @click="openMapDialog('logistics-source', index)">
-                                موقع الاستلام
+                                {{ t('sales.forms.common.labels.pickupLocationShort') }}
                             </ButtonWithIcon>
                             <ButtonWithIcon color="primary-800" variant="flat" class="text-white" rounded="lg"
                                 :prepend-icon="globeIcon" @click="openMapDialog('logistics-target', index)">
-                                موقع التسليم
+                                {{ t('sales.forms.common.labels.deliveryLocationShort') }}
                             </ButtonWithIcon>
 
                         </div>
@@ -1562,8 +1556,8 @@ onMounted(async () => {
 
                     <!-- Empty State -->
                     <div v-if="logisticsDetails.length === 0" class="text-center py-12">
-                        <p class="text-gray-500 text-lg">لا توجد تفاصيل نقل مضافة</p>
-                        <p class="text-gray-400 text-sm mt-2">اضغط على "أضف خدمة نقل" لإضافة تفاصيل جديدة</p>
+                        <p class="text-gray-500 text-lg">{{ t('sales.forms.common.misc.noTransportDetailsAdded') }}</p>
+                        <p class="text-gray-400 text-sm mt-2">{{ t('sales.forms.common.misc.hintAddTransportService') }}</p>
                     </div>
                 </div>
             </div>
@@ -1574,7 +1568,7 @@ onMounted(async () => {
                 <div class="px-6 py-6">
                     <div class="flex items-center gap-2 mb-2">
                         <span v-html="packageIcon"></span>
-                        <h2 class="text-base font-bold text-primary-600">تفاصيل المنتجات</h2>
+                        <h2 class="text-base font-bold text-primary-600">{{ t('sales.forms.common.sections.productDetails') }}</h2>
                     </div>
                 </div>
 
@@ -1587,7 +1581,7 @@ onMounted(async () => {
                             <template #activator="{ props }">
                                 <div class="flex items-center gap-2 cursor-pointer" v-bind="props">
                                     <v-icon size="20" color="primary" v-html="messagePlusIcon"></v-icon>
-                                    <span class="text-gray-900">{{ item.notes || 'أضف ملاحظة' }}</span>
+                                    <span class="text-gray-900">{{ item.notes || t('sales.forms.common.misc.addNote') }}</span>
                                 </div>
                             </template>
 
@@ -1596,7 +1590,7 @@ onMounted(async () => {
                                 <div class="!flex flex-nowrap items-center gap-3">
                                     <TextInput
                                         v-model="productTableItems[productTableItems.findIndex(p => p.item_id === item.item_id)].notes"
-                                        placeholder="أضف ملاحظة" variant="outlined" density="comfortable" hide-details
+                                        :placeholder="t('sales.forms.common.misc.addNote')" variant="outlined" density="comfortable" hide-details
                                         autofocus class="flex-1" />
                                     <ButtonWithIcon :icon="messagePlusIcon" color="primary" icon-only size="x-small" />
                                 </div>
@@ -1609,12 +1603,12 @@ onMounted(async () => {
                 <div class="flex justify-center gap-3 md:w-3/4 mx-auto my-6">
                     <ButtonWithIcon color="primary-100" variant="flat" class="!text-primary-900 font-bold flex-1"
                         @click="handleAddProduct">
-                        + إضافة منتج جديد
+                        {{ t('sales.forms.common.misc.addProductLine') }}
                     </ButtonWithIcon>
                     <ButtonWithIcon v-if="productTableItems.length > 0" color="primary-100" variant="flat"
                         class="!text-primary-900 font-bold flex-1"
                         @click="showEditProductsDialog = true">
-                        تعديل المنتجات
+                        {{ t('sales.forms.common.misc.editProducts') }}
                     </ButtonWithIcon>
                 </div>
             </div>
@@ -1624,7 +1618,7 @@ onMounted(async () => {
                 <div class="px-6 py-6">
                     <div class="flex items-center gap-2 mb-2">
                         <span v-html="busIcon"></span>
-                        <h2 class="text-base font-bold text-primary-600">تفاصيل الرحلات</h2>
+                        <h2 class="text-base font-bold text-primary-600">{{ t('sales.forms.common.sections.tripDetailsSection') }}</h2>
                     </div>
                 </div>
 
@@ -1646,7 +1640,7 @@ onMounted(async () => {
                 <div v-if="tripTableItems.length > 0" class="flex justify-center my-6">
                     <ButtonWithIcon color="primary-100" variant="flat" class="!text-primary-900 font-bold md:w-4/3"
                         @click="showEditTripsDialog = true">
-                        تعديل الرحلات
+                        {{ t('sales.forms.common.misc.editTrips') }}
                     </ButtonWithIcon>
                 </div>
             </div>
@@ -1656,23 +1650,22 @@ onMounted(async () => {
                 <div class="bg-white rounded-2xl xl:col-span-2">
                     <div class="flex items-center gap-2 p-6 border-b !border-gray-200">
                         <span v-html="CoinHandIcon"></span>
-                        <h2 class="text-base font-bold text-primary-600">بيانات الدفع</h2>
+                        <h2 class="text-base font-bold text-primary-600">{{ t('sales.forms.common.sections.paymentData') }}</h2>
                     </div>
                     <div class="p-6">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <!-- Final Logistics Service Amount -->
                             <PriceInput showRialIcon v-model="formData.final_logistics_service_amount"
-                                density="comfortable" label="القيمة الإجمالية لمبلغ خدمات النقل" placeholder="0"
+                                density="comfortable" :label="t('sales.forms.common.labels.transportServicesTotal')" :placeholder="t('sales.forms.common.misc.zeroPlaceholder')"
                                 disabled />
 
                             <!-- Final Logistics Trip Amount -->
                             <PriceInput showRialIcon v-model="formData.final_logistics_trip" density="comfortable"
-                                label="القيمة الإجمالية لمبلغ الرحلات" placeholder="0" disabled />
+                                :label="t('sales.forms.common.labels.tripsTotalValue')" :placeholder="t('sales.forms.common.misc.zeroPlaceholder')" disabled />
 
                             <!-- Approved Amount Radio -->
                             <div class="md:col-span-1" v-if="approvedAmountItems.length > 0">
-                                <label class="font-semibold text-sm text-gray-700 mb-2 block">المبلغ الإجمالي المعتمد في
-                                    العرض</label>
+                                <label class="font-semibold text-sm text-gray-700 mb-2 block">{{ t('sales.forms.common.labels.approvedOfferTotal') }}</label>
                                 <v-radio-group v-model="formData.approved_amount" inline density="comfortable"
                                     hide-details>
                                     <v-radio v-for="item in approvedAmountItems" :key="item.value" :label="item.title"
@@ -1682,37 +1675,37 @@ onMounted(async () => {
 
                             <!-- Payment Method -->
                             <SelectInput v-model="formData.payment_method" :items="paymentMethodItems"
-                                density="comfortable" placeholder="حدد طريقة الدفع" label="طريقة الدفع" />
+                                density="comfortable" :placeholder="t('sales.forms.common.placeholders.selectPaymentMethod')" :label="t('sales.forms.common.labels.paymentMethod')" />
                             <!-- Upfront Payment -->
                             <PriceInput showRialIcon v-model="formData.upfront_payment" density="comfortable"
-                                label="دفعة مقدمة" placeholder="أدخل قيمة الدفعة" />
+                                :label="t('sales.forms.common.labels.advancePayment')" :placeholder="t('sales.forms.common.placeholders.advancePaymentValue')" />
 
                             <!-- Invoice Interval -->
-                            <PriceInput label="مدة رفع الفاتورة" v-model="formData.invoice_interval"
-                                placeholder="أدخل المدة بالأيام" density="comfortable">
+                            <PriceInput :label="t('sales.forms.common.labels.invoiceUploadInterval')" v-model="formData.invoice_interval"
+                                :placeholder="t('sales.forms.common.placeholders.enterDays')" density="comfortable">
                                 <template #append-inner>
-                                    <span class="text-gray-500 text-sm">يوم</span>
+                                    <span class="text-gray-500 text-sm">{{ t('sales.forms.common.misc.dayWord') }}</span>
                                 </template>
                             </PriceInput>
                             <!-- Payment Term -->
-                            <PriceInput label="مدة السداد" v-model="formData.payment_term_no"
-                                placeholder="أدخل المدة بالأيام" density="comfortable">
+                            <PriceInput :label="t('sales.forms.common.labels.paymentTerm')" v-model="formData.payment_term_no"
+                                :placeholder="t('sales.forms.common.placeholders.enterDays')" density="comfortable">
                                 <template #append-inner>
-                                    <span class="text-gray-500 text-sm">يوم</span>
+                                    <span class="text-gray-500 text-sm">{{ t('sales.forms.common.misc.dayWord') }}</span>
                                 </template>
                             </PriceInput>
 
                             <!-- Late Fee -->
                             <TextInputWithSelect v-model="formData.late_fee"
-                                v-model:selectValue="formData.late_fee_type" label="غرامة التأخير"
-                                placeholder="أدخل المبلغ" type="number" select-width="110px"
-                                :select-items="feeTypeItems" select-placeholder="اختر" />
+                                v-model:selectValue="formData.late_fee_type" :label="t('sales.forms.common.labels.lateFee')"
+                                :placeholder="t('sales.forms.common.placeholders.enterAmount')" type="number" select-width="110px"
+                                :select-items="feeTypeItems" :select-placeholder="t('common.form.choose')" />
 
                             <!-- Cancel Fee -->
                             <TextInputWithSelect v-model="formData.cancel_fee"
-                                v-model:selectValue="formData.cancel_fee_type" label="غرامة الإلغاء"
-                                placeholder="أدخل المبلغ" type="number" select-width="110px"
-                                :select-items="feeTypeItems" select-placeholder="اختر" />
+                                v-model:selectValue="formData.cancel_fee_type" :label="t('sales.forms.common.labels.cancelFee')"
+                                :placeholder="t('sales.forms.common.placeholders.enterAmount')" type="number" select-width="110px"
+                                :select-items="feeTypeItems" :select-placeholder="t('common.form.choose')" />
                         </div>
                     </div>
                 </div>
@@ -1723,17 +1716,17 @@ onMounted(async () => {
                             <tr class="bg-primary-400">
                                 <th
                                     class="text-white font-semibold text-base py-3 px-4 text-center border-l !border-gray-200">
-                                    العنصر
+                                    {{ t('sales.forms.stats.item') }}
                                 </th>
                                 <th class="text-white font-semibold text-base py-3 px-4 text-center">
-                                    المبلغ
+                                    {{ t('sales.forms.stats.amount') }}
                                 </th>
                             </tr>
                         </thead>
                         <tbody class="text-sm bg-primary-25">
                             <tr class="border-b !border-gray-200">
                                 <td class="py-5 px-4 text-center font-bold text-gray-900 border-l !border-gray-200">
-                                    قيمة النقل
+                                    {{ t('sales.forms.stats.transportValue') }}
                                 </td>
                                 <td class="py-5 px-4 text-center text-gray-600">
                                     <span class="font-semibold text-gray-900">{{
@@ -1744,7 +1737,7 @@ onMounted(async () => {
 
                             <tr class="border-b !border-gray-200">
                                 <td class="py-5 px-4 text-center font-bold text-gray-900 border-l !border-gray-200">
-                                    الضريبة
+                                    {{ t('sales.forms.stats.tax') }}
                                 </td>
                                 <td class="py-5 px-4 text-center text-gray-600">
                                     {{ summaryTotals.taxRatePercent }}%
@@ -1753,7 +1746,7 @@ onMounted(async () => {
 
                             <tr class="border-b !border-gray-200">
                                 <td class="py-5 px-4 text-center font-bold text-gray-900 border-l !border-gray-200">
-                                    اجمالي الضريبة
+                                    {{ t('sales.forms.stats.vatTotalGross') }}
                                 </td>
                                 <td class="py-5 px-4 text-center text-gray-600">
                                     <span class="font-semibold text-gray-900">{{ formatCurrency(summaryTotals.taxAmount)
@@ -1763,7 +1756,7 @@ onMounted(async () => {
 
                             <tr class="border-b !border-gray-200">
                                 <td class="py-5 px-4 text-center font-bold text-gray-900 border-l !border-gray-200">
-                                    الإجمالي النهائي
+                                    {{ t('sales.forms.stats.grandTotalFinal') }}
                                 </td>
                                 <td class="py-5 px-4 font-bold text-center text-gray-900">
                                     <span class="font-semibold text-gray-900">{{
@@ -1780,11 +1773,11 @@ onMounted(async () => {
                 <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col">
                     <ButtonWithIcon variant="flat" color="primary" height="48" rounded="4"
                         custom-class="font-semibold text-base px-6 md:!px-10" :prepend-icon="returnIcon"
-                        label="حفظ والعودة للرئيسية" :loading="isSubmitting" @click="handleSubmit('navigate')" />
+                        :label="t('sales.forms.common.actions.saveBackHome')" :loading="isSubmitting" @click="handleSubmit('navigate')" />
 
                     <ButtonWithIcon variant="flat" color="primary-50" height="48" rounded="4"
                         custom-class="font-semibold text-base text-primary-700 px-6 md:!px-10" :prepend-icon="saveIcon"
-                        label="حفظ وإنشاء جديد" :loading="isSubmitting" @click="handleSubmit('reset')" />
+                        :label="t('sales.forms.common.actions.saveCreateNew')" :loading="isSubmitting" @click="handleSubmit('reset')" />
                 </div>
             </div>
         </div>
