@@ -364,6 +364,9 @@
           "loadQuotationError": "فشل تحميل بيانات عرض السعر",
           "loadDataError": "فشل تحميل البيانات",
           "savePoError": "حدث خطأ أثناء حفظ الطلبية"
+        },
+        "actions": {
+          "editTrips": "تعديل الرحلات"
         }
       }
     },

@@ -3,6 +3,7 @@ import { ref, computed, onMounted, watch } from "vue";
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import AddProductDialog, { type ProductToAdd } from '@/components/price-offers/AddProductDialog.vue';
+import EditProductsDialog from '@/components/price-offers/EditProductsDialog.vue';
 import AddLogisticsDetailDialog, { type LogisticsDetail } from './components/AddLogisticsDetailDialog.vue';
 import TopHeader from '@/components/price-offers/TopHeader.vue';
 import DateTimePickerInput from '@/components/common/forms/DateTimePickerInput.vue';
@@ -232,8 +233,13 @@ const logisticsDetails = ref<LogisticsDetail[]>([]);
 const tripTableItems = ref<TripTableItem[]>([]);
 
 const showAddProductDialog = ref(false);
+const showEditProductsDialog = ref(false);
+const showEditTripsDialog = ref(false);
 const editingProduct = ref<ProductToAdd | null>(null);
 const productDialogMode = ref<'logistics' | 'logistics-trips'>('logistics');
+
+const originalProductIds = ref<Record<number, number>>({});
+const originalTripIds = ref<Record<number, number>>({});
 
 const formatValidationFieldKey = (key: string): string => {
   return key.split('.').map(part => {
@@ -449,26 +455,36 @@ const fetchFormData = async () => {
         }));
       }
       if (data.po_product_details && Array.isArray(data.po_product_details)) {
-        productTableItems.value = data.po_product_details.map((item: any) => ({
-          id: item.id,
-          item_id: item.item_id,
-          item_name: item.item_name || '',
-          unit_id: item.unit_id,
-          unit_name: item.unit_name || '',
-          quantity: item.quantity,
-          from_date: item.from_date,
-          trip_no: item.trip_no,
-          transport_type: item.transport_type,
-          transport_type_name: item.transport_type_label,
-          notes: item.notes ?? '',
-        }));
+        productTableItems.value = data.po_product_details.map((item: any) => {
+          const itemId = Number(item.item_id);
+          if (item.id && itemId) {
+            originalProductIds.value[itemId] = item.id;
+          }
+          return {
+            id: item.id,
+            item_id: itemId,
+            item_name: item.item_name || '',
+            unit_id: item.unit_id,
+            unit_name: item.unit_name || '',
+            quantity: item.quantity,
+            from_date: item.from_date,
+            trip_no: item.trip_no,
+            transport_type: item.transport_type,
+            transport_type_name: item.transport_type_label,
+            notes: item.notes ?? '',
+          };
+        });
       }
       if (data.po_trip_details && Array.isArray(data.po_trip_details) && data.po_trip_details.length > 0) {
         tripTableItems.value = data.po_trip_details.map((t: any) => {
           const transportTypes = Array.isArray(t.transport_type) ? t.transport_type.map(Number) : (t.transport_type != null ? [Number(t.transport_type)] : []);
+          const tripItemId = Number(t.item_id);
+          if (t.id && tripItemId) {
+            originalTripIds.value[tripItemId] = t.id;
+          }
           return {
             id: t.id,
-            item_id: t.item_id,
+            item_id: tripItemId,
             item_name: t.item_name || '',
             unit_id: t.unit_id,
             unit_name: t.unit_name || '',
@@ -528,6 +544,9 @@ const handleProductSaved = async (products: any[]) => {
   if (productDialogMode.value === 'logistics-trips') {
     const newTripItems: TripTableItem[] = [];
     products.forEach(p => {
+      const existingTrip = tripTableItems.value.find(e => e.item_id === p.item_id);
+      const restoredTripId =
+        p.id ?? existingTrip?.id ?? originalTripIds.value[p.item_id];
       newTripItems.push({
         item_id: p.item_id,
         item_name: p.item_name,
@@ -543,7 +562,8 @@ const handleProductSaved = async (products: any[]) => {
         discount_type: p.discount_type ?? null,
         notes: p.notes || '',
         isAdded: p.isAdded,
-        id: p.id,
+        id: restoredTripId,
+        quotation_logistics_detail_id: existingTrip?.quotation_logistics_detail_id ?? p.quotation_logistics_detail_id ?? null,
       });
     });
     for (let i = 0; i < newTripItems.length; i++) {
@@ -555,13 +575,14 @@ const handleProductSaved = async (products: any[]) => {
     const newTripItems: TripTableItem[] = [];
     products.forEach(p => {
       const existing = productTableItems.value.find(e => e.item_id === p.item_id);
+      const restoredId = p.id ?? existing?.id ?? originalProductIds.value[p.item_id];
       newItems.push({
         item_id: p.item_id,
         item_name: p.item_name,
         unit_id: p.unit_id,
         unit_name: p.unit_name,
         quantity: p.quantity,
-        id: existing?.id || p.id,
+        id: restoredId,
         from_date: p.from_date,
         trip_no: p.trip_no,
         transport_type: p.transport_type,
@@ -578,6 +599,7 @@ const handleProductSaved = async (products: any[]) => {
           unit_id: p.unit_id,
           unit_name: p.unit_name,
           quantity: p.quantity,
+          id: existingTrip.id ?? originalTripIds.value[p.item_id],
         });
       } else {
         const transportArr = p.transport_type != null ? [p.transport_type as number] : [];
@@ -593,12 +615,113 @@ const handleProductSaved = async (products: any[]) => {
           transport_type: transportArr,
           transport_type_names: getTransportTypeNames(transportArr),
           notes: '',
+          id: originalTripIds.value[p.item_id],
         });
       }
     });
     productTableItems.value = newItems;
     tripTableItems.value = newTripItems;
   }
+};
+
+const handleEditProductsBulk = (updatedProducts: any[]) => {
+  const newItems: ProductTableItem[] = updatedProducts.map((p: any) => {
+    const tt = p.transport_type;
+    const single = Array.isArray(tt) ? tt[0] : tt;
+    return {
+      item_id: p.item_id,
+      item_name: p.item_name,
+      unit_id: p.unit_id,
+      unit_name: p.unit_name ?? '',
+      quantity: p.quantity,
+      from_date: p.from_date ?? '',
+      trip_no: p.trip_no ?? null,
+      transport_type: single ?? null,
+      transport_type_name: getTransportTypeName(single),
+      notes: p.notes ?? '',
+      id:
+        productTableItems.value.find((x) => x.item_id === p.item_id)?.id
+        ?? originalProductIds.value[p.item_id]
+        ?? p.id,
+      isAdded: true,
+    };
+  });
+  productTableItems.value = newItems;
+
+  const newTripItems: TripTableItem[] = [];
+  newItems.forEach((p) => {
+    const existingTrip = tripTableItems.value.find((e) => e.item_id === p.item_id);
+    if (existingTrip) {
+      newTripItems.push({
+        ...existingTrip,
+        item_name: p.item_name,
+        unit_id: p.unit_id,
+        unit_name: p.unit_name,
+        quantity: p.quantity,
+        trip_no: p.trip_no ?? existingTrip.trip_no ?? null,
+        trip_date: (p.from_date as string | null) ?? existingTrip.trip_date ?? null,
+      });
+    } else {
+      const transportArr = p.transport_type != null ? [p.transport_type as number] : [];
+      newTripItems.push({
+        item_id: p.item_id,
+        item_name: p.item_name,
+        unit_id: p.unit_id,
+        unit_name: p.unit_name,
+        quantity: p.quantity,
+        trip_date: (p.from_date as string | null) ?? null,
+        trip_no: p.trip_no ?? null,
+        trip_price: null,
+        transport_type: transportArr,
+        transport_type_names: getTransportTypeNames(transportArr),
+        notes: '',
+        id: originalTripIds.value[p.item_id],
+        quotation_logistics_detail_id: null,
+      });
+    }
+  });
+  tripTableItems.value = newTripItems;
+};
+
+const handleEditTripsBulk = async (updatedProducts: any[]) => {
+  const newTripItems: TripTableItem[] = [];
+  for (const p of updatedProducts) {
+    const transportTypes = Array.isArray(p.transport_type)
+      ? p.transport_type
+      : (p.transport_type != null ? [p.transport_type] : []);
+    const existingTrip = tripTableItems.value.find((e) => e.item_id === p.item_id);
+    const trip: TripTableItem = {
+      item_id: p.item_id,
+      item_name: p.item_name,
+      unit_id: p.unit_id,
+      unit_name: p.unit_name,
+      quantity: p.quantity,
+      trip_date: p.trip_date ?? null,
+      trip_no: p.trip_no ?? null,
+      trip_price: p.trip_price ?? null,
+      transport_type: transportTypes,
+      transport_type_names: p.transport_type_names ?? getTransportTypeNames(transportTypes),
+      discount_val: p.discount ?? null,
+      discount_type: p.discount_type ?? null,
+      notes: p.notes || '',
+      isAdded: p.isAdded,
+      id: existingTrip?.id ?? originalTripIds.value[p.item_id] ?? p.id,
+      quotation_logistics_detail_id: existingTrip?.quotation_logistics_detail_id ?? p.quotation_logistics_detail_id ?? null,
+    };
+    trip.sub_total = await calculateTripItemSubTotal(trip);
+    newTripItems.push(trip);
+  }
+  tripTableItems.value = newTripItems;
+
+  newTripItems.forEach((t) => {
+    const pi = productTableItems.value.findIndex((pr) => pr.item_id === t.item_id);
+    if (pi !== -1) {
+      productTableItems.value[pi].quantity = t.quantity;
+      productTableItems.value[pi].unit_id = t.unit_id;
+      productTableItems.value[pi].unit_name = t.unit_name;
+      productTableItems.value[pi].trip_no = t.trip_no ?? null;
+    }
+  });
 };
 
 const handleEditProduct = (item: any) => {
@@ -648,6 +771,9 @@ const handleProductUpdated = async (updatedProduct: any) => {
   if (productDialogMode.value === 'logistics-trips') {
     const index = tripTableItems.value.findIndex(t => t.item_id === updatedProduct.item_id);
     if (index !== -1) {
+      const prevTrip = tripTableItems.value[index];
+      const preservedTripId =
+        prevTrip.id ?? originalTripIds.value[updatedProduct.item_id] ?? updatedProduct.id;
       tripTableItems.value[index] = {
         item_id: updatedProduct.item_id,
         item_name: updatedProduct.item_name,
@@ -663,7 +789,8 @@ const handleProductUpdated = async (updatedProduct: any) => {
         discount_type: updatedProduct.discount_type ?? null,
         notes: updatedProduct.notes || '',
         isAdded: updatedProduct.isAdded,
-        id: updatedProduct.id,
+        id: preservedTripId,
+        quotation_logistics_detail_id: prevTrip.quotation_logistics_detail_id ?? updatedProduct.quotation_logistics_detail_id ?? null,
       };
       tripTableItems.value[index].sub_total = await calculateTripItemSubTotal(tripTableItems.value[index]);
       // Sync quantity back to product table
@@ -679,6 +806,9 @@ const handleProductUpdated = async (updatedProduct: any) => {
     const index = productTableItems.value.findIndex(p => p.item_id === updatedProduct.item_id);
     if (index !== -1) {
       const existingNotes = productTableItems.value[index].notes;
+      const prevRow = productTableItems.value[index];
+      const preservedId =
+        prevRow.id ?? originalProductIds.value[updatedProduct.item_id] ?? updatedProduct.id;
       productTableItems.value[index] = {
         item_id: updatedProduct.item_id,
         item_name: updatedProduct.item_name,
@@ -686,7 +816,7 @@ const handleProductUpdated = async (updatedProduct: any) => {
         unit_name: updatedProduct.unit_name,
         quantity: updatedProduct.quantity,
         notes: existingNotes || updatedProduct.notes || '',
-        id: updatedProduct.id,
+        id: preservedId,
         from_date: updatedProduct.from_date,
         trip_no: updatedProduct.trip_no,
         transport_type: updatedProduct.transport_type,
@@ -1404,10 +1534,19 @@ onMounted(async () => {
             </template>
           </DataTable>
         </div>
-        <div class="flex justify-center">
-          <ButtonWithIcon color="primary-100" variant="flat" class="!text-primary-900 font-bold w-75"
+        <div class="flex justify-center gap-3 mx-auto md:w-3/4">
+          <ButtonWithIcon color="primary-100" variant="flat" class="!text-primary-900 font-bold flex-1"
             @click="handleAddProduct">
             {{ t('purchases.shared.forms.common.actions.addProduct') }}
+          </ButtonWithIcon>
+          <ButtonWithIcon
+            v-if="productTableItems.length > 0"
+            color="primary-100"
+            variant="flat"
+            class="!text-primary-900 font-bold flex-1"
+            @click="showEditProductsDialog = true"
+          >
+            {{ t('purchases.shared.forms.common.actions.editProducts') }}
           </ButtonWithIcon>
         </div>
       </div>
@@ -1433,6 +1572,16 @@ onMounted(async () => {
             <span v-else>—</span>
           </template>
         </DataTable>
+        <div v-if="tripTableItems.length > 0" class="flex justify-center py-4">
+          <ButtonWithIcon
+            color="primary-100"
+            variant="flat"
+            class="!text-primary-900 font-bold w-full max-w-md"
+            @click="showEditTripsDialog = true"
+          >
+            {{ t('purchases.orders.shared.actions.editTrips') }}
+          </ButtonWithIcon>
+        </div>
       </div>
 
       <!-- بيانات الدفع وملخص المبالغ (آخر قسم قبل أزرار الحفظ) -->
@@ -1564,12 +1713,36 @@ onMounted(async () => {
       :address="String(currentMapType === 'target' ? (formData.target_location || '') : (formData.source_location || ''))"
       @location-selected="handleLocationSelected" />
 
-    <AddProductDialog v-model="showAddProductDialog" :request-type="productDialogMode"
-      :unit-items="unitItems" :transport-types="transportTypeItems"
-      items-endpoint="/items/list?with_category=true"
+    <!-- مودال المنتجات: بدون supplier_id ولا material_type — /categories/list و /items/list فقط -->
+    <AddProductDialog
+      v-model="showAddProductDialog"
+      :request-type="productDialogMode"
+      :unit-items="unitItems"
+      :transport-types="transportTypeItems"
       :edit-product="(editingProduct as any)"
       :existing-products="(productDialogMode === 'logistics' ? productTableItems : tripTableItems) as any[]"
-      @saved="handleProductSaved" @product-updated="handleProductUpdated" />
+      @saved="handleProductSaved"
+      @product-updated="handleProductUpdated"
+    />
+
+    <EditProductsDialog
+      v-model="showEditProductsDialog"
+      request-type="logistics"
+      :products="productTableItems"
+      :transport-types="transportTypeItems"
+      :unit-items="unitItems"
+      @products-updated="handleEditProductsBulk"
+    />
+
+    <EditProductsDialog
+      v-model="showEditTripsDialog"
+      request-type="logistics-trips"
+      :products="tripTableItems as any"
+      :transport-types="transportTypeItems"
+      :unit-items="unitItems"
+      :discount-type-items="logisticsDiscountTypeOptions"
+      @products-updated="handleEditTripsBulk"
+    />
 
     <AddLogisticsDetailDialog v-model="showAddLogisticsDialog" :transport-types="transportTypeItems"
       :am-pm-interval-options="amPmIntervalItems" :categories-items="categoriesItems"
