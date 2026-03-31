@@ -4,6 +4,7 @@ import * as L from 'leaflet'
 import AppDialog from './AppDialog.vue'
 import TextInput from './forms/textInput.vue'
 import ButtonWithIcon from './buttons/ButtonWithIcon.vue'
+import { useI18n } from 'vue-i18n'
 
 /* ================= PROPS ================= */
 interface Props {
@@ -14,6 +15,7 @@ interface Props {
 }
 
 const props = defineProps<Props>()
+const { t } = useI18n()
 
 /* ================= EMITS ================= */
 const emit = defineEmits<{
@@ -171,7 +173,7 @@ watch(
 
 <template>
     <AppDialog :model-value="modelValue" @update:model-value="emit('update:modelValue', $event)"
-        title="اختر الموقع الجغرافي" max-width="800">
+        :title="t('common.map.selectLocationTitle')" max-width="800">
         <div class="w-full h-[390px] rounded-lg overflow-hidden border border-gray-200 relative mb-4">
             <div v-if="!isMapReady" class="absolute inset-0 flex items-center justify-center bg-gray-100 z-10">
                 <v-progress-circular indeterminate color="primary" />
@@ -181,7 +183,7 @@ watch(
             <div v-if="isLoadingAddress" class="absolute inset-0 flex items-center justify-center bg-black/40 !z-[1000000]">
                 <div class="bg-white rounded-lg px-6 py-4 flex items-center gap-3 shadow-lg">
                     <v-progress-circular indeterminate color="primary" size="24" />
-                    <span class="text-sm font-medium">جاري تحميل العنوان...</span>
+                    <span class="text-sm font-medium">{{ t('common.map.loadingAddress') }}</span>
                 </div>
             </div>
 
@@ -190,17 +192,17 @@ watch(
         </div>
 
         <!-- Address Input -->
-        <TextInput v-model="address" label="العنوان" placeholder="أدخل العنوان" class="mb-4" />
+        <TextInput v-model="address" :label="t('common.map.addressLabel')" :placeholder="t('common.map.addressPlaceholder')" class="mb-4" />
 
         <!-- Action Buttons -->
         <template #actions>
             <div class="flex justify-end gap-2 items-center flex-1">
                 <v-btn variant="flat" color="primary" rounded="4" class="font-semibold px-6" @click="handleSave">
-                    تأكيد
+                    {{ t('common.actions.confirm') }}
                 </v-btn>
                 <v-btn variant="outlined" color="gray-700" rounded="4" border="thin gray" class="font-semibold"
                     @click="closeDialog">
-                    إلغاء
+                    {{ t('common.actions.cancel') }}
                 </v-btn>
             </div>
         </template>

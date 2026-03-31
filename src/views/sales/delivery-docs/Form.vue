@@ -3,6 +3,7 @@ import { ref, computed, onMounted } from "vue";
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router';
 import TopHeader from '@/components/price-offers/TopHeader.vue';
+import AppFormBreadcrumb from '@/components/common/AppFormBreadcrumb.vue';
 import { useApi } from '@/composables/useApi';
 import { returnIcon, saveIcon, fileCheckIcon, fileIcon_2 } from '@/components/icons/globalIcons';
 import { useForm } from '@/composables/useForm';
@@ -282,6 +283,15 @@ const handleSubmitToOrdersList = async () => {
 <template>
     <default-layout>
         <div class="receiving-docs-page -mx-6 bg-qallab-dashboard-bg space-y-4">
+            <AppFormBreadcrumb
+                list-path="/sales/delivery-docs/list"
+                module-root-key="breadcrumb.sales.root"
+                list-label-key="breadcrumb.sales.deliveryDocs.standard.list"
+                create-label-key="breadcrumb.sales.deliveryDocs.standard.create"
+                edit-label-key="breadcrumb.sales.deliveryDocs.standard.edit"
+                :is-edit-mode="isEditMode"
+                :code="isEditMode ? formData.code : ''"
+            />
             <!-- Page Header -->
             <TopHeader :icon="fileCheckIcon" title-key="pages.DeliveryDocs.title"
                 :description-key="isEditMode ? 'pages.DeliveryDocs.edit' : 'pages.DeliveryDocs.create'" :show-action="false"

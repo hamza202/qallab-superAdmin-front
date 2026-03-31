@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import { useApi } from '@/composables/useApi';
+import { useI18n } from "vue-i18n";
 
 interface Category {
   id: number;
@@ -48,6 +49,7 @@ const emit = defineEmits<{
 }>();
 
 const api = useApi();
+const { t } = useI18n();
 
 const internalOpen = computed({
   get: () => props.modelValue,
@@ -70,7 +72,7 @@ const editProductData = ref<FuelQuotationProductToAdd | null>(null);
 const unitItemsList = computed(() => props.unitItems || []);
 const discountTypeOptionsList = computed(() => props.discountTypeOptions || [
   { title: '%', value: 1 },
-  { title: 'ريال', value: 2 },
+  { title: t('purchases.orders.shared.labels.currencyRial'), value: 2 },
 ]);
 
 const extractCategories = (list: ApiItem[]): Category[] => {
@@ -272,7 +274,7 @@ const plusIconDisabled = `<svg width="16" height="16" viewBox="0 0 16 16" fill="
         <span class="!bg-gray-50 border border-gray-100 rounded px-1 py-0.5 text-gray-600">
           <span v-html="cubeIcon"></span>
         </span>
-        {{ isEditMode ? 'تعديل منتج' : 'إضافة منتج' }}
+        {{ isEditMode ? t('common.productDialog.editProduct') : t('common.productDialog.addProduct') }}
       </div>
     </template>
 
@@ -301,24 +303,24 @@ const plusIconDisabled = `<svg width="16" height="16" viewBox="0 0 16 16" fill="
           <!-- Row 1: الوحدة، الكمية، سعر الوحدة -->
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
             <div>
-              <SelectInput v-model="editProductData.unit_id" :items="unitItemsList" placeholder="الوحدة" density="compact" item-title="title" item-value="value" />
+              <SelectInput v-model="editProductData.unit_id" :items="unitItemsList" :placeholder="t('common.productDialog.unit')" density="compact" item-title="title" item-value="value" />
             </div>
             <div>
-              <TextInput v-model="editProductData.quantity" type="number" placeholder="الكمية" density="compact" />
+              <TextInput v-model="editProductData.quantity" type="number" :placeholder="t('common.productDialog.quantity')" density="compact" />
             </div>
             <div>
-              <TextInput v-model="editProductData.price_per_unit" type="number" placeholder="سعر الوحدة" density="compact" />
+              <TextInput v-model="editProductData.price_per_unit" type="number" :placeholder="t('purchases.orders.shared.tableHeaders.unitPrice')" density="compact" />
             </div>
                         <div>
               <TextInputWithSelect
                 v-model="editProductData.discount_val"
                 v-model:selectValue="editProductData.discount_type"
-                placeholder="الخصم"
+                :placeholder="t('purchases.orders.shared.tableHeaders.discount')"
                 type="number"
                 density="compact"
                 select-width="110px"
                 :select-items="discountTypeOptionsList"
-                select-placeholder="اختر"
+                :select-placeholder="t('purchases.shared.forms.common.select')"
               />
             </div>
 
@@ -327,13 +329,13 @@ const plusIconDisabled = `<svg width="16" height="16" viewBox="0 0 16 16" fill="
           <!-- Row 2: الخصم، المبلغ الخاضع للضريبة، مبلغ الضريبة، الإجمالي -->
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
-              <TextInput :model-value="calculateTaxableAmount(editProductData)" label="المبلغ الخاضع للضريبة"  type="number" placeholder="المبلغ الخاضع للضريبة" density="compact" disabled />
+              <TextInput :model-value="calculateTaxableAmount(editProductData)" :label="t('purchases.invoices.form.tableHeaders.taxableAmount')"  type="number" :placeholder="t('purchases.invoices.form.tableHeaders.taxableAmount')" density="compact" disabled />
             </div>
             <div>
-              <TextInput :model-value="calculateTotalTax(editProductData)" type="number" label="مبلغ الضريبة"  placeholder="مبلغ الضريبة" density="compact" disabled />
+              <TextInput :model-value="calculateTotalTax(editProductData)" type="number" :label="t('purchases.orders.shared.tableHeaders.taxAmount')"  :placeholder="t('purchases.orders.shared.tableHeaders.taxAmount')" density="compact" disabled />
             </div>
             <div>
-              <TextInput :model-value="calculateTotal(editProductData)" type="number" label="إجمالي المبلغ" placeholder="إجمالي المبلغ" density="compact" disabled />
+              <TextInput :model-value="calculateTotal(editProductData)" type="number" :label="t('purchases.orders.shared.tableHeaders.totalAmount')" :placeholder="t('purchases.orders.shared.tableHeaders.totalAmount')" density="compact" disabled />
             </div>
           </div>
         </div>
@@ -342,7 +344,7 @@ const plusIconDisabled = `<svg width="16" height="16" viewBox="0 0 16 16" fill="
 
     <div v-else-if="!isEditMode && items.length === 0" class="flex flex-col items-center justify-center py-20 text-gray-500">
       <v-icon size="64" color="gray-400">mdi-package-variant-closed</v-icon>
-      <p class="mt-4 text-lg font-medium">لا توجد منتجات</p>
+      <p class="mt-4 text-lg font-medium">{{ t('common.ui.noData') }}</p>
     </div>
 
     <template v-else-if="!isEditMode">
@@ -374,7 +376,7 @@ const plusIconDisabled = `<svg width="16" height="16" viewBox="0 0 16 16" fill="
       </div>
 
       <div class="mb-3">
-        <TextInput v-model="searchQuery" placeholder="ابحث في المنتجات ..." density="comfortable">
+        <TextInput v-model="searchQuery" :placeholder="t('common.productDialog.searchProducts')" density="comfortable">
           <template #prepend-inner>
             <v-icon v-html="searchIcon"></v-icon>
           </template>
@@ -413,24 +415,24 @@ const plusIconDisabled = `<svg width="16" height="16" viewBox="0 0 16 16" fill="
               <!-- Row 1: الوحدة، الكمية، سعر الوحدة -->
               <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
-                  <SelectInput v-model="product.unit_id" :items="unitItemsList" placeholder="الوحدة" density="compact" item-title="title" item-value="value" :disabled="product.isAdded" />
+                  <SelectInput v-model="product.unit_id" :items="unitItemsList" :placeholder="t('common.productDialog.unit')" density="compact" item-title="title" item-value="value" :disabled="product.isAdded" />
                 </div>
                 <div>
-                  <TextInput v-model="product.quantity" type="number" placeholder="الكمية" density="compact" :disabled="product.isAdded" />
+                  <TextInput v-model="product.quantity" type="number" :placeholder="t('common.productDialog.quantity')" density="compact" :disabled="product.isAdded" />
                 </div>
                 <div>
-                  <TextInput v-model="product.price_per_unit" type="number" placeholder="سعر الوحدة" density="compact" :disabled="product.isAdded" />
+                  <TextInput v-model="product.price_per_unit" type="number" :placeholder="t('purchases.orders.shared.tableHeaders.unitPrice')" density="compact" :disabled="product.isAdded" />
                 </div>
                                 <div>
                   <TextInputWithSelect
                     v-model="product.discount_val"
                     v-model:selectValue="product.discount_type"
-                    placeholder="الخصم"
+                    :placeholder="t('purchases.orders.shared.tableHeaders.discount')"
                     type="number"
                     density="compact"
                     select-width="80px"
                     :select-items="discountTypeOptionsList"
-                    select-placeholder="اختر"
+                    :select-placeholder="t('purchases.shared.forms.common.select')"
                     :disabled="product.isAdded"
                   />
                 </div>
@@ -438,13 +440,13 @@ const plusIconDisabled = `<svg width="16" height="16" viewBox="0 0 16 16" fill="
               <!-- Row 2: الخصم، المبلغ الخاضع للضريبة، مبلغ الضريبة، الإجمالي -->
               <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
-                  <TextInput :model-value="calculateTaxableAmount(product)" type="number" label="المبلغ الخاضع للضريبة" placeholder="المبلغ الخاضع للضريبة" density="compact" disabled />
+                  <TextInput :model-value="calculateTaxableAmount(product)" type="number" :label="t('purchases.invoices.form.tableHeaders.taxableAmount')" :placeholder="t('purchases.invoices.form.tableHeaders.taxableAmount')" density="compact" disabled />
                 </div>
                 <div>
-                  <TextInput :model-value="calculateTotalTax(product)" type="number" label="مبلغ الضريبة" placeholder="مبلغ الضريبة" density="compact" disabled />
+                  <TextInput :model-value="calculateTotalTax(product)" type="number" :label="t('purchases.orders.shared.tableHeaders.taxAmount')" :placeholder="t('purchases.orders.shared.tableHeaders.taxAmount')" density="compact" disabled />
                 </div>
                 <div>
-                  <TextInput :model-value="calculateTotal(product)" type="number" label="إجمالي المبلغ" placeholder="إجمالي المبلغ" density="compact" disabled />
+                  <TextInput :model-value="calculateTotal(product)" type="number" :label="t('purchases.orders.shared.tableHeaders.totalAmount')" :placeholder="t('purchases.orders.shared.tableHeaders.totalAmount')" density="compact" disabled />
                 </div>
               </div>
             </div>
@@ -460,11 +462,11 @@ const plusIconDisabled = `<svg width="16" height="16" viewBox="0 0 16 16" fill="
           color="primary"
           size="large"
           custom-class="px-8"
-          :label="isEditMode ? 'حفظ التعديلات' : '+ أضف منتجات'"
+          :label="isEditMode ? t('common.productDialog.saveChanges') : t('purchases.shared.forms.common.actions.addProduct')"
           @click="handleDone"
           :disabled="!!(isEditMode && editProductData && !canAddProduct(editProductData))"
         />
-        <ButtonWithIcon variant="outlined" color="gray-700" border="gray-300" size="large" custom-class="px-4" label="إلغاء" @click="handleCancel" />
+        <ButtonWithIcon variant="outlined" color="gray-700" border="gray-300" size="large" custom-class="px-4" :label="t('common.actions.cancel')" @click="handleCancel" />
       </div>
     </template>
   </AppDialog>

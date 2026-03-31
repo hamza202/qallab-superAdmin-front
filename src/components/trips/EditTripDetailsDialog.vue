@@ -2,6 +2,8 @@
 import { computed, ref, watch } from "vue";
 import type { TripLogisticsDetail } from './AddTripDetailsDialog.vue';
 import { busIcon } from '@/components/icons/priceOffersIcons';
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 
 const props = defineProps<{
   modelValue: boolean;
@@ -66,14 +68,14 @@ const closeDialog = () => {
     <template #title>
       <div class="text-base font-bold text-gray-900 flex items-center gap-2">
         <span v-html="busIcon"></span>
-        {{ title || 'تعديل تفاصيل الرحلات' }}
+        {{ title || t('common.trips.editTripDetails') }}
       </div>
     </template>
 
     <div v-if="editableDetails.length === 0" class="flex flex-col items-center justify-center py-20 text-gray-500">
       <v-icon size="64" color="gray-400">mdi-bus</v-icon>
-      <p class="mt-4 text-lg font-medium">لا توجد تفاصيل للتعديل</p>
-      <p class="text-sm text-gray-400 mt-1">أضف منتجات أولاً ليتم عرض تفاصيلها هنا</p>
+      <p class="mt-4 text-lg font-medium">{{ t('common.trips.noDetailsToEdit') }}</p>
+      <p class="text-sm text-gray-400 mt-1">{{ t('common.trips.addProductsFirst') }}</p>
     </div>
 
     <div v-else class="space-y-3 max-h-[500px] overflow-auto custom-scroll">
@@ -83,30 +85,30 @@ const closeDialog = () => {
 
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
-            <PriceInput v-model="detail.quantity" placeholder="الكمية" density="compact" />
+            <PriceInput v-model="detail.quantity" :placeholder="t('common.productDialog.quantity')" density="compact" />
           </div>
           <div>
-            <SelectInput v-model="detail.unit_id" :items="unitItemsList" placeholder="الوحدة" density="compact"
+            <SelectInput v-model="detail.unit_id" :items="unitItemsList" :placeholder="t('common.productDialog.unit')" density="compact"
               item-title="title" item-value="value" />
           </div>
           <div class="md:col-span-2">
             <SelectInput v-model="detail.transport_type" :items="packageTypeItemsList" multiple
-              placeholder="نوع مركبة النقل" density="compact" item-title="title" item-value="value" />
+              :placeholder="t('common.trips.transportVehicleType')" density="compact" item-title="title" item-value="value" />
           </div>
         </div>
 
         <div class="mt-3 w-1/4">
-          <PriceInput v-model="detail.price" placeholder="السعر" density="compact" showRialIcon />
+          <PriceInput v-model="detail.price" :placeholder="t('common.trips.price')" density="compact" showRialIcon />
         </div>
       </div>
     </div>
 
     <template #actions>
       <div class="flex items-center justify-center gap-4 flex-1 mt-4">
-        <ButtonWithIcon variant="flat" color="primary" size="large" custom-class="px-8" label="حفظ التعديلات"
+        <ButtonWithIcon variant="flat" color="primary" size="large" custom-class="px-8" :label="t('common.productDialog.saveChanges')"
           @click="handleSave" />
         <ButtonWithIcon variant="outlined" color="gray-700" border="gray-300" size="large" custom-class="px-4"
-          label="إلغاء" @click="closeDialog" />
+          :label="t('common.actions.cancel')" @click="closeDialog" />
       </div>
     </template>
   </AppDialog>

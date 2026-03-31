@@ -5,6 +5,7 @@ import { useRoute, useRouter } from 'vue-router';
 import AddProductDialog, { type ProductToAdd } from '@/components/price-offers/AddProductDialog.vue';
 import EditProductsDialog from '@/components/price-offers/EditProductsDialog.vue';
 import TopHeader from '@/components/price-offers/TopHeader.vue';
+import AppFormBreadcrumb from '@/components/common/AppFormBreadcrumb.vue';
 import { useApi } from '@/composables/useApi';
 import { fileIcon, mapMarkerIcon, messagePlusIcon, filePlusIcon, CoinHandIcon, fileCheckIcon, busIcon, globeIcon } from '@/components/icons/priceOffersIcons';
 import { useCalculations, type CalculationItem } from '@/composables/useCalculations';
@@ -1320,6 +1321,15 @@ onMounted(async () => {
 <template>
     <default-layout>
         <div class="request-material-product-page -mx-6 bg-qallab-dashboard-bg space-y-4">
+            <AppFormBreadcrumb
+                list-path="/sales/quotations/logistics/list"
+                module-root-key="breadcrumb.sales.root"
+                list-label-key="breadcrumb.sales.quotations.logistics.list"
+                create-label-key="breadcrumb.sales.quotations.logistics.create"
+                edit-label-key="breadcrumb.sales.quotations.logistics.edit"
+                :is-edit-mode="isEditMode"
+                :code="isEditMode ? (formData.code || '') : ''"
+            />
             <!-- Page Header -->
             <TopHeader :icon="filePlusIcon" title-key="pages.SalesQuotationsLogistics.FormTitle"
                 description-key="pages.SalesQuotationsLogistics.FormDescription" :show-action="false"

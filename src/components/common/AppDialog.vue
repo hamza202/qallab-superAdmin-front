@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useI18n } from "vue-i18n";
 interface AppDialogProps {
   modelValue: boolean;
   title?: string;
@@ -18,6 +19,7 @@ const props = withDefaults(defineProps<AppDialogProps>(), {
   hideHeader: false,
   hideActions: false,
 });
+const { t } = useI18n();
 
 const emit = defineEmits<{
   (e: "update:modelValue", value: boolean): void;
@@ -77,7 +79,7 @@ const closeDialog = () => {
             class="font-semibold text-base text-primary-700 sm:flex-1"
             @click="closeDialog"
           >
-            اغلاق
+            {{ t('common.actions.close') }}
           </v-btn>
         </slot>
       </v-card-actions>

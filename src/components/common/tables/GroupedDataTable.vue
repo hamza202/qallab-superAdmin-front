@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
 
 interface TableHeader {
   key: string
@@ -297,7 +299,7 @@ const eyeIcon = `<svg width="22" height="16" viewBox="0 0 22 16" fill="none" xml
                         {{ subHeader.title }}
                       </th>
                       <th class="!font-bold !text-gray-600 !text-xs !bg-white !py-3 !px-6 text-center w-[130px]">
-                        الاجراءات
+                        {{ t('common.table.actions') }}
                       </th>
                     </tr>
                   </thead>
@@ -359,7 +361,7 @@ const eyeIcon = `<svg width="22" height="16" viewBox="0 0 22 16" fill="none" xml
             :colspan="headers.length + (showActions ? 1 : 0) + (showCheckbox ? 1 : 0)"
             class="text-center py-8 text-gray-500"
           >
-            لا توجد بيانات
+            {{ t('common.ui.noData') }}
           </td>
         </tr>
       </tbody>

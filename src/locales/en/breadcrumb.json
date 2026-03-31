@@ -1,0 +1,183 @@
+{
+  "breadcrumb": {
+    "shared": {
+      "home": "Home",
+      "list": "List",
+      "create": "Add",
+      "edit": "Edit"
+    },
+    "purchases": {
+      "root": "Purchases",
+      "requests": {
+        "materialProduct": {
+          "list": "Raw material RFQ requests",
+          "create": "Add raw material RFQ request",
+          "edit": "Edit raw material RFQ request"
+        },
+        "fuels": {
+          "list": "Fuel RFQ requests",
+          "create": "Add fuel RFQ request",
+          "edit": "Edit fuel RFQ request"
+        },
+        "logistics": {
+          "list": "Transport RFQ requests",
+          "create": "Add transport RFQ request",
+          "edit": "Edit transport RFQ request"
+        }
+      },
+      "orders": {
+        "materialProduct": {
+          "list": "Raw material purchase orders",
+          "create": "Add raw material purchase order",
+          "edit": "Edit raw material purchase order"
+        },
+        "fuels": {
+          "list": "Fuel purchase orders",
+          "create": "Add fuel purchase order",
+          "edit": "Edit fuel purchase order"
+        },
+        "logistics": {
+          "list": "Transport purchase orders",
+          "create": "Add transport purchase order",
+          "edit": "Edit transport purchase order"
+        }
+      },
+      "invoices": {
+        "buildingMaterials": {
+          "list": "Raw material purchase invoices",
+          "create": "Issue raw material purchase invoice",
+          "edit": "Edit raw material purchase invoice"
+        },
+        "logistics": {
+          "list": "Transport purchase invoices",
+          "create": "Issue transport purchase invoice",
+          "edit": "Edit transport purchase invoice"
+        }
+      },
+      "receivingDocs": {
+        "standard": {
+          "list": "Goods receipt notes",
+          "create": "Add goods receipt note",
+          "edit": "Edit goods receipt note"
+        },
+        "logistics": {
+          "list": "Transport receipt notes",
+          "create": "Add transport receipt note",
+          "edit": "Edit transport receipt note"
+        }
+      },
+      "link": {
+        "quotations": {
+          "list": "Link purchase quotations",
+          "form": "Edit quotation link"
+        },
+        "orders": {
+          "list": "Link purchase orders",
+          "form": "Edit order link"
+        }
+      }
+    },
+    "sales": {
+      "root": "Sales",
+      "requests": {
+        "materialProduct": {
+          "list": "Raw material sales RFQ requests",
+          "create": "Add raw material sales RFQ request",
+          "edit": "Edit raw material sales RFQ request"
+        },
+        "fuels": {
+          "list": "Fuel sales RFQ requests",
+          "create": "Add fuel sales RFQ request",
+          "edit": "Edit fuel sales RFQ request"
+        },
+        "logistics": {
+          "list": "Transport sales RFQ requests",
+          "create": "Add transport sales RFQ request",
+          "edit": "Edit transport sales RFQ request"
+        }
+      },
+      "quotations": {
+        "materialProduct": {
+          "list": "Raw material sales quotations",
+          "create": "Add raw material sales quotation",
+          "edit": "Edit raw material sales quotation"
+        },
+        "fuels": {
+          "list": "Fuel sales quotations",
+          "create": "Add fuel sales quotation",
+          "edit": "Edit fuel sales quotation"
+        },
+        "logistics": {
+          "list": "Transport sales quotations",
+          "create": "Add transport sales quotation",
+          "edit": "Edit transport sales quotation"
+        }
+      },
+      "orders": {
+        "materialProduct": {
+          "list": "Raw material sales orders",
+          "create": "Add raw material sales order",
+          "edit": "Edit raw material sales order"
+        },
+        "fuels": {
+          "list": "Fuel sales orders",
+          "create": "Add fuel sales order",
+          "edit": "Edit fuel sales order"
+        },
+        "logistics": {
+          "list": "Transport sales orders",
+          "create": "Add transport sales order",
+          "edit": "Edit transport sales order"
+        }
+      },
+      "invoices": {
+        "buildingMaterials": {
+          "list": "Raw material sales invoices",
+          "create": "Issue raw material sales invoice",
+          "edit": "Edit raw material sales invoice"
+        }
+      },
+      "logisticsInvoices": {
+        "list": "Transport sales invoices",
+        "create": "Issue transport sales invoice",
+        "edit": "Edit transport sales invoice"
+      },
+      "payments": {
+        "list": "Sales payments",
+        "create": "Record payment",
+        "edit": "Edit payment"
+      },
+      "trips": {
+        "list": "Trips",
+        "create": "Create trip",
+        "edit": "Edit trip"
+      },
+      "deliveryDocs": {
+        "standard": {
+          "list": "Delivery documents",
+          "create": "Add delivery document",
+          "edit": "Edit delivery document"
+        },
+        "logistics": {
+          "list": "Transport delivery documents",
+          "create": "Add transport delivery document",
+          "edit": "Edit transport delivery document"
+        }
+      },
+      "soPickups": {
+        "list": "Delivery pickups",
+        "create": "Add delivery pickup",
+        "edit": "Edit delivery pickup"
+      }
+    },
+    "settings": {
+      "root": "Settings",
+      "docStatusTransitions": {
+        "list": "Document status transitions",
+        "transitionCreate": "Add status transition",
+        "transitionEdit": "Edit status transition",
+        "workflow": "Transition workflow"
+      }
+    }
+  }
+}

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import { useApi } from '@/composables/useApi';
+import { useI18n } from "vue-i18n";
 
 type RequestType = 'raw_materials' | 'fuel' | 'transfer_service' | 'trips' | 'logistics' | 'logistics-trips';
 
@@ -67,7 +68,7 @@ const discountTypeOptionsList = computed(() => {
   }
   return [
     { title: '%', value: 1 },
-    { title: 'ريال', value: 2 },
+    { title: t('purchases.orders.shared.labels.currencyRial'), value: 2 },
   ];
 });
 
@@ -78,6 +79,7 @@ const emit = defineEmits<{
 }>();
 
 const api = useApi();
+const { t } = useI18n();
 
 const internalOpen = computed({
   get: () => props.modelValue,
@@ -429,7 +431,7 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
         <span class="!bg-gray-50 border border-gray-100 rounded px-1 py-0.5 text-gray-600">
           <span v-html="cubeIcon"></span>
         </span>
-        {{ isEditMode ? 'تعديل منتج' : 'إضافة منتج' }}
+        {{ isEditMode ? t('common.productDialog.editProduct') : t('common.productDialog.addProduct') }}
       </div>
     </template>
 
@@ -463,7 +465,7 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
             <TextInput 
               v-model="editProductData.quantity" 
               type="number" 
-              placeholder="الكمية" 
+              :placeholder="t('common.productDialog.quantity')" 
               density="compact"
               class="min-w-[170px]" 
             />
@@ -474,7 +476,7 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
             <SelectInput 
               v-model="editProductData.unit_id" 
               :items="unitItemsList" 
-              placeholder="الوحدة" 
+              :placeholder="t('common.productDialog.unit')" 
               density="compact"
               class="min-w-[170px]" 
               item-title="title" 
@@ -487,7 +489,7 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
             <TextInput 
               v-model="editProductData.unit_price" 
               type="number" 
-              placeholder="سعر الوحدة" 
+              :placeholder="t('purchases.orders.shared.tableHeaders.unitPrice')" 
               density="compact"
               class="min-w-[170px]" 
             />
@@ -499,11 +501,11 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
               v-model="editProductData.discount" 
               v-model:selectValue="editProductData.discount_type"
               type="number" 
-              placeholder="الخصم" 
+              :placeholder="t('purchases.orders.shared.tableHeaders.discount')" 
               density="compact"
               select-width="75px"
               :select-items="discountTypeOptionsList"
-              select-placeholder="اختر"
+              :select-placeholder="t('purchases.shared.forms.common.select')"
               class="min-w-[170px]" 
             />
           </div>
@@ -513,7 +515,7 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
             <SelectInput 
               v-model="editProductData.transport_type" 
               :items="packageTypeItemsList" 
-              placeholder="نوع الناقلة"
+              :placeholder="t('purchases.requests.materialProduct.form.tableHeaders.transportType')"
               density="compact" 
               class="min-w-[170px]" 
               item-title="title" 
@@ -526,7 +528,7 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
             <SelectInput 
               v-model="editProductData.transport_type" 
               :items="packageTypeItemsList" 
-              placeholder="نوع المركبات"
+              :placeholder="t('purchases.requests.materialProduct.form.tableHeaders.vehicleTypes')"
               density="compact" 
               class="min-w-[170px]" 
               item-title="title" 
@@ -540,7 +542,7 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
             <TextInput 
               v-model="editProductData.trip_no" 
               type="number" 
-              placeholder="عدد الرحلات" 
+              :placeholder="t('purchases.requests.logistics.form.detailCard.tripCount')" 
               density="compact"
               class="min-w-[170px]" 
             />
@@ -552,7 +554,7 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
           <div v-if="requestType === 'logistics'">
             <DatePickerInput 
               v-model="editProductData.from_date" 
-              placeholder="تاريخ بداية النقل" 
+              :placeholder="t('purchases.orders.shared.tableHeaders.transportStartDate')" 
               density="compact"
               class="min-w-[170px]" 
             />
@@ -562,7 +564,7 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
           <div v-if="requestType === 'logistics-trips'">
             <DatePickerInput 
               v-model="editProductData.trip_date" 
-              placeholder="تاريخ الرحلة" 
+              :placeholder="t('purchases.orders.shared.tableHeaders.tripDate')" 
               density="compact"
               class="min-w-[170px]" 
             />
@@ -573,7 +575,7 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
             <PriceInput 
               v-model="editProductData.trip_price" 
               showRialIcon
-              placeholder="سعر الرحلة" 
+              :placeholder="t('purchases.orders.shared.tableHeaders.tripPrice')" 
               density="compact"
               class="min-w-[170px]" 
             />
@@ -585,11 +587,11 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
               v-model="editProductData.discount" 
               v-model:selectValue="editProductData.discount_type"
               type="number" 
-              placeholder="الخصم" 
+              :placeholder="t('purchases.orders.shared.tableHeaders.discount')" 
               density="compact"
               select-width="75px"
               :select-items="discountTypeOptionsList"
-              select-placeholder="اختر"
+              :select-placeholder="t('purchases.shared.forms.common.select')"
               class="min-w-[170px]" 
             />
           </div>
@@ -601,7 +603,7 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
     <!-- No Categories State -->
     <div v-else-if="!isEditMode && categories.length === 0" class="flex flex-col items-center justify-center py-20 text-gray-500">
       <v-icon size="64" color="gray-400">mdi-package-variant-closed</v-icon>
-      <p class="mt-4 text-lg font-medium">لا توجد تصنيفات</p>
+      <p class="mt-4 text-lg font-medium">{{ t('common.ui.noData') }}</p>
     </div>
 
     <!-- Add Mode Content -->
@@ -636,7 +638,7 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
 
       <!-- Search -->
       <div class="mb-3">
-        <TextInput v-model="searchQuery" placeholder="ابحث في المنتجات ..." density="comfortable">
+        <TextInput v-model="searchQuery" :placeholder="t('common.productDialog.searchProducts')" density="comfortable">
           <template #prepend-inner>
             <v-icon v-html="searchIcon"></v-icon>
           </template>
@@ -691,7 +693,7 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
               <div>
                 <PriceInput 
                   v-model="product.quantity"
-                  placeholder="الكمية" 
+                  :placeholder="t('common.productDialog.quantity')" 
                   density="compact"
                   class="min-w-[170px]" 
                 />
@@ -702,7 +704,7 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
                 <SelectInput 
                   v-model="product.unit_id" 
                   :items="unitItemsList" 
-                  placeholder="الوحدة" 
+                  :placeholder="t('common.productDialog.unit')" 
                   density="compact"
                   class="min-w-[170px]" 
                   item-title="title" 
@@ -714,7 +716,7 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
               <div v-if="showPricingFields">
                 <PriceInput 
                   v-model="product.unit_price" 
-                  placeholder="سعر الوحدة" 
+                  :placeholder="t('purchases.orders.shared.tableHeaders.unitPrice')" 
                   density="compact"
                   class="min-w-[170px]" 
                 />
@@ -726,11 +728,11 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
                   v-model="product.discount" 
                   v-model:selectValue="product.discount_type"
                   type="number" 
-                  placeholder="الخصم" 
+                  :placeholder="t('purchases.orders.shared.tableHeaders.discount')" 
                   density="compact"
                   select-width="75px"
                   :select-items="discountTypeOptionsList"
-                  select-placeholder="اختر"
+                  :select-placeholder="t('purchases.shared.forms.common.select')"
                   class="min-w-[170px]" 
                 />
               </div>
@@ -740,7 +742,7 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
                 <SelectInput 
                   v-model="product.transport_type" 
                   :items="packageTypeItemsList" 
-                  placeholder="نوع الناقلة"
+                  :placeholder="t('purchases.requests.materialProduct.form.tableHeaders.transportType')"
                   density="compact" 
                   class="min-w-[170px]" 
                   item-title="title" 
@@ -753,7 +755,7 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
                 <SelectInput 
                   v-model="product.transport_type" 
                   :items="packageTypeItemsList" 
-                  placeholder="نوع المركبات"
+                  :placeholder="t('purchases.requests.materialProduct.form.tableHeaders.vehicleTypes')"
                   density="compact" 
                   class="min-w-[170px]" 
                   item-title="title" 
@@ -767,7 +769,7 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
                 <TextInput 
                   v-model="product.trip_no" 
                   type="number"
-                  placeholder="عدد الرحلات" 
+                  :placeholder="t('purchases.requests.logistics.form.detailCard.tripCount')" 
                   density="compact"
                   class="min-w-[170px]" 
                 />
@@ -779,7 +781,7 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
               <div v-if="requestType === 'logistics'">
                 <DatePickerInput 
                   v-model="product.from_date" 
-                  placeholder="تاريخ بداية النقل" 
+                  :placeholder="t('purchases.orders.shared.tableHeaders.transportStartDate')" 
                   density="compact"
                   class="min-w-[170px]" 
                 />
@@ -789,7 +791,7 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
               <div v-if="requestType === 'logistics-trips'">
                 <DatePickerInput 
                   v-model="product.trip_date" 
-                  placeholder="تاريخ الرحلة" 
+                  :placeholder="t('purchases.orders.shared.tableHeaders.tripDate')" 
                   density="compact"
                   class="min-w-[170px]" 
                 />
@@ -800,7 +802,7 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
                 <PriceInput 
                   v-model="product.trip_price" 
                   showRialIcon
-                  placeholder="سعر الرحلة" 
+                  :placeholder="t('purchases.orders.shared.tableHeaders.tripPrice')" 
                   density="compact"
                   class="min-w-[170px]" 
                 />
@@ -818,7 +820,7 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
           color="primary" 
           size="large" 
           custom-class="px-8" 
-          :label="isEditMode ? 'حفظ التعديلات' : 'تم'"
+          :label="isEditMode ? t('common.productDialog.saveChanges') : t('common.productDialog.done')"
           @click="handleDone" 
           :disabled="!!(isEditMode && editProductData && !canAddProduct(editProductData))"
         />
@@ -829,7 +831,7 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
           border="gray-300" 
           size="large" 
           custom-class="px-4"
-          label="إلغاء" 
+          :label="t('common.actions.cancel')" 
           @click="handleCancel" 
         />
       </div>

@@ -2,6 +2,7 @@
 import { ref, computed, onMounted, watch, nextTick, reactive } from "vue";
 import { useRoute, useRouter } from 'vue-router';
 import TopHeader from '@/components/price-offers/TopHeader.vue';
+import AppFormBreadcrumb from '@/components/common/AppFormBreadcrumb.vue';
 import { useApi } from '@/composables/useApi';
 import { returnIcon, saveIcon, fileCheckIcon, fileIcon_2, rialIcon } from '@/components/icons/globalIcons';
 import { useForm } from '@/composables/useForm';
@@ -571,6 +572,15 @@ onMounted(async () => {
 <template>
     <default-layout>
         <div class="-mx-6 bg-qallab-dashboard-bg space-y-4">
+            <AppFormBreadcrumb
+                list-path="/sales/invoices/list"
+                module-root-key="breadcrumb.sales.root"
+                list-label-key="breadcrumb.sales.invoices.buildingMaterials.list"
+                create-label-key="breadcrumb.sales.invoices.buildingMaterials.create"
+                edit-label-key="breadcrumb.sales.invoices.buildingMaterials.edit"
+                :is-edit-mode="isEditMode"
+                :code="InvoiceCode"
+            />
             <TopHeader :icon="fileCheckIcon" title-key="pages.SalesInvoices.FormTitle"
                 description-key="pages.SalesInvoices.FormDescription" :code="InvoiceCode" code-label="كود الفاتورة"
                 :show-action="false" />

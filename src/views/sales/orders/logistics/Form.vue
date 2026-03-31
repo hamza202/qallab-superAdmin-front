@@ -23,6 +23,7 @@ import {
   rialIcon,
   packageIcon,
 } from "@/components/icons/globalIcons";
+import AppFormBreadcrumb from "@/components/common/AppFormBreadcrumb.vue";
 import { useForm } from "@/composables/useForm";
 import { useNotification as useNotify } from "@/composables/useNotification";
 import AddLogisticsDetailDialog from "@/views/sales/quotations/logistics/components/AddLogisticsDetailDialog.vue";
@@ -1402,6 +1403,15 @@ onMounted(async () => {
 <template>
   <default-layout>
     <div class="request-material-product-page -mx-6 bg-qallab-dashboard-bg space-y-4">
+      <AppFormBreadcrumb
+        list-path="/sales/orders/logistics/list"
+        module-root-key="breadcrumb.sales.root"
+        list-label-key="breadcrumb.sales.orders.logistics.list"
+        create-label-key="breadcrumb.sales.orders.logistics.create"
+        edit-label-key="breadcrumb.sales.orders.logistics.edit"
+        :is-edit-mode="isEditMode"
+        :code="isEditMode ? (formData.code || '') : ''"
+      />
       <!-- Page Header -->
       <TopHeader
         :icon="filePlusIcon"

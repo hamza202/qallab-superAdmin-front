@@ -5,6 +5,7 @@ import AddProductDialog from '@/components/price-offers/AddProductDialog.vue';
 import EditProductsDialog from '@/components/price-offers/EditProductsDialog.vue';
 import EditSupplyDetailsDialog from '@/components/price-offers/EditSupplyDetailsDialog.vue';
 import TopHeader from '@/components/price-offers/TopHeader.vue';
+import AppFormBreadcrumb from '@/components/common/AppFormBreadcrumb.vue';
 import { useApi } from '@/composables/useApi';
 import { useCalculations } from "@/composables/useCalculations";
 import { fileIcon, mapMarkerIcon, messagePlusIcon, filePlusIcon, busIcon, listIcon, CoinHandIcon, fileCheckIcon } from '@/components/icons/priceOffersIcons';
@@ -874,6 +875,15 @@ const serviceTableItems = computed(() =>
 <template>
     <default-layout>
         <div class="request-material-product-page -mx-6 bg-qallab-dashboard-bg space-y-4">
+            <AppFormBreadcrumb
+                list-path="/sales/quotations/material-product/list"
+                module-root-key="breadcrumb.sales.root"
+                list-label-key="breadcrumb.sales.quotations.materialProduct.list"
+                create-label-key="breadcrumb.sales.quotations.materialProduct.create"
+                edit-label-key="breadcrumb.sales.quotations.materialProduct.edit"
+                :is-edit-mode="isEditMode"
+                :code="isEditMode ? (formData.code || '') : ''"
+            />
             <!-- Page Header -->
             <TopHeader :icon="filePlusIcon" title-key="pages.PricesOffersMaterialProduct.FormTitle"
                 description-key="pages.PricesOffersMaterialProduct.FormDescription" :show-action="false"

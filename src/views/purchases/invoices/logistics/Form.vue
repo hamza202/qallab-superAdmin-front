@@ -3,6 +3,7 @@ import { ref, reactive, computed, onMounted, watch, nextTick } from "vue";
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import TopHeader from '@/components/price-offers/TopHeader.vue';
+import AppFormBreadcrumb from '@/components/common/AppFormBreadcrumb.vue';
 import { useApi } from '@/composables/useApi';
 import { returnIcon, saveIcon, fileCheckIcon, fileIcon_2 } from '@/components/icons/globalIcons';
 import { useForm } from '@/composables/useForm';
@@ -617,6 +618,15 @@ onMounted(async () => {
 <template>
     <default-layout>
         <div class="-mx-6 bg-qallab-dashboard-bg space-y-4">
+            <AppFormBreadcrumb
+                list-path="/purchases/invoices/logistics/list"
+                module-root-key="breadcrumb.purchases.root"
+                list-label-key="breadcrumb.purchases.invoices.logistics.list"
+                create-label-key="breadcrumb.purchases.invoices.logistics.create"
+                edit-label-key="breadcrumb.purchases.invoices.logistics.edit"
+                :is-edit-mode="isEditMode"
+                :code="InvoiceCode"
+            />
             <TopHeader :icon="fileCheckIcon" title-key="pages.PurchaseInvoicesLogistics.FormTitle"
                 description-key="pages.PurchaseInvoicesLogistics.FormDescription" :code="InvoiceCode" code-label-key="purchases.invoices.form.codeLabel"
                 :show-action="false" />
@@ -786,7 +796,7 @@ onMounted(async () => {
                             <!-- Tax Total -->
                             <tr class="border-b !border-gray-200">
                                 <td class="py-4 px-4 text-center font-bold text-gray-900 border-l !border-gray-200">
-                                    الضريبة
+                                    {{ t('purchases.invoices.form.summary.tax') }}
                                 </td>
                                 <td class="py-4 px-4 text-center text-gray-600">
                                     15%

@@ -26,6 +26,7 @@ import {
     saveIcon,
     rialIcon,
 } from '@/components/icons/globalIcons';
+import AppFormBreadcrumb from '@/components/common/AppFormBreadcrumb.vue';
 
 const { t } = useI18n();
 const api = useApi();
@@ -893,6 +894,15 @@ const tableItems = computed(() =>
 <template>
     <default-layout>
         <div class="request-material-product-page -mx-6 bg-qallab-dashboard-bg space-y-4">
+            <AppFormBreadcrumb
+                list-path="/purchases/orders/fuels/list"
+                module-root-key="breadcrumb.purchases.root"
+                list-label-key="breadcrumb.purchases.orders.fuels.list"
+                create-label-key="breadcrumb.purchases.orders.fuels.create"
+                edit-label-key="breadcrumb.purchases.orders.fuels.edit"
+                :is-edit-mode="isEditMode"
+                :code="isEditMode ? (formData.code ? '#' + formData.code : '') : ''"
+            />
             <!-- Page Header -->
             <TopHeader :icon="filePlusIcon" title-key="pages.OrdersFuels.FormTitle"
                 :description-key="isEditMode ? 'pages.OrdersFuels.FormDescriptionEdit' : 'pages.OrdersFuels.FormDescriptionCreate'"
@@ -964,7 +974,7 @@ const tableItems = computed(() =>
                                 class="flex items-center justify-between px-4 py-2 min-h-[48px] border !border-blue-400 rounded-lg cursor-pointer hover:bg-blue-100 transition-colors">
                                 <span
                                     class="text-base font-medium text-blue-900 whitespace-nowrap overflow-hidden text-ellipsis">
-                                    {{ formData.target_location || 'حدد الموقع' }}
+                                    {{ formData.target_location || t('purchases.shared.forms.common.pickLocation') }}
                                 </span>
                                 <div class="flex items-center gap-2">
                                     <span v-html="mapMarkerIcon"></span>

@@ -11,6 +11,7 @@ import { fileIcon, mapMarkerIcon, packageIcon, downloadIcon, fileQuestionIcon, b
 import { useForm } from '@/composables/useForm';
 import { useNotification } from '@/composables/useNotification';
 import { binIcon, fileCheckIcon, returnIcon, saveIcon } from "@/components/icons/globalIcons";
+import AppFormBreadcrumb from "@/components/common/AppFormBreadcrumb.vue";
 const { formRef, isFormValid, validate } = useForm();
 const { success, warning, apiError } = useNotification();
 
@@ -735,6 +736,15 @@ onMounted(async () => {
 <template>
     <default-layout>
         <div class="request-material-product-page  -mx-6 bg-qallab-dashboard-bg space-y-4">
+            <AppFormBreadcrumb
+                list-path="/purchases/requests/logistics/list"
+                module-root-key="breadcrumb.purchases.root"
+                list-label-key="breadcrumb.purchases.requests.logistics.list"
+                create-label-key="breadcrumb.purchases.requests.logistics.create"
+                edit-label-key="breadcrumb.purchases.requests.logistics.edit"
+                :is-edit-mode="isEditMode"
+                :code="isEditMode ? (formData.code || '') : ''"
+            />
             <!-- Page Header -->
             <TopHeader :icon="fileQuestionIcon" title-key="pages.purchasesLogistics.create"
                 description-key="pages.purchasesLogistics.createDescription" :show-action="false"

@@ -2,6 +2,7 @@
 import { computed, ref, watch, onMounted, nextTick } from "vue";
 import { debounce } from "lodash-es";
 import { searchIcon } from "@/components/icons/globalIcons";
+import { useI18n } from "vue-i18n";
 
 type Density = "default" | "comfortable" | "compact";
 
@@ -58,6 +59,7 @@ const props = withDefaults(defineProps<SelectInputProps>(), {
     debounceTime: 500,
     perPage: 15,
 });
+const { t } = useI18n();
 
 const emit = defineEmits<{
     (e: "update:modelValue", value: string | number | null | (string | number)[]): void;
@@ -120,7 +122,11 @@ const fetchData = async (search: string = "", reset: boolean = true) => {
             if (reset) {
                 serverItems.value = mappedItems;
             } else {
-                serverItems.value = [...serverItems.value, ...mappedItems];
+                // Filter out duplicates by checking if the value already exists
+                const valueKey = props.itemValueKey || 'value';
+                const existingValues = new Set(serverItems.value.map((item: any) => item[valueKey]));
+                const uniqueNewItems = mappedItems.filter((item: any) => !existingValues.has(item[valueKey]));
+                serverItems.value = [...serverItems.value, ...uniqueNewItems];
             }
 
             // Update selectedItem if the current selection is in the new results
@@ -251,7 +257,7 @@ watch(() => displayItems.value.length, async () => {
             :custom-filter="customFilter" v-bind="{ ...inputProps, ...$attrs }">
             <template v-if="serverSide" #prepend-item>
                 <div class="px-3 py-2" @mousedown.stop @click.stop @keydown.stop>
-                    <TextInput v-model="searchQuery" density="compact" placeholder="ابحث..." clearable hide-details>
+                    <TextInput v-model="searchQuery" density="compact" :placeholder="t('common.actions.search')" clearable hide-details>
                         <template #prepend-inner>
                             <span class="text-gray-500" v-html="searchIcon"></span>
                         </template>
@@ -262,7 +268,7 @@ watch(() => displayItems.value.length, async () => {
             <template v-if="serverSide" #no-data>
                 <v-list-item>
                     <v-list-item-title class="text-center text-gray-500">
-                        {{ isLoading ? 'جاري التحميل...' : 'لا توجد بيانات' }}
+                        {{ isLoading ? t('common.ui.loading') : t('common.ui.noData') }}
                     </v-list-item-title>
                 </v-list-item>
             </template>
@@ -272,7 +278,7 @@ watch(() => displayItems.value.length, async () => {
                 <v-list-item v-if="isLoading" class="py-2">
                     <v-list-item-title class="text-center">
                         <v-progress-circular indeterminate size="20" color="blue-grey" width="2" class="me-2" />
-                        <span class="text-gray-500">جاري التحميل...</span>
+                        <span class="text-gray-500">{{ t('common.ui.loading') }}</span>
                     </v-list-item-title>
                 </v-list-item>
             </template>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from "vue";
+import { useI18n } from "vue-i18n";
 import { required } from "@/utils/validators";
 
 export interface LogisticsDetail {
@@ -27,6 +28,7 @@ const props = defineProps<{
   amPmIntervalOptions?: any[];
   editService?: TransportServiceTableItem | null;
 }>();
+const { t } = useI18n();
 
 const emit = defineEmits<{
   "update:modelValue": [value: boolean];
@@ -54,9 +56,9 @@ const form = reactive({
 });
 
 const tripTimeOptionsList = computed(() => props.amPmIntervalOptions || [
-  { title: 'صباحاً', value: 'am' },
-  { title: 'مساءً', value: 'pm' },
-  { title: 'كلاهما', value: 'both' },
+  { title: t('purchases.views.shared.timeInterval.am'), value: 'am' },
+  { title: t('purchases.views.shared.timeInterval.pm'), value: 'pm' },
+  { title: t('purchases.views.shared.timeInterval.both'), value: 'both' },
 ]);
 
 const vehicleTypeOptionsList = computed(() => props.transportTypes || []);
@@ -146,7 +148,7 @@ const plusIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
         <span class="!bg-gray-50 border border-gray-100 rounded px-1.5 py-1.5 text-gray-600">
           <span v-html="truckIcon"></span>
         </span>
-        {{ isEditMode ? 'تعديل خدمة النقل' : 'إضافة خدمة نقل' }}
+        {{ isEditMode ? t('common.actions.save') : t('purchases.requests.logistics.form.addTransportService') }}
       </div>
     </template>
 
@@ -155,16 +157,16 @@ const plusIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
         <!-- Date Range -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <DatePickerInput 
-            label="تاريخ بدء النقل" 
+            :label="t('purchases.requests.logistics.form.detailCard.fromDate')" 
             v-model="form.from_date" 
-            placeholder="اختر التاريخ"
+            :placeholder="t('purchases.shared.forms.common.placeholders.selectDate')"
             density="comfortable" 
             :rules="[required()]"
           />
           <DatePickerInput 
-            label="تاريخ انتهاء النقل" 
+            :label="t('purchases.requests.logistics.form.detailCard.toDate')" 
             v-model="form.to_date" 
-            placeholder="اختر التاريخ"
+            :placeholder="t('purchases.shared.forms.common.placeholders.selectDate')"
             density="comfortable" 
             :rules="[required()]"
           />
@@ -172,7 +174,7 @@ const plusIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
           <!-- Trip Time -->
           <div>
             <label class="text-sm font-semibold text-gray-700 mb-2 block">
-              توقيت النقل
+              {{ t('purchases.views.shared.workHoursTransport') }}
             </label>
             <div class="flex items-center gap-4">
               <v-radio-group 
@@ -198,10 +200,10 @@ const plusIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
 
           <!-- Vehicle Types -->
           <MultipleSelectInput 
-            label="نوع المركبات" 
+            :label="t('purchases.requests.logistics.form.detailCard.vehicleType')" 
             v-model="form.vehicle_types" 
             :items="vehicleTypeOptionsList"
-            placeholder="اختر نوع المركبة" 
+            :placeholder="t('purchases.shared.forms.common.select')" 
             item-title="title" 
             item-value="value" 
           />
@@ -209,9 +211,9 @@ const plusIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
           <!-- Notes -->
           <div class="md:col-span-2">
             <TextareaInput 
-              label="ملاحظات" 
+              :label="t('purchases.shared.forms.common.tableHeaders.notes')" 
               v-model="form.notes" 
-              placeholder="أدخل الملاحظات" 
+              :placeholder="t('purchases.shared.forms.common.placeholders.addNote')" 
               :rows="4"
               density="comfortable" 
               hide-details 
@@ -229,7 +231,7 @@ const plusIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
           color="primary" 
           size="large" 
           custom-class="px-8" 
-          :label="isEditMode ? 'حفظ التعديلات' : 'أضف خدمة'"
+          :label="isEditMode ? t('common.actions.save') : t('purchases.requests.logistics.form.addTransportService')"
           :prepend-icon="isEditMode ? undefined : plusIcon" 
           @click="handleSave" 
         />
@@ -240,7 +242,7 @@ const plusIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
           border="gray-300" 
           size="large" 
           custom-class="px-4"
-          label="إلغاء" 
+          :label="t('common.actions.cancel')" 
           @click="handleCancel" 
         />
       </div>

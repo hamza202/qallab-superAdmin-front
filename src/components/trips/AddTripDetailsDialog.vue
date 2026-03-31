@@ -267,6 +267,9 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
 </svg>`;
 
 import { busIcon } from '@/components/icons/priceOffersIcons';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 </script>
 
@@ -275,7 +278,7 @@ import { busIcon } from '@/components/icons/priceOffersIcons';
     <template #title>
       <div class="text-base font-bold text-gray-900 flex items-center gap-2">
         <span v-html="busIcon"></span>
-        {{ isEditMode ? 'تعديل تفاصيل رحلة' : 'تفاصيل الرحلات' }}
+        {{ isEditMode ? t('common.trips.editTripDetail') : t('common.trips.tripDetails') }}
       </div>
     </template>
 
@@ -284,13 +287,13 @@ import { busIcon } from '@/components/icons/priceOffersIcons';
         <div class="font-medium text-gray-900 mb-3 text-lg">{{ editItemData.item_name }}</div>
         
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <PriceInput v-model="editItemData.quantity" placeholder="الكمية" density="compact" />
-          <SelectInput v-model="editItemData.unit_id" :items="unitItemsList" placeholder="الوحدة" density="compact" item-title="title" item-value="value" />
-          <SelectInput v-model="editItemData.transport_type" :items="packageTypeItemsList" multiple placeholder="نوع مركبة النقل" density="compact" item-title="title" item-value="value" class="md:col-span-2" />
+          <PriceInput v-model="editItemData.quantity" :placeholder="t('common.productDialog.quantity')" density="compact" />
+          <SelectInput v-model="editItemData.unit_id" :items="unitItemsList" :placeholder="t('common.productDialog.unit')" density="compact" item-title="title" item-value="value" />
+          <SelectInput v-model="editItemData.transport_type" :items="packageTypeItemsList" multiple :placeholder="t('common.trips.transportVehicleType')" density="compact" item-title="title" item-value="value" class="md:col-span-2" />
         </div>
         
         <div class="mt-4 w-1/4">
-          <PriceInput v-model="editItemData.price" placeholder="السعر" density="compact" showRialIcon />
+          <PriceInput v-model="editItemData.price" :placeholder="t('common.trips.price')" density="compact" showRialIcon />
         </div>
 
         <div class="absolute bottom-4 left-4">
@@ -313,7 +316,7 @@ import { busIcon } from '@/components/icons/priceOffersIcons';
     <!-- No Products State -->
     <div v-else-if="!isEditMode && supplierItems.length === 0" class="flex flex-col items-center justify-center py-20 text-gray-500">
       <v-icon size="64" color="gray-400">mdi-package-variant-closed</v-icon>
-      <p class="mt-4 text-lg font-medium">لا توجد منتجات متاحة</p>
+      <p class="mt-4 text-lg font-medium">{{ t('common.trips.noAvailableProducts') }}</p>
     </div>
 
     <template v-else-if="!isEditMode">
@@ -347,7 +350,7 @@ import { busIcon } from '@/components/icons/priceOffersIcons';
       </div>
 
       <div class="mb-4">
-        <TextInput v-model="searchQuery" placeholder="ابحث في المنتجات .." density="comfortable">
+        <TextInput v-model="searchQuery" :placeholder="t('common.productDialog.searchProducts')" density="comfortable">
           <template #prepend-inner>
             <v-icon v-html="searchIcon"></v-icon>
           </template>
@@ -394,16 +397,16 @@ import { busIcon } from '@/components/icons/priceOffersIcons';
                 {{ product.item_name }}
               </div>
               <div>
-                <PriceInput v-model="product.quantity" placeholder="الكمية" density="compact" hide-details class="min-w-[150px]" />
+                <PriceInput v-model="product.quantity" :placeholder="t('common.productDialog.quantity')" density="compact" hide-details class="min-w-[150px]" />
               </div>
               <div>
-                <SelectInput v-model="product.unit_id" :items="unitItemsList" placeholder="الوحدة" density="compact" item-title="title" item-value="value" hide-details class="min-w-[150px]" />
+                <SelectInput v-model="product.unit_id" :items="unitItemsList" :placeholder="t('common.productDialog.unit')" density="compact" item-title="title" item-value="value" hide-details class="min-w-[150px]" />
               </div>
               <div>
-                <SelectInput v-model="product.transport_type" :items="packageTypeItemsList" multiple placeholder="نوع مركبة النقل" density="compact" item-title="title" item-value="value" hide-details class="min-w-[150px]" />
+                <SelectInput v-model="product.transport_type" :items="packageTypeItemsList" multiple :placeholder="t('common.trips.transportVehicleType')" density="compact" item-title="title" item-value="value" hide-details class="min-w-[150px]" />
               </div>
               <div>
-                 <PriceInput v-model="product.price" placeholder="السعر" density="compact" showRialIcon hide-details class="min-w-[150px]" />
+                 <PriceInput v-model="product.price" :placeholder="t('common.trips.price')" density="compact" showRialIcon hide-details class="min-w-[150px]" />
               </div>
             </div>
           </div>
@@ -414,12 +417,12 @@ import { busIcon } from '@/components/icons/priceOffersIcons';
         <ButtonWithIcon 
           color="primary" 
           variant="flat" 
-          label="إضافة تفاصيل الرحلة" 
+          :label="t('common.trips.addTripDetails')" 
           :prepend-icon="plusIcon"
           @click="handleDone"
           custom-class="px-8 !font-bold h-[44px] !text-[15px]"
         />
-        <v-btn variant="outlined" color="gray-500" class="!border-gray-200 !text-gray-700 font-bold px-6 h-[44px]" @click="closeDialog">إلغاء</v-btn>
+        <v-btn variant="outlined" color="gray-500" class="!border-gray-200 !text-gray-700 font-bold px-6 h-[44px]" @click="closeDialog">{{ t('common.actions.cancel') }}</v-btn>
       </div>
     </template>
   </AppDialog>

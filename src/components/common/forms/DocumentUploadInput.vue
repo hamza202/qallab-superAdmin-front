@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from "vue";
+import { useI18n } from "vue-i18n";
 import { pdfIcon, excelIcon, imgIcon, wordIcon, deleteIcon } from '@/components/icons/globalIcons';
 
 interface DocumentUploadInputProps {
@@ -21,6 +22,7 @@ const props = withDefaults(defineProps<DocumentUploadInputProps>(), {
     disabled: false,
     hint: "PNG, JPG, PDF, XLS",
 });
+const { t } = useI18n();
 
 const emit = defineEmits<{
     (e: "update:modelValue", value: (File | string)[] | null): void;
@@ -104,7 +106,7 @@ const formatSize = (bytes: number) => {
 
 const getFileName = (file: File | string): string => {
     if (typeof file === 'string') {
-        return file.split('/').pop() || 'ملف مرفق';
+        return file.split('/').pop() || t('common.uploads.attachedFile');
     }
     return file.name;
 };
@@ -142,7 +144,7 @@ const uploadCloudIcon = `<svg width="24" height="24" viewBox="0 0 24 24" fill="n
                 <div class="w-12 h-12 flex items-center justify-center bg-blue-50 text-blue-600 rounded-full mb-3">
                     <span v-html="uploadCloudIcon"></span>
                 </div>
-                <p class="text-blue-600 font-bold text-sm mb-1">أرفق ملف</p>
+                <p class="text-blue-600 font-bold text-sm mb-1">{{ t('common.uploads.attachFile') }}</p>
                 <p class="text-xs text-gray-500">{{ hint }}</p>
             </div>
 

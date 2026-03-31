@@ -13,6 +13,7 @@ import { fileIcon, mapMarkerIcon, packageIcon, busIcon, globeIcon, CoinHandIcon,
 import { useForm } from '@/composables/useForm';
 import { useNotification as useNotify } from '@/composables/useNotification';
 import { binIcon, fileCheckIcon, HelpCircleIcon, returnIcon, saveIcon, rialIcon } from "@/components/icons/globalIcons";
+import AppFormBreadcrumb from "@/components/common/AppFormBreadcrumb.vue";
 import { required, numeric, positive } from '@/utils/validators';
 
 
@@ -1161,6 +1162,15 @@ onMounted(async () => {
 <template>
   <default-layout>
     <div class="request-material-product-page -mx-6 bg-qallab-dashboard-bg space-y-4">
+      <AppFormBreadcrumb
+        list-path="/purchases/orders/logistics/list"
+        module-root-key="breadcrumb.purchases.root"
+        list-label-key="breadcrumb.purchases.orders.logistics.list"
+        create-label-key="breadcrumb.purchases.orders.logistics.create"
+        edit-label-key="breadcrumb.purchases.orders.logistics.edit"
+        :is-edit-mode="isEditMode"
+        :code="isEditMode ? (formData.code || '') : ''"
+      />
       <TopHeader :icon="fileCheckIcon" title-key="pages.OrdersLogistics.FormTitle"
         description-key="pages.OrdersLogistics.FormDescription" :show-action="false"
         code-label-key="purchases.orders.shared.labels.purchaseOrderCode"

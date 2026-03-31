@@ -13,6 +13,7 @@ import {
 } from "@/components/icons/globalIcons";
 import SarIcon from "@/components/icons/SarIcon.vue";
 import TopHeader from "@/components/price-offers/TopHeader.vue";
+import AppFormBreadcrumb from "@/components/common/AppFormBreadcrumb.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -74,22 +75,43 @@ const fetchConstants = async () => {
   }
 };
 
-const fetchCustomers = async () => {
-  loadingCustomers.value = true;
-  try {
-    const res = await api.get<any>("/customers/list");
-    if (Array.isArray(res?.data)) {
-      customerItems.value = res.data.map((c: any) => ({
-        title: c.full_name,
-        value: c.id,
-        type: c.type ?? "",
-      }));
-    }
-  } catch (e) {
-    console.error("fetchCustomers error:", e);
-  } finally {
-    loadingCustomers.value = false;
+const waitForCustomerData = async () => {
+  if (!selectedCustomerId.value) return;
+
+  await new Promise(resolve => {
+    const checkInterval = setInterval(() => {
+      if (selectedCustomerId.value) {
+        clearInterval(checkInterval);
+        clearTimeout(timeoutId);
+        resolve(true);
+      }
+    }, 10);
+
+    const timeoutId = setTimeout(() => {
+      clearInterval(checkInterval);
+      resolve(true);
+    }, 5000);
+  });
+};
+
+const fetchCustomers = async (search = '', cursor?: string, perPage = 15) => {
+  const params: Record<string, any> = { per_page: perPage };
+  if (search) {
+    params.name = search;
   }
+  if (cursor) {
+    params.cursor = cursor;
+  }
+  if (selectedCustomerId.value) {
+    params.order_by_id = selectedCustomerId.value;
+  }
+
+  const res = await api.get<any>('/customers/list', { params });
+
+  return {
+    data: res.data || [],
+    next_cursor: res.pagination?.next_cursor || null,
+  };
 };
 
 const fetchSalesCodes = async () => {
@@ -217,7 +239,6 @@ const fetchLinkedItems = async () => {
 
 onMounted(() => {
   fetchConstants();
-  fetchCustomers();
   fetchLinkedItems();
 });
 
@@ -284,6 +305,16 @@ const handleViewLinked = (row: {
 <template>
   <default-layout>
     <div class="link-form-page -mx-6 bg-qallab-dashboard-bg space-y-4">
+      <AppFormBreadcrumb
+        list-path="/purchases/quotations/link/view"
+        module-root-key="breadcrumb.purchases.root"
+        list-label-key="breadcrumb.purchases.link.quotations.list"
+        create-label-key="breadcrumb.purchases.link.quotations.form"
+        edit-label-key="breadcrumb.purchases.link.quotations.form"
+        :is-edit-mode="false"
+        action-label-key="breadcrumb.purchases.link.quotations.form"
+        :code="sall_quotations_code_from_index || purchaseUuid"
+      />
 
       <!-- ── Page Header ─────────────────────────────────────────── -->
       <TopHeader
@@ -307,13 +338,17 @@ const handleViewLinked = (row: {
           <div>
             <SelectInput
               v-model="selectedCustomerId"
-              :items="customerItems"
+              :items="[]"
               :label="t('purchases.link.shared.labels.customerName')"
               item-title="title"
               item-value="value"
               density="comfortable"
               :placeholder="t('purchases.link.shared.labels.selectCustomerPlaceholder')"
-              :loading="loadingCustomers"
+              :server-side="true"
+              :fetch-function="fetchCustomers"
+              item-title-key="full_name"
+              item-value-key="id"
+              :debounce-time="500"
             />
           </div>
 

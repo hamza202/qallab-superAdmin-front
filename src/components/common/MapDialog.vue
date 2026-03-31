@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue';
 import AppDialog from './AppDialog.vue';
+import { useI18n } from 'vue-i18n';
 
 interface Props {
   modelValue: boolean;
@@ -9,6 +10,7 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+const { t } = useI18n();
 
 const emit = defineEmits<{
   'update:modelValue': [value: boolean];
@@ -78,7 +80,7 @@ watch(() => props.modelValue, (newValue) => {
 
 <template>
   <AppDialog :model-value="modelValue" @update:model-value="emit('update:modelValue', $event)"
-    title="اختر الموقع الجغرافي" max-width="800" hide-actions>
+    :title="t('common.map.selectLocationTitle')" max-width="800" hide-actions>
       <!-- Map Container -->
       <div class="w-full h-[400px] rounded-lg overflow-hidden border border-gray-200 relative mb-4">
         <div v-if="!isMapReady" class="absolute inset-0 flex items-center justify-center bg-gray-100">
