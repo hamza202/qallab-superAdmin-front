@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import WaveSurfer from 'wavesurfer.js';
 import RecordPlugin from 'wavesurfer.js/dist/plugins/record.esm.js';
 import ButtonWithIcon from '@/components/common/buttons/ButtonWithIcon.vue';
+
+const { t } = useI18n();
 
 const props = withDefaults(
   defineProps<{
@@ -15,10 +18,10 @@ const props = withDefaults(
   }>(),
   {
     modelValue: null,
-    title: 'رسالة صوتية',
-    hintAttachNotes: 'هل تود إرفاق بعض الملاحظات',
-    hintRecordPrompt: 'قم بتسجيل رسالتك الصوتية إلى',
-    recordingInProgress: 'جاري التسجيل...',
+    title: '',
+    hintAttachNotes: '',
+    hintRecordPrompt: '',
+    recordingInProgress: '',
   }
 );
 
@@ -446,15 +449,15 @@ const trashIcon = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" x
     
     <!-- Initial State: Text -->
     <div v-if="!isRecording && !modelValue" class="flex-1">
-      <p class="text-primary-600 font-bold text-sm mb-2">{{ props.title }}</p>
-      <p class="text-gray-400 font-medium text-sm">{{ props.hintAttachNotes }}</p>
-      <p class="text-blue-900 font-medium text-sm">{{ props.hintRecordPrompt }}</p>
+      <p class="text-primary-600 font-bold text-sm mb-2">{{ props.title || t('common.voiceRecorder.title') }}</p>
+      <p class="text-gray-400 font-medium text-sm">{{ props.hintAttachNotes || t('common.voiceRecorder.hintAttachNotes') }}</p>
+      <p class="text-blue-900 font-medium text-sm">{{ props.hintRecordPrompt || t('common.voiceRecorder.hintRecordPrompt') }}</p>
     </div>
 
     <!-- Recording State: Timer & Visualizer Placehoder -->
     <div v-else-if="isRecording" class="flex-1 flex items-center gap-4">
         <div class="text-error-600 font-bold animate-pulse">
-            {{ props.recordingInProgress }} {{ recordingTimer }}
+            {{ props.recordingInProgress || t('common.voiceRecorder.recordingInProgress') }} {{ recordingTimer }}
         </div>
         <!-- Waveform container will be used for visualization if configured, but here we keep it for playback later. 
              If we want live visualization, we need to connect it. Record plugin does not auto-visualize in the same container easily without config.

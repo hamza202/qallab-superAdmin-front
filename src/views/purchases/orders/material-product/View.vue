@@ -179,7 +179,7 @@ import { busIcon, truckIcon, packageIcon } from '@/components/icons/priceOffersI
 const route = useRoute()
 const api = useApi()
 const { error } = useNotification()
-
+const { t } = useI18n();
 const isLoading = ref(false)
 const orderData = ref<any>(null)
 

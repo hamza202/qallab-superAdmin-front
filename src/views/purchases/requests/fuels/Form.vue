@@ -623,7 +623,7 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
                             <div @click="openSourceMapDialog"
                                 class="flex items-center justify-between px-4 py-2 min-h-[48px] border rounded-lg cursor-pointer transition-colors !border-blue-400 hover:bg-blue-100">
                                 <span class="text-base font-medium text-blue-900 whitespace-nowrap overflow-hidden text-ellipsis">
-                                    {{ formData.source_location || 'حدد الموقع' }}
+                                    {{ formData.source_location || t('purchases.shared.forms.common.pickLocation') }}
                                 </span>
                                 <div class="flex items-center gap-2">
                                     <span v-html="mapMarkerIcon"></span>

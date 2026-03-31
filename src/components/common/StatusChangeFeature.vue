@@ -3,6 +3,7 @@ import { ref, computed, watch } from 'vue';
 import { useApi } from '@/composables/useApi';
 import { useNotification } from '@/composables/useNotification';
 import { changeStatusIcon } from '@/components/icons/priceOffersIcons';
+import { useI18n } from 'vue-i18n';
 
 /** Workflow item from full-document-workflow API */
 interface WorkflowItem {
@@ -42,9 +43,11 @@ interface Props {
   message?: string;
 }
 
+const { t } = useI18n();
+
 const props = withDefaults(defineProps<Props>(), {
-  title: 'تغيير الحالة',
-  message: 'تغيير الحالة:',
+  title: '',
+  message: '',
 });
 
 const emit = defineEmits<{
@@ -107,7 +110,7 @@ const fetchStatusTransitions = async (item: StatusChangeItem) => {
     }));
   } catch (err: any) {
     console.error('Error fetching status transitions:', err);
-    const errorMessage = err?.response?.data?.message || 'فشل تحميل الحالات المتاحة';
+    const errorMessage = err?.response?.data?.message || t('common.messages.general.loadDataFailed');
     error(errorMessage);
     emit('error', errorMessage);
   } finally {
@@ -132,11 +135,11 @@ const handleStatusChange = async (convertedStatusId: any) => {
     formData.append('converted_status_id', String(convertedStatusId));
 
     await api.post(props.changeStatusUrl, formData);
-    success('تم تغيير الحالة بنجاح');
+    success(t('common.messages.general.changeStatusSuccess'));
     emit('success');
   } catch (err: any) {
     console.error('Error changing status:', err);
-    const errorMessage = err?.response?.data?.message || 'فشل تغيير الحالة';
+    const errorMessage = err?.response?.data?.message || t('common.messages.general.changeStatusError');
     error(errorMessage);
     emit('error', errorMessage);
   } finally {
@@ -151,8 +154,8 @@ const handleStatusChange = async (convertedStatusId: any) => {
   <StatusChangeDialog
     v-model="internalOpen"
     v-model:selectValue="selectedStatus"
-    :title="title"
-    :message="message"
+    :title="title || t('common.statusChange.title')"
+    :message="message || t('common.statusChange.message')"
     :show-select="true"
     :select-items="statusTransitionOptions"
     :initial-select-value="item?.status_id ?? null"

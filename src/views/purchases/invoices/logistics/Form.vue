@@ -786,7 +786,7 @@ onMounted(async () => {
                             <!-- Tax Total -->
                             <tr class="border-b !border-gray-200">
                                 <td class="py-4 px-4 text-center font-bold text-gray-900 border-l !border-gray-200">
-                                    الضريبة
+                                    {{ t('purchases.invoices.form.summary.tax') }}
                                 </td>
                                 <td class="py-4 px-4 text-center text-gray-600">
                                     15%

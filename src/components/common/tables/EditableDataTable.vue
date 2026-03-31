@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 interface TableHeader {
   key: string;
   title: string;
@@ -33,7 +36,7 @@ const props = withDefaults(defineProps<Props>(), {
   showDelete: true,
   confirmDelete: true,
   loading: false,
-  emptyText: "لا توجد بيانات",
+  emptyText: "",
 });
 
 const emit = defineEmits<{
@@ -204,7 +207,7 @@ const cancelDelete = () => {
         <tr v-if="items.length === 0">
           <td :colspan="flatHeaders.length + (showActions && showDelete ? 1 : 0) + (showCheckbox ? 1 : 0)"
             class="text-center py-8 text-gray-500">
-            {{ emptyText }}
+            {{ emptyText || t('common.ui.noData') }}
           </td>
         </tr>
       </tbody>

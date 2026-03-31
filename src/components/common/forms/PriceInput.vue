@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
+import { useI18n } from "vue-i18n";
 
 type Density = "default" | "comfortable" | "compact";
 
@@ -37,6 +38,8 @@ interface PriceInputProps {
     allowNegative?: boolean;
 }
 
+const { t } = useI18n();
+
 const props = withDefaults(defineProps<PriceInputProps>(), {
     currency: '',
     color: "primary-300",
@@ -48,7 +51,7 @@ const props = withDefaults(defineProps<PriceInputProps>(), {
     showCurrencyOnLeft: false,
     showRialIcon: false,
     keepCurrencyVisible: false,
-    placeholder: "ادخل السعر",
+    placeholder: "",
     allowNegative: false,
 });
 
@@ -98,7 +101,7 @@ const rialIcon = `<svg width="13" height="15" viewBox="0 0 13 15" fill="none" xm
             {{ label }}
         </label>
 
-        <v-text-field v-model="internalValue" type="number" :placeholder="placeholder" :variant="variant || 'outlined'" :color="color"
+        <v-text-field v-model="internalValue" type="number" :placeholder="placeholder || t('common.form.enterPrice')" :variant="variant || 'outlined'" :color="color"
             :density="density" :disabled="disabled" :readonly="readonly" :clearable="clearable" :rules="rules"
             :hide-details="false" :hint="hint" :persistent-hint="persistentHint"
             :prefix="!keepCurrencyVisible && showCurrencyOnLeft ? currency : undefined"

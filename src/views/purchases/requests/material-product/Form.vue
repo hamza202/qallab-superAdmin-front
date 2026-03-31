@@ -845,8 +845,8 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
                 </div>
 
                 <!-- Add / Edit Product Buttons -->
-                <div class="flex justify-center gap-3">
-                    <ButtonWithIcon color="primary-100" variant="flat" class="!text-primary-900 font-bold w-75"
+                <div class="flex justify-center gap-3 w-75 mx-auto">
+                    <ButtonWithIcon color="primary-100" variant="flat" class="!text-primary-900 font-bold flex-1"
                         @click="handleAddProduct">
                         {{ t('purchases.shared.forms.common.actions.addProduct') }}
                     </ButtonWithIcon>
@@ -854,10 +854,10 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
                         v-if="productTableItems.length > 0"
                         color="primary-100"
                         variant="flat"
-                        class="!text-primary-900 font-bold w-75"
+                        class="!text-primary-900 font-bold flex-1"
                         @click="showEditProductsDialog = true"
                     >
-                        تعديل المنتجات
+                        {{ t('purchases.shared.forms.common.actions.editProducts') }}
                     </ButtonWithIcon>
                 </div>
             </div>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from "vue";
+import { useI18n } from "vue-i18n";
 
 interface Props {
   modelValue?: string | null;
@@ -10,9 +11,11 @@ interface Props {
   readonly?: boolean;
 }
 
+const { t } = useI18n();
+
 const props = withDefaults(defineProps<Props>(), {
   modelValue: "",
-  label: "رقم الهاتف",
+  label: "",
   placeholder: "05xxxxxxxx",
   rules: () => [],
   disabled: false,
@@ -68,15 +71,15 @@ const saudiPhoneRule = (v: string) => {
   // Check the display value for validation
   return (
     /^05\d{8}$/.test(displayValue.value) ||
-    "يجب أن يبدأ الرقم بـ 05 ويتكون من 10 أرقام"
+    t("validation.validation.saudiPhone")
   );
 };
 </script>
 
 <template>
   <div class="saudi-phone-input">
-    <label v-if="label" class="qallab-label mb-2 block text-sm font-medium text-gray-700">
-      {{ label }}
+    <label class="qallab-label mb-2 block text-sm font-medium text-gray-700">
+      {{ label || t("common.form.phoneNumber") }}
     </label>
     
     <v-text-field

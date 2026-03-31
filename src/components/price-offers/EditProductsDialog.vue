@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import type { ProductToAdd } from './AddProductDialog.vue';
+import { useI18n } from "vue-i18n";
 
 type RequestType = 'raw_materials' | 'fuel' | 'transfer_service' | 'logistics' | 'trips' | 'logistics-trips';
 
@@ -23,6 +24,7 @@ const emit = defineEmits<{
   "update:modelValue": [value: boolean];
   "productsUpdated": [products: ProductToAdd[]];
 }>();
+const { t } = useI18n();
 
 const internalOpen = computed({
   get: () => props.modelValue,
@@ -42,7 +44,7 @@ const discountTypeOptionsList = computed(() => {
   }
   return [
     { title: '%', value: 1 },
-    { title: 'ريال', value: 2 },
+    { title: t('purchases.orders.shared.labels.currencyRial'), value: 2 },
   ];
 });
 
@@ -154,13 +156,13 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
         <span class="!bg-gray-50 border border-gray-100 rounded px-1 py-0.5 text-gray-600">
           <span v-html="cubeIcon"></span>
         </span>
-        تعديل المنتجات
+        {{ t('common.productDialog.saveChanges') }}
       </div>
     </template>
 
     <div v-if="editableProducts.length === 0" class="flex flex-col items-center justify-center py-20 text-gray-500">
       <v-icon size="64" color="gray-400">mdi-package-variant-closed</v-icon>
-      <p class="mt-4 text-lg font-medium">لا توجد منتجات للتعديل</p>
+      <p class="mt-4 text-lg font-medium">{{ t('common.ui.noData') }}</p>
     </div>
 
     <div v-else class="space-y-3 max-h-[500px] overflow-auto custom-scroll">
@@ -179,7 +181,7 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
           <div>
             <PriceInput
               v-model="product.quantity"
-              placeholder="الكمية"
+              :placeholder="t('common.productDialog.quantity')"
               density="compact"
               class="min-w-[170px]"
             />
@@ -189,7 +191,7 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
             <SelectInput
               v-model="product.unit_id"
               :items="unitItemsList"
-              placeholder="الوحدة"
+              :placeholder="t('common.productDialog.unit')"
               density="compact"
               class="min-w-[170px]"
               item-title="title"
@@ -201,7 +203,7 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
             <SelectInput
               v-model="product.transport_type"
               :items="fillingsOptionsList"
-              placeholder="التعبئة"
+              :placeholder="t('purchases.requests.fuels.form.tableHeaders.packaging')"
               density="compact"
               class="min-w-[170px]"
               item-title="title"
@@ -211,10 +213,10 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
 
           <div v-if="requestType === 'fuel'">
             <SelectInput
-              :model-value="(product as any).supply_type ?? null"
-              @update:model-value="(v: any) => { (product as any).supply_type = Array.isArray(v) ? v[0] : v }"
+              :model-value="product.supply_type ?? null"
+              @update:model-value="(v) => { product.supply_type = Array.isArray(v) ? v[0] : v }"
               :items="supplyTypeOptionsList"
-              placeholder="نوع التوريد"
+              :placeholder="t('purchases.requests.fuels.form.tableHeaders.supplyType')"
               density="compact"
               class="min-w-[170px]"
               item-title="title"
@@ -225,7 +227,7 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
           <div v-if="showPricingFields">
             <PriceInput
               v-model="product.unit_price"
-              placeholder="سعر الوحدة"
+              :placeholder="t('purchases.orders.shared.tableHeaders.unitPrice')"
               density="compact"
               class="min-w-[170px]"
             />
@@ -236,11 +238,11 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
               v-model="product.discount"
               v-model:selectValue="product.discount_type"
               type="number"
-              placeholder="الخصم"
+              :placeholder="t('purchases.orders.shared.tableHeaders.discount')"
               density="compact"
               select-width="75px"
               :select-items="discountTypeOptionsList"
-              select-placeholder="اختر"
+              :select-placeholder="t('purchases.shared.forms.common.select')"
               class="min-w-[170px]"
             />
           </div>
@@ -248,7 +250,7 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
           <div v-if="!showPricingFields && (requestType === 'raw_materials' || requestType === 'logistics')">
             <PriceInput
               v-model="product.trip_no"
-              placeholder="عدد الرحلات"
+              :placeholder="t('purchases.requests.logistics.form.detailCard.tripCount')"
               density="compact"
               class="min-w-[170px]"
             />
@@ -257,7 +259,7 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
           <div v-if="requestType === 'logistics'">
             <DatePickerInput
               v-model="product.from_date"
-              placeholder="تاريخ بداية النقل"
+              :placeholder="t('purchases.orders.shared.tableHeaders.transportStartDate')"
               density="compact"
               class="min-w-[170px]"
             />
@@ -267,7 +269,7 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
             <SelectInput
               v-model="product.transport_type"
               :items="packageTypeItemsList"
-              placeholder="نوع الناقلة"
+              :placeholder="t('purchases.requests.materialProduct.form.tableHeaders.transportType')"
               density="compact"
               class="min-w-[170px]"
               item-title="title"
@@ -278,7 +280,7 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
           <div v-if="!showPricingFields && requestType === 'trips'">
             <PriceInput
               v-model="product.transport_no"
-              placeholder="عدد الناقلات"
+              :placeholder="t('purchases.requests.logistics.form.detailCard.vehicleCount')"
               density="compact"
               class="min-w-[170px]"
             />
@@ -287,7 +289,7 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
           <div v-if="requestType === 'logistics-trips'">
             <DatePickerInput
               v-model="product.trip_date"
-              placeholder="تاريخ الرحلة"
+              :placeholder="t('purchases.orders.shared.tableHeaders.tripDate')"
               density="compact"
               class="min-w-[170px]"
             />
@@ -297,7 +299,7 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
             <PriceInput
               v-model="product.trip_price"
               showRialIcon
-              placeholder="سعر الرحلة"
+              :placeholder="t('purchases.orders.shared.tableHeaders.tripPrice')"
               density="compact"
               class="min-w-[170px]"
             />
@@ -307,7 +309,7 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
             <SelectInput
               v-model="product.transport_type"
               :items="packageTypeItemsList"
-              placeholder="نوع المركبات"
+              :placeholder="t('purchases.requests.materialProduct.form.tableHeaders.vehicleTypes')"
               density="compact"
               class="min-w-[170px]"
               item-title="title"
@@ -326,7 +328,7 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
           color="primary"
           size="large"
           custom-class="px-8"
-          label="حفظ التعديلات"
+          :label="t('common.productDialog.saveChanges')"
           @click="handleSave"
         />
 
@@ -336,7 +338,7 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
           border="gray-300"
           size="large"
           custom-class="px-4"
-          label="إلغاء"
+          :label="t('common.actions.cancel')"
           @click="handleCancel"
         />
       </div>

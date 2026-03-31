@@ -70,10 +70,56 @@
     "name": "الاسم",
     "noDescription": "لا يوجد وصف",
     "choose": "اختر",
-    "settings": "الإعدادات"
+    "settings": "الإعدادات",
+    "phoneNumber": "رقم الهاتف",
+    "enterPrice": "ادخل السعر",
+    "requestCode": "كود الطلب"
+  },
+  "uploads": {
+    "attachFile": "أرفق ملف",
+    "attachImage": "أرفق صورة",
+    "attachedFile": "ملف مرفق"
+  },
+  "voiceRecorder": {
+    "title": "رسالة صوتية",
+    "hintAttachNotes": "هل تود إرفاق بعض الملاحظات",
+    "hintRecordPrompt": "قم بتسجيل رسالتك الصوتية إلى",
+    "recordingInProgress": "جاري التسجيل..."
+  },
+  "map": {
+    "selectLocationTitle": "اختر الموقع الجغرافي",
+    "loadingAddress": "جاري تحميل العنوان...",
+    "addressLabel": "العنوان",
+    "addressPlaceholder": "أدخل العنوان"
+  },
+  "statusChange": {
+    "title": "تغيير الحالة",
+    "message": "تغيير الحالة:"
+  },
+  "productDialog": {
+    "addProduct": "إضافة منتج",
+    "editProduct": "تعديل منتج",
+    "quantity": "الكمية",
+    "unit": "الوحدة",
+    "searchProducts": "ابحث في المنتجات ...",
+    "noProductsInRequest": "لا توجد منتجات في هذا الطلب",
+    "saveChanges": "حفظ التعديلات",
+    "done": "تم"
+  },
+  "trips": {
+    "tripDetails": "تفاصيل الرحلات",
+    "editTripDetail": "تعديل تفاصيل رحلة",
+    "editTripDetails": "تعديل تفاصيل الرحلات",
+    "noDetailsToEdit": "لا توجد تفاصيل للتعديل",
+    "addProductsFirst": "أضف منتجات أولاً ليتم عرض تفاصيلها هنا",
+    "transportVehicleType": "نوع مركبة النقل",
+    "price": "السعر",
+    "noAvailableProducts": "لا توجد منتجات متاحة",
+    "addTripDetails": "إضافة تفاصيل الرحلة"
   },
   "dialogs": {
     "confirmStatusChange": "تأكيد تغيير الحالة",
+    "statusChangePrompt": "هل تريد بالتأكيد تغيير الحالة ؟",
     "statusChangeMessage": "هل تريد بالتأكيد تغيير حالة '{name}' إلى '{status}'؟",
     "confirmDelete": "هل أنت متأكد من حذف",
     "deleteConfirm": {
@@ -114,7 +160,8 @@
       "loadDataFailed": "فشل تحميل البيانات",
       "loadConstantsFailed": "فشل تحميل الثوابت",
       "loadCategoriesFailed": "فشل تحميل الفئات",
-      "fetchCategoriesFailed": "فشل في جلب التصنيفات"
+      "fetchCategoriesFailed": "فشل في جلب التصنيفات",
+      "copyCodeSuccess": "تم نسخ الكود بنجاح"
     }
   }
 }

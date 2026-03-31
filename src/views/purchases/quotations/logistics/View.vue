@@ -294,6 +294,7 @@ import { useNotification } from '@/composables/useNotification'
 import { archiveIcon, fileIcon_2, homeIcon } from '@/components/icons/globalIcons'
 import { busIcon, truckIcon, packageIcon } from '@/components/icons/priceOffersIcons'
 import SarIcon from '@/components/icons/SarIcon.vue'
+const { t } = useI18n();
 const route = useRoute()
 const api = useApi()
 const { error } = useNotification()

@@ -815,7 +815,7 @@ onMounted(async () => {
 
                         <!-- Statement (Full width) -->
                         <div class="lg:col-span-2">
-                            <TextInput v-model="formData.notes" placeholder="أدخل البيان هنا" label="البيان"
+                            <TextInput v-model="formData.notes" :placeholder="t('purchases.invoices.form.placeholders.notes')" :label="t('purchases.invoices.form.labels.statement')"
                                 density="comfortable" rows="3" />
                         </div>
                     </div>

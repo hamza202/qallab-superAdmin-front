@@ -17,7 +17,7 @@
         <slot name="code">
             <div class="flex items-center lg:gap-3 gap-2" v-if="code">
                 <!-- Label -->
-                <span class="text-sm font-semibold text-white">{{ codeLabelKey ? t(codeLabelKey) : codeLabel }}</span>
+                <span class="text-sm font-semibold text-white">{{ codeLabelKey ? t(codeLabelKey) : (codeLabel || t('common.form.requestCode')) }}</span>
                 <!-- Code Badge -->
                 <div
                     class="flex items-center gap-2 px-2.5 py-1.5 bg-primary-100 border border-primary-300 rounded shadow-xs">
@@ -42,6 +42,7 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 import { fileIcon } from '@/components/icons/priceOffersIcons'
+import { toast } from 'vue3-toastify';
 const { t } = useI18n();
 
 interface Props {
@@ -61,7 +62,7 @@ const props = withDefaults(defineProps<Props>(), {
     actionLabel: undefined,
     actionIcon: undefined,
     showAction: true,
-    codeLabel: 'كود الطلب',
+    codeLabel: '',
     code: ''
 });
 
@@ -77,7 +78,7 @@ const onAction = () => {
 const copyCode = async () => {
     try {
         await navigator.clipboard.writeText(props.code || '');
-        toast.success("تم نسخ الكود بنجاح");
+        toast.success(t("common.messages.general.copyCodeSuccess"));
     } catch (err) {
         console.error("Failed to copy:", err);
         // Fallback for older browsers
@@ -87,7 +88,7 @@ const copyCode = async () => {
         textArea.select();
         document.execCommand("copy");
         document.body.removeChild(textArea);
-        toast.success("تم نسخ الكود بنجاح");
+        toast.success(t("common.messages.general.copyCodeSuccess"));
     }
 };
 
