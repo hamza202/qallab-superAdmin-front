@@ -3,6 +3,9 @@ import { computed, reactive, ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useApi } from "@/composables/useApi";
 import { useNotification } from "@/composables/useNotification";
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 import { SaveDoubleIcon, fileIcon } from "@/components/icons/globalIcons";
 import TopHeader from "@/components/price-offers/TopHeader.vue";
 import Map from "@/components/common/Map.vue";
@@ -116,7 +119,7 @@ const fetchGeoAreaData = async (geoAreaId: string) => {
         form.is_active = Boolean(geoArea.is_active);
     } catch (err: any) {
         console.error('Error fetching geographical zone details:', err);
-        apiError(err, 'فشل في تحميل بيانات المنطقة الجغرافية');
+        apiError(err, t('common.messages.general.loadDataFailed'));
         router.push('/settings/geo-areas/list');
     }
 };
@@ -196,10 +199,10 @@ const handleSave = async () => {
             formData.append('is_active', form.is_active ? '1' : '0');
 
             await api.post(`/geographical-zones/${form.id}`, formData);
-            success('تم تحديث المنطقة الجغرافية بنجاح');
+            success(t('common.messages.general.editSuccess'));
         } else {
             await api.post('/geographical-zones', payload);
-            success('تم إضافة المنطقة الجغرافية بنجاح');
+            success(t('common.messages.general.createSuccess'));
         }
 
         router.push('/settings/geo-areas/list');
@@ -213,7 +216,7 @@ const handleSave = async () => {
             });
         }
         
-        apiError(err, 'فشل في حفظ المنطقة الجغرافية');
+        apiError(err, t('common.messages.general.saveError'));
     } finally {
         saving.value = false;
     }
@@ -247,42 +250,42 @@ onMounted(async () => {
                 <v-form ref="formRef" class="space-y-6" v-model="isFormValid" @submit.prevent="handleSave">
                     <div class="flex items-center gap-2 text-primary-600">
                         <span class="w-[17px] h-[20px]" v-html="fileIcon"></span>
-                        <h2 class="text-base font-bold">البيانات الأساسية</h2>
+                        <h2 class="text-base font-bold">{{ t('pages.geoAreas.form.basicData') }}</h2>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 gap-y-8">
                         <!-- Name with Language Tabs -->
-                        <LanguageTabs :languages="availableLanguages" label="الإسم">
+                        <LanguageTabs :languages="availableLanguages" :label="t('form.fields.name.label')">
                             <template #en>
-                                <TextInput v-model="form.nameEn" placeholder="Enter name in English" :rules="[required()]"
+                                <TextInput v-model="form.nameEn" :placeholder="t('form.fields.nameEn.placeholder')" :rules="[required()]"
                                     :hide-details="true" :error-messages="formErrors['name.en']"
                                     @update:model-value="delete formErrors['name.en']" />
                             </template>
                             <template #ar>
-                                <TextInput v-model="form.nameAr" placeholder="ادخل الاسم بالعربية" :hide-details="true"
+                                <TextInput v-model="form.nameAr" :placeholder="t('form.fields.nameAr.placeholder')" :hide-details="true"
                                     :error-messages="formErrors['name.ar']" :rules="[required()]"
                                     @update:model-value="delete formErrors['name.ar']" />
                             </template>
                         </LanguageTabs>
 
                         <!-- Type -->
-                        <SelectInput v-model="form.type" clearable :items="zoneTypes" label="نوع التقسيم"
-                            placeholder="اختر نوع التقسيم" :rules="[required()]" :error-messages="formErrors['type']"
+                        <SelectInput v-model="form.type" clearable :items="zoneTypes" :label="t('pages.geoAreas.form.zoneType')"
+                            :placeholder="t('pages.geoAreas.form.selectZoneType')" :rules="[required()]" :error-messages="formErrors['type']"
                             @update:model-value="delete formErrors['type']" />
 
                         <!-- Parent Zone -->
-                        <SelectInput v-model="form.parent_id" clearable :items="parentZones" label="التقسيم الأساسي"
-                            placeholder="اختر التقسيم الأساسي" :error-messages="formErrors['parent_id']"
+                        <SelectInput v-model="form.parent_id" clearable :items="parentZones" :label="t('pages.geoAreas.form.parentZone')"
+                            :placeholder="t('pages.geoAreas.form.selectParentZone')" :error-messages="formErrors['parent_id']"
                             @update:model-value="delete formErrors['parent_id']" />
 
                         <!-- Location Picker with Map -->
                         <div class="relative">
-                            <label class="text-sm font-medium text-gray-700 mb-2 block">الموقع الجغرافي</label>
+                            <label class="text-sm font-medium text-gray-700 mb-2 block">{{ t('form.address.geoLocation.label') }}</label>
                             <div @click="openMapDialog()"
                                 class="flex items-center justify-between px-4 py-2 min-h-[48px] border rounded-lg cursor-pointer transition-colors"
                                 :class="formErrors['details_location'] ? '!border-error-500 bg-error-50' : '!border-blue-400 hover:bg-blue-100'">
                                 <span class="text-base font-medium whitespace-nowrap overflow-hidden text-ellipsis"
                                     :class="formErrors['details_location'] ? 'text-error-700' : 'text-blue-900'">
-                                    {{ form.details_location || "حدد الموقع على الخريطة" }}
+                                    {{ form.details_location || t('form.address.selectLocationOnMap.placeholder') }}
                                 </span>
                                 <div class="flex items-center gap-2">
                                     <span v-html="mapMarkerIcon"></span>
@@ -294,28 +297,28 @@ onMounted(async () => {
                         </div>
 
                         <!-- Target Latitude (Read-only, auto-filled from map) -->
-                        <TextInput v-model.number="form.target_latitude" v-if="form.target_latitude" label="خط العرض"
-                            placeholder="يتم التحديد من الخريطة" type="number" step="any" readonly
+                        <TextInput v-model.number="form.target_latitude" v-if="form.target_latitude" :label="t('form.address.latitude.label')"
+                            :placeholder="t('pages.geoAreas.form.autoFilledFromMap')" type="number" step="any" readonly
                             :error-messages="formErrors['target_latitude']"
                             @update:model-value="delete formErrors['target_latitude']" />
 
                         <!-- Target Longitude (Read-only, auto-filled from map) -->
-                        <TextInput v-model.number="form.target_longitude" v-if="form.target_latitude" label="خط الطول"
-                            placeholder="يتم التحديد من الخريطة" type="number" step="any" readonly
+                        <TextInput v-model.number="form.target_longitude" v-if="form.target_latitude" :label="t('form.address.longitude.label')"
+                            :placeholder="t('pages.geoAreas.form.autoFilledFromMap')" type="number" step="any" readonly
                             :error-messages="formErrors['target_longitude']"
                             @update:model-value="delete formErrors['target_longitude']" />
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 gap-y-8">
                         <!-- Description with Language Tabs -->
-                        <LanguageTabs :languages="availableLanguages" label="الوصف" class="md:col-span-2">
+                        <LanguageTabs :languages="availableLanguages" :label="t('form.fields.description.label')" class="md:col-span-2">
                             <template #en>
-                                <TextareaInput v-model="form.descriptionEn" placeholder="Description in English"
+                                <TextareaInput v-model="form.descriptionEn" :placeholder="t('form.fields.descriptionEnglish.placeholder')"
                                     :rows="4" :hide-details="true" :error-messages="formErrors['description.en']"
                                     @update:model-value="delete formErrors['description.en']" />
                             </template>
                             <template #ar>
-                                <TextareaInput v-model="form.descriptionAr" placeholder="الوصف بالعربية" :rows="4"
+                                <TextareaInput v-model="form.descriptionAr" :placeholder="t('form.fields.descriptionArabic.placeholder')" :rows="4"
                                     :hide-details="true" :error-messages="formErrors['description.ar']"
                                     @update:model-value="delete formErrors['description.ar']" />
                             </template>
@@ -323,14 +326,14 @@ onMounted(async () => {
 
                         <!-- Status -->
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-3">الحالة</label>
+                            <label class="block text-sm font-semibold text-gray-700 mb-3">{{ t('form.fields.status.label') }}</label>
                             <div class="flex items-center gap-3 mt-1">
                                 <v-radio-group v-model="form.is_active" inline hide-details>
                                     <v-radio :value="true" color="primary">
                                         <template #label>
                                             <span
                                                 :class="form.is_active ? 'text-primary font-semibold' : 'text-gray-600'">
-                                                فعال
+                                                {{ t('common.status.active') }}
                                             </span>
                                         </template>
                                     </v-radio>
@@ -338,7 +341,7 @@ onMounted(async () => {
                                         <template #label>
                                             <span
                                                 :class="!form.is_active ? 'text-primary font-semibold' : 'text-gray-600'">
-                                                غير فعال
+                                                {{ t('common.status.inactive') }}
                                             </span>
                                         </template>
                                     </v-radio>
@@ -349,12 +352,12 @@ onMounted(async () => {
                     <!-- Action Buttons -->
                     <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col">
                         <ButtonWithIcon variant="flat" color="primary" rounded="4" height="48" custom-class="min-w-56"
-                            :prepend-icon="SaveDoubleIcon" :label="isEditMode ? 'تحديث' : 'حفظ'" :loading="saving"
+                            :prepend-icon="SaveDoubleIcon" :label="isEditMode ? t('common.actions.edit') : t('common.actions.save')" :loading="saving"
                             :disabled="saving" @click="handleSave" />
 
                         <ButtonWithIcon prepend-icon="mdi-close" variant="flat" color="primary-50" rounded="4"
                             height="48" custom-class="font-semibold text-base text-primary-700 px-6 min-w-56"
-                            label="إغلاق" :disabled="saving" @click="handleCancel" />
+                            :label="t('common.actions.close')" :disabled="saving" @click="handleCancel" />
                     </div>
                 </v-form>
             </div>

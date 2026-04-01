@@ -6,8 +6,9 @@ import { useNotification } from "@/composables/useNotification";
 import { useI18n } from 'vue-i18n'
 import { useTableColumns } from '@/composables/useTableColumns';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog.vue';
-import StatusChangeDialog from '@/components/common/StatusChangeDialog.vue';
+import StatusChangeFeature from '@/components/common/StatusChangeFeature.vue';
 import { trash_1_icon, trash_2_icon, importIcon, columnIcon, exportIcon, plusIcon, searchIcon } from "@/components/icons/globalIcons";
+import { switcStatusIcon } from '@/components/icons/priceOffersIcons';
 import DatePickerInput from '@/components/common/forms/DatePickerInput.vue';
 
 const { t } = useI18n()
@@ -37,6 +38,7 @@ interface VoucherAction {
 
 interface Voucher {
     id: number;
+    uuid: string;
     voucher_number: string;
     client_name: string;
     voucher_type: string;
@@ -50,6 +52,7 @@ interface Voucher {
     class: 'received' | 'payment';
     actions: VoucherAction;
     status?: string | boolean;
+    status_id: number;
 }
 
 interface TableHeader {
@@ -101,8 +104,7 @@ const canCreate = ref(false);
 const canBulkDelete = ref(true);
 const loading = ref(false);
 const loadingMore = ref(false);
-const showStatusChangeDialog = ref(false);
-const statusChangeLoading = ref(false);
+const showChangeStatusDialog = ref(false);
 const itemToChangeStatus = ref<Voucher | null>(null);
 
 // Pagination
@@ -138,38 +140,9 @@ const toggleAdvancedFilters = () => {
     showAdvancedFilters.value = !showAdvancedFilters.value;
 };
 
-const handleStatusChange = (item: Voucher) => {
-    itemToChangeStatus.value = { ...item };
-    showStatusChangeDialog.value = true;
-};
-
-const confirmStatusChange = async () => {
-    if (!itemToChangeStatus.value) return;
-
-    try {
-        statusChangeLoading.value = true;
-        const currentItem = itemToChangeStatus.value;
-        const newStatus = !currentItem.status;
-
-        await api.patch(`/receipts-payments-transactions/${currentItem.id}/change-status`, { status: newStatus });
-
-        success(newStatus ? 'تم تفعيل السند بنجاح' : 'تم إيقاف السند بنجاح');
-
-        const index = tableItems.value.findIndex((voucher) => voucher.id === currentItem.id);
-        if (index !== -1) {
-            tableItems.value[index] = {
-                ...tableItems.value[index],
-                status: newStatus ? 'active' : 'inactive',
-            };
-        }
-    } catch (err: any) {
-        console.error('Error changing voucher status:', err);
-        error(err?.response?.data?.message || 'فشل تغيير حالة السند');
-    } finally {
-        statusChangeLoading.value = false;
-        showStatusChangeDialog.value = false;
-        itemToChangeStatus.value = null;
-    }
+const openChangeStatusDialog = (item: Voucher | Record<string, unknown>) => {
+    itemToChangeStatus.value = item as Voucher;
+    showChangeStatusDialog.value = true;
 };
 
 // Delete confirmation
@@ -488,11 +461,13 @@ onBeforeUnmount(() => {
                 <DataTable :headers="tableHeaders" :items="tableItems" :loading="loading" :show-checkbox="canBulkDelete"
                     show-actions @edit="handleEdit" @delete="confirmDelete" @view="handleView"
                     @select="handleSelectVoucher" @selectAll="handleSelectAllVouchers">
-                    <template #item.status="{ item }">
-                        <v-switch :model-value="item.status" hide-details inset density="compact" color="primary"
-                            class="small-switch" @update:model-value="() => handleStatusChange(item)"
-                            v-if="item.actions.can_change_status" />
-                        <span v-else class="text-sm text-gray-600">--</span>
+                    <template #item.actions="{ item }">
+                        <div class="flex items-center gap-1">
+                            <v-btn v-if="item.actions?.can_change_status" icon variant="text" size="small" color="warning-600"
+                                @click="openChangeStatusDialog(item)">
+                                <span v-html="switcStatusIcon"></span>
+                            </v-btn>
+                        </div>
                     </template>
                 </DataTable>
 
@@ -507,9 +482,14 @@ onBeforeUnmount(() => {
         <DeleteConfirmDialog v-model="showBulkDeleteDialog" :loading="deleteLoading" title="حذف السندات"
             :message="`هل أنت متأكد من حذف ${selectedVouchers.length} سند؟`" @confirm="confirmBulkDelete" />
 
-        <StatusChangeDialog v-model="showStatusChangeDialog" :loading="statusChangeLoading"
-            :item-name="itemToChangeStatus?.voucher_number" :current-status="itemToChangeStatus?.status || false"
-            @confirm="confirmStatusChange" />
+        <StatusChangeFeature
+            v-model="showChangeStatusDialog"
+            :item="itemToChangeStatus"
+            :change-status-url="`/receipts-payments-transactions/${itemToChangeStatus?.id}/change-status`"
+            title="تغيير الحالة"
+            message="تغيير الحالة:"
+            @success="fetchVouchers"
+        />
     </default-layout>
 </template>
 

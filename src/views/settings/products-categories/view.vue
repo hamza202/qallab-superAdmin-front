@@ -9,9 +9,9 @@
             <!-- Error State -->
             <div v-else-if="error" class="flex flex-col items-center justify-center min-h-[400px] px-6">
                 <v-icon size="64" class="text-red-500 mb-4">mdi-alert-circle-outline</v-icon>
-                <h3 class="text-xl font-bold text-gray-900 mb-2">حدث خطأ في تحميل البيانات</h3>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">{{ t('common.ui.dataLoadError') }}</h3>
                 <p class="text-gray-600 mb-4">{{ error }}</p>
-                <ButtonWithIcon color="primary" label="إعادة المحاولة" @click="fetchCategory" />
+                <ButtonWithIcon color="primary" :label="t('common.ui.retry')" @click="fetchCategory" />
             </div>
 
             <!-- Content -->
@@ -23,11 +23,11 @@
                     </router-link>
                     <span class="text-lg text-gray-300">/</span>
                     <router-link to="/settings" class="text-gray-600 hover:text-primary-600">
-                        الإعدادات
+                        {{ t('common.form.settings') }}
                     </router-link>
                     <span class="text-lg text-gray-300">/</span>
                     <router-link to="/settings/products-categories" class="text-gray-600 hover:text-primary-600">
-                        تصنيفات المنتجات
+                        {{ t('pages.ProductsCategories.title') }}
                     </router-link>
                     <span class="text-lg text-gray-300">/</span>
                     <span class="text-primary-700 font-medium bg-primary-50 px-2 py-1 rounded-md">{{ category.name_translations?.ar || category.name }}</span>
@@ -42,7 +42,7 @@
                             </div>
                             <div>
                                 <h1 class="text-lg font-bold text-gray-900 mb-1">{{ category.name_translations?.ar || category.name }}</h1>
-                                <p class="text-sm text-gray-600">{{ category.name_translations?.en || 'تصنيف رئيسي من قائمة تصنيفات المنتجات' }}</p>
+                                <p class="text-sm text-gray-600">{{ category.name_translations?.en || category.name }}</p>
                             </div>
                         </div>
                     </div>
@@ -50,41 +50,41 @@
 
                 <!-- General Information Section -->
                 <div class="p-6 border-b border-gray-200">
-                    <h2 class="text-xl font-bold text-primary-900 mb-6">المعلومات العامة للتصنيف</h2>
+                    <h2 class="text-xl font-bold text-primary-900 mb-6">{{ t('pages.ProductsCategories.view.generalInfo') }}</h2>
 
                     <div class="flex flex-wrap gap-4">
                         <div class="info-item-bordered flex-1 px-6 py-4">
-                            <label class="font-semibold text-sm text-gray-500 mb-2 block">الاسم بالعربية</label>
+                            <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('form.fields.nameAr.label') }}</label>
                             <p class="text-base font-semibold text-gray-900">{{ category.name_translations?.ar || category.name || '-' }}</p>
                         </div>
                         <v-divider vertical class="my-6"></v-divider>
                         <div class="info-item-bordered flex-1 px-6 py-4">
-                            <label class="font-semibold text-sm text-gray-500 mb-2 block">الاسم بالانجليزية</label>
+                            <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('form.fields.nameEn.label') }}</label>
                             <p class="text-base font-semibold text-gray-900">{{ category.name_translations?.en || '-' }}</p>
                         </div>
                         <v-divider vertical class="my-6"></v-divider>
                         <div class="info-item-bordered flex-1 px-6 py-4">
-                            <label class="font-semibold text-sm text-gray-500 mb-2 block">التصنيف الرئيسي</label>
+                            <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('form.product.parentCategory.label') }}</label>
                             <p class="text-base font-semibold text-gray-900">{{ category.parent_name || '-' }}</p>
                         </div>
                         <v-divider vertical class="my-6"></v-divider>
                         <div class="info-item-bordered flex-1 px-6 py-4">
-                            <label class="font-semibold text-sm text-gray-500 mb-2 block">الحالة</label>
+                            <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('form.fields.status.label') }}</label>
                             <p class="text-base font-semibold text-gray-900">
                                 <span :class="category.is_active ? 'text-green-600' : 'text-red-600'">
-                                    {{ category.is_active ? 'فعال' : 'غير فعال' }}
+                                    {{ category.is_active ? t('common.status.active') : t('common.status.inactive') }}
                                 </span>
                             </p>
                         </div>
                     </div>
                     <div class="flex gap-4 mt-4">
                         <div class="info-item-bordered flex-1 px-6 py-4">
-                            <label class="font-semibold text-sm text-gray-500 mb-2 block">الوصف بالانجليزي</label>
+                            <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('form.fields.descriptionEnglish.label') }}</label>
                             <p class="text-sm text-gray-700 leading-relaxed" v-html="category.description_translations?.en || category.description || '-'"></p>
                         </div>
                         <v-divider vertical class="my-6"></v-divider>
                         <div class="info-item-bordered flex-1 px-6 py-4">
-                            <label class="font-semibold text-sm text-gray-500 mb-2 block">الوصف عربي</label>
+                            <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('form.fields.descriptionArabic.label') }}</label>
                             <p class="text-sm text-gray-700 leading-relaxed" v-html="category.description_translations?.ar || category.description || '-'"></p>
                         </div>
                     </div>
@@ -92,45 +92,45 @@
 
                 <!-- Tax Rules Section -->
                 <div class="p-6 border-b border-gray-200">
-                    <h2 class="text-xl font-bold text-primary-900 mb-6">الضرائب المضافة</h2>
+                    <h2 class="text-xl font-bold text-primary-900 mb-6">{{ t('pages.ProductsCategories.view.addedTaxes') }}</h2>
                     
                     <div v-if="category.taxes && category.taxes.length > 0" class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <!-- Tax 1 -->
                         <div v-for="(tax, index) in category.taxes" :key="tax.id" class="border border-gray-200 rounded-lg p-4">
-                            <h3 class="text-lg font-bold text-primary-700 mb-4">ضريبة {{ index + 1 }}</h3>
+                            <h3 class="text-lg font-bold text-primary-700 mb-4">{{ t('form.tax.tax.label') }} {{ index + 1 }}</h3>
                             <div class="space-y-3">
                                 <div class="flex justify-between items-center">
-                                    <span class="text-sm text-gray-600">الضريبة</span>
-                                    <span class="text-base font-semibold text-gray-900">{{ tax.tax_name || 'ضريبة القيمة المضافة' }}</span>
+                                    <span class="text-sm text-gray-600">{{ t('form.tax.taxName.label') }}</span>
+                                    <span class="text-base font-semibold text-gray-900">{{ tax.tax_name || '-' }}</span>
                                 </div>
                                 <div class="flex justify-between items-center">
-                                    <span class="text-sm text-gray-600">نسبة الضريبة</span>
+                                    <span class="text-sm text-gray-600">{{ t('form.tax.taxPercentage.label') }}</span>
                                     <span class="text-base font-semibold text-gray-900">{{ tax.percentage || '25' }} %</span>
                                 </div>
                                 <div class="flex justify-between items-center">
-                                    <span class="text-sm text-gray-600">اقل قيمة</span>
+                                    <span class="text-sm text-gray-600">{{ t('form.tax.minValue.label') }}</span>
                                     <span class="text-base font-semibold text-gray-900">{{ tax.minimum || '0' }}</span>
                                 </div>
                                 <div class="flex justify-between items-center">
-                                    <span class="text-sm text-gray-600">الاولوية</span>
+                                    <span class="text-sm text-gray-600">{{ t('form.tax.priority.label') }}</span>
                                     <span class="text-base font-semibold" :class="tax.is_active ? 'text-green-600' : 'text-gray-400'">
-                                        {{ tax.priority_label || (tax.is_active ? 'عالية' : 'غير فعال') }}
+                                        {{ tax.priority_label || (tax.is_active ? t('pages.ProductsCategories.view.high') : t('common.status.inactive')) }}
                                     </span>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div v-else class="text-center py-8 text-gray-500">
-                        لا توجد ضرائب مضافة لهذا التصنيف
+                        {{ t('form.tax.noTaxesAdded.label') }}
                     </div>
                 </div>
 
                 <!-- Attachments Section -->
                 <div class="p-6">
-                    <h2 class="text-xl font-bold text-primary-900 mb-6">المرفقات</h2>
+                    <h2 class="text-xl font-bold text-primary-900 mb-6">{{ t('pages.ProductsCategories.view.attachments') }}</h2>
                     
                     <div v-if="category.attachments && category.attachments.length > 0" class="space-y-3">
-                        <p class="text-sm text-gray-600 mb-4">مستندات مرفقة</p>
+                        <p class="text-sm text-gray-600 mb-4">{{ t('pages.ProductsCategories.view.attachedDocuments') }}</p>
                         <div v-for="attachment in category.attachments" :key="attachment.id" 
                              class="border border-gray-200 rounded-lg p-4 flex items-center justify-between hover:bg-gray-50 transition-colors">
                             <div class="flex items-center gap-3">
@@ -138,8 +138,8 @@
                                     <v-icon color="primary">mdi-file-document-outline</v-icon>
                                 </div>
                                 <div>
-                                    <p class="text-sm font-semibold text-gray-900">{{ attachment.name || 'منتج المشروع' }}</p>
-                                    <p class="text-xs text-gray-500">{{ attachment.size || '200 KB' }} — {{ attachment.uploaded ? '100% uploaded' : 'جاري الرفع' }}</p>
+                                    <p class="text-sm font-semibold text-gray-900">{{ attachment.name || '-' }}</p>
+                                    <p class="text-xs text-gray-500">{{ attachment.size || '200 KB' }} — {{ attachment.uploaded ? `100% ${t('pages.ProductsCategories.view.uploaded')}` : t('pages.ProductsCategories.view.uploading') }}</p>
                                 </div>
                             </div>
                             <div class="flex items-center gap-2">
@@ -152,7 +152,7 @@
                     </div>
                     <div v-else class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
                         <v-icon size="48" class="text-gray-400 mb-2">mdi-file-document-outline</v-icon>
-                        <p class="text-gray-500">لا توجد مرفقات</p>
+                        <p class="text-gray-500">{{ t('pages.ProductsCategories.view.noAttachments') }}</p>
                     </div>
                 </div>
             </div>
@@ -164,6 +164,9 @@
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useApi } from '@/composables/useApi'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 interface CategoryData {
     id: number
@@ -246,10 +249,10 @@ const fetchCategory = async () => {
         if (response.status && response.data) {
             category.value = response.data
         } else {
-            throw new Error(response.message || 'فشل في تحميل بيانات التصنيف')
+            throw new Error(response.message || t('common.messages.general.loadDataFailed'))
         }
     } catch (err: any) {
-        const errorMessage = err?.response?.data?.message || 'Failed to fetch category details'
+        const errorMessage = err?.response?.data?.message || t('common.messages.general.loadDataFailed')
         toast.error(errorMessage)
         error.value = errorMessage
     } finally {

@@ -40,9 +40,9 @@ const form = reactive<SampleTypeForm>({
 });
 
 // === Computed ===
-const pageTitle = computed(() => isEditMode.value ? 'تعديل نوع العينة' : 'نوع عينة جديد');
-const pageDescription = computed(() => isEditMode.value ? 'تعديل بيانات نوع العينة' : 'إضافة نوع عينة جديد');
-const formTitle = computed(() => isEditMode.value ? 'تعديل نوع العينة' : 'نوع عينة جديد');
+const pageTitle = computed(() => isEditMode.value ? t('pages.sampleTypes.form.edit') : t('pages.sampleTypes.form.add'));
+const pageDescription = computed(() => isEditMode.value ? t('pages.sampleTypes.form.editDescription') : t('pages.sampleTypes.form.addDescription'));
+const formTitle = computed(() => isEditMode.value ? t('pages.sampleTypes.form.edit') : t('pages.sampleTypes.form.add'));
 
 // === Icons ===
 const sampleTypeIcon = `<svg width="52" height="52" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -71,7 +71,7 @@ const fetchSampleType = async (id: number) => {
     form.status = data.is_active;
   } catch (err: any) {
     console.error('Error fetching sample type:', err);
-    error(err?.response?.data?.message || 'حدث خطأ أثناء جلب البيانات');
+    error(err?.response?.data?.message || t('common.messages.general.loadDataFailed'));
     router.push('/settings/sample-types/list');
   } finally {
     loading.value = false;
@@ -101,16 +101,16 @@ const handleSave = async () => {
 
     if (isEditMode.value && sampleTypeId.value) {
       await sampleTypeService.update(sampleTypeId.value, formData);
-      success('تم تحديث نوع العينة بنجاح');
+      success(t('common.messages.success.updated'));
     } else {
       await sampleTypeService.create(formData);
-      success('تم إنشاء نوع العينة بنجاح');
+      success(t('common.messages.success.created'));
     }
 
     router.push("/settings/sample-types/list");
   } catch (err: any) {
     console.error('Error saving sample type:', err);
-    error(err?.response?.data?.message || 'حدث خطأ أثناء الحفظ');
+    error(err?.response?.data?.message || t('common.messages.error.saveFailed'));
   } finally {
     saveLoading.value = false;
   }
@@ -152,41 +152,41 @@ onMounted(() => {
 
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div class="md:col-span-2">
-              <LanguageTabs :languages="availableLanguages" label="الإسم">
+              <LanguageTabs :languages="availableLanguages" :label="t('common.form.name')">
                 <template #en>
                   <TextInput
                     v-model="form.nameEn"
-                    placeholder="Enter name"
+                    :placeholder="t('form.fields.nameEn.placeholder')"
                     :hide-details="false"
-                    :rules="[(v: string) => !!v || 'Name is required']"
+                    :rules="[required()]"
                   />
                 </template>
                 <template #ar>
                   <TextInput
                     v-model="form.nameAr"
-                    placeholder="ادخل الاسم"
+                    :placeholder="t('form.fields.nameAr.placeholder')"
                     :hide-details="false"
-                    :rules="[(v: string) => !!v || 'الاسم مطلوب']"
+                    :rules="[required()]"
                   />
                 </template>
               </LanguageTabs>
             </div>
 
             <div>
-              <label class="block text-sm font-semibold text-gray-700 mb-3">الحالة</label>
+              <label class="block text-sm font-semibold text-gray-700 mb-3">{{ t('form.fields.status.label') }}</label>
               <div class="flex items-center gap-3 mt-1">
                 <v-radio-group v-model="form.status" inline hide-details>
                   <v-radio :value="true" color="primary">
                     <template #label>
                       <span :class="form.status ? 'text-primary font-semibold' : 'text-gray-600'">
-                        فعال
+                        {{ t('common.status.active') }}
                       </span>
                     </template>
                   </v-radio>
                   <v-radio :value="false" color="primary">
                     <template #label>
                       <span :class="!form.status ? 'text-primary font-semibold' : 'text-gray-600'">
-                        غير فعال
+                        {{ t('common.status.inactive') }}
                       </span>
                     </template>
                   </v-radio>
@@ -195,18 +195,18 @@ onMounted(() => {
             </div>
 
             <div class="md:col-span-3">
-              <LanguageTabs :languages="availableLanguages" label="الوصف">
+              <LanguageTabs :languages="availableLanguages" :label="t('form.fields.description.label')">
                 <template #en>
                   <TextareaInput
                     v-model="form.descriptionEn"
-                    placeholder="Enter description"
+                    :placeholder="t('form.fields.descriptionEnglish.placeholder')"
                     :hide-details="true"
                   />
                 </template>
                 <template #ar>
                   <TextareaInput
                     v-model="form.descriptionAr"
-                    placeholder="ادخل الوصف"
+                    :placeholder="t('form.fields.descriptionArabic.placeholder')"
                     :hide-details="true"
                   />
                 </template>
@@ -223,7 +223,7 @@ onMounted(() => {
               height="48"
               custom-class="min-w-56" 
               :prepend-icon="saveIcon" 
-              :label="isEditMode ? 'تحديث' : 'حفظ'" 
+              :label="isEditMode ? t('common.actions.update') : t('common.actions.save')" 
               :loading="saveLoading"
               :disabled="saveLoading"
               @click="handleSave" 
@@ -236,7 +236,7 @@ onMounted(() => {
               rounded="4" 
               height="48"
               custom-class="font-semibold text-base text-primary-700 px-6 min-w-56"
-              label="إغلاق" 
+              :label="t('common.actions.close')" 
               :disabled="saveLoading"
               @click="handleCancel" 
             />

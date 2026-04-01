@@ -263,7 +263,7 @@ const plusIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
       <div class="flex justify-end pb-2">
         <ButtonWithIcon variant="outlined" height="40"
           custom-class="font-semibold text-base border-gray-300 bg-primary-50 !text-primary-900"
-          :prepend-icon="exportIcon" :label="t('common.export')" />
+          :prepend-icon="exportIcon" :label="t('common.actions.export')" />
       </div>
 
       <div class="bg-gray-50 rounded-md -mx-6">
@@ -284,7 +284,7 @@ const plusIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
                   height="40"
                   custom-class="font-semibold text-base border-gray-400"
                   :prepend-icon="columnIcon" 
-                  :label="t('common.columns')" 
+                  :label="t('common.table.columns')" 
                   append-icon="mdi-chevron-down" 
                 />
               </template>
@@ -309,7 +309,7 @@ const plusIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
             
             <ButtonWithIcon variant="flat" color="primary-500" height="40" rounded="4"
               custom-class="px-7 font-semibold text-base text-white border !border-primary-200"
-              :prepend-icon="searchIcon" :label="t('common.advancedSearch')" @click="toggleAdvancedFilters" />
+              :prepend-icon="searchIcon" :label="t('common.table.advancedSearch')" @click="toggleAdvancedFilters" />
 
             <ButtonWithIcon 
               v-if="canCreate"
@@ -319,7 +319,7 @@ const plusIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
               rounded="4"
               custom-class="px-7 font-semibold text-base !text-primary-800 border !border-primary-200"
               :prepend-icon="plusIcon" 
-              :label="t('common.add')" 
+              :label="t('common.form.addNew')" 
               @click="handleCreate" 
             />
           </div>
@@ -337,19 +337,19 @@ const plusIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
                 density="comfortable"
                 variant="outlined"
                 hide-details
-                :placeholder="t('common.name')"
+                :placeholder="t('common.form.name')"
                 class="w-full sm:w-60 bg-white"
               />
               <SelectInput
                 v-model="filterStatus"
                 :items="[
-                  { title: t('common.active'), value: 1 },
-                  { title: t('common.inactive'), value: 0 }
+                  { title: t('common.status.active'), value: 1 },
+                  { title: t('common.status.inactive'), value: 0 }
                 ]"
                 density="comfortable"
                 variant="outlined"
                 hide-details
-                :placeholder="t('common.status')"
+                :placeholder="t('common.form.status')"
                 class="w-full sm:w-40 bg-white"
               />
             </div>
@@ -361,7 +361,7 @@ const plusIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
                 height="40"
                 custom-class="px-5 font-semibold !text-white text-sm sm:text-base"
                 :prepend-icon="searchIcon" 
-                :label="t('common.search')"
+                :label="t('common.actions.search')"
                 @click="applyFilters" 
               />
               <ButtonWithIcon 
@@ -372,7 +372,7 @@ const plusIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
                 border="sm"
                 custom-class="px-5 font-semibold text-sm sm:text-base !text-primary-800 !border-primary-200"
                 prepend-icon="mdi-refresh" 
-                :label="t('common.reset')"
+                :label="t('common.actions.reset')"
                 @click="resetFilters" 
               />
             </div>

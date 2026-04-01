@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue"
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useApi } from '@/composables/useApi'
+
+const { t } = useI18n()
 
 interface TableItem {
   id: string | number
@@ -147,6 +150,8 @@ const allRows = ref<PriceListRow[]>([])
 const modifiedItemIds = ref<Set<number>>(new Set())
 const selectedRows = ref<number[]>([])
 
+const asRow = (item: unknown) => item as PriceListRow
+
 // Filtered rows based on search and category
 const rows = computed(() => {
   let filtered = allRows.value
@@ -175,7 +180,7 @@ const fetchCategories = async () => {
     categories.value = response.data
   } catch (err: any) {
     console.error('Error fetching categories:', err)
-    toast.error(err?.response?.data?.message || 'فشل في جلب التصنيفات')
+    toast.error(err?.response?.data?.message || t('pages.ProductsBuildingMaterialPriceList.form.messages.fetchCategoriesError'))
   }
 }
 
@@ -224,7 +229,7 @@ const fetchPriceListItems = async (priceListId: number) => {
     }
   } catch (err: any) {
     console.error('Error fetching price list items:', err)
-    toast.error(err?.response?.data?.message || 'فشل في جلب عناصر قائمة الأسعار')
+    toast.error(err?.response?.data?.message || t('pages.ProductsBuildingMaterialPriceList.form.messages.fetchItemsError'))
   } finally {
     loading.value = false
   }
@@ -233,8 +238,8 @@ const fetchPriceListItems = async (priceListId: number) => {
 
 const tableHeaders = [
   { key: "rowNumber", title: "#", width: "30px" },
-  { key: "itemId", title: "المنتج", width: "420px" },
-  { key: "salePrice", title: "سعر البيع", width: "420px" },
+  { key: "itemId", title: t('pages.ProductsBuildingMaterialPriceList.form.table.product'), width: "420px" },
+  { key: "salePrice", title: t('pages.ProductsBuildingMaterialPriceList.form.table.salePrice'), width: "420px" },
   // { key: "actions", title: "الإجراءات", width: "100px" },
 ]
 
@@ -244,13 +249,13 @@ const bulkEditAmount = ref<number | null>(10)
 const applyBulkEdit = (direction: BulkEditDirection) => {
   // Check if any rows are selected
   if (selectedRows.value.length === 0) {
-    toast.error('الرجاء تحديد منتجات لتطبيق التعديل')
+    toast.error(t('pages.ProductsBuildingMaterialPriceList.form.messages.selectProductsFirst'))
     return
   }
 
   const amount = Math.abs(Number(bulkEditAmount.value))
   if (!Number.isFinite(amount) || amount === 0) {
-    toast.error('الرجاء إدخال قيمة صحيحة')
+    toast.error(t('pages.ProductsBuildingMaterialPriceList.form.messages.enterValidValue'))
     return
   }
 
@@ -281,7 +286,11 @@ const applyBulkEdit = (direction: BulkEditDirection) => {
     }
   })
 
-  toast.success(`تم تطبيق التعديل على ${selectedRows.value.length} منتج`)
+  toast.success(
+    t('pages.ProductsBuildingMaterialPriceList.form.messages.bulkEditApplied', {
+      count: selectedRows.value.length,
+    })
+  )
 }
 
 // Category filter items
@@ -349,14 +358,14 @@ const handleSave = async () => {
     // Send ALL items (API will determine what to add/update/remove)
     const response = await bulkSyncItems(allRows.value)
     const data = response.data
-    toast.success(data.message || 'تم حفظ القائمة بنجاح')
+    toast.success(data.message || t('pages.ProductsBuildingMaterialPriceList.form.messages.saveSuccess'))
 
     // Refresh data
     if (priceListId.value)
       await fetchPriceListItems(priceListId.value)
   } catch (err: any) {
     console.error('Error saving price list:', err)
-    toast.error(err?.response?.data?.message || 'فشل في حفظ قائمة الأسعار')
+    toast.error(err?.response?.data?.message || t('pages.ProductsBuildingMaterialPriceList.form.messages.saveError'))
   } finally {
     saving.value = false
   }
@@ -393,13 +402,19 @@ onMounted(async () => {
         <div class="pb-2">
           <div class="px-4 py-3">
             <div class="flex flex-col md:flex-row gap-5 md:items-center">
-              <div class="text-lg font-bold text-gray-900">تعديل الكل</div>
+              <div class="text-lg font-bold text-gray-900">
+                {{ t('pages.ProductsBuildingMaterialPriceList.form.sections.bulkEdit') }}
+              </div>
 
               <div class="flex flex-wrap items-center gap-3">
                 <div class="p-1 bg-gray-50 border border-gray-100 rounded-lg">
                   <v-btn-toggle v-model="bulkEditMode" mandatory density="comfortable" color="primary" class="gap-2">
-                    <v-btn value="percentage" variant="flat" class="px-6">نسبة</v-btn>
-                    <v-btn value="value" variant="flat" class="px-6">قيمة</v-btn>
+                    <v-btn value="percentage" variant="flat" class="px-6">
+                      {{ t('pages.ProductsBuildingMaterialPriceList.form.bulkEdit.modes.percentage') }}
+                    </v-btn>
+                    <v-btn value="value" variant="flat" class="px-6">
+                      {{ t('pages.ProductsBuildingMaterialPriceList.form.bulkEdit.modes.value') }}
+                    </v-btn>
                   </v-btn-toggle>
                 </div>
 
@@ -414,7 +429,9 @@ onMounted(async () => {
                         <v-icon icon="mdi-plus" size="13" />
                       </span>
                     </template>
-                    <span class="font-semibold text-white">زيادة</span>
+                    <span class="font-semibold text-white">
+                      {{ t('pages.ProductsBuildingMaterialPriceList.form.bulkEdit.directions.increase') }}
+                    </span>
                   </v-btn>
                   <v-btn variant="flat" color="primary-500" class="px-4" height="40" @click="applyBulkEdit('decrease')">
                     <template #prepend>
@@ -422,7 +439,9 @@ onMounted(async () => {
                         <v-icon icon="mdi-minus" size="13" />
                       </span>
                     </template>
-                    <span class="font-semibold text-white">نقصان</span>
+                    <span class="font-semibold text-white">
+                      {{ t('pages.ProductsBuildingMaterialPriceList.form.bulkEdit.directions.decrease') }}
+                    </span>
                   </v-btn>
                 </div>
               </div>
@@ -431,14 +450,17 @@ onMounted(async () => {
         </div>
 
         <div class="flex gap-4 justify-between flex-wrap items-center border-y border-y-gray-200 py-2 px-4 sm:!px-6">
-          <div class="text-gray-900 text-lg font-bold">قائمة اسعار منتجات مواد البناء</div>
+          <div class="text-gray-900 text-lg font-bold">
+            {{ t('pages.ProductsBuildingMaterialPriceList.form.sections.pageTitle') }}
+          </div>
 
           <div class="flex items-center gap-3">
             <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4" border="sm" @click="refreshData"
-              custom-class="px-5 font-semibold text-sm sm:text-base !text-primary-800 !border-primary-200" label="تحديث"
+              custom-class="px-5 font-semibold text-sm sm:text-base !text-primary-800 !border-primary-200"
+              :label="t('common.actions.refresh')"
               prepend-icon="mdi-refresh" />
 
-            <TextInput v-model="productName" placeholder="ابحث بالكود" :hide-details="true"
+            <TextInput v-model="productName" :placeholder="t('pages.ProductsBuildingMaterialPriceList.form.placeholders.searchByCode')" :hide-details="true"
               :input-props="{ class: 'bg-white min-w-60' }">
               <template #prepend-inner>
                 <span v-html="searchIcon"></span>
@@ -451,7 +473,7 @@ onMounted(async () => {
             <div class="flex flex-wrap gap-3 flex-1">
               <div class="min-w-[200px]">
                 <SelectInput v-model="selectedCategory" :items="categoryItems" clearable
-                  placeholder="جلب المنتجات عن طريق تصنيف محدد" :hide-details="true"
+                  :placeholder="t('pages.ProductsBuildingMaterialPriceList.form.placeholders.filterByCategory')" :hide-details="true"
                   :input-props="{ class: 'bg-white min-w-[200px] md:min-w-[300px]' }" />
               </div>
             </div>
@@ -463,33 +485,36 @@ onMounted(async () => {
         </div>
         <EditableDataTable :headers="tableHeaders" :items="rows" :loading="loading" show-checkbox :show-actions="false"
           @select="handleSelectRow" @select-all="handleSelectAll">
+          <!-- eslint-disable-next-line vue/valid-v-slot -->
           <template #item.rowNumber="{ rowIndex }">
             <span class="text-sm text-gray-600">{{ rowIndex + 1 }}</span>
           </template>
 
+          <!-- eslint-disable-next-line vue/valid-v-slot -->
           <template #item.itemId="{ item }">
             <div class="flex items-center gap-3">
               <!-- <v-avatar v-if="(item as PriceListRow).image" size="40" rounded>
                 <v-img :src="(item as PriceListRow).image || undefined" :alt="(item as PriceListRow).name" />
               </v-avatar> -->
               <div>
-                <div class="text-sm font-semibold text-gray-900">{{ (item as PriceListRow).name }}</div>
+                <div class="text-sm font-semibold text-gray-900">{{ asRow(item).name }}</div>
               </div>
             </div>
           </template>
 
+          <!-- eslint-disable-next-line vue/valid-v-slot -->
           <template #item.salePrice="{ item }">
             <div class="flex items-center gap-2 py-2">
               <div class="w-[160px]">
-                <PriceInput v-model="(item as PriceListRow).priceTon" currency="طن" keep-currency-visible
+                <PriceInput v-model="asRow(item).priceTon" currency="طن" keep-currency-visible
                   placeholder="0" :input-props="{ class: 'bg-white' }" :rules="[numeric(), positive()]" />
               </div>
               <div class="w-[160px]">
-                <PriceInput v-model="(item as PriceListRow).priceM3" currency="م^3" keep-currency-visible
+                <PriceInput v-model="asRow(item).priceM3" currency="م^3" keep-currency-visible
                   placeholder="0" :input-props="{ class: 'bg-white' }" :rules="[numeric(), positive()]" />
               </div>
               <div class="w-[160px]">
-                <PriceInput v-model="(item as PriceListRow).priceRd" currency="رد" keep-currency-visible placeholder="0"
+                <PriceInput v-model="asRow(item).priceRd" currency="رد" keep-currency-visible placeholder="0"
                  :input-props="{ class: 'bg-white' }" :rules="[numeric(), positive()]" />
               </div>
             </div>
@@ -502,11 +527,11 @@ onMounted(async () => {
 
         <div class="flex flex-col sm:flex-row gap-3 sm:justify-center mt-6">
           <ButtonWithIcon variant="flat" rounded="4" color="primary" height="44"
-            custom-class="font-semibold text-base sm:min-w-[200px]" :prepend-icon="saveIcon" label="حفظ"
+            custom-class="font-semibold text-base sm:min-w-[200px]" :prepend-icon="saveIcon" :label="t('common.actions.save')"
             @click="handleSave" :loading="saving" :disabled="loading" v-if="canSyncItems"/>
 
           <ButtonWithIcon variant="flat" rounded="4" color="primary-50" height="44"
-            custom-class="font-semibold text-base text-primary-700 sm:min-w-[200px]" label="إغلاق" @click="handleClose"
+            custom-class="font-semibold text-base text-primary-700 sm:min-w-[200px]" :label="t('common.actions.close')" @click="handleClose"
             :disabled="saving">
             <template #prepend>
               <v-icon>mdi-close</v-icon>

@@ -302,8 +302,8 @@ const formIcon = `<svg width="52" height="52" viewBox="0 0 52 52" fill="none" xm
                             <table class="w-full border-collapse">
                                 <thead>
                                     <tr class="bg-gray-50">
-                                        <th class="border border-gray-300 px-4 py-3 text-right text-sm font-semibold">مجموعة الاختبارات</th>
-                                        <th class="border border-gray-300 px-4 py-3 text-right text-sm font-semibold">الاختبار</th>
+                                        <th class="border border-gray-300 px-4 py-3 text-start text-sm font-semibold">مجموعة الاختبارات</th>
+                                        <th class="border border-gray-300 px-4 py-3 text-start text-sm font-semibold">الاختبار</th>
                                         <th class="border border-gray-300 px-4 py-3 text-center text-sm font-semibold">عدد الاختبارات</th>
                                         <th class="border border-gray-300 px-4 py-3 text-center text-sm font-semibold">عدد العينات</th>
                                         <th class="border border-gray-300 px-4 py-3 text-center text-sm font-semibold">الوحدة</th>

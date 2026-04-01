@@ -1,0 +1,759 @@
+{
+  "purchases": {
+    "shared": {
+      "actions": {
+        "search": "Search"
+      },
+      "messages": {
+        "columnsUpdateError": "Failed to update columns",
+        "bulkDeleteError": "Bulk delete failed",
+        "loadingMore": "Loading more..."
+      },
+      "statusChange": {
+        "title": "Change Status",
+        "message": "Change Status:"
+      },
+      "lists": {
+        "quotation": {
+          "messages": {
+            "fetchError": "Failed to load quotations list",
+            "deleteSuccess": "Quotation deleted successfully",
+            "deleteError": "Failed to delete quotation",
+            "bulkDeleteSuccess": "{count} quotations deleted successfully"
+          },
+          "dialogs": {
+            "delete": {
+              "title": "Delete Quotation",
+              "message": "Are you sure you want to delete this quotation?"
+            },
+            "bulkDelete": {
+              "title": "Delete Quotations",
+              "message": "Are you sure you want to delete {count} quotations?"
+            }
+          }
+        },
+        "receivingDoc": {
+          "buttons": {
+            "add": "Add Receipt Document"
+          },
+          "messages": {
+            "fetchError": "Failed to load receipt documents list",
+            "deleteSuccess": "Receipt document deleted successfully",
+            "deleteError": "Failed to delete receipt document",
+            "bulkDeleteSuccess": "{count} receipt documents deleted successfully"
+          },
+          "dialogs": {
+            "bulkDelete": {
+              "title": "Delete Receipt Documents",
+              "message": "Are you sure you want to delete {count} receipt documents?"
+            }
+          }
+        },
+        "purchaseRequest": {
+          "buttons": {
+            "add": "Add Request"
+          },
+          "messages": {
+            "fetchError": "Failed to load requests list",
+            "deleteSuccess": "Request deleted successfully",
+            "deleteError": "Failed to delete request",
+            "bulkDeleteSuccess": "{count} requests deleted successfully"
+          },
+          "dialogs": {
+            "deleteBulk": {
+              "title": "Delete Requests",
+              "message": "Are you sure you want to delete {count} requests?"
+            },
+            "deleteSingle": {
+              "title": "Delete Request",
+              "message": "Are you sure you want to delete this request?"
+            }
+          }
+        },
+        "purchaseOrder": {
+          "buttons": {
+            "add": "Add Order"
+          },
+          "messages": {
+            "fetchError": "Failed to load orders list",
+            "deleteSuccess": "Order deleted successfully",
+            "deleteError": "Failed to delete order",
+            "bulkDeleteSuccess": "{count} orders deleted successfully"
+          },
+          "dialogs": {
+            "delete": {
+              "title": "Delete Order",
+              "message": "Are you sure you want to delete this order?"
+            },
+            "bulkDelete": {
+              "title": "Delete Orders",
+              "message": "Are you sure you want to delete {count} orders?"
+            }
+          }
+        }
+      },
+      "forms": {
+        "common": {
+          "none": "None",
+          "pickLocation": "Pick Location",
+          "day": "Day",
+          "vehicleCount": "{count} Vehicles",
+          "select": "Select",
+          "warnings": {
+            "selectSupplierFirst": "You must select a supplier name first",
+            "atLeastOneProduct": "At least one product must be added",
+            "deliveryLocationRequired": "Material delivery location must be specified",
+            "atLeastOneTransportService": "At least one transport service must be added"
+          },
+          "success": {
+            "requestCreated": "Request created successfully",
+            "requestUpdated": "Request updated successfully"
+          },
+          "sections": {
+            "basicInfo": "Basic Info",
+            "products": "Products",
+            "attachments": "Attachments",
+            "requestSummary": "Request Summary"
+          },
+          "labels": {
+            "supplierName": "Supplier Name",
+            "responsibleName": "Responsible Name",
+            "responsiblePhone": "Responsible Phone",
+            "requestDate": "Request Date",
+            "paymentMethod": "Payment Method",
+            "advancePayment": "Advance Payment",
+            "products": "Products",
+            "services": "Services",
+            "requestCode": "Request Code"
+          },
+          "placeholders": {
+            "selectSupplier": "Select Supplier",
+            "selectPaymentMethod": "Select Payment Method",
+            "enterResponsibleName": "Enter Responsible Name",
+            "enterAdvanceAmount": "Enter Advance Amount",
+            "selectDateTime": "Select Date and Time",
+            "selectDate": "Select Date",
+            "addNote": "Add Note",
+            "cashSample": "Cash",
+            "phoneSample": "5XX XXX XXXX"
+          },
+          "actions": {
+            "importExcel": "Import from Excel file",
+            "addProduct": "+ Add New Product",
+            "editProducts": "Edit Products",
+            "submitRequest": "Submit Request",
+            "saveAndReturn": "Save and Return to Home",
+            "saveAndCreateNew": "Save and Create New"
+          },
+          "textNote": {
+            "title": "Text Note",
+            "placeholder": "If you would like to attach some notes, please write them here and they will be attached to the sent quotation request"
+          },
+          "voiceRecorder": {
+            "title": "Voice Message",
+            "hintAttachNotes": "Would you like to attach some notes?",
+            "hintRecordPrompt": "Record your voice message to",
+            "recordingInProgress": "Recording in progress..."
+          },
+          "tableHeaders": {
+            "productName": "Product Name",
+            "quantity": "Quantity",
+            "unit": "Unit",
+            "notes": "Notes"
+          },
+          "timeOfDay": {
+            "am": "AM",
+            "pm": "PM",
+            "both": "Both"
+          }
+        }
+      }
+    },
+    "requests": {
+      "materialProduct": {
+        "form": {
+          "requestInfoTitle": "Request Info :",
+          "labels": {
+            "requestType": "Request Type",
+            "issueDate": "Request Issue Date",
+            "projectLocation": "Project Location"
+          },
+          "placeholders": {
+            "selectRequestType": "Select Request Type"
+          },
+          "transportService": "Transport Service",
+          "addTransportRow": "+ Add New Transport Data",
+          "tableHeaders": {
+            "transportType": "Carrier Type",
+            "dailyTrips": "Daily Trips Count",
+            "transportFromDate": "Transport Start Date",
+            "transportToDate": "Transport End Date",
+            "vehicleTypes": "Vehicle Types",
+            "transportTiming": "Transport Timing"
+          }
+        }
+      },
+      "fuels": {
+        "form": {
+          "labels": {
+            "deliveryMethod": "Delivery Method",
+            "deliveryLocation": "Material Delivery Location",
+            "sourceLocation": "Material Pickup Location",
+            "deliveryStartDate": "Delivery Start Date",
+            "supplyType": "Supply Type",
+            "supplyDuration": "Supply Duration",
+            "deliveryDuration": "Delivery Duration"
+          },
+          "placeholders": {
+            "selectDeliveryMethod": "Select Delivery Method",
+            "selectSupplyType": "Select Supply Type",
+            "enterDuration": "Enter Duration"
+          },
+          "tableHeaders": {
+            "packaging": "Packaging",
+            "supplyType": "Supply Type",
+            "supplyIntervalDays": "Supply Duration (Days)",
+            "deliveredIntervalDays": "Delivery Duration (Days)"
+          }
+        }
+      },
+      "logistics": {
+        "form": {
+          "labels": {
+            "transportCompany": "Transport Company",
+            "projectName": "Project Name",
+            "sourceMaterialsLocation": "Material Source Location",
+            "projectLocation": "Project Location",
+            "requestDateSample": "2024-03-01",
+            "advancePaymentLong": "Enter Advance Payment Value"
+          },
+          "placeholders": {
+            "enterProjectName": "Enter Project Name"
+          },
+          "transportDetails": "Transport Details",
+          "addTransportService": "Add Transport Service",
+          "emptyTransportTitle": "No transport details added",
+          "emptyTransportHint": "Click \"Add Transport Service\" to add new details",
+          "detailCard": {
+            "materialType": "Moved Material Type",
+            "tripCount": "Number of Trips",
+            "executionDuration": "Execution Duration",
+            "transportTimes": "Transport Times",
+            "fromDate": "Transport Start Date",
+            "toDate": "Transport End Date",
+            "vehicleType": "Transport Vehicle Type",
+            "vehicleCount": "Number of Transport Vehicles",
+            "unloadingResponsible": "Unloading Officer",
+            "loadingResponsible": "Loading Officer",
+            "deliveryLocation": "Delivery Location",
+            "pickupLocation": "Pickup Location"
+          },
+          "map": {
+            "pickup": "Pickup Location",
+            "delivery": "Delivery Location"
+          },
+          "productsTable": {
+            "fromDate": "Transport Start Date",
+            "tripNo": "Number of Trips"
+          }
+        },
+        "addDetailDialog": {
+          "titleAdd": "Add Transport Service",
+          "titleEdit": "Edit Transport Service",
+          "labels": {
+            "fromDate": "Transport Start Date",
+            "toDate": "Transport End Date",
+            "executionDuration": "Execution Duration",
+            "executionDurationPlaceholder": "Enter execution duration in days",
+            "transportTimes": "Transport Times",
+            "vehicleTypes": "Transport Vehicle Types",
+            "vehicleTypesPlaceholder": "Tipper",
+            "vehicleCount": "Number of Transport Vehicles",
+            "vehicleCountPlaceholder": "Enter number of vehicles",
+            "materialTypes": "Transport Material Type",
+            "tripCount": "Number of Trips",
+            "tripCountPlaceholder": "Enter number of trips",
+            "loadingResponsible": "Loading Officer",
+            "loadingResponsiblePlaceholder": "Enter loading officer name",
+            "unloadingResponsible": "Unloading Officer",
+            "unloadingResponsiblePlaceholder": "Enter unloading officer name"
+          },
+          "actions": {
+            "saveEdits": "Save Edits",
+            "addService": "Add Service"
+          }
+        }
+      }
+    },
+    "orders": {
+      "shared": {
+        "success": {
+          "poUpdated": "Order updated successfully",
+          "poCreated": "Order created successfully"
+        },
+        "labels": {
+          "purchaseOrderCode": "Order Code",
+          "poDate": "Order Date",
+          "project": "Project",
+          "itemsTableTitle": "Order Items Table",
+          "pricesIncludeTransport": "** Prices include transport",
+          "paymentData": "Payment Data",
+          "invoiceUploadDuration": "Extract Upload Interval",
+          "paymentDuration": "Payment Term",
+          "lateFee": "Late Fee",
+          "cancelFee": "Cancellation Fee",
+          "summaryItem": "Item",
+          "summaryAmount": "Amount",
+          "subtotalBeforeDiscount": "Subtotal Before Discount",
+          "discountRow": "Discount",
+          "subtotalAfterDiscount": "Subtotal After Discount",
+          "taxRow": "Tax",
+          "taxPercentDisplay": "15%",
+          "totalTaxRow": "Total Tax",
+          "finalTotalRow": "Final Total",
+          "saveReturnToMain": "Save and Return to Home",
+          "saveAndCreateNewPo": "Save and Create New",
+          "quotationCode": "Quotation Code",
+          "poType": "Order Type",
+          "compensationPo": "Compensatory Order",
+          "supplyDetailsSection": "Supply Details",
+          "editSupplyDetails": "+ Edit Supply Details",
+          "extraLogisticsSection": "Additional Supply Data",
+          "transportValueLabel": "Transport Value",
+          "tripDetailsSection": "Trips Details",
+          "logisticsTransportTotal": "Total Value of Transport Services",
+          "logisticsTripsTotal": "Total Value of Trips",
+          "approvedOfferTotal": "Approved Total Amount in Offer",
+          "logisticsTransportAmount": "Transport Amount",
+          "saveReturnToList": "Save and Return to List",
+          "currencyRial": "SAR",
+          "percentSymbol": "%"
+        },
+        "placeholders": {
+          "selectSupplierPo": "Select Supplier",
+          "enterProjectNameAlt": "Enter Project Name",
+          "enterDurationDays": "Enter Duration in Days",
+          "enterFeeAmount": "Enter Amount",
+          "noNotesProduct": "No notes",
+          "enterCount": "Enter Count"
+        },
+        "tableHeaders": {
+          "unitPrice": "Unit Price",
+          "discount": "Discount",
+          "taxAmount": "Tax Amount",
+          "totalAmount": "Total Amount",
+          "product": "Product",
+          "transportStartDate": "Transport Start Date",
+          "vehicleType": "Transport Vehicle Type",
+          "tripCount": "Number of Trips",
+          "tripCapacity": "Trip Capacity",
+          "tripTiming": "Trip Timing",
+          "totalTripsCount": "Total Number of Trips",
+          "vehicleCount": "Number of Transport Vehicles",
+          "tripDate": "Trip Date",
+          "transportTypes": "Vehicle Types",
+          "tripPrice": "Trip Price",
+          "subTotal": "Subtotal Price"
+        },
+        "warnings": {
+          "sourceLocationRequired": "Material source location must be specified",
+          "projectLocationRequired": "Project location must be specified",
+          "atLeastOneTripLeg": "At least one trip detail must be added",
+          "pickupRequiredForService": "Pickup location must be specified for transport service number {n}",
+          "deliveryRequiredForService": "Delivery location must be specified for transport service number {n}",
+          "loadQuotationError": "Failed to load quotation data",
+          "loadDataError": "Failed to load data",
+          "savePoError": "An error occurred while saving the order"
+        },
+        "actions": {
+          "editTrips": "Edit Trips"
+        }
+      }
+    },
+    "link": {
+      "shared": {
+        "messages": {
+          "linkSuccess": "Linked successfully",
+          "linkFailed": "Linking failed",
+          "deleteSuccess": "Deleted successfully",
+          "deleteFailed": "Deletion failed"
+        },
+        "labels": {
+          "customerName": "Customer Name",
+          "selectCustomerPlaceholder": "Select Customer Name",
+          "selectPlaceholder": "Select",
+          "productsSection": "Products",
+          "addButton": "+ Add",
+          "number": "Number",
+          "customerAndType": "Customer / Customer Type",
+          "actions": "Actions",
+          "projectLocation": "Project Location :",
+          "productCount": "Number of Products :"
+        },
+        "table": {
+          "productName": "Product Name",
+          "quantity": "Quantity",
+          "unitPrice": "Unit Price",
+          "discount": "Discount",
+          "taxAmount": "Tax Amount",
+          "totalAmount": "Total Amount",
+          "emptyProducts": "No products"
+        }
+      },
+      "orders": {
+        "form": {
+          "pageTitle": "Linking with Customer Orders",
+          "pageDescription": "Helps you link product orders between buyer and seller",
+          "codeLabel": "Order Code",
+          "sectionInfo": "Order Info",
+          "documentType": "Order Type",
+          "salesDocumentCode": "Sales Order Code",
+          "sectionDetails": "Order Details",
+          "documentStatus": "Order Status:",
+          "salesOfferCode": "Sales Offer Code :",
+          "purchaseOfferCode": "Purchase Offer Code :",
+          "documentDate": "Order Date :",
+          "linkedListTitle": "Linked Orders List",
+          "colSalesCodeDate": "Customer Sales Order Code / Date",
+          "colPurchaseCodeDate": "Tipper Purchase Order Code / Date",
+          "emptyLinked": "No linked orders"
+        }
+      },
+      "quotations": {
+        "form": {
+          "pageTitle": "Linking with Customer Quotations",
+          "pageDescription": "Helps you link quotation products between buyer and seller",
+          "codeLabel": "Quotation Code",
+          "sectionInfo": "Quotation Info",
+          "documentType": "Quotation Type",
+          "salesDocumentCode": "Sales Quotation Code",
+          "sectionDetails": "Quotation Details",
+          "documentStatus": "Quotation Status:",
+          "salesRequestCode": "Sales Request Code :",
+          "purchaseRequestCode": "Purchase Request Code :",
+          "documentDate": "Quotation Date :",
+          "linkedListTitle": "Linked Quotations List",
+          "colSalesCodeDate": "Customer Sales Quotation Code / Date",
+          "colPurchaseCodeDate": "Tipper Purchase Quotation Code / Date",
+          "emptyLinked": "No linked quotations"
+        }
+      },
+      "view": {
+        "shared": {
+          "purchasesBreadcrumb": "Purchases",
+          "products": "Products",
+          "taxShort": "Tax"
+        },
+        "orders": {
+          "pageTitleCrumb": "Linking with Customer Orders",
+          "listFuels": "Fuels Orders",
+          "listMaterials": "Raw Building Materials Orders",
+          "customerAdmin": "System Admin",
+          "customerContractor": "Contractor",
+          "headerPurchaseOrderCode": "Tipper Purchase Order Code",
+          "headerSalesOrderCode": "Customer Sales Order Code",
+          "supplierWithName": "Supplier / {name}",
+          "emptyLinked": "No linked orders",
+          "loadSalesError": "Failed to load sales order data",
+          "loadPurchaseError": "Failed to load purchase order data"
+        },
+        "quotations": {
+          "pageTitleCrumb": "Linking with Customer Quotations",
+          "listFuels": "Fuels Quotations",
+          "listMaterials": "Raw Materials Quotations",
+          "purchaseCodeLabel": "Purchases Code",
+          "salesCodeLabel": "Sales Code",
+          "loadError": "Failed to load quotation data"
+        }
+      }
+    },
+    "invoices": {
+      "list": {
+        "buttons": {
+          "add": "Add Invoice"
+        },
+        "dialogs": {
+          "bulkDelete": {
+            "title": "Delete Invoices",
+            "message": "Are you sure you want to delete {count} invoices?"
+          }
+        },
+        "messages": {
+          "fetchError": "Failed to load invoices list",
+          "deleteSuccess": "Invoice deleted successfully",
+          "deleteError": "Failed to delete invoice",
+          "bulkDeleteSuccess": "{count} invoices deleted successfully"
+        }
+      },
+      "form": {
+        "codeLabel": "Invoice Code",
+        "sections": {
+          "basicInfo": "Basic Info",
+          "itemsTable": "Purchase Invoice Items Table"
+        },
+        "labels": {
+          "supplierName": "Supplier Name",
+          "poCategory": "Order Type",
+          "pullProducts": "Fetch Products",
+          "supplierDisplayName": "Name:",
+          "taxNo": "VAT No.:",
+          "address": "Address:",
+          "purchaseOrderCode": "Purchase Order Code",
+          "salesInvoices": "Sales Invoices",
+          "invoiceCreatedAt": "Invoice Creation Date",
+          "invoiceIssueDate": "Invoice Issue Date",
+          "invoiceDueDate": "Invoice Due Date",
+          "project": "Project",
+          "statement": "Statement"
+        },
+        "placeholders": {
+          "select": "Select",
+          "selectOrder": "Select Order",
+          "selectSalesInvoices": "Select Sales Invoices",
+          "dateSample": "2024-03-01",
+          "projectName": "Enter Project Name",
+          "notes": "Enter statement here"
+        },
+        "fetchItemFallback": "From Sales Invoice",
+        "fallbacks": {
+          "orderTitle": "Order #{id}",
+          "invoiceTitle": "Invoice #{id}",
+          "poById": "Order #{id}"
+        },
+        "messages": {
+          "atLeastOneProduct": "The invoice must contain at least one product",
+          "updated": "Invoice updated successfully",
+          "created": "Invoice created successfully",
+          "saveError": "An error occurred while saving the invoice"
+        },
+        "tableHeaders": {
+          "taxableAmount": "Taxable Amount"
+        },
+        "summary": {
+          "item": "Item",
+          "amount": "Amount",
+          "totalQty": "Total Quantities",
+          "totalExclTax": "Total (Excluding Tax)",
+          "totalDiscounts": "Total Discounts",
+          "totalTaxable": "Taxable Total",
+          "tax": "Tax",
+          "totalTax": "Total Tax",
+          "totalDue": "Total Due Amount"
+        },
+        "actions": {
+          "saveReturnMain": "Save and Return to Home",
+          "saveCreateNew": "Save and Create New"
+        }
+      },
+      "view": {
+        "shared": {
+          "purchasesBreadcrumb": "Purchases",
+          "invoicesListCrumb": "Purchase Invoices",
+          "subtitle": "Invoice details and information",
+          "loadError": "Failed to load invoice data",
+          "invoiceInfoSection": "Invoice Info",
+          "salesOrderCode": "Sales Order Code",
+          "invoiceCreatedAt": "Invoice Creation Date",
+          "invoiceIssueDate": "Invoice Issue Date",
+          "invoiceDueDate": "Invoice Due Date"
+        }
+      },
+      "logistics": {
+        "form": {
+          "tripTableHeaders": {
+            "tripCode": "Trip Code",
+            "pickupLocation": "Pickup Location",
+            "deliveryLocation": "Delivery Location",
+            "tripCount": "Number of Trips",
+            "tripPrice": "Trip Price",
+            "taxableAmount": "Taxable Amount",
+            "taxAmount": "Tax Amount",
+            "totalAmount": "Total Amount"
+          }
+        }
+      }
+    },
+    "views": {
+      "shared": {
+        "purchasesBreadcrumb": "Purchases",
+        "loadQuotationError": "Failed to load quotation data",
+        "loadOrderError": "Failed to load order data",
+        "loadRequestError": "Failed to load request data",
+        "loadLogisticsRequestError": "Failed to load transport request data",
+        "quotationSubtitle": "Quotation details and information",
+        "orderSubtitle": "Order details and information",
+        "requestSubtitle": "Request details and information",
+        "requestMaterialSubtitle": "Raw Building Materials Quotation Request",
+        "listComma": ", ",
+        "paymentCash": "Cash",
+        "paymentDeferred": "Deferred",
+        "paymentNaqd": "Cash",
+        "paymentInstallment": "Installment",
+        "discountPercent": "Percentage",
+        "discountFixed": "Fixed Value",
+        "categoryLogistics": "Logistics Services",
+        "noNotes": "None",
+        "daysWithUnit": "{n} Days",
+        "tripsWithUnit": "{n} Trips",
+        "vehiclesWithUnit": "{n} Vehicles",
+        "transportServiceHash": "Transport Service #{n}",
+        "timeInterval": {
+          "am": "AM",
+          "pm": "PM",
+          "both": "Morning and Evening"
+        },
+        "requestTypeWithoutLogistics": "Request without Logistics Service",
+        "requestTypeWithLogistics": "Request with Logistics Service",
+        "requestPurchaseWithLogistics": "Purchase Request with Logistics",
+        "orderTypeWithoutLogistics": "Order without Logistics Service",
+        "orderTypeWithLogistics": "Order with Logistics Service",
+        "orderTypePurchaseWithoutLogistics": "Purchase Order without Logistics Service",
+        "orderTypePurchaseWithLogistics": "Purchase Order with Logistics Service",
+        "tabs": {
+          "requestGeneral": "General Request Information",
+          "requestProducts": "Added Products",
+          "requestTransport": "Transport Data",
+          "transportDetails": "Transport Details",
+          "movedMaterials": "Moved Materials"
+        },
+        "requestInfoSection": "Request Info",
+        "requestStatus": "Request Status",
+        "attachmentsSection": "Attachments",
+        "summarySectionTitle": "Request Summary",
+        "issueDateRequest": "Request Issue Date",
+        "quotationInfoSection": "Quotation Info",
+        "itemsTableQuotation": "Quotation Items Table",
+        "quotationName": "Quotation Name",
+        "quotationDate": "Quotation Date",
+        "quotationValidity": "Quotation Validity",
+        "offerDate": "Offer Date",
+        "category": "Category",
+        "orderInfoSection": "Order Info",
+        "contract": "Contract",
+        "advancePaymentWording": "Advance Payment",
+        "quotationSummaryTitle": "Quotation Summary",
+        "totalBeforeDiscount": "Total Before Discount",
+        "totalDiscountSum": "Total Discount",
+        "totalAfterDiscount": "Total After Discount",
+        "taxPercentLabel": "Tax Percentage",
+        "totalTaxSum": "Total Tax",
+        "finalTotal": "Final Total",
+        "transportAmount": "Transport Amount",
+        "discountType": "Discount Type",
+        "discountValue": "Discount Value",
+        "workHours": "Work Hours",
+        "workHoursTransport": "Transport Times",
+        "productsSection": "Products",
+        "tripsSection": "Trips",
+        "tripDetailsSection": "Trips Details",
+        "transportCarrierType": "Carrier Type",
+        "listQuotationsMaterial": "Quotations",
+        "listQuotationsFuels": "Fuels Quotations",
+        "listQuotationsLogistics": "Logistics Services Quotations",
+        "listOrdersMaterial": "Purchase Orders",
+        "listOrdersFuels": "Fuels Orders",
+        "listOrdersLogistics": "Logistics Service Order",
+        "listRequestsMaterial": "Raw Building Materials Quotation Requests",
+        "listRequestsFuels": "Fuels Quotation Requests",
+        "listRequestsLogistics": "Logistics Service Quotation Requests",
+        "unloadingResponsibleAlt": "Unloading Officer",
+        "totalTripsOverall": "Total Number of Trips",
+        "tripPrice": "Trip Price",
+        "grandTripPrice": "Grand Total Price",
+        "fromDateLabel": "From Date",
+        "toDateLabel": "To Date",
+        "dailyTripsCount": "Daily Trips Count",
+        "basicDataSection": "Basic Data",
+        "basicDataSectionAlt": "Basic Data",
+        "requestDetailsSection": "Request Details",
+        "orderStatus": "Order Status",
+        "orderTypeLabel": "Order Type",
+        "supplyDuration": "Supply Duration",
+        "deliveryDuration": "Delivery Duration",
+        "supplyType": "Supply Type",
+        "deliveryMaterialsLocation": "Material Delivery Location",
+        "pickupOriginLocation": "Departure Location",
+        "materialMovedType": "Moved Material Type",
+        "receiptLocation": "Pickup Location",
+        "fuelsLogisticsSection": "Logistics Data",
+        "transportCompanyDisplay": "Transport Company Name",
+        "vehicleTypeSingular": "Vehicle Type",
+        "vehicleCountSingular": "Number of Vehicles",
+        "materialTypeShort": "Material Type",
+        "uploadedMeta": "Uploaded {progress}%",
+        "transportFromDate": "Transport Start Date",
+        "transportToDate": "Transport End Date",
+        "executionDurationDaysShort": "Execution Duration (Days)"
+      }
+    },
+    "receivingDocs": {
+      "form": {
+        "sections": {
+          "basicInfo": "Basic Info",
+          "itemsTable": "Receipt Document Items Table",
+          "attachments": "Attachments",
+          "deliveryPickup": "Delivery and Pickup Location",
+          "deliveryLocation": "Delivery Location",
+          "pickupLocation": "Pickup Location"
+        },
+        "labels": {
+          "purchaseOrderCode": "Purchase Order Code",
+          "docCode": "Receipt Document Code",
+          "receivedAt": "Receiving Date",
+          "createdAt": "Creation Date"
+        },
+        "placeholders": {
+          "purchaseOrderCode": "Purchase Order Code",
+          "docCode": "Receipt Document Code",
+          "select": "Select",
+          "baseQty": "Base Quantity",
+          "fromSupplier": "From Supplier",
+          "fromTransport": "From Transport Company",
+          "fromCustomer": "From Customer",
+          "receivedQty": "Received Quantity",
+          "enter": "Enter"
+        },
+        "tableHeaders": {
+          "productName": "Product Name",
+          "baseQty": "Base Quantity",
+          "qtyFromSupplier": "Actual Quantity from Supplier",
+          "qtyFromTransport": "Actual Quantity from Logistics Company",
+          "qtyFromCustomer": "Actual Quantity from Customer",
+          "qtyFromSupplierShort": "Quantity from Supplier",
+          "qtyFromTransportShort": "Quantity from Logistics",
+          "qtyFromCustomerShort": "Quantity from Customer",
+          "receivedQty": "Received Quantity",
+          "actualQty": "Actual Quantity",
+          "vehiclesSent": "Dispatched Transport Vehicles",
+          "vehiclesReceived": "Received Transport Vehicles"
+        },
+        "messages": {
+          "loadError": "Failed to load receipt document data",
+          "atLeastOneItem": "At least one item must be added",
+          "updated": "Receipt document updated successfully",
+          "created": "Receipt document created successfully"
+        },
+        "actions": {
+          "saveToReceivingList": "Save and Return to Receipt Documents List",
+          "saveToPurchasesList": "Save and Return to Purchases List"
+        }
+      },
+      "view": {
+        "shared": {
+          "purchasesBreadcrumb": "Purchases",
+          "subtitle": "Receipt document details and information",
+          "basicInfo": "Basic Info",
+          "receiptStatus": "Receiving Status",
+          "itemsTable": "Receipt Document Items Table",
+          "attachments": "Attachments",
+          "viewAction": "View",
+          "noAttachments": "No attachments to display",
+          "loadError": "Failed to load receipt document data",
+          "attachmentFallback": "Attachment {n}"
+        },
+        "listCrumbMaterial": "Receipt Documents List",
+        "listCrumbLogistics": "Logistics Receipt Documents List"
+      }
+    }
+  }
+}

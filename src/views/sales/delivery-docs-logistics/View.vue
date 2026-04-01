@@ -10,12 +10,12 @@
                     </router-link>
                     <span class="text-lg text-gray-300">/</span>
                     <router-link to="/sales" class="text-gray-600 hover:text-primary-600">
-                        المشتريات
+                        {{ t('sales.forms.viewPages.breadcrumb.sales') }}
                     </router-link>
                     <span class="text-lg text-gray-300">/</span>
                     <router-link to="/sales/delivery-docs-logistics/list"
                         class="text-gray-600 hover:text-primary-600">
-                        قائمة وثائق تسليم خدمات النقل
+                        {{ t('sales.forms.viewPages.lists.deliveryDocsLogistics') }}
                     </router-link>
                     <span class="text-lg text-gray-300">/</span>
                     <span class="text-primary-700 font-medium bg-primary-50 px-2 py-1 rounded-md">{{ documentCode ||
@@ -31,7 +31,7 @@
                             </div>
                             <div>
                                 <h1 class="text-lg font-bold text-gray-900 mb-1">{{ documentCode || '--' }}</h1>
-                                <p class="text-sm text-gray-600">تفاصيل وثيقة التسليم والمعلومات الخاصة بها</p>
+                                <p class="text-sm text-gray-600">{{ t('sales.forms.viewPages.subtitles.deliveryDocLogisticsDetail') }}</p>
                             </div>
                         </div>
                     </div>
@@ -40,27 +40,27 @@
                 <!-- Main Content -->
                 <!-- Delivery Document Information Section -->
                 <div class="p-6">
-                    <h2 class="text-lg font-bold text-primary-900 mb-6">البيانات الأساسية</h2>
+                    <h2 class="text-lg font-bold text-primary-900 mb-6">{{ t('sales.forms.common.sections.basicData') }}</h2>
 
                     <div class="flex flex-wrap gap-4">
                         <div class="info-item-bordered flex-1 px-6 py-4">
-                            <label class="font-semibold text-sm text-gray-500 mb-2 block">كود طلبية المشتريات</label>
+                            <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('sales.forms.common.labels.purchaseOrderCode') }}</label>
                             <p class="text-base font-semibold text-gray-900">{{ purchaseOrderCode }}</p>
                         </div>
                         <v-divider vertical class="my-6"></v-divider>
                         <div class="info-item-bordered flex-1 px-6 py-4">
-                            <label class="font-semibold text-sm text-gray-500 mb-2 block">كود وثيقة التسليم</label>
+                            <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('sales.forms.common.labels.deliveryLogisticsDocumentCode') }}</label>
                             <p class="text-base font-semibold text-gray-900">{{ documentCode }}</p>
                         </div>
                         <v-divider vertical class="my-6"></v-divider>
                         <div class="info-item-bordered flex-1 px-6 py-4">
-                            <label class="font-semibold text-sm text-gray-500 mb-2 block">تاريخ التسليم</label>
+                            <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('sales.forms.common.labels.deliveryDate') }}</label>
                             <p class="text-base font-semibold text-gray-900">{{ deliveryDocData?.receiving_date || '—'
                                 }}</p>
                         </div>
                         <v-divider vertical class="my-6"></v-divider>
                         <div class="info-item-bordered flex-1 px-6 py-4">
-                            <label class="font-semibold text-sm text-gray-500 mb-2 block">حالة التسليم</label>
+                            <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('sales.forms.viewPages.sections.deliveryStatus') }}</label>
                             <p class="text-base font-semibold text-gray-900">{{ statusLabel }}</p>
                         </div>
                     </div>
@@ -71,7 +71,7 @@
                     <div class="bg-white px-6 py-3">
                         <div class="flex items-center gap-2 text-primary-600">
                             <span class="w-4" v-html="fileCheckIcon"></span>
-                            <h2 class="text-base font-bold">جدول عناصر وثيقة التسليم</h2>
+                            <h2 class="text-base font-bold">{{ t('sales.forms.viewPages.sections.deliveryLogisticsDocItemsTable') }}</h2>
                         </div>
                     </div>
                     <div>
@@ -80,16 +80,16 @@
                                 <span v-for="(el, index) in item.vehicle_type_no_from_transport_label" :key="index"
                                     class="text-gray-900 text-sm font-medium">
                                     {{ el.transport_type_label }} : {{ el.transport_no }}
-                                    <span v-if="Number(index) < item.vehicle_type_no_from_transport_label.length - 1">،
-                                    </span>
+                                    <span v-if="Number(index) < item.vehicle_type_no_from_transport_label.length - 1">{{
+                                        t('sales.forms.common.misc.listComma') }}</span>
                                 </span>
                             </template>
                             <template #item.vehicle_type_no_from_customer_label="{ item }">
                                 <span v-for="(el, index) in item.vehicle_type_no_from_customer_label" :key="index"
                                     class="text-gray-900 text-sm font-medium">
                                     {{ el.transport_type_label }} : {{ el.transport_no }}
-                                    <span v-if="Number(index) < item.vehicle_type_no_from_customer_label.length - 1">،
-                                    </span>
+                                    <span v-if="Number(index) < item.vehicle_type_no_from_customer_label.length - 1">{{
+                                        t('sales.forms.common.misc.listComma') }}</span>
                                 </span>
                             </template>
                         </DataTable>
@@ -97,7 +97,7 @@
                 </div>
 
                 <div class="my-6">
-                    <h2 class="text-base font-bold text-primary-900 text-lg px-6 mb-3">المرفقات</h2>
+                    <h2 class="text-base font-bold text-primary-900 text-lg px-6 mb-3">{{ t('sales.forms.common.sections.attachments') }}</h2>
                     <div class="px-6">
                         <div v-if="attachmentsData.length" class="space-y-4">
                             <div v-for="attachment in attachmentsData" :key="attachment.id"
@@ -114,13 +114,13 @@
                                 </div>
                                 <a v-if="attachment.url" :href="attachment.url" target="_blank" rel="noopener"
                                     class="text-primary-600 text-sm font-medium hover:underline">
-                                    عرض
+                                    {{ t('sales.forms.viewPages.attachments.view') }}
                                 </a>
                                 <span v-else class="text-xs text-gray-400">—</span>
                             </div>
                         </div>
                         <div v-else class="text-gray-500 text-sm">
-                            لا توجد مرفقات لعرضها
+                            {{ t('sales.forms.viewPages.attachments.none') }}
                         </div>
                     </div>
                 </div>
@@ -136,6 +136,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import { useApi } from '@/composables/useApi'
 import { useNotification } from '@/composables/useNotification'
@@ -192,6 +193,7 @@ interface LogisticItemRow {
     vehicle_type_no_from_transport_label: VehicleLabel[]
     vehicle_type_no_from_customer_label: VehicleLabel[]
 }
+const { t } = useI18n()
 const route = useRoute()
 const api = useApi()
 const { error } = useNotification()
@@ -212,7 +214,7 @@ const fetchDeliveryDocData = async () => {
         deliveryDocData.value = res.data
     } catch (e: any) {
         console.error('Error fetching delivery document data:', e)
-        error(e?.response?.data?.message || 'فشل تحميل بيانات وثيقة التسليم')
+        error(e?.response?.data?.message || t('sales.forms.common.messages.loadDeliveryDocLogisticsFailed'))
     } finally {
         isLoading.value = false
     }
@@ -225,8 +227,13 @@ onMounted(() => {
 const formatFileSize = (value?: number | string): string => {
     if (value === undefined || value === null || value === '') return '—'
     if (typeof value === 'number') {
-        if (value === 0) return '0 KB'
-        const units = ['Bytes', 'KB', 'MB', 'GB']
+        if (value === 0) return `0 ${t('sales.forms.common.misc.fileSizeKb')}`
+        const units = [
+            t('sales.forms.common.misc.fileSizeBytes'),
+            t('sales.forms.common.misc.fileSizeKb'),
+            t('sales.forms.common.misc.fileSizeMb'),
+            t('sales.forms.common.misc.fileSizeGb'),
+        ]
         const index = Math.min(Math.floor(Math.log(value) / Math.log(1024)), units.length - 1)
         const sized = value / Math.pow(1024, index)
         return `${sized % 1 === 0 ? sized : sized.toFixed(1)} ${units[index]}`
@@ -240,19 +247,19 @@ const attachmentsData = computed<AttachmentCard[]>(() => {
 
     return attachments.map((attachment, index) => {
         if (typeof attachment === 'string') {
-            const name = attachment.split('/').pop() || `مرفق ${index + 1}`
+            const name = attachment.split('/').pop() || t('sales.forms.viewPages.attachments.fallbackName', { n: index + 1 })
             return {
                 id: String(index),
                 name,
-                meta: '— — 100% uploaded',
+                meta: `— — ${t('sales.forms.common.misc.uploadProgressPercent', { percent: 100 })}`,
                 url: attachment,
             }
         }
 
-        const name = attachment.file_name || attachment.name || `مرفق ${index + 1}`
+        const name = attachment.file_name || attachment.name || t('sales.forms.viewPages.attachments.fallbackName', { n: index + 1 })
         const size = formatFileSize(attachment.file_size ?? attachment.size)
         const progress = attachment.uploaded_percentage ?? attachment.progress ?? 100
-        const metaParts = [size !== '—' ? size : null, progress !== undefined ? `${progress}% uploaded` : null]
+        const metaParts = [size !== '—' ? size : null, progress !== undefined ? t('sales.forms.common.misc.uploadProgressPercent', { percent: progress }) : null]
         const url = attachment.url || attachment.path || attachment.file_url || undefined
 
         return {
@@ -291,13 +298,13 @@ const itemsData = computed<LogisticItemRow[]>(() => {
 })
 
 // Table headers
-const itemHeaders = [
-    { title: 'اسم المنتج', key: 'item_name' },
-    { title: 'الكمية الأساسية', key: 'base_quantity' },
-    { title: 'الكمية الفعلية', key: 'received_quantity' },
-    { title: 'المركبات الناقلة المرسلة', key: 'vehicle_type_no_from_transport_label' },
-    { title: 'المركبات الناقلة المستلمة', key: 'vehicle_type_no_from_customer_label' },
-]
+const itemHeaders = computed(() => [
+    { title: t('sales.forms.tables.tripProducts.itemName'), key: 'item_name' },
+    { title: t('sales.forms.tables.deliveryDocStandard.baseQuantity'), key: 'base_quantity' },
+    { title: t('sales.forms.tables.deliveryDocLogistics.receivedQuantity'), key: 'received_quantity' },
+    { title: t('sales.forms.tables.deliveryDocLogistics.vehiclesSent'), key: 'vehicle_type_no_from_transport_label' },
+    { title: t('sales.forms.tables.deliveryDocLogistics.vehiclesReceived'), key: 'vehicle_type_no_from_customer_label' },
+])
 
 </script>
 

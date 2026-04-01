@@ -20,7 +20,7 @@
                         </h3>
                         <!-- Status Badge -->
                         <span class="px-2 py-0.5 text-[12px] font-medium rounded-full" :class="statusBadgeClass">
-                            {{ user.is_active ? 'فعال' : 'غير فعال' }}
+                            {{ user.is_active ? t('common.status.active') : t('common.status.inactive') }}
                         </span>
                     </div>
 
@@ -69,6 +69,9 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 // Props
 interface Role {

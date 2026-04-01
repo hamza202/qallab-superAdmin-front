@@ -3,6 +3,7 @@ import { ref, computed, onMounted, watch } from "vue";
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import AddProductDialog, { type ProductToAdd } from '@/components/price-offers/AddProductDialog.vue';
+import EditProductsDialog from '@/components/price-offers/EditProductsDialog.vue';
 import AddLogisticsDetailDialog, { type LogisticsDetail } from './components/AddLogisticsDetailDialog.vue';
 import TopHeader from '@/components/price-offers/TopHeader.vue';
 import DateTimePickerInput from '@/components/common/forms/DateTimePickerInput.vue';
@@ -13,6 +14,7 @@ import { fileIcon, mapMarkerIcon, packageIcon, busIcon, globeIcon, CoinHandIcon,
 import { useForm } from '@/composables/useForm';
 import { useNotification as useNotify } from '@/composables/useNotification';
 import { binIcon, fileCheckIcon, HelpCircleIcon, returnIcon, saveIcon, rialIcon } from "@/components/icons/globalIcons";
+import AppFormBreadcrumb from "@/components/common/AppFormBreadcrumb.vue";
 import { required, numeric, positive } from '@/utils/validators';
 
 
@@ -231,8 +233,13 @@ const logisticsDetails = ref<LogisticsDetail[]>([]);
 const tripTableItems = ref<TripTableItem[]>([]);
 
 const showAddProductDialog = ref(false);
+const showEditProductsDialog = ref(false);
+const showEditTripsDialog = ref(false);
 const editingProduct = ref<ProductToAdd | null>(null);
 const productDialogMode = ref<'logistics' | 'logistics-trips'>('logistics');
+
+const originalProductIds = ref<Record<number, number>>({});
+const originalTripIds = ref<Record<number, number>>({});
 
 const formatValidationFieldKey = (key: string): string => {
   return key.split('.').map(part => {
@@ -385,7 +392,7 @@ const fetchQuotationForOrder = async () => {
     }
   } catch (e: any) {
     console.error('Error fetching quotation data:', e);
-    error(getApiErrorDisplayMessage(e, 'فشل تحميل بيانات عرض السعر'));
+    error(getApiErrorDisplayMessage(e, t('purchases.orders.shared.warnings.loadQuotationError')));
     isFormDataLoaded.value = true;
   } finally {
     isLoading.value = false;
@@ -448,26 +455,36 @@ const fetchFormData = async () => {
         }));
       }
       if (data.po_product_details && Array.isArray(data.po_product_details)) {
-        productTableItems.value = data.po_product_details.map((item: any) => ({
-          id: item.id,
-          item_id: item.item_id,
-          item_name: item.item_name || '',
-          unit_id: item.unit_id,
-          unit_name: item.unit_name || '',
-          quantity: item.quantity,
-          from_date: item.from_date,
-          trip_no: item.trip_no,
-          transport_type: item.transport_type,
-          transport_type_name: item.transport_type_label,
-          notes: item.notes ?? '',
-        }));
+        productTableItems.value = data.po_product_details.map((item: any) => {
+          const itemId = Number(item.item_id);
+          if (item.id && itemId) {
+            originalProductIds.value[itemId] = item.id;
+          }
+          return {
+            id: item.id,
+            item_id: itemId,
+            item_name: item.item_name || '',
+            unit_id: item.unit_id,
+            unit_name: item.unit_name || '',
+            quantity: item.quantity,
+            from_date: item.from_date,
+            trip_no: item.trip_no,
+            transport_type: item.transport_type,
+            transport_type_name: item.transport_type_label,
+            notes: item.notes ?? '',
+          };
+        });
       }
       if (data.po_trip_details && Array.isArray(data.po_trip_details) && data.po_trip_details.length > 0) {
         tripTableItems.value = data.po_trip_details.map((t: any) => {
           const transportTypes = Array.isArray(t.transport_type) ? t.transport_type.map(Number) : (t.transport_type != null ? [Number(t.transport_type)] : []);
+          const tripItemId = Number(t.item_id);
+          if (t.id && tripItemId) {
+            originalTripIds.value[tripItemId] = t.id;
+          }
           return {
             id: t.id,
-            item_id: t.item_id,
+            item_id: tripItemId,
             item_name: t.item_name || '',
             unit_id: t.unit_id,
             unit_name: t.unit_name || '',
@@ -502,7 +519,7 @@ const fetchFormData = async () => {
     }
   } catch (e: any) {
     console.error('Error fetching form data:', e);
-    error(getApiErrorDisplayMessage(e, 'فشل تحميل البيانات'));
+    error(getApiErrorDisplayMessage(e, t('purchases.orders.shared.warnings.loadDataError')));
     isFormDataLoaded.value = true;
   } finally {
     isLoading.value = false;
@@ -527,6 +544,9 @@ const handleProductSaved = async (products: any[]) => {
   if (productDialogMode.value === 'logistics-trips') {
     const newTripItems: TripTableItem[] = [];
     products.forEach(p => {
+      const existingTrip = tripTableItems.value.find(e => e.item_id === p.item_id);
+      const restoredTripId =
+        p.id ?? existingTrip?.id ?? originalTripIds.value[p.item_id];
       newTripItems.push({
         item_id: p.item_id,
         item_name: p.item_name,
@@ -542,7 +562,8 @@ const handleProductSaved = async (products: any[]) => {
         discount_type: p.discount_type ?? null,
         notes: p.notes || '',
         isAdded: p.isAdded,
-        id: p.id,
+        id: restoredTripId,
+        quotation_logistics_detail_id: existingTrip?.quotation_logistics_detail_id ?? p.quotation_logistics_detail_id ?? null,
       });
     });
     for (let i = 0; i < newTripItems.length; i++) {
@@ -554,13 +575,14 @@ const handleProductSaved = async (products: any[]) => {
     const newTripItems: TripTableItem[] = [];
     products.forEach(p => {
       const existing = productTableItems.value.find(e => e.item_id === p.item_id);
+      const restoredId = p.id ?? existing?.id ?? originalProductIds.value[p.item_id];
       newItems.push({
         item_id: p.item_id,
         item_name: p.item_name,
         unit_id: p.unit_id,
         unit_name: p.unit_name,
         quantity: p.quantity,
-        id: existing?.id || p.id,
+        id: restoredId,
         from_date: p.from_date,
         trip_no: p.trip_no,
         transport_type: p.transport_type,
@@ -577,6 +599,7 @@ const handleProductSaved = async (products: any[]) => {
           unit_id: p.unit_id,
           unit_name: p.unit_name,
           quantity: p.quantity,
+          id: existingTrip.id ?? originalTripIds.value[p.item_id],
         });
       } else {
         const transportArr = p.transport_type != null ? [p.transport_type as number] : [];
@@ -592,12 +615,113 @@ const handleProductSaved = async (products: any[]) => {
           transport_type: transportArr,
           transport_type_names: getTransportTypeNames(transportArr),
           notes: '',
+          id: originalTripIds.value[p.item_id],
         });
       }
     });
     productTableItems.value = newItems;
     tripTableItems.value = newTripItems;
   }
+};
+
+const handleEditProductsBulk = (updatedProducts: any[]) => {
+  const newItems: ProductTableItem[] = updatedProducts.map((p: any) => {
+    const tt = p.transport_type;
+    const single = Array.isArray(tt) ? tt[0] : tt;
+    return {
+      item_id: p.item_id,
+      item_name: p.item_name,
+      unit_id: p.unit_id,
+      unit_name: p.unit_name ?? '',
+      quantity: p.quantity,
+      from_date: p.from_date ?? '',
+      trip_no: p.trip_no ?? null,
+      transport_type: single ?? null,
+      transport_type_name: getTransportTypeName(single),
+      notes: p.notes ?? '',
+      id:
+        productTableItems.value.find((x) => x.item_id === p.item_id)?.id
+        ?? originalProductIds.value[p.item_id]
+        ?? p.id,
+      isAdded: true,
+    };
+  });
+  productTableItems.value = newItems;
+
+  const newTripItems: TripTableItem[] = [];
+  newItems.forEach((p) => {
+    const existingTrip = tripTableItems.value.find((e) => e.item_id === p.item_id);
+    if (existingTrip) {
+      newTripItems.push({
+        ...existingTrip,
+        item_name: p.item_name,
+        unit_id: p.unit_id,
+        unit_name: p.unit_name,
+        quantity: p.quantity,
+        trip_no: p.trip_no ?? existingTrip.trip_no ?? null,
+        trip_date: (p.from_date as string | null) ?? existingTrip.trip_date ?? null,
+      });
+    } else {
+      const transportArr = p.transport_type != null ? [p.transport_type as number] : [];
+      newTripItems.push({
+        item_id: p.item_id,
+        item_name: p.item_name,
+        unit_id: p.unit_id,
+        unit_name: p.unit_name,
+        quantity: p.quantity,
+        trip_date: (p.from_date as string | null) ?? null,
+        trip_no: p.trip_no ?? null,
+        trip_price: null,
+        transport_type: transportArr,
+        transport_type_names: getTransportTypeNames(transportArr),
+        notes: '',
+        id: originalTripIds.value[p.item_id],
+        quotation_logistics_detail_id: null,
+      });
+    }
+  });
+  tripTableItems.value = newTripItems;
+};
+
+const handleEditTripsBulk = async (updatedProducts: any[]) => {
+  const newTripItems: TripTableItem[] = [];
+  for (const p of updatedProducts) {
+    const transportTypes = Array.isArray(p.transport_type)
+      ? p.transport_type
+      : (p.transport_type != null ? [p.transport_type] : []);
+    const existingTrip = tripTableItems.value.find((e) => e.item_id === p.item_id);
+    const trip: TripTableItem = {
+      item_id: p.item_id,
+      item_name: p.item_name,
+      unit_id: p.unit_id,
+      unit_name: p.unit_name,
+      quantity: p.quantity,
+      trip_date: p.trip_date ?? null,
+      trip_no: p.trip_no ?? null,
+      trip_price: p.trip_price ?? null,
+      transport_type: transportTypes,
+      transport_type_names: p.transport_type_names ?? getTransportTypeNames(transportTypes),
+      discount_val: p.discount ?? null,
+      discount_type: p.discount_type ?? null,
+      notes: p.notes || '',
+      isAdded: p.isAdded,
+      id: existingTrip?.id ?? originalTripIds.value[p.item_id] ?? p.id,
+      quotation_logistics_detail_id: existingTrip?.quotation_logistics_detail_id ?? p.quotation_logistics_detail_id ?? null,
+    };
+    trip.sub_total = await calculateTripItemSubTotal(trip);
+    newTripItems.push(trip);
+  }
+  tripTableItems.value = newTripItems;
+
+  newTripItems.forEach((t) => {
+    const pi = productTableItems.value.findIndex((pr) => pr.item_id === t.item_id);
+    if (pi !== -1) {
+      productTableItems.value[pi].quantity = t.quantity;
+      productTableItems.value[pi].unit_id = t.unit_id;
+      productTableItems.value[pi].unit_name = t.unit_name;
+      productTableItems.value[pi].trip_no = t.trip_no ?? null;
+    }
+  });
 };
 
 const handleEditProduct = (item: any) => {
@@ -647,6 +771,9 @@ const handleProductUpdated = async (updatedProduct: any) => {
   if (productDialogMode.value === 'logistics-trips') {
     const index = tripTableItems.value.findIndex(t => t.item_id === updatedProduct.item_id);
     if (index !== -1) {
+      const prevTrip = tripTableItems.value[index];
+      const preservedTripId =
+        prevTrip.id ?? originalTripIds.value[updatedProduct.item_id] ?? updatedProduct.id;
       tripTableItems.value[index] = {
         item_id: updatedProduct.item_id,
         item_name: updatedProduct.item_name,
@@ -662,7 +789,8 @@ const handleProductUpdated = async (updatedProduct: any) => {
         discount_type: updatedProduct.discount_type ?? null,
         notes: updatedProduct.notes || '',
         isAdded: updatedProduct.isAdded,
-        id: updatedProduct.id,
+        id: preservedTripId,
+        quotation_logistics_detail_id: prevTrip.quotation_logistics_detail_id ?? updatedProduct.quotation_logistics_detail_id ?? null,
       };
       tripTableItems.value[index].sub_total = await calculateTripItemSubTotal(tripTableItems.value[index]);
       // Sync quantity back to product table
@@ -678,6 +806,9 @@ const handleProductUpdated = async (updatedProduct: any) => {
     const index = productTableItems.value.findIndex(p => p.item_id === updatedProduct.item_id);
     if (index !== -1) {
       const existingNotes = productTableItems.value[index].notes;
+      const prevRow = productTableItems.value[index];
+      const preservedId =
+        prevRow.id ?? originalProductIds.value[updatedProduct.item_id] ?? updatedProduct.id;
       productTableItems.value[index] = {
         item_id: updatedProduct.item_id,
         item_name: updatedProduct.item_name,
@@ -685,7 +816,7 @@ const handleProductUpdated = async (updatedProduct: any) => {
         unit_name: updatedProduct.unit_name,
         quantity: updatedProduct.quantity,
         notes: existingNotes || updatedProduct.notes || '',
-        id: updatedProduct.id,
+        id: preservedId,
         from_date: updatedProduct.from_date,
         trip_no: updatedProduct.trip_no,
         transport_type: updatedProduct.transport_type,
@@ -921,28 +1052,28 @@ const handleSubmit = async (type: string) => {
   locationError.value = null;
   sourceLocationError.value = null;
   if (!formData.value.source_location?.trim()) {
-    sourceLocationError.value = 'يجب تحديد موقع مصدر المواد';
-    warning('يجب تحديد موقع مصدر المواد');
+    sourceLocationError.value = t('purchases.orders.shared.warnings.sourceLocationRequired');
+    warning(t('purchases.orders.shared.warnings.sourceLocationRequired'));
     return;
   }
   if (!formData.value.target_location?.trim()) {
-    locationError.value = 'يجب تحديد موقع المشروع';
-    warning('يجب تحديد موقع المشروع');
+    locationError.value = t('purchases.orders.shared.warnings.projectLocationRequired');
+    warning(t('purchases.orders.shared.warnings.projectLocationRequired'));
     return;
   }
 
   if (productTableItems.value.length === 0) {
-    warning('يجب إضافة منتج واحد على الأقل');
+    warning(t('purchases.shared.forms.common.warnings.atLeastOneProduct'));
     return;
   }
 
   if (logisticsDetails.value.length === 0) {
-    warning('يجب إضافة خدمة نقل واحدة على الأقل');
+    warning(t('purchases.shared.forms.common.warnings.atLeastOneTransportService'));
     return;
   }
 
   if (tripTableItems.value.length === 0) {
-    warning('يجب إضافة تفاصيل رحلة واحدة على الأقل');
+    warning(t('purchases.orders.shared.warnings.atLeastOneTripLeg'));
     return;
   }
 
@@ -951,11 +1082,11 @@ const handleSubmit = async (type: string) => {
   for (let i = 1; i < logisticsDetails.value.length; i++) {
     const detail = logisticsDetails.value[i];
     if (!detail.source_location?.trim()) {
-      warning(`يجب تحديد موقع الاستلام لخدمة النقل رقم ${i + 1}`);
+      warning(t('purchases.orders.shared.warnings.pickupRequiredForService', { n: i + 1 }));
       return;
     }
     if (!detail.target_location?.trim()) {
-      warning(`يجب تحديد موقع التسليم لخدمة النقل رقم ${i + 1}`);
+      warning(t('purchases.orders.shared.warnings.deliveryRequiredForService', { n: i + 1 }));
       return;
     }
   }
@@ -966,10 +1097,10 @@ const handleSubmit = async (type: string) => {
     const payload = buildPayload();
     if (isEditMode.value && routeId.value) {
       await api.put(`/purchases/orders/logistics/${routeId.value}`, payload);
-      success('تم تحديث الطلبية بنجاح');
+      success(t('purchases.orders.shared.success.poUpdated'));
     } else {
       await api.post('/purchases/orders/logistics', payload);
-      success('تم إنشاء الطلبية بنجاح');
+      success(t('purchases.orders.shared.success.poCreated'));
     }
     if (type === 'return_to_list') {
       router.push({ name: 'OrdersLogisticsList' });
@@ -991,24 +1122,24 @@ const handleSubmit = async (type: string) => {
       if (messages.length) {
         messages.forEach(msg => error(msg));
       } else {
-        error(e?.response?.data?.message || 'حدث خطأ أثناء حفظ الطلبية');
+        error(e?.response?.data?.message || t('purchases.orders.shared.warnings.savePoError'));
       }
     } else {
-      error(e?.response?.data?.message || 'حدث خطأ أثناء حفظ الطلبية');
+      error(e?.response?.data?.message || t('purchases.orders.shared.warnings.savePoError'));
     }
   } finally {
     isSubmitting.value = false;
   }
 };
 
-const headers = [
-  { title: 'اسم المنتج', key: 'name' },
-  { title: 'الوحدة', key: 'unit' },
-  { title: 'الكمية', key: 'quantity' },
-  { title: 'تاريخ بداية النقل', key: 'from_date' },
-  { title: 'عدد الرحلات', key: 'trip_no' },
-  { title: 'ملاحظات', key: 'notes' },
-];
+const headers = computed(() => [
+  { title: t('purchases.shared.forms.common.tableHeaders.productName'), key: 'name' },
+  { title: t('purchases.shared.forms.common.tableHeaders.unit'), key: 'unit' },
+  { title: t('purchases.shared.forms.common.tableHeaders.quantity'), key: 'quantity' },
+  { title: t('purchases.orders.shared.tableHeaders.transportStartDate'), key: 'from_date' },
+  { title: t('purchases.requests.logistics.form.productsTable.tripNo'), key: 'trip_no' },
+  { title: t('purchases.shared.forms.common.tableHeaders.notes'), key: 'notes' },
+]);
 
 const tableItems = computed(() => productTableItems.value.map(item => ({
   id: item.item_id,
@@ -1022,17 +1153,17 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
 })));
 
 // Trip details table headers and computed items
-const tripHeaders = [
-  { title: 'اسم المنتج', key: 'name' },
-  { title: 'الوحدة', key: 'unit' },
-  { title: 'الكمية', key: 'quantity' },
-  { title: 'تاريخ الرحلة', key: 'trip_date' },
-  { title: 'نوع المركبات', key: 'transport_type_names' },
-  { title: 'عدد الرحلات', key: 'trip_no' },
-  { title: 'سعر الرحلة', key: 'trip_price' },
-  { title: 'الخصم', key: 'discount_display' },
-  { title: 'السعر الإجمالي', key: 'sub_total' },
-];
+const tripHeaders = computed(() => [
+  { title: t('purchases.shared.forms.common.tableHeaders.productName'), key: 'name' },
+  { title: t('purchases.shared.forms.common.tableHeaders.unit'), key: 'unit' },
+  { title: t('purchases.shared.forms.common.tableHeaders.quantity'), key: 'quantity' },
+  { title: t('purchases.orders.shared.tableHeaders.tripDate'), key: 'trip_date' },
+  { title: t('purchases.orders.shared.tableHeaders.transportTypes'), key: 'transport_type_names' },
+  { title: t('purchases.requests.logistics.form.productsTable.tripNo'), key: 'trip_no' },
+  { title: t('purchases.orders.shared.tableHeaders.tripPrice'), key: 'trip_price' },
+  { title: t('purchases.orders.shared.tableHeaders.discount'), key: 'discount_display' },
+  { title: t('purchases.orders.shared.tableHeaders.subTotal'), key: 'sub_total' },
+]);
 
 const tripItems = computed(() => tripTableItems.value.map(item => ({
   id: item.item_id,
@@ -1050,7 +1181,20 @@ const tripItems = computed(() => tripTableItems.value.map(item => ({
   transport_type_names: item.transport_type_names || getTransportTypeNames(item.transport_type) || '—',
 })));
 
+const timeOfDayLabel = (interval: string | null | undefined) => {
+  if (interval === 'am') return t('purchases.shared.forms.common.timeOfDay.am');
+  if (interval === 'pm') return t('purchases.shared.forms.common.timeOfDay.pm');
+  if (interval === 'both') return t('purchases.shared.forms.common.timeOfDay.both');
+  if (interval) return String(interval);
+  return '—';
+};
 
+const formatVehicleCount = (n: number | string | null | undefined) => {
+  if (n == null || n === '') return '—';
+  const num = Number(n);
+  if (Number.isNaN(num)) return '—';
+  return t('purchases.shared.forms.common.vehicleCount', { count: num });
+};
 
 const summaryTotals = computed(() => {
   const transportValue = logisticsDetails.value.reduce((total, detail) => {
@@ -1116,6 +1260,10 @@ watch(computedFinalLogisticsTrip, (newVal) => {
   formData.value.final_logistics_trip = newVal;
 }, { immediate: true });
 
+const logisticsDiscountTypeOptions = computed(() => [
+  { title: t('purchases.orders.shared.labels.percentSymbol'), value: 1 },
+  { title: t('purchases.orders.shared.labels.currencyRial'), value: 2 },
+]);
 
 const formatCurrency = (value: number): string => {
   if (!Number.isFinite(value)) return '0.00';
@@ -1144,69 +1292,79 @@ onMounted(async () => {
 <template>
   <default-layout>
     <div class="request-material-product-page -mx-6 bg-qallab-dashboard-bg space-y-4">
+      <AppFormBreadcrumb
+        list-path="/purchases/orders/logistics/list"
+        module-root-key="breadcrumb.purchases.root"
+        list-label-key="breadcrumb.purchases.orders.logistics.list"
+        create-label-key="breadcrumb.purchases.orders.logistics.create"
+        edit-label-key="breadcrumb.purchases.orders.logistics.edit"
+        :is-edit-mode="isEditMode"
+        :code="isEditMode ? (formData.code || '') : ''"
+      />
       <TopHeader :icon="fileCheckIcon" title-key="pages.OrdersLogistics.FormTitle"
         description-key="pages.OrdersLogistics.FormDescription" :show-action="false"
+        code-label-key="purchases.orders.shared.labels.purchaseOrderCode"
         :code="isEditMode ? (formData.code || '') : ''" :code-icon="fileIcon" @action="handleNewRequest" />
 
       <div class="p-6 bg-white rounded-3xl border !border-gray-100">
         <div class="flex items-center mb-6 gap-2 text-primary-600">
           <span class="w-4" v-html="fileCheckIcon"></span>
-          <h2 class="text-base font-bold">البيانات الأساسية</h2>
+          <h2 class="text-base font-bold">{{ t('purchases.shared.forms.common.sections.basicInfo') }}</h2>
         </div>
 
         <v-form ref="formRef" v-model="isFormValid" @submit.prevent>
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             <!-- اسم المورد (يُستخدم لجلب المنتجات وإرسال supplier_id) -->
             <SelectInput v-model="formData.supplier_id" :disabled="isFromQuotation" :items="[]"
-              placeholder="اختر المورد" label="اسم المورد" :rules="[required()]" density="comfortable"
+              :placeholder="t('purchases.orders.shared.placeholders.selectSupplierPo')" :label="t('purchases.shared.forms.common.labels.supplierName')" :rules="[required()]" density="comfortable"
               item-title="title" item-value="value" :server-side="true" :fetch-function="fetchSuppliers"
               item-title-key="full_name" item-value-key="id" :debounce-time="500" />
 
-            <TextInput v-model="formData.responsible_person" label="اسم المسؤول" placeholder="أدخل اسم المسؤول"
+            <TextInput v-model="formData.responsible_person" :label="t('purchases.shared.forms.common.labels.responsibleName')" :placeholder="t('purchases.shared.forms.common.placeholders.enterResponsibleName')"
               :rules="[required()]" density="comfortable" />
-            <DateTimePickerInput v-model="formData.po_datetime" label="تاريخ الطلبية" placeholder="اختر التاريخ والوقت"
+            <DateTimePickerInput v-model="formData.po_datetime" :label="t('purchases.orders.shared.labels.poDate')" :placeholder="t('purchases.shared.forms.common.placeholders.selectDateTime')"
               density="comfortable" />
-            <TelInput v-model="formData.responsible_phone" label="هاتف المسؤول" :rules="[required(), saudiPhone()]"
+            <TelInput v-model="formData.responsible_phone" :label="t('purchases.shared.forms.common.labels.responsiblePhone')" :placeholder="t('purchases.shared.forms.common.placeholders.phoneSample')" :rules="[required(), saudiPhone()]"
               density="comfortable" />
             <div class="relative">
-              <label class="text-sm font-medium text-gray-700 mb-2 block">موقع مصدر المواد <span
+              <label class="text-sm font-medium text-gray-700 mb-2 block">{{ t('purchases.requests.logistics.form.labels.sourceMaterialsLocation') }} <span
                   class="text-red-500">*</span></label>
               <div @click="openMapDialog('source')"
                 :class="['flex items-center justify-between px-4 py-2 min-h-[48px] border rounded-lg cursor-pointer', sourceLocationError ? '!border-error-500 bg-error-50' : '!border-blue-400 hover:bg-blue-100']">
                 <span class="text-base font-medium whitespace-nowrap overflow-hidden text-ellipsis"
                   :class="sourceLocationError ? 'text-error-700' : 'text-blue-900'">
-                  {{ formData.source_location || 'حدد الموقع' }}
+                  {{ formData.source_location || t('purchases.shared.forms.common.pickLocation') }}
                 </span>
                 <span v-html="mapMarkerIcon"></span>
               </div>
               <p v-if="sourceLocationError" class="text-error-600 text-xs mt-1">{{ sourceLocationError }}</p>
             </div>
             <div class="relative">
-              <label class="text-sm font-medium text-gray-700 mb-2 block">موقع المشروع <span
+              <label class="text-sm font-medium text-gray-700 mb-2 block">{{ t('purchases.requests.logistics.form.labels.projectLocation') }} <span
                   class="text-red-500">*</span></label>
               <div @click="openMapDialog('target')"
                 :class="locationError ? '!border-error-500 bg-error-50' : '!border-blue-400 hover:bg-blue-100'" class="flex items-center justify-between px-4 py-2 min-h-[48px] border !border-blue-400 rounded-lg
                 cursor-pointer hover:bg-blue-100">
                 <span class="text-base font-medium text-blue-900 whitespace-nowrap overflow-hidden text-ellipsis"
                   :class="locationError ? 'text-error-700' : 'text-blue-900'">
-                  {{ formData.target_location || 'حدد الموقع' }}
+                  {{ formData.target_location || t('purchases.shared.forms.common.pickLocation') }}
                 </span>
                 <span v-html="mapMarkerIcon"></span>
               </div>
               <p v-if="locationError" class="text-error-600 text-xs mt-1">{{ locationError }}</p>
 
             </div>
-            <TextInput v-model="formData.project_name" label="اسم المشروع" placeholder="أدخل اسم المشروع"
+            <TextInput v-model="formData.project_name" :label="t('purchases.requests.logistics.form.labels.projectName')" :placeholder="t('purchases.requests.logistics.form.placeholders.enterProjectName')"
               :rules="[required()]" density="comfortable" />
             <TextInput disabled v-model="formData.purchase_quotation_code" v-if="formData.purchase_quotation_code"
-              readonly label="كود عرض السعر" density="comfortable" :hide-details="true">
+              readonly :label="t('purchases.orders.shared.labels.quotationCode')" density="comfortable" :hide-details="true">
               <template #append-inner>
                 <v-tooltip location="top" content-class="custom-tooltip">
                   <template #activator="{ props: tooltipProps }">
                     <ButtonWithIcon variant="text" size="small" density="compact" custom-class="!min-w-0 p-0"
                       :prepend-icon="HelpCircleIcon" v-bind="tooltipProps" />
                   </template>
-                  <div>كود عرض السعر</div>
+                  <div>{{ t('purchases.orders.shared.labels.quotationCode') }}</div>
                 </v-tooltip>
               </template>
             </TextInput>
@@ -1220,10 +1378,10 @@ onMounted(async () => {
         <div class="flex flex-wrap gap-3 items-center justify-between px-6 py-3">
           <div class="flex items-center gap-2 text-primary-600">
             <span v-html="busIcon"></span>
-            <h2 class="text-base font-bold">تفاصيل النقل</h2>
+            <h2 class="text-base font-bold">{{ t('purchases.requests.logistics.form.transportDetails') }}</h2>
           </div>
           <ButtonWithIcon color="primary-600" variant="flat" rounded="lg" @click="handleAddLogisticsDetail">
-            أضف خدمة نقل
+            {{ t('purchases.requests.logistics.form.addTransportService') }}
           </ButtonWithIcon>
         </div>
         <!-- Logistics Details Cards (نفس هيكل طلبات خدمة النقل) -->
@@ -1232,57 +1390,55 @@ onMounted(async () => {
             <div class="flex gap-4 items-stretch">
               <div class="flex flex-wrap gap-x-2 gap-y-0">
                 <div class="info-item-bordered px-4 py-2">
-                  <label class="font-semibold text-sm text-gray-500 mb-2 block">نوع المواد المنقولة</label>
+                  <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('purchases.requests.logistics.form.detailCard.materialType') }}</label>
                   <p class="text-base font-semibold text-gray-900">{{ getCategoriesNames(detail.material_type) }}</p>
                 </div>
                 <v-divider vertical class="my-6"></v-divider>
                 <div class="info-item-bordered px-4 py-2">
-                  <label class="font-semibold text-sm text-gray-500 mb-2 block">عدد الرحلات</label>
+                  <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('purchases.requests.logistics.form.detailCard.tripCount') }}</label>
                   <p class="text-base font-semibold text-gray-900">{{ detail.trip_no }}</p>
                 </div>
                 <v-divider vertical class="my-6"></v-divider>
                 <div class="info-item-bordered px-4 py-2">
-                  <label class="font-semibold text-sm text-gray-500 mb-2 block">مدة التنفيذ</label>
+                  <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('purchases.requests.logistics.form.detailCard.executionDuration') }}</label>
                   <p class="text-base font-semibold text-gray-900">{{ detail.actual_execution_interval ?? '—' }}</p>
                 </div>
                 <v-divider vertical class="my-6"></v-divider>
                 <div class="info-item-bordered px-4 py-2">
-                  <label class="font-semibold text-sm text-gray-500 mb-2 block">أوقات النقل</label>
-                  <p class="text-base font-semibold text-gray-900">{{ detail.am_pm_interval === 'am' ? 'صباحاً' :
-                    detail.am_pm_interval === 'pm' ? 'مساءً' : (detail.am_pm_interval || '—') }}</p>
+                  <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('purchases.requests.logistics.form.detailCard.transportTimes') }}</label>
+                  <p class="text-base font-semibold text-gray-900">{{ timeOfDayLabel(detail.am_pm_interval) }}</p>
                 </div>
                 <v-divider vertical class="my-6"></v-divider>
                 <div class="info-item-bordered px-4 py-2">
-                  <label class="font-semibold text-sm text-gray-500 mb-2 block">تاريخ بدء النقل</label>
+                  <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('purchases.requests.logistics.form.detailCard.fromDate') }}</label>
                   <p class="text-base font-semibold text-gray-900">{{ detail.from_date || '—' }}</p>
                 </div>
                 <v-divider vertical class="my-6"></v-divider>
                 <div class="info-item-bordered px-4 py-2">
-                  <label class="font-semibold text-sm text-gray-500 mb-2 block">تاريخ انتهاء النقل</label>
+                  <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('purchases.requests.logistics.form.detailCard.toDate') }}</label>
                   <p class="text-base font-semibold text-gray-900">{{ detail.to_date || '—' }}</p>
                 </div>
                 <v-divider vertical class="my-6"></v-divider>
                 <div class="info-item-bordered px-4 py-2">
-                  <label class="font-semibold text-sm text-gray-500 mb-2 block">نوع مركبة النقل</label>
+                  <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('purchases.orders.shared.tableHeaders.vehicleType') }}</label>
                   <p class="text-base font-semibold text-gray-900">{{ getTransportTypeNames(detail.transport_type) }}
                   </p>
                 </div>
                 <v-divider vertical class="my-6"></v-divider>
                 <div class="info-item-bordered px-4 py-2">
-                  <label class="font-semibold text-sm text-gray-500 mb-2 block">عدد مركبات النقل</label>
-                  <p class="text-base font-semibold text-gray-900">{{ detail.transport_no != null ? detail.transport_no
-                    + ' مركبة' : '—' }}</p>
+                  <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('purchases.requests.logistics.form.detailCard.vehicleCount') }}</label>
+                  <p class="text-base font-semibold text-gray-900">{{ formatVehicleCount(detail.transport_no) }}</p>
                 </div>
                 <v-divider vertical class="my-6"></v-divider>
                 <div class="info-item-bordered px-4 py-2">
-                  <label class="font-semibold text-sm text-gray-500 mb-2 block">مبلغ النقل</label>
+                  <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('purchases.orders.shared.labels.logisticsTransportAmount') }}</label>
                   <p class="text-base font-semibold text-gray-900 flex items-center gap-2">
                     {{ detail.transport_amount ?? '—' }} <span v-html="rialIcon"> </span>
                   </p>
                 </div>
                 <v-divider vertical class="my-6" v-if="detail.discount_val"></v-divider>
                 <div class="info-item-bordered px-4 py-2" v-if="detail.discount_val">
-                  <label class="font-semibold text-sm text-gray-500 mb-2 block">الخصم</label>
+                  <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('purchases.orders.shared.labels.discountRow') }}</label>
                   <p class="text-base font-semibold text-gray-900 flex items-center gap-1">
                     {{ detail.discount_val }}
                     <span v-if="detail.discount_type == 1">%</span>
@@ -1291,22 +1447,22 @@ onMounted(async () => {
                 </div>
                 <v-divider vertical class="my-6"></v-divider>
                 <div class="info-item-bordered px-4 py-2">
-                  <label class="font-semibold text-sm text-gray-500 mb-2 block">مسؤول التفريغ</label>
+                  <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('purchases.requests.logistics.form.detailCard.unloadingResponsible') }}</label>
                   <p class="text-base font-semibold text-gray-900">{{ detail.loading_responsible_party || '—' }}</p>
                 </div>
                 <v-divider vertical class="my-6"></v-divider>
                 <div class="info-item-bordered px-4 py-2">
-                  <label class="font-semibold text-sm text-gray-500 mb-2 block">مسؤول التحميل</label>
+                  <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('purchases.requests.logistics.form.detailCard.loadingResponsible') }}</label>
                   <p class="text-base font-semibold text-gray-900">{{ detail.downloading_responsible_party || '—' }}</p>
                 </div>
                 <v-divider vertical class="my-6" v-if="detail.target_location"></v-divider>
                 <div class="info-item-bordered px-4 py-2" v-if="detail.target_location">
-                  <label class="font-semibold text-sm text-gray-500 mb-2 block">موقع التسليم</label>
+                  <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('purchases.requests.logistics.form.detailCard.deliveryLocation') }}</label>
                   <p class="text-base font-semibold text-gray-900">{{ detail.target_location }}</p>
                 </div>
                 <v-divider vertical class="my-6" v-if="detail.source_location"></v-divider>
                 <div class="info-item-bordered px-4 py-2" v-if="detail.source_location">
-                  <label class="font-semibold text-sm text-gray-500 mb-2 block">موقع الإستلام</label>
+                  <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('purchases.requests.logistics.form.detailCard.pickupLocation') }}</label>
                   <p class="text-base font-semibold text-gray-900">{{ detail.source_location }}</p>
                 </div>
               </div>
@@ -1315,16 +1471,16 @@ onMounted(async () => {
             </div>
             <div class="flex justify-end gap-2 mt-2">
               <ButtonWithIcon color="primary-800" variant="flat" class="text-white" rounded="lg"
-                :prepend-icon="globeIcon" @click="openLogisticsLocationDialog(index, 'source')">موقع الاستلام
+                :prepend-icon="globeIcon" @click="openLogisticsLocationDialog(index, 'source')">{{ t('purchases.requests.logistics.form.map.pickup') }}
               </ButtonWithIcon>
               <ButtonWithIcon color="primary-800" variant="flat" class="text-white" rounded="lg"
-                :prepend-icon="globeIcon" @click="openLogisticsLocationDialog(index, 'target')">موقع التسليم
+                :prepend-icon="globeIcon" @click="openLogisticsLocationDialog(index, 'target')">{{ t('purchases.requests.logistics.form.map.delivery') }}
               </ButtonWithIcon>
             </div>
           </div>
           <div v-if="logisticsDetails.length === 0" class="text-center py-12">
-            <p class="text-gray-500 text-lg">لا توجد تفاصيل نقل مضافة</p>
-            <p class="text-gray-400 text-sm mt-2">اضغط على "أضف خدمة نقل" لإضافة تفاصيل جديدة</p>
+            <p class="text-gray-500 text-lg">{{ t('purchases.requests.logistics.form.emptyTransportTitle') }}</p>
+            <p class="text-gray-400 text-sm mt-2">{{ t('purchases.requests.logistics.form.emptyTransportHint') }}</p>
           </div>
         </div>
       </div>
@@ -1334,7 +1490,7 @@ onMounted(async () => {
         <div class="flex flex-wrap gap-3 items-center justify-between bg-primary-50 px-6 py-3">
           <div class="flex items-center gap-2 text-primary-600">
             <span v-html="packageIcon"></span>
-            <h2 class="text-xl font-bold">المنتجات</h2>
+            <h2 class="text-xl font-bold">{{ t('purchases.shared.forms.common.sections.products') }}</h2>
           </div>
         </div>
         <div class="mb-4">
@@ -1351,7 +1507,7 @@ onMounted(async () => {
                 <template #activator="{ props }">
                   <div class="flex items-center gap-2 cursor-pointer" v-bind="props">
                     <v-icon size="20" color="primary" v-html="messagePlusIcon"></v-icon>
-                    <span class="text-gray-900">{{ item.notes || "أضف ملاحظة" }}</span>
+                    <span class="text-gray-900">{{ item.notes || t('purchases.shared.forms.common.placeholders.addNote') }}</span>
                   </div>
                 </template>
 
@@ -1364,7 +1520,7 @@ onMounted(async () => {
                   <div class="!flex flex-nowrap items-center gap-3">
                     <TextInput
                       v-model="productTableItems[productTableItems.findIndex((p) => p.item_id === item.item_id)].notes"
-                      placeholder="أضف ملاحظة"
+                      :placeholder="t('purchases.shared.forms.common.placeholders.addNote')"
                       variant="outlined"
                       density="comfortable"
                       hide-details
@@ -1378,10 +1534,19 @@ onMounted(async () => {
             </template>
           </DataTable>
         </div>
-        <div class="flex justify-center">
-          <ButtonWithIcon color="primary-100" variant="flat" class="!text-primary-900 font-bold w-75"
+        <div class="flex justify-center gap-3 mx-auto md:w-3/4">
+          <ButtonWithIcon color="primary-100" variant="flat" class="!text-primary-900 font-bold flex-1"
             @click="handleAddProduct">
-            + إضافة منتج جديد
+            {{ t('purchases.shared.forms.common.actions.addProduct') }}
+          </ButtonWithIcon>
+          <ButtonWithIcon
+            v-if="productTableItems.length > 0"
+            color="primary-100"
+            variant="flat"
+            class="!text-primary-900 font-bold flex-1"
+            @click="showEditProductsDialog = true"
+          >
+            {{ t('purchases.shared.forms.common.actions.editProducts') }}
           </ButtonWithIcon>
         </div>
       </div>
@@ -1391,7 +1556,7 @@ onMounted(async () => {
         <div class="px-6 py-6">
           <div class="flex items-center gap-2 mb-2">
             <span v-html="busIcon"></span>
-            <h2 class="text-base font-bold text-primary-600">تفاصيل الرحلات</h2>
+            <h2 class="text-base font-bold text-primary-600">{{ t('purchases.orders.shared.labels.tripDetailsSection') }}</h2>
           </div>
         </div>
 
@@ -1407,6 +1572,16 @@ onMounted(async () => {
             <span v-else>—</span>
           </template>
         </DataTable>
+        <div v-if="tripTableItems.length > 0" class="flex justify-center py-4">
+          <ButtonWithIcon
+            color="primary-100"
+            variant="flat"
+            class="!text-primary-900 font-bold w-full max-w-md"
+            @click="showEditTripsDialog = true"
+          >
+            {{ t('purchases.orders.shared.actions.editTrips') }}
+          </ButtonWithIcon>
+        </div>
       </div>
 
       <!-- بيانات الدفع وملخص المبالغ (آخر قسم قبل أزرار الحفظ) -->
@@ -1414,18 +1589,18 @@ onMounted(async () => {
         <div class="bg-white rounded-2xl xl:col-span-2">
           <div class="flex items-center gap-2 p-6 border-b !border-gray-200">
             <span v-html="CoinHandIcon"></span>
-            <h2 class="text-base font-bold text-primary-600">بيانات الدفع</h2>
+            <h2 class="text-base font-bold text-primary-600">{{ t('purchases.orders.shared.labels.paymentData') }}</h2>
           </div>
           <div class="p-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <PriceInput showRialIcon v-model="formData.final_logistics_service_amount" density="comfortable"
-                label="القيمة الإجمالية لمبلغ خدمات النقل" placeholder="0" disabled />
+                :label="t('purchases.orders.shared.labels.logisticsTransportTotal')" placeholder="0" disabled />
 
               <PriceInput showRialIcon v-model="formData.final_logistics_trip" density="comfortable"
-                label="القيمة الإجمالية لمبلغ الرحلات" placeholder="0" disabled />
+                :label="t('purchases.orders.shared.labels.logisticsTripsTotal')" placeholder="0" disabled />
 
               <div class="md:col-span-1" v-if="approvedAmountItems.length > 0">
-                <label class="font-semibold text-sm text-gray-700 mb-2 block">المبلغ الإجمالي المعتمد في العرض</label>
+                <label class="font-semibold text-sm text-gray-700 mb-2 block">{{ t('purchases.orders.shared.labels.approvedOfferTotal') }}</label>
                 <v-radio-group v-model="formData.approved_amount" inline density="comfortable" hide-details>
                   <v-radio
                     v-for="item in approvedAmountItems"
@@ -1438,31 +1613,31 @@ onMounted(async () => {
               </div>
 
               <SelectInput v-model="formData.payment_method" :items="paymentMethodItems" density="comfortable"
-                placeholder="حدد طريقة الدفع" label="طريقة الدفع" item-title="title" item-value="value"
+                :placeholder="t('purchases.shared.forms.common.placeholders.selectPaymentMethod')" :label="t('purchases.shared.forms.common.labels.paymentMethod')" item-title="title" item-value="value"
                 :rules="[required()]" />
-              <PriceInput showRialIcon v-model="formData.upfront_payment" density="comfortable" label="دفعة مقدمة"
-                placeholder="أدخل قيمة الدفعة" />
+              <PriceInput showRialIcon v-model="formData.upfront_payment" density="comfortable" :label="t('purchases.shared.forms.common.labels.advancePayment')"
+                :placeholder="t('purchases.shared.forms.common.placeholders.enterAdvanceAmount')" />
 
-              <PriceInput label="مدة رفع المستخلص" v-model="formData.invoice_interval" placeholder="أدخل المدة بالأيام"
+              <PriceInput :label="t('purchases.orders.shared.labels.invoiceUploadDuration')" v-model="formData.invoice_interval" :placeholder="t('purchases.orders.shared.placeholders.enterDurationDays')"
                 :rules="[numeric()]" density="comfortable">
                 <template #append-inner>
-                  <span class="text-gray-500 text-sm"> يوم </span>
+                  <span class="text-gray-500 text-sm"> {{ t('purchases.shared.forms.common.day') }} </span>
                 </template>
               </PriceInput>
-              <PriceInput label="مدة السداد" v-model="formData.payment_term_no" placeholder="أدخل المدة بالأيام"
+              <PriceInput :label="t('purchases.orders.shared.labels.paymentDuration')" v-model="formData.payment_term_no" :placeholder="t('purchases.orders.shared.placeholders.enterDurationDays')"
                 :rules="[numeric()]" density="comfortable">
                 <template #append-inner>
-                  <span class="text-gray-500 text-sm"> يوم </span>
+                  <span class="text-gray-500 text-sm"> {{ t('purchases.shared.forms.common.day') }} </span>
                 </template>
               </PriceInput>
 
               <TextInputWithSelect v-model="formData.late_fee" v-model:selectValue="formData.late_fee_type"
-                label="غرامة التأخير" placeholder="أدخل المبلغ" type="number" :rules="[numeric(), positive()]"
-                select-width="110px" :select-items="feeTypeItems" select-placeholder="اختر" />
+                :label="t('purchases.orders.shared.labels.lateFee')" :placeholder="t('purchases.orders.shared.placeholders.enterFeeAmount')" type="number" :rules="[numeric(), positive()]"
+                select-width="110px" :select-items="feeTypeItems" :select-placeholder="t('purchases.shared.forms.common.select')" />
 
               <TextInputWithSelect v-model="formData.cancel_fee" v-model:selectValue="formData.cancel_fee_type"
-                label="غرامة الإلغاء" placeholder="أدخل المبلغ" type="number" :rules="[numeric(), positive()]"
-                select-width="110px" :select-items="feeTypeItems" select-placeholder="اختر" />
+                :label="t('purchases.orders.shared.labels.cancelFee')" :placeholder="t('purchases.orders.shared.placeholders.enterFeeAmount')" type="number" :rules="[numeric(), positive()]"
+                select-width="110px" :select-items="feeTypeItems" :select-placeholder="t('purchases.shared.forms.common.select')" />
             </div>
           </div>
         </div>
@@ -1472,17 +1647,17 @@ onMounted(async () => {
             <thead>
               <tr class="bg-primary-400">
                 <th class="text-white font-semibold text-base py-3 px-4 text-center border-l !border-gray-200">
-                  العنصر
+                  {{ t('purchases.orders.shared.labels.summaryItem') }}
                 </th>
                 <th class="text-white font-semibold text-base py-3 px-4 text-center">
-                  المبلغ
+                  {{ t('purchases.orders.shared.labels.summaryAmount') }}
                 </th>
               </tr>
             </thead>
             <tbody class="text-sm bg-primary-25">
               <tr class="border-b !border-gray-200">
                 <td class="py-5 px-4 text-center font-bold text-gray-900 border-l !border-gray-200">
-                  قيمة النقل
+                  {{ t('purchases.orders.shared.labels.transportValueLabel') }}
                 </td>
                 <td class="py-5 px-4 text-center text-gray-600">
                   <span class="font-semibold text-gray-900">{{ formatCurrency(summaryTotals.transportValue) }}</span>
@@ -1491,7 +1666,7 @@ onMounted(async () => {
 
               <tr class="border-b !border-gray-200">
                 <td class="py-5 px-4 text-center font-bold text-gray-900 border-l !border-gray-200">
-                  الضريبة
+                  {{ t('purchases.orders.shared.labels.taxRow') }}
                 </td>
                 <td class="py-5 px-4 text-center text-gray-600">
                   {{ summaryTotals.taxRatePercent }}%
@@ -1500,7 +1675,7 @@ onMounted(async () => {
 
               <tr class="border-b !border-gray-200">
                 <td class="py-5 px-4 text-center font-bold text-gray-900 border-l !border-gray-200">
-                  اجمالي الضريبة
+                  {{ t('purchases.orders.shared.labels.totalTaxRow') }}
                 </td>
                 <td class="py-5 px-4 text-center text-gray-600">
                   <span class="font-semibold text-gray-900">{{ formatCurrency(summaryTotals.taxAmount) }}</span>
@@ -1509,7 +1684,7 @@ onMounted(async () => {
 
               <tr class="border-b !border-gray-200">
                 <td class="py-5 px-4 text-center font-bold text-gray-900 border-l !border-gray-200">
-                  الإجمالي النهائي
+                  {{ t('purchases.orders.shared.labels.finalTotalRow') }}
                 </td>
                 <td class="py-5 px-4 font-bold text-center text-gray-900">
                   <span class="font-semibold text-gray-900">{{ formatCurrency(summaryTotals.finalTotal) }}</span>
@@ -1523,11 +1698,11 @@ onMounted(async () => {
       <div class="mt-3 flex items-center justify-center gap-3">
         <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col">
           <ButtonWithIcon variant="flat" color="primary" height="48" rounded="4"
-            custom-class="font-semibold text-base px-6 md:!px-10" :prepend-icon="returnIcon" label="حفظ والعودة للقائمة"
+            custom-class="font-semibold text-base px-6 md:!px-10" :prepend-icon="returnIcon" :label="t('purchases.orders.shared.labels.saveReturnToList')"
             :loading="isSubmitting" @click="handleSubmit('return_to_list')" />
           <ButtonWithIcon variant="flat" color="primary-50" height="48" rounded="4"
             custom-class="font-semibold text-base text-primary-700 px-6 md:!px-10" :prepend-icon="saveIcon"
-            label="حفظ وإنشاء جديد" :loading="isSubmitting" @click="handleSubmit('create_new')" />
+            :label="t('purchases.orders.shared.labels.saveAndCreateNewPo')" :loading="isSubmitting" @click="handleSubmit('create_new')" />
         </div>
       </div>
     </div>
@@ -1538,16 +1713,40 @@ onMounted(async () => {
       :address="String(currentMapType === 'target' ? (formData.target_location || '') : (formData.source_location || ''))"
       @location-selected="handleLocationSelected" />
 
-    <AddProductDialog v-model="showAddProductDialog" :request-type="productDialogMode"
-      :unit-items="unitItems" :transport-types="transportTypeItems"
-      items-endpoint="/items/list?with_category=true"
+    <!-- مودال المنتجات: بدون supplier_id ولا material_type — /categories/list و /items/list فقط -->
+    <AddProductDialog
+      v-model="showAddProductDialog"
+      :request-type="productDialogMode"
+      :unit-items="unitItems"
+      :transport-types="transportTypeItems"
       :edit-product="(editingProduct as any)"
       :existing-products="(productDialogMode === 'logistics' ? productTableItems : tripTableItems) as any[]"
-      @saved="handleProductSaved" @product-updated="handleProductUpdated" />
+      @saved="handleProductSaved"
+      @product-updated="handleProductUpdated"
+    />
+
+    <EditProductsDialog
+      v-model="showEditProductsDialog"
+      request-type="logistics"
+      :products="productTableItems"
+      :transport-types="transportTypeItems"
+      :unit-items="unitItems"
+      @products-updated="handleEditProductsBulk"
+    />
+
+    <EditProductsDialog
+      v-model="showEditTripsDialog"
+      request-type="logistics-trips"
+      :products="tripTableItems as any"
+      :transport-types="transportTypeItems"
+      :unit-items="unitItems"
+      :discount-type-items="logisticsDiscountTypeOptions"
+      @products-updated="handleEditTripsBulk"
+    />
 
     <AddLogisticsDetailDialog v-model="showAddLogisticsDialog" :transport-types="transportTypeItems"
       :am-pm-interval-options="amPmIntervalItems" :categories-items="categoriesItems"
-      :discount-type-options="[{ title: '%', value: 1 }, { title: 'ريال', value: 2 }]"
+      :discount-type-options="logisticsDiscountTypeOptions"
       :edit-detail="editingLogisticsDetail" @saved="handleLogisticsDetailSaved"
       @updated="handleLogisticsDetailUpdated" />
 

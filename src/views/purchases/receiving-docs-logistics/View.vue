@@ -10,12 +10,12 @@
                     </router-link>
                     <span class="text-lg text-gray-300">/</span>
                     <router-link to="/purchases" class="text-gray-600 hover:text-primary-600">
-                        المشتريات
+                        {{ t('purchases.receivingDocs.view.shared.purchasesBreadcrumb') }}
                     </router-link>
                     <span class="text-lg text-gray-300">/</span>
                     <router-link to="/purchases/receiving-docs-logistics/list"
                         class="text-gray-600 hover:text-primary-600">
-                        قائمة سندات استلام خدمات النقل
+                        {{ t('purchases.receivingDocs.view.listCrumbLogistics') }}
                     </router-link>
                     <span class="text-lg text-gray-300">/</span>
                     <span class="text-primary-700 font-medium bg-primary-50 px-2 py-1 rounded-md">{{ documentCode ||
@@ -31,7 +31,7 @@
                             </div>
                             <div>
                                 <h1 class="text-lg font-bold text-gray-900 mb-1">{{ documentCode || '--' }}</h1>
-                                <p class="text-sm text-gray-600">تفاصيل سند الاستلام والمعلومات الخاصة به</p>
+                                <p class="text-sm text-gray-600">{{ t('purchases.receivingDocs.view.shared.subtitle') }}</p>
                             </div>
                         </div>
                     </div>
@@ -40,27 +40,27 @@
                 <!-- Main Content -->
                 <!-- Receiving Document Information Section -->
                 <div class="p-6">
-                    <h2 class="text-lg font-bold text-primary-900 mb-6">البيانات الأساسية</h2>
+                    <h2 class="text-lg font-bold text-primary-900 mb-6">{{ t('purchases.receivingDocs.view.shared.basicInfo') }}</h2>
 
                     <div class="flex flex-wrap gap-4">
                         <div class="info-item-bordered flex-1 px-6 py-4">
-                            <label class="font-semibold text-sm text-gray-500 mb-2 block">كود طلبية المشتريات</label>
+                            <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('purchases.receivingDocs.form.labels.purchaseOrderCode') }}</label>
                             <p class="text-base font-semibold text-gray-900">{{ purchaseOrderCode }}</p>
                         </div>
                         <v-divider vertical class="my-6"></v-divider>
                         <div class="info-item-bordered flex-1 px-6 py-4">
-                            <label class="font-semibold text-sm text-gray-500 mb-2 block">كود سند الاستلام</label>
+                            <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('purchases.receivingDocs.form.labels.docCode') }}</label>
                             <p class="text-base font-semibold text-gray-900">{{ documentCode }}</p>
                         </div>
                         <v-divider vertical class="my-6"></v-divider>
                         <div class="info-item-bordered flex-1 px-6 py-4">
-                            <label class="font-semibold text-sm text-gray-500 mb-2 block">تاريخ الاستلام</label>
+                            <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('purchases.receivingDocs.form.labels.receivedAt') }}</label>
                             <p class="text-base font-semibold text-gray-900">{{ receivingDocData?.receiving_date || '—'
                                 }}</p>
                         </div>
                         <v-divider vertical class="my-6"></v-divider>
                         <div class="info-item-bordered flex-1 px-6 py-4">
-                            <label class="font-semibold text-sm text-gray-500 mb-2 block">حالة الإستلام</label>
+                            <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('purchases.receivingDocs.view.shared.receiptStatus') }}</label>
                             <p class="text-base font-semibold text-gray-900">{{ statusLabel }}</p>
                         </div>
                     </div>
@@ -71,7 +71,7 @@
                     <div class="bg-white px-6 py-3">
                         <div class="flex items-center gap-2 text-primary-600">
                             <span class="w-4" v-html="fileCheckIcon"></span>
-                            <h2 class="text-base font-bold">جدول عناصر سند الاستلام</h2>
+                            <h2 class="text-base font-bold">{{ t('purchases.receivingDocs.view.shared.itemsTable') }}</h2>
                         </div>
                     </div>
                     <div>
@@ -80,16 +80,16 @@
                                 <span v-for="(el, index) in item.vehicle_type_no_from_transport_label" :key="index"
                                     class="text-gray-900 text-sm font-medium">
                                     {{ el.transport_type_label }} : {{ el.transport_no }}
-                                    <span v-if="Number(index) < item.vehicle_type_no_from_transport_label.length - 1">،
-                                    </span>
+                                    <span v-if="Number(index) < item.vehicle_type_no_from_transport_label.length - 1">{{
+                                        t('purchases.views.shared.listComma') }}</span>
                                 </span>
                             </template>
                             <template #item.vehicle_type_no_from_customer_label="{ item }">
                                 <span v-for="(el, index) in item.vehicle_type_no_from_customer_label" :key="index"
                                     class="text-gray-900 text-sm font-medium">
                                     {{ el.transport_type_label }} : {{ el.transport_no }}
-                                    <span v-if="Number(index) < item.vehicle_type_no_from_customer_label.length - 1">،
-                                    </span>
+                                    <span v-if="Number(index) < item.vehicle_type_no_from_customer_label.length - 1">{{
+                                        t('purchases.views.shared.listComma') }}</span>
                                 </span>
                             </template>
                         </DataTable>
@@ -97,7 +97,7 @@
                 </div>
 
                 <div class="my-6">
-                    <h2 class="text-base font-bold text-primary-900 text-lg px-6 mb-3">المرفقات</h2>
+                    <h2 class="text-base font-bold text-primary-900 text-lg px-6 mb-3">{{ t('purchases.receivingDocs.view.shared.attachments') }}</h2>
                     <div class="px-6">
                         <div v-if="attachmentsData.length" class="space-y-4">
                             <div v-for="attachment in attachmentsData" :key="attachment.id"
@@ -114,13 +114,13 @@
                                 </div>
                                 <a v-if="attachment.url" :href="attachment.url" target="_blank" rel="noopener"
                                     class="text-primary-600 text-sm font-medium hover:underline">
-                                    عرض
+                                    {{ t('purchases.receivingDocs.view.shared.viewAction') }}
                                 </a>
                                 <span v-else class="text-xs text-gray-400">—</span>
                             </div>
                         </div>
                         <div v-else class="text-gray-500 text-sm">
-                            لا توجد مرفقات لعرضها
+                            {{ t('purchases.receivingDocs.view.shared.noAttachments') }}
                         </div>
                     </div>
                 </div>
@@ -137,6 +137,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useApi } from '@/composables/useApi'
 import { useNotification } from '@/composables/useNotification'
 import { archiveIcon, homeIcon, fileCheckIcon, documentIcon } from '@/components/icons/globalIcons'
@@ -195,6 +196,7 @@ interface LogisticItemRow {
 const route = useRoute()
 const api = useApi()
 const { error } = useNotification()
+const { t } = useI18n()
 
 const isLoading = ref(false)
 const receivingDocData = ref<ReceivingDoc | null>(null)
@@ -212,7 +214,7 @@ const fetchReceivingDocData = async () => {
         receivingDocData.value = res.data
     } catch (e: any) {
         console.error('Error fetching receiving document data:', e)
-        error(e?.response?.data?.message || 'فشل تحميل بيانات سند الاستلام')
+        error(e?.response?.data?.message || t('purchases.receivingDocs.view.shared.loadError'))
     } finally {
         isLoading.value = false
     }
@@ -240,7 +242,7 @@ const attachmentsData = computed<AttachmentCard[]>(() => {
 
     return attachments.map((attachment, index) => {
         if (typeof attachment === 'string') {
-            const name = attachment.split('/').pop() || `مرفق ${index + 1}`
+            const name = attachment.split('/').pop() || t('purchases.receivingDocs.view.shared.attachmentFallback', { n: index + 1 })
             return {
                 id: String(index),
                 name,
@@ -249,7 +251,7 @@ const attachmentsData = computed<AttachmentCard[]>(() => {
             }
         }
 
-        const name = attachment.file_name || attachment.name || `مرفق ${index + 1}`
+        const name = attachment.file_name || attachment.name || t('purchases.receivingDocs.view.shared.attachmentFallback', { n: index + 1 })
         const size = formatFileSize(attachment.file_size ?? attachment.size)
         const progress = attachment.uploaded_percentage ?? attachment.progress ?? 100
         const metaParts = [size !== '—' ? size : null, progress !== undefined ? `${progress}% uploaded` : null]
@@ -291,13 +293,13 @@ const itemsData = computed<LogisticItemRow[]>(() => {
 })
 
 // Table headers
-const itemHeaders = [
-    { title: 'اسم المنتج', key: 'item_name' },
-    { title: 'الكمية الأساسية', key: 'base_quantity' },
-    { title: 'الكمية الفعلية', key: 'received_quantity' },
-    { title: 'المركبات الناقلة المرسلة', key: 'vehicle_type_no_from_transport_label' },
-    { title: 'المركبات الناقلة المستلمة', key: 'vehicle_type_no_from_customer_label' },
-]
+const itemHeaders = computed(() => [
+    { title: t('purchases.receivingDocs.form.tableHeaders.productName'), key: 'item_name' },
+    { title: t('purchases.receivingDocs.form.tableHeaders.baseQty'), key: 'base_quantity' },
+    { title: t('purchases.receivingDocs.form.tableHeaders.actualQty'), key: 'received_quantity' },
+    { title: t('purchases.receivingDocs.form.tableHeaders.vehiclesSent'), key: 'vehicle_type_no_from_transport_label' },
+    { title: t('purchases.receivingDocs.form.tableHeaders.vehiclesReceived'), key: 'vehicle_type_no_from_customer_label' },
+])
 
 </script>
 

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import SarIcon from '@/components/icons/SarIcon.vue';
+import { useI18n } from 'vue-i18n';
 
 interface SelectItem {
   title: string;
@@ -25,12 +26,14 @@ interface Props {
   allowNegative?: boolean;
 }
 
+const { t } = useI18n();
+
 const props = withDefaults(defineProps<Props>(), {
   modelValue: '',
   selectValue: null,
   label: '',
   placeholder: '',
-  selectPlaceholder: 'اختر',
+  selectPlaceholder: '',
   selectItems: () => [],
   type: 'text',
   rules: () => [],
@@ -101,7 +104,7 @@ const handleWheel = (e: WheelEvent) => {
         <div class="h-full flex items-center bg-gray-100 px-2 -mx-3 rounded-tl-lg !rounded-bl-lg" :style="{ width: selectWidth, minWidth: selectWidth }" @mousedown.stop @click.stop>
           <v-select
             v-model="internalSelectValue"
-            :placeholder="selectPlaceholder"
+            :placeholder="selectPlaceholder || t('common.form.choose')"
             :items="selectItems"
             variant="plain"
             density="compact"

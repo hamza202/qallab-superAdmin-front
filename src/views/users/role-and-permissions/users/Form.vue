@@ -8,15 +8,15 @@
                 </router-link>
                 <span class="text-lg text-gray-300">/</span>
                 <router-link to="/users/list" class="text-gray-600 hover:text-primary-600">
-                    المستخدمين
+                    {{ t('pages.users.title') }}
                 </router-link>
                 <span class="text-lg text-gray-300">/</span>
                 <router-link to="/users/list" class="text-gray-600 hover:text-primary-600">
-                    ادارة المستخدمين
+                    {{ t('pages.users.list.pageTitle') }}
                 </router-link>
                 <span class="text-lg text-gray-300">/</span>
                 <span class="text-primary-700 font-medium bg-primary-50 px-2 py-1 rounded-md">
-                    {{ isEditing ? 'تعديل المستخدم' : 'اضافة مستخدم جديد' }}
+                    {{ isEditing ? t('pages.users.form.editUser') : t('pages.users.form.addUser') }}
                 </span>
             </div>
 
@@ -28,10 +28,10 @@
                     </div>
                     <div>
                         <h1 class="text-xl font-bold text-gray-900 mb-1">
-                            {{ isEditing ? 'تعديل المستخدم' : 'اضافة مستخدم جديد' }}
+                            {{ isEditing ? t('pages.users.form.editUser') : t('pages.users.form.addUser') }}
                         </h1>
                         <p class="text-sm text-gray-500">
-                            قم بملئ البيانات الأساسية واختيار الأدوار للمستخدم
+                            {{ t('pages.users.form.fillBasicData') }}
                         </p>
                     </div>
                 </div>
@@ -43,7 +43,7 @@
                     <!-- Section Title -->
                     <div class="flex items-center gap-2 mb-6">
                         <span v-html="clipboardIcon" class="text-primary-500"></span>
-                        <h2 class="text-lg font-bold text-primary-600">البيانات الأساسية</h2>
+                        <h2 class="text-lg font-bold text-primary-600">{{ t('pages.users.form.basicData') }}</h2>
                     </div>
                     <!-- Form Fields -->
                     <div class="space-y-6">
@@ -51,23 +51,22 @@
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <!-- Name -->
                             <div>
-                                <label class="qallab-label">الاسم</label>
-                                <TextInput v-model="form.name" placeholder="ادخل الاسم" :rules="[required()]" />
+                                <label class="qallab-label">{{ t('pages.users.form.userName') }}</label>
+                                <TextInput v-model="form.name" :placeholder="t('pages.users.form.namePlaceholder')"
+                                    :rules="[required()]" />
                             </div>
 
                             <!-- Phone -->
                             <div>
-                                <SaudiPhoneInput
-                                    v-model="form.phone"
-                                    label="الهاتف"
-                                    :rules="[required()]"
-                                />
+                                <SaudiPhoneInput v-model="form.phone" :label="t('pages.users.form.phone')"
+                                    :rules="[required()]" />
                             </div>
 
                             <!-- Email -->
                             <div>
-                                <label class="qallab-label">البريد الإلكتروني</label>
-                                <TextInput v-model="form.email" placeholder="info@example.com"
+                                <label class="qallab-label">{{ t('pages.users.form.email') }}</label>
+                                <TextInput v-model="form.email"
+                                    :placeholder="t('pages.users.form.emailPlaceholder', { email: 'info@example.com'})"
                                     :rules="[required(), email()]" />
                             </div>
                         </div>
@@ -76,40 +75,37 @@
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <!-- Password (only for create) -->
                             <div v-if="!isEditing">
-                                <label class="qallab-label">كلمة المرور</label>
-                                <TextInput v-model="form.password" type="password" placeholder="كلمة المرور"
+                                <label class="qallab-label">{{ t('pages.users.form.password') }}</label>
+                                <TextInput v-model="form.password" type="password"
+                                    :placeholder="t('pages.users.form.passwordPlaceholder')"
                                     :rules="[required(), strongPassword()]" />
                             </div>
 
                             <!-- Confirm Password (only for create) -->
                             <div v-if="!isEditing">
-                                <label class="qallab-label">تأكيد كلمة المرور</label>
+                                <label class="qallab-label">{{ t('pages.users.form.confirmPassword') }}</label>
                                 <TextInput v-model="form.password_confirmation" type="password"
-                                    placeholder="تأكيد كلمة المرور"
+                                    :placeholder="t('pages.users.form.confirmPasswordPlaceholder')"
                                     :rules="[required(), confirmPassword(form.password)]" />
                             </div>
 
                             <!-- Roles -->
                             <div>
-                                <MultipleSelectInput
-                                    v-model="form.roles"
-                                    label="الأدوار"
-                                    :items="rolesOptions"
-                                    placeholder="اختر الأدوار"
+                                <MultipleSelectInput v-model="form.roles" :label="t('pages.users.form.roles')"
+                                    :items="rolesOptions" :placeholder="t('pages.users.form.rolesPlaceholder')"
                                     :input-props="{
                                         rules: [required()]
-                                    }"
-                                />
+                                    }" />
                             </div>
                         </div>
 
                         <!-- Row 3: Status -->
                         <div>
-                            <label class="qallab-label">الحالة</label>
+                            <label class="qallab-label">{{ t('pages.users.form.status') }}</label>
                             <div class="flex items-center gap-6">
                                 <v-radio-group v-model="form.is_active" inline hide-details class="mt-0">
-                                    <v-radio label="فعال" :value="true" color="primary" />
-                                    <v-radio label="غير فعال" :value="false" color="primary" />
+                                    <v-radio :label="t('common.status.active')" :value="true" color="primary" />
+                                    <v-radio :label="t('common.status.inactive')" :value="false" color="primary" />
                                 </v-radio-group>
                             </div>
                         </div>
@@ -117,27 +113,13 @@
 
                     <!-- Action Buttons -->
                     <div class="flex items-center justify-center gap-4 mt-10">
-                        <ButtonWithIcon
-                            variant="flat"
-                            rounded="4"
-                            color="primary"
-                            height="44"
-                            custom-class="font-semibold text-base px-10 text-white"
-                            :prepend-icon="userPlusSmallIcon"
-                            :label="isEditing ? 'حفظ التعديلات' : 'أضف مستخدم جديد'"
-                            :loading="loading"
-                            @click="handleSubmit"
-                        />
-                        <ButtonWithIcon
-                            variant="flat"
-                            rounded="4"
-                            color="primary-50"
-                            height="44"
-                            custom-class="font-semibold text-base text-primary-700 px-10"
-                            :prepend-icon="closeIcon"
-                            label="الغاء"
-                            @click="handleCancel"
-                        />
+                        <ButtonWithIcon variant="flat" rounded="4" color="primary" height="44"
+                            custom-class="font-semibold text-base px-10 text-white" :prepend-icon="userPlusSmallIcon"
+                            :label="isEditing ? t('pages.users.form.saveChanges') : t('pages.users.form.addNewUserButton')"
+                            :loading="loading" @click="handleSubmit" />
+                        <ButtonWithIcon variant="flat" rounded="4" color="primary-50" height="44"
+                            custom-class="font-semibold text-base text-primary-700 px-10" :prepend-icon="closeIcon"
+                            :label="t('pages.users.form.cancel')" @click="handleCancel" />
                     </div>
                 </v-form>
             </div>
@@ -151,6 +133,9 @@ import { useRouter, useRoute } from 'vue-router'
 import { useApi } from '@/composables/useApi'
 import { useNotification } from '@/composables/useNotification'
 import { required, email, confirmPassword, strongPassword } from '@/utils/validators'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 // Composables
 const api = useApi()
@@ -225,7 +210,7 @@ const fetchUser = async () => {
         }
     } catch (err: any) {
         console.error('Error fetching user:', err)
-        errorNotification(err?.response?.data?.message || 'حدث خطأ أثناء جلب بيانات المستخدم')
+        errorNotification(err?.response?.data?.message || t('pages.users.form.messages.fetchUserError'))
     } finally {
         loading.value = false
     }
@@ -240,24 +225,24 @@ const handleSubmit = async () => {
 
         // Build FormData for multipart/form-data request
         const formData = new FormData()
-        
+
         // Add _method for PUT request when editing
         if (isEditing.value) {
             formData.append('_method', 'PUT')
         }
-        
+
         formData.append('name', form.value.name)
         formData.append('email', form.value.email)
         formData.append('mobile', form.value.phone) // API expects 'mobile'
-        
+
         // Only include password for new users (not editing)
         if (!isEditing.value && form.value.password) {
             formData.append('password', form.value.password)
             formData.append('password_confirmation', form.value.password_confirmation)
         }
-        
+
         formData.append('is_active', form.value.is_active ? 'true' : 'false')
-        
+
         // Append roles as roles[0], roles[1], etc.
         form.value.roles.forEach((roleId, index) => {
             // Get the role name from rolesOptions
@@ -269,16 +254,16 @@ const handleSubmit = async () => {
 
         if (isEditing.value) {
             await api.post(`/users/${userId.value}`, formData)
-            success('تم تحديث المستخدم بنجاح')
+            success(t('pages.users.form.messages.updateSuccess'))
         } else {
             await api.post('/users', formData)
-            success('تم إضافة المستخدم بنجاح')
+            success(t('pages.users.form.messages.createSuccess'))
         }
 
         router.push({ name: 'UsersList' })
     } catch (err: any) {
         console.error('Error saving user:', err)
-        errorNotification(err?.response?.data?.message || 'حدث خطأ أثناء حفظ البيانات')
+        errorNotification(err?.response?.data?.message || t('pages.users.form.messages.saveError'))
     } finally {
         loading.value = false
     }

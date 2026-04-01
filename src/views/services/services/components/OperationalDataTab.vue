@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import DatePickerInput from '@/components/common/forms/DatePickerInput.vue';
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 // Available languages
 const availableLanguages = ref([
@@ -53,17 +56,17 @@ const handleFileUpload = (event: any) => {
     <div class="space-y-3">
         <!-- الموعد والمدة Section -->
         <div class="bg-gray-50 rounded-lg p-6">
-            <h3 class="text-base font-bold text-black mb-6">الموعد والمدة ؟</h3>
+            <h3 class="text-base font-bold text-black mb-6">{{ t('pages.services.form.operationalData.appointmentSection') }}</h3>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="mb-6">
-                    <label class="block text-sm font-semibold text-gray-900 mb-2">هل تحتاج موعد؟</label>
+                    <label class="block text-sm font-semibold text-gray-900 mb-2">{{ t('pages.services.form.operationalData.requiresScheduling') }}</label>
                     <v-radio-group v-model="formData.requires_scheduling" inline hide-details
                         @update:model-value="updateFormData">
                         <v-radio :value="true" color="primary">
                             <template #label>
                                 <span
                                     :class="formData.requires_scheduling ? 'text-primary font-semibold' : 'text-gray-600'">
-                                    نعم
+                                    {{ t('pages.services.form.basicInfo.yes') }}
                                 </span>
                             </template>
                         </v-radio>
@@ -71,7 +74,7 @@ const handleFileUpload = (event: any) => {
                             <template #label>
                                 <span
                                     :class="!formData.requires_scheduling ? 'text-primary font-semibold' : 'text-gray-600'">
-                                    لا
+                                    {{ t('pages.services.form.basicInfo.no') }}
                                 </span>
                             </template>
                         </v-radio>
@@ -93,9 +96,9 @@ const handleFileUpload = (event: any) => {
                         </template>
                     </v-text-field> -->
                     <TextInputWithSelect v-model="formData.service_duration"
-                        v-model:selectValue="formData.service_duration_unit" label="مدة الخدمة" placeholder="أدخل المدة"
+                        v-model:selectValue="formData.service_duration_unit" :label="t('pages.services.form.operationalData.serviceDuration')" :placeholder="t('pages.services.form.operationalData.serviceDurationPlaceholder')"
                         type="number" :rules="[numeric(), positive()]" :select-items="durationUnitItems"
-                        select-placeholder="اختر" select-width="100px" @update:model-value="updateFormData"
+                        :select-placeholder="t('pages.services.form.operationalData.durationUnitPlaceholder')" select-width="100px" @update:model-value="updateFormData"
                         @update:select-value="updateFormData" />
 
                 </div>
@@ -104,17 +107,17 @@ const handleFileUpload = (event: any) => {
 
         <!-- حالة الخدمة Section -->
         <div class="bg-gray-50 rounded-lg p-6">
-            <h3 class="text-base font-bold text-black mb-6">حالة الخدمة ؟</h3>
+            <h3 class="text-base font-bold text-black mb-6">{{ t('pages.services.form.operationalData.serviceStatusSection') }}</h3>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
-                    <label class="block text-sm font-semibold text-gray-900 mb-2">تتطلب موافقة</label>
+                    <label class="block text-sm font-semibold text-gray-900 mb-2">{{ t('pages.services.form.operationalData.requiresApproval') }}</label>
                     <v-radio-group v-model="formData.requires_approval" inline hide-details
                         @update:model-value="updateFormData">
                         <v-radio :value="true" color="primary">
                             <template #label>
                                 <span
                                     :class="formData.requires_approval ? 'text-primary font-semibold' : 'text-gray-600'">
-                                    نعم
+                                    {{ t('pages.services.form.basicInfo.yes') }}
                                 </span>
                             </template>
                         </v-radio>
@@ -122,41 +125,41 @@ const handleFileUpload = (event: any) => {
                             <template #label>
                                 <span
                                     :class="!formData.requires_approval ? 'text-primary font-semibold' : 'text-gray-600'">
-                                    لا
+                                    {{ t('pages.services.form.basicInfo.no') }}
                                 </span>
                             </template>
                         </v-radio>
                     </v-radio-group>
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-gray-900 mb-2">قابلة للمقايضة</label>
+                    <label class="block text-sm font-semibold text-gray-900 mb-2">{{ t('pages.services.form.operationalData.isBarter') }}</label>
                     <v-radio-group v-model="formData.is_barter" inline hide-details
                         @update:model-value="updateFormData">
                         <v-radio :value="true" color="primary">
                             <template #label>
                                 <span :class="formData.is_barter ? 'text-primary font-semibold' : 'text-gray-600'">
-                                    نعم
+                                    {{ t('pages.services.form.basicInfo.yes') }}
                                 </span>
                             </template>
                         </v-radio>
                         <v-radio :value="false" color="primary">
                             <template #label>
                                 <span :class="!formData.is_barter ? 'text-primary font-semibold' : 'text-gray-600'">
-                                    لا
+                                    {{ t('pages.services.form.basicInfo.no') }}
                                 </span>
                             </template>
                         </v-radio>
                     </v-radio-group>
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-gray-900 mb-2">قابلة للتجزئة</label>
+                    <label class="block text-sm font-semibold text-gray-900 mb-2">{{ t('pages.services.form.operationalData.isPartialAllowed') }}</label>
                     <v-radio-group v-model="formData.is_partial_allowed" inline hide-details
                         @update:model-value="updateFormData">
                         <v-radio :value="true" color="primary">
                             <template #label>
                                 <span
                                     :class="formData.is_partial_allowed ? 'text-primary font-semibold' : 'text-gray-600'">
-                                    نعم
+                                    {{ t('pages.services.form.basicInfo.yes') }}
                                 </span>
                             </template>
                         </v-radio>
@@ -164,7 +167,7 @@ const handleFileUpload = (event: any) => {
                             <template #label>
                                 <span
                                     :class="!formData.is_partial_allowed ? 'text-primary font-semibold' : 'text-gray-600'">
-                                    لا
+                                    {{ t('pages.services.form.basicInfo.no') }}
                                 </span>
                             </template>
                         </v-radio>
@@ -172,20 +175,20 @@ const handleFileUpload = (event: any) => {
                 </div>
 
                 <div>
-                    <label class="block text-sm font-semibold text-gray-900 mb-2">متاحة للبيع</label>
+                    <label class="block text-sm font-semibold text-gray-900 mb-2">{{ t('pages.services.form.operationalData.salesEnabled') }}</label>
                     <v-radio-group v-model="formData.sales_enabled" inline hide-details
                         @update:model-value="updateFormData">
                         <v-radio :value="true" color="primary">
                             <template #label>
                                 <span :class="formData.sales_enabled ? 'text-primary font-semibold' : 'text-gray-600'">
-                                    نعم
+                                    {{ t('pages.services.form.basicInfo.yes') }}
                                 </span>
                             </template>
                         </v-radio>
                         <v-radio :value="false" color="primary">
                             <template #label>
                                 <span :class="!formData.sales_enabled ? 'text-primary font-semibold' : 'text-gray-600'">
-                                    لا
+                                    {{ t('pages.services.form.basicInfo.no') }}
                                 </span>
                             </template>
                         </v-radio>
@@ -193,14 +196,14 @@ const handleFileUpload = (event: any) => {
                 </div>
 
                 <div>
-                    <label class="block text-sm font-semibold text-gray-900 mb-2">متاحة للشراء</label>
+                    <label class="block text-sm font-semibold text-gray-900 mb-2">{{ t('pages.services.form.operationalData.purchaseEnabled') }}</label>
                     <v-radio-group v-model="formData.purchase_enabled" inline hide-details
                         @update:model-value="updateFormData">
                         <v-radio :value="true" color="primary">
                             <template #label>
                                 <span
                                     :class="formData.purchase_enabled ? 'text-primary font-semibold' : 'text-gray-600'">
-                                    نعم
+                                    {{ t('pages.services.form.basicInfo.yes') }}
                                 </span>
                             </template>
                         </v-radio>
@@ -208,21 +211,21 @@ const handleFileUpload = (event: any) => {
                             <template #label>
                                 <span
                                     :class="!formData.purchase_enabled ? 'text-primary font-semibold' : 'text-gray-600'">
-                                    لا
+                                    {{ t('pages.services.form.basicInfo.no') }}
                                 </span>
                             </template>
                         </v-radio>
                     </v-radio-group>
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-gray-900 mb-2">متاحة للمشاريع</label>
+                    <label class="block text-sm font-semibold text-gray-900 mb-2">{{ t('pages.services.form.operationalData.projectEnabled') }}</label>
                     <v-radio-group v-model="formData.project_enabled" inline hide-details
                         @update:model-value="updateFormData">
                         <v-radio :value="true" color="primary">
                             <template #label>
                                 <span
                                     :class="formData.project_enabled ? 'text-primary font-semibold' : 'text-gray-600'">
-                                    نعم
+                                    {{ t('pages.services.form.basicInfo.yes') }}
                                 </span>
                             </template>
                         </v-radio>
@@ -230,25 +233,25 @@ const handleFileUpload = (event: any) => {
                             <template #label>
                                 <span
                                     :class="!formData.project_enabled ? 'text-primary font-semibold' : 'text-gray-600'">
-                                    لا
+                                    {{ t('pages.services.form.basicInfo.no') }}
                                 </span>
                             </template>
                         </v-radio>
                     </v-radio-group>
                 </div>
 
-                <selectInput label="مستوى الرؤية" v-model="formData.visibility_level" :items="visibilityItems"
-                    variant="outlined" density="comfortable" placeholder="عام" hide-details class="max-w-md"
+                <selectInput :label="t('pages.services.form.operationalData.visibilityLevel')" v-model="formData.visibility_level" :items="visibilityItems"
+                    variant="outlined" density="comfortable" :placeholder="t('pages.services.form.operationalData.visibilityPlaceholder')" hide-details class="max-w-md"
                     @update:model-value="updateFormData" />
             </div>
         </div>
 
         <!-- بيانات إضافية Section -->
         <div class="bg-gray-50 rounded-lg p-6">
-            <h3 class="text-lg font-bold text-gray-900 mb-4">بيانات إضافية</h3>
+            <h3 class="text-lg font-bold text-gray-900 mb-4">{{ t('pages.services.form.operationalData.additionalDataSection') }}</h3>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <TextareaInput v-model="formData.notes" label="ملاحظات" placeholder="ملاحظات" :rows="4"
+                <TextareaInput v-model="formData.notes" :label="t('pages.services.form.operationalData.notes')" :placeholder="t('pages.services.form.operationalData.notesPlaceholder')" :rows="4"
                     :hide-details="true" @update:model-value="updateFormData" />
 
                 <!-- <div>
@@ -274,9 +277,9 @@ const handleFileUpload = (event: any) => {
                 </div>
  -->
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">تاريخ التفعيل</label>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">{{ t('pages.services.form.operationalData.activationDate') }}</label>
                     <DatePickerInput v-model="formData.activation_date" variant="outlined" density="comfortable"
-                        placeholder="2024-03-01" hide-details @update:model-value="updateFormData" />
+                        :placeholder="t('pages.services.form.operationalData.activationDatePlaceholder')" hide-details @update:model-value="updateFormData" />
                 </div>
             </div>
         </div>

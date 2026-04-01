@@ -1,0 +1,759 @@
+{
+  "purchases": {
+    "shared": {
+      "actions": {
+        "search": "ابحث"
+      },
+      "messages": {
+        "columnsUpdateError": "فشل تحديث الأعمدة",
+        "bulkDeleteError": "فشل الحذف الجماعي",
+        "loadingMore": "جاري تحميل المزيد..."
+      },
+      "statusChange": {
+        "title": "تغيير الحالة",
+        "message": "تغيير الحالة:"
+      },
+      "lists": {
+        "quotation": {
+          "messages": {
+            "fetchError": "فشل تحميل قائمة عروض السعر",
+            "deleteSuccess": "تم حذف عرض السعر بنجاح",
+            "deleteError": "فشل حذف عرض السعر",
+            "bulkDeleteSuccess": "تم حذف {count} عرض بنجاح"
+          },
+          "dialogs": {
+            "delete": {
+              "title": "حذف عرض السعر",
+              "message": "هل أنت متأكد من حذف هذا العرض؟"
+            },
+            "bulkDelete": {
+              "title": "حذف عروض السعر",
+              "message": "هل أنت متأكد من حذف {count} عرض؟"
+            }
+          }
+        },
+        "receivingDoc": {
+          "buttons": {
+            "add": "إضافة سند استلام"
+          },
+          "messages": {
+            "fetchError": "فشل تحميل قائمة سندات الاستلام",
+            "deleteSuccess": "تم حذف سند الاستلام بنجاح",
+            "deleteError": "فشل حذف سند الاستلام",
+            "bulkDeleteSuccess": "تم حذف {count} سند استلام بنجاح"
+          },
+          "dialogs": {
+            "bulkDelete": {
+              "title": "حذف سندات الاستلام",
+              "message": "هل أنت متأكد من حذف {count} سند استلام؟"
+            }
+          }
+        },
+        "purchaseRequest": {
+          "buttons": {
+            "add": "أضف طلب"
+          },
+          "messages": {
+            "fetchError": "فشل تحميل قائمة الطلبات",
+            "deleteSuccess": "تم حذف الطلب بنجاح",
+            "deleteError": "فشل حذف الطلب",
+            "bulkDeleteSuccess": "تم حذف {count} طلب بنجاح"
+          },
+          "dialogs": {
+            "deleteBulk": {
+              "title": "حذف الطلبات",
+              "message": "هل أنت متأكد من حذف {count} طلب؟"
+            },
+            "deleteSingle": {
+              "title": "حذف الطلب",
+              "message": "هل أنت متأكد من حذف هذا الطلب؟"
+            }
+          }
+        },
+        "purchaseOrder": {
+          "buttons": {
+            "add": "أضف طلبية"
+          },
+          "messages": {
+            "fetchError": "فشل تحميل قائمة الطلبيات",
+            "deleteSuccess": "تم حذف الطلبية بنجاح",
+            "deleteError": "فشل حذف الطلبية",
+            "bulkDeleteSuccess": "تم حذف {count} طلبية بنجاح"
+          },
+          "dialogs": {
+            "delete": {
+              "title": "حذف الطلبية",
+              "message": "هل أنت متأكد من حذف هذه الطلبية؟"
+            },
+            "bulkDelete": {
+              "title": "حذف الطلبيات",
+              "message": "هل أنت متأكد من حذف {count} طلبية؟"
+            }
+          }
+        }
+      },
+      "forms": {
+        "common": {
+          "none": "لا يوجد",
+          "pickLocation": "حدد الموقع",
+          "day": "يوم",
+          "vehicleCount": "{count} مركبة",
+          "select": "اختر",
+          "warnings": {
+            "selectSupplierFirst": "يجب عليك اختيار اسم المورد أولاً",
+            "atLeastOneProduct": "يجب إضافة منتج واحد على الأقل",
+            "deliveryLocationRequired": "يجب تحديد موقع تسليم المواد",
+            "atLeastOneTransportService": "يجب إضافة خدمة نقل واحدة على الأقل"
+          },
+          "success": {
+            "requestCreated": "تم إنشاء الطلب بنجاح",
+            "requestUpdated": "تم تحديث الطلب بنجاح"
+          },
+          "sections": {
+            "basicInfo": "البيانات الأساسية",
+            "products": "المنتجات",
+            "attachments": "مرفقات",
+            "requestSummary": "ملخص الطلب"
+          },
+          "labels": {
+            "supplierName": "اسم المورد",
+            "responsibleName": "اسم المسؤول",
+            "responsiblePhone": "هاتف المسؤول",
+            "requestDate": "تاريخ الطلب",
+            "paymentMethod": "طريقة الدفع",
+            "advancePayment": "دفعة مقدمة",
+            "products": "المنتجات",
+            "services": "الخدمات",
+            "requestCode": "كود الطلب"
+          },
+          "placeholders": {
+            "selectSupplier": "حدد المورد",
+            "selectPaymentMethod": "حدد طريقة الدفع",
+            "enterResponsibleName": "أدخل اسم المسؤول",
+            "enterAdvanceAmount": "أدخل قيمة الدفعة",
+            "selectDateTime": "اختر التاريخ والوقت",
+            "selectDate": "اختر التاريخ",
+            "addNote": "أضف ملاحظة",
+            "cashSample": "نقدي",
+            "phoneSample": "5XX XXX XXXX"
+          },
+          "actions": {
+            "importExcel": "استيراد من ملف إكسل",
+            "addProduct": "+ إضافة منتج جديد",
+            "editProducts": "تعديل المنتجات",
+            "submitRequest": "إرسال الطلب",
+            "saveAndReturn": "حفظ والعودة للرئيسية",
+            "saveAndCreateNew": "حفظ وانشاء جديد"
+          },
+          "textNote": {
+            "title": "ملاحظة نصية",
+            "placeholder": "هل تود إرفاق بعض الملاحظات، قم بكتابتها هنا من فضلك وسيتم إرفاقها مع طلب عرض السعر المرسل"
+          },
+          "voiceRecorder": {
+            "title": "رسالة صوتية",
+            "hintAttachNotes": "هل تود إرفاق بعض الملاحظات",
+            "hintRecordPrompt": "قم بتسجيل رسالتك الصوتية إلى",
+            "recordingInProgress": "جاري التسجيل..."
+          },
+          "tableHeaders": {
+            "productName": "اسم المنتج",
+            "quantity": "الكمية",
+            "unit": "الوحدة",
+            "notes": "ملاحظات"
+          },
+          "timeOfDay": {
+            "am": "صباحاً",
+            "pm": "مساءً",
+            "both": "كلاهما"
+          }
+        }
+      }
+    },
+    "requests": {
+      "materialProduct": {
+        "form": {
+          "requestInfoTitle": "معلومات الطلب :",
+          "labels": {
+            "requestType": "نوع الطلب",
+            "issueDate": "تاريخ إصدار الطلب",
+            "projectLocation": "موقع المشروع"
+          },
+          "placeholders": {
+            "selectRequestType": "حدد نوع الطلب"
+          },
+          "transportService": "خدمة النقل",
+          "addTransportRow": "+ إضافة بيانات نقل جديدة",
+          "tableHeaders": {
+            "transportType": "نوع الناقلة",
+            "dailyTrips": "عدد الرحلات اليومية",
+            "transportFromDate": "تاريخ بدء النقل",
+            "transportToDate": "تاريخ انتهاء النقل",
+            "vehicleTypes": "نوع المركبات",
+            "transportTiming": "توقيت النقل"
+          }
+        }
+      },
+      "fuels": {
+        "form": {
+          "labels": {
+            "deliveryMethod": "طريقة التسليم",
+            "deliveryLocation": "موقع تسليم المواد",
+            "sourceLocation": "موقع استلام المواد",
+            "deliveryStartDate": "تاريخ بدء التسليم",
+            "supplyType": "نوع التوريد",
+            "supplyDuration": "مدة التوريد",
+            "deliveryDuration": "مدة التسليم"
+          },
+          "placeholders": {
+            "selectDeliveryMethod": "حدد طريقة التسليم",
+            "selectSupplyType": "حدد نوع التوريد",
+            "enterDuration": "أدخل المدة"
+          },
+          "tableHeaders": {
+            "packaging": "التعبئة",
+            "supplyType": "نوع التوريد",
+            "supplyIntervalDays": "مدة التوريد (يوم)",
+            "deliveredIntervalDays": "مدة التسليم (يوم)"
+          }
+        }
+      },
+      "logistics": {
+        "form": {
+          "labels": {
+            "transportCompany": "شركة النقل",
+            "projectName": "اسم المشروع",
+            "sourceMaterialsLocation": "موقع مصدر المواد",
+            "projectLocation": "موقع المشروع",
+            "requestDateSample": "2024-03-01",
+            "advancePaymentLong": "أدخل قيمة الدفعة المقدمة"
+          },
+          "placeholders": {
+            "enterProjectName": "أدخل اسم المشروع"
+          },
+          "transportDetails": "تفاصيل النقل",
+          "addTransportService": "أضف خدمة نقل",
+          "emptyTransportTitle": "لا توجد تفاصيل نقل مضافة",
+          "emptyTransportHint": "اضغط على \"أضف خدمة نقل\" لإضافة تفاصيل جديدة",
+          "detailCard": {
+            "materialType": "نوع المواد المنقولة",
+            "tripCount": "عدد الرحلات",
+            "executionDuration": "مدة التنفيذ",
+            "transportTimes": "أوقات النقل",
+            "fromDate": "تاريخ بدء النقل",
+            "toDate": "تاريخ انتهاء النقل",
+            "vehicleType": "نوع مركبة النقل",
+            "vehicleCount": "عدد مركبات النقل",
+            "unloadingResponsible": "مسؤول التفريغ",
+            "loadingResponsible": "مسؤول التحميل",
+            "deliveryLocation": "موقع التسليم",
+            "pickupLocation": "موقع الإستلام"
+          },
+          "map": {
+            "pickup": "موقع الاستلام",
+            "delivery": "موقع التسليم"
+          },
+          "productsTable": {
+            "fromDate": "تاريخ بدء النقل",
+            "tripNo": "عدد الرحلات"
+          }
+        },
+        "addDetailDialog": {
+          "titleAdd": "إضافة خدمة نقل",
+          "titleEdit": "تعديل خدمة النقل",
+          "labels": {
+            "fromDate": "تاريخ بدء النقل",
+            "toDate": "تاريخ انتهاء النقل",
+            "executionDuration": "مدة التنفيذ",
+            "executionDurationPlaceholder": "أدخل مدة التنفيذ بالأيام",
+            "transportTimes": "أوقات النقل",
+            "vehicleTypes": "نوع مركبات النقل",
+            "vehicleTypesPlaceholder": "قلاب",
+            "vehicleCount": "عدد مركبات النقل",
+            "vehicleCountPlaceholder": "أدخل عدد المركبات",
+            "materialTypes": "نوع  مواد النقل",
+            "tripCount": "عدد الرحلات",
+            "tripCountPlaceholder": "أدخل عدد الرحلات",
+            "loadingResponsible": "مسؤول التحميل",
+            "loadingResponsiblePlaceholder": "أدخل اسم مسؤول التحميل",
+            "unloadingResponsible": "مسؤول التفريغ",
+            "unloadingResponsiblePlaceholder": "أدخل اسم مسؤول التفريغ"
+          },
+          "actions": {
+            "saveEdits": "حفظ التعديلات",
+            "addService": "أضف خدمة"
+          }
+        }
+      }
+    },
+    "orders": {
+      "shared": {
+        "success": {
+          "poUpdated": "تم تحديث الطلبية بنجاح",
+          "poCreated": "تم إنشاء الطلبية بنجاح"
+        },
+        "labels": {
+          "purchaseOrderCode": "كود الطلبية",
+          "poDate": "تاريخ الطلبية",
+          "project": "المشروع",
+          "itemsTableTitle": "جدول عناصر الطلبية",
+          "pricesIncludeTransport": "** الأسعار شاملة للنقل",
+          "paymentData": "بيانات الدفع",
+          "invoiceUploadDuration": "مدة رفع المستخلص",
+          "paymentDuration": "مدة السداد",
+          "lateFee": "غرامة التأخير",
+          "cancelFee": "غرامة الإلغاء",
+          "summaryItem": "العنصر",
+          "summaryAmount": "المبلغ",
+          "subtotalBeforeDiscount": "المجموع قبل الخصم",
+          "discountRow": "الخصم",
+          "subtotalAfterDiscount": "المجموع بعد الخصم",
+          "taxRow": "الضريبة",
+          "taxPercentDisplay": "15%",
+          "totalTaxRow": "اجمالي الضريبة",
+          "finalTotalRow": "الإجمالي النهائي",
+          "saveReturnToMain": "حفظ والعودة للرئيسية",
+          "saveAndCreateNewPo": "حفظ وإنشاء جديد",
+          "quotationCode": "كود عرض السعر",
+          "poType": "نوع الطلبية",
+          "compensationPo": "طلبية تعويض",
+          "supplyDetailsSection": "تفاصيل التوريد",
+          "editSupplyDetails": "+ تعديل تفاصيل التوريد",
+          "extraLogisticsSection": "بيانات التوريد الإضافية",
+          "transportValueLabel": "قيمة النقل",
+          "tripDetailsSection": "تفاصيل الرحلات",
+          "logisticsTransportTotal": "القيمة الإجمالية لمبلغ خدمات النقل",
+          "logisticsTripsTotal": "القيمة الإجمالية لمبلغ الرحلات",
+          "approvedOfferTotal": "المبلغ الإجمالي المعتمد في العرض",
+          "logisticsTransportAmount": "مبلغ النقل",
+          "saveReturnToList": "حفظ والعودة للقائمة",
+          "currencyRial": "ريال",
+          "percentSymbol": "%"
+        },
+        "placeholders": {
+          "selectSupplierPo": "اختر المورد",
+          "enterProjectNameAlt": "ادخل اسم المشروع",
+          "enterDurationDays": "أدخل المدة بالأيام",
+          "enterFeeAmount": "أدخل المبلغ",
+          "noNotesProduct": "لا توجد ملاحظات",
+          "enterCount": "أدخل العدد"
+        },
+        "tableHeaders": {
+          "unitPrice": "سعر الوحدة",
+          "discount": "خصم",
+          "taxAmount": "مبلغ الضريبة",
+          "totalAmount": "إجمالي المبلغ",
+          "product": "المنتج",
+          "transportStartDate": "تاريخ بداية النقل",
+          "vehicleType": "نوع مركبة النقل",
+          "tripCount": "عدد الرحلات",
+          "tripCapacity": "سعة الرحلة",
+          "tripTiming": "توقيت الرحلة",
+          "totalTripsCount": "عدد الرحلات الكلي",
+          "vehicleCount": "عدد مركبات النقل",
+          "tripDate": "تاريخ الرحلة",
+          "transportTypes": "نوع المركبات",
+          "tripPrice": "سعر الرحلة",
+          "subTotal": "السعر الإجمالي"
+        },
+        "warnings": {
+          "sourceLocationRequired": "يجب تحديد موقع مصدر المواد",
+          "projectLocationRequired": "يجب تحديد موقع المشروع",
+          "atLeastOneTripLeg": "يجب إضافة تفاصيل رحلة واحدة على الأقل",
+          "pickupRequiredForService": "يجب تحديد موقع الاستلام لخدمة النقل رقم {n}",
+          "deliveryRequiredForService": "يجب تحديد موقع التسليم لخدمة النقل رقم {n}",
+          "loadQuotationError": "فشل تحميل بيانات عرض السعر",
+          "loadDataError": "فشل تحميل البيانات",
+          "savePoError": "حدث خطأ أثناء حفظ الطلبية"
+        },
+        "actions": {
+          "editTrips": "تعديل الرحلات"
+        }
+      }
+    },
+    "link": {
+      "shared": {
+        "messages": {
+          "linkSuccess": "تم الربط بنجاح",
+          "linkFailed": "فشل الربط",
+          "deleteSuccess": "تم الحذف بنجاح",
+          "deleteFailed": "فشل الحذف"
+        },
+        "labels": {
+          "customerName": "اسم العميل",
+          "selectCustomerPlaceholder": "اختر اسم العميل",
+          "selectPlaceholder": "اختر",
+          "productsSection": "المنتجات",
+          "addButton": "+ اضافة",
+          "number": "الرقم",
+          "customerAndType": "العميل / نوع العميل",
+          "actions": "الإجراءات",
+          "projectLocation": "موقع المشروع :",
+          "productCount": "عدد المنتجات :"
+        },
+        "table": {
+          "productName": "اسم المنتج",
+          "quantity": "الكمية",
+          "unitPrice": "سعر الوحدة",
+          "discount": "خصم",
+          "taxAmount": "مبلغ الضريبة",
+          "totalAmount": "إجمالي المبلغ",
+          "emptyProducts": "لا توجد منتجات"
+        }
+      },
+      "orders": {
+        "form": {
+          "pageTitle": "الربط مع طلبيات العملاء",
+          "pageDescription": "تساعدك في الربط بين طللبيات المنتجات بين البائع والمشتري",
+          "codeLabel": "كود الطلبية",
+          "sectionInfo": "معلومات الطلبية",
+          "documentType": "نوع الطلبية",
+          "salesDocumentCode": "كود طلبية المبيعات",
+          "sectionDetails": "تفاصيل الطلبية",
+          "documentStatus": "حالة الطلبية:",
+          "salesOfferCode": "كود عرض مبيعات :",
+          "purchaseOfferCode": "كود عرض مشتريات :",
+          "documentDate": "تاريخ الطلبية :",
+          "linkedListTitle": "قائمة الطلبيات المرتبطة",
+          "colSalesCodeDate": "كود طلب مبيعات العميل / التاريخ",
+          "colPurchaseCodeDate": "كود طلبية مشتريات قلاب / التاريخ",
+          "emptyLinked": "لا توجد طلبيات مرتبطة"
+        }
+      },
+      "quotations": {
+        "form": {
+          "pageTitle": "الربط مع عروض العملاء",
+          "pageDescription": "تساعدك في الربط بين منتجات عروض الاسعار بين البائع والمشتري",
+          "codeLabel": "كود العرض",
+          "sectionInfo": "معلومات العرض",
+          "documentType": "نوع العرض",
+          "salesDocumentCode": "كود عرض سعر المبيعات",
+          "sectionDetails": "تفاصيل العرض",
+          "documentStatus": "حالة العرض:",
+          "salesRequestCode": "كود طلب مبيعات :",
+          "purchaseRequestCode": "كود طلب مشتريات :",
+          "documentDate": "تاريخ العرض :",
+          "linkedListTitle": "قائمة العروض المرتبطة",
+          "colSalesCodeDate": "كود عرض مبيعات العميل / التاريخ",
+          "colPurchaseCodeDate": "كود عرض مشتريات قلاب / التاريخ",
+          "emptyLinked": "لا توجد عروض مرتبطة"
+        }
+      },
+      "view": {
+        "shared": {
+          "purchasesBreadcrumb": "المشتريات",
+          "products": "المنتجات",
+          "taxShort": "الضريبة"
+        },
+        "orders": {
+          "pageTitleCrumb": "الربط مع طلبيات العملاء",
+          "listFuels": "طلبيات المحروقات",
+          "listMaterials": "طلبيات مواد بناء أولية",
+          "customerAdmin": "مدير النظام",
+          "customerContractor": "مقاول",
+          "headerPurchaseOrderCode": "كود طلبية مشتريات قلاب",
+          "headerSalesOrderCode": "كود طلبية مبيعات العميل",
+          "supplierWithName": "المورد / {name}",
+          "emptyLinked": "لا توجد طلبيات مرتبطة",
+          "loadSalesError": "فشل تحميل بيانات طلبية المبيعات",
+          "loadPurchaseError": "فشل تحميل بيانات طلبية المشتريات"
+        },
+        "quotations": {
+          "pageTitleCrumb": "الربط مع عروض العملاء",
+          "listFuels": "عروض أسعار المحروقات",
+          "listMaterials": "عروض أسعار مواد أولية",
+          "purchaseCodeLabel": "كود المشتريات",
+          "salesCodeLabel": "كود المبيعات",
+          "loadError": "فشل تحميل بيانات العرض"
+        }
+      }
+    },
+    "invoices": {
+      "list": {
+        "buttons": {
+          "add": "أضف فاتورة"
+        },
+        "dialogs": {
+          "bulkDelete": {
+            "title": "حذف الفواتير",
+            "message": "هل أنت متأكد من حذف {count} فاتورة؟"
+          }
+        },
+        "messages": {
+          "fetchError": "فشل تحميل قائمة الفواتير",
+          "deleteSuccess": "تم حذف الفاتورة بنجاح",
+          "deleteError": "فشل حذف الفاتورة",
+          "bulkDeleteSuccess": "تم حذف {count} فاتورة بنجاح"
+        }
+      },
+      "form": {
+        "codeLabel": "كود الفاتورة",
+        "sections": {
+          "basicInfo": "البيانات الأساسية",
+          "itemsTable": "جدول عناصر فاتورة المشتريات"
+        },
+        "labels": {
+          "supplierName": "اسم المورد",
+          "poCategory": "نوع الطلبية",
+          "pullProducts": "سحب المنتجات",
+          "supplierDisplayName": "الاسم:",
+          "taxNo": "الرقم الضريبي:",
+          "address": "العنوان:",
+          "purchaseOrderCode": "كود طلبية المشتريات",
+          "salesInvoices": "فواتير المبيعات",
+          "invoiceCreatedAt": "تاريخ إنشاء الفاتورة",
+          "invoiceIssueDate": "تاريخ إصدار الفاتورة",
+          "invoiceDueDate": "تاريخ استحقاق الفاتورة",
+          "project": "المشروع",
+          "statement": "البيان"
+        },
+        "placeholders": {
+          "select": "اختر",
+          "selectOrder": "اختر الطلبية",
+          "selectSalesInvoices": "اختر فواتير المبيعات",
+          "dateSample": "2024-03-01",
+          "projectName": "أدخل اسم المشروع",
+          "notes": "أدخل البيان هنا"
+        },
+        "fetchItemFallback": "من فاتورة مبيعات",
+        "fallbacks": {
+          "orderTitle": "طلبية #{id}",
+          "invoiceTitle": "فاتورة #{id}",
+          "poById": "طلبية #{id}"
+        },
+        "messages": {
+          "atLeastOneProduct": "يجب أن تحتوي الفاتورة على منتج واحد على الأقل",
+          "updated": "تم تحديث الفاتورة بنجاح",
+          "created": "تم إنشاء الفاتورة بنجاح",
+          "saveError": "حدث خطأ أثناء حفظ الفاتورة"
+        },
+        "tableHeaders": {
+          "taxableAmount": "المبلغ الخاضع للضريبة"
+        },
+        "summary": {
+          "item": "العنصر",
+          "amount": "المبلغ",
+          "totalQty": "إجمالي الكميات",
+          "totalExclTax": "الإجمالي (غير شامل الضريبة)",
+          "totalDiscounts": "مجموع الخصومات",
+          "totalTaxable": "الإجمالي الخاضع للضريبة",
+          "tax": "الضريبة",
+          "totalTax": "مجموع الضريبة",
+          "totalDue": "إجمالي المبلغ المستحق"
+        },
+        "actions": {
+          "saveReturnMain": "حفظ والعودة للرئيسية",
+          "saveCreateNew": "حفظ وإنشاء جديد"
+        }
+      },
+      "view": {
+        "shared": {
+          "purchasesBreadcrumb": "المشتريات",
+          "invoicesListCrumb": "فواتير المشتريات",
+          "subtitle": "تفاصيل الفاتورة والمعلومات الخاصة بها",
+          "loadError": "فشل تحميل بيانات الفاتورة",
+          "invoiceInfoSection": "معلومات الفاتورة",
+          "salesOrderCode": "كود طلبية المبيعات",
+          "invoiceCreatedAt": "تاريخ إنشاء الفاتورة",
+          "invoiceIssueDate": "تاريخ إصدار الفاتورة",
+          "invoiceDueDate": "تاريخ إستحقاق الفاتورة"
+        }
+      },
+      "logistics": {
+        "form": {
+          "tripTableHeaders": {
+            "tripCode": "كود الرحلة",
+            "pickupLocation": "موقع الإستلام",
+            "deliveryLocation": "موقع التسليم",
+            "tripCount": "عدد الرحلات",
+            "tripPrice": "سعر الرحلة",
+            "taxableAmount": "المبلغ الخاضع للضريبة",
+            "taxAmount": "مبلغ الضريبة",
+            "totalAmount": "إجمالي المبلغ"
+          }
+        }
+      }
+    },
+    "views": {
+      "shared": {
+        "purchasesBreadcrumb": "المشتريات",
+        "loadQuotationError": "فشل تحميل بيانات عرض السعر",
+        "loadOrderError": "فشل تحميل بيانات الطلبية",
+        "loadRequestError": "فشل تحميل بيانات الطلب",
+        "loadLogisticsRequestError": "فشل تحميل بيانات طلب النقل",
+        "quotationSubtitle": "تفاصيل عرض السعر والمعلومات الخاصة به",
+        "orderSubtitle": "تفاصيل الطلبية والمعلومات الخاصة بها",
+        "requestSubtitle": "تفاصيل الطلب والمعلومات الخاصة به",
+        "requestMaterialSubtitle": "طلب عرض سعر مواد بناء أولية",
+        "listComma": "،",
+        "paymentCash": "كاش",
+        "paymentDeferred": "آجل",
+        "paymentNaqd": "نقدي",
+        "paymentInstallment": "تقسيط",
+        "discountPercent": "نسبة مئوية",
+        "discountFixed": "قيمة ثابتة",
+        "categoryLogistics": "خدمات النقل",
+        "noNotes": "لا يوجد",
+        "daysWithUnit": "{n} يوم",
+        "tripsWithUnit": "{n} رحلة",
+        "vehiclesWithUnit": "{n} مركبة",
+        "transportServiceHash": "خدمة النقل رقم {n}",
+        "timeInterval": {
+          "am": "صباحاً",
+          "pm": "مساءً",
+          "both": "صباحاً ومساءً"
+        },
+        "requestTypeWithoutLogistics": "طلب بدون خدمة نقل",
+        "requestTypeWithLogistics": "طلب مع خدمة نقل",
+        "requestPurchaseWithLogistics": "طلب شراء مع لوجستيات",
+        "orderTypeWithoutLogistics": "طلبية بدون خدمة نقل",
+        "orderTypeWithLogistics": "طلبية مع خدمة نقل",
+        "orderTypePurchaseWithoutLogistics": "طلبية شراء بدون خدمة نقل",
+        "orderTypePurchaseWithLogistics": "طلبية شراء مع خدمة نقل",
+        "tabs": {
+          "requestGeneral": "المعلومات العامة للطلب",
+          "requestProducts": "المنتجات المضافة",
+          "requestTransport": "بيانات النقل",
+          "transportDetails": "تفاصيل النقل",
+          "movedMaterials": "المواد المنقولة"
+        },
+        "requestInfoSection": "معلومات الطلب",
+        "requestStatus": "حالة الطلب",
+        "attachmentsSection": "مرفقات",
+        "summarySectionTitle": "ملخص الطلب",
+        "issueDateRequest": "تاريخ إصدار الطلب",
+        "quotationInfoSection": "معلومات عرض السعر",
+        "itemsTableQuotation": "جدول عناصر عرض السعر",
+        "quotationName": "اسم عرض السعر",
+        "quotationDate": "تاريخ عرض السعر",
+        "quotationValidity": "صلاحية عرض السعر",
+        "offerDate": "تاريخ العرض",
+        "category": "الفئة",
+        "orderInfoSection": "معلومات الطلبية",
+        "contract": "العقد",
+        "advancePaymentWording": "الدفعة المقدمة",
+        "quotationSummaryTitle": "ملخص عرض السعر",
+        "totalBeforeDiscount": "الإجمالي قبل الخصم",
+        "totalDiscountSum": "مجموع الخصم",
+        "totalAfterDiscount": "الإجمالي بعد الخصم",
+        "taxPercentLabel": "نسبة الضريبة",
+        "totalTaxSum": "إجمالي الضريبة",
+        "finalTotal": "الإجمالي النهائي",
+        "transportAmount": "مبلغ النقل",
+        "discountType": "نوع الخصم",
+        "discountValue": "قيمة الخصم",
+        "workHours": "أوقات العمل",
+        "workHoursTransport": "أوقات النقل",
+        "productsSection": "المنتجات",
+        "tripsSection": "الرحلات",
+        "tripDetailsSection": "تفاصيل الرحلات",
+        "transportCarrierType": "نوع الناقلة",
+        "listQuotationsMaterial": "عروض الأسعار",
+        "listQuotationsFuels": "عروض أسعار المحروقات",
+        "listQuotationsLogistics": "عروض اسعار خدمة النقل",
+        "listOrdersMaterial": "طلبيات المشتريات",
+        "listOrdersFuels": "طلبيات المحروقات",
+        "listOrdersLogistics": "طلبية خدمة النقل",
+        "listRequestsMaterial": "طلبات عروض أسعار مواد بناء أولية",
+        "listRequestsFuels": "طلبات عروض أسعار محروقات",
+        "listRequestsLogistics": "طلبات عروض أسعار خدمة نقل",
+        "unloadingResponsibleAlt": "مسؤول التنزيل",
+        "totalTripsOverall": "عدد الرحلات الكلي",
+        "tripPrice": "سعر الرحلة",
+        "grandTripPrice": "السعر الاجمالي",
+        "fromDateLabel": "من تاريخ",
+        "toDateLabel": "إلى تاريخ",
+        "dailyTripsCount": "عدد الرحلات اليومية",
+        "basicDataSection": "البيانات الأساسية",
+        "basicDataSectionAlt": "البيانات الاساسية",
+        "requestDetailsSection": "تفاصيل الطلب",
+        "orderStatus": "حالة الطلبية",
+        "orderTypeLabel": "نوع الطلبية",
+        "supplyDuration": "مدة التوريد",
+        "deliveryDuration": "مدة التسليم",
+        "supplyType": "نوع التوريد",
+        "deliveryMaterialsLocation": "موقع تسليم المواد",
+        "pickupOriginLocation": "موقع الانطلاق",
+        "materialMovedType": "نوع المواد المنقولة",
+        "receiptLocation": "موقع الإستلام",
+        "fuelsLogisticsSection": "بيانات اللوجستيات",
+        "transportCompanyDisplay": "اسم شركة النقل",
+        "vehicleTypeSingular": "نوع المركبة",
+        "vehicleCountSingular": "عدد المركبات",
+        "materialTypeShort": "نوع المواد",
+        "uploadedMeta": "مُرفوع {progress}%",
+        "transportFromDate": "تاريخ بدء النقل",
+        "transportToDate": "تاريخ انتهاء النقل",
+        "executionDurationDaysShort": "مدة التنفيذ (يوم)"
+      }
+    },
+    "receivingDocs": {
+      "form": {
+        "sections": {
+          "basicInfo": "البيانات الأساسية",
+          "itemsTable": "جدول عناصر سند الاستلام",
+          "attachments": "المرفقات",
+          "deliveryPickup": "موقع التسليم والإستلام",
+          "deliveryLocation": "موقع التسليم",
+          "pickupLocation": "موقع الإستلام"
+        },
+        "labels": {
+          "purchaseOrderCode": "كود طلبية المشتريات",
+          "docCode": "كود سند الاستلام",
+          "receivedAt": "تاريخ الاستلام",
+          "createdAt": "تاريخ الإنشاء"
+        },
+        "placeholders": {
+          "purchaseOrderCode": "كود طلبية المشتريات",
+          "docCode": "كود سند الاستلام",
+          "select": "اختر",
+          "baseQty": "الكمية الأساسية",
+          "fromSupplier": "من المورد",
+          "fromTransport": "من شركة النقل",
+          "fromCustomer": "من العميل",
+          "receivedQty": "الكمية المستلمة",
+          "enter": "أدخل"
+        },
+        "tableHeaders": {
+          "productName": "اسم المنتج",
+          "baseQty": "الكمية الأساسية",
+          "qtyFromSupplier": "الكمية الفعلية من المورد",
+          "qtyFromTransport": "الكمية الفعلية من شركة النقل",
+          "qtyFromCustomer": "الكمية الفعلية من العميل",
+          "qtyFromSupplierShort": "الكمية من المورد",
+          "qtyFromTransportShort": "الكمية من النقل",
+          "qtyFromCustomerShort": "الكمية من العميل",
+          "receivedQty": "الكمية المستلمة",
+          "actualQty": "الكمية الفعلية",
+          "vehiclesSent": "المركبات الناقلة المرسلة",
+          "vehiclesReceived": "المركبات الناقلة المستلمة"
+        },
+        "messages": {
+          "loadError": "فشل تحميل بيانات سند الاستلام",
+          "atLeastOneItem": "يجب إضافة عنصر واحد على الأقل",
+          "updated": "تم تحديث سند الاستلام بنجاح",
+          "created": "تم إنشاء سند الاستلام بنجاح"
+        },
+        "actions": {
+          "saveToReceivingList": "حفظ والعودة لقائمة سندات الاستلام",
+          "saveToPurchasesList": "حفظ والعودة لقائمة المشتريات"
+        }
+      },
+      "view": {
+        "shared": {
+          "purchasesBreadcrumb": "المشتريات",
+          "subtitle": "تفاصيل سند الاستلام والمعلومات الخاصة به",
+          "basicInfo": "البيانات الأساسية",
+          "receiptStatus": "حالة الإستلام",
+          "itemsTable": "جدول عناصر سند الاستلام",
+          "attachments": "المرفقات",
+          "viewAction": "عرض",
+          "noAttachments": "لا توجد مرفقات لعرضها",
+          "loadError": "فشل تحميل بيانات سند الاستلام",
+          "attachmentFallback": "مرفق {n}"
+        },
+        "listCrumbMaterial": "قائمة سندات الاستلام",
+        "listCrumbLogistics": "قائمة سندات استلام خدمات النقل"
+      }
+    }
+  }
+}

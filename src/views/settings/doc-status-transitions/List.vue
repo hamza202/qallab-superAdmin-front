@@ -354,7 +354,7 @@ onBeforeUnmount(() => {
                 class="flex justify-end items-stretch rounded border border-gray-300 w-fit ms-auto mb-4 overflow-hidden bg-white text-sm">
                 <ButtonWithIcon variant="flat" height="40" rounded="0"
                     custom-class="font-semibold text-base border-gray-300 bg-primary-50 !text-primary-900"
-                    :prepend-icon="exportIcon" :label="t('common.export')" />
+                    :prepend-icon="exportIcon" :label="t('common.actions.export')" />
             </div>
 
             <div class="bg-gray-50 rounded-md -mx-6">
@@ -364,12 +364,12 @@ onBeforeUnmount(() => {
                         class="flex flex-wrap items-stretch rounded overflow-hidden border border-gray-200 bg-white text-sm">
                         <ButtonWithIcon variant="flat" height="40" rounded="0"
                             custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-                            :prepend-icon="trash_1_icon" color="white" :label="t('common.delete')"
+                            :prepend-icon="trash_1_icon" color="white" :label="t('common.table.deleteSelected')"
                             @click="handleBulkDelete" />
                         <div class="w-px bg-gray-200"></div>
                         <ButtonWithIcon variant="flat" height="40" rounded="0"
                             custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-                            :prepend-icon="trash_2_icon" color="white" :label="t('common.deleteAll')"
+                            :prepend-icon="trash_2_icon" color="white" :label="t('common.actions.delete')"
                             @click="handleBulkDelete" />
                     </div>
 
@@ -379,7 +379,7 @@ onBeforeUnmount(() => {
                             <template v-slot:activator="{ props }">
                                 <ButtonWithIcon v-bind="props" variant="outlined" rounded="4" color="gray-500"
                                     height="40" custom-class="font-semibold text-base border-gray-400"
-                                    :prepend-icon="columnIcon" :label="t('common.columns')"
+                                    :prepend-icon="columnIcon" :label="t('common.table.columns')"
                                     append-icon="mdi-chevron-down" />
                             </template>
                             <v-card min-width="200">
@@ -403,7 +403,7 @@ onBeforeUnmount(() => {
 
                         <ButtonWithIcon v-if="canCreate" variant="flat" color="primary-100" height="40" rounded="4"
                             custom-class="px-7 font-semibold text-base !text-primary-800 border !border-primary-200"
-                            :prepend-icon="plusIcon" label="أضف مسار عمل" @click="handleCreate" />
+                            :prepend-icon="plusIcon" :label="t('common.form.addNew')" @click="handleCreate" />
                     </div>
                 </div>
 
@@ -423,10 +423,10 @@ onBeforeUnmount(() => {
                         <div class="flex gap-2 items-center">
                             <ButtonWithIcon variant="flat" color="primary-500" rounded="4" height="40"
                                 custom-class="px-5 font-semibold !text-white text-sm sm:text-base"
-                                :prepend-icon="searchIcon" :label="t('common.search')" @click="applyFilters" />
+                                :prepend-icon="searchIcon" :label="t('common.actions.search')" @click="applyFilters" />
                             <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4" border="sm"
                                 custom-class="px-5 font-semibold text-sm sm:text-base !text-primary-800 !border-primary-200"
-                                prepend-icon="mdi-refresh" :label="t('common.reset')" @click="resetFilters" />
+                                prepend-icon="mdi-refresh" :label="t('common.actions.reset')" @click="resetFilters" />
                         </div>
                     </div>
                 </div> -->
@@ -478,7 +478,7 @@ onBeforeUnmount(() => {
                 <!-- Loading more indicator -->
                 <div v-if="loadingMore" class="flex justify-center items-center py-4">
                     <v-progress-circular indeterminate color="primary" size="32" />
-                    <span class="mr-2 text-gray-600">جاري تحميل المزيد...</span>
+                    <span class="ms-2 text-gray-600">{{ t('common.table.loadingMore') }}</span>
                 </div>
             </div>
         </div>

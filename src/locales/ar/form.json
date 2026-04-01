@@ -1,430 +1,1627 @@
 {
-  "labels": {
-    "name_ar": "الاسم بالعربية",
-    "name_en": "الاسم بالانجليزية",
-    "status": "الحالة",
-    "businessName": "الاسم التجاري",
-    "commercialRegister": "السجل التجاري",
-    "taxNumber": "الرقم الضريبي",
-    "ownerName": "اسم المالك",
-    "phone": "الهاتف",
-    "email": "البريد الإلكتروني",
-    "from": "من",
-    "to": "إلى",
-    "userName": "اسم المستخدم",
-    "roleName": "اسم الدور",
-    "roles": "الأدوار",
-    "code": "الرمز",
-    "role": "الدور",
-    "firstName": "الاسم الأول",
-    "lastName": "الاسم الأخير",
-    "defaultCurrency": "العملة الافتراضية",
-    "mobilePhone": "الجوال",
-    "commercialRegisterNumber": "رقم السجل التجاري",
-    "country": "الدولة",
-    "postalCode": "الرمز البريدي",
-    "district": "اسم الحي",
-    "streetName": "اسم الشارع",
-    "buildingNumber": "رقم المبنى",
-    "nationalAddress": "العنوان الوطني",
-    "address2": "العنوان 2",
-    "account": "الحساب",
-    "legalName": "الاسم القانوني",
-    "entityType": "نوع الكيان",
-    "tradeName": "الاسم التجاري",
-    "priceType": "نوع السعر",
-    "customerClassification": "تصنيف العميل",
-    "salesRepresentative": "مندوب المبيعات",
-    "customerType": "نوع العميل",
-    "licenseIssueDate": "تاريخ اصدار الرخصة",
-    "customerName": "اسم العميل",
-    "projectName": "اسم المشروع",
-    "startDate": "تاريخ البدء",
-    "endDate": "تاريخ الانتهاء",
-    "address": "العنوان",
-    "description": "الوصف",
-    "geoLocation": "الموقع الجغرافي",
-    "accountTypeLabel": "نوع حساب العميل",
-    "contactsList": "قائمة جهات الاتصال",
-    "customersList": "قائمة عملاء العميل",
-    "attachmentsList": "قائمة المرفقات",
-    "basicInfo": "المعلومات الاساسية",
-    "accountingInfo": "المعلومات المحاسبية",
-    "projectInfo": "معلومات المشروع",
-    "projectContact": "جهة اتصال المشروع",
-    "projectAttachments": "مرفقات المشروع",
-    "voucherTitle": "عنوان السند",
-    "voucherDescription": "وصف السند",
-    "amount": "المبلغ",
-    "notes": "ملاحظات",
-    "unitCode": "كود الوحدة",
-    "parentUnit": "الوحدة الأساسية ذات الصلة",
-    "type": "النوع",
-    "testCode": "كود الاختبار",
-    "testMethod": "منهجية الاختبار",
-    "testGroup": "مجموعة الاختبار",
-    "minPrice": "أدنى سعر",
-    "maxPrice": "أعلى سعر",
-    "minQuantity": "اقل كمية",
-    "listName": "اسم القائمة",
-    "createdAt": "تاريخ الإنشاء",
-    "password": "كلمة المرور",
-    "passwordConfirmation": "تأكيد كلمة المرور",
-    "position": "المنصب",
-    "requestType": "نوع الطلب",
-    "supplierName": "اسم المورد",
-    "requestIssueDate": "تاريخ إصدار الطلب",
-    "projectLocation": "موقع المشروع",
-    "paymentMethod": "طريقة الدفع",
-    "requestCode": "كود الطلب",
-    "requestDate": "تاريخ الطلب",
-    "validityPeriod": "فترة الصلاحية",
-    "purchaseOrderDate": "تاريخ طلبية المشتريات",
-    "invoiceCode": "كود الفاتورة",
-    "invoiceDueDate": "تاريخ استحقاق الفاتورة",
-    "receivingDocCode": "كود مستند الاستلام",
-    "receivingDate": "تاريخ الاستلام",
-    "purchaseOrderCode": "كود طلبية المشتريات",
-    "targetLocation": "موقع الهدف",
-    "actualExecutionDuration": "مدة التنفيذ الفعلية",
-    "finalTotal": "الإجمالي النهائي",
-    "quotationValidity": "صلاحية عرض السعر",
-    "textNote": "ملاحظة نصية",
-    "products": "المنتجات",
-    "transportService": "خدمة النقل",
-    "responsiblePerson": "اسم المسؤول",
-    "responsiblePhone": "هاتف المسؤول",
-    "attachments": "مرفقات",
-    "requestSummary": "ملخص الطلب",
-    "sendRequest": "إرسال الطلب",
-    "convertToQuotation": "تحويل إلى عرض سعر",
-    "services": "الخدمات",
-    "bankTransfer": "تحويل بنكي",
-    "supplyDetails": "بيانات التوريد الإضافية",
-    "executionPeriod": "مدة التنفيذ",
-    "dailyTrips": "عدد الرحلات اليومية",
-    "tripCount": "عدد الرحلات",
-    "transportMovements": "حركات النقل",
-    "vehicleType": "نوع المركبة",
-    "transportVehicleType": "نوع مركبة النقل",
-    "loadingResponsible": "مسؤول التحميل",
-    "unloadingResponsible": "مسؤول التفريغ",
-    "tripCapacity": "سعة الرحلة",
-    "tripTiming": "توقيت الرحلة",
-    "transportStartDate": "تاريخ بدء النقل",
-    "transportEndDate": "تاريخ انتهاء النقل",
-    "lateFee": "غرامة التأخير",
-    "cancelFee": "غرامة الإلغاء",
-    "invoiceInterval": "مدة رفع المستخلص",
-    "paymentTermNo": "مدة السداد",
-    "sourceLocation": "موقع مصدر المواد",
-    "productName": "اسم المنتج",
-    "unit": "الوحدة",
-    "quantity": "الكمية",
-    "discount": "خصم",
-    "taxAmount": "مبلغ الضريبة",
-    "totalAmount": "إجمالي المبلغ",
-    "product": "المنتج",
-    "materialType": "نوع المواد",
-    "transportMaterialType": "نوع مواد النقل",
-    "vehicleCount": "عدد المركبات",
-    "transportDetails": "تفاصيل النقل",
-    "addTransportService": "أضف خدمة نقل",
-    "noTransportDetailsAdded": "لا توجد تفاصيل نقل مضافة",
-    "clickAddTransportService": "اضغط على \"أضف خدمة نقل\" لإضافة تفاصيل جديدة",
-    "approvedTotalAmount": "المبلغ الإجمالي المعتمد في العرض",
-    "totalServiceAmount": "القيمة الإجمالية لمبلغ خدمات النقل",
-    "totalTripsAmount": "القيمة الإجمالية لمبلغ الرحلات",
-    "generalInfo": "المعلومات العامة للطلب",
-    "addedProducts": "المنتجات المضافة",
-    "requestInfo": "معلومات الطلب",
-    "orderInfo": "معلومات الطلبية",
-    "quotationSummary": "ملخص عرض السعر",
-    "totalBeforeDiscount": "الإجمالي قبل الخصم",
-    "totalAfterDiscount": "الإجمالي بعد الخصم",
-    "additionalSupplyData": "بيانات التوريد الإضافية",
-    "basicData": "البيانات الاساسية",
-    "noData": "لا يوجد",
-    "noNotes": "لا توجد ملاحظات",
-    "noProducts": "لا توجد منتجات",
-    "noAttachments": "لا توجد مرفقات لعرضها",
-    "selectDateTime": "اختر التاريخ والوقت",
-    "selectDate": "اختر التاريخ",
-    "select": "اختر",
-    "transportTimes": "أوقات النقل",
-    "baseQuantity": "الكمية الأساسية",
-    "receivedQuantity": "الكمية المستلمة",
-    "actualQuantity": "الكمية الفعلية",
-    "quantityFromSupplier": "الكمية من المورد",
-    "quantityFromTransport": "الكمية من النقل",
-    "quantityFromCustomer": "الكمية من العميل",
-    "actualQuantityFromSupplier": "الكمية الفعلية من المورد",
-    "actualQuantityFromTransport": "الكمية الفعلية من شركة النقل",
-    "actualQuantityFromCustomer": "الكمية الفعلية من العميل",
-    "sentTransportVehicles": "المركبات الناقلة المرسلة",
-    "receivedTransportVehicles": "المركبات الناقلة المستلمة",
-    "receivingDocsTable": "جدول عناصر سند الاستلام",
-    "deliveryLocation": "موقع التسليم",
-    "receivingLocation": "موقع الإستلام",
-    "deliveryReceivingSite": "موقع التسليم والإستلام",
-    "requestStatus": "حالة الطلب",
-    "orderType": "نوع الطلبية",
-    "orderDateTime": "تاريخ الطلبية",
-    "orderItemsTable": "جدول عناصر الطلبية",
-    "orderDetails": "تفاصيل الطلبية والمعلومات الخاصة بها",
-    "orderDateFrom": "تاريخ الطلبية من",
-    "orderDateTo": "تاريخ الطلبية إلى",
-    "quotationItemsTable": "جدول عناصر عرض السعر",
-    "pricesIncludeTransport": "الأسعار شاملة للنقل",
-    "editSupplyDetails": "تعديل تفاصيل التوريد",
-    "totalTax": "اجمالي الضريبة",
-    "deliveryMethod": "طريقة التسليم",
-    "departureLocation": "موقع الانطلاق",
-    "supplyType": "نوع التوريد",
-    "supplyDuration": "مدة التوريد",
-    "deliveryDuration": "مدة التسليم",
-    "transportedMaterialType": "نوع المواد المنقولة",
-    "tripDetails": "تفاصيل الرحلات",
-    "referenceNumber": "الرقم المرجعي",
-    "pickupDate": "التاريخ",
-    "timing": "التوقيت",
-    "morning": "صباحاً",
-    "evening": "مساءً",
-    "both": "كلاهما",
-    "morningAndEvening": "صباحاً ومساءً",
-    "productsTable": "جدول المنتجات",
-    "importFromExcel": "استيراد من ملف إكسل",
-    "addNote": "أضف ملاحظة",
-    "addNewProduct": "اضافة منتج جديد",
-    "saveAndReturnToPickups": "حفظ والعودة الى قائمة الحجوزات",
-    "saveAndReturnToOrders": "حفظ والعودة لجدول الطلبيات",
-    "saveAndCreateNew": "حفظ وانشاء جديد",
-    "transportCompany": "شركة النقل",
-    "loadingLocation": "موقع التحميل",
-    "loadingDateTime": "تاريخ / وقت التحميل",
-    "unloadingLocation": "موقع التفريغ",
-    "unloadingDateTime": "تاريخ / وقت التفريغ",
-    "totalQuantityTon": "الكمية الكلية / طن",
-    "totalQuantityM3": "الكمية الكلية / م³",
-    "billOfLading": "رقم بوليصة الشحن",
-    "trackingPoints": "عدد مرات ارسال الاحداثيات",
-    "timePeriod": "الفترة الزمنية",
-    "tripValue": "قيمة ارحلة",
-    "tripsList": "قائمة الرحلات",
-    "tripDetailsInfo": "تفاصيل الرحلة والمعلومات الخاصة بها",
-    "tripInfo": "معلومات الرحلة",
-    "logisticsSaleOrder": "طلبية مبيعات خدمة النقل",
-    "selectLogisticsOrder": "اختر طلبية النقل",
-    "customer": "العميل",
-    "selectCustomer": "اختر العميل",
-    "customerSaleOrder": "طلبية مبيعات العميل",
-    "selectCustomerOrder": "اختر طلبية العميل",
-    "selectLocation": "حدد الموقع",
-    "unloadingDatetime": "تاريخ / وقت التنزيل",
-    "loadingResponsibleParty": "مسؤول التحميل",
-    "enterLoadingResponsible": "أدخل اسم مسؤول التحميل",
-    "unloadingResponsibleParty": "مسؤول التنزيل",
-    "enterUnloadingResponsible": "أدخل اسم مسؤول التنزيل",
-    "trackingPointsCount": "عدد مرات إرسال الإحداثيات",
-    "enterTrackingPoints": "أدخل عدد مرات إرسال الإحداثيات",
-    "enterBillOfLading": "أدخل رقم بوليصة الشحن",
-    "enterQuantityTon": "أدخل الكمية بالطن",
-    "enterQuantityM3": "أدخل الكمية بالمتر المكعب",
-    "enterTripsCount": "أدخل عدد الرحلات",
-    "customerTripAmount": "مبلغ الرحلة للعميل",
-    "logisticCompanyTripAmount": "مبلغ الرحلة لشركة النقل",
-    "enterTripAmount": "أدخل مبلغ الرحلة",
-    "tripDetailsBetweenQallabCustomer": "تفاصيل الرحلة بين قلاب والعميل",
-    "tripDetailsBetweenQallabLogistic": "تفاصيل الرحلة بين قلاب وشركة النقل",
-    "vehicles": "المركبات",
-    "price": "السعر",
-    "addCustomerTripDetails": "اضافة تفاصيل رحلة للعميل",
-    "addLogisticTripDetails": "اضافة تفاصيل رحلة لشركة النقل",
-    "saveAndReturnToTrips": "حفظ والعودة لجدول الرحلات",
-    "tripName": "اسم الرحلة",
-    "tripDateFrom": "تاريخ الرحلة من",
-    "tripDateTo": "تاريخ الرحلة إلى",
-    "deliveryDocsList": "قائمة سندات التسليم",
-    "logisticsDeliveryDocsList": "قائمة وثائق تسليم خدمات النقل",
-    "deliveryDocDetails": "تفاصيل سند التسليم والمعلومات الخاصة به",
-    "logisticsDeliveryDocDetails": "تفاصيل وثيقة التسليم والمعلومات الخاصة بها",
-    "deliveryDocCode": "كود سند التسليم",
-    "logisticsDeliveryDocCode": "كود وثيقة التسليم",
-    "deliveryDate": "تاريخ التسليم",
-    "receivingStatus": "حالة الإستلام",
-    "deliveryStatus": "حالة التسليم",
-    "deliveryDocItemsTable": "جدول عناصر سند التسليم",
-    "logisticsDeliveryDocItemsTable": "جدول عناصر وثيقة التسليم",
-    "view": "عرض",
-    "noAttachmentsToShow": "لا توجد مرفقات لعرضها",
-    "attachment": "مرفق",
-    "loadingMore": "جاري تحميل المزيد...",
-    "deleteDeliveryDocs": "حذف سندات التسليم",
-    "deleteDeliveryDocConfirm": "هل أنت متأكد من حذف {count} سند استلام؟",
-    "changeStatus": "تغيير الحالة",
-    "changeStatusMessage": "تغيير الحالة:",
-    "salesInvoices": "فواتير المبيعات",
-    "logisticsSalesInvoices": "فواتير مبيعات خدمة نقل",
-    "invoiceDetails": "تفاصيل الفاتورة والمعلومات الخاصة بها",
-    "invoiceInfo": "معلومات الفاتورة",
-    "salesInvoiceItemsTable": "جدول عناصر فاتورة المبيعات",
-    "printInvoice": "طباعة الفاتورة",
-    "taxInvoice": "فاتورة مبيعات ضريبية",
-    "invoiceNumber": "رقم الفاتورة",
-    "invoiceDateLabel": "تاريخ الفاتورة",
-    "crNumber": "رقم السجل التجاري",
-    "addInvoice": "أضف فاتورة",
-    "invoiceCodePlaceholder": "كود الفاتورة",
-    "finalTotalPlaceholder": "إجمالي المبلغ",
-    "startDatePlaceholder": "تاريخ البداية",
-    "endDatePlaceholder": "تاريخ النهاية",
-    "priceOffers": "عروض الأسعار",
-    "quotationDetails": "تفاصيل عرض السعر والمعلومات الخاصة به",
-    "quotationName": "اسم عرض السعر",
-    "quotationDateTime": "تاريخ عرض السعر",
-    "upfrontPayment": "الدفعة المقدمة",
-    "addQuotation": "أضف عرض",
-    "quotationCodePlaceholder": "كود العرض",
-    "customerNamePlaceholder": "اسم العميل",
-    "pricePlaceholder": "الالسعر",
-    "quotationDatePlaceholder": "تاريخ العرض",
-    "deleteQuotations": "حذف عروض السعر",
-    "deleteQuotationConfirm": "هل أنت متأكد من حذف {count} عرض؟",
-    "productDetails": "تفاصيل المنتج والمعلومات الخاصة به",
-    "taxInfo": "معلومات الضريبة",
-    "productCode": "كود المنتج",
-    "productStatus": "حالة المنتج",
-    "parentProduct": "المنتج الأب",
-    "hasSubProducts": "له منتجات فرعية",
-    "descriptionEnglish": "الوصف بالانجليزي",
-    "descriptionArabic": "الوصف عربي",
-    "taxName": "اسم الضريبة",
-    "taxPercentage": "نسبة الضريبة",
-    "taxAccount": "حساب الضريبة",
-    "tests": "الاختبارات",
-    "groupProductsTable": "جدول المنتجات المجموعة",
-    "productGeneralInfo": "المعلومات العامة للمنتج",
-    "productTests": "الاختبارات على المنتج",
-    "taxData": "بيانات الضرائب",
-    "additionalData": "بيانات اضافية",
-    "testsList": "قائمة الاختبارات",
-    "subProductName": "اسم المنتج الفرعي",
-    "tax": "الضريبة",
-    "percentage": "النسبة",
-    "minValue": "أقل قيمة",
-    "priority": "الأولوية",
-    "test": "الاختبار",
-    "testsCount": "عدد الاختبارات",
-    "samplesCount": "عدد العينات",
-    "sampleQuantity": "كمية العينات",
-    "productVariableNameAr": "ادخل اسم المتغير بالعربية",
-    "productVariableNameEn": "Enter variable name in English"
-  },
-  "placeholders": {
-    "name_ar": "أدخل الاسم بالعربية",
-    "name_en": "أدخل الاسم بالانجليزية",
-    "status": "الحالة",
-    "businessName": "اسم الشركة",
-    "commercialRegister": "رقم السجل",
-    "taxNumber": "الرقم الضريبي",
-    "ownerName": "اسم المالك",
-    "phone": "الهاتف",
-    "email": "البريد الإلكتروني",
-    "userName": "اسم المستخدم",
-    "roleName": "اسم الدور",
-    "roles": "الأدوار",
-    "accountName": "اسم الحساب",
-    "brandName": "اسم العلامة التجارية",
-    "cityName": "اسم المدينة",
-    "countryName": "اسم الدولة",
-    "code": "الرمز",
-    "unitName": "اسم الوحدة",
-    "taxName": "اسم الضريبة",
-    "supplierCode": "كود المورد",
-    "fullName": "الاسم الكامل",
-    "city": "المدينة",
-    "customerCode": "كود العميل",
-    "mobile": "رقم الجوال",
-    "projectNumber": "رقم المشروع",
-    "nameEnglish": "الاسم بالانجليزية",
-    "nameArabic": "الاسم بالعربية",
-    "minStartDate": "اقل تاريخ بدء",
-    "maxStartDate": "اعلى تاريخ بدء",
-    "voucherNumber": "رقم السند",
-    "voucherType": "نوع السند",
-    "voucherDate": "تاريخ السند",
-    "unit": "الوحدة",
-    "classification": "التصنيف",
-    "serviceName": "اسم الخدمة",
-    "serviceCode": "كود الخدمة",
-    "serviceCategory": "تصنيف الخدمة",
-    "selectRequestType": "حدد نوع الطلب",
-    "selectSupplier": "حدد المورد",
-    "selectPaymentMethod": "حدد طريقة الدفع",
-    "enterPaymentValue": "أدخل قيمة الدفعة",
-    "selectLocationOnMap": "حدد الموقع على الخريطة",
-    "enterBusinessNameAr": "ادخل الاسم التجاري بالعربية",
-    "enterBusinessNameEn": "Enter business name in English",
-    "enterFirstNameAr": "ادخل الاسم الأول بالعربية",
-    "enterFirstNameEn": "Enter first name in English",
-    "enterLastNameAr": "ادخل الاسم الأخير بالعربية",
-    "enterLastNameEn": "Enter last name in English",
-    "saudiRiyal": "ريال سعودي",
-    "enterNumber": "ادخل الرقم",
-    "exampleEmail": "{email}",
-    "selectCountry": "اختر الدولة",
-    "selectCity": "اختر المدينة",
-    "postalCodeExample": "مثال: 12345",
-    "enterNeighborhood": "ادخل اسم الحي",
-    "enterStreetName": "ادخل اسم الشارع",
-    "enterBuildingNumber": "ادخل رقم المبنى",
-    "enterNationalAddress": "اكتب العنوان الوطني الكامل",
-    "additionalAddressDetails": "تفاصيل عنوان إضافية",
-    "enterFirstName": "اكتب الاسم الأول",
-    "fullNameArabic": "الاسم الكامل بالعربية",
-    "fullNameEnglish": "Full name (English)",
-    "tradeNameArabic": "الاسم التجاري بالعربية",
-    "tradeNameEnglish": "Trade name (English)",
-    "enterLegalName": "ادخل الاسم القانوني",
-    "selectEntityType": "اختر نوع الكيان",
-    "enterCommercialRegister": "ادخل رقم السجل التجاري",
-    "noteText": "هل تود إرفاق بعض الملاحظات، قم بكتابتها هنا من فضلك وسيتم إرفاقها مع طلب عرض السعر المرسل",
-    "enterResponsibleName": "أدخل اسم المسؤول",
-    "enterExecutionPeriod": "أدخل مدة التنفيذ بالأيام",
-    "enterTripCount": "أدخل عدد الرحلات",
-    "enterLoadingResponsible": "أدخل اسم مسؤول التحميل",
-    "enterUnloadingResponsible": "أدخل اسم مسؤول التفريغ"
-  },
-  "buttons": {
-    "addContact": "أضف جهة اتصال",
-    "addCustomer": "أضف عميل",
-    "addAttachment": "أضف مرفق",
-    "addList": "أضف قائمة",
-    "addTest": "إضافة اختبار",
-    "addUnit": "إضافة وحدة",
-    "addReceiptVoucher": "اضافة سند قبض",
-    "addPaymentVoucher": "اضافة سند صرف",
-    "apply": "تطبيق",
-    "save": "حفظ",
-    "saveChanges": "حفظ التعديلات",
-    "addNewUser": "أضف مستخدم جديد",
-    "cancel": "الغاء",
-    "close": "إغلاق",
-    "addRequest": "أضف طلب",
-    "addOrder": "أضف طلبية",
-    "addQuotation": "أضف عرض سعر",
-    "addInvoice": "أضف فاتورة",
-    "addReceivingDoc": "أضف مستند استلام",
-    "addProduct": "إضافة منتج جديد",
-    "addTransportService": "إضافة بيانات نقل جديدة",
-    "importFromExcel": "استيراد من ملف إكسل",
-    "selectLocation": "حدد الموقع",
-    "addNote": "أضف ملاحظة"
-  },
-  "statusOptions": {
-    "active": "فعال",
-    "inactive": "غير فعال",
-    "activeAlt": "نشط",
-    "inactiveAlt": "غير نشط"
+  "form": {
+    "fields": {
+      "nameAr": {
+        "label": "الاسم بالعربية",
+        "placeholder": "أدخل الاسم بالعربية"
+      },
+      "nameEn": {
+        "label": "الاسم بالانجليزية",
+        "placeholder": "أدخل الاسم بالانجليزية"
+      },
+      "status": {
+        "label": "الحالة",
+        "placeholder": "الحالة"
+      },
+      "defaultStatus": {
+        "label": "الحالة الافتراضية"
+      },
+      "code": {
+        "label": "الرمز",
+        "placeholder": "الرمز"
+      },
+      "type": {
+        "label": "النوع",
+        "placeholder": "اختر النوع"
+      },
+      "description": {
+        "label": "الوصف"
+      },
+      "descriptionArabic": {
+        "label": "الوصف عربي",
+        "placeholder": "أدخل الوصف بالعربية "
+      },
+      "descriptionEnglish": {
+        "label": "الوصف بالانجليزي",
+        "placeholder": "أدخل الوصف بالانجليزية "
+      },
+      "notes": {
+        "label": "ملاحظات",
+        "placeholder": "ملاحظات"
+      },
+      "name": {
+        "label": "الإسم"
+      },
+      "unitCode": {
+        "label": "كود الوحدة",
+        "placeholder": "كود الوحدة"
+      },
+      "parentUnit": {
+        "label": "الوحدة الأساسية ذات الصلة",
+        "placeholder": "اختر الوحدة الأساسية"
+      },
+      "taxRule": {
+        "label": "قاعدة الضريبة",
+        "placeholder": "اختر قاعدة الضريبة"
+      },
+      "calculationMethod": {
+        "label": "طريقة الاحتساب",
+        "placeholder": "اختر طريقة الاحتساب"
+      },
+      "amountIncludesTax": {
+        "label": "المبلغ شامل الضريبة"
+      },
+      "code2": {
+        "label": "الرمز 2",
+        "placeholder": "ادخل الرمز"
+      },
+      "code3": {
+        "label": "الرمز 3",
+        "placeholder": "ادخل الرمز"
+      },
+      "phoneCode": {
+        "label": "كود الهاتف",
+        "placeholder": "ادخل كود الهاتف"
+      },
+      "isDefault": {
+        "label": "افتراضي"
+      },
+      "textNote": {
+        "label": "ملاحظة نصية",
+        "placeholder": "هل تود إرفاق بعض الملاحظات، قم بكتابتها هنا من فضلك وسيتم إرفاقها مع طلب عرض السعر المرسل"
+      },
+      "startDate": {
+        "label": "تاريخ البدء"
+      },
+      "endDate": {
+        "label": "تاريخ الانتهاء"
+      },
+      "from": {
+        "label": "من"
+      },
+      "to": {
+        "label": "إلى"
+      },
+      "createdAt": {
+        "label": "تاريخ الإنشاء"
+      },
+      "referenceNumber": {
+        "label": "الرقم المرجعي"
+      },
+      "listName": {
+        "label": "اسم القائمة"
+      },
+      "account": {
+        "label": "الحساب"
+      },
+      "position": {
+        "label": "المنصب"
+      },
+      "price": {
+        "label": "السعر"
+      },
+      "value": {
+        "label": "قيمة"
+      },
+      "min": {
+        "label": "أدنى"
+      },
+      "max": {
+        "label": "أعلى"
+      },
+      "percentage": {
+        "label": "النسبة"
+      },
+      "attachments": {
+        "label": "مرفقات"
+      }
+    },
+    "identity": {
+      "ownerName": {
+        "label": "اسم المالك / الشركة المالكة",
+        "placeholder": "أدخل اسم المالك"
+      },
+      "licenseNumber": {
+        "label": "رقم الرخصة",
+        "placeholder": "رقم الرخصة"
+      },
+      "firstName": {
+        "label": "الاسم الأول",
+        "placeholder": "ادخل الاسم الأول بالعربية",
+        "placeholderEn": "Enter first name in English"
+      },
+      "unifiedLoginId": {
+        "label": "معرف الدخول الموحد",
+        "placeholder": "أدخل معرف الدخول الموحد"
+      },
+      "lastName": {
+        "label": "الاسم الأخير",
+        "placeholder": "ادخل الاسم الأخير بالعربية",
+        "placeholderEn": "Enter last name in English"
+      },
+      "fullName": {
+        "label": "الاسم الأول",
+        "placeholder": "الاسم الكامل"
+      },
+      "fullNameArabic": {
+        "label": "الاسم بالعربية",
+        "placeholder": "الاسم الكامل بالعربية"
+      },
+      "fullNameEnglish": {
+        "label": "الاسم بالانجليزية",
+        "placeholder": "Full name (English)"
+      },
+      "businessName": {
+        "label": "الاسم التجاري",
+        "placeholder": "ادخل الاسم التجاري بالعربية",
+        "placeholderEn": "Enter business name in English"
+      },
+      "legalName": {
+        "label": "الاسم القانوني",
+        "placeholder": "ادخل الاسم القانوني"
+      },
+      "entityType": {
+        "label": "نوع الكيان",
+        "placeholder": "اختر نوع الكيان"
+      },
+      "language": {
+        "label": "اللغة",
+        "placeholder": "اختر اللغة"
+      },
+      "commercialRegister": {
+        "label": "السجل التجاري",
+        "placeholder": "رقم السجل"
+      },
+      "commercialRegisterNumber": {
+        "label": "رقم السجل التجاري",
+        "placeholder": "ادخل رقم السجل التجاري"
+      },
+      "taxNumber": {
+        "label": "الرقم الضريبي",
+        "placeholder": "ادخل الرقم الضريبي"
+      },
+      "userName": {
+        "label": "اسم المستخدم",
+        "placeholder": "اسم المستخدم"
+      },
+      "password": {
+        "label": "كلمة المرور"
+      },
+      "passwordConfirmation": {
+        "label": "تأكيد كلمة المرور"
+      },
+      "role": {
+        "label": "الدور",
+        "placeholder": "اسم الدور"
+      },
+      "roles": {
+        "label": "الأدوار",
+        "placeholder": "الأدوار"
+      },
+      "roleName": {
+        "label": "اسم الدور",
+        "placeholder": "اسم الدور"
+      },
+      "defaultCurrency": {
+        "label": "العملة الافتراضية"
+      },
+      "phone": {
+        "label": "الهاتف",
+        "placeholder": "الهاتف"
+      },
+      "IdNumber": {
+        "label": "رقم الهوية",
+        "placeholder": "أدخل رقم الهوية"
+      },
+      "mobilePhone": {
+        "label": "الجوال",
+        "placeholder": "رقم الجوال"
+      },
+      "email": {
+        "label": "البريد الإلكتروني",
+        "placeholder": "{email}"
+      },
+      "licenseIssueDate": {
+        "label": "تاريخ إصدار الرخصة",
+        "placeholder": "اختر التاريخ",
+        "info": "تاريخ إصدار صلاحية الرخصة"
+      },
+      "licenseExpiryDate": {
+        "label": "تاريخ انتهاء الرخصة",
+        "placeholder": "اختر التاريخ",
+        "info": "تاريخ انتهاء صلاحية الرخصة"
+      }
+    },
+    "address": {
+      "sections": {
+        "addressInfo": "بيانات العنوان"
+      },
+      "address": {
+        "label": "العنوان"
+      },
+      "address2": {
+        "label": "العنوان 2"
+      },
+      "country": {
+        "label": "الدولة",
+        "placeholder": "اختر الدولة"
+      },
+      "city": {
+        "label": "المدينة",
+        "placeholder": "اختر المدينة"
+      },
+      "district": {
+        "label": "اسم الحي",
+        "placeholder": "ادخل اسم الحي"
+      },
+      "streetName": {
+        "label": "اسم الشارع",
+        "placeholder": "ادخل اسم الشارع"
+      },
+      "buildingNumber": {
+        "label": "رقم المبنى",
+        "placeholder": "ادخل رقم المبنى"
+      },
+      "postalCode": {
+        "label": "الرمز البريدي",
+        "placeholder": "مثال: 12345"
+      },
+      "nationalAddress": {
+        "label": "العنوان الوطني",
+        "placeholder": "اكتب العنوان الوطني الكامل"
+      },
+      "additionalAddressDetails": {
+        "label": "العنوان 2",
+        "placeholder": "تفاصيل عنوان إضافية"
+      },
+      "geoLocation": {
+        "label": "الموقع الجغرافي"
+      },
+      "selectLocationOnMap": {
+        "label": "الموقع الجغرافي",
+        "placeholder": "حدد الموقع على الخريطة"
+      },
+      "latitude": {
+        "label": "خط العرض (Latitude)"
+      },
+      "longitude": {
+        "label": "خط الطول (Longitude)"
+      }
+    },
+    "customer": {
+      "customerName": {
+        "label": "اسم العميل",
+        "placeholder": "كود العميل"
+      },
+      "customerType": {
+        "label": "نوع العميل"
+      },
+      "customerClassification": {
+        "label": "تصنيف العميل"
+      },
+      "salesRepresentative": {
+        "label": "مندوب المبيعات"
+      },
+      "accountTypeLabel": {
+        "label": "نوع حساب العميل"
+      },
+      "priceType": {
+        "label": "نوع السعر"
+      },
+      "contactsList": {
+        "label": "قائمة جهات الاتصال"
+      },
+      "customersList": {
+        "label": "قائمة عملاء العميل"
+      },
+      "attachmentsList": {
+        "label": "قائمة المرفقات"
+      },
+      "basicInfo": {
+        "label": "المعلومات الاساسية"
+      },
+      "accountingInfo": {
+        "label": "المعلومات المحاسبية"
+      }
+    },
+    "supplier": {
+      "supplierName": {
+        "label": "اسم المورد",
+        "placeholder": "حدد المورد"
+      },
+      "supplierCode": {
+        "label": "كود المورد",
+        "placeholder": "كود المورد"
+      }
+    },
+    "contractor": {
+      "basicInfo": {
+        "fullName": {
+          "label": "الاسم كامل",
+          "placeholderEn": "Enter full name in English",
+          "placeholderAr": "ادخل الاسم كامل بالعربية"
+        }
+      },
+      "commercialInfo": {
+        "contractorClassification": {
+          "label": "تصنيف المقاول",
+          "placeholder": "اختر"
+        },
+        "classificationGrade": {
+          "label": "درجة تصنيف المقاول",
+          "placeholder": "اختر"
+        },
+        "scopeOfWork": {
+          "label": "نطاق الأعمال",
+          "placeholder": "اختر"
+        },
+        "municipalLicenseNumber": {
+          "label": "رقم رخصة البلدية",
+          "placeholder": "ادخل الرقم"
+        },
+        "municipalLicenseExpiry": {
+          "label": "تاريخ انتهاء رخصة البلدية",
+          "placeholder": "اختر التاريخ",
+          "tooltip": "تاريخ انتهاء صلاحية رخصة البلدية"
+        },
+        "municipalLicenseStatus": {
+          "label": "حالة رخصة البلدية",
+          "placeholder": "اختر"
+        },
+        "safetyCertification": {
+          "label": "شهادات السلامة المهنية",
+          "placeholder": "اختر"
+        },
+        "environmentalCertification": {
+          "label": "شهادات البيئة",
+          "placeholder": "اختر"
+        },
+        "civilDefenseApproval": {
+          "label": "موافقة الدفاع المدني ؟"
+        }
+      },
+      "financialInfo": {
+        "sections": {
+          "bankAccounts": "الحسابات البنكية"
+        },
+        "bankAccount": {
+          "bankName": {
+            "label": "اسم البنك",
+            "placeholder": "اسم البنك"
+          },
+          "bankBranch": {
+            "label": "فرع البنك",
+            "placeholder": "فرع البنك"
+          },
+          "iban": {
+            "label": "الآيبان/IBAN",
+            "placeholder": "الآيبان/IBAN",
+            "tooltip": "الرقم التعريفي الدولي للحساب البنكي"
+          },
+          "accountNumber": {
+            "label": "رقم الحساب البنكي",
+            "placeholder": "رقم الحساب البنكي"
+          },
+          "status": {
+            "label": "الحالة"
+          },
+          "actions": {
+            "label": "الإجراءات"
+          },
+          "addAccount": {
+            "label": "إضافة حساب"
+          },
+          "noAccounts": "لا توجد حسابات بنكية. انقر على \"أضف حساب بنكي\" لإضافة حساب جديد."
+        }
+      },
+      "operationalInfo": {
+        "sectionTitle": "المعلومات التشغيلية",
+        "ongoingProjects": {
+          "label": "عدد المشاريع الجارية",
+          "placeholder": "ادخل العدد"
+        },
+        "completedProjects": {
+          "label": "عدد المشاريع المكتملة",
+          "placeholder": "ادخل العدد"
+        },
+        "employeesCount": {
+          "label": "إجمالي عدد الموظفين",
+          "placeholder": "ادخل العدد"
+        },
+        "engineersCount": {
+          "label": "عدد المهندسين",
+          "placeholder": "ادخل العدد"
+        },
+        "techniciansCount": {
+          "label": "عدد الفنيين",
+          "placeholder": "ادخل العدد"
+        },
+        "operationalCapacity": {
+          "label": "القدرة التشغيلية للمقاول",
+          "placeholder": "اختر"
+        },
+        "specialization": {
+          "label": "التخصص الرئيسي المقاول",
+          "placeholder": "اختر"
+        },
+        "siteReadiness": {
+          "label": "جاهزية مواقع العمل",
+          "placeholder": "اختر"
+        },
+        "safetyManagementSystem": {
+          "label": "نظام إدارة السلامة"
+        },
+        "environmentalCompliance": {
+          "label": "الالتزام بالأنظمة البيئية"
+        }
+      },
+      "documents": {
+        "sectionTitle": "المستندات",
+        "documentName": {
+          "label": "اسم الملف",
+          "placeholder": "ادخل الاسم"
+        },
+        "documentType": {
+          "label": "نوع الملف",
+          "placeholder": "اختر"
+        },
+        "fileUpload": {
+          "label": "ارفق ملف",
+          "hint": "Click to upload or drag and drop"
+        },
+        "addButton": {
+          "label": "إضافة"
+        },
+        "tableHeaders": {
+          "attachmentName": "اسم المرفق",
+          "attachmentDate": "تاريخ المرفق",
+          "attachmentType": "نوع المرفق",
+          "file": "الملف",
+          "actions": "الإجراءات"
+        }
+      }
+    },
+    "crusher": {
+      "commercialInfo": {
+        "managerData": {
+          "sectionTitle": "بيانات المدير"
+        },
+        "licenseIssueDate": {
+          "info": "تاريخ إصدار رخصة الكسارة الرسمي"
+        },
+        "licenseExpiryDate": {
+          "info": "تاريخ إنتهاء رخصة الكسارة الرسمي"
+        }
+      },
+      "operationalInfo": {
+        "sectionTitle": "المعلومات التشغيلية",
+        "productionLines": {
+          "label": "عدد خطوط الإنتاج",
+          "placeholder": "20"
+        },
+        "rockType": {
+          "label": "نوع الصخر",
+          "placeholder": "اختر نوع الصخر"
+        },
+        "crusherType": {
+          "label": "نوع الكسارة",
+          "placeholder": "اختر نوع الكسارة"
+        },
+        "feedRate": {
+          "label": "سرعة التغذية",
+          "placeholder": "20",
+          "tooltip": "سرعة تغذية المواد الخام للكسارة"
+        },
+        "maxProduction": {
+          "label": "الحد الأقصى للإنتاج",
+          "placeholder": "50",
+          "tooltip": "أقصى قدرة إنتاجية للكسارة"
+        },
+        "currentProduction": {
+          "label": "الإنتاج الحالي",
+          "placeholder": "45"
+        },
+        "design": {
+          "label": "تصميم الكسارة",
+          "placeholder": "اختر التصميم"
+        },
+        "workersCount": {
+          "label": "عدد العمال",
+          "placeholder": "50"
+        }
+      }
+    },
+    "factory": {
+      "commercialInfo": {
+        "licenseType": {
+          "label": "نوع الرخصة",
+          "placeholder": "اختر نوع الرخصة"
+        },
+        "issuingAuthority": {
+          "label": "الجهة المانحة",
+          "placeholder": "اختر الجهة المانحة"
+        },
+        "licenseStatus": {
+          "label": "حالة الرخصة"
+        },
+        "licensedActivity": {
+          "label": "النشاط المرخص",
+          "placeholder": "اختر النشاط المرخص"
+        },
+        "activityTypes": {
+          "label": "نوع المواد",
+          "placeholder": "اختر نوع النشاط"
+        },
+        "productTypes": {
+          "label": "أنواع المنتجات",
+          "placeholder": "اختر أنواع المنتجات"
+        },
+        "rawMaterialTypes": {
+          "label": "نوع المواد الخام",
+          "placeholder": "اختر نوع المواد الخام"
+        },
+        "rawMaterialSource": {
+          "label": "مصدر المواد الخام",
+          "placeholder": "اختر مصدر المواد الخام"
+        },
+        "licensedCapacity": {
+          "label": "الطاقة المرخصة",
+          "placeholder": "ادخل الطاقة المرخصة"
+        }
+      },
+      "operationalInfo": {
+        "productionLinesCount": {
+          "label": "عدد خطوط الإنتاج",
+          "placeholder": "ادخل عدد خطوط الإنتاج"
+        },
+        "operationalStatus": {
+          "label": "حالة التشغيل",
+          "placeholder": "اختر حالة التشغيل"
+        },
+        "totalWorkers": {
+          "label": "عدد العمال",
+          "placeholder": "ادخل عدد العمال"
+        },
+        "qualityControlSystem": {
+          "label": "نظام ضبط الجودة",
+          "placeholder": "اختر نظام الجودة"
+        },
+        "workingHours": {
+          "label": "اوقات العمل",
+          "placeholder": "اختر أوقات العمل"
+        },
+        "safetySystem": {
+          "label": "نظام السلامة",
+          "placeholder": "اختر نظام السلامة"
+        },
+        "equipmentType": {
+          "label": "نوع المعدات",
+          "placeholder": "اختر نوع المعدات"
+        },
+        "maintenanceSystem": {
+          "label": "نظام الصيانة",
+          "placeholder": "اختر نظام الصيانة"
+        },
+        "operationMode": {
+          "label": "طريقة التشغيل",
+          "placeholder": "اختر طريقة التشغيل"
+        },
+        "weighbridgeType": {
+          "label": "نوع الميزان",
+          "placeholder": "اختر نوع الميزان"
+        },
+        "weighbridgeAvailability": {
+          "label": "وجود ميزان"
+        },
+        "qualityLabAvailability": {
+          "label": "وجود مختبر جودة"
+        },
+        "engineersCount": {
+          "label": "عدد المهندسين",
+          "placeholder": "ادخل العدد"
+        },
+        "techniciansCount": {
+          "label": "عدد الفنيين",
+          "placeholder": "ادخل العدد"
+        }
+      }
+    },
+    "logistics": {
+      "commercialInfo": {
+        "sections": {
+          "licenseCompliance": "الترخيص والامتثال"
+        },
+        "transportMinistryLicenseNumber": {
+          "label": "رقم ترخيص وزارة النقل",
+          "placeholder": "11478523"
+        },
+        "transportLicenseIssueDate": {
+          "label": "تاريخ إصدار الترخيص",
+          "placeholder": "DD-MM-YYYY"
+        },
+        "transportLicenseExpiryDate": {
+          "label": "تاريخ انتهاء الترخيص",
+          "placeholder": "DD-MM-YYYY"
+        },
+        "activityClassification": {
+          "label": "تصنيف النشاط",
+          "placeholder": "اختر تصنيف النشاط"
+        },
+        "safetyClassification": {
+          "label": "تصنيف السلامة",
+          "placeholder": "اختر تصنيف السلامة"
+        },
+        "insuranceProvider": {
+          "label": " جهة التأمين ",
+          "placeholder": "اسم شركة التأمين"
+        },
+        "fleetInsuranceCoverage": {
+          "label": "تأمين شامل للأسطول"
+        },
+        "hazardousTransport": {
+          "label": "رخصة نقل المواد الخطرة للمحروقات"
+        },
+        "civilDefensePermit": {
+          "label": "تصريح الدفاع المدني"
+        },
+        "ownershipType": {
+          "label": "نوع الملكية",
+          "placeholder": "اختر نوع الملكية"
+        }
+      },
+      "operationalInfo": {
+        "sections": {
+          "operationalData": "المعلومات التشغيلية"
+        },
+        "materialTypes": {
+          "label": "أنواع المواد",
+          "placeholder": "اختر أنواع المواد"
+        },
+        "fleetSize": {
+          "label": "عدد الأساطيل",
+          "placeholder": "أدخل عدد الأساطيل"
+        },
+        "branchesCount": {
+          "label": "عدد الفروع",
+          "placeholder": "أدخل عدد الفروع"
+        },
+        "operationScope": {
+          "label": "نطاق التشغيل ",
+          "placeholder": "اختر نطاق العمليات"
+        },
+        "driversCount": {
+          "label": "عدد السائقين",
+          "placeholder": "أدخل عدد السائقين"
+        },
+        "supervisorsCount": {
+          "label": "عدد المشرفين",
+          "placeholder": "أدخل عدد المشرفين"
+        },
+        "dailyTripsAvg": {
+          "label": " عدد الرحلات اليومية ",
+          "placeholder": "أدخل عدد الرحلات اليومية"
+        },
+        "operationMode": {
+          "label": "نظام التشغيل",
+          "placeholder": "اختر نظام التشغيل"
+        },
+        "maintenanceStrategy": {
+          "label": "نظام الصيانة",
+          "placeholder": "اختر نظام الصيانة"
+        },
+        "fleetManagementSystem": {
+          "label": "نظام إدارة الأسطول"
+        },
+        "gpsTracking": {
+          "label": "نظام تتبع GPS"
+        }
+      }
+    },
+    "project": {
+      "projectName": {
+        "label": "اسم المشروع",
+        "placeholder": "رقم المشروع"
+      },
+      "projectLocation": {
+        "label": "موقع المشروع"
+      },
+      "projectInfo": {
+        "label": "معلومات المشروع"
+      },
+      "projectContact": {
+        "label": "جهة اتصال المشروع"
+      },
+      "projectAttachments": {
+        "label": "مرفقات المشروع"
+      },
+      "startDate": {
+        "label": "تاريخ البدء",
+        "placeholder": "اقل تاريخ بدء"
+      },
+      "endDate": {
+        "label": "تاريخ الانتهاء",
+        "placeholder": "اعلى تاريخ بدء"
+      }
+    },
+    "voucher": {
+      "voucherTitle": {
+        "label": "عنوان السند"
+      },
+      "voucherDescription": {
+        "label": "وصف السند"
+      },
+      "voucherNumber": {
+        "label": "الرقم المرجعي",
+        "placeholder": "رقم السند"
+      },
+      "voucherType": {
+        "label": "النوع",
+        "placeholder": "نوع السند"
+      },
+      "voucherDate": {
+        "label": "تاريخ البدء",
+        "placeholder": "تاريخ السند"
+      },
+      "amount": {
+        "label": "المبلغ",
+        "placeholder": "أدخل قيمة الدفعة"
+      },
+      "paymentMethod": {
+        "label": "طريقة الدفع",
+        "placeholder": "حدد طريقة الدفع"
+      },
+      "bankTransfer": {
+        "label": "تحويل بنكي"
+      },
+      "paymentTermNo": {
+        "label": "مدة السداد"
+      },
+      "upfrontPayment": {
+        "label": "الدفعة المقدمة"
+      }
+    },
+    "financial": {
+      "amount": {
+        "label": "المبلغ"
+      },
+      "discount": {
+        "label": "خصم"
+      },
+      "taxAmount": {
+        "label": "مبلغ الضريبة"
+      },
+      "totalAmount": {
+        "label": "إجمالي المبلغ"
+      },
+      "totalBeforeDiscount": {
+        "label": "الإجمالي قبل الخصم"
+      },
+      "totalAfterDiscount": {
+        "label": "الإجمالي بعد الخصم"
+      },
+      "totalTax": {
+        "label": "اجمالي الضريبة"
+      },
+      "finalTotal": {
+        "label": "الإجمالي النهائي"
+      },
+      "approvedTotalAmount": {
+        "label": "المبلغ الإجمالي المعتمد في العرض"
+      },
+      "totalServiceAmount": {
+        "label": "القيمة الإجمالية لمبلغ خدمات النقل"
+      },
+      "totalTripsAmount": {
+        "label": "القيمة الإجمالية لمبلغ الرحلات"
+      },
+      "salePrice": {
+        "label": "سعر البيع"
+      },
+      "priceType": {
+        "label": "نوع السعر"
+      },
+      "minPrice": {
+        "label": "أدنى سعر"
+      },
+      "maxPrice": {
+        "label": "أعلى سعر"
+      },
+      "minValue": {
+        "label": "أقل قيمة"
+      },
+      "invoiceInterval": {
+        "label": "مدة رفع المستخلص"
+      },
+      "minimumCredit": {
+        "label": "الحد الادنى (دائن)"
+      },
+      "maximumCredit": {
+        "label": "الحد الاعلى (دائن)"
+      },
+      "minimumDebit": {
+        "label": "الحد الادنى (مدين)"
+      },
+      "maximumDebit": {
+        "label": "الحد الاعلى (مدين)"
+      },
+      "debitLimit": {
+        "label": "الحد الأعلى للدين",
+        "placeholder": "أدخل الحد الأعلى للدين",
+        "info": "الحد الأقصى المسموح به للدين"
+      },
+      "creditLimit": {
+        "label": "الحد الأعلى للإئتمان",
+        "placeholder": "أدخل الحد الأعلى للإئتمان",
+        "info": "الحد الأقصى المسموح به للإئتمان"
+      },
+      "saudiRiyal": "ريال سعودي"
+    },
+    "tax": {
+      "taxName": {
+        "label": "اسم الضريبة",
+        "placeholder": "اسم الضريبة"
+      },
+      "taxPercentage": {
+        "label": "نسبة الضريبة"
+      },
+      "taxAccount": {
+        "label": "حساب الضريبة"
+      },
+      "taxData": {
+        "label": "بيانات الضرائب"
+      },
+      "taxInfo": {
+        "label": "معلومات الضريبة"
+      },
+      "taxInvoice": {
+        "label": "فاتورة مبيعات ضريبية"
+      },
+      "tax": {
+        "label": "الضريبة",
+        "placeholder": "قم باختيار الضريبة"
+      },
+      "percentage": {
+        "label": "النسبة"
+      },
+      "priority": {
+        "label": "الأولوية",
+        "placeholder":"اختر الأولوية"
+      },
+      "minValue": {
+        "label": "أقل قيمة"
+      },
+      "noTaxesAdded": {
+        "label": "لا توجد ضرائب مضافة بعد"
+      }
+    },
+    "product": {
+      "productName": {
+        "label": "اسم المنتج",
+        "placeholder": "اسم الوحدة"
+      },
+      "productCode": {
+        "label": "كود المنتج"
+      },
+      "productStatus": {
+        "label": "حالة المنتج"
+      },
+      "parentProduct": {
+        "label": "المنتج الأب",
+        "placeholder": "اختر المنتج الأب"
+      },
+      "parentCategory": {
+        "label": "التصنيف الرئيسي",
+        "placeholder": "اختر التصنيف الرئيسي"
+      },
+      "categoryDetails": {
+        "label": "تفاصيل التصنيف",
+        "placeholder": "أدخل تفاصيل التصنيف بالعربية",
+        "placeholderEn": "Enter Category Details in English"
+      },
+      "hasSubProducts": {
+        "label": "له منتجات فرعية"
+      },
+      "subProductName": {
+        "label": "اسم المنتج الفرعي"
+      },
+      "product": {
+        "label": "المنتج"
+      },
+      "products": {
+        "label": "المنتجات"
+      },
+      "unit": {
+        "label": "الوحدة",
+        "placeholder": "الوحدة"
+      },
+      "unitCode": {
+        "label": "كود الوحدة"
+      },
+      "parentUnit": {
+        "label": "الوحدة الأساسية ذات الصلة"
+      },
+      "quantity": {
+        "label": "الكمية"
+      },
+      "minQuantity": {
+        "label": "اقل كمية"
+      },
+      "materialType": {
+        "label": "نوع المواد"
+      },
+      "productGeneralInfo": {
+        "label": "المعلومات العامة للمنتج"
+      },
+      "productDetails": {
+        "label": "تفاصيل المنتج والمعلومات الخاصة به"
+      },
+      "productTests": {
+        "label": "الاختبارات على المنتج"
+      },
+      "additionalData": {
+        "label": "بيانات اضافية"
+      },
+      "groupProductsTable": {
+        "label": "جدول المنتجات المجموعة"
+      },
+      "productsTable": {
+        "label": "جدول المنتجات"
+      },
+      "productCount": {
+        "label": "عدد المنتجات"
+      },
+      "productVariableNameAr": {
+        "label": "ادخل اسم المتغير بالعربية"
+      },
+      "productVariableNameEn": {
+        "label": "Enter variable name in English"
+      },
+      "bulkEdit": {
+        "label": "تعديل الكل"
+      },
+      "increase": {
+        "label": "زيادة"
+      },
+      "decrease": {
+        "label": "نقصان"
+      },
+      "searchByCode": {
+        "label": "ابحث بالكود"
+      },
+      "getProductsByCategory": {
+        "label": "جلب المنتجات عن طريق تصنيف محدد"
+      },
+      "generalProductsPriceList": {
+        "label": "قائمة اسعار المنتجات العامة"
+      },
+      "buildingMaterialPriceList": {
+        "label": "قائمة اسعار منتجات مواد البناء"
+      },
+      "salePrice": {
+        "label": "سعر البيع"
+      }
+    },
+    "tests": {
+      "tests": {
+        "label": "الاختبارات"
+      },
+      "test": {
+        "label": "الاختبار"
+      },
+      "testCode": {
+        "label": "كود الاختبار"
+      },
+      "testMethod": {
+        "label": "منهجية الاختبار"
+      },
+      "testGroup": {
+        "label": "مجموعة الاختبار"
+      },
+      "testsList": {
+        "label": "قائمة الاختبارات"
+      },
+      "testsCount": {
+        "label": "عدد الاختبارات"
+      },
+      "samplesCount": {
+        "label": "عدد العينات"
+      },
+      "sampleQuantity": {
+        "label": "كمية العينات"
+      }
+    },
+    "production": {
+      "productionPerHour": {
+        "label": "كمية الإنتاج بالطن / ساعة"
+      },
+      "productionPerDay": {
+        "label": "كمية الإنتاج بالطن / باليوم"
+      },
+      "productionPerWeek": {
+        "label": "كمية الإنتاج بالطن / بالاسبوع"
+      },
+      "productionPerMonth": {
+        "label": "كمية الإنتاج بالطن / بالشهر"
+      }
+    },
+    "services": {
+      "services": {
+        "label": "الخدمات"
+      },
+      "serviceName": {
+        "label": "اسم المنتج",
+        "placeholder": "اسم الخدمة"
+      },
+      "serviceCode": {
+        "label": "الرمز",
+        "placeholder": "كود الخدمة"
+      },
+      "serviceCategory": {
+        "label": "النوع",
+        "placeholder": "تصنيف الخدمة"
+      }
+    },
+    "order": {
+      "requestType": {
+        "label": "نوع الطلب",
+        "placeholder": "حدد نوع الطلب"
+      },
+      "requestCode": {
+        "label": "كود الطلب"
+      },
+      "requestDate": {
+        "label": "تاريخ الطلب"
+      },
+      "requestIssueDate": {
+        "label": "تاريخ إصدار الطلب"
+      },
+      "requestStatus": {
+        "label": "حالة الطلب"
+      },
+      "requestInfo": {
+        "label": "معلومات الطلب"
+      },
+      "requestSummary": {
+        "label": "ملخص الطلب"
+      },
+      "sendRequest": {
+        "label": "إرسال الطلب"
+      },
+      "convertToQuotation": {
+        "label": "تحويل إلى عرض سعر"
+      },
+      "orderType": {
+        "label": "نوع الطلبية"
+      },
+      "orderDateTime": {
+        "label": "تاريخ الطلبية"
+      },
+      "orderDateFrom": {
+        "label": "تاريخ الطلبية من"
+      },
+      "orderDateTo": {
+        "label": "تاريخ الطلبية إلى"
+      },
+      "orderInfo": {
+        "label": "معلومات الطلبية"
+      },
+      "orderDetails": {
+        "label": "تفاصيل الطلبية والمعلومات الخاصة بها"
+      },
+      "orderItemsTable": {
+        "label": "جدول عناصر الطلبية"
+      },
+      "generalInfo": {
+        "label": "المعلومات العامة للطلب"
+      },
+      "addedProducts": {
+        "label": "المنتجات المضافة"
+      },
+      "purchaseOrderCode": {
+        "label": "كود طلبية المشتريات"
+      },
+      "purchaseOrderDate": {
+        "label": "تاريخ طلبية المشتريات"
+      },
+      "validityPeriod": {
+        "label": "فترة الصلاحية"
+      },
+      "executionPeriod": {
+        "label": "مدة التنفيذ",
+        "placeholder": "أدخل مدة التنفيذ بالأيام"
+      },
+      "actualExecutionDuration": {
+        "label": "مدة التنفيذ الفعلية"
+      },
+      "supplyType": {
+        "label": "نوع التوريد"
+      },
+      "supplyDuration": {
+        "label": "مدة التوريد"
+      },
+      "supplyDetails": {
+        "label": "بيانات التوريد الإضافية"
+      },
+      "additionalSupplyData": {
+        "label": "بيانات التوريد الإضافية"
+      },
+      "editSupplyDetails": {
+        "label": "تعديل تفاصيل التوريد"
+      },
+      "pricesIncludeTransport": {
+        "label": "الأسعار شاملة للنقل"
+      },
+      "basicData": {
+        "label": "البيانات الاساسية"
+      }
+    },
+    "quotation": {
+      "quotationName": {
+        "label": "اسم عرض السعر"
+      },
+      "quotationDateTime": {
+        "label": "تاريخ عرض السعر"
+      },
+      "quotationValidity": {
+        "label": "صلاحية عرض السعر"
+      },
+      "quotationSummary": {
+        "label": "ملخص عرض السعر"
+      },
+      "quotationDetails": {
+        "label": "تفاصيل عرض السعر والمعلومات الخاصة به"
+      },
+      "quotationItemsTable": {
+        "label": "جدول عناصر عرض السعر"
+      },
+      "priceOffers": {
+        "label": "عروض الأسعار"
+      }
+    },
+    "invoice": {
+      "invoiceCode": {
+        "label": "كود الفاتورة",
+        "placeholder": "كود الفاتورة"
+      },
+      "invoiceNumber": {
+        "label": "رقم الفاتورة"
+      },
+      "invoiceDueDate": {
+        "label": "تاريخ استحقاق الفاتورة"
+      },
+      "invoiceDateLabel": {
+        "label": "تاريخ الفاتورة"
+      },
+      "invoiceDetails": {
+        "label": "تفاصيل الفاتورة والمعلومات الخاصة بها"
+      },
+      "invoiceInfo": {
+        "label": "معلومات الفاتورة"
+      },
+      "salesInvoices": {
+        "label": "فواتير المبيعات"
+      },
+      "logisticsSalesInvoices": {
+        "label": "فواتير مبيعات خدمة نقل"
+      },
+      "salesInvoiceItemsTable": {
+        "label": "جدول عناصر فاتورة المبيعات"
+      },
+      "printInvoice": {
+        "label": "طباعة الفاتورة"
+      },
+      "taxInvoice": {
+        "label": "فاتورة مبيعات ضريبية"
+      }
+    },
+    "receivingDoc": {
+      "receivingDocCode": {
+        "label": "كود مستند الاستلام"
+      },
+      "receivingDate": {
+        "label": "تاريخ الاستلام"
+      },
+      "receivingDocsTable": {
+        "label": "جدول عناصر سند الاستلام"
+      },
+      "receivingLocation": {
+        "label": "موقع الإستلام"
+      },
+      "receivingStatus": {
+        "label": "حالة الإستلام"
+      }
+    },
+    "deliveryDoc": {
+      "deliveryLocation": {
+        "label": "موقع التسليم"
+      },
+      "deliveryReceivingSite": {
+        "label": "موقع التسليم والإستلام"
+      },
+      "deliveryDate": {
+        "label": "تاريخ التسليم"
+      },
+      "deliveryStatus": {
+        "label": "حالة التسليم"
+      },
+      "deliveryMethod": {
+        "label": "طريقة التسليم"
+      },
+      "deliveryDuration": {
+        "label": "مدة التسليم"
+      },
+      "deliveryDocCode": {
+        "label": "كود سند التسليم"
+      },
+      "logisticsDeliveryDocCode": {
+        "label": "كود وثيقة التسليم"
+      },
+      "deliveryDocDetails": {
+        "label": "تفاصيل سند التسليم والمعلومات الخاصة به"
+      },
+      "logisticsDeliveryDocDetails": {
+        "label": "تفاصيل وثيقة التسليم والمعلومات الخاصة بها"
+      },
+      "deliveryDocsList": {
+        "label": "قائمة سندات التسليم"
+      },
+      "logisticsDeliveryDocsList": {
+        "label": "قائمة وثائق تسليم خدمات النقل"
+      },
+      "deliveryDocItemsTable": {
+        "label": "جدول عناصر سند التسليم"
+      },
+      "logisticsDeliveryDocItemsTable": {
+        "label": "جدول عناصر وثيقة التسليم"
+      }
+    },
+    "transport": {
+      "transportService": {
+        "label": "خدمة النقل"
+      },
+      "transportCompany": {
+        "label": "شركة النقل"
+      },
+      "transportDetails": {
+        "label": "تفاصيل النقل"
+      },
+      "transportMovements": {
+        "label": "حركات النقل"
+      },
+      "transportTimes": {
+        "label": "أوقات النقل"
+      },
+      "transportStartDate": {
+        "label": "تاريخ بدء النقل"
+      },
+      "transportEndDate": {
+        "label": "تاريخ انتهاء النقل"
+      },
+      "transportedMaterialType": {
+        "label": "نوع المواد المنقولة"
+      },
+      "transportMaterialType": {
+        "label": "نوع مواد النقل"
+      },
+      "transportVehicleType": {
+        "label": "نوع مركبة النقل"
+      },
+      "vehicleType": {
+        "label": "نوع المركبة"
+      },
+      "vehicleCount": {
+        "label": "عدد المركبات"
+      },
+      "sourceLocation": {
+        "label": "موقع مصدر المواد"
+      },
+      "targetLocation": {
+        "label": "موقع الهدف"
+      },
+      "departureLocation": {
+        "label": "موقع الانطلاق"
+      },
+      "loadingLocation": {
+        "label": "موقع التحميل"
+      },
+      "loadingDateTime": {
+        "label": "تاريخ / وقت التحميل"
+      },
+      "loadingResponsible": {
+        "label": "مسؤول التحميل",
+        "placeholder": "أدخل اسم مسؤول التحميل"
+      },
+      "loadingResponsibleParty": {
+        "label": "مسؤول التحميل"
+      },
+      "unloadingLocation": {
+        "label": "موقع التفريغ"
+      },
+      "unloadingDateTime": {
+        "label": "تاريخ / وقت التفريغ"
+      },
+      "unloadingDatetime": {
+        "label": "تاريخ / وقت التنزيل"
+      },
+      "unloadingResponsible": {
+        "label": "مسؤول التفريغ",
+        "placeholder": "أدخل اسم مسؤول التنزيل"
+      },
+      "unloadingResponsibleParty": {
+        "label": "مسؤول التنزيل"
+      },
+      "lateFee": {
+        "label": "غرامة التأخير"
+      },
+      "cancelFee": {
+        "label": "غرامة الإلغاء"
+      },
+      "invoiceInterval": {
+        "label": "مدة رفع المستخلص"
+      },
+      "responsiblePerson": {
+        "label": "اسم المسؤول",
+        "placeholder": "أدخل اسم المسؤول"
+      },
+      "responsiblePhone": {
+        "label": "هاتف المسؤول"
+      },
+      "logisticsSaleOrder": {
+        "label": "طلبية مبيعات خدمة النقل"
+      },
+      "selectLogisticsOrder": {
+        "label": "اختر طلبية النقل"
+      },
+      "customer": {
+        "label": "العميل"
+      },
+      "selectCustomer": {
+        "label": "اختر العميل"
+      },
+      "customerSaleOrder": {
+        "label": "طلبية مبيعات العميل"
+      },
+      "selectCustomerOrder": {
+        "label": "اختر طلبية العميل"
+      },
+      "selectLocation": {
+        "label": "حدد الموقع"
+      }
+    },
+    "quantity": {
+      "quantity": {
+        "label": "الكمية"
+      },
+      "baseQuantity": {
+        "label": "الكمية الأساسية"
+      },
+      "receivedQuantity": {
+        "label": "الكمية المستلمة"
+      },
+      "actualQuantity": {
+        "label": "الكمية الفعلية"
+      },
+      "quantityFromSupplier": {
+        "label": "الكمية من المورد"
+      },
+      "quantityFromTransport": {
+        "label": "الكمية من النقل"
+      },
+      "quantityFromCustomer": {
+        "label": "الكمية من العميل"
+      },
+      "actualQuantityFromSupplier": {
+        "label": "الكمية الفعلية من المورد"
+      },
+      "actualQuantityFromTransport": {
+        "label": "الكمية الفعلية من شركة النقل"
+      },
+      "actualQuantityFromCustomer": {
+        "label": "الكمية الفعلية من العميل"
+      },
+      "totalQuantityTon": {
+        "label": "الكمية الكلية / طن"
+      },
+      "totalQuantityM3": {
+        "label": "الكمية الكلية / م³"
+      },
+      "minQuantity": {
+        "label": "اقل كمية"
+      }
+    },
+    "trip": {
+      "tripName": {
+        "label": "اسم الرحلة"
+      },
+      "tripCount": {
+        "label": "عدد الرحلات",
+        "placeholder": "أدخل عدد الرحلات"
+      },
+      "dailyTrips": {
+        "label": "عدد الرحلات اليومية"
+      },
+      "tripCapacity": {
+        "label": "سعة الرحلة"
+      },
+      "tripTiming": {
+        "label": "توقيت الرحلة"
+      },
+      "tripValue": {
+        "label": "سعر الرحلة"
+      },
+      "tripDetails": {
+        "label": "تفاصيل الرحلات"
+      },
+      "tripDetailsInfo": {
+        "label": "تفاصيل الرحلة والمعلومات الخاصة بها"
+      },
+      "tripInfo": {
+        "label": "معلومات الرحلة"
+      },
+      "tripDateFrom": {
+        "label": "تاريخ الرحلة من"
+      },
+      "tripDateTo": {
+        "label": "تاريخ الرحلة إلى"
+      },
+      "tripsList": {
+        "label": "قائمة الرحلات"
+      },
+      "timePeriod": {
+        "label": "الفترة الزمنية"
+      },
+      "timing": {
+        "label": "التوقيت"
+      },
+      "morning": {
+        "label": "صباحاً"
+      },
+      "evening": {
+        "label": "مساءً"
+      },
+      "both": {
+        "label": "كلاهما"
+      },
+      "morningAndEvening": {
+        "label": "صباحاً ومساءً"
+      },
+      "billOfLading": {
+        "label": "رقم بوليصة الشحن",
+        "placeholder": "أدخل رقم بوليصة الشحن"
+      },
+      "trackingPoints": {
+        "label": "عدد مرات ارسال الاحداثيات"
+      },
+      "trackingPointsCount": {
+        "label": "عدد مرات إرسال الإحداثيات",
+        "placeholder": "أدخل عدد مرات إرسال الإحداثيات"
+      },
+      "customerTripAmount": {
+        "label": "مبلغ الرحلة للعميل"
+      },
+      "logisticCompanyTripAmount": {
+        "label": "مبلغ الرحلة لشركة النقل"
+      },
+      "enterTripAmount": {
+        "label": "سعر الرحلة",
+        "placeholder": "أدخل عدد الرحلات"
+      },
+      "sentTransportVehicles": {
+        "label": "المركبات الناقلة المرسلة"
+      },
+      "receivedTransportVehicles": {
+        "label": "المركبات الناقلة المستلمة"
+      },
+      "vehicles": {
+        "label": "المركبات"
+      },
+      "enterQuantityTon": {
+        "label": "الكمية الكلية / طن",
+        "placeholder": "أدخل الكمية بالطن"
+      },
+      "enterQuantityM3": {
+        "label": "الكمية الكلية / م³",
+        "placeholder": "أدخل الكمية بالمتر المكعب"
+      },
+      "tripDetailsBetweenQallabCustomer": {
+        "label": "تفاصيل الرحلة بين قلاب والعميل"
+      },
+      "tripDetailsBetweenQallabLogistic": {
+        "label": "تفاصيل الرحلة بين قلاب وشركة النقل"
+      }
+    },
+    "pickup": {
+      "pickupDate": {
+        "label": "التاريخ"
+      },
+      "timing": {
+        "label": "التوقيت"
+      },
+      "morning": {
+        "label": "صباحاً"
+      },
+      "evening": {
+        "label": "مساءً"
+      },
+      "both": {
+        "label": "كلاهما"
+      },
+      "morningAndEvening": {
+        "label": "صباحاً ومساءً"
+      },
+      "referenceNumber": {
+        "label": "الرقم المرجعي"
+      }
+    },
+    "ui": {
+      "noData": "لا يوجد",
+      "noNotes": "لا توجد ملاحظات",
+      "noProducts": "لا توجد منتجات",
+      "attachFile": "أرفق ملف",
+      "noAttachments": "لا توجد مرفقات لعرضها",
+      "noAttachmentsToShow": "لا توجد مرفقات لعرضها",
+      "noTransportDetailsAdded": "لا توجد تفاصيل نقل مضافة",
+      "clickAddTransportService": "اضغط على \"أضف خدمة نقل\" لإضافة تفاصيل جديدة",
+      "selectDate": "اختر التاريخ",
+      "selectDateTime": "اختر التاريخ والوقت",
+      "select": "اختر",
+      "loadingMore": "جاري تحميل المزيد...",
+      "view": "عرض",
+      "refresh": "تحديث",
+      "changeStatus": "تغيير الحالة",
+      "changeStatusMessage": "تغيير الحالة:",
+      "attachment": "مرفق",
+      "deleteDeliveryDocs": "حذف سندات التسليم",
+      "deleteDeliveryDocConfirm": "هل أنت متأكد من حذف {count} سند استلام؟",
+      "deleteQuotations": "حذف عروض السعر",
+      "deleteQuotationConfirm": "هل أنت متأكد من حذف {count} عرض؟",
+      "importFromExcel": "استيراد من ملف إكسل",
+      "enterNumber": "ادخل الرقم",
+      "exampleEmail": "{email}"
+    },
+    "buttons": {
+      "addContact": "أضف جهة اتصال",
+      "addCustomer": "أضف عميل",
+      "addAttachment": "أضف مرفق",
+      "addList": "أضف قائمة",
+      "addTest": "إضافة اختبار",
+      "addUnit": "إضافة وحدة",
+      "addBrand": "إضافة علامة تجارية",
+      "addFactory": "إضافة مصنع",
+      "addTax": "إضافة ضريبة",
+      "addCountry": "إضافة دولة",
+      "addCity": "إضافة مدينة",
+      "addReceiptVoucher": "اضافة سند قبض",
+      "addPaymentVoucher": "اضافة سند صرف",
+      "apply": "تطبيق",
+      "saveChanges": "حفظ التعديلات",
+      "addNewUser": "أضف مستخدم جديد",
+      "addRequest": "أضف طلب",
+      "addOrder": "أضف طلبية",
+      "addQuotation": "أضف عرض سعر",
+      "addInvoice": "أضف فاتورة",
+      "addReceivingDoc": "أضف مستند استلام",
+      "addProduct": "إضافة منتج جديد",
+      "addTransportService": "إضافة بيانات نقل جديدة",
+      "addLogisticTripDetails": "اضافة تفاصيل رحلة لشركة النقل",
+      "addCustomerTripDetails": "اضافة تفاصيل رحلة للعميل",
+      "addNote": "أضف ملاحظة",
+      "importFromExcel": "استيراد من ملف إكسل",
+      "selectLocation": "حدد الموقع",
+      "saveAndReturnToPickups": "حفظ والعودة الى قائمة الحجوزات",
+      "saveAndReturnToOrders": "حفظ والعودة لجدول الطلبيات",
+      "saveAndReturnToTrips": "حفظ والعودة لجدول الرحلات",
+      "saveAndCreateNew": "حفظ وانشاء جديد"
+    }
   }
 }

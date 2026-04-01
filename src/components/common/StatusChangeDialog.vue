@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 interface SelectItem {
   title: string;
@@ -22,17 +23,19 @@ interface Props {
   dialogIcon?: string;
 }
 
+const { t } = useI18n();
+
 const props = withDefaults(defineProps<Props>(), {
   loading: false,
   itemName: '',
   currentStatus: false,
-  title: 'تغيير الحالة',
-  message: 'هل تريد بالتأكيد تغيير الحالة ؟',
+  title: '',
+  message: '',
   showSelect: false,
   selectItems: () => [],
   selectValue: null,
   selectLabel: '',
-  selectPlaceholder: 'اختر الحالة',
+  selectPlaceholder: '',
   dialogIcon: '',
 });
 
@@ -67,6 +70,8 @@ const handleCancel = () => {
   emit('cancel');
 };
 
+const getSelectItemProps = (item: SelectItem) => ({ disabled: item?.disabled });
+
 const icon = `<svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
 <rect x="4" y="4" width="48" height="48" rx="24" fill="#D1E9FF"/>
 <rect x="4" y="4" width="48" height="48" rx="24" stroke="#EFF8FF" stroke-width="8"/>
@@ -86,7 +91,7 @@ const infoIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none" xm
       <div class="flex items-center justify-between w-full">
         <div class="flex items-center gap-2">
           <span class="bg-gray-50 border border-gray-100 rounded px-1 py-1" v-html="infoIcon"></span>
-          <span class="text-base font-bold text-gray-900">{{ title }}</span>
+          <span class="text-base font-bold text-gray-900">{{ title || t('common.dialogs.confirmStatusChange') }}</span>
         </div>
       </div>
     </template>
@@ -100,23 +105,23 @@ const infoIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none" xm
       <slot>
         <div class="text-center">
           <p class="text-gray-700 mb-4">
-            {{ message }}
+            {{ message || t('common.dialogs.statusChangePrompt') }}
           </p>
           
           <!-- Select Dropdown -->
           <div v-if="showSelect" class="mt-4 w-75 mx-auto mb-4">
-            <label v-if="selectLabel" class="block text-sm font-semibold text-gray-900 mb-2 text-right">
+            <label v-if="selectLabel" class="block text-sm font-semibold text-gray-900 mb-2 text-start">
               {{ selectLabel }}
             </label>
             <SelectInput
               v-model="internalSelectValue"
               :items="selectItems"
-              :placeholder="selectPlaceholder"
+              :placeholder="selectPlaceholder || t('common.form.status')"
               variant="outlined"
               density="comfortable"
               item-title="title"
               item-value="value"
-              :item-props="(item: SelectItem) => ({ disabled: item.disabled })"
+              :item-props="getSelectItemProps"
               hide-details
             />
           </div>
@@ -128,11 +133,11 @@ const infoIcon = `<svg width="19" height="19" viewBox="0 0 19 19" fill="none" xm
       <div class="flex justify-center gap-2 items-center flex-1">
         <v-btn variant="flat" color="primary" rounded="4" class="font-semibold px-6"
           :loading="loading" @click="handleConfirm">
-          تأكيد
+          {{ t('common.actions.confirm') }}
         </v-btn>
         <v-btn variant="outlined" color="gray-700" rounded="4" border="thin gray" class="font-semibold"
           :disabled="props.loading" @click="handleCancel">
-         إلغاء
+         {{ t('common.actions.cancel') }}
         </v-btn>
       </div>
 

@@ -41,18 +41,18 @@ const saveIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xm
 
 const activeTab = ref(0)
 
-const tabs = [
+const tabs = computed(() => [
     {
-        title: "البيانات الأساسية", value: 0, icon: `<svg width="19" height="22" viewBox="0 0 19 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+        title: t('pages.services.form.tabs.basicInfo'), value: 0, icon: `<svg width="19" height="22" viewBox="0 0 19 22" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M17 11.5V5.8C17 4.11984 17 3.27976 16.673 2.63803C16.3854 2.07354 15.9265 1.6146 15.362 1.32698C14.7202 1 13.8802 1 12.2 1H5.8C4.11984 1 3.27976 1 2.63803 1.32698C2.07354 1.6146 1.6146 2.07354 1.32698 2.63803C1 3.27976 1 4.11984 1 5.8V16.2C1 17.8802 1 18.7202 1.32698 19.362C1.6146 19.9265 2.07354 20.3854 2.63803 20.673C3.27976 21 4.11984 21 5.8 21H9M11 10H5M7 14H5M13 6H5M11.5 18L13.5 20L18 15.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
 ` },
     {
-        title: "البيانات التشغيلية", value: 1, icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        title: t('pages.services.form.tabs.operationalData'), value: 1, icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M12 4V15.2C12 16.8802 12 17.7202 12.327 18.362C12.6146 18.9265 13.0735 19.3854 13.638 19.673C14.2798 20 15.1198 20 16.8 20H17M17 20C17 21.1046 17.8954 22 19 22C20.1046 22 21 21.1046 21 20C21 18.8954 20.1046 18 19 18C17.8954 18 17 18.8954 17 20ZM7 4L17 4M7 4C7 5.10457 6.10457 6 5 6C3.89543 6 3 5.10457 3 4C3 2.89543 3.89543 2 5 2C6.10457 2 7 2.89543 7 4ZM17 4C17 5.10457 17.8954 6 19 6C20.1046 6 21 5.10457 21 4C21 2.89543 20.1046 2 19 2C17.8954 2 17 2.89543 17 4ZM12 12H17M17 12C17 13.1046 17.8954 14 19 14C20.1046 14 21 13.1046 21 12C21 10.8954 20.1046 10 19 10C17.8954 10 17 10.8954 17 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
 ` },
-]
+])
 
 // Form data matching API payload structure
 const basicInfoData = ref({
@@ -102,7 +102,7 @@ const fetchConstants = async () => {
         visibilityLevels.value = data.visibility || []
     } catch (err: any) {
         console.error('Error fetching constants:', err)
-        toast.error(err?.response?.data?.message || 'Failed to fetch constants')
+        toast.error(err?.response?.data?.message || t('pages.services.form.messages.fetchError'))
     }
 }
 
@@ -188,7 +188,7 @@ const fetchServiceData = async () => {
         }
     } catch (err: any) {
         console.error('Error fetching service data:', err)
-        toast.error(err?.response?.data?.message || 'Failed to fetch service data')
+        toast.error(err?.response?.data?.message || t('pages.services.form.messages.fetchError'))
     } finally {
         loading.value = false
     }
@@ -262,7 +262,7 @@ const saveStep = async (step: number) => {
             serviceId.value = response.data.service_id
         }
 
-        toast.success(response.message || 'تم حفظ الخدمة بنجاح')
+        toast.success(response.message || t('pages.services.form.messages.saveSuccess'))
         return true
     } catch (err: any) {
         console.error('Error saving service:', err)
@@ -273,13 +273,13 @@ const saveStep = async (step: number) => {
             Object.keys(apiErrors).forEach(key => {
                 formErrors[key] = apiErrors[key][0]
             })
-            toast.error(err?.response?.data?.message || 'يرجى تصحيح الأخطاء في النموذج')
+            toast.error(err?.response?.data?.message || t('pages.services.form.messages.validationError'))
         } else if (err?.response?.data?.errors) {
             const errors = err.response.data.errors
             const errorMessages = Object.values(errors).flat().join('\n')
             toast.error(errorMessages)
         } else {
-            toast.error(err?.response?.data?.message || 'فشل في حفظ الخدمة')
+            toast.error(err?.response?.data?.message || t('pages.services.form.messages.saveError'))
         }
         return false
     } finally {
@@ -365,7 +365,7 @@ onMounted(async () => {
                 <!-- Action Buttons -->
                 <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col px-4">
                     <ButtonWithIcon variant="flat" color="primary" rounded="4" height="48" custom-class="min-w-56"
-                        :prepend-icon="saveIcon" label="حفظ" @click="handleSave" :loading="saving" />
+                        :prepend-icon="saveIcon" :label="t('pages.services.form.buttons.save')" @click="handleSave" :loading="saving" />
 
                     <ButtonWithIcon prepend-icon="mdi-close" variant="flat" color="primary-50" rounded="4" height="48"
                         custom-class="font-semibold text-base text-primary-700 px-6 min-w-56" :label="t('common.close')"

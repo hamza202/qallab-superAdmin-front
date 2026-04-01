@@ -41,7 +41,7 @@
                 <span v-html="orderIcon" class="text-primary-600"></span>
               </div>
               <div>
-                <h1 class="text-lg font-bold text-gray-900 mb-1 rtl:text-right ltr:text-left" dir="ltr">#{{ detail?.code
+                <h1 class="text-lg font-bold text-gray-900 mb-1 rtl:text-start ltr:text-left" dir="ltr">#{{ detail?.code
                   ?? pickupId }}</h1>
                 <p class="text-sm text-gray-900">{{ t('pages.SalesSoPickups.viewPage.headerSubtitle') }}</p>
               </div>
@@ -125,16 +125,11 @@ const detail = ref<any>(null)
 const loading = ref(false)
 const errorMessage = ref<string | null>(null)
 
-const translateWithFallback = (key: string, fallback: string) => {
-  const translated = t(key)
-  return translated !== key ? translated : fallback
-}
-
 const tripPeriodLabel = computed(() => {
   const value = detail.value?.am_pm_interval
-  if (value === 'am') return t('pages.SalesSoPickups.viewPage.labels.morning') || 'صباحاً'
-  if (value === 'pm') return t('pages.SalesSoPickups.viewPage.labels.evening') || 'مساءً'
-  if (value === 'both') return 'صباحاً ومساءً'
+  if (value === 'am') return t('sales.forms.common.intervals.morning')
+  if (value === 'pm') return t('sales.forms.common.intervals.evening')
+  if (value === 'both') return t('sales.forms.common.intervals.morningAndEvening')
   return '—'
 })
 

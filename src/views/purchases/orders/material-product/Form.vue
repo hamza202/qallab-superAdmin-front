@@ -3,6 +3,7 @@ import { ref, computed, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
 import AddProductDialog from "@/components/price-offers/AddProductDialog.vue";
+import EditProductsDialog from "@/components/price-offers/EditProductsDialog.vue";
 import EditSupplyDetailsDialog from "@/components/price-offers/EditSupplyDetailsDialog.vue";
 import TopHeader from "@/components/price-offers/TopHeader.vue";
 import { useApi } from "@/composables/useApi";
@@ -24,7 +25,9 @@ import {
   HelpCircleIcon,
   rialIcon,
 } from "@/components/icons/globalIcons";
+import AppFormBreadcrumb from "@/components/common/AppFormBreadcrumb.vue";
 
+const { t } = useI18n();
 
 const api = useApi();
 const route = useRoute();
@@ -86,7 +89,7 @@ const fetchOrdersConstants = async () => {
       feeTypeItems.value =
         data.fee_types?.map((i: any) => ({ title: i.label, value: i.key })) ||
         [];
-        requestTypeItems.value =
+      requestTypeItems.value =
         data.po_types?.map((i: any) => ({
           title: i.label,
           value: i.key,
@@ -253,6 +256,12 @@ const fetchFormData = async () => {
         productTableItems.value = data.items.map((item: any) => {
           const itemId = Number(item.item_id);
           const log = logisticsByItemId[itemId];
+          if (item.id && itemId) {
+            originalProductIds.value[itemId] = item.id;
+          }
+          if (log?.id && itemId) {
+            originalLogisticsDetailIds.value[itemId] = log.id;
+          }
           const vehicleTypes = log?.transport_type
             ? Array.isArray(log.transport_type)
               ? log.transport_type.map((t: string | number) => Number(t))
@@ -260,9 +269,9 @@ const fetchFormData = async () => {
             : [];
           const transportTypeName = vehicleTypes.length
             ? vehicleTypes
-                .map((id: number) => getTransportTypeName(id))
-                .filter(Boolean)
-                .join(", ")
+              .map((id: number) => getTransportTypeName(id))
+              .filter(Boolean)
+              .join(", ")
             : getTransportTypeName(item.transport_type);
 
           return {
@@ -289,8 +298,8 @@ const fetchFormData = async () => {
             vehicle_types: vehicleTypes.length
               ? vehicleTypes
               : item.transport_type != null
-              ? [Number(item.transport_type)]
-              : [],
+                ? [Number(item.transport_type)]
+                : [],
             logistics_detail_id: log?.id ?? null,
           };
         });
@@ -368,16 +377,16 @@ const fetchQuotationForOrder = async () => {
     if (data) {
       // Mark as loaded from quotation to disable supplier select
       isFromQuotation.value = true;
-      
+
       // Set quotation code from API response if not already set from query param
       if (data.code && !fromQuotationCode.value) {
         formData.value.purchase_quotation_code = data.code;
       }
-      
+
       // Map quotation fields to order form fields
       // supplier can come as object {id, name} or as supplier_id
-      formData.value.supplier_id = data.supplier?.id != null 
-        ? Number(data.supplier.id) 
+      formData.value.supplier_id = data.supplier?.id != null
+        ? Number(data.supplier.id)
         : (data.supplier_id != null ? Number(data.supplier_id) : null);
       // Set flag immediately after supplier_id is populated
       isFormDataLoaded.value = true;
@@ -397,7 +406,7 @@ const fetchQuotationForOrder = async () => {
       formData.value.cancel_fee_type = data.cancel_fee_type || null;
       formData.value.cancel_fee = data.cancel_fee != null ? Number(data.cancel_fee) : null;
       formData.value.textNote = data.notes || "";
-      
+
       // Map quotation_type to po_type if available
       if (data.quotation_type) {
         formData.value.po_type = data.quotation_type;
@@ -427,9 +436,9 @@ const fetchQuotationForOrder = async () => {
             : [];
           const transportTypeName = vehicleTypes.length
             ? vehicleTypes
-                .map((id: number) => getTransportTypeName(id))
-                .filter(Boolean)
-                .join(", ")
+              .map((id: number) => getTransportTypeName(id))
+              .filter(Boolean)
+              .join(", ")
             : "";
 
           // Get unit name from unit object or unitItems
@@ -593,6 +602,8 @@ const formData = ref({
 
 // Products table items (dynamically populated from dialog)
 const productTableItems = ref<ProductTableItem[]>([]);
+const originalProductIds = ref<Record<number, number>>({});
+const originalLogisticsDetailIds = ref<Record<number, number>>({});
 
 // API-driven calculations via composable
 const { vatRate, fetchCalculations: _fetchCalc, summaryTotals } = useCalculations(productTableItems);
@@ -626,11 +637,12 @@ import { required, numeric, positive } from "@/utils/validators";
 
 
 const showAddProductDialog = ref(false);
+const showEditProductsDialog = ref(false);
 const editingProduct = ref<ProductTableItem | null>(null);
 
 const handleAddProduct = () => {
   if (!formData.value.supplier_id) {
-    warning("يجب عليك اختيار اسم المورد أولاً");
+    warning(t("purchases.shared.forms.common.warnings.selectSupplierFirst"));
     return;
   }
   editingProduct.value = null; // Reset edit mode
@@ -638,30 +650,48 @@ const handleAddProduct = () => {
 };
 
 const handleProductSaved = async (products: any[]) => {
-  const existingItems = [...productTableItems.value];
-  
-  products.forEach((p) => {
-    const existingIndex = existingItems.findIndex(
-      (existing) => existing.item_id === p.item_id,
-    );
+  const newItems: ProductTableItem[] = [];
 
-    if (existingIndex !== -1) {
-      const existingNotes = existingItems[existingIndex].notes;
-      existingItems[existingIndex] = {
-        ...p,
-        notes: existingNotes || p.notes || "",
-        isAdded: true,
-      } as ProductTableItem;
-    } else {
-      existingItems.push({
-        ...p,
-        notes: p.notes || "",
-        isAdded: true,
-      } as ProductTableItem);
-    }
+  products.forEach((p) => {
+    const existing = productTableItems.value.find(
+      (e) => e.item_id === p.item_id,
+    );
+    const restoredId =
+      p.id ?? existing?.id ?? originalProductIds.value[p.item_id];
+    const restoredLogisticsId =
+      p.logistics_detail_id ??
+      existing?.logistics_detail_id ??
+      originalLogisticsDetailIds.value[p.item_id];
+
+    newItems.push({
+      ...p,
+      id: restoredId,
+      logistics_detail_id: restoredLogisticsId,
+      price_per_unit: p.unit_price ?? p.price_per_unit ?? existing?.price_per_unit ?? null,
+      discount_val: p.discount ?? p.discount_val ?? existing?.discount_val ?? null,
+      notes: existing?.notes || p.notes || "",
+    } as ProductTableItem);
   });
 
-  productTableItems.value = existingItems;
+  productTableItems.value = newItems;
+  await fetchCalculations();
+};
+
+const handleEditProductsBulk = async (updatedProducts: any[]) => {
+  productTableItems.value = updatedProducts.map((p) => ({
+    ...p,
+    price_per_unit: p.unit_price ?? p.price_per_unit ?? null,
+    discount_val: p.discount ?? p.discount_val ?? null,
+    id:
+      productTableItems.value.find((x) => x.item_id === p.item_id)?.id ??
+      originalProductIds.value[p.item_id] ??
+      p.id,
+    logistics_detail_id:
+      productTableItems.value.find((x) => x.item_id === p.item_id)
+        ?.logistics_detail_id ??
+      originalLogisticsDetailIds.value[p.item_id] ??
+      p.logistics_detail_id,
+  }));
   await fetchCalculations();
 };
 
@@ -686,11 +716,21 @@ const handleProductUpdated = async (updatedProduct: any) => {
   );
   if (index !== -1) {
     const existingNotes = productTableItems.value[index].notes;
+    const preservedId =
+      productTableItems.value[index].id ??
+      originalProductIds.value[updatedProduct.item_id] ??
+      updatedProduct.id;
+    const preservedLogisticsId =
+      productTableItems.value[index].logistics_detail_id ??
+      originalLogisticsDetailIds.value[updatedProduct.item_id] ??
+      updatedProduct.logistics_detail_id;
     productTableItems.value[index] = {
       ...updatedProduct,
       price_per_unit: updatedProduct.unit_price ?? updatedProduct.price_per_unit ?? null,
       discount_val: updatedProduct.discount ?? updatedProduct.discount_val ?? null,
       notes: existingNotes || updatedProduct.notes || "",
+      id: preservedId,
+      logistics_detail_id: preservedLogisticsId,
     } as ProductTableItem;
   }
   editingProduct.value = null;
@@ -783,8 +823,8 @@ const buildFormData = (): FormData => {
     normalizePoDateTime(formData.value.po_datetime || ""),
   );
   if (isEditMode.value) {
-        fd.append('_method', 'PUT');
-    }
+    fd.append('_method', 'PUT');
+  }
   fd.append("supplier_id", String(formData.value.supplier_id || ""));
   fd.append("source_location", formData.value.source_location || "");
   fd.append("source_latitude", String(formData.value.source_latitude ?? ""));
@@ -975,7 +1015,7 @@ const handleSubmit = async (options?: { redirectToList?: boolean }) => {
   if (!(await validate())) return;
 
   if (productTableItems.value.length === 0) {
-    warning("يجب إضافة منتج واحد على الأقل");
+    warning(t("purchases.shared.forms.common.warnings.atLeastOneProduct"));
     return;
   }
 
@@ -1002,7 +1042,11 @@ const handleSubmit = async (options?: { redirectToList?: boolean }) => {
       });
     }
 
-    success(isEditMode.value ? "تم تحديث الطلب بنجاح" : "تم إنشاء الطلب بنجاح");
+    success(
+      isEditMode.value
+        ? t("purchases.orders.shared.success.poUpdated")
+        : t("purchases.orders.shared.success.poCreated"),
+    );
 
     if (options?.redirectToList) {
       router.push({ name: "OrdersMaterialProductList" });
@@ -1131,16 +1175,16 @@ const openMapDialog = (mode: "target" | "source") => {
 };
 
 // نفس أعمدة جدول المنتجات في فورم المبيعات: اسم المنتج، الوحدة، الكمية، سعر الوحدة، خصم، مبلغ الضريبة، إجمالي المبلغ، ملاحظات
-const headers = [
-  { title: "اسم المنتج", key: "name" },
-  { title: "الوحدة", key: "unit" },
-  { title: "الكمية", key: "quantity" },
-  { title: "سعر الوحدة", key: "unit_price" },
-  { title: "خصم", key: "discount_display" },
-  { title: "مبلغ الضريبة", key: "tax_amount" },
-  { title: "إجمالي المبلغ", key: "total_amount" },
-  { title: "ملاحظات", key: "notes" },
-];
+const headers = computed(() => [
+  { title: t("purchases.shared.forms.common.tableHeaders.productName"), key: "name" },
+  { title: t("purchases.shared.forms.common.tableHeaders.unit"), key: "unit" },
+  { title: t("purchases.shared.forms.common.tableHeaders.quantity"), key: "quantity" },
+  { title: t("purchases.orders.shared.tableHeaders.unitPrice"), key: "unit_price" },
+  { title: t("purchases.orders.shared.tableHeaders.discount"), key: "discount_display" },
+  { title: t("purchases.orders.shared.tableHeaders.taxAmount"), key: "tax_amount" },
+  { title: t("purchases.orders.shared.tableHeaders.totalAmount"), key: "total_amount" },
+  { title: t("purchases.shared.forms.common.tableHeaders.notes"), key: "notes" },
+]);
 
 // Computed items for the DataTable (مطابق لجدول المبيعات)
 const tableItems = computed(() =>
@@ -1161,15 +1205,15 @@ const tableItems = computed(() =>
 );
 
 // جدول تفاصيل التوريد: يعكس المنتجات المضافة أعلاه (المنتج، الكمية، تاريخ بداية النقل، نوع المركبة، عدد الرحلات، سعة الرحلة، توقيت الرحلة)
-const ServicesHeaders = [
-  { title: "المنتج", key: "product_name" },
-  { title: "الكمية", key: "quantity_display" },
-  { title: "تاريخ بداية النقل", key: "transport_start_date" },
-  { title: "نوع مركبة النقل", key: "transport_type_name" },
-  { title: "عدد الرحلات", key: "trip_no" },
-  { title: "سعة الرحلة", key: "trip_capacity" },
-  { title: "توقيت الرحلة", key: "am_pm_interval_label" },
-];
+const ServicesHeaders = computed(() => [
+  { title: t("purchases.orders.shared.tableHeaders.product"), key: "product_name" },
+  { title: t("purchases.shared.forms.common.tableHeaders.quantity"), key: "quantity_display" },
+  { title: t("purchases.orders.shared.tableHeaders.transportStartDate"), key: "transport_start_date" },
+  { title: t("purchases.orders.shared.tableHeaders.vehicleType"), key: "transport_type_name" },
+  { title: t("purchases.requests.logistics.form.productsTable.tripNo"), key: "trip_no" },
+  { title: t("purchases.orders.shared.tableHeaders.tripCapacity"), key: "trip_capacity" },
+  { title: t("purchases.orders.shared.tableHeaders.tripTiming"), key: "am_pm_interval_label" },
+]);
 
 // عناصر الجدول مبنية على جدول المنتجات: كل منتج = صف واحد (زر التعديل فقط، بدون حذف)
 const serviceTableItems = computed(() =>
@@ -1200,85 +1244,63 @@ const serviceTableItems = computed(() =>
 
 <template>
   <default-layout>
-    <div
-      class="request-material-product-page -mx-6 bg-qallab-dashboard-bg space-y-4"
-    >
-      <!-- Page Header -->
-      <TopHeader
-        :icon="filePlusIcon"
-        title-key="pages.OrdersMaterialProduct.FormTitle"
-        description-key="pages.OrdersMaterialProduct.FormDescription"
-        :show-action="false"
+    <div class="request-material-product-page -mx-6 bg-qallab-dashboard-bg space-y-4">
+      <AppFormBreadcrumb
+        list-path="/purchases/orders/material-product/list"
+        module-root-key="breadcrumb.purchases.root"
+        list-label-key="breadcrumb.purchases.orders.materialProduct.list"
+        create-label-key="breadcrumb.purchases.orders.materialProduct.create"
+        edit-label-key="breadcrumb.purchases.orders.materialProduct.edit"
+        :is-edit-mode="isEditMode"
         :code="isEditMode ? formData.code : ''"
-        :code-icon="fileIcon"
-        @action="handleNewRequest"
       />
+
+      <!-- Page Header -->
+      <TopHeader :icon="filePlusIcon" title-key="pages.OrdersMaterialProduct.FormTitle"
+        description-key="pages.OrdersMaterialProduct.FormDescription" :show-action="false"
+        code-label-key="purchases.orders.shared.labels.purchaseOrderCode" :code="isEditMode ? formData.code : ''"
+        :code-icon="fileIcon" @action="handleNewRequest" />
 
       <!-- Request Information Section -->
       <div class="p-6 bg-white rounded-3xl border !border-gray-100">
         <div class="flex items-center mb-6 gap-2 text-primary-600">
           <span v-html="fileCheckIcon"></span>
-          <h2 class="text-base font-bold">البيانات الأساسية</h2>
+          <h2 class="text-base font-bold">{{ t('purchases.shared.forms.common.sections.basicInfo') }}</h2>
         </div>
 
         <v-form ref="formRef" v-model="isFormValid" @submit.prevent>
-          <div
-            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
-          >
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             <!-- اسم المورد (يُستخدم لجلب المنتجات وإرسال supplier_id) -->
             <div>
-              <SelectInput
-                v-model="formData.supplier_id"
-                :disabled="isFromQuotation"
-                :items="[]"
-                placeholder="اختر المورد"
-                label="اسم المورد"
-                :rules="[required()]"
-                density="comfortable"
-                item-title="title"
-                item-value="value"
-                :server-side="true"
-                :fetch-function="fetchSuppliers"
-                item-title-key="full_name"
-                item-value-key="id"
-                :debounce-time="500"
-              />
+              <SelectInput v-model="formData.supplier_id" :disabled="isFromQuotation" :items="[]"
+                :placeholder="t('purchases.orders.shared.placeholders.selectSupplierPo')"
+                :label="t('purchases.shared.forms.common.labels.supplierName')" :rules="[required()]"
+                density="comfortable" item-title="title" item-value="value" :server-side="true"
+                :fetch-function="fetchSuppliers" item-title-key="full_name" item-value-key="id" :debounce-time="500" />
             </div>
 
             <!-- Request Date -->
             <div>
-              <DateTimePickerInput
-                v-model="formData.po_datetime"
-                density="comfortable"
-                placeholder="اختر التاريخ والوقت"
-                label="تاريخ الطلبية"
-              />
+              <DateTimePickerInput v-model="formData.po_datetime" density="comfortable"
+                :placeholder="t('purchases.shared.forms.common.placeholders.selectDateTime')"
+                :label="t('purchases.orders.shared.labels.poDate')" />
             </div>
 
             <!-- Request Type -->
             <div>
-              <SelectInput
-                v-model="formData.po_type"
-                :items="requestTypeItems"
-                label="نوع الطلبية"
-                density="comfortable"
-                placeholder="اختر"
-              />
+              <SelectInput v-model="formData.po_type" :items="requestTypeItems"
+                :label="t('purchases.orders.shared.labels.poType')" density="comfortable"
+                :placeholder="t('purchases.shared.forms.common.select')" />
             </div>
 
             <!-- موقع المشروع → target_location (مثل فورم عروض الأسعار) -->
             <div class="relative">
-              <label class="text-sm font-medium text-gray-700 mb-2 block"
-                >موقع المشروع</label
-              >
-              <div
-                @click="openMapDialog('target')"
-                class="flex items-center justify-between px-4 py-2 min-h-[48px] border !border-blue-400 rounded-lg cursor-pointer hover:bg-blue-100 transition-colors"
-              >
-                <span
-                  class="text-base font-medium text-blue-900 whitespace-nowrap overflow-hidden text-ellipsis"
-                >
-                  {{ formData.target_location || "حدد الموقع" }}
+              <label class="text-sm font-medium text-gray-700 mb-2 block">{{
+                t('purchases.requests.logistics.form.labels.projectLocation') }}</label>
+              <div @click="openMapDialog('target')"
+                class="flex items-center justify-between px-4 py-2 min-h-[48px] border !border-blue-400 rounded-lg cursor-pointer hover:bg-blue-100 transition-colors">
+                <span class="text-base font-medium text-blue-900 whitespace-nowrap overflow-hidden text-ellipsis">
+                  {{ formData.target_location || t('purchases.shared.forms.common.pickLocation') }}
                 </span>
                 <div class="flex items-center gap-2">
                   <span v-html="mapMarkerIcon"></span>
@@ -1288,33 +1310,24 @@ const serviceTableItems = computed(() =>
 
             <!-- موقع مصدر المواد → source_location -->
             <div class="relative">
-              <label class="text-sm font-medium text-gray-700 mb-2 block"
-                >موقع مصدر المواد</label
-              >
-              <div
-                @click="openMapDialog('source')"
-                class="flex items-center justify-between px-4 py-2 min-h-[48px] border !border-blue-400 rounded-lg cursor-pointer hover:bg-blue-100 transition-colors"
-              >
-                <span
-                  class="text-base font-medium text-blue-900 whitespace-nowrap overflow-hidden text-ellipsis"
-                >
-                  {{ formData.source_location || "حدد الموقع" }}
+              <label class="text-sm font-medium text-gray-700 mb-2 block">{{
+                t('purchases.requests.logistics.form.labels.sourceMaterialsLocation') }}</label>
+              <div @click="openMapDialog('source')"
+                class="flex items-center justify-between px-4 py-2 min-h-[48px] border !border-blue-400 rounded-lg cursor-pointer hover:bg-blue-100 transition-colors">
+                <span class="text-base font-medium text-blue-900 whitespace-nowrap overflow-hidden text-ellipsis">
+                  {{ formData.source_location || t('purchases.shared.forms.common.pickLocation') }}
                 </span>
                 <div class="flex items-center gap-2">
                   <span v-html="mapMarkerIcon"></span>
                 </div>
               </div>
-            </div>            
+            </div>
 
             <!-- Project -->
             <div>
-              <TextInput
-                v-model="formData.project_name"
-                label="المشروع"
-                :rules="[required()]"
-                density="comfortable"
-                placeholder="ادخل اسم المشروع"
-              />
+              <TextInput v-model="formData.project_name" :label="t('purchases.orders.shared.labels.project')"
+                :rules="[required()]" density="comfortable"
+                :placeholder="t('purchases.orders.shared.placeholders.enterProjectNameAlt')" />
             </div>
 
             <!-- Delegation Method -->
@@ -1332,27 +1345,15 @@ const serviceTableItems = computed(() =>
               />
             </div> -->
 
-            <TextInput
-              v-model="formData.purchase_quotation_code"
-              v-if="formData.purchase_quotation_code"
-              readonly
-              label="كود عرض السعر"
-              density="comfortable"
-              :hide-details="true"
-            >
+            <TextInput v-model="formData.purchase_quotation_code" v-if="formData.purchase_quotation_code" readonly
+              :label="t('purchases.orders.shared.labels.quotationCode')" density="comfortable" :hide-details="true">
               <template #append-inner>
                 <v-tooltip location="top" content-class="custom-tooltip">
                   <template #activator="{ props: tooltipProps }">
-                    <ButtonWithIcon
-                      variant="text"
-                      size="small"
-                      density="compact"
-                      custom-class="!min-w-0 p-0"
-                      :prepend-icon="HelpCircleIcon"
-                      v-bind="tooltipProps"
-                    />
+                    <ButtonWithIcon variant="text" size="small" density="compact" custom-class="!min-w-0 p-0"
+                      :prepend-icon="HelpCircleIcon" v-bind="tooltipProps" />
                   </template>
-                  <div>كود عرض السعر</div>
+                  <div>{{ t('purchases.orders.shared.labels.quotationCode') }}</div>
                 </v-tooltip>
               </template>
             </TextInput>
@@ -1366,24 +1367,17 @@ const serviceTableItems = computed(() =>
           <div class="flex items-center gap-2 mb-2">
             <span v-html="listIcon"></span>
             <h2 class="text-base font-bold text-primary-600">
-              جدول عناصر الطللبية
+              {{ t('purchases.orders.shared.labels.itemsTableTitle') }}
             </h2>
           </div>
           <p class="text-emerald-500 text-sm font-bold ms-7">
-            ** الأسعار شاملة للنقل
+            {{ t('purchases.orders.shared.labels.pricesIncludeTransport') }}
           </p>
         </div>
 
         <!-- Products Table -->
-        <DataTable
-          :headers="headers"
-          :items="tableItems"
-          show-actions
-          force-show-edit
-          force-show-delete
-          @edit="handleEditProduct"
-          @delete="handleDeleteProduct"
-        >
+        <DataTable :headers="headers" :items="tableItems" show-actions force-show-edit force-show-delete
+          @edit="handleEditProduct" @delete="handleDeleteProduct">
           <template #item.discount_display="{ item }">
             <span v-if="item.discount_val != null && Number(item.discount_val) > 0" class="flex items-center gap-1">
               {{ item.discount_val }}
@@ -1394,73 +1388,53 @@ const serviceTableItems = computed(() =>
           </template>
 
           <template #item.notes="{ item }">
-            <v-menu
-              attach="request-material-product-page"
-              location="bottom"
-              offset="8"
-              :close-on-content-click="false"
-              transition="slide-y-transition"
-            >
+            <v-menu attach="request-material-product-page" location="bottom" offset="8" :close-on-content-click="false"
+              transition="slide-y-transition">
               <template #activator="{ props }">
-                <div
-                  class="flex items-center gap-2 cursor-pointer"
-                  v-bind="props"
-                >
-                  <v-icon
-                    size="20"
-                    color="primary"
-                    v-html="messagePlusIcon"
-                  ></v-icon>
+                <div class="flex items-center gap-2 cursor-pointer" v-bind="props">
+                  <v-icon size="20" color="primary" v-html="messagePlusIcon"></v-icon>
                   <span class="text-gray-900">{{
-                    item.notes || "أضف ملاحظة"
+                    item.notes || t('purchases.shared.forms.common.placeholders.addNote')
                   }}</span>
                 </div>
               </template>
 
               <!-- Popup content -->
-              <v-card
-                class="pa-4 shadow-[rgba(149,157,165,0.2)_0px_8px_24px] overflow-hidden px-3 py-3"
-                color="white"
-                rounded="lg"
-                width="300"
-              >
+              <v-card class="pa-4 shadow-[rgba(149,157,165,0.2)_0px_8px_24px] overflow-hidden px-3 py-3" color="white"
+                rounded="lg" width="300">
                 <div class="!flex flex-nowrap items-center gap-3">
-                  <TextInput
-                    v-model="
-                      productTableItems[
-                        productTableItems.findIndex(
-                          (p) => p.item_id === item.item_id,
-                        )
-                      ].notes
-                    "
-                    placeholder="أضف ملاحظة"
-                    variant="outlined"
-                    density="comfortable"
-                    hide-details
-                    autofocus
-                    class="flex-1"
-                  />
-                  <ButtonWithIcon
-                    :icon="messagePlusIcon"
-                    color="primary"
-                    icon-only
-                    size="x-small"
-                  />
+                  <TextInput v-model="productTableItems[
+                      productTableItems.findIndex(
+                        (p) => p.item_id === item.item_id,
+                      )
+                    ].notes
+                    " :placeholder="t('purchases.shared.forms.common.placeholders.addNote')" variant="outlined"
+                    density="comfortable" hide-details autofocus class="flex-1" />
+                  <ButtonWithIcon :icon="messagePlusIcon" color="primary" icon-only size="x-small" />
                 </div>
               </v-card>
             </v-menu>
           </template>
         </DataTable>
 
-        <!-- Add Product Button -->
-        <div class="flex justify-center my-6">
+        <!-- Add / Edit Product Buttons -->
+        <div class="flex justify-center gap-3 my-6 mx-auto md:w-3/4">
           <ButtonWithIcon
             color="primary-100"
             variant="flat"
-            class="!text-primary-900 font-bold w-75"
+            class="!text-primary-900 font-bold flex-1"
             @click="handleAddProduct"
           >
-            + إضافة منتج جديد
+            {{ t('purchases.shared.forms.common.actions.addProduct') }}
+          </ButtonWithIcon>
+          <ButtonWithIcon
+            v-if="productTableItems.length > 0"
+            color="primary-100"
+            variant="flat"
+            class="!text-primary-900 font-bold flex-1"
+            @click="showEditProductsDialog = true"
+          >
+            {{ t('purchases.shared.forms.common.actions.editProducts') }}
           </ButtonWithIcon>
         </div>
       </div>
@@ -1470,27 +1444,19 @@ const serviceTableItems = computed(() =>
         <div class="px-6 py-6">
           <div class="flex items-center gap-2">
             <span v-html="busIcon"></span>
-            <h2 class="text-base font-bold text-primary-600">تفاصيل التوريد</h2>
+            <h2 class="text-base font-bold text-primary-600">{{ t('purchases.orders.shared.labels.supplyDetailsSection')
+              }}
+            </h2>
           </div>
         </div>
 
-        <DataTable
-          :headers="ServicesHeaders"
-          :items="serviceTableItems"
-          show-actions
-          force-show-edit
-          @edit="handleEditSupply"
-        />
-
+        <DataTable :headers="ServicesHeaders" :items="serviceTableItems" show-actions force-show-edit
+          @edit="handleEditSupply" />
+        
         <div class="flex justify-center my-6">
-          <ButtonWithIcon
-            color="primary-100"
-            variant="flat"
-            class="!text-primary-900 font-bold w-75"
-            :disabled="productTableItems.length === 0"
-            @click="handleAddSupply"
-          >
-            + تعديل تفاصيل التوريد
+          <ButtonWithIcon color="primary-100" variant="flat" class="!text-primary-900 font-bold md:w-3/4"
+            :disabled="productTableItems.length === 0" @click="handleAddSupply">
+            {{ t('purchases.orders.shared.labels.editSupplyDetails') }}
           </ButtonWithIcon>
         </div>
       </div>
@@ -1499,181 +1465,122 @@ const serviceTableItems = computed(() =>
       <div class="p-6 bg-white rounded-3xl border !border-gray-100">
         <div class="flex items-center mb-6 gap-2 text-primary-600">
           <span v-html="truckIcon"></span>
-          <h2 class="text-base font-bold">بيانات التوريد الإضافية</h2>
+          <h2 class="text-base font-bold">{{ t('purchases.orders.shared.labels.extraLogisticsSection') }}</h2>
         </div>
 
         <v-form ref="formRef" v-model="isFormValid" @submit.prevent>
-          <div
-            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
-          >
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             <!-- Transport Start Date -->
             <div>
-              <DatePickerInput
-                v-model="formData.transport_start_date"
-                type="date"
-                density="comfortable"
-                placeholder="اختر"
-                label="تاريخ بدء النقل"
-              />
+              <DatePickerInput v-model="formData.transport_start_date" type="date" density="comfortable"
+                :placeholder="t('purchases.shared.forms.common.select')"
+                :label="t('purchases.requests.logistics.addDetailDialog.labels.fromDate')" />
             </div>
 
             <!-- Transport End Date -->
             <div>
-              <DatePickerInput
-                v-model="formData.transport_end_date"
-                type="date"
-                density="comfortable"
-                placeholder="اختر"
-                label="تاريخ انتهاء النقل"
-                :rules="[required()]"
-              />
+              <DatePickerInput v-model="formData.transport_end_date" type="date" density="comfortable"
+                :placeholder="t('purchases.shared.forms.common.select')"
+                :label="t('purchases.requests.logistics.addDetailDialog.labels.toDate')" :rules="[required()]" />
             </div>
 
             <!-- Execution Period -->
             <div>
-              <PriceInput
-                v-model="formData.execution_period"
-                label="مدة التنفيذ"
-                placeholder="أدخل المدة بالأيام"
-                :rules="[required()]"
-                density="comfortable"
-              >
+              <PriceInput v-model="formData.execution_period"
+                :label="t('purchases.requests.logistics.form.detailCard.executionDuration')"
+                :placeholder="t('purchases.orders.shared.placeholders.enterDurationDays')" :rules="[required()]"
+                density="comfortable">
                 <template #append-inner>
-                  <span class="text-gray-500 text-sm"> يوم </span>
+                  <span class="text-gray-500 text-sm"> {{ t('purchases.shared.forms.common.day') }} </span>
                 </template>
               </PriceInput>
             </div>
 
             <!-- Transport Vehicle Type -->
             <div>
-              <MultipleSelectInput
-                v-model="formData.transport_vehicle_type"
-                :items="transportTypeItems"
-                label="نوع مركبة النقل"
-                density="comfortable"
-                placeholder="اختر"
-                item-title="title"
-                item-value="value"
-              />
+              <MultipleSelectInput v-model="formData.transport_vehicle_type" :items="transportTypeItems"
+                :label="t('purchases.orders.shared.tableHeaders.vehicleType')" density="comfortable"
+                :placeholder="t('purchases.shared.forms.common.select')" item-title="title" item-value="value" />
             </div>
             <!-- Number of Transport Movements -->
             <div>
-              <PriceInput
-                v-model="formData.transport_movements"
-                placeholder="أدخل العدد"
-                label="عدد مركبات النقل"
-                density="comfortable"
-              />
+              <PriceInput v-model="formData.transport_movements"
+                :placeholder="t('purchases.orders.shared.placeholders.enterCount')"
+                :label="t('purchases.orders.shared.tableHeaders.vehicleCount')" density="comfortable" />
             </div>
 
             <!-- Number of Daily Trips -->
             <div>
-              <PriceInput
-                v-model="formData.daily_trips"
-                placeholder="أدخل العدد"
-                label="عدد الرحلات الكلي"
-                :rules="[required()]"
-                density="comfortable"
-              />
+              <PriceInput v-model="formData.daily_trips"
+                :placeholder="t('purchases.orders.shared.placeholders.enterCount')"
+                :label="t('purchases.orders.shared.tableHeaders.totalTripsCount')" :rules="[required()]"
+                density="comfortable" />
             </div>
 
             <!-- Responsible for Loading -->
             <div>
-              <TextInput
-                v-model="formData.loading_responsible"
-                placeholder="أدخل اسم مسؤول التحميل"
-                label="مسؤول التحميل"
-                density="comfortable"
-              />
+              <TextInput v-model="formData.loading_responsible"
+                :placeholder="t('purchases.requests.logistics.addDetailDialog.labels.loadingResponsiblePlaceholder')"
+                :label="t('purchases.requests.logistics.addDetailDialog.labels.loadingResponsible')"
+                density="comfortable" />
             </div>
 
             <!-- Responsible for Unloading -->
             <div>
-              <TextInput
-                v-model="formData.unloading_responsible"
-                placeholder="أدخل اسم مسؤول التفريغ"
-                label="مسؤول التفريغ"
-                density="comfortable"
-              />
+              <TextInput v-model="formData.unloading_responsible"
+                :placeholder="t('purchases.requests.logistics.addDetailDialog.labels.unloadingResponsiblePlaceholder')"
+                :label="t('purchases.requests.logistics.addDetailDialog.labels.unloadingResponsible')"
+                density="comfortable" />
             </div>
           </div>
         </v-form>
       </div>
 
       <!-- Attachments and Summary Section -->
-      <div
-        class="grid grid-cols-1 xl:grid-cols-3 justify-between gap-4 bg-qallab-dashboard-bg py-5 px-2"
-      >
+      <div class="grid grid-cols-1 xl:grid-cols-3 justify-between gap-4 bg-qallab-dashboard-bg py-5 px-2">
         <div class="bg-white rounded-2xl xl:col-span-2">
           <div class="flex items-center gap-2 p-6 border-b !border-gray-200">
             <span v-html="CoinHandIcon"></span>
-            <h2 class="text-base font-bold text-primary-600">بيانات الدفع</h2>
+            <h2 class="text-base font-bold text-primary-600">{{ t('purchases.orders.shared.labels.paymentData') }}</h2>
           </div>
           <div class="p-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <SelectInput
-                v-model="formData.paymentMethod"
-                :items="paymentMethodItems"
-                density="comfortable"
-                placeholder="حدد طريقة الدفع"
-                label="طريقة الدفع"
-              />
-              <PriceInput
-                showRialIcon
-                v-model="formData.advancePayment"
-                density="comfortable"
-                label="دفعة مقدمة"
-                placeholder="أدخل قيمة الدفعة"
-              />
+              <SelectInput v-model="formData.paymentMethod" :items="paymentMethodItems" density="comfortable"
+                :placeholder="t('purchases.shared.forms.common.placeholders.selectPaymentMethod')"
+                :label="t('purchases.shared.forms.common.labels.paymentMethod')" />
+              <PriceInput showRialIcon v-model="formData.advancePayment" density="comfortable"
+                :label="t('purchases.shared.forms.common.labels.advancePayment')"
+                :placeholder="t('purchases.shared.forms.common.placeholders.enterAdvanceAmount')" />
 
-              <TextInput
-                label="مدة رفع المستخلص"
+              <TextInput :label="t('purchases.orders.shared.labels.invoiceUploadDuration')"
                 v-model="formData.invoice_interval"
-                placeholder="أدخل المدة بالأيام"
-                :rules="[required(), numeric()]"
-                density="comfortable"
-              >
+                :placeholder="t('purchases.orders.shared.placeholders.enterDurationDays')"
+                :rules="[required(), numeric()]" density="comfortable">
                 <template #append-inner>
-                  <span class="text-gray-500 text-sm"> يوم </span>
+                  <span class="text-gray-500 text-sm"> {{ t('purchases.shared.forms.common.day') }} </span>
                 </template>
               </TextInput>
-              <TextInput
-                label="مدة السداد"
-                v-model="formData.payment_term_no"
-                placeholder="أدخل المدة بالأيام"
-                :rules="[required(), numeric()]"
-                density="comfortable"
-              >
+              <TextInput :label="t('purchases.orders.shared.labels.paymentDuration')" v-model="formData.payment_term_no"
+                :placeholder="t('purchases.orders.shared.placeholders.enterDurationDays')"
+                :rules="[required(), numeric()]" density="comfortable">
                 <template #append-inner>
-                  <span class="text-gray-500 text-sm"> يوم </span>
+                  <span class="text-gray-500 text-sm"> {{ t('purchases.shared.forms.common.day') }} </span>
                 </template>
               </TextInput>
 
               <!-- late_fee / late_fee_type: غرامة التأخير (من /purchases/orders/constants fee_types) -->
-              <TextInputWithSelect
-                v-model="formData.late_fee"
-                v-model:selectValue="formData.late_fee_type"
-                label="غرامة التأخير"
-                placeholder="أدخل المبلغ"
-                type="number"
-                :rules="[numeric(), positive()]"
-                select-width="110px"
-                :select-items="feeTypeItems"
-                select-placeholder="اختر"
-              />
+              <TextInputWithSelect v-model="formData.late_fee" v-model:selectValue="formData.late_fee_type"
+                :label="t('purchases.orders.shared.labels.lateFee')"
+                :placeholder="t('purchases.orders.shared.placeholders.enterFeeAmount')" type="number"
+                :rules="[numeric(), positive()]" select-width="110px" :select-items="feeTypeItems"
+                :select-placeholder="t('purchases.shared.forms.common.select')" />
 
               <!-- cancel_fee / cancel_fee_type: غرامة الإلغاء -->
-              <TextInputWithSelect
-                v-model="formData.cancel_fee"
-                v-model:selectValue="formData.cancel_fee_type"
-                label="غرامة الإلغاء"
-                placeholder="أدخل المبلغ"
-                type="number"
-                :rules="[numeric(), positive()]"
-                select-width="110px"
-                :select-items="feeTypeItems"
-                select-placeholder="اختر"
-              />
+              <TextInputWithSelect v-model="formData.cancel_fee" v-model:selectValue="formData.cancel_fee_type"
+                :label="t('purchases.orders.shared.labels.cancelFee')"
+                :placeholder="t('purchases.orders.shared.placeholders.enterFeeAmount')" type="number"
+                :rules="[numeric(), positive()]" select-width="110px" :select-items="feeTypeItems"
+                :select-placeholder="t('purchases.shared.forms.common.select')" />
 
               <!-- <SelectInput v-model="formData.account" :items="supplierItems" label="الحساب"
                                 :rules="[required()]" density="comfortable" placeholder="حدد الحساب" /> -->
@@ -1681,22 +1588,16 @@ const serviceTableItems = computed(() =>
           </div>
         </div>
 
-        <div
-          class="rounded-2xl overflow-hidden border !border-gray-200 bg-primary-25"
-        >
+        <div class="rounded-2xl overflow-hidden border !border-gray-200 bg-primary-25">
           <table class="w-full">
             <!-- Table Header -->
             <thead>
               <tr class="bg-primary-400">
-                <th
-                  class="text-white font-semibold text-base py-3 px-4 text-center border-l !border-gray-200"
-                >
-                  العنصر
+                <th class="text-white font-semibold text-base py-3 px-4 text-center border-l !border-gray-200">
+                  {{ t('purchases.orders.shared.labels.summaryItem') }}
                 </th>
-                <th
-                  class="text-white font-semibold text-base py-3 px-4 text-center"
-                >
-                  المبلغ
+                <th class="text-white font-semibold text-base py-3 px-4 text-center">
+                  {{ t('purchases.orders.shared.labels.summaryAmount') }}
                 </th>
               </tr>
             </thead>
@@ -1704,10 +1605,8 @@ const serviceTableItems = computed(() =>
             <tbody class="text-sm bg-primary-25">
               <!-- المجموع قبل الخصم -->
               <tr class="border-b !border-gray-200">
-                <td
-                  class="py-6 px-4 text-center font-bold text-gray-900 border-l !border-gray-200"
-                >
-                  المجموع قبل الخصم
+                <td class="py-6 px-4 text-center font-bold text-gray-900 border-l !border-gray-200">
+                  {{ t('purchases.orders.shared.labels.subtotalBeforeDiscount') }}
                 </td>
                 <td class="py-6 px-4 text-center text-gray-600">
                   {{ summaryTotals.subtotalBeforeDiscount }}
@@ -1716,10 +1615,8 @@ const serviceTableItems = computed(() =>
 
               <!-- الخصم -->
               <tr class="border-b !border-gray-200">
-                <td
-                  class="py-6 px-4 text-center font-bold text-gray-900 border-l !border-gray-200"
-                >
-                  الخصم
+                <td class="py-6 px-4 text-center font-bold text-gray-900 border-l !border-gray-200">
+                  {{ t('purchases.orders.shared.labels.discountRow') }}
                 </td>
                 <td class="py-6 px-4 text-center text-gray-600">
                   {{ summaryTotals.totalDiscount }}
@@ -1728,10 +1625,8 @@ const serviceTableItems = computed(() =>
 
               <!-- المجموع بعد الخصم -->
               <tr class="border-b !border-gray-200">
-                <td
-                  class="py-6 px-4 text-center font-bold text-gray-900 border-l !border-gray-200"
-                >
-                  المجموع بعد الخصم
+                <td class="py-6 px-4 text-center font-bold text-gray-900 border-l !border-gray-200">
+                  {{ t('purchases.orders.shared.labels.subtotalAfterDiscount') }}
                 </td>
                 <td class="py-6 px-4 text-center text-gray-600">
                   {{ summaryTotals.subtotalAfterDiscount }}
@@ -1740,20 +1635,16 @@ const serviceTableItems = computed(() =>
 
               <!-- الضريبة -->
               <tr class="border-b !border-gray-200">
-                <td
-                  class="py-6 px-4 text-center font-bold text-gray-900 border-l !border-gray-200"
-                >
-                  الضريبة
+                <td class="py-6 px-4 text-center font-bold text-gray-900 border-l !border-gray-200">
+                  {{ t('purchases.orders.shared.labels.taxRow') }}
                 </td>
                 <td class="py-6 px-4 text-center text-gray-600">{{ vatRate != null ? `${vatRate * 100}%` : '—' }}</td>
               </tr>
 
               <!-- اجمالي الضريبة -->
               <tr class="border-b !border-gray-200">
-                <td
-                  class="py-6 px-4 text-center font-bold text-gray-900 border-l !border-gray-200"
-                >
-                  اجمالي الضريبة
+                <td class="py-6 px-4 text-center font-bold text-gray-900 border-l !border-gray-200">
+                  {{ t('purchases.orders.shared.labels.totalTaxRow') }}
                 </td>
                 <td class="py-6 px-4 text-center text-gray-600">
                   {{ summaryTotals.totalTaxAmount }}
@@ -1762,10 +1653,8 @@ const serviceTableItems = computed(() =>
 
               <!-- الإجمالي النهائي -->
               <tr class="">
-                <td
-                  class="py-6 px-4 text-center font-bold text-gray-900 border-l !border-gray-200"
-                >
-                  الإجمالي النهائي
+                <td class="py-6 px-4 text-center font-bold text-gray-900 border-l !border-gray-200">
+                  {{ t('purchases.orders.shared.labels.finalTotalRow') }}
                 </td>
                 <td class="py-6 px-4 font-bold text-center text-gray-900">
                   {{ summaryTotals.finalTotal }}
@@ -1779,68 +1668,55 @@ const serviceTableItems = computed(() =>
       <!-- Action Buttons -->
       <div class="mt-3 flex items-center justify-center gap-3">
         <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col">
-          <ButtonWithIcon
-            variant="flat"
-            color="primary"
-            height="48"
-            rounded="4"
-            custom-class="font-semibold text-base px-6 md:!px-10"
-            :prepend-icon="returnIcon"
-            label="حفظ والعودة للرئيسية"
-            :loading="isSubmitting"
-            :disabled="isSubmitting"
-            @click="handleSubmit({ redirectToList: true })"
-          />
+          <ButtonWithIcon variant="flat" color="primary" height="48" rounded="4"
+            custom-class="font-semibold text-base px-6 md:!px-10" :prepend-icon="returnIcon"
+            :label="t('purchases.orders.shared.labels.saveReturnToMain')" :loading="isSubmitting"
+            :disabled="isSubmitting" @click="handleSubmit({ redirectToList: true })" />
 
-          <ButtonWithIcon
-            variant="flat"
-            color="primary-50"
-            height="48"
-            rounded="4"
-            custom-class="font-semibold text-base text-primary-700 px-6 md:!px-10"
-            :prepend-icon="saveIcon"
-            label="حفظ وإنشاء جديد"
-            :loading="isSubmitting"
-            :disabled="isSubmitting"
-            @click="handleSubmit({ redirectToList: false })"
-          />
+          <ButtonWithIcon variant="flat" color="primary-50" height="48" rounded="4"
+            custom-class="font-semibold text-base text-primary-700 px-6 md:!px-10" :prepend-icon="saveIcon"
+            :label="t('purchases.orders.shared.labels.saveAndCreateNewPo')" :loading="isSubmitting"
+            :disabled="isSubmitting" @click="handleSubmit({ redirectToList: false })" />
         </div>
       </div>
     </div>
 
-    <Map
-      v-model="showMapDialog"
+    <Map v-model="showMapDialog"
       :latitude="mapDialogMode === 'source' ? formData.source_latitude : formData.target_latitude"
       :longitude="mapDialogMode === 'source' ? formData.source_longitude : formData.target_longitude"
       :address="mapDialogMode === 'source' ? formData.source_location : formData.target_location"
-      @location-selected="handleLocationSelected"
-    />
+      @location-selected="handleLocationSelected" />
 
-    <!-- Add Product Dialog -->
+    <!-- Add Product Dialog: material_type=1 + supplier_id على التصنيفات و /items/supplier-items -->
     <AddProductDialog
       v-model="showAddProductDialog"
-      :items-query-params="{ material_type: 1 }"
       request-type="raw_materials"
       show-unit-price-and-discount
       :transport-types="transportTypeItems"
       :unit-items="unitItems"
       :supplier-id="formData.supplier_id"
+      items-endpoint="/items/supplier-items"
+      :items-query-params="{ material_type: 1, supplier_id: formData.supplier_id ?? '' }"
       :edit-product="editingProduct"
       :existing-products="productTableItems"
       @saved="handleProductSaved"
       @product-updated="handleProductUpdated"
     />
 
-    <!-- Edit Supply Details Dialog – تفاصيل التوريد لكل منتج (نفس لوجيك المبيعات) -->
-    <EditSupplyDetailsDialog
-      v-model="showAddSupplyDialog"
-      :products="supplyDialogProducts"
-      :transport-type-items="transportTypeItems"
-      :single-product-item-id="editingSupplyProductId"
-      show-trip-capacity
-      :am-pm-interval-items="amPmIntervalItems"
-      @saved="handleSupplyDetailsSaved"
+    <EditProductsDialog
+      v-model="showEditProductsDialog"
+      request-type="raw_materials"
+      :show-unit-price-and-discount="true"
+      :products="productTableItems"
+      :transport-types="transportTypeItems"
+      :unit-items="unitItems"
+      @products-updated="handleEditProductsBulk"
     />
+
+    <!-- Edit Supply Details Dialog – تفاصيل التوريد لكل منتج (نفس لوجيك المبيعات) -->
+    <EditSupplyDetailsDialog v-model="showAddSupplyDialog" :products="supplyDialogProducts"
+      :transport-type-items="transportTypeItems" :single-product-item-id="editingSupplyProductId" show-trip-capacity
+      :am-pm-interval-items="amPmIntervalItems" @saved="handleSupplyDetailsSaved" />
   </default-layout>
 </template>
 

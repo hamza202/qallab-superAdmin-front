@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from "vue";
+import { useI18n } from "vue-i18n";
 import { required } from "@/utils/validators";
-import { useApi } from '@/composables/useApi';
 import { playIcon, truckIcon } from "@/components/icons/priceOffersIcons";
 import { plusIcon } from "@/components/icons/globalIcons";
 import { plusCircleIcon } from "@/components/icons/productIcons";
 
-const api = useApi();
+const { t } = useI18n();
 
 export interface LogisticsDetail {
   id?: number;
@@ -180,9 +180,6 @@ const handleCancel = () => {
 
 const showTargetMapDialog = ref(false);
 const showSourceMapDialog = ref(false);
-
-onMounted(() => {
-});
 </script>
 
 <template>
@@ -192,7 +189,7 @@ onMounted(() => {
         <span class="!bg-gray-50 border border-gray-100 rounded px-1.5 py-1.5 text-gray-600">
           <span v-html="truckIcon"></span>
         </span>
-        {{ isEditMode ? 'تعديل خدمة النقل' : 'إضافة خدمة نقل' }}
+        {{ isEditMode ? t('purchases.requests.logistics.addDetailDialog.titleEdit') : t('purchases.requests.logistics.addDetailDialog.titleAdd') }}
       </div>
     </template>
 
@@ -200,34 +197,34 @@ onMounted(() => {
       <div class="space-y-4">
         <!-- Row 1: Date Range -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <DatePickerInput label="تاريخ بدء النقل" v-model="form.from_date" placeholder="اختر"
+          <DatePickerInput :label="t('purchases.requests.logistics.addDetailDialog.labels.fromDate')" v-model="form.from_date" :placeholder="t('purchases.shared.forms.common.select')"
             density="comfortable" :rules="[required()]" />
-          <DatePickerInput label="تاريخ انتهاء النقل" v-model="form.to_date" placeholder="اختر"
+          <DatePickerInput :label="t('purchases.requests.logistics.addDetailDialog.labels.toDate')" v-model="form.to_date" :placeholder="t('purchases.shared.forms.common.select')"
             density="comfortable" :rules="[required()]" />
-          <PriceInput label="مدة التنفيذ" v-model="form.actual_execution_interval"
-            placeholder="أدخل مدة التنفيذ بالأيام" density="comfortable" :rules="[required()]">
+          <PriceInput :label="t('purchases.requests.logistics.addDetailDialog.labels.executionDuration')" v-model="form.actual_execution_interval"
+            :placeholder="t('purchases.requests.logistics.addDetailDialog.labels.executionDurationPlaceholder')" density="comfortable" :rules="[required()]">
             <template #append-inner>
-              <span class="text-gray-500 text-sm"> يوم </span>
+              <span class="text-gray-500 text-sm"> {{ t('purchases.shared.forms.common.day') }} </span>
             </template>
           </PriceInput>
 
-          <SelectInput label="أوقات النقل" v-model="form.am_pm_interval" :items="amPmIntervalList" placeholder="اختر"
+          <SelectInput :label="t('purchases.requests.logistics.addDetailDialog.labels.transportTimes')" v-model="form.am_pm_interval" :items="amPmIntervalList" :placeholder="t('purchases.shared.forms.common.select')"
            density="comfortable" :rules="[required()]" />
-          <MultipleSelectInput label="نوع مركبات النقل" v-model="form.transport_type" :items="transportTypesList"
-            placeholder="قلاب" item-title="title" item-value="value" :rules="[required()]" />
+          <MultipleSelectInput :label="t('purchases.requests.logistics.addDetailDialog.labels.vehicleTypes')" v-model="form.transport_type" :items="transportTypesList"
+            :placeholder="t('purchases.requests.logistics.addDetailDialog.labels.vehicleTypesPlaceholder')" item-title="title" item-value="value" :rules="[required()]" />
 
-          <PriceInput label="عدد مركبات النقل" v-model="form.transport_no" placeholder="أدخل عدد المركبات" density="comfortable"
+          <PriceInput :label="t('purchases.requests.logistics.addDetailDialog.labels.vehicleCount')" v-model="form.transport_no" :placeholder="t('purchases.requests.logistics.addDetailDialog.labels.vehicleCountPlaceholder')" density="comfortable"
             :rules="[required()]" />
-          <MultipleSelectInput label="نوع  مواد النقل" v-model="form.material_type" :items="categoriesList"
-            placeholder="اختر"  :rules="[required()]" />
+          <MultipleSelectInput :label="t('purchases.requests.logistics.addDetailDialog.labels.materialTypes')" v-model="form.material_type" :items="categoriesList"
+            :placeholder="t('purchases.shared.forms.common.select')"  :rules="[required()]" />
 
-          <PriceInput label="عدد الرحلات" v-model="form.trip_no" placeholder="أدخل عدد الرحلات" density="comfortable"
+          <PriceInput :label="t('purchases.requests.logistics.addDetailDialog.labels.tripCount')" v-model="form.trip_no" :placeholder="t('purchases.requests.logistics.addDetailDialog.labels.tripCountPlaceholder')" density="comfortable"
             :rules="[required()]" />
-          <TextInput label="مسؤول التحميل" v-model="form.loading_responsible_party" placeholder="أدخل اسم مسؤول التحميل"
+          <TextInput :label="t('purchases.requests.logistics.addDetailDialog.labels.loadingResponsible')" v-model="form.loading_responsible_party" :placeholder="t('purchases.requests.logistics.addDetailDialog.labels.loadingResponsiblePlaceholder')"
             density="comfortable" :rules="[required()]" />
 
-          <TextInput label="مسؤول التفريغ" v-model="form.downloading_responsible_party"
-            placeholder="أدخل اسم مسؤول التفريغ" density="comfortable" :rules="[required()]" />
+          <TextInput :label="t('purchases.requests.logistics.addDetailDialog.labels.unloadingResponsible')" v-model="form.downloading_responsible_party"
+            :placeholder="t('purchases.requests.logistics.addDetailDialog.labels.unloadingResponsiblePlaceholder')" density="comfortable" :rules="[required()]" />
         </div>
       </div>
     </v-form>
@@ -235,11 +232,11 @@ onMounted(() => {
     <template #actions>
       <div class="flex items-center justify-center gap-4 flex-1 mt-4">
         <ButtonWithIcon variant="flat" color="primary" custom-class="px-8"
-          :label="isEditMode ? 'حفظ التعديلات' : 'أضف خدمة'" :prepend-icon="isEditMode ? undefined : plusCircleIcon"
+          :label="isEditMode ? t('purchases.requests.logistics.addDetailDialog.actions.saveEdits') : t('purchases.requests.logistics.addDetailDialog.actions.addService')" :prepend-icon="isEditMode ? undefined : plusCircleIcon"
           @click="handleSave" />
 
         <ButtonWithIcon variant="outlined" color="gray-700" border="gray-300" size="large" custom-class="px-4"
-          label="إلغاء" @click="handleCancel" />
+          :label="t('common.actions.cancel')" @click="handleCancel" />
       </div>
     </template>
   </AppDialog>

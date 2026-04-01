@@ -97,80 +97,80 @@ const markIcon = `<svg width="18" height="22" viewBox="0 0 18 22" fill="none" xm
 
 <template>
   <div class="mb-6 bg-gray-50 rounded-lg p-6">
-    <h2 class="text-lg font-bold text-primary-900 mb-4">البيانات العامة</h2>
+    <h2 class="text-lg font-bold text-primary-900 mb-4">{{ $t('pages.materialMerchants.form.tabs.basicInfo') }}</h2>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 gap-y-6 mb-4">
-      <LanguageTabs :languages="availableLanguages" label="اسم الشركة">
+      <LanguageTabs :languages="availableLanguages" :label="$t('form.identity.businessName.label')">
         <template #en>
           <TextInput v-model="formData.businessNameTranslations.en" @input="() => handleInputUpdate('business_name.en')"
-            placeholder="Enter business name in English" :hide-details="false" :rules="[required()]"
+            :placeholder="$t('form.identity.businessName.placeholder')" :hide-details="false" :rules="[required()]"
             :error-messages="props.formErrors?.['business_name.en']" />
         </template>
         <template #ar>
           <TextInput v-model="formData.businessNameTranslations.ar" @input="() => handleInputUpdate('business_name.ar')"
-            placeholder="ادخل اسم الشركة بالعربية" :hide-details="false" :rules="[required()]"
+            :placeholder="$t('form.identity.businessName.placeholder')" :hide-details="false" :rules="[required()]"
             :error-messages="props.formErrors?.['business_name.ar']" required />
         </template>
       </LanguageTabs>
 
       <TextInput v-model="formData.buisnessno" @input="() => handleInputUpdate('buisnessno')" :rules="[required()]"
-        :error-messages="props.formErrors?.['buisnessno']" label="رقم السجل التجاري"
-        placeholder="أدخل رقم السجل التجاري" :hide-details="false" required />
+        :error-messages="props.formErrors?.['buisnessno']" :label="$t('form.identity.commercialRegister.label')"
+        :placeholder="$t('form.identity.commercialRegister.placeholder')" :hide-details="false" required />
 
       <TextInput v-model="formData.taxno" :hide-details="false" @input="() => handleInputUpdate('taxno')"
-        label="الرقم الضريبي" placeholder="أدخل الرقم الضريبي" :rules="[taxNo()]"
+        :label="$t('form.identity.taxNumber.label')" :placeholder="$t('form.identity.taxNumber.placeholder')" :rules="[taxNo()]"
         :error-messages="props.formErrors?.['taxno']" @update:model-value="clearError('taxno')" type="text" required />
 
       <TextInput v-model="formData.unifiedLoginId" @input="() => handleInputUpdate('unified_login_id')"
-        label="معرف الدخول الموحد" placeholder="أدخل معرف الدخول الموحد" :hide-details="false"
+        :label="$t('form.identity.unifiedLoginId.label')" :placeholder="$t('form.identity.unifiedLoginId.placeholder')" :hide-details="false"
         :rules="[unifiedLoginId()]" :error-messages="props.formErrors?.['unified_login_id']"
         @update:model-value="clearError('unified_login_id')" type="text" />
 
       <TextInput v-model="formData.ownerName" @input="() => handleInputUpdate('owner_name')" :rules="[required()]"
-        :error-messages="props.formErrors?.['owner_name']" label="اسم المالك" placeholder="أدخل اسم المالك"
+        :error-messages="props.formErrors?.['owner_name']" :label="$t('form.identity.ownerName.label')" :placeholder="$t('form.identity.ownerName.placeholder')"
         :hide-details="false" required />
 
-      <TelInput v-model="formData.phone" label="رقم الهاتف" :rules="[required(), saudiPhone()]"
+      <TelInput v-model="formData.phone" :label="$t('form.identity.phone.label')" :rules="[required(), saudiPhone()]"
         :error-messages="props.formErrors?.['phone']" @input="() => handleInputUpdate('phone')" />
 
-      <TelInput v-model="formData.mobile" label="رقم الجوال" :rules="[saudiPhone()]"
+      <TelInput v-model="formData.mobile" :label="$t('form.identity.mobilePhone.label')" :rules="[saudiPhone()]"
         :error-messages="props.formErrors?.['mobile']" @input="() => handleInputUpdate('mobile')" />
 
-      <TextInput v-model="formData.email" @input="() => handleInputUpdate('email')" label="البريد الإلكتروني"
-        placeholder="أدخل البريد الإلكتروني" :hide-details="false" :rules="[required(), email()]"
+      <TextInput v-model="formData.email" @input="() => handleInputUpdate('email')" :label="$t('form.identity.email.label')"
+        :placeholder="$t('form.identity.email.placeholder')" :hide-details="false" :rules="[required(), email()]"
         :error-messages="props.formErrors?.['email']" dir="ltr" required />
     </div>
   </div>
 
   <div class="mb-6 bg-gray-50 rounded-lg p-6">
     <div class="flex items-center gap-2 mb-4">
-      <h2 class="text-lg font-bold text-primary-900">معلومات العنوان</h2>
+      <h2 class="text-lg font-bold text-primary-900">{{ $t('form.address.sections.addressInfo') }}</h2>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 gap-y-6">
       <SelectInput v-model="formData.countryId" @update:model-value="() => handleInputUpdate('country_id')"
-        :items="props.countryItems" label="الدولة" placeholder="اختر الدولة" :hide-details="false" :rules="[required()]"
+        :items="props.countryItems" :label="$t('form.address.country.label')" :placeholder="$t('form.address.country.placeholder')" :hide-details="false" :rules="[required()]"
         :error-messages="props.formErrors?.['country_id']" required />
 
       <SelectInput v-model="formData.cityId" @update:model-value="() => handleInputUpdate('city_id')"
-        :items="props.cityItems" label="المدينة" placeholder="اختر المدينة" :hide-details="false" :rules="[required()]"
+        :items="props.cityItems" :label="$t('form.address.city.label')" :placeholder="$t('form.address.city.placeholder')" :hide-details="false" :rules="[required()]"
         :error-messages="props.formErrors?.['city_id']" required />
 
-      <TextInput v-model="formData.neighborhood" @input="() => handleInputUpdate('neighborhood')" label="الحي"
-        placeholder="أدخل اسم الحي" :hide-details="false" :error-messages="props.formErrors?.['neighborhood']" />
+      <TextInput v-model="formData.neighborhood" @input="() => handleInputUpdate('neighborhood')" :label="$t('form.address.district.label')"
+        :placeholder="$t('form.address.district.placeholder')" :hide-details="false" :error-messages="props.formErrors?.['neighborhood']" />
 
-      <TextInput v-model="formData.streetName" @input="() => handleInputUpdate('street_name')" label="اسم الشارع"
-        placeholder="أدخل اسم الشارع" :hide-details="false" :error-messages="props.formErrors?.['street_name']" />
+      <TextInput v-model="formData.streetName" @input="() => handleInputUpdate('street_name')" :label="$t('form.address.streetName.label')"
+        :placeholder="$t('form.address.streetName.placeholder')" :hide-details="false" :error-messages="props.formErrors?.['street_name']" />
 
       <TextInput v-model="formData.buildingNumber" @input="() => handleInputUpdate('building_number')"
-        label="رقم المبنى" placeholder="أدخل رقم المبنى" :hide-details="false"
+        :label="$t('form.address.buildingNumber.label')" :placeholder="$t('form.address.buildingNumber.placeholder')" :hide-details="false"
         :error-messages="props.formErrors?.['building_number']" />
 
-      <TextInput v-model="formData.postalCode" @input="() => handleInputUpdate('postal_code')" label="الرمز البريدي"
-        placeholder="أدخل الرمز البريدي" :hide-details="false" :error-messages="props.formErrors?.['postal_code']" />
+      <TextInput v-model="formData.postalCode" @input="() => handleInputUpdate('postal_code')" :label="$t('form.address.postalCode.label')"
+        :placeholder="$t('form.address.postalCode.placeholder')" :hide-details="false" :error-messages="props.formErrors?.['postal_code']" />
 
-      <TextInput v-model="formData.address1" @input="() => handleInputUpdate('address_1')" label="العنوان التفصيلي"
-        placeholder="أدخل العنوان التفصيلي" :hide-details="false" :error-messages="props.formErrors?.['address_1']"
+      <TextInput v-model="formData.address1" @input="() => handleInputUpdate('address_1')" :label="$t('form.address.nationalAddress.label')"
+        :placeholder="$t('form.address.nationalAddress.placeholder')" :hide-details="false" :error-messages="props.formErrors?.['address_1']"
         class="md:col-span-2">
         <template #append-inner>
           <span v-html="markIcon"></span>

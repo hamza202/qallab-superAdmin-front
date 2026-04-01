@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { useAppStore } from "@/stores/app";
+import { useI18n } from "vue-i18n";
 
 const appStore = useAppStore();
+const { t } = useI18n();
 
 interface TableHeader {
   key: string;
@@ -111,15 +113,17 @@ const confirmDelete = async () => {
   deleteLoading.value = true;
   emit("delete", pendingDeleteItem.value);
 
-  // Wait a bit for the parent to handle the delete
-  // The parent should ideally emit a success/error event, but for now we'll use a timeout
-  await new Promise(resolve => setTimeout(resolve, 100));
+  await new Promise(resolve => setTimeout(resolve, 300));
+
+  deleteLoading.value = false;
+  showDeleteDialog.value = false;
+  pendingDeleteItem.value = null;
 };
 
 const cancelDelete = () => {
-  if (deleteLoading.value) return;
   pendingDeleteItem.value = null;
   showDeleteDialog.value = false;
+  deleteLoading.value = false;
 };
 
 // Watch for when the pending item is cleared externally (after successful delete)
@@ -301,7 +305,7 @@ const eyeIcon = `<svg width="22" height="16" viewBox="0 0 22 16" fill="none" xml
         <tr v-if="items.length === 0">
           <td :colspan="headers.length + (showActions ? 1 : 0) + (showCheckbox ? 1 : 0)
             " class="text-center py-8 text-gray-500">
-            لا توجد بيانات
+            {{ t('common.ui.noData') }}
           </td>
         </tr>
       </tbody>

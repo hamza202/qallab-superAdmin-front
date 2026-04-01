@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from "vue";
+import { useI18n } from "vue-i18n";
 import { required } from "@/utils/validators";
 import { truckIcon } from "@/components/icons/priceOffersIcons";
 import { plusCircleIcon } from "@/components/icons/productIcons";
@@ -35,6 +36,7 @@ const props = defineProps<{
   discountTypeOptions?: any[];
   editDetail?: LogisticsDetail | null;
 }>();
+const { t } = useI18n();
 
 const emit = defineEmits<{
   "update:modelValue": [value: boolean];
@@ -79,7 +81,7 @@ const amPmIntervalList = computed(() => props.amPmIntervalOptions || []);
 const categoriesList = computed(() => props.categoriesItems || []);
 const discountTypeOptionsList = computed(() => props.discountTypeOptions || [
   { title: '%', value: 1 },
-  { title: 'ريال', value: 2 },
+  { title: t('purchases.orders.shared.labels.currencyRial'), value: 2 },
 ]);
 
 watch(() => props.modelValue, (newVal) => {
@@ -187,56 +189,56 @@ const handleCancel = () => {
         <span class="!bg-gray-50 border border-gray-100 rounded px-1.5 py-1.5 text-gray-600">
           <span v-html="truckIcon"></span>
         </span>
-        {{ isEditMode ? 'تعديل خدمة النقل' : 'إضافة خدمة نقل' }}
+        {{ isEditMode ? t('common.actions.save') : t('purchases.requests.logistics.form.addTransportService') }}
       </div>
     </template>
 
     <v-form ref="formRef" v-model="isFormValid" @submit.prevent>
       <div class="space-y-4">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <DatePickerInput label="تاريخ بدء النقل" v-model="form.from_date" placeholder="اختر"
+          <DatePickerInput :label="t('purchases.requests.logistics.form.detailCard.fromDate')" v-model="form.from_date" :placeholder="t('purchases.shared.forms.common.select')"
             density="comfortable" :rules="[required()]" />
-          <DatePickerInput label="تاريخ انتهاء النقل" v-model="form.to_date" placeholder="اختر"
+          <DatePickerInput :label="t('purchases.requests.logistics.form.detailCard.toDate')" v-model="form.to_date" :placeholder="t('purchases.shared.forms.common.select')"
             density="comfortable" :rules="[required()]" />
-          <PriceInput label="مدة التنفيذ" v-model="form.actual_execution_interval"
-            placeholder="أدخل مدة التنفيذ بالأيام" density="comfortable" :rules="[required()]">
+          <PriceInput :label="t('purchases.requests.logistics.form.detailCard.executionDuration')" v-model="form.actual_execution_interval"
+            :placeholder="t('purchases.orders.shared.placeholders.enterDurationDays')" density="comfortable" :rules="[required()]">
             <template #append-inner>
-              <span class="text-gray-500 text-sm"> يوم </span>
+              <span class="text-gray-500 text-sm"> {{ t('purchases.shared.forms.common.day') }} </span>
             </template>
           </PriceInput>
 
-          <SelectInput label="أوقات النقل" v-model="form.am_pm_interval" :items="amPmIntervalList" placeholder="اختر"
+          <SelectInput :label="t('purchases.views.shared.workHoursTransport')" v-model="form.am_pm_interval" :items="amPmIntervalList" :placeholder="t('purchases.shared.forms.common.select')"
             density="comfortable" item-title="title" item-value="value" :rules="[required()]" />
-          <MultipleSelectInput label="نوع مركبات النقل" v-model="form.transport_type" :items="transportTypesList"
-            placeholder="قلاب" item-title="title" item-value="value" :rules="[required()]" />
+          <MultipleSelectInput :label="t('purchases.requests.logistics.form.detailCard.vehicleType')" v-model="form.transport_type" :items="transportTypesList"
+            :placeholder="t('purchases.shared.forms.common.select')" item-title="title" item-value="value" :rules="[required()]" />
 
-          <PriceInput label="عدد مركبات النقل" v-model="form.transport_no" placeholder="أدخل عدد المركبات" density="comfortable"
+          <PriceInput :label="t('purchases.requests.logistics.form.detailCard.vehicleCount')" v-model="form.transport_no" :placeholder="t('purchases.orders.shared.placeholders.enterCount')" density="comfortable"
             :rules="[required()]" />
-          <MultipleSelectInput label="نوع مواد النقل" v-model="form.material_type" :items="categoriesList"
-            placeholder="اختر" item-title="title" item-value="value" :rules="[required()]" />
+          <MultipleSelectInput :label="t('purchases.views.shared.materialMovedType')" v-model="form.material_type" :items="categoriesList"
+            :placeholder="t('purchases.shared.forms.common.select')" item-title="title" item-value="value" :rules="[required()]" />
 
-          <PriceInput label="عدد الرحلات" v-model="form.trip_no" placeholder="أدخل عدد الرحلات" density="comfortable"
+          <PriceInput :label="t('purchases.requests.logistics.form.detailCard.tripCount')" v-model="form.trip_no" :placeholder="t('purchases.orders.shared.placeholders.enterCount')" density="comfortable"
             :rules="[required()]" />
-          <TextInput label="مسؤول التحميل" v-model="form.loading_responsible_party" placeholder="أدخل اسم مسؤول التحميل"
+          <TextInput :label="t('purchases.requests.logistics.form.detailCard.loadingResponsible')" v-model="form.loading_responsible_party" :placeholder="t('purchases.requests.logistics.form.detailCard.loadingResponsible')"
             density="comfortable" :rules="[required()]" />
 
-          <TextInput label="مسؤول التفريغ" v-model="form.downloading_responsible_party"
-            placeholder="أدخل اسم مسؤول التفريغ" density="comfortable" :rules="[required()]" />
+          <TextInput :label="t('purchases.requests.logistics.form.detailCard.unloadingResponsible')" v-model="form.downloading_responsible_party"
+            :placeholder="t('purchases.requests.logistics.form.detailCard.unloadingResponsible')" density="comfortable" :rules="[required()]" />
           <div>
-            <PriceInput showRialIcon label="مبلغ النقل" v-model="form.transport_amount" placeholder="أدخل مبلغ النقل"
+            <PriceInput showRialIcon :label="t('purchases.views.shared.transportAmount')" v-model="form.transport_amount" :placeholder="t('purchases.orders.shared.placeholders.enterFeeAmount')"
               density="comfortable" :rules="[required()]" />
           </div>
           <div >
             <TextInputWithSelect
               v-model="form.discount_val"
               v-model:selectValue="form.discount_type"
-              label="الخصم"
-              placeholder="الخصم"
+              :label="t('purchases.orders.shared.tableHeaders.discount')"
+              :placeholder="t('purchases.orders.shared.tableHeaders.discount')"
               type="number"
               density="comfortable"
               select-width="80px"
               :select-items="discountTypeOptionsList"
-              select-placeholder="اختر"
+              :select-placeholder="t('purchases.shared.forms.common.select')"
             />
           </div>
         </div>
@@ -246,11 +248,11 @@ const handleCancel = () => {
     <template #actions>
       <div class="flex items-center justify-center gap-4 flex-1 mt-4">
         <ButtonWithIcon variant="flat" color="primary" custom-class="px-8"
-          :label="isEditMode ? 'حفظ التعديلات' : 'أضف خدمة'" :prepend-icon="isEditMode ? undefined : plusCircleIcon"
+          :label="isEditMode ? t('common.actions.save') : t('purchases.requests.logistics.form.addTransportService')" :prepend-icon="isEditMode ? undefined : plusCircleIcon"
           @click="handleSave" />
 
         <ButtonWithIcon variant="outlined" color="gray-700" border="gray-300" size="large" custom-class="px-4"
-          label="إلغاء" @click="handleCancel" />
+          :label="t('common.actions.cancel')" @click="handleCancel" />
       </div>
     </template>
   </AppDialog>

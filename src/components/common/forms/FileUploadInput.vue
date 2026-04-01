@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
+import { useI18n } from "vue-i18n";
 
 interface FileUploadInputProps {
     modelValue: File[] | string | null;
@@ -15,11 +16,13 @@ interface FileUploadInputProps {
     layout?: 'default' | 'horizontal';
 }
 
+const { t } = useI18n();
+
 const props = withDefaults(defineProps<FileUploadInputProps>(), {
     accept: "image/png, image/jpeg, image/gif",
     multiple: true,
     maxSize: 5,
-    innerLabel: 'أرفق صورة',
+    innerLabel: '',
     maxFiles: 4,
     disabled: false,
     labelClass: "",
@@ -28,6 +31,7 @@ const props = withDefaults(defineProps<FileUploadInputProps>(), {
 });
 
 const isHorizontalLayout = computed(() => props.layout === 'horizontal');
+const resolvedInnerLabel = computed(() => props.innerLabel || t('common.uploads.attachImage'));
 
 const emit = defineEmits<{
     (e: "update:modelValue", value: File[] | string | null): void;
@@ -149,7 +153,7 @@ const trashIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" x
                         <button type="button"
                             class="font-cairo font-bold text-sm leading-5 text-primary-600 bg-transparent border-none cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
                             :disabled="disabled">
-                            أرفق صورة
+                            {{ resolvedInnerLabel }}
                         </button>
                     </div>
                     <p class="font-inter font-normal text-xs leading-[18px] text-gray-500 text-center">{{ hint }}</p>
@@ -190,7 +194,7 @@ const trashIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" x
                         <button type="button"
                             class="font-cairo font-bold text-sm leading-5 text-primary-600 bg-transparent border-none cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
                             :disabled="disabled">
-                            {{ innerLabel }}
+                            {{ resolvedInnerLabel }}
                         </button>
                     </div>
 

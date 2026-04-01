@@ -1,16 +1,16 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, nextTick, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useApi } from '@/composables/useApi'
 import { useNotification } from '@/composables/useNotification'
 import { useTableColumns } from '@/composables/useTableColumns'
 import DatePickerInput from '@/components/common/forms/DatePickerInput.vue'
+import { toast } from 'vue3-toastify'
 
 const router = useRouter()
-const { t } = useI18n()
 const api = useApi()
-const { success, error: showError } = useNotification()
+const { t } = useI18n()
 
 // === TypeScript Interfaces ===
 interface SimpleProduct {
@@ -151,17 +151,17 @@ const plusIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
 </svg>`
 
 // Default headers (fallback)
-const defaultTableHeaders: TableHeader[] = [
-  { key: 'name', title: 'الاسم', width: '180px' },
-  { key: 'code', title: 'الكود', width: '120px' },
-  { key: 'unit', title: 'الوحدة', width: '100px' },
-  { key: 'category', title: 'التصنيف', width: '100px' },
-  { key: 'purchase_price', title: 'سعر الشراء', width: '100px' },
-  { key: 'sell_price', title: 'سعر البيع', width: '100px' },
-  { key: 'min_quantity', title: 'الحد الأدنى للكمية', width: '100px' },
-  { key: 'update_at', title: 'تاريخ التحديث', width: '120px' },
-  { key: 'is_active', title: 'الحالة', width: '100px' },
-]
+const defaultTableHeaders = computed(() => [
+  { key: 'name', title: t('pages.simpleProducts.list.table.name'), sortable: true },
+  { key: 'code', title: t('pages.simpleProducts.list.table.code'), sortable: true },
+  { key: 'unit', title: t('pages.simpleProducts.list.table.unit'), sortable: false },
+  { key: 'category', title: t('pages.simpleProducts.list.table.category'), sortable: false },
+  { key: 'purchase_price', title: t('pages.simpleProducts.list.table.purchasePrice'), sortable: true },
+  { key: 'sell_price', title: t('pages.simpleProducts.list.table.sellPrice'), sortable: true },
+  { key: 'min_quantity', title: t('pages.simpleProducts.list.table.minQuantity'), sortable: true },
+  { key: 'updated_at', title: t('pages.simpleProducts.list.table.updatedAt'), sortable: true },
+  { key: 'is_active', title: t('pages.simpleProducts.list.table.status'), sortable: true },
+])
 
 // === Computed ===
 const tableHeaders = computed(() => {
@@ -172,7 +172,7 @@ const tableHeaders = computed(() => {
       width: '140px',
     }))
   }
-  return defaultTableHeaders
+  return defaultTableHeaders.value
 })
 
 // === API Functions ===
@@ -222,7 +222,7 @@ const fetchData = async (cursor?: string | null, append = false) => {
     nextCursor.value = response.pagination.next_cursor
   } catch (err: any) {
     errorMessage.value = err?.response?.data?.message || 'حدث خطأ أثناء جلب البيانات'
-    showError(errorMessage.value || 'حدث خطأ')
+    toast.error(t('pages.simpleProducts.list.messages.fetchError'))
     console.error('Error fetching items:', err)
   } finally {
     isLoading.value = false
@@ -263,17 +263,17 @@ const confirmDelete = async () => {
       if (!itemToDelete.value) return
       await api.delete(`/items/${itemToDelete.value.id}`)
       tableItems.value = tableItems.value.filter(t => t.id !== itemToDelete.value!.id)
-      success('تم حذف المنتج بنجاح')
+      toast.success(t('pages.simpleProducts.list.messages.deleteSuccess'))
     } else {
       // Bulk delete
       if (selectedRows.value.length === 0) return
       await Promise.all(selectedRows.value.map(id => api.delete(`/items/${id}`)))
       tableItems.value = tableItems.value.filter(t => !selectedRows.value.includes(t.id))
       selectedRows.value = []
-      success('تم حذف المنتجات المحددة بنجاح')
+      toast.success(t('pages.simpleProducts.list.messages.bulkDeleteSuccess'))
     }
   } catch (err: any) {
-    showError(err?.response?.data?.message || 'حدث خطأ أثناء الحذف')
+    toast.error(t('pages.simpleProducts.list.messages.deleteError'))
     console.error('Error deleting items:', err)
   } finally {
     deleteLoading.value = false
@@ -297,7 +297,8 @@ const confirmStatusChange = async () => {
     const newStatus = !itemToChangeStatus.value.is_active
 
     await api.patch(`/items/${itemToChangeStatus.value.id}/change-status`, { is_active: newStatus })
-    success(`تم ${newStatus ? 'تفعيل' : 'تعطيل'} المنتج بنجاح`)
+    const statusText = newStatus ? t('pages.simpleProducts.list.messages.activateSuccess') : t('pages.simpleProducts.list.messages.deactivateSuccess')
+    toast.success(t('pages.simpleProducts.list.messages.statusChangeSuccess', { status: statusText }))
 
     // Update local state
     const index = tableItems.value.findIndex(t => t.id === itemToChangeStatus.value!.id)
@@ -305,7 +306,7 @@ const confirmStatusChange = async () => {
       tableItems.value[index].is_active = newStatus
     }
   } catch (err: any) {
-    showError(err?.response?.data?.message || 'حدث خطأ أثناء تغيير الحالة')
+    toast.error(t('pages.simpleProducts.list.messages.statusChangeError'))
     console.error('Error changing status:', err)
   } finally {
     statusChangeLoading.value = false
@@ -396,10 +397,10 @@ onBeforeUnmount(() => {
         class="flex justify-end items-stretch rounded border border-gray-300 w-fit ms-auto mb-4 overflow-hidden bg-white text-sm">
         <ButtonWithIcon variant="flat" height="40" rounded="0"
           custom-class="font-semibold text-base border-gray-300 bg-primary-100 !text-primary-900"
-          :prepend-icon="importIcon" :label="t('common.import')" />
+          :prepend-icon="importIcon" :label="t('common.actions.import')" />
         <ButtonWithIcon variant="flat" height="40" rounded="0"
           custom-class="font-semibold text-base border-gray-300 bg-primary-50 !text-primary-900"
-          :prepend-icon="exportIcon" :label="t('common.export')" />
+          :prepend-icon="exportIcon" :label="t('common.actions.export')" />
       </div>
 
       <div class="bg-gray-50 rounded-md -mx-6">
@@ -410,11 +411,11 @@ onBeforeUnmount(() => {
             class="flex flex-wrap items-stretch rounded overflow-hidden border border-gray-200 bg-white text-sm">
             <ButtonWithIcon variant="flat" height="40" rounded="0"
               custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-              :prepend-icon="trash_1_icon" color="white" label="حذف المحدد" @click="handleBulkDelete" />
+              :prepend-icon="trash_1_icon" color="white" :label="t('pages.simpleProducts.list.buttons.bulkDelete')" @click="handleBulkDelete" />
             <div class="w-px bg-gray-200"></div>
             <ButtonWithIcon variant="flat" height="40" rounded="0"
               custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-              :prepend-icon="trash_2_icon" color="white" label="حذف الجميع" @click="handleBulkDelete" />
+              :prepend-icon="trash_2_icon" color="white" :label="t('pages.simpleProducts.list.buttons.deleteAll')" @click="handleBulkDelete" />
           </div>
 
           <!-- Main header controls -->
@@ -424,7 +425,7 @@ onBeforeUnmount(() => {
               <template v-slot:activator="{ props }">
                 <ButtonWithIcon v-bind="props" variant="outlined" rounded="4" color="gray-500" height="40"
                   custom-class="font-semibold text-base border-gray-400" :prepend-icon="columnIcon"
-                  :label="t('common.columns')" append-icon="mdi-chevron-down" />
+                  :label="t('common.table.columns')" append-icon="mdi-chevron-down" />
               </template>
               <v-list>
                 <v-list-item v-for="header in allHeaders" :key="header.key" @click="toggleHeader(header.key)">
@@ -439,10 +440,10 @@ onBeforeUnmount(() => {
 
             <ButtonWithIcon variant="flat" color="primary-500" height="40" rounded="4"
               custom-class="px-7 font-semibold text-base text-white border !border-primary-200"
-              :prepend-icon="searchIcon" :label="t('common.advancedSearch')" @click="toggleAdvancedFilters" />
+              :prepend-icon="searchIcon" :label="t('common.table.advancedSearch')" @click="toggleAdvancedFilters" />
             <ButtonWithIcon v-if="canCreate" variant="flat" color="primary-100" height="40" rounded="4"
               custom-class="px-7 font-semibold text-base !text-primary-800 border !border-primary-200"
-              :prepend-icon="plusIcon" :label="t('common.addProduct')" @click="openCreate" />
+              :prepend-icon="plusIcon" :label="t('common.form.addProduct')" @click="openCreate" />
           </div>
         </div>
 
@@ -466,10 +467,10 @@ onBeforeUnmount(() => {
             <div class="flex gap-2 items-center">
               <ButtonWithIcon variant="flat" color="primary-500" rounded="4" height="40"
                 custom-class="px-5 font-semibold !text-white text-sm sm:text-base" :prepend-icon="searchIcon"
-                label="ابحث الآن" @click="handleSearch" />
+                :label="t('pages.simpleProducts.list.buttons.searchNow')" @click="handleSearch" />
               <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4" border="sm"
                 custom-class="px-5 font-semibold text-sm sm:text-base !text-primary-800 !border-primary-200"
-                prepend-icon="mdi-refresh" label="إعادة تعيين" @click="resetFilters" />
+                prepend-icon="mdi-refresh" :label="t('pages.simpleProducts.list.buttons.reset')" @click="resetFilters" />
             </div>
 
           </div>
@@ -502,15 +503,15 @@ onBeforeUnmount(() => {
         <!-- Loading more indicator -->
         <div v-if="loadingMore" class="flex justify-center items-center py-4">
           <v-progress-circular indeterminate color="primary" size="32" />
-          <span class="mr-2 text-gray-600">جاري تحميل المزيد...</span>
+          <span class="ms-2 text-gray-600">{{ t('pages.simpleProducts.list.messages.loadingMore') }}</span>
         </div>
       </div>
     </div>
 
     <!-- Unified Delete Confirmation Dialog -->
     <DeleteConfirmDialog v-model="showDeleteDialog" :loading="deleteLoading"
-      :title="deleteMode === 'single' ? 'حذف المنتج' : 'حذف المنتجات'"
-      :message="deleteMode === 'single' ? `هل أنت متأكد من حذف ${itemToDelete?.name}؟` : `هل أنت متأكد من حذف ${selectedRows.length} منتج؟`"
+      :title="deleteMode === 'single' ? t('pages.simpleProducts.list.deleteDialog.titleSingle') : t('pages.simpleProducts.list.deleteDialog.titleBulk')"
+      :message="deleteMode === 'single' ? t('pages.simpleProducts.list.deleteDialog.messageSingle', { name: itemToDelete?.name }) : t('pages.simpleProducts.list.deleteDialog.messageBulk', { count: selectedRows.length })"
       @confirm="confirmDelete" />
 
     <!-- Status Change Confirmation Dialog -->

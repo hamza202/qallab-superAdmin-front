@@ -184,7 +184,7 @@ const fetchTaxes = async (append = false) => {
     previousCursor.value = response.pagination.prev_cursor;
   } catch (err: any) {
     console.error('Error fetching taxes:', err);
-    toast.error(err?.response?.data?.message || 'Failed to fetch taxes');
+    toast.error(err?.response?.data?.message || t('common.messages.general.loadDataFailed'));
   } finally {
     loading.value = false;
     loadingMore.value = false;
@@ -237,7 +237,7 @@ const updateHeadersOnServer = async () => {
     await api.post('/headers', formData);
   } catch (err: any) {
     console.error('Error updating headers:', err);
-    toast.error(err?.response?.data?.message || 'Failed to update headers');
+    toast.error(err?.response?.data?.message || t('common.messages.general.saveError'));
   } finally {
     updatingHeaders.value = false;
   }
@@ -256,11 +256,11 @@ const handleEditTax = (item: any) => {
 const handleDeleteTax = async (item: any) => {
   try {
     await api.delete(`/taxes/${item.id}`);
-    toast.success('تم حذف الضريبة بنجاح');
+    toast.success(t('common.messages.general.deleteSuccess'));
     await fetchTaxes();
   } catch (err: any) {
     console.error('Error deleting tax:', err);
-    toast.error(err?.response?.data?.message || 'Failed to delete tax');
+    toast.error(err?.response?.data?.message || t('common.messages.general.deleteError'));
   }
 };
 
@@ -279,7 +279,7 @@ const confirmStatusChange = async () => {
 
     await api.patch(`/taxes/${itemToChangeStatus.value.id}/change-status`, { status: newStatus });
 
-    toast.success(`تم ${newStatus ? 'تفعيل' : 'تعطيل'} الضريبة بنجاح`);
+    toast.success(t(`common.messages.general.${newStatus ? 'activateSuccess' : 'deactivateSuccess'}`));
 
     // Update local state
     const index = tableItems.value.findIndex(t => t.id === itemToChangeStatus.value!.id);
@@ -288,7 +288,7 @@ const confirmStatusChange = async () => {
     }
   } catch (err: any) {
     console.error('Error changing status:', err);
-    toast.error(err?.response?.data?.message || 'Failed to change status');
+    toast.error(err?.response?.data?.message || t('common.messages.general.changeStatusError'));
   } finally {
     statusChangeLoading.value = false;
     showStatusChangeDialog.value = false;
@@ -307,12 +307,12 @@ const confirmBulkDelete = async () => {
   try {
     deleteLoading.value = true;
     await api.post('/taxes/bulk-delete', { ids: selectedTaxes.value });
-    toast.success(`تم حذف ${selectedTaxes.value.length} ضريبة بنجاح`);
+    toast.success(t('common.messages.general.bulkDeleteSuccess', { count: selectedTaxes.value.length }));
     selectedTaxes.value = [];
     await fetchTaxes();
   } catch (err: any) {
     console.error('Error deleting taxes:', err);
-    toast.error(err?.response?.data?.message || 'Failed to delete taxes');
+    toast.error(err?.response?.data?.message || t('common.messages.general.deleteError'));
   } finally {
     deleteLoading.value = false;
     showDeleteDialog.value = false;
@@ -407,7 +407,7 @@ const exportIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" 
         class="flex justify-end items-stretch rounded border border-gray-300 w-fit ms-auto mb-4 overflow-hidden bg-white text-sm">
         <ButtonWithIcon variant="flat" height="40" rounded="0"
           custom-class="font-semibold text-base border-gray-300 bg-primary-50 !text-primary-900"
-          :prepend-icon="exportIcon" :label="t('common.export')" />
+          :prepend-icon="exportIcon" :label="t('common.actions.export')" />
       </div>
 
       <div class="bg-gray-50 rounded-md -mx-6">
@@ -419,11 +419,11 @@ const exportIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" 
             class="flex flex-wrap items-stretch rounded overflow-hidden border border-gray-200 bg-white text-sm">
             <ButtonWithIcon variant="flat" height="40" rounded="0"
               custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-              :prepend-icon="trash_1_icon" color="white" :label="t('common.delete')" @click="handleBulkDelete" />
+              :prepend-icon="trash_1_icon" color="white" :label="t('common.table.deleteSelected')" @click="handleBulkDelete" />
             <div class="w-px bg-gray-200"></div>
             <ButtonWithIcon variant="flat" height="40" rounded="0"
               custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-              :prepend-icon="trash_2_icon" color="white" :label="t('common.deleteAll')" @click="handleBulkDelete" />
+              :prepend-icon="trash_2_icon" color="white" :label="t('common.actions.delete')" @click="handleBulkDelete" />
           </div>
 
           <!-- Main header controls -->
@@ -433,7 +433,7 @@ const exportIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" 
               <template v-slot:activator="{ props }">
                 <ButtonWithIcon v-bind="props" variant="outlined" rounded="4" color="gray-500" height="40"
                   custom-class="font-semibold text-base border-gray-400" :prepend-icon="columnIcon"
-                  :label="t('common.columns')" append-icon="mdi-chevron-down" />
+                  :label="t('common.table.columns')" append-icon="mdi-chevron-down" />
               </template>
               <v-list>
                 <v-list-item v-for="header in allHeaders" :key="header.key" @click="toggleHeader(header.key)">
@@ -449,12 +449,12 @@ const exportIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" 
             <!-- Advanced Filters Toggle -->
             <ButtonWithIcon variant="flat" color="primary-500" height="40" rounded="4"
               custom-class="px-7 font-semibold text-base text-white border !border-primary-200"
-              :prepend-icon="searchIcon" :label="t('common.advancedSearch')" @click="toggleAdvancedFilters" />
+              :prepend-icon="searchIcon" :label="t('common.table.advancedSearch')" @click="toggleAdvancedFilters" />
 
             <!-- Add New Button -->
             <ButtonWithIcon v-if="canCreate" variant="flat" color="primary-100" height="40" rounded="4"
               custom-class="px-7 font-semibold text-base !text-primary-800 border !border-primary-200"
-              :prepend-icon="plusIcon" :label="t('common.addNew')" @click="openCreateTax" />
+              :prepend-icon="plusIcon" :label="t('common.form.addNew')" @click="openCreateTax" />
           </div>
         </div>
 
@@ -474,11 +474,11 @@ const exportIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" 
             <div class="flex gap-2 items-center">
               <ButtonWithIcon variant="flat" color="primary-500" rounded="4" height="40"
                 custom-class="px-5 font-semibold !text-white text-sm sm:text-base" :prepend-icon="searchIcon"
-                label="بحث" @click="applyFilters" />
+                :label="t('common.actions.search')" @click="applyFilters" />
 
               <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4" border="sm"
                 custom-class="px-5 font-semibold text-sm sm:text-base !text-primary-800 !border-primary-200"
-                prepend-icon="mdi-refresh" label="إعادة تعيين" @click="resetFilters" />
+                prepend-icon="mdi-refresh" :label="t('common.actions.reset')" @click="resetFilters" />
             </div>
           </div>
         </div>
@@ -503,8 +503,8 @@ const exportIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" 
     </div>
 
     <!-- Bulk Delete Confirmation Dialog -->
-    <DeleteConfirmDialog v-model="showDeleteDialog" :loading="deleteLoading" title="حذف الضرائب"
-      :message="`هل أنت متأكد من حذف ${selectedTaxes.length} ضريبة؟`" @confirm="confirmBulkDelete" />
+    <DeleteConfirmDialog v-model="showDeleteDialog" :loading="deleteLoading" :title="$t('pages.taxes.list.deleteDialog.title')"
+      :message="$t('pages.taxes.list.deleteDialog.message', { count: selectedTaxes.length })" @confirm="confirmBulkDelete" />
 
     <!-- Status Change Confirmation Dialog -->
     <StatusChangeDialog v-model="showStatusChangeDialog" :loading="statusChangeLoading"

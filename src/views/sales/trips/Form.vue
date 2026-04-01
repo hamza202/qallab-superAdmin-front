@@ -1,13 +1,17 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from "vue";
+import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { useApi } from '@/composables/useApi';
 import { useNotification } from '@/composables/useNotification';
 import { useForm } from '@/composables/useForm';
 import TopHeader from '@/components/price-offers/TopHeader.vue';
+import AppFormBreadcrumb from '@/components/common/AppFormBreadcrumb.vue';
 import AddProductDialog from '@/components/price-offers/AddProductDialog.vue';
+import EditProductsDialog from '@/components/price-offers/EditProductsDialog.vue';
 import Map from '@/components/common/Map.vue';
-import AddTripDetailsDialog, { TripLogisticsDetail } from '@/components/trips/AddTripDetailsDialog.vue';
+import AddTripDetailsDialog, { type TripLogisticsDetail } from '@/components/trips/AddTripDetailsDialog.vue';
+import EditTripDetailsDialog from '@/components/trips/EditTripDetailsDialog.vue';
 import { returnIcon, saveIcon, fileCheckIcon, fileIcon } from '@/components/icons/globalIcons';
 import { mapMarkerIcon, packageIcon, downloadIcon, messagePlusIcon, busIcon } from '@/components/icons/priceOffersIcons';
 
@@ -26,6 +30,7 @@ interface ProductTableItem {
   isAdded?: boolean; // For dialog state
 }
 
+const { t } = useI18n();
 const api = useApi();
 const route = useRoute();
 const router = useRouter();
@@ -59,6 +64,13 @@ const loadingCustomerSaleOrders = ref(false);
 const tripCategory = ref<string | null>(null); // Category from API response for edit mode
 const hasCustomerDataFromApi = ref(false); // Track if customer data came from API in edit mode
 
+const productDialogQueryParams = computed(() => {
+  if (isEditMode.value) {
+    return tripCategory.value === 'logistics' ? undefined : { material_type: 1 };
+  }
+  return routeFrom.value === 'logistics' ? undefined : { material_type: 1 };
+});
+
 const formData = ref({
   so_pickup_id: null as number | null,
   sale_order_id: null as number | null,
@@ -87,14 +99,18 @@ const formData = ref({
 const unitItems = ref<any[]>([]);
 const transportTypeItems = ref<any[]>([]);
 const productTableItems = ref<ProductTableItem[]>([]);
+const originalProductIds = ref<Record<number, number>>({});
 const showAddProductDialog = ref(false);
+const showEditProductsDialog = ref(false);
 const editingProduct = ref<any>(null);
 
 const customerTripDetails = ref<TripLogisticsDetail[]>([]);
 const logisticCompanyTripDetails = ref<TripLogisticsDetail[]>([]);
 const availableTripDetails = ref<TripLogisticsDetail[]>([]);
-const showCustomerDetailsDialog = ref(false);
-const showLogisticCompanyDetailsDialog = ref(false);
+const showEditCustomerDetailsDialog = ref(false);
+const showEditLogisticDetailsDialog = ref(false);
+const showCustomerRowDetailsDialog = ref(false);
+const showLogisticRowDetailsDialog = ref(false);
 const editingTripDetail = ref<TripLogisticsDetail | null>(null);
 
 const showMapDialog = ref(false);
@@ -247,6 +263,142 @@ const getTransportTypeName = (typeValue: string | number | null): string => {
   return found ? found.title : '';
 };
 
+const vehicleTypesFromTransportField = (transportType: unknown): { transport_type: number; transport_no: number | null }[] => {
+  if (transportType == null) return [];
+  if (Array.isArray(transportType)) {
+    return transportType
+      .map((t: any) => {
+        const n = parseInt(String(t), 10);
+        return Number.isNaN(n) ? null : { transport_type: n, transport_no: null as number | null };
+      })
+      .filter((x): x is { transport_type: number; transport_no: number | null } => x != null);
+  }
+  const n = parseInt(String(transportType), 10);
+  return Number.isNaN(n) ? [] : [{ transport_type: n, transport_no: null }];
+};
+
+/** ملء المنتجات وجداول تفاصيل الرحلة من استجابة طلبية النقل (so_trip_details أو items + so_logistics_product_details) */
+const populateTripFormFromLogisticsOrderData = (data: any): boolean => {
+  if (!data) return false;
+
+  if (data.so_trip_details && Array.isArray(data.so_trip_details) && data.so_trip_details.length > 0) {
+    const availableDetails: TripLogisticsDetail[] = [];
+    const productItems: ProductTableItem[] = [];
+
+    data.so_trip_details.forEach((item: any) => {
+      const vehicleTypes = vehicleTypesFromTransportField(item.transport_type);
+
+      availableDetails.push({
+        item_id: item.item_id,
+        item_name: item.item_name || '',
+        unit_id: item.unit_id,
+        unit_name: item.unit_name || '',
+        quantity: item.quantity || null,
+        transport_type: [],
+        vehicle_type_no: vehicleTypes,
+        price: null
+      });
+
+      const existingIndex = productItems.findIndex(p => p.item_id === item.item_id);
+      if (existingIndex === -1) {
+        const firstT = vehicleTypes.length > 0 ? vehicleTypes[0].transport_type : null;
+        productItems.push({
+          item_id: item.item_id,
+          item_name: item.item_name || '',
+          unit_id: item.unit_id,
+          unit_name: item.unit_name || '',
+          quantity: item.quantity || null,
+          transport_type: firstT,
+          transport_no: null,
+          transport_type_name: getTransportTypeName(firstT),
+          notes: '',
+          isAdded: true
+        });
+      }
+    });
+
+    availableTripDetails.value = JSON.parse(JSON.stringify(availableDetails));
+    customerTripDetails.value = JSON.parse(JSON.stringify(availableDetails));
+
+    const logistcDetails = JSON.parse(JSON.stringify(availableDetails));
+    logistcDetails.forEach((ld: any) => { ld.price = null; });
+    logisticCompanyTripDetails.value = logistcDetails;
+
+    productTableItems.value = productItems;
+    return true;
+  }
+
+  if (data.items && Array.isArray(data.items) && data.items.length > 0) {
+    const logisticsList = data.so_logistics_product_details ?? data.logistics_product_details;
+    const logisticsByItemId: Record<number, any> = {};
+    if (Array.isArray(logisticsList)) {
+      logisticsList.forEach((log: any) => {
+        const iid = Number(log.item_id);
+        if (!Number.isNaN(iid) && logisticsByItemId[iid] === undefined) {
+          logisticsByItemId[iid] = log;
+        }
+      });
+    }
+
+    const availableDetails: TripLogisticsDetail[] = [];
+    const productItems: ProductTableItem[] = [];
+
+    data.items.forEach((item: any) => {
+      const itemId = Number(item.item_id);
+      const log = logisticsByItemId[itemId];
+      const vehicleTypes =
+        log != null
+          ? vehicleTypesFromTransportField(log.transport_type)
+          : vehicleTypesFromTransportField(item.transport_type);
+
+      availableDetails.push({
+        item_id: itemId,
+        item_name: item.item_name || '',
+        unit_id: item.unit_id,
+        unit_name: item.unit_name || '',
+        quantity: item.quantity ?? null,
+        transport_type: [],
+        vehicle_type_no: vehicleTypes,
+        price: null
+      });
+
+      const firstT =
+        vehicleTypes.length > 0
+          ? vehicleTypes[0].transport_type
+          : (item.transport_type != null
+            ? (Array.isArray(item.transport_type)
+              ? parseInt(String(item.transport_type[0]), 10)
+              : parseInt(String(item.transport_type), 10))
+            : null);
+
+      productItems.push({
+        item_id: itemId,
+        item_name: item.item_name || '',
+        unit_id: item.unit_id,
+        unit_name: item.unit_name || '',
+        quantity: item.quantity ?? null,
+        transport_type: Number.isNaN(firstT as number) ? null : firstT,
+        transport_no: null,
+        transport_type_name: getTransportTypeName(Number.isNaN(firstT as number) ? null : firstT),
+        notes: '',
+        isAdded: true
+      });
+    });
+
+    availableTripDetails.value = JSON.parse(JSON.stringify(availableDetails));
+    customerTripDetails.value = JSON.parse(JSON.stringify(availableDetails));
+
+    const logistcDetails = JSON.parse(JSON.stringify(availableDetails));
+    logistcDetails.forEach((ld: any) => { ld.price = null; });
+    logisticCompanyTripDetails.value = logistcDetails;
+
+    productTableItems.value = productItems;
+    return true;
+  }
+
+  return false;
+};
+
 // Fetch logistics orders list for material-product flow
 const fetchSoLogisticsList = async () => {
   if (!isFromMaterialProduct.value || !formData.value.supplier_logistic_id) return;
@@ -313,69 +465,20 @@ const fetchSoLogisticDetails = async () => {
         supplier_id: formData.value.supplier_logistic_id,
         category: 'logistics',
         with_so_trip_details: true,
+        with_so_logistics_product_details: true,
         code: selectedItem.code
       }
     });
     
     const data = Array.isArray(res.data) && res.data.length > 0 ? res.data[0] : null;
     if (!data) return;
-    
-    // Process so_trip_details
-    if (data.so_trip_details && Array.isArray(data.so_trip_details)) {
-      const availableDetails: TripLogisticsDetail[] = [];
-      const productItems: ProductTableItem[] = [];
 
-      data.so_trip_details.forEach((item: any) => {
-        const vehicleTypes = Array.isArray(item.transport_type) 
-          ? item.transport_type.map((t: any) => ({ transport_type: parseInt(t), transport_no: null }))
-          : (item.transport_type != null ? [{ transport_type: parseInt(item.transport_type), transport_no: null }] : []);
-          
-        availableDetails.push({
-          id: item.item_id,
-          item_id: item.item_id,
-          item_name: item.item_name || '',
-          unit_id: item.unit_id,
-          unit_name: item.unit_name || '',
-          quantity: item.quantity || null,
-          transport_type: [],
-          vehicle_type_no: vehicleTypes,
-          price: null
-        });
-
-        // Check if item already exists in productItems
-        const existingIndex = productItems.findIndex(p => p.item_id === item.item_id);
-        if (existingIndex === -1) {
-          productItems.push({
-            item_id: item.item_id,
-            item_name: item.item_name || '',
-            unit_id: item.unit_id,
-            unit_name: item.unit_name || '',
-            quantity: item.quantity || null,
-            transport_type: Array.isArray(item.transport_type) && item.transport_type.length > 0 
-              ? parseInt(item.transport_type[0]) 
-              : (item.transport_type != null ? parseInt(item.transport_type) : null),
-            transport_no: null,
-            transport_type_name: Array.isArray(item.transport_type) && item.transport_type.length > 0 
-              ? getTransportTypeName(parseInt(item.transport_type[0])) 
-              : (item.transport_type != null ? getTransportTypeName(parseInt(item.transport_type)) : ''),
-            notes: '',
-            isAdded: true
-          });
-        }
-      });
-
-      availableTripDetails.value = JSON.parse(JSON.stringify(availableDetails));
-      customerTripDetails.value = JSON.parse(JSON.stringify(availableDetails));
-      
-      const logistcDetails = JSON.parse(JSON.stringify(availableDetails));
-      logistcDetails.forEach((ld: any) => ld.price = null);
-      logisticCompanyTripDetails.value = logistcDetails;
-      
-      productTableItems.value = productItems;
+    if (populateTripFormFromLogisticsOrderData(data)) {
+      syncProductsToTripDetails();
     }
   } catch (err: any) {
     console.error('Error fetching logistics order details:', err);
-    error(err?.response?.data?.message || 'فشل تحميل تفاصيل طلبية النقل');
+    error(err?.response?.data?.message || t('sales.forms.common.messages.loadLogisticsOrderFailed'));
   } finally {
     isLoading.value = false;
   }
@@ -395,45 +498,20 @@ const fetchSoLogisticDetailsForEdit = async () => {
         supplier_id: formData.value.supplier_logistic_id,
         category: 'logistics',
         with_so_trip_details: true,
+        with_so_logistics_product_details: true,
         code: selectedItem.code
       }
     });
     
     const data = Array.isArray(res.data) && res.data.length > 0 ? res.data[0] : null;
     if (!data) return;
-    
-    // Process so_trip_details - update trip details tables
-    if (data.so_trip_details && Array.isArray(data.so_trip_details)) {
-      const availableDetails: TripLogisticsDetail[] = [];
 
-      data.so_trip_details.forEach((item: any) => {
-        const vehicleTypes = Array.isArray(item.transport_type) 
-          ? item.transport_type.map((t: any) => ({ transport_type: parseInt(t), transport_no: null }))
-          : (item.transport_type != null ? [{ transport_type: parseInt(item.transport_type), transport_no: null }] : []);
-          
-        availableDetails.push({
-          id: item.item_id,
-          item_id: item.item_id,
-          item_name: item.item_name || '',
-          unit_id: item.unit_id,
-          unit_name: item.unit_name || '',
-          quantity: item.quantity || null,
-          transport_type: [],
-          vehicle_type_no: vehicleTypes,
-          price: null
-        });
-      });
-
-      availableTripDetails.value = JSON.parse(JSON.stringify(availableDetails));
-      customerTripDetails.value = JSON.parse(JSON.stringify(availableDetails));
-      
-      const logistcDetails = JSON.parse(JSON.stringify(availableDetails));
-      logistcDetails.forEach((ld: any) => ld.price = null);
-      logisticCompanyTripDetails.value = logistcDetails;
+    if (populateTripFormFromLogisticsOrderData(data)) {
+      syncProductsToTripDetails();
     }
   } catch (err: any) {
     console.error('Error fetching logistics order details for edit:', err);
-    error(err?.response?.data?.message || 'فشل تحميل تفاصيل طلبية النقل');
+    error(err?.response?.data?.message || t('sales.forms.common.messages.loadLogisticsOrderFailed'));
   } finally {
     isLoading.value = false;
   }
@@ -467,10 +545,11 @@ const fetchSoPickupData = async () => {
         notes: '',
         isAdded: true
       }));
+      syncProductsToTripDetails();
     }
   } catch (err: any) {
     console.error('Error fetching SO pickup data:', err);
-    error(err?.response?.data?.message || 'فشل تحميل بيانات طلب الاستلام');
+    error(err?.response?.data?.message || t('sales.forms.common.messages.loadReceivingFailed'));
   } finally {
     isLoading.value = false;
   }
@@ -531,7 +610,6 @@ const fetchSaleOrderData = async () => {
             : (item.transport_type != null ? [{ transport_type: parseInt(item.transport_type), transport_no: null }] : []);
             
           availableDetails.push({
-            id: item.item_id,
             item_id: item.item_id,
             item_name: item.item_name || '',
             unit_id: item.unit_id,
@@ -573,7 +651,14 @@ const fetchSaleOrderData = async () => {
         logisticCompanyTripDetails.value = logistcDetails;
       }
 
-      productTableItems.value = productItems;
+      if (productItems.length > 0) {
+        productTableItems.value = productItems;
+      } else if (!populateTripFormFromLogisticsOrderData(data)) {
+        productTableItems.value = [];
+      }
+      if (productTableItems.value.length > 0) {
+        syncProductsToTripDetails();
+      }
     } else {
       // Handle building materials order response
       formData.value.source_location = data.source_location || "";
@@ -599,22 +684,13 @@ const fetchSaleOrderData = async () => {
         }));
         
         // Populate available details too
-        availableTripDetails.value = data.items.map((item: any) => ({
-            id: item.item_id,
-            item_id: item.item_id,
-            item_name: item.item_name || '',
-            unit_id: item.unit_id,
-            unit_name: item.unit_name || '',
-            quantity: item.quantity || null,
-            transport_type: [],
-            vehicle_type_no: [],
-            price: null
-        }));
+        syncProductsToTripDetails();
+        availableTripDetails.value = JSON.parse(JSON.stringify(customerTripDetails.value));
       }
     }
   } catch (err: any) {
     console.error('Error fetching sale order data:', err);
-    error(err?.response?.data?.message || 'فشل تحميل بيانات الطلبية');
+    error(err?.response?.data?.message || t('sales.forms.common.messages.loadOrderDataFailed'));
   } finally {
     isLoading.value = false;
   }
@@ -667,8 +743,6 @@ const normalizePoDateTime = (value: string): string => {
 
 const fetchFormData = async () => {
   if (!isEditMode.value || !routeId.value) return;
-  console.log('ttt');
-
   isLoading.value = true;
   try {
     const raw = await api.get<any>(`/sales/trips/${routeId.value}`);
@@ -704,19 +778,25 @@ const fetchFormData = async () => {
 
     // Populate products (items)
     if (data.items && Array.isArray(data.items)) {
-      productTableItems.value = data.items.map((item: any) => ({
-        id: item.id,
-        item_id: item.item_id,
-        item_name: item.item_name || '',
-        unit_id: item.unit_id,
-        unit_name: item.unit_name || '',
-        quantity: item.quantity,
-        transport_type: item.transport_type,
-        transport_no: item.transport_no,
-        transport_type_name: getTransportTypeName(item.transport_type),
-        notes: item.notes || '',
-        isAdded: true
-      }));
+      productTableItems.value = data.items.map((item: any) => {
+        const itemId = Number(item.item_id);
+        if (item.id && itemId) {
+          originalProductIds.value[itemId] = item.id;
+        }
+        return {
+          id: item.id,
+          item_id: itemId,
+          item_name: item.item_name || '',
+          unit_id: item.unit_id,
+          unit_name: item.unit_name || '',
+          quantity: item.quantity,
+          transport_type: item.transport_type,
+          transport_no: item.transport_no,
+          transport_type_name: getTransportTypeName(item.transport_type),
+          notes: item.notes || '',
+          isAdded: true
+        };
+      });
     }
 
     // Populate customer trip logistics details
@@ -764,6 +844,10 @@ const fetchFormData = async () => {
         isAdded: true
       }));
     }
+
+    if (productTableItems.value.length > 0) {
+      syncProductsToTripDetails();
+    }
     
     // Populate edit mode: always fetch logistics orders list when supplier_logistic_id exists (from API or any change)
     if (formData.value.supplier_logistic_id) {
@@ -787,7 +871,7 @@ const fetchFormData = async () => {
     }
   } catch (err: any) {
     console.error('Error fetching trip data:', err);
-    error(err?.response?.data?.message || 'فشل تحميل بيانات الرحلة');
+    error(err?.response?.data?.message || t('sales.forms.common.messages.loadTripFailed'));
     isFormDataLoaded.value = true;
   } finally {
     isLoading.value = false;
@@ -801,7 +885,7 @@ const handleSubmit = async (option: SubmitOption) => {
   if (!(await validate())) return;
 
   if (productTableItems.value.length === 0) {
-    warning('يجب إضافة منتج واحد على الأقل');
+    warning(t('sales.forms.common.validation.atLeastOneProduct'));
     return;
   }
 
@@ -810,29 +894,29 @@ const handleSubmit = async (option: SubmitOption) => {
 
   // Validate required fields
   if (!formData.value.supplier_logistic_id) {
-    formErrors.value['supplier_logistic_id'] = ['الحقل supplier logistic id مطلوب.'];
+    formErrors.value['supplier_logistic_id'] = [t('sales.forms.common.validation.supplierLogisticIdError')];
   }
   if (!formData.value.target_location) {
-    formErrors.value['target_location'] = ['الحقل موقع التسليم مطلوب.'];
+    formErrors.value['target_location'] = [t('sales.forms.common.validation.deliveryLocationRequired')];
   }
   if (!formData.value.target_latitude) {
-    formErrors.value['target_latitude'] = ['الحقل خط عرض موقع التسليم مطلوب.'];
+    formErrors.value['target_latitude'] = [t('sales.forms.common.validation.deliveryLatRequired')];
   }
   if (!formData.value.target_longitude) {
-    formErrors.value['target_longitude'] = ['الحقل خط طول موقع التسليم مطلوب.'];
+    formErrors.value['target_longitude'] = [t('sales.forms.common.validation.deliveryLngRequired')];
   }
   if (!formData.value.source_location) {
-    formErrors.value['source_location'] = ['الحقل موقع الانطلاق مطلوب.'];
+    formErrors.value['source_location'] = [t('sales.forms.common.validation.sourceLocationRequiredShort')];
   }
   if (!formData.value.source_latitude) {
-    formErrors.value['source_latitude'] = ['الحقل خط عرض موقع الانطلاق مطلوب.'];
+    formErrors.value['source_latitude'] = [t('sales.forms.common.validation.sourceLatRequired')];
   }
   if (!formData.value.source_longitude) {
-    formErrors.value['source_longitude'] = ['الحقل خط طول موقع الانطلاق مطلوب.'];
+    formErrors.value['source_longitude'] = [t('sales.forms.common.validation.sourceLngRequired')];
   }
 
   if (Object.keys(formErrors.value).length > 0) {
-    error('يرجى ملء جميع الحقول المطلوبة');
+    error(t('sales.forms.common.validation.fillAllRequired'));
     return;
   }
 
@@ -850,7 +934,7 @@ const handleSubmit = async (option: SubmitOption) => {
         notes: item.notes
       })),
       customer_trip_logistics_details: customerTripDetails.value.map(item => ({
-        id: isEditMode.value ? item.id : null,
+        ...(isEditMode.value && item.id != null ? { id: item.id } : {}),
         item_id: item.item_id,
         unit_id: item.unit_id,
         quantity: item.quantity,
@@ -858,7 +942,7 @@ const handleSubmit = async (option: SubmitOption) => {
         vehicle_type_no: item.vehicle_type_no
       })),
       logistic_company_trip_logistics_details: logisticCompanyTripDetails.value.map(item => ({
-        id: isEditMode.value ? item.id : null,
+        ...(isEditMode.value && item.id != null ? { id: item.id } : {}),
         item_id: item.item_id,
         unit_id: item.unit_id,
         quantity: item.quantity,
@@ -887,10 +971,10 @@ const handleSubmit = async (option: SubmitOption) => {
 
     if (isEditMode.value) {
       await api.put(`/sales/trips/${routeId.value}`, payload);
-      success('تم تحديث الرحلة بنجاح');
+      success(t('sales.forms.common.messages.tripUpdated'));
     } else {
       await api.post(`/sales/trips`, payload);
-      success('تم إنشاء الرحلة بنجاح');
+      success(t('sales.forms.common.messages.tripCreated'));
     }
 
     if (option === 'trips_list') {
@@ -959,24 +1043,60 @@ const addProduct = () => {
   showAddProductDialog.value = true;
 };
 
-const headers = [
-  { title: 'اسم المنتج', key: 'name' },
-  { title: 'الكمية', key: 'quantity' },
-  { title: 'الوحدة', key: 'unit' },
-  { title: 'ملاحظات', key: 'notes' },
-];
+const headers = computed(() => [
+  { title: t('common.form.productName'), key: 'name' },
+  { title: t('sales.forms.common.labels.quantity'), key: 'quantity' },
+  { title: t('common.form.unit'), key: 'unit' },
+  { title: t('sales.forms.common.labels.notes'), key: 'notes' },
+]);
+
+const syncProductsToTripDetails = () => {
+  const syncToDetails = (
+    existingDetails: TripLogisticsDetail[],
+    products: ProductTableItem[]
+  ): TripLogisticsDetail[] => {
+    return products.map(product => {
+      const existing = existingDetails.find(d => d.item_id === product.item_id);
+      if (existing) {
+        return {
+          ...existing,
+          item_name: product.item_name,
+          unit_id: product.unit_id,
+          unit_name: product.unit_name || getUnitName(product.unit_id),
+          quantity: product.quantity,
+        };
+      }
+      return {
+        item_id: product.item_id,
+        item_name: product.item_name,
+        unit_id: product.unit_id,
+        unit_name: product.unit_name || getUnitName(product.unit_id),
+        quantity: product.quantity,
+        transport_type: [],
+        vehicle_type_no: [],
+        price: null,
+      };
+    });
+  };
+
+  customerTripDetails.value = syncToDetails(customerTripDetails.value, productTableItems.value);
+  logisticCompanyTripDetails.value = syncToDetails(logisticCompanyTripDetails.value, productTableItems.value);
+};
 
 const handleProductSaved = (products: any[]) => {
   const newItems: ProductTableItem[] = products.map(p => {
-    const existing = productTableItems.value.find(existing => existing.item_id === p.item_id);
+    const existing = productTableItems.value.find(e => e.item_id === p.item_id);
+    const restoredId = existing?.id ?? originalProductIds.value[p.item_id] ?? p.id;
     return {
       ...p,
+      id: restoredId,
       transport_type: p.transport_type ?? null,
       transport_type_name: getTransportTypeName(p.transport_type ?? null),
       notes: existing?.notes || p.notes || ''
     } as ProductTableItem;
   });
   productTableItems.value = newItems;
+  syncProductsToTripDetails();
 };
 
 const tableItems = computed(() => productTableItems.value.map(item => ({
@@ -1010,40 +1130,26 @@ const handleProductUpdated = (updatedProduct: any) => {
     } as ProductTableItem;
   }
   editingProduct.value = null;
+  syncProductsToTripDetails();
 };
 
-const tripDetailsHeaders = [
-  { title: "اسم المنتج", key: "item_name" },
-  { title: "الكمية", key: "quantity" },
-  { title: "الوحدة", key: "unit_name" },
-  { title: "المركبات", key: "vehicle_type_no" },
-  { title: "السعر", key: "price" }
-];
-
-// Customer Trip Details Handlers
-const addCustomerTripDetail = () => {
-  editingTripDetail.value = null;
-  showCustomerDetailsDialog.value = true;
-};
-
-const handleCustomerTripDetailSaved = (products: TripLogisticsDetail[]) => {
-  const newItems = products.map(p => ({
-    ...p,
-    id: p.id ?? p.item_id,
-    unit_name: getUnitName(p.unit_id)
-  }));
-  customerTripDetails.value = newItems;
-};
+const tripDetailsHeaders = computed(() => [
+  { title: t('sales.forms.tables.tripProducts.itemName'), key: "item_name" },
+  { title: t('sales.forms.common.labels.quantity'), key: "quantity" },
+  { title: t('common.form.unit'), key: "unit_name" },
+  { title: t('sales.forms.common.labels.itemVehicles'), key: "vehicle_type_no" },
+  { title: t('sales.forms.common.labels.itemPrice'), key: "price" },
+]);
 
 const handleEditCustomerTripDetail = (item: any) => {
   const toEdit = customerTripDetails.value.find(p => p.item_id === item.item_id);
   if (toEdit) {
     editingTripDetail.value = { ...toEdit, isAdded: true };
-    showCustomerDetailsDialog.value = true;
+    showCustomerRowDetailsDialog.value = true;
   }
 };
 
-const handleCustomerTripDetailUpdated = (updatedProduct: TripLogisticsDetail) => {
+const handleCustomerTripDetailRowUpdated = (updatedProduct: TripLogisticsDetail) => {
   const index = customerTripDetails.value.findIndex(p => p.item_id === updatedProduct.item_id);
   if (index !== -1) {
     customerTripDetails.value[index] = { ...updatedProduct };
@@ -1051,37 +1157,15 @@ const handleCustomerTripDetailUpdated = (updatedProduct: TripLogisticsDetail) =>
   editingTripDetail.value = null;
 };
 
-const handleDeleteCustomerTripDetail = (item: any) => {
-  const index = customerTripDetails.value.findIndex(p => p.item_id === item.item_id);
-  if (index !== -1) {
-    customerTripDetails.value.splice(index, 1);
-  }
-};
-
-// Logistic Company Trip Details Handlers
-const addLogisticTripDetail = () => {
-  editingTripDetail.value = null;
-  showLogisticCompanyDetailsDialog.value = true;
-};
-
-const handleLogisticTripDetailSaved = (products: TripLogisticsDetail[]) => {
-  const newItems = products.map(p => ({
-    ...p,
-    id: p.id ?? p.item_id,
-    unit_name: getUnitName(p.unit_id)
-  }));
-  logisticCompanyTripDetails.value = newItems;
-};
-
 const handleEditLogisticTripDetail = (item: any) => {
   const toEdit = logisticCompanyTripDetails.value.find(p => p.item_id === item.item_id);
   if (toEdit) {
     editingTripDetail.value = { ...toEdit, isAdded: true };
-    showLogisticCompanyDetailsDialog.value = true;
+    showLogisticRowDetailsDialog.value = true;
   }
 };
 
-const handleLogisticTripDetailUpdated = (updatedProduct: TripLogisticsDetail) => {
+const handleLogisticTripDetailRowUpdated = (updatedProduct: TripLogisticsDetail) => {
   const index = logisticCompanyTripDetails.value.findIndex(p => p.item_id === updatedProduct.item_id);
   if (index !== -1) {
     logisticCompanyTripDetails.value[index] = { ...updatedProduct };
@@ -1089,11 +1173,33 @@ const handleLogisticTripDetailUpdated = (updatedProduct: TripLogisticsDetail) =>
   editingTripDetail.value = null;
 };
 
-const handleDeleteLogisticTripDetail = (item: any) => {
-  const index = logisticCompanyTripDetails.value.findIndex(p => p.item_id === item.item_id);
-  if (index !== -1) {
-    logisticCompanyTripDetails.value.splice(index, 1);
-  }
+const handleCustomerDetailsUpdated = (details: TripLogisticsDetail[]) => {
+  customerTripDetails.value = details;
+};
+
+const handleLogisticDetailsUpdated = (details: TripLogisticsDetail[]) => {
+  logisticCompanyTripDetails.value = details;
+};
+
+const handleEditProductsBulk = (updatedProducts: any[]) => {
+  productTableItems.value = updatedProducts.map((updated: any) => {
+    const existing = productTableItems.value.find(p => p.item_id === updated.item_id);
+    return {
+      item_id: updated.item_id,
+      item_name: updated.item_name,
+      unit_id: updated.unit_id,
+      unit_name: updated.unit_name,
+      quantity: updated.quantity,
+      transport_type: updated.transport_type ?? existing?.transport_type ?? null,
+      transport_no: updated.transport_no ?? existing?.transport_no ?? null,
+      transport_type_name: getTransportTypeName(updated.transport_type ?? existing?.transport_type ?? null),
+      notes: existing?.notes ?? updated.notes ?? '',
+      id: existing?.id ?? updated.id,
+      isAdded: true,
+    } as ProductTableItem;
+  });
+  showEditProductsDialog.value = false;
+  syncProductsToTripDetails();
 };
 
 const handleDeleteProduct = (item: any) => {
@@ -1101,6 +1207,7 @@ const handleDeleteProduct = (item: any) => {
   if (index !== -1) {
     productTableItems.value.splice(index, 1);
   }
+  syncProductsToTripDetails();
 };
 
 // Watch for supplier_logistic_id: fetch logistics list when it exists or changes (edit load handled in fetchFormData)
@@ -1165,23 +1272,34 @@ onMounted(async () => {
   <default-layout>
     <div class="trips-form-page -mx-6 bg-qallab-dashboard-bg space-y-4"
       :class="{ 'opacity-60 pointer-events-none': isLoading }">
+      <AppFormBreadcrumb
+        list-path="/sales/trips/list"
+        module-root-key="breadcrumb.sales.root"
+        list-label-key="breadcrumb.sales.trips.list"
+        create-label-key="breadcrumb.sales.trips.create"
+        edit-label-key="breadcrumb.sales.trips.edit"
+        :is-edit-mode="isEditMode"
+        :code="tripCode"
+      />
       <!-- Page Header -->
       <TopHeader :icon="fileCheckIcon" title-key="pages.SalesTrips.create"
-        description-key="pages.SalesTrips.createDescription" :show-action="false" code-label="كود الرحلة"
+        description-key="pages.SalesTrips.createDescription" :show-action="false"
+        :code-label="t('sales.forms.common.labels.tripCode')"
         :code="tripCode" :code-icon="fileIcon" />
 
       <!-- Basic Information -->
       <div class="bg-white rounded-3xl border !border-gray-100">
         <div class="flex items-center gap-2 text-primary-900 px-6 pt-6 text-lg font-bold">
-          <h2>معلومات الرحلة</h2>
+          <h2>{{ t('sales.forms.common.sections.tripInfo') }}</h2>
           <span v-if="tripCode" class="dir-ltr">#{{ tripCode }}</span>
         </div>
 
         <v-form ref="formRef" v-model="isFormValid" @submit.prevent>
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-6">
             <div>
-              <selectInput :items="[]" v-model="formData.supplier_logistic_id" label="شركة النقل"
-                density="comfortable" placeholder="اختر" :hide-details="false" :rules="[required()]"
+              <selectInput :items="[]" v-model="formData.supplier_logistic_id"
+                :label="t('sales.forms.common.labels.logisticsCompany')"
+                density="comfortable" :placeholder="t('common.form.choose')" :hide-details="false" :rules="[required()]"
                 :error-messages="formErrors['supplier_logistic_id']"
                 @update:model-value="delete formErrors['supplier_logistic_id']"
                 :server-side="true" :fetch-function="fetchSuppliers"
@@ -1192,9 +1310,9 @@ onMounted(async () => {
               <selectInput 
                 :items="soLogisticItems" 
                 v-model="selectedSoLogisticId" 
-                label="طلبية مبيعات خدمة النقل"
+                :label="t('sales.forms.common.labels.logisticsSalesOrder')"
                 density="comfortable" 
-                placeholder="اختر طلبية النقل" 
+                :placeholder="t('sales.forms.common.labels.selectLogisticsOrder')" 
                 :hide-details="false"
                 :disabled="!formData.supplier_logistic_id"
                 :loading="loadingSoLogistics"
@@ -1206,9 +1324,9 @@ onMounted(async () => {
               <selectInput 
                 :items="[]" 
                 v-model="selectedCustomerId" 
-                label="العميل"
+                :label="t('sales.forms.common.labels.customer')"
                 density="comfortable" 
-                placeholder="اختر العميل" 
+                :placeholder="t('sales.forms.common.placeholders.selectClient')" 
                 item-title="title"
                 item-value="value"
                 :disabled="hasCustomerDataFromApi"
@@ -1225,9 +1343,9 @@ onMounted(async () => {
               <selectInput 
                 :items="customerSaleOrderItems" 
                 v-model="selectedCustomerSaleOrderId" 
-                label="طلبية مبيعات العميل"
+                :label="t('sales.forms.common.labels.customerSalesOrder')"
                 density="comfortable" 
-                placeholder="اختر طلبية العميل" 
+                :placeholder="t('sales.forms.common.labels.selectCustomerOrder')" 
                 :hide-details="false"
                 :disabled="!selectedCustomerId || hasCustomerDataFromApi"
                 :loading="loadingCustomerSaleOrders"
@@ -1235,13 +1353,13 @@ onMounted(async () => {
             </div>
 
             <div class="relative">
-              <label class="text-sm font-medium text-gray-700 mb-2 block">موقع التحميل</label>
+              <label class="text-sm font-medium text-gray-700 mb-2 block">{{ t('sales.forms.common.labels.tripLoadingLocation') }}</label>
               <div
                 @click="openMapDialog('source'); delete formErrors['source_location']; delete formErrors['source_latitude']; delete formErrors['source_longitude']"
                 class="flex items-center justify-between px-4 py-2 min-h-[48px] border rounded-lg cursor-pointer hover:bg-blue-100 transition-colors"
                 :class="formErrors['source_location'] || formErrors['source_latitude'] || formErrors['source_longitude'] ? '!border-red-500' : '!border-blue-400'">
                 <span class="text-base font-medium text-blue-900 whitespace-nowrap overflow-hidden text-ellipsis ">
-                  {{ formData.source_location || 'حدد الموقع' }}
+                  {{ formData.source_location || t('sales.forms.common.misc.pickLocation') }}
                 </span>
                 <div class="flex items-center gap-2">
                   <span v-html="mapMarkerIcon"></span>
@@ -1255,21 +1373,23 @@ onMounted(async () => {
               </div>
             </div>
             <div>
-              <DateTimePickerInput v-model="formData.planned_arrival_downloading" label="تاريخ / وقت التحميل"
-                density="comfortable" placeholder="2024-03-01 / 02:30 PM" />
+              <DateTimePickerInput v-model="formData.planned_arrival_downloading"
+                :label="t('sales.forms.common.labels.loadingDateTime')"
+                density="comfortable" :placeholder="t('sales.forms.common.placeholders.dateTimeSample')" />
             </div>
             <div>
-              <TextInput v-model="formData.downloading_responsible_party" label="مسؤول التحميل" density="comfortable"
-                placeholder="أدخل اسم مسؤول التحميل" />
+              <TextInput v-model="formData.downloading_responsible_party"
+                :label="t('sales.forms.common.labels.loadingOfficer')" density="comfortable"
+                :placeholder="t('sales.forms.common.placeholders.enterLoadingResponsible')" />
             </div>
             <div class="relative">
-              <label class="text-sm font-medium text-gray-700 mb-2 block">موقع التنزيل</label>
+              <label class="text-sm font-medium text-gray-700 mb-2 block">{{ t('sales.forms.common.labels.tripUnloadingLocation') }}</label>
               <div
                 @click="openMapDialog('target'); delete formErrors['target_location']; delete formErrors['target_latitude']; delete formErrors['target_longitude']"
                 class="flex items-center justify-between px-4 py-2 min-h-[48px] border rounded-lg cursor-pointer hover:bg-blue-100 transition-colors"
                 :class="formErrors['target_location'] || formErrors['target_latitude'] || formErrors['target_longitude'] ? '!border-red-500' : '!border-blue-400'">
                 <span class="text-base font-medium text-blue-900 whitespace-nowrap overflow-hidden text-ellipsis ">
-                  {{ formData.target_location || 'حدد الموقع' }}
+                  {{ formData.target_location || t('sales.forms.common.misc.pickLocation') }}
                 </span>
                 <div class="flex items-center gap-2">
                   <span v-html="mapMarkerIcon"></span>
@@ -1283,35 +1403,42 @@ onMounted(async () => {
               </div>
             </div>
             <div>
-              <DateTimePickerInput v-model="formData.planned_arrival_loading" label="تاريخ / وقت التنزيل"
-                density="comfortable" placeholder="2024-03-01 / 02:30 PM" />
+              <DateTimePickerInput v-model="formData.planned_arrival_loading"
+                :label="t('sales.forms.common.labels.unloadingDateTime')"
+                density="comfortable" :placeholder="t('sales.forms.common.placeholders.dateTimeSample')" />
             </div>
             <div>
-              <TextInput v-model="formData.loading_responsible_party" label="مسؤول التنزيل" density="comfortable"
-                placeholder="أدخل اسم مسؤول التنزيل" />
+              <TextInput v-model="formData.loading_responsible_party"
+                :label="t('sales.forms.common.labels.unloadingOfficerTrip')" density="comfortable"
+                :placeholder="t('sales.forms.common.placeholders.enterUnloadingResponsibleTrip')" />
             </div>
             <div>
-              <PriceInput v-model="formData.tracking_no_point" label="عدد مرات إرسال الإحداثيات" density="comfortable"
-                placeholder="أدخل عدد مرات إرسال الإحداثيات" />
+              <PriceInput v-model="formData.tracking_no_point"
+                :label="t('sales.forms.common.labels.coordSendCount')" density="comfortable"
+                :placeholder="t('sales.forms.common.placeholders.enterCoordinatesCount')" />
             </div>
             <div>
-              <PriceInput v-model="formData.bill_of_lading" label="رقم بوليصة الشحن" density="comfortable"
-                placeholder="أدخل رقم بوليصة الشحن" />
+              <PriceInput v-model="formData.bill_of_lading"
+                :label="t('sales.forms.common.labels.billOfLading')" density="comfortable"
+                :placeholder="t('sales.forms.common.placeholders.enterBillOfLading')" />
             </div>
             <div>
-              <PriceInput v-model="formData.total_quantity_ton" label="الكمية الكلية / طن" density="comfortable"
-                placeholder="أدخل الكمية بالطن" />
+              <PriceInput v-model="formData.total_quantity_ton"
+                :label="t('sales.forms.common.labels.totalQtyTon')" density="comfortable"
+                :placeholder="t('sales.forms.common.placeholders.enterQtyTon')" />
             </div>
             <div>
-              <PriceInput v-model="formData.total_quantity_m3" label="الكمية الكلية / م^3" density="comfortable"
-                placeholder="أدخل الكمية بالمتر المكعب" />
+              <PriceInput v-model="formData.total_quantity_m3"
+                :label="t('sales.forms.common.labels.totalQtyM3')" density="comfortable"
+                :placeholder="t('sales.forms.common.placeholders.enterQtyM3')" />
             </div>
             <div v-show="false">
-              <PriceInput v-model="formData.total_quantities" label="عدد الرحلات" density="comfortable"
-                placeholder="أدخل عدد الرحلات" />
+              <PriceInput v-model="formData.total_quantities"
+                :label="t('sales.forms.common.labels.tripsCount')" density="comfortable"
+                :placeholder="t('sales.forms.common.placeholders.enterTripCount')" />
             </div>
             <div>
-              <label class="block text-sm font-semibold text-gray-900 mb-2">توقيت الرحلة</label>
+              <label class="block text-sm font-semibold text-gray-900 mb-2">{{ t('sales.forms.common.labels.tripTiming') }}</label>
               <v-radio-group v-model="formData.am_pm_interval" inline hide-details>
                 <v-radio :value="item.value" color="primary" v-for="item in amPmIntervalItems" :key="item.value">
                   <template #label>
@@ -1321,26 +1448,23 @@ onMounted(async () => {
                     </span>
                   </template>
                 </v-radio>
-                <!-- <v-radio :value="false" color="primary">
-                  <template #label>
-                    <span :class="!formData.trip_time ? 'text-primary font-semibold' : 'text-gray-600'">
-                      مساءً
-                    </span>
-                  </template>
-                </v-radio> -->
+                <!-- legacy evening-only radio removed -->
               </v-radio-group>
             </div>
             <div>
-              <PriceInput v-model="formData.customer_total_trip_value" show-rial-icon label="مبلغ الرحلة للعميل" density="comfortable"
-                placeholder="أدخل مبلغ الرحلة" />
+              <PriceInput v-model="formData.customer_total_trip_value" show-rial-icon
+                :label="t('sales.forms.common.labels.customerTripAmount')" density="comfortable"
+                :placeholder="t('sales.forms.common.placeholders.enterTripAmount')" />
             </div>
             <div>
-              <PriceInput v-model="formData.logistic_company_total_trip_value" show-rial-icon label="مبلغ الرحلة لشركة النقل" density="comfortable"
-                placeholder="أدخل مبلغ الرحلة" />
+              <PriceInput v-model="formData.logistic_company_total_trip_value" show-rial-icon
+                :label="t('sales.forms.common.labels.logisticsTripAmount')" density="comfortable"
+                :placeholder="t('sales.forms.common.placeholders.enterTripAmount')" />
             </div>
             <div class="md:col-span-2">
-              <TextareaInput v-model="formData.notes" label="الملاحظات" density="comfortable"
-                placeholder="ادخل الملاحظات هنا" />
+              <TextareaInput v-model="formData.notes"
+                :label="t('sales.forms.common.labels.notes')" density="comfortable"
+                :placeholder="t('sales.forms.common.placeholders.notesHere')" />
             </div>
           </div>
         </v-form>
@@ -1349,11 +1473,11 @@ onMounted(async () => {
         <div class="flex flex-wrap gap-3 items-center justify-between bg-primary-50 px-6 py-3">
           <div class="flex items-center text-primary-900 gap-2">
             <span v-html="packageIcon"></span>
-            <h2 class="text-xl font-bold">المنتجات</h2>
+            <h2 class="text-xl font-bold">{{ t('sales.forms.common.sections.products') }}</h2>
           </div>
           <ButtonWithIcon color="primary-100" variant="flat" :prepend-icon="downloadIcon"
             class="!text-primary-900 font-bold">
-            استيراد من ملف إكسل
+            {{ t('sales.forms.common.misc.excelImportFile') }}
           </ButtonWithIcon>
         </div>
         <!-- Products Table -->
@@ -1366,7 +1490,7 @@ onMounted(async () => {
                 <template #activator="{ props }">
                   <div class="flex items-center gap-2 cursor-pointer" v-bind="props">
                     <v-icon size="20" color="primary" v-html="messagePlusIcon"></v-icon>
-                    <span class="text-gray-900">{{ item.notes || 'أضف ملاحظة' }}</span>
+                    <span class="text-gray-900">{{ item.notes || t('sales.forms.common.misc.addNote') }}</span>
                   </div>
                 </template>
 
@@ -1376,7 +1500,7 @@ onMounted(async () => {
                   <div class="!flex flex-nowrap items-center gap-3">
                     <TextInput
                       v-model="productTableItems[productTableItems.findIndex(p => p.item_id === item.item_id)].notes"
-                      placeholder="أضف ملاحظة" variant="outlined" density="comfortable" hide-details autofocus
+                      :placeholder="t('sales.forms.common.misc.addNote')" variant="outlined" density="comfortable" hide-details autofocus
                       class="flex-1" />
                     <ButtonWithIcon :icon="messagePlusIcon" color="primary" icon-only size="x-small" />
 
@@ -1387,22 +1511,31 @@ onMounted(async () => {
           </DataTable>
         </div>
 
-        <div class="flex justify-center my-6">
-          <ButtonWithIcon color="primary-100" variant="flat" class="!text-primary-900 font-bold w-75"
+        <div class="flex justify-center gap-3 my-6 md:w-3/4 mx-auto">
+          <ButtonWithIcon color="primary-100" variant="flat" class="!text-primary-900 font-bold flex-1"
             @click="addProduct">
-            + اضافة منتج جديد
+            {{ t('sales.forms.common.misc.addProductLineAlt') }}
+          </ButtonWithIcon>
+          <ButtonWithIcon
+            v-if="productTableItems.length > 0"
+            color="primary-100"
+            variant="flat"
+            class="!text-primary-900 font-bold flex-1"
+            @click="showEditProductsDialog = true"
+          >
+            {{ t('sales.forms.common.misc.editProducts') }}
           </ButtonWithIcon>
         </div>
 
         <div class="flex flex-wrap gap-3 items-center justify-between bg-primary-50 px-6 py-3 mt-4">
           <div class="flex items-center text-primary-700 gap-2">
             <span v-html="busIcon"></span>
-            <h2 class="text-lg font-bold">تفاصيل الرحلة بين قلاب والعميل</h2>
+            <h2 class="text-lg font-bold">{{ t('sales.forms.common.sections.tripDetailsTipperCustomer') }}</h2>
           </div>
         </div>
         <div class="mb-4">
-          <DataTable :headers="tripDetailsHeaders" :items="customerTripDetails" show-actions force-show-edit force-show-delete
-            @edit="handleEditCustomerTripDetail" @delete="handleDeleteCustomerTripDetail">
+          <DataTable :headers="tripDetailsHeaders" :items="customerTripDetails" show-actions force-show-edit
+            @edit="handleEditCustomerTripDetail">
             <template #item.vehicle_type_no="{ item }">
               <div class="flex gap-2 my-2">
                 <div v-for="(vehicle, index) in item.vehicle_type_no" :key="index" class="w-[180px]">
@@ -1429,10 +1562,11 @@ onMounted(async () => {
             </template>
           </DataTable>
         </div>
-        <div class="flex my-6 justify-center">
-          <ButtonWithIcon color="primary-100" variant="flat" class="!text-primary-900 font-bold w-75"
-            @click="addCustomerTripDetail">
-            + اضافة تفاصيل رحلة للعميل
+        <div class="flex my-6 justify-center md:w-3/4 mx-auto">
+          <ButtonWithIcon color="primary-100" variant="flat" class="!text-primary-900 font-bold flex-1"
+            @click="showEditCustomerDetailsDialog = true"
+            :disabled="customerTripDetails.length === 0">
+            {{ t('sales.forms.tripsForm.editDetailsCustomer') }}
           </ButtonWithIcon>
         </div>
 
@@ -1440,12 +1574,12 @@ onMounted(async () => {
         <div class="flex flex-wrap gap-3 items-center justify-between bg-primary-50 px-6 py-3 mt-4">
           <div class="flex items-center text-primary-600 gap-2">
             <span v-html="busIcon"></span>
-            <h2 class="text-lg font-bold">تفاصيل الرحلة بين قلاب وشركة النقل</h2>
+            <h2 class="text-lg font-bold">{{ t('sales.forms.common.sections.tripDetailsTipperLogistics') }}</h2>
           </div>  
         </div>
         <div class="mb-4">
-          <DataTable :headers="tripDetailsHeaders" :items="logisticCompanyTripDetails" show-actions force-show-edit force-show-delete
-            @edit="handleEditLogisticTripDetail" @delete="handleDeleteLogisticTripDetail">
+          <DataTable :headers="tripDetailsHeaders" :items="logisticCompanyTripDetails" show-actions force-show-edit
+            @edit="handleEditLogisticTripDetail">
             <template #item.vehicle_type_no="{ item }">
               <div class="flex gap-2 my-2 items-center">
                 <div v-for="(vehicle, index) in item.vehicle_type_no" :key="index" class="w-[180px]">
@@ -1472,10 +1606,11 @@ onMounted(async () => {
             </template>
           </DataTable>
         </div>
-        <div class="flex justify-center my-6">
-          <ButtonWithIcon color="primary-100" variant="flat" class="!text-primary-900 font-bold w-75"
-            @click="addLogisticTripDetail">
-            + اضافة تفاصيل رحلة لشركة النقل
+        <div class="flex justify-center my-6 md:w-3/4 mx-auto">
+          <ButtonWithIcon color="primary-100" variant="flat" class="!text-primary-900 font-bold flex-1"
+            @click="showEditLogisticDetailsDialog = true"
+            :disabled="logisticCompanyTripDetails.length === 0">
+            {{ t('sales.forms.tripsForm.editDetailsLogistics') }}
           </ButtonWithIcon>
         </div>
 
@@ -1485,35 +1620,80 @@ onMounted(async () => {
       <div class="mt-3 flex items-center justify-center gap-3 flex-wrap">
         <ButtonWithIcon variant="flat" color="primary" height="48" rounded="4"
           custom-class="font-semibold text-base px-6 md:!px-10" :prepend-icon="returnIcon"
-          label="حفظ والعودة الى قائمة الحجوزات" :loading="isSubmitting" :disabled="isSubmitting"
+          :label="t('sales.forms.common.actions.saveBackPickupsList')" :loading="isSubmitting" :disabled="isSubmitting"
           @click="handleSubmit('pickup_list')" />
         <ButtonWithIcon variant="flat" color="primary-50" height="48" rounded="4"
           custom-class="font-semibold text-base text-primary-700 px-6 md:!px-10" :prepend-icon="returnIcon"
-          label="حفظ والعودة لجدول الرحلات" :loading="isSubmitting" :disabled="isSubmitting"
+          :label="t('sales.forms.common.actions.saveBackTripsTable')" :loading="isSubmitting" :disabled="isSubmitting"
           @click="handleSubmit('trips_list')" />
         <ButtonWithIcon variant="flat" color="primary-50" height="48" rounded="4"
           custom-class="font-semibold text-base text-primary-700 px-6 md:!px-10" :prepend-icon="saveIcon"
-          label="حفظ وانشاء جديد" :loading="isSubmitting" :disabled="isSubmitting"
+          :label="t('sales.forms.common.actions.saveCreateNew')" :loading="isSubmitting" :disabled="isSubmitting"
           @click="handleSubmit('create_new')" />
       </div>
     </div>
 
     <!-- Add Product Dialog -->
-    <AddProductDialog v-model="showAddProductDialog" request-type="trips" :transport-types="transportTypeItems"
-      :unit-items="unitItems" :edit-product="editingProduct" :existing-products="productTableItems"
-      @saved="handleProductSaved" @product-updated="handleProductUpdated" />
+    <AddProductDialog
+      v-model="showAddProductDialog"
+      request-type="trips"
+      :items-query-params="productDialogQueryParams"
+      :transport-types="transportTypeItems"
+      :unit-items="unitItems"
+      :edit-product="editingProduct"
+      :existing-products="productTableItems"
+      @saved="handleProductSaved"
+      @product-updated="handleProductUpdated"
+    />
 
-    <!-- Customer Trip Details Dialog -->
-    <AddTripDetailsDialog v-model="showCustomerDetailsDialog" :transport-types="transportTypeItems"
-      :unit-items="unitItems" :edit-item="editingTripDetail" :available-items="availableTripDetails"
+    <!-- Edit Products Dialog -->
+    <EditProductsDialog
+      v-model="showEditProductsDialog"
+      :products="productTableItems"
+      :unit-items="unitItems"
+      request-type="transfer_service"
+      @products-updated="handleEditProductsBulk"
+    />
+
+    <AddTripDetailsDialog
+      v-model="showCustomerRowDetailsDialog"
+      :transport-types="transportTypeItems"
+      :unit-items="unitItems"
+      :edit-item="editingTripDetail"
+      :available-items="availableTripDetails.length ? availableTripDetails : customerTripDetails"
       :existing-items="customerTripDetails"
-      @saved="handleCustomerTripDetailSaved" @product-updated="handleCustomerTripDetailUpdated" />
+      @product-updated="handleCustomerTripDetailRowUpdated"
+    />
 
-    <!-- Logistic Company Trip Details Dialog -->
-    <AddTripDetailsDialog v-model="showLogisticCompanyDetailsDialog" :transport-types="transportTypeItems"
-      :unit-items="unitItems" :edit-item="editingTripDetail" :available-items="availableTripDetails"
+    <AddTripDetailsDialog
+      v-model="showLogisticRowDetailsDialog"
+      :transport-types="transportTypeItems"
+      :unit-items="unitItems"
+      :edit-item="editingTripDetail"
+      :available-items="availableTripDetails.length ? availableTripDetails : logisticCompanyTripDetails"
       :existing-items="logisticCompanyTripDetails"
-      @saved="handleLogisticTripDetailSaved" @product-updated="handleLogisticTripDetailUpdated" />
+      @product-updated="handleLogisticTripDetailRowUpdated"
+    />
+
+    <!-- Customer Trip Details Edit Dialog -->
+    <EditTripDetailsDialog
+      v-model="showEditCustomerDetailsDialog"
+      :trip-details="customerTripDetails"
+      :transport-types="transportTypeItems"
+      :unit-items="unitItems"
+      :title="t('sales.forms.tripsForm.editDetailsCustomer')"
+      @details-updated="handleCustomerDetailsUpdated"
+    />
+
+    <!-- Logistic Company Trip Details Edit Dialog -->
+    <EditTripDetailsDialog
+      v-model="showEditLogisticDetailsDialog"
+      :trip-details="logisticCompanyTripDetails"
+      :transport-types="transportTypeItems"
+      :unit-items="unitItems"
+      :title="t('sales.forms.tripsForm.editDetailsLogistics')"
+      @details-updated="handleLogisticDetailsUpdated"
+    />
 
     <Map v-model="showMapDialog"
       :latitude="String(currentMapType === 'target' ? (formData.target_latitude || '') : (formData.source_latitude || ''))"

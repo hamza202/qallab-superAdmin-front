@@ -96,8 +96,8 @@ const deleteMode = ref<'single' | 'bulk'>('single')
 const showAdvancedFilters = ref(false)
 const filterStatus = ref<string | null>(null)
 const statusOptions = [
-  { title: 'فعال', value: 'فعال' },
-  { title: 'غير فعال', value: 'غير فعال' }
+  { title: t('common.status.active'), value: 'active' },
+  { title: t('common.status.inactive'), value: 'inactive' }
 ]
 const filterCreatedAt = ref('')
 const filterName = ref('')
@@ -136,10 +136,10 @@ const plusIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xm
 
 // Default headers (fallback)
 const defaultTableHeaders: TableHeader[] = [
-  { key: 'name', title: 'الاسم', width: '180px' },
-  { key: 'supplier', title: 'المورد', width: '150px' },
-  { key: 'created_at', title: 'تاريخ الانشاء', width: '160px' },
-  { key: 'is_active', title: 'الحالة', width: '100px' },
+  { key: 'name', title: t('common.form.name'), width: '180px' },
+  { key: 'supplier', title: t('pages.productionCapacityLists.list.columns.supplier'), width: '150px' },
+  { key: 'created_at', title: t('common.form.createdAt'), width: '160px' },
+  { key: 'is_active', title: t('common.form.status'), width: '100px' },
 ]
 
 // === Computed ===
@@ -170,7 +170,7 @@ const fetchData = async (cursor?: string | null, append = false) => {
     if (filterCreatedAt.value) params.append('created_at', filterCreatedAt.value)
     if (filterName.value) params.append('name', filterName.value)
     if (filterStatus.value) {
-      params.append('status', filterStatus.value === 'فعال' ? '1' : '0')
+      params.append('status', filterStatus.value === 'active' ? '1' : '0')
     }
 
     const response = await api.get<ApiResponse>(`/production-capacities?${params}`)
@@ -197,8 +197,8 @@ const fetchData = async (cursor?: string | null, append = false) => {
 
     nextCursor.value = response.pagination.next_cursor
   } catch (err: any) {
-    errorMessage.value = err?.response?.data?.message || 'حدث خطأ أثناء جلب البيانات'
-    showError(errorMessage.value || 'حدث خطأ')
+    errorMessage.value = err?.response?.data?.message || t('pages.productionCapacityLists.list.messages.fetchError')
+    showError(errorMessage.value || t('pages.productionCapacityLists.list.messages.generalError'))
     console.error('Error fetching production capacities:', err)
   } finally {
     isLoading.value = false
@@ -244,7 +244,11 @@ const confirmStatusChange = async () => {
     const newStatus = !itemToChangeStatus.value.is_active
 
     await api.patch(`/production-capacities/${itemToChangeStatus.value.id}/change-status`, { is_active: newStatus })
-    toast.success(`تم ${newStatus ? 'تفعيل' : 'تعطيل'} القدرة الإنتاجية بنجاح`)
+    toast.success(
+      t('pages.productionCapacityLists.list.messages.statusChangeSuccess', {
+        status: newStatus ? t('common.actions.activate') : t('common.actions.deactivate'),
+      })
+    )
 
     // Update local state     
     const index = tableItems.value.findIndex(t => t.id === itemToChangeStatus.value!.id)
@@ -252,7 +256,7 @@ const confirmStatusChange = async () => {
       tableItems.value[index].is_active = newStatus
     }
   } catch (err: any) {
-    showError(err?.response?.data?.message || 'حدث خطأ أثناء تغيير الحالة')
+    showError(err?.response?.data?.message || t('pages.productionCapacityLists.list.messages.statusChangeError'))
     console.error('Error changing status:', err)
   } finally {
     statusChangeLoading.value = false
@@ -327,11 +331,11 @@ onBeforeUnmount(() => {
         class="flex justify-end items-stretch rounded border border-gray-300 w-fit ms-auto mb-4 overflow-hidden bg-white text-sm">
         <ButtonWithIcon variant="flat" height="40" rounded="0"
           custom-class="font-semibold text-base border-gray-300 bg-primary-100 !text-primary-900"
-          :prepend-icon="importIcon" :label="t('common.import')" />
+          :prepend-icon="importIcon" :label="t('common.actions.import')" />
 
         <ButtonWithIcon variant="flat" height="40" rounded="0"
           custom-class="font-semibold text-base border-gray-300 bg-primary-50 !text-primary-900"
-          :prepend-icon="exportIcon" :label="t('common.export')" />
+          :prepend-icon="exportIcon" :label="t('common.actions.export')" />
       </div>
 
       <div class="bg-gray-50 rounded-md -mx-6">
@@ -343,7 +347,7 @@ onBeforeUnmount(() => {
               <template v-slot:activator="{ props }">
                 <ButtonWithIcon v-bind="props" variant="outlined" rounded="4" color="gray-500" height="40"
                   custom-class="font-semibold text-base border-gray-400" :prepend-icon="columnIcon"
-                  :label="t('common.columns')" append-icon="mdi-chevron-down" />
+                  :label="t('common.table.columns')" append-icon="mdi-chevron-down" />
               </template>
               <v-list>
                 <v-list-item v-for="header in allHeaders" :key="header.key" @click="toggleHeader(header.key)">
@@ -358,7 +362,7 @@ onBeforeUnmount(() => {
 
             <ButtonWithIcon variant="flat" color="primary-500" height="40" rounded="4"
               custom-class="px-7 font-semibold text-base text-white border !border-primary-200"
-              :prepend-icon="searchIcon" :label="t('common.advancedSearch')" @click="toggleAdvancedFilters" />
+              :prepend-icon="searchIcon" :label="t('common.table.advancedSearch')" @click="toggleAdvancedFilters" />
 
             <!-- <v-btn variant="flat" color="primary-100" height="40" rounded="4"
               class="px-7 font-semibold text-base !text-primary-800 border !border-primary-200" @click="openCreate">
@@ -376,19 +380,19 @@ onBeforeUnmount(() => {
           class="border-y border-y-primary-100 bg-primary-50 px-4 sm:px-6 py-3 flex flex-col gap-3 sm:gap-2">
           <div class="flex flex-wrap lg:!flex-nowrap gap-3 flex-1 order-1 sm:order-2 justify-end sm:justify-start">
             <v-select v-model="filterStatus" :items="statusOptions" item-title="title" item-value="value"
-              density="comfortable" variant="outlined" hide-details :placeholder="t('common.status')"
+              density="comfortable" variant="outlined" hide-details :placeholder="t('common.form.status')"
               class="w-full sm:w-40 bg-white" clearable />
             <DatePickerInput v-model="filterCreatedAt" density="comfortable" hide-details
-              :placeholder="t('common.createdAt')" class="w-full sm:w-40 bg-white" />
+              :placeholder="t('common.form.createdAt')" class="w-full sm:w-40 bg-white" />
             <v-text-field v-model="filterName" density="comfortable" variant="outlined" hide-details
-              :placeholder="t('common.name')" class="w-full sm:w-40 bg-white" />
+              :placeholder="t('common.form.name')" class="w-full sm:w-40 bg-white" />
             <div class="flex gap-2 items-center">
               <ButtonWithIcon variant="flat" color="primary-500" rounded="4" height="40"
                 custom-class="px-5 font-semibold !text-white text-sm sm:text-base" :prepend-icon="searchIcon"
-                label="ابحث الآن" @click="handleSearch" />
+                :label="t('common.table.searchNow')" @click="handleSearch" />
               <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4" border="sm"
                 custom-class="px-5 font-semibold text-sm sm:text-base !text-primary-800 !border-primary-200"
-                prepend-icon="mdi-refresh" label="إعادة تعيين" @click="resetFilters" />
+                prepend-icon="mdi-refresh" :label="t('common.actions.reset')" @click="resetFilters" />
             </div>
           </div>
         </div>
@@ -400,6 +404,7 @@ onBeforeUnmount(() => {
 
         <!-- Production Capacity Table -->
         <DataTable :headers="tableHeaders" :items="tableItems" :loading="isLoading" :show-checkbox="canBulkDelete" show-actions @edit="handleEdit" @delete="confirmDelete" @select="handleSelect" @selectAll="handleSelectAll">
+          <!-- eslint-disable-next-line vue/valid-v-slot -->
           <template #item.is_active="{ item }">
             <v-switch :model-value="item.is_active" hide-details inset density="compact" color="primary"
               class="small-switch" @update:model-value="() => handleStatusChange(item)"
@@ -414,7 +419,7 @@ onBeforeUnmount(() => {
         <!-- Loading more indicator -->
         <div v-if="loadingMore" class="flex justify-center items-center py-4">
           <v-progress-circular indeterminate color="primary" size="32" />
-          <span class="mr-2 text-gray-600">جاري تحميل المزيد...</span>
+          <span class="ms-2 text-gray-600">{{ t('pages.productionCapacityLists.list.messages.loadingMore') }}</span>
         </div>
       </div>
     </div>

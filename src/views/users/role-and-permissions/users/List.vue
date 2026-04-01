@@ -10,11 +10,11 @@
                     </router-link>
                     <span class="text-lg text-gray-300">/</span>
                     <router-link to="/users/list" class="text-gray-600 hover:text-primary-600">
-                        المستخدمين
+                        {{ t('pages.users.title') }}
                     </router-link>
                     <span class="text-lg text-gray-300">/</span>
                     <router-link to="/users/list" class="text-gray-600 hover:text-primary-600">
-                        المستخدمين والأدوار
+                        {{ t('pages.users.list.pageTitle') }}
                     </router-link>
                     <!-- <span class="text-lg text-gray-300">/</span> -->
                     <!-- <span class="text-primary-700 font-medium bg-primary-50 px-2 py-1 rounded-md">dd</span> -->
@@ -27,8 +27,8 @@
                             <span v-html="usersIcon_2" class="text-primary-600"></span>
                         </div>
                         <div>
-                            <h1 class="text-lg font-semibold text-gray-900 mb-1">المستخدمين والأدوار</h1>
-                            <p class="text-sm text-gray-600">تمكنك من عرض وتعديل المستخدمين وادوارهم</p>
+                            <h1 class="text-lg font-semibold text-gray-900 mb-1">{{ t('pages.users.list.pageTitle') }}</h1>
+                            <p class="text-sm text-gray-600">{{ t('pages.users.list.pageDescription') }}</p>
                         </div>
                     </div>
                 </div>
@@ -37,10 +37,10 @@
                 <div
                     class="flex lg:items-center lg:justify-between py-4 border-b border-gray-200 flex-col lg:flex-row gap-3 px-6">
                     <div class="flex gap-2 overflow-y-auto">
-                        <ButtonWithIcon to="/users/list" variant="flat" size="large" label="المستخدمين" color="primary-500"
+                        <ButtonWithIcon to="/users/list" variant="flat" size="large" :label="t('pages.users.list.tabs.users')" color="primary-500"
                             :rounded="'md'" :prepend-icon="usersIcon_1" custom-class="text-white">
                         </ButtonWithIcon>
-                        <ButtonWithIcon to="/roles/list" variant="flat" size="large" label="الأدوار" color="white"
+                        <ButtonWithIcon to="/roles/list" variant="flat" size="large" :label="t('pages.users.list.tabs.roles')" color="white"
                             :rounded="'md'" :prepend-icon="checksIcon" custom-class="!text-gray-400">
                         </ButtonWithIcon>
                     </div>
@@ -54,18 +54,18 @@
                                 <!-- Right Side: Donut Chart -->
                                 <div class="md:col-span-2">
                                     <div class="d-flex flex-column bg-gray-50 rounded-3xl h-100 p-5">
-                                        <h3 class="text-lg font-bold text-gray-900 mb-4">المستخدمين الفعّالين :
+                                        <h3 class="text-lg font-bold text-gray-900 mb-4">{{ t('pages.users.list.activeUsers') }}
                                         </h3>
                                         <v-divider length="250" class="mb-5"></v-divider>
                                         <div class="position-relative mb-4 d-flex justify-center flex-1 flex-wrap gap-3">
                                             <div class="space-y-3">
                                                 <div class="d-flex align-center gap-2">
                                                     <div class="rounded-circle w-[8px] h-[8px] bg-primary-600"></div>
-                                                    <span class="text-gray-600 text-sm">فعال</span>
+                                                    <span class="text-gray-600 text-sm">{{ t('common.status.active') }}</span>
                                                 </div>
                                                 <div class="d-flex align-center gap-2">
                                                     <div class="rounded-circle w-[8px] h-[8px] bg-primary-100"></div>
-                                                    <span class="text-gray-600 text-sm">غير فعال</span>
+                                                    <span class="text-gray-600 text-sm">{{ t('common.status.inactive') }}</span>
                                                 </div>
                                             </div>
                                             <div class="flex-1 flex justify-center items-center flex-col gap-4">
@@ -89,7 +89,7 @@
                                 <!-- Left Side: User Roles -->
                                 <div class="md:col-span-3">
                                     <div class="bg-gray-50 !rounded-3xl p-5">
-                                        <h3 class="text-lg font-bold text-gray-900 mb-4">المستخدمين والأدوار :
+                                        <h3 class="text-lg font-bold text-gray-900 mb-4">{{ t('pages.users.list.usersAndRoles') }}
                                         </h3>
                                         <v-divider length="250" class="mb-5"></v-divider>
                                         <div class="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-20">
@@ -100,7 +100,7 @@
                                                             <span v-html="gridIcon"></span>
                                                         </v-avatar>
                                                         <span
-                                                            class="text-body-1 font-semibold text-gray-900">المنتجات</span>
+                                                            class="text-body-1 font-semibold text-gray-900">{{ t('pages.users.list.modules.products') }}</span>
                                                     </div>
                                                     <span class="text-base font-bold text-gray-900">56</span>
                                                 </div>
@@ -110,7 +110,7 @@
                                                             <span v-html="servicesIcon"></span>
                                                         </v-avatar>
                                                         <span
-                                                            class="text-body-1 font-semibold text-gray-900">الخدمات</span>
+                                                            class="text-body-1 font-semibold text-gray-900">{{ t('pages.users.list.modules.services') }}</span>
                                                     </div>
                                                     <span class="text-base font-bold text-gray-900">23</span>
                                                 </div>
@@ -120,7 +120,7 @@
                                                             <span v-html="shoppingCart"></span>
                                                         </v-avatar>
                                                         <span
-                                                            class="text-body-1 font-semibold text-gray-900">المشتريات</span>
+                                                            class="text-body-1 font-semibold text-gray-900">{{ t('pages.users.list.modules.purchases') }}</span>
                                                     </div>
                                                     <span class="text-base font-bold text-gray-900">44</span>
                                                 </div>
@@ -130,7 +130,7 @@
                                                             <span v-html="brandIcon"></span>
                                                         </v-avatar>
                                                         <span
-                                                            class="text-body-1 font-semibold text-gray-900">المالية</span>
+                                                            class="text-body-1 font-semibold text-gray-900">{{ t('pages.users.list.modules.finance') }}</span>
                                                     </div>
                                                     <span class="text-base font-bold text-gray-900">12</span>
                                                 </div>
@@ -139,8 +139,8 @@
                                                         <v-avatar color="#1570EF" size="42">
                                                             <span v-html="refreshIcon"></span>
                                                         </v-avatar>
-                                                        <span class="text-body-1 font-semibold text-gray-900">المقاصة
-                                                            والمقايضة</span>
+                                                        <span
+                                                            class="text-body-1 font-semibold text-gray-900">{{ t('pages.users.list.modules.clearing') }}</span>
                                                     </div>
                                                     <span class="text-base font-bold text-gray-900">65</span>
                                                 </div>
@@ -150,7 +150,7 @@
                                                             <span v-html="walletIcon"></span>
                                                         </v-avatar>
                                                         <span
-                                                            class="text-body-1 font-semibold text-gray-900">المالية</span>
+                                                            class="text-body-1 font-semibold text-gray-900">{{ t('pages.users.list.modules.finance') }}</span>
                                                     </div>
                                                     <span class="text-base font-bold text-gray-900">21</span>
                                                 </div>
@@ -162,7 +162,7 @@
                                                             <span v-html="calculatorIcon"></span>
                                                         </v-avatar>
                                                         <span
-                                                            class="text-body-1 font-semibold text-gray-900">المحاسبة</span>
+                                                            class="text-body-1 font-semibold text-gray-900">{{ t('pages.users.list.modules.accounting') }}</span>
                                                     </div>
                                                     <span class="text-base font-bold text-gray-900">07</span>
                                                 </div>
@@ -172,7 +172,7 @@
                                                             <span v-html="usersIcon"></span>
                                                         </v-avatar>
                                                         <span
-                                                            class="text-body-1 font-semibold text-gray-900">المستخدمين</span>
+                                                            class="text-body-1 font-semibold text-gray-900">{{ t('pages.users.list.modules.users') }}</span>
                                                     </div>
                                                     <span class="text-base font-bold text-gray-900">33</span>
                                                 </div>
@@ -181,8 +181,8 @@
                                                         <v-avatar color="#6F1877" size="42">
                                                             <span v-html="columnIcon"></span>
                                                         </v-avatar>
-                                                        <span class="text-body-1 font-semibold text-gray-900">ادارة
-                                                            المشاريع</span>
+                                                        <span
+                                                            class="text-body-1 font-semibold text-gray-900">{{ t('pages.users.list.modules.projectManagement') }}</span>
                                                     </div>
                                                     <span class="text-base font-bold text-gray-900">33</span>
                                                 </div>
@@ -192,7 +192,7 @@
                                                             <span v-html="fileIcon"></span>
                                                         </v-avatar>
                                                         <span
-                                                            class="text-body-1 font-semibold text-gray-900">التقارير</span>
+                                                            class="text-body-1 font-semibold text-gray-900">{{ t('pages.users.list.modules.reports') }}</span>
                                                     </div>
                                                     <span class="text-base font-bold text-gray-900">43</span>
                                                 </div>
@@ -202,7 +202,7 @@
                                                             <span v-html="carIcon"></span>
                                                         </v-avatar>
                                                         <span
-                                                            class="text-body-1 font-semibold text-gray-900">الناقلات</span>
+                                                            class="text-body-1 font-semibold text-gray-900">{{ t('pages.users.list.modules.carriers') }}</span>
                                                     </div>
                                                     <span class="text-base font-bold text-gray-900">66</span>
                                                 </div>
@@ -212,7 +212,7 @@
                                                             <span v-html="wallet_2_icon"></span>
                                                         </v-avatar>
                                                         <span
-                                                            class="text-body-1 font-semibold text-gray-900">التمويل</span>
+                                                            class="text-body-1 font-semibold text-gray-900">{{ t('pages.users.list.modules.funding') }}</span>
                                                     </div>
                                                     <span class="text-base font-bold text-gray-900">12</span>
                                                 </div>
@@ -231,26 +231,26 @@
                     <div class="flex flex-wrap xl:flex-row flex-col gap-3 items-center">
                         <div class="flex flex-wrap gap-3 flex-1 w-full">
                             <TextInput v-model="nameFilter" density="comfortable" variant="outlined" hide-details
-                                placeholder="اسم المستخدم" class="w-full sm:w-60 bg-white" />
+                                :placeholder="t('pages.users.filters.userName')" class="w-full sm:w-60 bg-white" />
 
                             <SelectInput v-model="rolesFilter" :items="rolesOptions" item-title="title"
                                 item-value="value" density="comfortable" variant="outlined" hide-details
-                                placeholder="الأدوار" class="w-full sm:w-60 bg-white" />
+                                :placeholder="t('pages.users.filters.roles')" class="w-full sm:w-60 bg-white" />
 
                             <SelectInput v-model="statusFilter" :items="statusOptions" item-title="title"
                                 item-value="value" density="comfortable" variant="outlined" hide-details
-                                placeholder="الحالة" class="w-full sm:w-40 bg-white" />
+                                :placeholder="t('pages.users.filters.status')" class="w-full sm:w-40 bg-white" />
                         </div>
 
                         <!-- Search Button -->
                         <div class="flex gap-2 items-center">
                             <ButtonWithIcon variant="flat" color="primary-500" rounded="4" height="40"
                                 custom-class="px-5 font-semibold !text-white text-sm sm:text-base"
-                                :prepend-icon="searchIcon" label="ابحث الأن" @click="fetchUsers" />
+                                :prepend-icon="searchIcon" :label="t('pages.users.filters.searchNow')" @click="fetchUsers" />
 
                             <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4" border="sm"
                                 custom-class="px-5 font-semibold text-sm sm:text-base !text-primary-800 !border-primary-200"
-                                prepend-icon="mdi-refresh" label="إعادة تعيين" @click="resetFilters" />
+                                prepend-icon="mdi-refresh" :label="t('pages.users.filters.reset')" @click="resetFilters" />
                         </div>
                     </div>
                 </div>
@@ -259,7 +259,7 @@
                 <div class="p-6">
                     <!-- Add User Button -->
                     <div class="flex mb-6" v-if="canCreate">
-                        <ButtonWithIcon @click="handleAddUser" variant="flat" size="large" label="اضافة مستخدم جديد" color="primary-500"
+                        <ButtonWithIcon @click="handleAddUser" variant="flat" size="large" :label="t('pages.users.list.addNewUser')" color="primary-500"
                             :rounded="'md'" :prepend-icon="plusIcon" custom-class="text-white">
                         </ButtonWithIcon>
                     </div>
@@ -279,8 +279,8 @@
                     <!-- Empty State -->
                     <div v-else class="flex flex-col items-center justify-center py-12 text-gray-500">
                         <span v-html="usersIcon_2" class="text-gray-300 mb-4"></span>
-                        <p class="text-lg font-medium">لا يوجد مستخدمين</p>
-                        <p class="text-sm">لم يتم العثور على مستخدمين مطابقين للبحث</p>
+                        <p class="text-lg font-medium">{{ t('pages.users.list.emptyState.title') }}</p>
+                        <p class="text-sm">{{ t('pages.users.list.emptyState.description') }}</p>
                     </div>
                 </div>
 
@@ -292,12 +292,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import ApexCharts from 'vue3-apexcharts'
 import UserCard from '../component/UserCard.vue'
 import { useApi } from '@/composables/useApi'
 import { useNotification } from '@/composables/useNotification'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 // Composables
 const api = useApi()
@@ -364,9 +367,9 @@ interface RolesApiResponse {
 
 const rolesOptions = ref<{ title: string; value: number }[]>([])
 
-const statusOptions = ref([
-    { title: 'نشط', value: 1 },
-    { title: 'غير نشط', value: 0 }
+const statusOptions = computed(() => [
+    { title: t('common.status.active'), value: 1 },
+    { title: t('common.status.inactive'), value: 0 }
 ])
 
 // === API Functions ===
@@ -401,7 +404,7 @@ const fetchUsers = async () => {
         canBulkDelete.value = response.actions?.can_bulk_delete ?? false
     } catch (err: any) {
         console.error('Error fetching users:', err)
-        errorNotification(err?.response?.data?.message || 'حدث خطأ أثناء جلب البيانات')
+        errorNotification(err?.response?.data?.message || t('pages.users.list.messages.fetchError'))
     } finally {
         usersLoading.value = false
     }
@@ -421,10 +424,10 @@ const handleStatusChange = async (user: User, newStatus: boolean) => {
             users.value[userIndex].is_active = newStatus
         }
         
-        success(newStatus ? 'تم تفعيل المستخدم بنجاح' : 'تم تعطيل المستخدم بنجاح')
+        success(t('pages.users.list.messages.statusChangeSuccess', { status: newStatus ? t('common.actions.activate') : t('common.actions.deactivate') }))
     } catch (err: any) {
         console.error('Error changing status:', err)
-        errorNotification(err?.response?.data?.message || 'حدث خطأ أثناء تغيير الحالة')
+        errorNotification(err?.response?.data?.message || t('pages.users.list.messages.statusChangeError'))
         // Revert the switch state by refreshing data
         await fetchUsers()
     } finally {
@@ -449,8 +452,8 @@ const resetFilters = () => {
 // Chart data
 const series = [120, 336]
 
-const chartOptions = {
-    labels: ['فعال', 'غير فعال'],
+const chartOptions = computed(() => ({
+    labels: [t('common.status.active'), t('common.status.inactive')],
     colors: ['#1570EF', '#D1E9FF'],
     legend: {
         show: false,
@@ -484,7 +487,7 @@ const chartOptions = {
     stroke: {
         width: 0,
     },
-}
+}))
 
 const productIcon = `<svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path opacity="0.12" d="M9.33337 18.6667H46.6667V37.8001C46.6667 41.7205 46.6667 43.6806 45.9038 45.178C45.2326 46.4952 44.1618 47.566 42.8446 48.2371C41.3473 49.0001 39.3871 49.0001 35.4667 49.0001H20.5334C16.613 49.0001 14.6528 49.0001 13.1554 48.2371C11.8383 47.566 10.7674 46.4952 10.0963 45.178C9.33337 43.6806 9.33337 41.7204 9.33337 37.8001V18.6667Z" fill="#1570EF"/>

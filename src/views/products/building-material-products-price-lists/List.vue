@@ -8,10 +8,10 @@
         class="flex justify-end items-stretch rounded border border-gray-300 w-fit ms-auto mb-4 overflow-hidden bg-white text-sm">
         <ButtonWithIcon variant="flat" height="40" rounded="0"
           custom-class="font-semibold text-base border-gray-300 bg-primary-100 !text-primary-900"
-          :prepend-icon="importIcon" :label="t('common.import')" />
+          :prepend-icon="importIcon" :label="t('common.actions.import')" />
         <ButtonWithIcon variant="flat" height="40" rounded="0"
           custom-class="font-semibold text-base border-gray-300 bg-primary-50 !text-primary-900"
-          :prepend-icon="exportIcon" :label="t('common.export')" />
+          :prepend-icon="exportIcon" :label="t('common.actions.export')" />
       </div>
 
       <div class="bg-gray-50 rounded-md -mx-6">
@@ -22,7 +22,7 @@
               <template v-slot:activator="{ props }">
                 <ButtonWithIcon v-bind="props" variant="outlined" rounded="4" color="gray-500" height="40"
                   custom-class="font-semibold text-base border-gray-400" :prepend-icon="columnIcon"
-                  :label="t('common.columns')" append-icon="mdi-chevron-down" />
+                  :label="t('common.table.columns')" append-icon="mdi-chevron-down" />
               </template>
               <v-list>
                 <v-list-item v-for="header in allHeaders" :key="header.key" @click="toggleHeader(header.key)">
@@ -37,7 +37,7 @@
 
             <ButtonWithIcon variant="flat" color="primary-500" height="40" rounded="4"
               custom-class="px-7 font-semibold text-base text-white border !border-primary-200"
-              :prepend-icon="searchIcon" :label="t('common.advancedSearch')" @click="toggleAdvancedFilters" />
+              :prepend-icon="searchIcon" :label="t('common.table.advancedSearch')" @click="toggleAdvancedFilters" />
           </div>
         </div>
 
@@ -46,26 +46,27 @@
           class="border-y border-y-primary-100 bg-primary-50 px-4 sm:px-6 py-3 flex flex-col gap-3 sm:gap-2">
           <div class="flex flex-wrap gap-3 flex-1">
             <SelectInput v-model="filterStatus" :items="StatusList" item-title="title" item-value="value"
-              density="comfortable" variant="outlined" hide-details placeholder="الحالة" class="flex-1 bg-white"
+              density="comfortable" variant="outlined" hide-details :placeholder="t('common.form.status')" class="flex-1 bg-white"
               @update:model-value="applyFilters" />
             <TextInput v-model="filterListName" density="comfortable" variant="outlined" hide-details
-              placeholder="اسم القائمة" class="flex-1 bg-white" @keyup.enter="applyFilters" />
-            <DatePickerInput v-model="filterCreatedAt" density="comfortable" hide-details placeholder="تاريخ الانشاء"
+              :placeholder="t('pages.ProductsBuildingMaterialPriceLists.list.filters.listName')" class="flex-1 bg-white" @keyup.enter="applyFilters" />
+            <DatePickerInput v-model="filterCreatedAt" density="comfortable" hide-details :placeholder="t('common.form.createdAt')"
               class="flex-1 bg-white" @update:model-value="applyFilters" />
             <div class="flex gap-2 items-center">
               <ButtonWithIcon variant="flat" color="primary-500" rounded="4" height="40"
                 custom-class="px-5 font-semibold !text-white text-sm sm:text-base" :prepend-icon="searchIcon"
-                label="ابحث الآن" @click="applyFilters" />
+                :label="t('common.table.searchNow')" @click="applyFilters" />
 
               <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4" border="sm"
                 custom-class="px-5 font-semibold text-sm sm:text-base !text-primary-800 !border-primary-200"
-                label="إعادة تعيين" prepend-icon="mdi-refresh" @click="resetFilters" />
+                :label="t('common.actions.reset')" prepend-icon="mdi-refresh" @click="resetFilters" />
             </div>
           </div>
         </div>
 
         <!-- Price Lists Table -->
         <DataTable :headers="tableHeaders" :items="tableItems" :loading="loading" show-actions @edit="handleEdit">
+          <!-- eslint-disable-next-line vue/valid-v-slot -->
           <template #item.is_active="{ item }">
             <v-switch :model-value="item.is_active" hide-details inset density="compact" color="primary"
               class="small-switch" @update:model-value="() => handleStatusChange(item)"
@@ -204,8 +205,8 @@ const filterStatus = ref<number | null>(null)
 
 // Status list
 const StatusList = [
-  { title: 'فعال', value: 1 },
-  { title: 'غير فعال', value: 0 }
+  { title: t('common.status.active'), value: 1 },
+  { title: t('common.status.inactive'), value: 0 }
 ]
 
 // Status change confirmation
@@ -251,7 +252,11 @@ const confirmStatusChange = async () => {
       status: newStatus
     })
 
-    toast.success(`تم ${newStatus ? 'تفعيل' : 'تعطيل'} قائمة الأسعار بنجاح`)
+    toast.success(
+      t('pages.ProductsBuildingMaterialPriceLists.list.messages.statusChangeSuccess', {
+        status: newStatus ? t('common.actions.activate') : t('common.actions.deactivate'),
+      })
+    )
 
     // Update local state
     const index = tableItems.value.findIndex(t => t.id === itemToChangeStatus.value!.id)
@@ -260,7 +265,7 @@ const confirmStatusChange = async () => {
     }
   } catch (err: any) {
     console.error('Error changing price list status:', err)
-    toast.error(err?.response?.data?.message || 'فشل تغيير حالة قائمة الأسعار')
+    toast.error(err?.response?.data?.message || t('pages.ProductsBuildingMaterialPriceLists.list.messages.statusChangeError'))
   } finally {
     statusChangeLoading.value = false
     showStatusChangeDialog.value = false
@@ -326,7 +331,7 @@ const fetchPriceLists = async (append = false) => {
     perPage.value = response.pagination.per_page
   } catch (err: any) {
     console.error('Error fetching price lists:', err)
-    toast.error(err?.response?.data?.message || 'فشل تحميل البيانات')
+    toast.error(err?.response?.data?.message || t('pages.ProductsBuildingMaterialPriceLists.list.messages.fetchError'))
   } finally {
     loading.value = false
     loadingMore.value = false
@@ -383,7 +388,7 @@ const updateHeadersOnServer = async () => {
     await api.post('/headers', formData)
   } catch (err: any) {
     console.error('Error updating headers:', err)
-    toast.error(err?.response?.data?.message || 'Failed to update headers')
+    toast.error(err?.response?.data?.message || t('pages.ProductsBuildingMaterialPriceLists.list.messages.columnsUpdateError'))
   } finally {
     updatingHeaders.value = false
   }

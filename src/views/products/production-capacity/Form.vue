@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue"
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useApi } from '@/composables/useApi'
 import { useNotification } from '@/composables/useNotification'
+
+const { t } = useI18n()
 
 interface TableItem {
   id: string | number
@@ -94,6 +97,8 @@ const canSyncItems = ref(false)
 const categories = ref<Array<{ id: number; name: string }>>([])
 const selectedCategory = ref<number | null>(null)
 
+const asRow = (item: unknown) => item as ProductionCapacityRow
+
 const productionCapacityIcon = `<svg width="52" height="52" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path fill-rule="evenodd" clip-rule="evenodd" d="M32.8485 26H36.4822C37.6244 26 38.6097 25.9999 39.4213 26.0662C40.2778 26.1362 41.1298 26.2907 41.9496 26.7085C43.1727 27.3316 44.1671 28.326 44.7902 29.5491C45.208 30.3689 45.3625 31.2209 45.4325 32.0774C45.4988 32.889 45.4987 33.8743 45.4987 35.0164V36.4836C45.4987 37.6257 45.4988 38.611 45.4325 39.4226C45.3625 40.2791 45.208 41.1311 44.7902 41.9509C44.1671 43.174 43.1727 44.1684 41.9496 44.7915C41.1298 45.2093 40.2778 45.3638 39.4213 45.4338C38.6097 45.5001 37.6243 45.5 36.4822 45.5H32.8486C31.7064 45.5 30.7211 45.5001 29.9095 45.4338C29.0529 45.3638 28.2009 45.2093 27.3811 44.7915C26.158 44.1684 25.1637 43.174 24.5405 41.9509C24.1228 41.1311 23.9683 40.2791 23.8983 39.4226C23.832 38.611 23.832 37.6257 23.832 36.4835V35.0165C23.832 33.8743 23.832 32.889 23.8983 32.0774C23.9683 31.2209 24.1228 30.3689 24.5405 29.5491C25.1637 28.326 26.158 27.3316 27.3811 26.7085C28.2009 26.2907 29.0529 26.1362 29.9095 26.0662C30.721 25.9999 31.7064 26 32.8485 26ZM30.2623 30.3852C29.6737 30.4333 29.4555 30.5149 29.3484 30.5695C28.9407 30.7772 28.6092 31.1087 28.4015 31.5164C28.3469 31.6235 28.2653 31.8417 28.2172 32.4303C28.1671 33.0442 28.1654 33.8508 28.1654 35.1V36.4C28.1654 37.6492 28.1671 38.4558 28.2172 39.0697C28.2653 39.6583 28.3469 39.8765 28.4015 39.9836C28.6092 40.3913 28.9407 40.7228 29.3484 40.9305C29.4555 40.9851 29.6737 41.0667 30.2623 41.1148C30.8762 41.165 31.6828 41.1667 32.932 41.1667H36.3987C37.6479 41.1667 38.4545 41.165 39.0684 41.1148C39.657 41.0667 39.8752 40.9851 39.9823 40.9305C40.39 40.7228 40.7215 40.3913 40.9292 39.9836C40.9838 39.8765 41.0654 39.6583 41.1135 39.0697C41.1637 38.4558 41.1654 37.6492 41.1654 36.4V35.1C41.1654 33.8508 41.1637 33.0442 41.1135 32.4303C41.0654 31.8417 40.9838 31.6235 40.9292 31.5164C40.7215 31.1087 40.39 30.7772 39.9823 30.5695C39.8752 30.5149 39.657 30.4333 39.0684 30.3852C38.4545 30.335 37.6479 30.3333 36.3987 30.3333H32.932C31.6828 30.3333 30.8762 30.335 30.2623 30.3852Z" fill="#1570EF"/>
 <path fill-rule="evenodd" clip-rule="evenodd" d="M13.9018 6.4996C13.0769 6.49895 12.3666 6.49838 11.7321 6.6246C9.15361 7.13749 7.13798 9.15312 6.62508 11.7316C6.49887 12.3661 6.49944 13.0764 6.50009 13.9013L6.50019 14.083L6.50009 14.2648C6.49944 15.0896 6.49887 15.7999 6.62508 16.4345C7.13798 19.0129 9.15361 21.0286 11.7321 21.5415C12.3666 21.6677 13.0769 21.6671 13.9018 21.6665H38.0986C38.9235 21.6671 39.6338 21.6677 40.2683 21.5415C42.8468 21.0286 44.8624 19.0129 45.3753 16.4345C45.5015 15.8 45.5009 15.0897 45.5003 14.2649L45.5002 14.083L45.5003 13.9013C45.5009 13.0765 45.5015 12.3661 45.3753 11.7316C44.8624 9.15312 42.8468 7.13749 40.2683 6.6246C39.6338 6.49838 38.9235 6.49895 38.0986 6.4996H13.9018ZM12.5775 10.8747C12.734 10.8435 12.9729 10.833 14.0835 10.833H37.9169C39.0275 10.833 39.2663 10.8435 39.4229 10.8747C40.2824 11.0456 40.9543 11.7175 41.1252 12.577C41.1564 12.7335 41.1669 12.9724 41.1669 14.083C41.1669 15.1936 41.1564 15.4325 41.1252 15.5891C40.9543 16.4486 40.2824 17.1204 39.4229 17.2914C39.2663 17.3225 39.0275 17.333 37.9169 17.333H14.0835C12.9729 17.333 12.734 17.3225 12.5775 17.2914C11.718 17.1204 11.0461 16.4486 10.8752 15.5891C10.844 15.4325 10.8335 15.1936 10.8335 14.083C10.8335 12.9724 10.844 12.7335 10.8752 12.577C11.0461 11.7175 11.718 11.0456 12.5775 10.8747Z" fill="#1570EF"/>
@@ -152,7 +157,7 @@ const fetchProductionCapacityItems = async (productionCapacityId: number) => {
     }
   } catch (err: any) {
     console.error('Error fetching production capacity items:', err)
-    error(err?.response?.data?.message || 'فشل في جلب عناصر القدرة الإنتاجية')
+    error(err?.response?.data?.message || t('pages.productionCapacityList.form.messages.fetchItemsError'))
   } finally {
     loading.value = false
   }
@@ -165,7 +170,7 @@ const fetchCategories = async () => {
     categories.value = response.data
   } catch (err: any) {
     console.error('Error fetching categories:', err)
-    error(err?.response?.data?.message || 'فشل في جلب التصنيفات')
+    error(err?.response?.data?.message || t('pages.productionCapacityList.form.messages.fetchCategoriesError'))
   }
 }
 
@@ -194,37 +199,37 @@ const handleCapacityChange = (row: ProductionCapacityRow) => {
 
 const tableHeaders = [
   { key: "rowNumber", title: "#", width: "70px" },
-  { key: "productId", title: "المنتج", width: "280px" },
+  { key: "productId", title: t('pages.productionCapacityList.form.table.product'), width: "280px" },
   {
     key: "tonPerHour",
-    title: "كمية الإنتاج بالطن / ساعة",
+    title: t('pages.productionCapacityList.form.table.tonPerHour.title'),
     children: [
-      { key: "tonPerHourMin", title: "أدنى", width: "140px" },
-      { key: "tonPerHourMax", title: "أعلى", width: "140px" },
+      { key: "tonPerHourMin", title: t('pages.productionCapacityList.form.table.min'), width: "140px" },
+      { key: "tonPerHourMax", title: t('pages.productionCapacityList.form.table.max'), width: "140px" },
     ],
   },
   {
     key: "tonPerDay",
-    title: "كمية الإنتاج بالطن / باليوم",
+    title: t('pages.productionCapacityList.form.table.tonPerDay.title'),
     children: [
-      { key: "tonPerDayMin", title: "أدنى", width: "140px" },
-      { key: "tonPerDayMax", title: "أعلى", width: "140px" },
+      { key: "tonPerDayMin", title: t('pages.productionCapacityList.form.table.min'), width: "140px" },
+      { key: "tonPerDayMax", title: t('pages.productionCapacityList.form.table.max'), width: "140px" },
     ],
   },
   {
     key: "tonPerWeek",
-    title: "كمية الإنتاج بالطن / بالاسبوع",
+    title: t('pages.productionCapacityList.form.table.tonPerWeek.title'),
     children: [
-      { key: "tonPerWeekMin", title: "أدنى", width: "140px" },
-      { key: "tonPerWeekMax", title: "أعلى", width: "140px" },
+      { key: "tonPerWeekMin", title: t('pages.productionCapacityList.form.table.min'), width: "140px" },
+      { key: "tonPerWeekMax", title: t('pages.productionCapacityList.form.table.max'), width: "140px" },
     ],
   },
   {
     key: "tonPerMonth",
-    title: "كمية الإنتاج بالطن / بالشهر",
+    title: t('pages.productionCapacityList.form.table.tonPerMonth.title'),
     children: [
-      { key: "tonPerMonthMin", title: "أدنى", width: "140px" },
-      { key: "tonPerMonthMax", title: "أعلى", width: "140px" },
+      { key: "tonPerMonthMin", title: t('pages.productionCapacityList.form.table.min'), width: "140px" },
+      { key: "tonPerMonthMax", title: t('pages.productionCapacityList.form.table.max'), width: "140px" },
     ],
   },
 ];
@@ -238,19 +243,19 @@ const handleSave = async () => {
     saving.value = true
 
     if (!productionCapacityId.value) {
-      error('معرف الطاقة الإنتاجية غير موجود')
+      error(t('pages.productionCapacityList.form.messages.missingId'))
       return
     }
 
     // Check if any modifications were made
     if (modifiedItemIds.value.size === 0) {
-      error('لم يتم تعديل أي عنصر')
+      error(t('pages.productionCapacityList.form.messages.noChanges'))
       return
     }
 
     // Send ALL items with their capacity data
     await saveItems(productionCapacityId.value, allRows.value)
-    success('تم حفظ التغييرات بنجاح')
+    success(t('pages.productionCapacityList.form.messages.saveSuccess'))
 
 
     // Refresh data
@@ -258,7 +263,7 @@ const handleSave = async () => {
     await fetchProductionCapacityItems(productionCapacityId.value)
   } catch (err: any) {
     console.error('Error saving production capacity:', err)
-    error(err?.response?.data?.message || 'فشل في حفظ القدرة الإنتاجية')
+    error(err?.response?.data?.message || t('pages.productionCapacityList.form.messages.saveError'))
   } finally {
     saving.value = false
   }
@@ -317,103 +322,113 @@ onMounted(async () => {
             <div class="flex flex-wrap gap-3 flex-1">
               <div class="min-w-[200px]">
                 <SelectInput v-model="selectedCategory" :items="categoryItems" clearable
-                  placeholder="جلب المنتجات عن طريق تصنيف محدد" :hide-details="true"
+                  :placeholder="t('pages.productionCapacityList.form.placeholders.filterByCategory')" :hide-details="true"
                   :input-props="{ class: 'bg-white min-w-[200px] md:min-w-[300px]' }" />
               </div>
             </div>
             <div class="text-sm font-semibold text-gray-700">
-              عدد المنتجات: {{ rows.length }}
+              {{ t('pages.productionCapacityList.form.labels.productsCount', { count: rows.length }) }}
             </div>
           </div>
         </div>
 
         <EditableDataTable :headers="tableHeaders" :items="rows" :loading="loading" :show-delete="false" show-checkbox
           @select="handleSelectRow" @select-all="handleSelectAll">
+          <!-- eslint-disable-next-line vue/valid-v-slot -->
           <template #item.rowNumber="{ rowIndex }">
             <span class="text-sm text-gray-600">{{ rowIndex + 1 }}</span>
           </template>
 
+          <!-- eslint-disable-next-line vue/valid-v-slot -->
           <template #item.productId="{ item }">
             <div class="flex items-center gap-3">
               <div>
-                <div class="text-sm font-semibold text-gray-900">{{ (item as ProductionCapacityRow).name }}</div>
-                <div class="text-xs text-gray-500">{{ (item as ProductionCapacityRow).category.name }}</div>
+                <div class="text-sm font-semibold text-gray-900">{{ asRow(item).name }}</div>
+                <div class="text-xs text-gray-500">{{ asRow(item).category.name }}</div>
               </div>
             </div>
           </template>
 
+          <!-- eslint-disable-next-line vue/valid-v-slot -->
           <template #item.tonPerHourMin="{ item }">
             <div class="w-[80px] py-1">
-              <PriceInput v-model="(item as ProductionCapacityRow).tonPerHourMin" placeholder="0"
+              <PriceInput v-model="asRow(item).tonPerHourMin" placeholder="0"
                 :input-props="{ class: 'bg-white' }" :rules="[numeric(), positive()]"
-                @update:model-value="handleCapacityChange(item as ProductionCapacityRow)" />
+                @update:model-value="handleCapacityChange(asRow(item))" />
             </div>
           </template>
 
+          <!-- eslint-disable-next-line vue/valid-v-slot -->
           <template #item.tonPerHourMax="{ item }">
             <div class="w-[80px]">
-              <PriceInput v-model="(item as ProductionCapacityRow).tonPerHourMax" placeholder="0"
+              <PriceInput v-model="asRow(item).tonPerHourMax" placeholder="0"
                 :input-props="{ class: 'bg-white' }" :rules="[numeric(), positive()]"
-                @update:model-value="handleCapacityChange(item as ProductionCapacityRow)" />
+                @update:model-value="handleCapacityChange(asRow(item))" />
             </div>
           </template>
 
+          <!-- eslint-disable-next-line vue/valid-v-slot -->
           <template #item.tonPerDayMin="{ item }">
             <div class="w-[80px]">
-              <PriceInput v-model="(item as ProductionCapacityRow).tonPerDayMin" placeholder="0"
+              <PriceInput v-model="asRow(item).tonPerDayMin" placeholder="0"
                 :input-props="{ class: 'bg-white' }" :rules="[numeric(), positive()]"
-                @update:model-value="handleCapacityChange(item as ProductionCapacityRow)" />
+                @update:model-value="handleCapacityChange(asRow(item))" />
             </div>
           </template>
 
+          <!-- eslint-disable-next-line vue/valid-v-slot -->
           <template #item.tonPerDayMax="{ item }">
             <div class="w-[80px]">
-              <PriceInput v-model="(item as ProductionCapacityRow).tonPerDayMax" placeholder="0"
+              <PriceInput v-model="asRow(item).tonPerDayMax" placeholder="0"
                 :input-props="{ class: 'bg-white' }" :rules="[numeric(), positive()]"
-                @update:model-value="handleCapacityChange(item as ProductionCapacityRow)" />
+                @update:model-value="handleCapacityChange(asRow(item))" />
             </div>
           </template>
 
+          <!-- eslint-disable-next-line vue/valid-v-slot -->
           <template #item.tonPerWeekMin="{ item }">
             <div class="w-[80px]">
-              <PriceInput v-model="(item as ProductionCapacityRow).tonPerWeekMin" placeholder="0"
+              <PriceInput v-model="asRow(item).tonPerWeekMin" placeholder="0"
                 :input-props="{ class: 'bg-white' }" :rules="[numeric(), positive()]"
-                @update:model-value="handleCapacityChange(item as ProductionCapacityRow)" />
+                @update:model-value="handleCapacityChange(asRow(item))" />
             </div>
           </template>
 
+          <!-- eslint-disable-next-line vue/valid-v-slot -->
           <template #item.tonPerWeekMax="{ item }">
             <div class="w-[80px]">
-              <PriceInput v-model="(item as ProductionCapacityRow).tonPerWeekMax" placeholder="0"
+              <PriceInput v-model="asRow(item).tonPerWeekMax" placeholder="0"
                 :input-props="{ class: 'bg-white' }" :rules="[numeric(), positive()]"
-                @update:model-value="handleCapacityChange(item as ProductionCapacityRow)" />
+                @update:model-value="handleCapacityChange(asRow(item))" />
             </div>
           </template>
 
+          <!-- eslint-disable-next-line vue/valid-v-slot -->
           <template #item.tonPerMonthMin="{ item }">
             <div class="w-[80px]">
-              <PriceInput v-model="(item as ProductionCapacityRow).tonPerMonthMin" placeholder="0"
+              <PriceInput v-model="asRow(item).tonPerMonthMin" placeholder="0"
                 :input-props="{ class: 'bg-white' }" :rules="[numeric(), positive()]"
-                @update:model-value="handleCapacityChange(item as ProductionCapacityRow)" />
+                @update:model-value="handleCapacityChange(asRow(item))" />
             </div>
           </template>
 
+          <!-- eslint-disable-next-line vue/valid-v-slot -->
           <template #item.tonPerMonthMax="{ item }">
             <div class="w-[80px]">
-              <PriceInput v-model="(item as ProductionCapacityRow).tonPerMonthMax" placeholder="0"
+              <PriceInput v-model="asRow(item).tonPerMonthMax" placeholder="0"
                 :input-props="{ class: 'bg-white' }" :rules="[numeric(), positive()]"
-                @update:model-value="handleCapacityChange(item as ProductionCapacityRow)" />
+                @update:model-value="handleCapacityChange(asRow(item))" />
             </div>
           </template>
         </EditableDataTable>
 
         <div class="flex flex-col sm:flex-row gap-3 sm:justify-center mt-6">
           <ButtonWithIcon variant="flat" rounded="4" color="primary" height="44"
-            custom-class="font-semibold text-base sm:min-w-[200px]" :prepend-icon="saveIcon" label="حفظ"
+            custom-class="font-semibold text-base sm:min-w-[200px]" :prepend-icon="saveIcon" :label="t('common.actions.save')"
             @click="handleSave" :loading="saving" :disabled="loading" v-if="canSyncItems" />
 
           <ButtonWithIcon variant="flat" rounded="4" color="primary-50" height="44"
-            custom-class="font-semibold text-base text-primary-700 sm:min-w-[200px]" label="إغلاق" @click="handleClose"
+            custom-class="font-semibold text-base text-primary-700 sm:min-w-[200px]" :label="t('common.actions.close')" @click="handleClose"
             :disabled="saving">
             <template #prepend>
               <v-icon>mdi-close</v-icon>

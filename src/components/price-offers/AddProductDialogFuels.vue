@@ -1,16 +1,11 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import { useApi } from '@/composables/useApi';
+import { useI18n } from "vue-i18n";
 
 interface Category {
   id: number;
   name: string;
-}
-
-interface ApiItem {
-  id: number;
-  name: string;
-  category?: Category;
 }
 
 export interface FuelProductToAdd {
@@ -29,15 +24,24 @@ export interface FuelProductToAdd {
   trip_no?: number | null;
   unit_price?: number | null;
   discount?: number | null;
+  discount_type?: number | null;
+  price_per_unit?: number | null;
+  discount_val?: number | null;
+  _categoryId?: number;
 }
 
 const props = defineProps<{
   modelValue: boolean;
+  materialType?: number;
+  supplierId?: number | null;
+  /** Base path without query; default /items/list. Use /items/supplier-items for supplier catalog. */
   itemsEndpoint?: string;
   unitItems?: any[];
-  /** Options for التعبئة (Packaging) from constants.fillings */
   fillingsOptions?: any[];
   supplyTypeOptions?: any[];
+  /** طلبات الشراء (طلبية وقود): عرض سعر الوحدة والخصم */
+  showUnitPriceAndDiscount?: boolean;
+  discountTypeItems?: any[];
   editProduct?: FuelProductToAdd | null;
   existingProducts?: FuelProductToAdd[];
 }>();
@@ -49,6 +53,7 @@ const emit = defineEmits<{
 }>();
 
 const api = useApi();
+const { t } = useI18n();
 
 const internalOpen = computed({
   get: () => props.modelValue,
@@ -57,33 +62,33 @@ const internalOpen = computed({
 
 const isEditMode = computed(() => !!props.editProduct);
 
-const loading = ref(false);
-const items = ref<ApiItem[]>([]);
+const categoriesLoading = ref(false);
+const itemsLoading = ref(false);
 const categories = ref<Category[]>([]);
 const activeTabId = ref<number | null>(null);
 const searchQuery = ref('');
 const showFullCategory = ref(false);
 const visibleTabsCount = 6;
+const loadedCategoryIds = ref<Set<number>>(new Set());
 
 const productsList = ref<FuelProductToAdd[]>([]);
 const editProductData = ref<FuelProductToAdd | null>(null);
 
-// Track manually unchecked products (to prevent auto-check)
 const manuallyUnchecked = ref<Set<number>>(new Set());
 
 const unitItemsList = computed(() => props.unitItems || []);
 const fillingsOptionsList = computed(() => props.fillingsOptions || []);
 const supplyTypeOptionsList = computed(() => props.supplyTypeOptions || []);
-
-const extractCategories = (list: ApiItem[]): Category[] => {
-  const categoryMap = new Map<number, Category>();
-  list.forEach(item => {
-    if (item.category && !categoryMap.has(item.category.id)) {
-      categoryMap.set(item.category.id, item.category);
-    }
-  });
-  return Array.from(categoryMap.values());
-};
+const showPricingFields = computed(() => !!props.showUnitPriceAndDiscount);
+const discountTypeOptionsList = computed(() => {
+  if (props.discountTypeItems && props.discountTypeItems.length > 0) {
+    return props.discountTypeItems;
+  }
+  return [
+    { title: '%', value: 1 },
+    { title: 'ريال', value: 2 },
+  ];
+});
 
 const displayedTabs = computed(() => {
   if (showFullCategory.value) return categories.value;
@@ -93,10 +98,7 @@ const displayedTabs = computed(() => {
 const filteredProducts = computed(() => {
   let filtered = productsList.value;
   if (activeTabId.value !== null) {
-    filtered = filtered.filter(product => {
-      const item = items.value.find(i => i.id === product.item_id);
-      return item?.category?.id === activeTabId.value;
-    });
+    filtered = filtered.filter(product => product._categoryId === activeTabId.value);
   }
   if (searchQuery.value.trim()) {
     const query = searchQuery.value.trim().toLowerCase();
@@ -105,69 +107,98 @@ const filteredProducts = computed(() => {
   return filtered;
 });
 
-const addedProducts = computed(() => productsList.value.filter(p => p.isAdded));
-
 const canAddProduct = (product: FuelProductToAdd): boolean => {
   const hasQty = product.quantity != null && Number(product.quantity) > 0;
   const hasUnit = !!product.unit_id;
   return !!(hasQty && hasUnit);
 };
 
-const fetchItems = async () => {
-  loading.value = true;
+const fetchCategories = async () => {
+  categoriesLoading.value = true;
   try {
-    const url = props.itemsEndpoint || '/items/active-list?with_category=true';
-    const res = await api.get<any>(url);
-    const data = Array.isArray(res.data) ? res.data : res.data?.data ?? [];
-    items.value = data;
-    categories.value = extractCategories(data);
-
-    const mappedProducts = data.map((item: ApiItem) => {
-      const existing = props.existingProducts?.find(p => p.item_id === item.id);
-      if (existing) return { ...existing, isAdded: true };
-      return {
-        item_id: item.id,
-        item_name: item.name,
-        unit_id: null,
-        unit_name: '',
-        quantity: null,
-        transport_type: null,
-        transport_type_name: '',
-        supply_type: null,
-        supply_type_name: '',
-        notes: '',
-        isAdded: false,
-        trip_no: null,
-        unit_price: null,
-        discount: null,
-      } as FuelProductToAdd;
-    });
-
-    // Sort on dialog open: products with values (isAdded) come first
-    productsList.value = mappedProducts.sort((a: FuelProductToAdd, b: FuelProductToAdd) => {
-      if (a.isAdded && !b.isAdded) return -1;
-      if (!a.isAdded && b.isAdded) return 1;
-      return 0;
-    });
-
-    if (categories.value.length > 0) activeTabId.value = categories.value[0].id;
+    const params = new URLSearchParams();
+    const mt = props.materialType ?? 0;
+    params.set('material_type', String(mt));
+    if (props.supplierId != null) {
+      params.set('supplier_id', String(props.supplierId));
+    }
+    const res = await api.get<any>(`/categories/list?${params.toString()}`);
+    if (Array.isArray(res.data)) {
+      categories.value = res.data;
+      if (categories.value.length > 0) {
+        activeTabId.value = categories.value[0].id;
+      }
+    }
   } catch (e) {
-    console.error('Error fetching items:', e);
-    items.value = [];
+    console.error('Error fetching categories:', e);
     categories.value = [];
-    productsList.value = [];
   } finally {
-    loading.value = false;
+    categoriesLoading.value = false;
   }
 };
 
-watch(() => props.modelValue, (newVal) => {
-  if (newVal) {
-    if (isEditMode.value && props.editProduct) {
-      editProductData.value = { ...props.editProduct };
-    } else {
-      fetchItems();
+const fetchCategoryItems = async (categoryId: number) => {
+  if (loadedCategoryIds.value.has(categoryId)) return;
+
+  itemsLoading.value = true;
+  try {
+    const base = (props.itemsEndpoint || '/items/list').replace(/\/$/, '');
+    const params = new URLSearchParams();
+    params.set('category_id', String(categoryId));
+    const mt = props.materialType ?? 0;
+    params.set('material_type', String(mt));
+    if (props.supplierId != null) {
+      params.set('supplier_id', String(props.supplierId));
     }
+    const res = await api.get<any>(`${base}?${params.toString()}`);
+    if (Array.isArray(res.data)) {
+      const newProducts: FuelProductToAdd[] = [];
+      res.data.forEach((item: any) => {
+        const isAlreadyInTable = props.existingProducts?.some(p => p.item_id === item.id);
+        if (isAlreadyInTable) return;
+
+        if (!productsList.value.some(p => p.item_id === item.id)) {
+          const product: FuelProductToAdd = {
+            item_id: item.id,
+            item_name: item.name,
+            unit_id: null,
+            unit_name: '',
+            quantity: null,
+            transport_type: null,
+            transport_type_name: '',
+            supply_type: null,
+            supply_type_name: '',
+            notes: '',
+            isAdded: false,
+            trip_no: null,
+            unit_price: null,
+            discount: null,
+            discount_type: 1,
+            _categoryId: categoryId,
+          };
+          newProducts.push(product);
+          productsList.value.push(product);
+        }
+      });
+      loadedCategoryIds.value.add(categoryId);
+
+      if (newProducts.length === 0) {
+        categories.value = categories.value.filter(c => c.id !== categoryId);
+        if (activeTabId.value === categoryId && categories.value.length > 0) {
+          activeTabId.value = categories.value[0].id;
+        }
+      }
+    }
+  } catch (e) {
+    console.error('Error fetching category items:', e);
+  } finally {
+    itemsLoading.value = false;
+  }
+};
+
+watch(activeTabId, (newId) => {
+  if (newId !== null && !isEditMode.value) {
+    fetchCategoryItems(newId);
   }
 });
 
@@ -231,7 +262,6 @@ const handleEditSave = () => {
 };
 
 const resetForm = () => {
-  items.value = [];
   categories.value = [];
   productsList.value = [];
   activeTabId.value = null;
@@ -239,7 +269,27 @@ const resetForm = () => {
   showFullCategory.value = false;
   manuallyUnchecked.value.clear();
   editProductData.value = null;
+  loadedCategoryIds.value.clear();
 };
+
+watch(() => props.modelValue, (newVal) => {
+  if (!newVal) {
+    resetForm();
+    return;
+  }
+  if (isEditMode.value && props.editProduct) {
+    const ep = props.editProduct;
+    editProductData.value = {
+      ...ep,
+      unit_price: ep.unit_price ?? ep.price_per_unit ?? null,
+      discount: ep.discount ?? ep.discount_val ?? null,
+      discount_type: ep.discount_type ?? 1,
+    };
+  } else {
+    resetForm();
+    fetchCategories();
+  }
+});
 
 const closeDialog = () => {
   internalOpen.value = false;
@@ -250,9 +300,10 @@ const handleDone = () => {
   if (isEditMode.value) {
     handleEditSave();
   } else {
-    // Only save products that are explicitly marked as added (isAdded = true)
-    const productsToSave = productsList.value.filter(p => p.isAdded);
-    
+    const newlyAdded = productsList.value.filter(p => p.isAdded);
+    const existing = (props.existingProducts || []).map(ep => ({ ...ep, isAdded: true as boolean | undefined }));
+    const productsToSave = [...existing, ...newlyAdded];
+
     emit('saved', productsToSave);
     closeDialog();
   }
@@ -292,11 +343,11 @@ const plusIconDisabled = `<svg width="16" height="16" viewBox="0 0 16 16" fill="
         <span class="!bg-gray-50 border border-gray-100 rounded px-1 py-0.5 text-gray-600">
           <span v-html="cubeIcon"></span>
         </span>
-        {{ isEditMode ? 'تعديل منتج' : 'إضافة منتج' }}
+        {{ isEditMode ? t('common.productDialog.editProduct') : t('common.productDialog.addProduct') }}
       </div>
     </template>
 
-    <div v-if="loading" class="flex items-center justify-center py-20">
+    <div v-if="categoriesLoading" class="flex items-center justify-center py-20">
       <v-progress-circular indeterminate color="primary" />
     </div>
 
@@ -319,33 +370,54 @@ const plusIconDisabled = `<svg width="16" height="16" viewBox="0 0 16 16" fill="
             {{ editProductData.item_name }}
           </div>
           <div>
-            <TextInput v-model="editProductData.quantity" type="number" placeholder="الكمية" density="compact" class="min-w-[170px]" />
+            <TextInput v-model="editProductData.quantity" type="number" :placeholder="t('common.productDialog.quantity')" density="compact" class="min-w-[170px]" />
           </div>
           <div>
-            <SelectInput v-model="editProductData.unit_id" :items="unitItemsList" placeholder="الوحدة" density="compact" class="min-w-[170px]" item-title="title" item-value="value" />
+            <SelectInput v-model="editProductData.unit_id" :items="unitItemsList" :placeholder="t('common.productDialog.unit')" density="compact" class="min-w-[170px]" item-title="title" item-value="value" />
           </div>
           <div>
-            <SelectInput v-model="editProductData.transport_type" :items="fillingsOptionsList" placeholder="التعبئة" density="compact" class="min-w-[170px]" item-title="title" item-value="value" />
+            <SelectInput v-model="editProductData.transport_type" :items="fillingsOptionsList" :placeholder="t('purchases.requests.fuels.form.tableHeaders.packaging')" density="compact" class="min-w-[170px]" item-title="title" item-value="value" />
           </div>
           <div>
             <SelectInput
               :model-value="editProductData.supply_type ?? null"
-              @update:model-value="(v) => { if (editProductData) editProductData.supply_type = (Array.isArray(v) ? v[0] : v) as string | null }"
+              @update:model-value="(v) => { if (editProductData) editProductData.supply_type = Array.isArray(v) ? v[0] : v }"
               :items="supplyTypeOptionsList"
-              placeholder="نوع التوريد"
+              :placeholder="t('purchases.requests.fuels.form.tableHeaders.supplyType')"
               density="compact"
               class="min-w-[170px]"
               item-title="title"
               item-value="value"
             />
           </div>
+          <div v-if="showPricingFields">
+            <PriceInput
+              v-model="editProductData.unit_price"
+              placeholder="سعر الوحدة"
+              density="compact"
+              class="min-w-[170px]"
+            />
+          </div>
+          <div v-if="showPricingFields">
+            <TextInputWithSelect
+              v-model="editProductData.discount"
+              v-model:selectValue="editProductData.discount_type"
+              type="number"
+              placeholder="الخصم"
+              density="compact"
+              select-width="75px"
+              :select-items="discountTypeOptionsList"
+              select-placeholder="اختر"
+              class="min-w-[170px]"
+            />
+          </div>
         </div>
       </div>
     </div>
 
-    <div v-else-if="!isEditMode && items.length === 0" class="flex flex-col items-center justify-center py-20 text-gray-500">
+    <div v-else-if="!isEditMode && categories.length === 0" class="flex flex-col items-center justify-center py-20 text-gray-500">
       <v-icon size="64" color="gray-400">mdi-package-variant-closed</v-icon>
-      <p class="mt-4 text-lg font-medium">لا توجد منتجات</p>
+      <p class="mt-4 text-lg font-medium">{{ t('common.ui.noData') }}</p>
     </div>
 
     <template v-else-if="!isEditMode">
@@ -377,14 +449,18 @@ const plusIconDisabled = `<svg width="16" height="16" viewBox="0 0 16 16" fill="
       </div>
 
       <div class="mb-3">
-        <TextInput v-model="searchQuery" placeholder="ابحث في المنتجات ..." density="comfortable">
+        <TextInput v-model="searchQuery" :placeholder="t('common.productDialog.searchProducts')" density="comfortable">
           <template #prepend-inner>
             <v-icon v-html="searchIcon"></v-icon>
           </template>
         </TextInput>
       </div>
 
-      <div class="space-y-1 max-h-[400px] min-h-[250px] overflow-auto custom-scroll">
+      <div v-if="itemsLoading" class="flex items-center justify-center py-10 min-h-[250px]">
+        <v-progress-circular indeterminate color="primary" size="32" />
+      </div>
+
+      <div v-else class="space-y-1 max-h-[400px] min-h-[250px] overflow-auto custom-scroll">
         <div v-for="product in filteredProducts" :key="product.item_id">
           <div class="flex gap-3 rounded-lg border !border-gray-100 p-3 bg-white">
             <div class="col-span-1 flex items-center justify-center gap-1">
@@ -422,24 +498,45 @@ const plusIconDisabled = `<svg width="16" height="16" viewBox="0 0 16 16" fill="
                 {{ product.item_name }}
               </div>
               <div>
-                <TextInput v-model="product.quantity" type="number" placeholder="الكمية" density="compact" class="min-w-[170px]" />
+                <TextInput v-model="product.quantity" type="number" :placeholder="t('common.productDialog.quantity')" density="compact" class="min-w-[170px]" />
               </div>
               <div>
-                <SelectInput v-model="product.unit_id" :items="unitItemsList" placeholder="الوحدة" density="compact" class="min-w-[170px]" item-title="title" item-value="value" />
+                <SelectInput v-model="product.unit_id" :items="unitItemsList" :placeholder="t('common.productDialog.unit')" density="compact" class="min-w-[170px]" item-title="title" item-value="value" />
               </div>
               <div>
-                <SelectInput v-model="product.transport_type" :items="fillingsOptionsList" placeholder="التعبئة" density="compact" class="min-w-[170px]" item-title="title" item-value="value" />
+                <SelectInput v-model="product.transport_type" :items="fillingsOptionsList" :placeholder="t('purchases.requests.fuels.form.tableHeaders.packaging')" density="compact" class="min-w-[170px]" item-title="title" item-value="value" />
               </div>
               <div>
                 <SelectInput
                   :model-value="product.supply_type ?? null"
-                  @update:model-value="(v) => (product.supply_type = (Array.isArray(v) ? v[0] : v) as string | null)"
+                  @update:model-value="(v) => (product.supply_type = Array.isArray(v) ? v[0] : v)"
                   :items="supplyTypeOptionsList"
-                  placeholder="نوع التوريد"
+                  :placeholder="t('purchases.requests.fuels.form.tableHeaders.supplyType')"
                   density="compact"
                   class="min-w-[170px]"
                   item-title="title"
                   item-value="value"
+                />
+              </div>
+              <div v-if="showPricingFields">
+                <PriceInput
+                  v-model="product.unit_price"
+                  placeholder="سعر الوحدة"
+                  density="compact"
+                  class="min-w-[170px]"
+                />
+              </div>
+              <div v-if="showPricingFields">
+                <TextInputWithSelect
+                  v-model="product.discount"
+                  v-model:selectValue="product.discount_type"
+                  type="number"
+                  placeholder="الخصم"
+                  density="compact"
+                  select-width="75px"
+                  :select-items="discountTypeOptionsList"
+                  select-placeholder="اختر"
+                  class="min-w-[170px]"
                 />
               </div>
             </div>
@@ -455,11 +552,11 @@ const plusIconDisabled = `<svg width="16" height="16" viewBox="0 0 16 16" fill="
           color="primary"
           size="large"
           custom-class="px-8"
-          :label="isEditMode ? 'حفظ التعديلات' : '+ أضف منتجات'"
+          :label="isEditMode ? t('common.productDialog.saveChanges') : t('purchases.shared.forms.common.actions.addProduct')"
           @click="handleDone"
           :disabled="!!(isEditMode && editProductData && !canAddProduct(editProductData))"
         />
-        <ButtonWithIcon variant="outlined" color="gray-700" border="gray-300" size="large" custom-class="px-4" label="إلغاء" @click="handleCancel" />
+        <ButtonWithIcon variant="outlined" color="gray-700" border="gray-300" size="large" custom-class="px-4" :label="t('common.actions.cancel')" @click="handleCancel" />
       </div>
     </template>
   </AppDialog>

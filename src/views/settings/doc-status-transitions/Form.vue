@@ -2,8 +2,12 @@
 import { computed, reactive, ref, onMounted, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useApi } from "@/composables/useApi";
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 import { SaveDoubleIcon, fileIcon, fileCheckIcon, SettingsIcon, trash_1_icon, trash_2_icon, columnIcon, exportIcon, plusIcon, searchIcon } from "@/components/icons/globalIcons";
 import TopHeader from "@/components/price-offers/TopHeader.vue";
+import AppFormBreadcrumb from "@/components/common/AppFormBreadcrumb.vue";
 
 const api = useApi();
 const route = useRoute();
@@ -73,7 +77,7 @@ const fetchTransitionData = async (transitionId: string) => {
     form.requires_approval = Boolean(transition.requires_approval);
   } catch (err: any) {
     console.error('Error fetching transition details:', err);
-    toast.error(err?.response?.data?.message || 'Failed to fetch transition details');
+    toast.error(err?.response?.data?.message || t('common.messages.general.loadDataFailed'));
     router.push('/settings/doc-status-transitions/list');
   } finally {
     loadingTransitionData.value = false;
@@ -175,10 +179,10 @@ const handleSave = async () => {
       formData.append('description[ar]', form.descriptionAr);
 
       await api.post(`/doc-status-transitions/${form.id}`, formData);
-      toast.success('تم تحديث مسار العمل بنجاح');
+      toast.success(t('common.messages.success.updated'));
     } else {
       await api.post('/doc-status-transitions', payload);
-      toast.success('تم إضافة مسار العمل بنجاح');
+      toast.success(t('common.messages.success.created'));
     }
 
     router.push('/settings/doc-status-transitions/list');
@@ -190,9 +194,9 @@ const handleSave = async () => {
       Object.keys(apiErrors).forEach(key => {
         formErrors[key] = apiErrors[key][0];
       });
-      toast.error(err?.response?.data?.message || 'يرجى تصحيح الأخطاء في النموذج');
+      toast.error(err?.response?.data?.message || t('common.messages.error.validationFailed'));
     } else {
-      toast.error(err?.response?.data?.message || 'Failed to save transition');
+      toast.error(err?.response?.data?.message || t('common.messages.error.saveFailed'));
     }
   } finally {
     saving.value = false;
@@ -223,6 +227,15 @@ onMounted(async () => {
 <template>
   <default-layout>
     <div class="doc-status-transitions-form-page -mx-6">
+      <AppFormBreadcrumb
+        list-path="/settings/doc-status-transitions/list"
+        module-root-key="breadcrumb.settings.root"
+        list-label-key="breadcrumb.settings.docStatusTransitions.list"
+        create-label-key="breadcrumb.settings.docStatusTransitions.transitionCreate"
+        edit-label-key="breadcrumb.settings.docStatusTransitions.transitionEdit"
+        :is-edit-mode="isEditMode"
+        :code="isEditMode ? String(form.doc_slug || '') : ''"
+      />
       <!-- Page Header -->
       <TopHeader :icon="fileCheckIcon" title-key="pages.docStatusTransitions.FormTitle"
         description-key="pages.docStatusTransitions.FormDescription" :show-action="false" />
@@ -236,45 +249,45 @@ onMounted(async () => {
         <v-form ref="formRef" v-model="isFormValid" @submit.prevent="handleSave">
           <div class="flex items-center gap-2 text-primary-600 mb-4">
             <span class="w-[17px] h-[20px]" v-html="fileCheckIcon"></span>
-            <h2 class="text-base font-bold">البيانات الأساسية</h2>
+            <h2 class="text-base font-bold">{{ t('pages.docStatusTransitions.form.basicData') }}</h2>
           </div>
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 gap-y-8">
             <!-- Document Selection -->
-            <SelectInput v-model="form.doc_id" clearable :items="documentSettings" label="اسم المستند"
-              placeholder="اختر المستند" :rules="[required()]" :error-messages="formErrors['doc_id']"
+            <SelectInput v-model="form.doc_id" clearable :items="documentSettings" :label="t('pages.docStatusTransitions.form.documentName')"
+              :placeholder="t('pages.docStatusTransitions.form.selectDocument')" :rules="[required()]" :error-messages="formErrors['doc_id']"
               @update:model-value="delete formErrors['doc_id']" />
 
             <!-- Document Slug (Show only in edit mode) -->
-            <TextInput disabled v-model="form.doc_slug" label="معرف المستند" placeholder="قم باختيار المستند"
+            <TextInput disabled v-model="form.doc_slug" :label="t('pages.docStatusTransitions.form.documentId')" :placeholder="t('pages.docStatusTransitions.form.selectDocumentPlaceholder')"
               :rules="[required()]" :error-messages="formErrors['doc_slug']"
               @update:model-value="delete formErrors['doc_slug']" />
 
             <!-- Status Level -->
-            <SelectInput v-model="form.status_level" clearable :items="statusLevels" label="مستوى الحالة"
-              placeholder="اختر مستوى الحالة" :rules="[required()]" :error-messages="formErrors['status_level']"
+            <SelectInput v-model="form.status_level" clearable :items="statusLevels" :label="t('pages.docStatusTransitions.form.statusLevel')"
+              :placeholder="t('pages.docStatusTransitions.form.selectStatusLevel')" :rules="[required()]" :error-messages="formErrors['status_level']"
               @update:model-value="delete formErrors['status_level']" />
 
             <!-- Status Selection -->
-            <SelectInput v-model="form.status_id" clearable :items="systemStatuses" label="اسم الحالة"
-              placeholder="اختر اسم الحالة" :rules="[required()]" :error-messages="formErrors['status_id']"
+            <SelectInput v-model="form.status_id" clearable :items="systemStatuses" :label="t('pages.docStatusTransitions.form.statusName')"
+              :placeholder="t('pages.docStatusTransitions.form.selectStatusName')" :rules="[required()]" :error-messages="formErrors['status_id']"
               @update:model-value="delete formErrors['status_id']" />
 
             <!-- Active Status -->
             <div>
-              <label class="block text-sm font-semibold text-gray-700 mb-3">الحالة</label>
+              <label class="block text-sm font-semibold text-gray-700 mb-3">{{ t('form.fields.status.label') }}</label>
               <div class="flex items-center gap-3 mt-1">
                 <v-radio-group v-model="form.is_active" inline hide-details>
                   <v-radio :value="true" color="primary">
                     <template #label>
                       <span :class="form.is_active ? 'text-primary font-semibold' : 'text-gray-600'">
-                        فعال
+                        {{ t('common.status.active') }}
                       </span>
                     </template>
                   </v-radio>
                   <v-radio :value="false" color="primary">
                     <template #label>
                       <span :class="!form.is_active ? 'text-primary font-semibold' : 'text-gray-600'">
-                        غير فعال
+                        {{ t('common.status.inactive') }}
                       </span>
                     </template>
                   </v-radio>
@@ -284,34 +297,34 @@ onMounted(async () => {
 
             <!-- Other Options -->
             <div class="md:col-span-2">
-              <label class="block text-sm font-semibold text-gray-700 mb-3">خيارات أخرى</label>
+              <label class="block text-sm font-semibold text-gray-700 mb-3">{{ t('pages.docStatusTransitions.form.otherOptions') }}</label>
               <div class="flex sm:items-center flex-col sm:flex-row sm:gap-5 xl:gap-10">
                 <v-checkbox v-model="form.is_required" color="primary" hide-details density="compact">
                   <template #label>
-                    <span class="text-sm font-medium text-gray-700">مطلوب</span>
+                    <span class="text-sm font-medium text-gray-700">{{ t('pages.docStatusTransitions.form.required') }}</span>
                   </template>
                 </v-checkbox>
                 <v-checkbox v-model="form.has_auto_action" color="primary" hide-details density="compact">
                   <template #label>
-                    <span class="text-sm font-medium text-gray-700">تطبيق إجراء تلقائي</span>
+                    <span class="text-sm font-medium text-gray-700">{{ t('pages.docStatusTransitions.form.autoAction') }}</span>
                   </template>
                 </v-checkbox>
 
                 <v-checkbox v-model="form.requires_approval" color="primary" hide-details density="compact">
                   <template #label>
-                    <span class="text-sm font-medium text-gray-700">يحتاج موافقة</span>
+                    <span class="text-sm font-medium text-gray-700">{{ t('pages.docStatusTransitions.form.requiresApproval') }}</span>
                   </template>
                 </v-checkbox>
               </div>
             </div>
 
-            <LanguageTabs :languages="availableLanguages" label="الوصف" class="md:col-span-2">
+            <LanguageTabs :languages="availableLanguages" :label="t('form.fields.description.label')" class="md:col-span-2">
               <template #en>
-                <TextareaInput v-model="form.descriptionEn" placeholder="Description in English" :rows="4"
+                <TextareaInput v-model="form.descriptionEn" :placeholder="t('form.fields.descriptionEnglish.placeholder')" :rows="4"
                   :hide-details="true" />
               </template>
               <template #ar>
-                <TextareaInput v-model="form.descriptionAr" placeholder="الوصف بالعربية" :rows="4"
+                <TextareaInput v-model="form.descriptionAr" :placeholder="t('form.fields.descriptionArabic.placeholder')" :rows="4"
                   :hide-details="true" />
               </template>
             </LanguageTabs>
@@ -321,11 +334,11 @@ onMounted(async () => {
           <!-- Action Buttons -->
           <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col">
             <ButtonWithIcon variant="flat" color="primary" rounded="4" height="48" custom-class="min-w-56"
-              :prepend-icon="SaveDoubleIcon" :label="isEditMode ? 'تحديث' : 'حفظ'" :loading="saving" :disabled="saving"
+              :prepend-icon="SaveDoubleIcon" :label="isEditMode ? t('common.actions.update') : t('common.actions.save')" :loading="saving" :disabled="saving"
               @click="handleSave" />
 
             <ButtonWithIcon prepend-icon="mdi-close" variant="flat" color="primary-50" rounded="4" height="48"
-              custom-class="font-semibold text-base text-primary-700 px-6 min-w-56" label="إغلاق" :disabled="saving"
+              custom-class="font-semibold text-base text-primary-700 px-6 min-w-56" :label="t('common.actions.close')" :disabled="saving"
               @click="handleCancel" />
           </div>
         </v-form>

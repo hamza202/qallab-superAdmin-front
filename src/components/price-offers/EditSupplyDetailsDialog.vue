@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import AppDialog from '@/components/common/AppDialog.vue';
 import TextInput from '@/components/common/forms/textInput.vue';
 import DatePickerInput from '@/components/common/forms/DatePickerInput.vue';
@@ -52,6 +53,7 @@ const emit = defineEmits<{
   'update:modelValue': [value: boolean];
   saved: [rows: SupplyDetailRow[]];
 }>();
+const { t } = useI18n();
 
 const internalOpen = computed({
   get: () => props.modelValue,
@@ -116,7 +118,7 @@ const truckIcon = `<svg width="22" height="20" viewBox="0 0 22 20" fill="none" x
         <span class="!bg-gray-50 border border-gray-100 rounded px-1.5 py-1.5 text-gray-600">
           <span v-html="truckIcon"></span>
         </span>
-        تعديل تفاصيل التوريد
+        {{ t('purchases.orders.shared.labels.editSupplyDetails') }}
       </div>
     </template>
 
@@ -143,7 +145,7 @@ const truckIcon = `<svg width="22" height="20" viewBox="0 0 22 20" fill="none" x
           <DatePickerInput
             v-if="requestType === 'logistics-trips'"
             v-model="rows[index].trip_date"
-            placeholder="تاريخ الرحلة"
+            :placeholder="t('purchases.orders.shared.tableHeaders.tripDate')"
             density="compact"
             class="w-full"
             hide-details
@@ -151,7 +153,7 @@ const truckIcon = `<svg width="22" height="20" viewBox="0 0 22 20" fill="none" x
           <DatePickerInput
             v-else
             v-model="rows[index].transport_start_date"
-            placeholder="تاريخ بداية النقل"
+            :placeholder="t('purchases.orders.shared.tableHeaders.transportStartDate')"
             density="compact"
             class="w-full"
             hide-details
@@ -164,7 +166,7 @@ const truckIcon = `<svg width="22" height="20" viewBox="0 0 22 20" fill="none" x
             v-if="requestType === 'logistics-trips'"
             v-model="rows[index].trip_price"
             showRialIcon
-            placeholder="سعر الرحلة"
+            :placeholder="t('purchases.orders.shared.tableHeaders.tripPrice')"
             density="compact"
             class="w-full"
             hide-details
@@ -173,7 +175,7 @@ const truckIcon = `<svg width="22" height="20" viewBox="0 0 22 20" fill="none" x
             v-else
             v-model="rows[index].trip_no"
             type="number"
-            placeholder="عدد الرحلات"
+            :placeholder="t('purchases.requests.logistics.form.detailCard.tripCount')"
             density="compact"
             class="w-full"
             hide-details
@@ -186,7 +188,7 @@ const truckIcon = `<svg width="22" height="20" viewBox="0 0 22 20" fill="none" x
             v-if="requestType === 'logistics-trips'"
             v-model="rows[index].transport_type"
             :items="vehicleOptions"
-            placeholder="نوع المركبات"
+            :placeholder="t('purchases.requests.materialProduct.form.tableHeaders.vehicleTypes')"
             density="compact"
             item-title="title"
             item-value="value"
@@ -197,7 +199,7 @@ const truckIcon = `<svg width="22" height="20" viewBox="0 0 22 20" fill="none" x
             v-else
             v-model="rows[index].vehicle_types"
             :items="vehicleOptions"
-            placeholder="نوع المركبات"
+            :placeholder="t('purchases.requests.materialProduct.form.tableHeaders.vehicleTypes')"
             density="compact"
             item-title="title"
             item-value="value"
@@ -211,7 +213,7 @@ const truckIcon = `<svg width="22" height="20" viewBox="0 0 22 20" fill="none" x
           <PriceInput
             :model-value="rows[index].trip_capacity ?? null"
             type="number"
-            placeholder="سعة الرحلة"
+            :placeholder="t('purchases.orders.shared.tableHeaders.tripCapacity')"
             density="compact"
             class="w-full"
             hide-details
@@ -227,7 +229,7 @@ const truckIcon = `<svg width="22" height="20" viewBox="0 0 22 20" fill="none" x
           <SelectInput
             :model-value="rows[index].am_pm_interval ?? null"
             :items="amPmIntervalItems"
-            placeholder="توقيت الرحلة"
+            :placeholder="t('purchases.orders.shared.tableHeaders.tripTiming')"
             density="compact"
             item-title="title"
             item-value="value"
@@ -247,7 +249,7 @@ const truckIcon = `<svg width="22" height="20" viewBox="0 0 22 20" fill="none" x
           border="gray-300"
           size="large"
           custom-class="px-6"
-          label="إلغاء"
+          :label="t('common.actions.cancel')"
           @click="closeDialog"
         />
         <ButtonWithIcon
@@ -255,7 +257,7 @@ const truckIcon = `<svg width="22" height="20" viewBox="0 0 22 20" fill="none" x
           color="primary"
           size="large"
           custom-class="px-8"
-          label="حفظ"
+          :label="t('common.actions.save')"
           @click="handleSave"
         />
       </div>

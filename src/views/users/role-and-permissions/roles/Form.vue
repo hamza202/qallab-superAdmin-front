@@ -8,15 +8,15 @@
                 </router-link>
                 <span class="text-lg text-gray-300">/</span>
                 <router-link to="/users/list" class="text-gray-600 hover:text-primary-600">
-                    المستخدمين
+                    {{ t('pages.users.title') }}
                 </router-link>
                 <span class="text-lg text-gray-300">/</span>
                 <router-link to="/roles/list" class="text-gray-600 hover:text-primary-600">
-                    ادارة المستخدمين
+                    {{ t('pages.roles.list.pageTitle') }}
                 </router-link>
                 <span class="text-lg text-gray-300">/</span>
                 <span class="text-primary-700 font-medium bg-primary-50 px-2 py-1 rounded-md">
-                    {{ isEditing ? 'تعديل الدور' : 'اضافة دور' }}
+                    {{ isEditing ? t('pages.roles.form.editRole') : t('pages.roles.form.addRole') }}
                 </span>
             </div>
 
@@ -28,10 +28,10 @@
                     </div>
                     <div>
                         <h1 class="text-xl font-bold text-gray-900 mb-1">
-                            {{ isEditing ? 'تعديل الدور' : 'اضافة دور جديد' }}
+                            {{ isEditing ? t('pages.roles.form.editRole') : t('pages.roles.form.addNewRole') }}
                         </h1>
                         <p class="text-sm text-gray-500">
-                            قم بملئ البيانات الأساسية واختيار الأدوار
+                            {{ t('pages.roles.form.fillBasicData') }}
                         </p>
                     </div>
                 </div>
@@ -43,19 +43,19 @@
                     <!-- Section Title: البيانات الأساسية -->
                     <div class="flex items-center gap-2 mb-6">
                         <span v-html="clipboardIcon" class="text-primary-500"></span>
-                        <h2 class="text-lg font-bold text-primary-600">البيانات الأساسية</h2>
+                        <h2 class="text-lg font-bold text-primary-600">{{ t('pages.roles.form.basicData') }}</h2>
                     </div>
 
                     <!-- Role Name Field -->
                     <div class="max-w-md mb-8">
-                        <label class="qallab-label">اسم الدور</label>
-                        <TextInput v-model="form.name" placeholder="الاسم" :rules="[required()]" />
+                        <label class="qallab-label">{{ t('pages.roles.form.roleName') }}</label>
+                        <TextInput v-model="form.name" :placeholder="t('pages.roles.form.namePlaceholder')" :rules="[required()]" />
                     </div>
 
                     <!-- Section Title: الصلاحيات -->
                     <div class="flex items-center gap-2 mb-6">
                         <span v-html="shieldIcon" class="text-primary-500"></span>
-                        <h2 class="text-lg font-bold text-primary-600">الصلاحيات</h2>
+                        <h2 class="text-lg font-bold text-primary-600">{{ t('pages.roles.form.permissions') }}</h2>
                     </div>
 
                     <!-- Loading State -->
@@ -94,7 +94,7 @@
                                     <!-- Select All Checkbox -->
                                     <div class="flex items-center mb-3 border-b border-gray-100 pb-2 pt-2">
                                         <label class="flex items-center gap-2 cursor-pointer flex-row-reverse">
-                                            <span class="text-sm font-medium text-primary-600">جميع الصلاحيات</span>
+                                            <span class="text-sm font-medium text-primary-600">{{ t('pages.roles.form.allPermissions') }}</span>
                                             <v-checkbox
                                                 :model-value="isGroupAllSelected(groupKey)"
                                                 :indeterminate="isGroupPartiallySelected(groupKey)"
@@ -137,7 +137,7 @@
                             height="44"
                             custom-class="font-semibold text-base px-10 text-white"
                             :prepend-icon="saveIcon"
-                            :label="isEditing ? 'حفظ التعديلات' : 'أضف دور جديد'"
+                            :label="isEditing ? t('pages.roles.form.saveChanges') : t('pages.roles.form.addNewRoleButton')"
                             :loading="loading"
                             @click="handleSubmit"
                         />
@@ -148,7 +148,7 @@
                             height="44"
                             custom-class="font-semibold text-base text-primary-700 px-10"
                             :prepend-icon="closeIcon"
-                            label="الغاء"
+                            :label="t('pages.roles.form.cancel')"
                             @click="handleCancel"
                         />
                     </div>
@@ -164,6 +164,9 @@ import { useRouter, useRoute } from 'vue-router'
 import { useApi } from '@/composables/useApi'
 import { useNotification } from '@/composables/useNotification'
 import { required } from '@/utils/validators'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 // Composables
 const api = useApi()
@@ -288,7 +291,7 @@ const fetchPermissions = async () => {
         }
     } catch (err: any) {
         console.error('Error fetching permissions:', err)
-        errorNotification(err?.response?.data?.message || 'حدث خطأ أثناء جلب الصلاحيات')
+        errorNotification(err?.response?.data?.message || t('pages.roles.form.messages.fetchPermissionsError'))
     } finally {
         permissionsLoading.value = false
     }
@@ -308,7 +311,7 @@ const fetchRole = async () => {
         }
     } catch (err: any) {
         console.error('Error fetching role:', err)
-        errorNotification(err?.response?.data?.message || 'حدث خطأ أثناء جلب بيانات الدور')
+        errorNotification(err?.response?.data?.message || t('pages.roles.form.messages.fetchRoleError'))
     } finally {
         loading.value = false
     }
@@ -346,16 +349,16 @@ const handleSubmit = async () => {
 
         if (isEditing.value) {
             await api.post(`/roles/${roleId.value}`, formData)
-            success('تم تحديث الدور بنجاح')
+            success(t('pages.roles.form.messages.updateSuccess'))
         } else {
             await api.post('/roles', formData)
-            success('تم إضافة الدور بنجاح')
+            success(t('pages.roles.form.messages.createSuccess'))
         }
 
         router.push({ name: 'RolesList' })
     } catch (err: any) {
         console.error('Error saving role:', err)
-        errorNotification(err?.response?.data?.message || 'حدث خطأ أثناء حفظ البيانات')
+        errorNotification(err?.response?.data?.message || t('pages.roles.form.messages.saveError'))
     } finally {
         loading.value = false
     }

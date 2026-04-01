@@ -3,8 +3,12 @@ import { computed, reactive, ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useApi } from "@/composables/useApi";
 import { useNotification } from "@/composables/useNotification";
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 import { SaveDoubleIcon, fileCheckIcon } from "@/components/icons/globalIcons";
 import TopHeader from "@/components/price-offers/TopHeader.vue";
+import AppFormBreadcrumb from "@/components/common/AppFormBreadcrumb.vue";
 
 const api = useApi();
 const route = useRoute();
@@ -76,7 +80,7 @@ const fetchTransitionData = async (transitionId: string) => {
 
     } catch (err: any) {
         console.error('Error fetching transition details:', err);
-        error(err?.response?.data?.message || 'Failed to fetch transition details');
+        error(err?.response?.data?.message || t('common.messages.general.loadDataFailed'));
     } finally {
     }
 };
@@ -129,7 +133,7 @@ const handleSave = async () => {
         };
 
         await api.post(`/doc-status-transitions/${form.id}/workflow`, payload);
-        success('تم تحديث مسار العمل بنجاح');
+        success(t('common.messages.success.updated'));
 
         router.push('/settings/doc-status-transitions/list');
     } catch (err: any) {
@@ -140,9 +144,9 @@ const handleSave = async () => {
             Object.keys(apiErrors).forEach(key => {
                 formErrors[key] = apiErrors[key][0];
             });
-            error(err?.response?.data?.message || 'يرجى تصحيح الأخطاء في النموذج');
+            error(err?.response?.data?.message || t('common.messages.error.validationFailed'));
         } else {
-            error(err?.response?.data?.message || 'Failed to save transition');
+            error(err?.response?.data?.message || t('common.messages.error.saveFailed'));
         }
     } finally {
         saving.value = false;
@@ -167,6 +171,16 @@ onMounted(async () => {
 <template>
     <default-layout>
         <div class="doc-status-transitions-form-page -mx-6">
+            <AppFormBreadcrumb
+                list-path="/settings/doc-status-transitions/list"
+                module-root-key="breadcrumb.settings.root"
+                list-label-key="breadcrumb.settings.docStatusTransitions.list"
+                create-label-key="breadcrumb.settings.docStatusTransitions.workflow"
+                edit-label-key="breadcrumb.settings.docStatusTransitions.workflow"
+                :is-edit-mode="false"
+                action-label-key="breadcrumb.settings.docStatusTransitions.workflow"
+                :code="String(status_label || '')"
+            />
             <!-- Page Header -->
             <TopHeader :icon="fileCheckIcon" title-key="pages.docStatusTransitions.statusTransitionsTitle"
                 description-key="pages.docStatusTransitions.FormDescription" :show-action="false" />
@@ -180,15 +194,15 @@ onMounted(async () => {
                 <v-form ref="formRef" v-model="isFormValid" @submit.prevent="handleSave">
                     <div class="flex items-center gap-2 text-primary-600 mb-4">
                         <span class="w-[17px] h-[20px]" v-html="fileCheckIcon"></span>
-                        <h2 class="text-base font-bold">معلومات الانتقال</h2>
+                        <h2 class="text-base font-bold">{{ t('pages.docStatusTransitions.workflow.transitionInfo') }}</h2>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
                         <!-- Document Slug (Show only in edit mode) -->
-                        <TextInput disabled v-model="status_label" label="الحالية" />
+                        <TextInput disabled v-model="status_label" :label="t('pages.docStatusTransitions.workflow.currentStatus')" />
 
                         <!-- Previous Status Selection -->
                         <MultipleSelectInput v-model="form.previous_status" clearable :items="availablePreviousStatuses"
-                            label="الحالات السابقة" placeholder="اختر الحالات"
+                            :label="t('pages.docStatusTransitions.workflow.previousStatuses')" :placeholder="t('pages.docStatusTransitions.workflow.selectStatuses')"
                             :rules="[status_level === 'temp' || status_level === 'end' ? required() : null]"
                             :error-messages="formErrors['previous_status']"
                             @update:model-value="delete formErrors['previous_status']"
@@ -196,7 +210,7 @@ onMounted(async () => {
 
                         <!-- Next Status Selection -->
                         <MultipleSelectInput v-model="form.next_status" clearable :items="availableNextStatuses"
-                            label="الحالات التالية" placeholder="اختر الحالات"
+                            :label="t('pages.docStatusTransitions.workflow.nextStatuses')" :placeholder="t('pages.docStatusTransitions.workflow.selectStatuses')"
                             :rules="[status_level === 'temp' || status_level === 'start' ? required() : null]"
                             :error-messages="formErrors['next_status']"
                             @update:model-value="delete formErrors['next_status']"
@@ -204,7 +218,7 @@ onMounted(async () => {
 
                         <!-- Rollback Status Selection -->
                         <MultipleSelectInput v-model="form.rollback_status" clearable :items="availableRollbackStatuses"
-                            label="حالات التراجع" placeholder="اختر الحالات"
+                            :label="t('pages.docStatusTransitions.workflow.rollbackStatuses')" :placeholder="t('pages.docStatusTransitions.workflow.selectStatuses')"
                             :error-messages="formErrors['rollback_status']"
                             @update:model-value="delete formErrors['rollback_status']"
                             :disabled="status_level === 'start'" />
@@ -248,12 +262,12 @@ onMounted(async () => {
                     <!-- Action Buttons -->
                     <div class="flex justify-center gap-5 sm:mt-20 lg:flex-row flex-col">
                         <ButtonWithIcon variant="flat" color="primary" rounded="4" height="48" custom-class="min-w-56"
-                            :prepend-icon="SaveDoubleIcon" label="حفظ" :loading="saving" :disabled="saving"
+                            :prepend-icon="SaveDoubleIcon" :label="t('common.actions.save')" :loading="saving" :disabled="saving"
                             @click="handleSave" v-if="canUpdateWorkflow" />
 
                         <ButtonWithIcon prepend-icon="mdi-close" variant="flat" color="primary-50" rounded="4"
                             height="48" custom-class="font-semibold text-base text-primary-700 px-6 min-w-56"
-                            label="إغلاق" :disabled="saving" @click="handleCancel" />
+                            :label="t('common.actions.close')" :disabled="saving" @click="handleCancel" />
                     </div>
                 </v-form>
             </div>

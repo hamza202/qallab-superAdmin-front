@@ -3,6 +3,9 @@ import { ref, reactive, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import api from "@/services/api";
 import { toast } from "vue3-toastify";
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const router = useRouter();
 const route = useRoute();
@@ -78,11 +81,11 @@ const handleSave = async () => {
       });
     }
 
-    toast.success(response.data.message || "تم الحفظ بنجاح");
+    toast.success(response.data.message || t('common.messages.success.saved'));
     router.push("/settings/test-methodology/list");
   } catch (error: any) {
     console.error("Error saving test methodology:", error);
-    const errorMessage = error.response?.data?.message || "حدث خطأ أثناء الحفظ";
+    const errorMessage = error.response?.data?.message || t('common.messages.error.saveFailed');
     toast.error(errorMessage);
   } finally {
     isLoading.value = false;
@@ -106,8 +109,8 @@ onMounted(() => {
 <template>
   <default-layout>
     <div class="test-methodology-form-page">
-      <PageHeader :icon="testMethodologyIcon" :title-key="isEditMode ? 'تعديل منهجية الاختبار' : 'إضافة منهجية اختبار'"
-        :description-key="isEditMode ? 'تعديل بيانات منهجية الاختبار' : 'إضافة منهجية اختبار جديدة'" />
+      <PageHeader :icon="testMethodologyIcon" :title-key="isEditMode ? t('pages.testMethodology.form.edit') : t('pages.testMethodology.form.add')"
+        :description-key="isEditMode ? t('pages.testMethodology.form.editDescription') : t('pages.testMethodology.form.addDescription')" />
 
       <div class="bg-gray-50 rounded-lg p-6">
         <v-form ref="formRef" v-model="isFormValid" @submit.prevent="handleSave">
@@ -115,38 +118,38 @@ onMounted(() => {
             <div class="w-10 h-9 rounded-lg bg-primary-500 flex items-center justify-center">
               <span v-html="listIcon"></span>
             </div>
-            <h2 class="text-xl font-bold text-primary-900">المعلومات العامة للمنهجية</h2>
+            <h2 class="text-xl font-bold text-primary-900">{{ t('pages.testMethodology.form.generalInfo') }}</h2>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div class="md:col-span-2">
-              <LanguageTabs :languages="availableLanguages" label="الإسم">
+              <LanguageTabs :languages="availableLanguages" :label="t('common.form.name')">
                 <template #en>
-                  <TextInput v-model="form.nameEn" placeholder="ادخل الاسم" :hide-details="false"
-                    :rules="[(v: string) => !!v || 'Name is required']" />
+                  <TextInput v-model="form.nameEn" :placeholder="t('form.fields.nameEn.placeholder')" :hide-details="false"
+                    :rules="[required()]" />
                 </template>
                 <template #ar>
-                  <TextInput v-model="form.nameAr" placeholder="ادخل الاسم" :hide-details="false"
-                    :rules="[(v: string) => !!v || 'الاسم مطلوب']" />
+                  <TextInput v-model="form.nameAr" :placeholder="t('form.fields.nameAr.placeholder')" :hide-details="false"
+                    :rules="[required()]" />
                 </template>
               </LanguageTabs>
             </div>
 
             <div>
-              <label class="block text-sm font-semibold text-gray-700 mb-3">الحالة</label>
+              <label class="block text-sm font-semibold text-gray-700 mb-3">{{ t('form.fields.status.label') }}</label>
               <div class="flex items-center gap-3 mt-1">
                 <v-radio-group v-model="form.status" inline hide-details>
                   <v-radio :value="true" color="primary">
                     <template #label>
                       <span :class="form.status ? 'text-primary font-semibold' : 'text-gray-600'">
-                        فعال
+                        {{ t('common.status.active') }}
                       </span>
                     </template>
                   </v-radio>
                   <v-radio :value="false" color="primary">
                     <template #label>
                       <span :class="!form.status ? 'text-primary font-semibold' : 'text-gray-600'">
-                        غير فعال
+                        {{ t('common.status.inactive') }}
                       </span>
                     </template>
                   </v-radio>
@@ -155,12 +158,12 @@ onMounted(() => {
             </div>
 
             <div class="md:col-span-3">
-              <LanguageTabs :languages="availableLanguages" label="الوصف">
+              <LanguageTabs :languages="availableLanguages" :label="t('form.fields.description.label')">
                 <template #en>
-                  <TextareaInput v-model="form.descriptionEn" placeholder="Enter description" :hide-details="true" />
+                  <TextareaInput v-model="form.descriptionEn" :placeholder="t('form.fields.descriptionEnglish.placeholder')" :hide-details="true" />
                 </template>
                 <template #ar>
-                  <TextareaInput v-model="form.descriptionAr" placeholder="ادخل الوصف" :hide-details="true" />
+                  <TextareaInput v-model="form.descriptionAr" :placeholder="t('form.fields.descriptionArabic.placeholder')" :hide-details="true" />
                 </template>
               </LanguageTabs>
             </div>
@@ -169,11 +172,11 @@ onMounted(() => {
           <!-- Action Buttons -->
           <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col">
             <ButtonWithIcon variant="flat" color="primary" rounded="4" height="48"
-              custom-class="min-w-56" :prepend-icon="saveIcon" label="حفظ" :loading="isLoading" :disabled="isLoading" @click="handleSave" />
+              custom-class="min-w-56" :prepend-icon="saveIcon" :label="t('common.actions.save')" :loading="isLoading" :disabled="isLoading" @click="handleSave" />
             
             <ButtonWithIcon prepend-icon="mdi-close" variant="flat" color="primary-50" rounded="4" height="48"
               custom-class="font-semibold text-base text-primary-700 px-6 min-w-56"
-              label="إغلاق" @click="handleCancel" />
+              :label="t('common.actions.close')" @click="handleCancel" />
           </div>
         </v-form>
       </div>

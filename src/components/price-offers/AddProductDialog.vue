@@ -1,19 +1,13 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import { useApi } from '@/composables/useApi';
+import { useI18n } from "vue-i18n";
 
 type RequestType = 'raw_materials' | 'fuel' | 'transfer_service' | 'trips' | 'logistics' | 'logistics-trips';
 
 interface Category {
   id: number;
   name: string;
-}
-
-interface SupplierItem {
-  id: number;
-  name: string;
-  code: string;
-  category: Category;
 }
 
 export interface ProductToAdd {
@@ -51,10 +45,13 @@ const props = defineProps<{
   /** عند true في المشتريات: عرض سعر الوحدة والخصم بدل عدد الرحلات/نوع الناقلة (مثل طلبات المشتريات) */
   showUnitPriceAndDiscount?: boolean;
   itemsQueryParams?: Record<string, string | number>;
+  /** Override default /items/list endpoint (e.g. /items/supplier-items) */
+  itemsEndpoint?: string;
   editProduct?: ProductToAdd | null;
   existingProducts?: ProductToAdd[];
   /** Options for discount type dropdown */
   discountTypeItems?: any[];
+  hideTripNo?: boolean;
 }>();
 
 const variant = computed(() => props.variant || 'purchases');
@@ -71,7 +68,7 @@ const discountTypeOptionsList = computed(() => {
   }
   return [
     { title: '%', value: 1 },
-    { title: 'ريال', value: 2 },
+    { title: t('purchases.orders.shared.labels.currencyRial'), value: 2 },
   ];
 });
 
@@ -82,6 +79,7 @@ const emit = defineEmits<{
 }>();
 
 const api = useApi();
+const { t } = useI18n();
 
 const internalOpen = computed({
   get: () => props.modelValue,
@@ -92,13 +90,15 @@ const internalOpen = computed({
 const isEditMode = computed(() => !!props.editProduct);
 
 // Data states
-const loading = ref(false);
-const supplierItems = ref<SupplierItem[]>([]);
+const categoriesLoading = ref(false);
+const itemsLoading = ref(false);
 const categories = ref<Category[]>([]);
 const activeTabId = ref<number | null>(null);
 const searchQuery = ref('');
 const showFullCategory = ref(false);
 const visibleTabsCount = 6;
+const loadedCategoryIds = ref<Set<number>>(new Set());
+const loadedItemIds = ref<Set<number>>(new Set());
 
 // Products with their form data
 const productsList = ref<ProductToAdd[]>([]);
@@ -112,17 +112,6 @@ const editProductData = ref<ProductToAdd | null>(null);
 const unitItemsList = computed(() => props.unitItems || []);
 const packageTypeItemsList = computed(() => props.transportTypes || []);
 
-// Computed: unique categories from supplier items
-const extractCategories = (items: SupplierItem[]): Category[] => {
-  const categoryMap = new Map<number, Category>();
-  items.forEach(item => {
-    if (item.category && !categoryMap.has(item.category.id)) {
-      categoryMap.set(item.category.id, item.category);
-    }
-  });
-  return Array.from(categoryMap.values());
-};
-
 // Computed: displayed tabs
 const displayedTabs = computed(() => {
   if (showFullCategory.value) {
@@ -131,19 +120,13 @@ const displayedTabs = computed(() => {
   return categories.value.slice(0, visibleTabsCount);
 });
 
-// Computed: products filtered by active tab and search (order is set on dialog open, not during typing)
 const filteredProducts = computed(() => {
   let filtered = productsList.value;
   
-  // Filter by category
   if (activeTabId.value !== null) {
-    filtered = filtered.filter(product => {
-      const supplierItem = supplierItems.value.find(i => i.id === product.item_id);
-      return supplierItem?.category?.id === activeTabId.value;
-    });
+    filtered = filtered.filter(product => product._categoryId === activeTabId.value);
   }
   
-  // Filter by search
   if (searchQuery.value.trim()) {
     const query = searchQuery.value.trim().toLowerCase();
     filtered = filtered.filter(product => 
@@ -168,33 +151,53 @@ const canAddProduct = (product: ProductToAdd): boolean => {
   return true;
 };
 
-// Fetch items: للمشتريات مع supplier_id => /items/supplier-items?supplier_id=:id
-const fetchItems = async () => {
-  loading.value = true;
+const fetchCategories = async () => {
+  categoriesLoading.value = true;
   try {
-    const isPurchasesWithSupplier = !isSalesMode.value && props.supplierId != null;
-    let url = isPurchasesWithSupplier
-      ? `/items/supplier-items?supplier_id=${props.supplierId}`
-      : '/items/supplier-items';
-
-    if (props.itemsQueryParams) {
-      const params = new URLSearchParams();
-      Object.entries(props.itemsQueryParams).forEach(([key, value]) => {
-        params.append(key, String(value));
-      });
-      url += (url.includes('?') ? '&' : '?') + params.toString();
-    }
-    
-    const res = await api.get<any>(url);
+    const params = new URLSearchParams();
+    const materialType = props.itemsQueryParams?.material_type;
+    if (materialType != null) params.set('material_type', String(materialType));
+    const supplierId = props.itemsQueryParams?.supplier_id ?? props.supplierId;
+    if (supplierId != null) params.set('supplier_id', String(supplierId));
+    const qs = params.toString();
+    const categoryUrl = qs ? `/categories/list?${qs}` : '/categories/list';
+    const res = await api.get<any>(categoryUrl);
     if (Array.isArray(res.data)) {
-      supplierItems.value = res.data;
-      categories.value = extractCategories(res.data);
+      categories.value = res.data;
+      if (categories.value.length > 0) {
+        activeTabId.value = categories.value[0].id;
+      }
+    }
+  } catch (e) {
+    console.error('Error fetching categories:', e);
+    categories.value = [];
+  } finally {
+    categoriesLoading.value = false;
+  }
+};
 
-      const mappedProducts = res.data.map((item: SupplierItem) => {
-        const existingProduct = props.existingProducts?.find(p => p.item_id === item.id);
-        if (existingProduct) {
-          return { ...existingProduct, isAdded: true };
-        }
+const fetchCategoryItems = async (categoryId: number) => {
+  if (loadedCategoryIds.value.has(categoryId)) return;
+
+  itemsLoading.value = true;
+  try {
+    const baseEndpoint = props.itemsEndpoint || '/items/list';
+    const params = new URLSearchParams();
+    params.set('category_id', String(categoryId));
+    const materialType = props.itemsQueryParams?.material_type;
+    if (materialType != null) params.set('material_type', String(materialType));
+    const supplierId = props.itemsQueryParams?.supplier_id ?? props.supplierId;
+    if (supplierId != null) params.set('supplier_id', String(supplierId));
+    const itemsUrl = `${baseEndpoint}?${params.toString()}`;
+    const res = await api.get<any>(itemsUrl);
+    if (Array.isArray(res.data)) {
+      const newProducts: ProductToAdd[] = [];
+      res.data.forEach((item: any) => {
+        loadedItemIds.value.add(item.id);
+
+        const isAlreadyInTable = props.existingProducts?.some(p => p.item_id === item.id);
+        if (isAlreadyInTable) return;
+
         const base: ProductToAdd = {
           item_id: item.id,
           item_name: item.name,
@@ -215,43 +218,54 @@ const fetchItems = async () => {
           discount: null,
           discount_type: null,
           id: null,
+          _categoryId: categoryId,
         };
         if (showPricingFields.value) {
           base.unit_price = null;
           base.discount = null;
         }
-        return base;
+        newProducts.push(base);
       });
 
-      // Sort on dialog open: products with values (isAdded) come first
-      productsList.value = mappedProducts.sort((a: ProductToAdd, b: ProductToAdd) => {
-        if (a.isAdded && !b.isAdded) return -1;
-        if (!a.isAdded && b.isAdded) return 1;
-        return 0;
+      const existingItemIds = new Set(productsList.value.map(p => p.item_id));
+      newProducts.forEach(p => {
+        if (!existingItemIds.has(p.item_id)) {
+          productsList.value.push(p);
+        }
       });
 
-      if (categories.value.length > 0) {
-        activeTabId.value = categories.value[0].id;
+      loadedCategoryIds.value.add(categoryId);
+
+      if (newProducts.length === 0) {
+        categories.value = categories.value.filter(c => c.id !== categoryId);
+        if (activeTabId.value === categoryId && categories.value.length > 0) {
+          activeTabId.value = categories.value[0].id;
+        }
       }
     }
   } catch (e) {
-    console.error('Error fetching items:', e);
-    supplierItems.value = [];
-    categories.value = [];
-    productsList.value = [];
+    console.error('Error fetching category items:', e);
   } finally {
-    loading.value = false;
+    itemsLoading.value = false;
   }
 };
 
-// Watch for dialog open
 watch(() => props.modelValue, (newVal) => {
-  if (newVal) {
-    if (isEditMode.value && props.editProduct) {
-      editProductData.value = { ...props.editProduct };
-    } else {
-      fetchItems();
-    }
+  if (!newVal) {
+    resetForm();
+    return;
+  }
+  if (isEditMode.value && props.editProduct) {
+    editProductData.value = { ...props.editProduct };
+  } else {
+    resetForm();
+    fetchCategories();
+  }
+});
+
+watch(activeTabId, (newId) => {
+  if (newId !== null && !isEditMode.value) {
+    fetchCategoryItems(newId);
   }
 });
 
@@ -337,7 +351,6 @@ const handleEditSave = () => {
 };
 
 const resetForm = () => {
-  supplierItems.value = [];
   categories.value = [];
   productsList.value = [];
   activeTabId.value = null;
@@ -345,6 +358,8 @@ const resetForm = () => {
   showFullCategory.value = false;
   editProductData.value = null;
   manuallyUnchecked.value.clear();
+  loadedCategoryIds.value.clear();
+  loadedItemIds.value.clear();
 };
 
 const closeDialog = () => {
@@ -356,9 +371,10 @@ const handleDone = () => {
   if (isEditMode.value) {
     handleEditSave();
   } else {
-    // Only save products that are explicitly marked as added (isAdded = true)
-    const productsToSave = productsList.value.filter(p => p.isAdded);
-    
+    const newlyAdded = productsList.value.filter(p => p.isAdded);
+    const existing = (props.existingProducts || []).map(ep => ({ ...ep, isAdded: true as boolean | undefined }));
+    const productsToSave = [...existing, ...newlyAdded];
+
     emit('saved', productsToSave);
     closeDialog();
   }
@@ -415,12 +431,12 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
         <span class="!bg-gray-50 border border-gray-100 rounded px-1 py-0.5 text-gray-600">
           <span v-html="cubeIcon"></span>
         </span>
-        {{ isEditMode ? 'تعديل منتج' : 'إضافة منتج' }}
+        {{ isEditMode ? t('common.productDialog.editProduct') : t('common.productDialog.addProduct') }}
       </div>
     </template>
 
-    <!-- Loading State -->
-    <div v-if="loading" class="flex items-center justify-center py-20">
+    <!-- Loading Categories -->
+    <div v-if="categoriesLoading" class="flex items-center justify-center py-20">
       <v-progress-circular indeterminate color="primary" />
     </div>
 
@@ -449,7 +465,7 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
             <TextInput 
               v-model="editProductData.quantity" 
               type="number" 
-              placeholder="الكمية" 
+              :placeholder="t('common.productDialog.quantity')" 
               density="compact"
               class="min-w-[170px]" 
             />
@@ -460,7 +476,7 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
             <SelectInput 
               v-model="editProductData.unit_id" 
               :items="unitItemsList" 
-              placeholder="الوحدة" 
+              :placeholder="t('common.productDialog.unit')" 
               density="compact"
               class="min-w-[170px]" 
               item-title="title" 
@@ -473,7 +489,7 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
             <TextInput 
               v-model="editProductData.unit_price" 
               type="number" 
-              placeholder="سعر الوحدة" 
+              :placeholder="t('purchases.orders.shared.tableHeaders.unitPrice')" 
               density="compact"
               class="min-w-[170px]" 
             />
@@ -485,11 +501,11 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
               v-model="editProductData.discount" 
               v-model:selectValue="editProductData.discount_type"
               type="number" 
-              placeholder="الخصم" 
+              :placeholder="t('purchases.orders.shared.tableHeaders.discount')" 
               density="compact"
               select-width="75px"
               :select-items="discountTypeOptionsList"
-              select-placeholder="اختر"
+              :select-placeholder="t('purchases.shared.forms.common.select')"
               class="min-w-[170px]" 
             />
           </div>
@@ -499,7 +515,7 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
             <SelectInput 
               v-model="editProductData.transport_type" 
               :items="packageTypeItemsList" 
-              placeholder="نوع الناقلة"
+              :placeholder="t('purchases.requests.materialProduct.form.tableHeaders.transportType')"
               density="compact" 
               class="min-w-[170px]" 
               item-title="title" 
@@ -512,7 +528,7 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
             <SelectInput 
               v-model="editProductData.transport_type" 
               :items="packageTypeItemsList" 
-              placeholder="نوع المركبات"
+              :placeholder="t('purchases.requests.materialProduct.form.tableHeaders.vehicleTypes')"
               density="compact" 
               class="min-w-[170px]" 
               item-title="title" 
@@ -522,11 +538,11 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
           </div>
 
           <!-- Delivery Count (trip_no) - purchases فقط بدون سعر/خصم -->
-          <div v-if="!showPricingFields && requestType == 'raw_materials'|| requestType == 'logistics' || requestType === 'logistics-trips'">
+          <div v-if="!hideTripNo && ((!showPricingFields && requestType == 'raw_materials') || requestType == 'logistics' || requestType === 'logistics-trips')">
             <TextInput 
               v-model="editProductData.trip_no" 
               type="number" 
-              placeholder="عدد الرحلات" 
+              :placeholder="t('purchases.requests.logistics.form.detailCard.tripCount')" 
               density="compact"
               class="min-w-[170px]" 
             />
@@ -538,7 +554,7 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
           <div v-if="requestType === 'logistics'">
             <DatePickerInput 
               v-model="editProductData.from_date" 
-              placeholder="تاريخ بداية النقل" 
+              :placeholder="t('purchases.orders.shared.tableHeaders.transportStartDate')" 
               density="compact"
               class="min-w-[170px]" 
             />
@@ -548,7 +564,7 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
           <div v-if="requestType === 'logistics-trips'">
             <DatePickerInput 
               v-model="editProductData.trip_date" 
-              placeholder="تاريخ الرحلة" 
+              :placeholder="t('purchases.orders.shared.tableHeaders.tripDate')" 
               density="compact"
               class="min-w-[170px]" 
             />
@@ -559,7 +575,7 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
             <PriceInput 
               v-model="editProductData.trip_price" 
               showRialIcon
-              placeholder="سعر الرحلة" 
+              :placeholder="t('purchases.orders.shared.tableHeaders.tripPrice')" 
               density="compact"
               class="min-w-[170px]" 
             />
@@ -571,11 +587,11 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
               v-model="editProductData.discount" 
               v-model:selectValue="editProductData.discount_type"
               type="number" 
-              placeholder="الخصم" 
+              :placeholder="t('purchases.orders.shared.tableHeaders.discount')" 
               density="compact"
               select-width="75px"
               :select-items="discountTypeOptionsList"
-              select-placeholder="اختر"
+              :select-placeholder="t('purchases.shared.forms.common.select')"
               class="min-w-[170px]" 
             />
           </div>
@@ -584,10 +600,10 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
       </div>
     </div>
 
-    <!-- No Products State -->
-    <div v-else-if="!isEditMode && supplierItems.length === 0" class="flex flex-col items-center justify-center py-20 text-gray-500">
+    <!-- No Categories State -->
+    <div v-else-if="!isEditMode && categories.length === 0" class="flex flex-col items-center justify-center py-20 text-gray-500">
       <v-icon size="64" color="gray-400">mdi-package-variant-closed</v-icon>
-      <p class="mt-4 text-lg font-medium">{{ isSalesMode ? 'لا توجد منتجات تابعة لهذا العميل' : 'لا توجد منتجات تابعة لهذا المزود' }}</p>
+      <p class="mt-4 text-lg font-medium">{{ t('common.ui.noData') }}</p>
     </div>
 
     <!-- Add Mode Content -->
@@ -622,15 +638,20 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
 
       <!-- Search -->
       <div class="mb-3">
-        <TextInput v-model="searchQuery" placeholder="ابحث في المنتجات ..." density="comfortable">
+        <TextInput v-model="searchQuery" :placeholder="t('common.productDialog.searchProducts')" density="comfortable">
           <template #prepend-inner>
             <v-icon v-html="searchIcon"></v-icon>
           </template>
         </TextInput>
       </div>
 
+      <!-- Products Loading -->
+      <div v-if="itemsLoading" class="flex items-center justify-center py-10 min-h-[250px]">
+        <v-progress-circular indeterminate color="primary" size="32" />
+      </div>
+
       <!-- Products List -->
-      <div class="space-y-1 max-h-[350px] min-h-[250px] overflow-auto custom-scroll">
+      <div v-else class="space-y-1 max-h-[350px] min-h-[250px] overflow-auto custom-scroll">
         <div v-for="product in filteredProducts" :key="product.item_id">
           <div class="flex gap-3 rounded-lg border !border-gray-100 p-3 bg-white">
             <!-- Actions -->
@@ -672,7 +693,7 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
               <div>
                 <PriceInput 
                   v-model="product.quantity"
-                  placeholder="الكمية" 
+                  :placeholder="t('common.productDialog.quantity')" 
                   density="compact"
                   class="min-w-[170px]" 
                 />
@@ -683,7 +704,7 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
                 <SelectInput 
                   v-model="product.unit_id" 
                   :items="unitItemsList" 
-                  placeholder="الوحدة" 
+                  :placeholder="t('common.productDialog.unit')" 
                   density="compact"
                   class="min-w-[170px]" 
                   item-title="title" 
@@ -695,7 +716,7 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
               <div v-if="showPricingFields">
                 <PriceInput 
                   v-model="product.unit_price" 
-                  placeholder="سعر الوحدة" 
+                  :placeholder="t('purchases.orders.shared.tableHeaders.unitPrice')" 
                   density="compact"
                   class="min-w-[170px]" 
                 />
@@ -707,11 +728,11 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
                   v-model="product.discount" 
                   v-model:selectValue="product.discount_type"
                   type="number" 
-                  placeholder="الخصم" 
+                  :placeholder="t('purchases.orders.shared.tableHeaders.discount')" 
                   density="compact"
                   select-width="75px"
                   :select-items="discountTypeOptionsList"
-                  select-placeholder="اختر"
+                  :select-placeholder="t('purchases.shared.forms.common.select')"
                   class="min-w-[170px]" 
                 />
               </div>
@@ -721,7 +742,7 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
                 <SelectInput 
                   v-model="product.transport_type" 
                   :items="packageTypeItemsList" 
-                  placeholder="نوع الناقلة"
+                  :placeholder="t('purchases.requests.materialProduct.form.tableHeaders.transportType')"
                   density="compact" 
                   class="min-w-[170px]" 
                   item-title="title" 
@@ -734,7 +755,7 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
                 <SelectInput 
                   v-model="product.transport_type" 
                   :items="packageTypeItemsList" 
-                  placeholder="نوع المركبات"
+                  :placeholder="t('purchases.requests.materialProduct.form.tableHeaders.vehicleTypes')"
                   density="compact" 
                   class="min-w-[170px]" 
                   item-title="title" 
@@ -743,12 +764,12 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
                 />
               </div>
 
-              <!-- Delivery Count (trip_no) - purchases فقط بدون سعر/خصم -->
-              <div v-if="requestType == 'raw_materials' || requestType == 'logistics' || requestType === 'logistics-trips'">
+              <!-- Delivery Count (trip_no) - purchases فقط بدون سعر/خصم (مخفي مع سعر الوحدة/الخصم لمواد خام) -->
+              <div v-if="!hideTripNo && ((!showPricingFields && requestType == 'raw_materials') || requestType == 'logistics' || requestType === 'logistics-trips')">
                 <TextInput 
                   v-model="product.trip_no" 
                   type="number"
-                  placeholder="عدد الرحلات" 
+                  :placeholder="t('purchases.requests.logistics.form.detailCard.tripCount')" 
                   density="compact"
                   class="min-w-[170px]" 
                 />
@@ -760,7 +781,7 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
               <div v-if="requestType === 'logistics'">
                 <DatePickerInput 
                   v-model="product.from_date" 
-                  placeholder="تاريخ بداية النقل" 
+                  :placeholder="t('purchases.orders.shared.tableHeaders.transportStartDate')" 
                   density="compact"
                   class="min-w-[170px]" 
                 />
@@ -770,7 +791,7 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
               <div v-if="requestType === 'logistics-trips'">
                 <DatePickerInput 
                   v-model="product.trip_date" 
-                  placeholder="تاريخ الرحلة" 
+                  :placeholder="t('purchases.orders.shared.tableHeaders.tripDate')" 
                   density="compact"
                   class="min-w-[170px]" 
                 />
@@ -781,7 +802,7 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
                 <PriceInput 
                   v-model="product.trip_price" 
                   showRialIcon
-                  placeholder="سعر الرحلة" 
+                  :placeholder="t('purchases.orders.shared.tableHeaders.tripPrice')" 
                   density="compact"
                   class="min-w-[170px]" 
                 />
@@ -799,7 +820,7 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
           color="primary" 
           size="large" 
           custom-class="px-8" 
-          :label="isEditMode ? 'حفظ التعديلات' : 'تم'"
+          :label="isEditMode ? t('common.productDialog.saveChanges') : t('common.productDialog.done')"
           @click="handleDone" 
           :disabled="!!(isEditMode && editProductData && !canAddProduct(editProductData))"
         />
@@ -810,7 +831,7 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
           border="gray-300" 
           size="large" 
           custom-class="px-4"
-          label="إلغاء" 
+          :label="t('common.actions.cancel')" 
           @click="handleCancel" 
         />
       </div>

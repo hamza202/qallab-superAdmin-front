@@ -1,22 +1,30 @@
 <script setup lang="ts">
 import { reactive, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 interface Props {
-  contractorClassification: string | null;
-  classificationGrade: string | null;
-  scopeOfWork: string | null;
-  municipalLicenseNumber: string;
-  municipalLicenseExpiry: string;
-  municipalLicenseStatus: string | null;
-  safetyCertification: string | null;
-  environmentalCertification: string | null;
-  civilDefenseApproval: boolean;
-  contractorClassificationItems: Array<{ title: string; value: string }>;
-  classificationGradeItems: Array<{ title: string; value: string }>;
-  scopeOfWorkItems: Array<{ title: string; value: string }>;
-  municipalLicenseStatusItems: Array<{ title: string; value: string }>;
-  safetyCertificationItems: Array<{ title: string; value: string }>;
-  environmentalCertificationItems: Array<{ title: string; value: string }>;
+  licenseType: string | null;
+  licenseNumber: string;
+  issuingAuthority: string | null;
+  issueDate: string;
+  expiryDate: string;
+  licenseStatus: string | null;
+  licensedActivity: string | null;
+  activityTypes: string[];
+  productTypes: number[];
+  rawMaterialTypes: string[];
+  rawMaterialSource: string | null;
+  licensedCapacity: number | null;
+  licenseTypeItems: Array<{ title: string; value: string }>;
+  issuingAuthorityItems: Array<{ title: string; value: string }>;
+  licenseStatusItems: Array<{ title: string; value: string }>;
+  licensedActivityItems: Array<{ title: string; value: string }>;
+  activityTypesItems: Array<{ title: string; value: string }>;
+  productTypesItems: Array<{ title: string; value: number }>;
+  rawMaterialTypesItems: Array<{ title: string; value: string }>;
+  rawMaterialSourceItems: Array<{ title: string; value: string }>;
   formErrors?: Record<string, string>;
 }
 
@@ -27,43 +35,47 @@ const emit = defineEmits<{
   'clear:error': [field: string];
 }>();
 
-const clearError = (field: string) => {
-  emit('clear:error', field);
+const formData = reactive({
+  licenseType: props.licenseType,
+  licenseNumber: props.licenseNumber,
+  issuingAuthority: props.issuingAuthority,
+  issueDate: props.issueDate,
+  expiryDate: props.expiryDate,
+  licenseStatus: props.licenseStatus,
+  licensedActivity: props.licensedActivity,
+  activityTypes: props.activityTypes,
+  productTypes: props.productTypes,
+  rawMaterialTypes: props.rawMaterialTypes,
+  rawMaterialSource: props.rawMaterialSource,
+  licensedCapacity: props.licensedCapacity,
+});
+
+watch(() => props, (newProps) => {
+  Object.assign(formData, {
+    licenseType: newProps.licenseType,
+    licenseNumber: newProps.licenseNumber,
+    issuingAuthority: newProps.issuingAuthority,
+    issueDate: newProps.issueDate,
+    expiryDate: newProps.expiryDate,
+    licenseStatus: newProps.licenseStatus,
+    licensedActivity: newProps.licensedActivity,
+    activityTypes: newProps.activityTypes,
+    productTypes: newProps.productTypes,
+    rawMaterialTypes: newProps.rawMaterialTypes,
+    rawMaterialSource: newProps.rawMaterialSource,
+    licensedCapacity: newProps.licensedCapacity,
+  });
+}, { deep: true });
+
+const clearError = (field: string) => emit('clear:error', field);
+
+const emitUpdate = () => {
+  emit('update:formData', { ...formData });
 };
 
 const handleFieldUpdate = (field: string) => {
   clearError(field);
   emitUpdate();
-};
-
-const formData = reactive({
-  contractorClassification: props.contractorClassification,
-  classificationGrade: props.classificationGrade,
-  scopeOfWork: props.scopeOfWork,
-  municipalLicenseNumber: props.municipalLicenseNumber,
-  municipalLicenseExpiry: props.municipalLicenseExpiry,
-  municipalLicenseStatus: props.municipalLicenseStatus,
-  safetyCertification: props.safetyCertification,
-  environmentalCertification: props.environmentalCertification,
-  civilDefenseApproval: props.civilDefenseApproval,
-});
-
-watch(() => props, (newProps) => {
-  Object.assign(formData, {
-    contractorClassification: newProps.contractorClassification,
-    classificationGrade: newProps.classificationGrade,
-    scopeOfWork: newProps.scopeOfWork,
-    municipalLicenseNumber: newProps.municipalLicenseNumber,
-    municipalLicenseExpiry: newProps.municipalLicenseExpiry,
-    municipalLicenseStatus: newProps.municipalLicenseStatus,
-    safetyCertification: newProps.safetyCertification,
-    environmentalCertification: newProps.environmentalCertification,
-    civilDefenseApproval: newProps.civilDefenseApproval,
-  });
-}, { deep: true });
-
-const emitUpdate = () => {
-  emit('update:formData', { ...formData });
 };
 
 const infoIcon = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -86,28 +98,22 @@ const datepickerInput = `<svg width="16" height="16" viewBox="0 0 16 16" fill="n
 
 <template>
   <div class="mb-6 bg-gray-50 rounded-lg p-6">
-    <h2 class="text-lg font-bold text-primary-900 mb-4">البيانات التجارية</h2>
+    <h2 class="text-lg font-bold text-primary-900 mb-4">{{ t('pages.factories.form.tabs.commercialInfo') }}</h2>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-      <SelectWithIconInput clearable v-model="formData.contractorClassification" 
-        @update:model-value="() => handleFieldUpdate('contractor_classification')"
-        label="تصنيف المقاول" placeholder="اختر" :items="contractorClassificationItems" 
-        :error-messages="formErrors?.contractor_classification" required />
-      <SelectWithIconInput clearable v-model="formData.classificationGrade" 
-        @update:model-value="() => handleFieldUpdate('classification_grade')"
-        label="درجة تصنيف المقاول" placeholder="اختر" :items="classificationGradeItems" 
-        :error-messages="formErrors?.classification_grade" required />
-      <SelectWithIconInput clearable v-model="formData.scopeOfWork" 
-        @update:model-value="() => handleFieldUpdate('scope_of_work')" label="نطاق الأعمال"
-        placeholder="اختر" :items="scopeOfWorkItems" :error-messages="formErrors?.scope_of_work" />
+      <SelectWithIconInput clearable v-model="formData.licenseType" @update:model-value="() => handleFieldUpdate('license_type')"
+        :label="t('form.factory.commercialInfo.licenseType.label')" :placeholder="t('form.factory.commercialInfo.licenseType.placeholder')" :items="licenseTypeItems" 
+        :error-messages="formErrors?.license_type" />
 
-      <TextInput v-model="formData.municipalLicenseNumber" @input="() => handleFieldUpdate('municipal_license_number')" 
-        label="رقم رخصة البلدية" placeholder="ادخل الرقم" 
-        :error-messages="formErrors?.municipal_license_number" />
-      <DatePickerInput v-model="formData.municipalLicenseExpiry" 
-        @update:model-value="() => handleFieldUpdate('municipal_license_expiry')" 
-        label="تاريخ انتهاء رخصة البلدية" placeholder="اختر التاريخ" 
-        :error-messages="formErrors?.municipal_license_expiry">
+      <TextInput v-model="formData.licenseNumber" @input="() => handleFieldUpdate('license_number')" :label="t('form.identity.licenseNumber.label')"
+        :placeholder="t('form.identity.licenseNumber.placeholder')" :error-messages="formErrors?.license_number" />
+
+      <SelectWithIconInput clearable v-model="formData.issuingAuthority" @update:model-value="() => handleFieldUpdate('issuing_authority')"
+        :label="t('form.factory.commercialInfo.issuingAuthority.label')" :placeholder="t('form.factory.commercialInfo.issuingAuthority.placeholder')" :items="issuingAuthorityItems" 
+        :error-messages="formErrors?.issuing_authority" />
+
+      <DatePickerInput v-model="formData.issueDate" @update:model-value="() => handleFieldUpdate('issue_date')" :label="t('form.identity.licenseIssueDate.label')"
+        :placeholder="t('form.identity.licenseIssueDate.placeholder')" :error-messages="formErrors?.issue_date">
         <template #append-inner>
           <v-tooltip location="top" content-class="custom-tooltip">
             <template #activator="{ props: tooltipProps }">
@@ -115,7 +121,7 @@ const datepickerInput = `<svg width="16" height="16" viewBox="0 0 16 16" fill="n
                 custom-class="!min-w-0 p-0" :prepend-icon="infoIcon" v-bind="tooltipProps" />
             </template>
             <div>
-              تاريخ انتهاء صلاحية رخصة البلدية
+              {{ t('form.identity.licenseIssueDate.info') }}
             </div>
           </v-tooltip>
         </template>
@@ -123,43 +129,68 @@ const datepickerInput = `<svg width="16" height="16" viewBox="0 0 16 16" fill="n
           <span v-html="datepickerInput"></span>
         </template>
       </DatePickerInput>
-      <SelectWithIconInput clearable v-model="formData.municipalLicenseStatus" 
-        @update:model-value="() => handleFieldUpdate('municipal_license_status')"
-        label="حالة رخصة البلدية" placeholder="اختر" :items="municipalLicenseStatusItems" 
-        :error-messages="formErrors?.municipal_license_status" />
 
-      <SelectWithIconInput clearable v-model="formData.safetyCertification" 
-        @update:model-value="() => handleFieldUpdate('safety_certification')"
-        label="شهادات السلامة المهنية" placeholder="اختر" :items="safetyCertificationItems" 
-        :error-messages="formErrors?.safety_certification" />
-
-      <SelectWithIconInput clearable v-model="formData.environmentalCertification" 
-        @update:model-value="() => handleFieldUpdate('environmental_certification')"
-        label="شهادات البيئة" placeholder="اختر" :items="environmentalCertificationItems" 
-        :error-messages="formErrors?.environmental_certification" />
+      <DatePickerInput v-model="formData.expiryDate" @update:model-value="() => handleFieldUpdate('expiry_date')" :label="t('form.identity.licenseExpiryDate.label')"
+        :placeholder="t('form.identity.licenseExpiryDate.placeholder')" :error-messages="formErrors?.expiry_date">
+        <template #append-inner>
+          <v-tooltip location="top" content-class="custom-tooltip">
+            <template #activator="{ props: tooltipProps }">
+              <ButtonWithIcon variant="text" size="small" density="compact"
+                custom-class="!min-w-0 p-0" :prepend-icon="infoIcon" v-bind="tooltipProps" />
+            </template>
+            <div>
+              {{ t('form.identity.licenseExpiryDate.info') }}
+            </div>
+          </v-tooltip>
+        </template>
+        <template #prepend-inner>
+          <span v-html="datepickerInput"></span>
+        </template>
+      </DatePickerInput>
 
       <div>
-        <span class="text-gray-700 text-sm font-semibold mb-2 block">موافقة الدفاع المدني ؟</span>
+        <span class="text-gray-700 text-sm font-semibold mb-2 block">{{ t('form.factory.commercialInfo.licenseStatus.label') }}</span>
         <div class="flex gap-4">
-          <v-radio-group v-model="formData.civilDefenseApproval" 
-            @update:model-value="() => handleFieldUpdate('civil_defense_approval')" inline hide-details>
-            <v-radio :value="true" color="primary">
+          <v-radio-group v-model="formData.licenseStatus" @update:model-value="() => handleFieldUpdate('license_status')" inline hide-details>
+            <v-radio value="active" color="primary">
               <template #label>
-                <span :class="formData.civilDefenseApproval ? 'text-primary font-semibold' : 'text-gray-600'">
-                  نعم
+                <span :class="formData.licenseStatus === 'active' ? 'text-primary font-semibold' : 'text-gray-600'">
+                  {{ t('common.status.active') }}
                 </span>
               </template>
             </v-radio>
-            <v-radio :value="false" color="primary">
+            <v-radio value="inactive" color="primary">
               <template #label>
-                <span :class="!formData.civilDefenseApproval ? 'text-primary font-semibold' : 'text-gray-600'">
-                  لا
+                <span :class="formData.licenseStatus === 'inactive' ? 'text-primary font-semibold' : 'text-gray-600'">
+                  {{ t('common.status.inactive') }}
                 </span>
               </template>
             </v-radio>
           </v-radio-group>
         </div>
       </div>
+
+      <SelectWithIconInput clearable v-model="formData.licensedActivity" @update:model-value="() => handleFieldUpdate('licensed_activity')" :label="t('form.factory.commercialInfo.licensedActivity.label')"
+        :placeholder="t('form.factory.commercialInfo.licensedActivity.placeholder')"  :items="licensedActivityItems"  :error-messages="formErrors?.licensed_activity"/>
+
+      <MultipleSelectInput v-model="formData.activityTypes" @update:model-value="() => handleFieldUpdate('activity_types')"
+        :label="t('form.factory.commercialInfo.activityTypes.label')" :placeholder="t('form.factory.commercialInfo.activityTypes.placeholder')" :items="activityTypesItems"
+        :input-props="{ clearable: true }" :error-messages="formErrors?.activity_types" />
+
+      <MultipleSelectInput v-model="formData.productTypes" @update:model-value="() => handleFieldUpdate('product_types')"
+        :label="t('form.factory.commercialInfo.productTypes.label')" :placeholder="t('form.factory.commercialInfo.productTypes.placeholder')" :items="productTypesItems"
+        :input-props="{ clearable: true }" :error-messages="formErrors?.product_types" />
+
+      <MultipleSelectInput v-model="formData.rawMaterialTypes" @update:model-value="() => handleFieldUpdate('raw_material_types')"
+        :label="t('form.factory.commercialInfo.rawMaterialTypes.label')" :placeholder="t('form.factory.commercialInfo.rawMaterialTypes.placeholder')" :items="rawMaterialTypesItems"
+        :input-props="{ clearable: true }" :error-messages="formErrors?.raw_material_types" />
+
+      <SelectWithIconInput clearable v-model="formData.rawMaterialSource" @update:model-value="() => handleFieldUpdate('raw_material_source')"
+        :label="t('form.factory.commercialInfo.rawMaterialSource.label')" :placeholder="t('form.factory.commercialInfo.rawMaterialSource.placeholder')" :items="rawMaterialSourceItems" 
+        :error-messages="formErrors?.raw_material_source" />
+
+      <TextInput v-model="formData.licensedCapacity" @input="() => handleFieldUpdate('licensed_capacity')" :label="t('form.factory.commercialInfo.licensedCapacity.label')"
+        :placeholder="t('form.factory.commercialInfo.licensedCapacity.placeholder')" type="number" :error-messages="formErrors?.licensed_capacity" />
     </div>
   </div>
 </template>

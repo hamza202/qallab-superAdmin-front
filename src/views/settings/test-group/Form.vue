@@ -3,6 +3,9 @@ import { ref, reactive, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import testGroupService, { type TestGroup } from '@/services/api/test-group.service'
 import { toast } from "vue3-toastify";
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const router = useRouter();
 const route = useRoute();
@@ -86,11 +89,11 @@ const handleSave = async () => {
       await testGroupService.create(formData);
     }
 
-    toast.success("تم الحفظ بنجاح");
+    toast.success(t('common.messages.success.saved'));
     router.push("/settings/test-group/list");
   } catch (error: any) {
     console.error("Error saving test group:", error);
-    const errorMessage = error.response?.data?.message || "حدث خطأ أثناء الحفظ";
+    const errorMessage = error.response?.data?.message || t('common.messages.error.saveFailed');
     toast.error(errorMessage);
   } finally {
     isLoading.value = false;
@@ -114,7 +117,7 @@ const fetchParentGroups = async () => {
     }))
   } catch (error: any) {
     console.error('Error fetching parent groups:', error)
-    toast.error(error.response?.data?.message || 'حدث خطأ أثناء جلب المجموعات')
+    toast.error(error.response?.data?.message || t('common.messages.general.loadDataFailed'))
   } finally {
     loadingParentGroups.value = false
   }
@@ -136,7 +139,7 @@ const fetchTestGroupData = async () => {
     form.status = data.is_active
   } catch (error: any) {
     console.error('Error fetching test group:', error)
-    toast.error(error.response?.data?.message || 'حدث خطأ أثناء جلب البيانات')
+    toast.error(error.response?.data?.message || t('common.messages.general.loadDataFailed'))
   } finally {
     isLoading.value = false
   }
@@ -159,8 +162,8 @@ onMounted(async () => {
 <template>
   <default-layout>
     <div class="test-group-form-page">
-      <PageHeader :icon="testGroupIcon" :title-key="isEditMode ? 'تعديل مجموعة الاختبارات' : 'إضافة مجموعة الاختبارات'"
-        :description-key="isEditMode ? 'تعديل بيانات مجموعة الاختبارات' : 'إضافة مجموعة اختبارات جديدة'" />
+      <PageHeader :icon="testGroupIcon" :title-key="isEditMode ? t('pages.testGroup.form.edit') : t('pages.testGroup.form.add')"
+        :description-key="isEditMode ? t('pages.testGroup.form.editDescription') : t('pages.testGroup.form.addDescription')" />
 
       <div class="bg-gray-50 rounded-lg p-6">
         <v-form ref="formRef" v-model="isFormValid" @submit.prevent="handleSave">
@@ -169,56 +172,56 @@ onMounted(async () => {
             <div class="w-10 h-9 rounded-lg bg-primary-500 flex items-center justify-center">
               <span v-html="listIcon"></span>
             </div>
-            <h2 class="text-xl font-bold text-primary-900">المعلومات العامة للمجموعة</h2>
+            <h2 class="text-xl font-bold text-primary-900">{{ t('pages.testGroup.form.generalInfo') }}</h2>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <!-- Name (Bilingual) -->
             <div class="md:col-span-2">
-              <LanguageTabs :languages="availableLanguages" label="الإسم">
+              <LanguageTabs :languages="availableLanguages" :label="t('common.form.name')">
                 <template #en>
-                  <TextInput v-model="form.nameEn" placeholder="ادخل الاسم" :hide-details="false"
-                    :rules="[(v: string) => !!v || 'Name is required']" />
+                  <TextInput v-model="form.nameEn" :placeholder="t('form.fields.nameEn.placeholder')" :hide-details="false"
+                    :rules="[required()]" />
                 </template>
                 <template #ar>
-                  <TextInput v-model="form.nameAr" placeholder="ادخل الاسم" :hide-details="false"
-                    :rules="[(v: string) => !!v || 'الاسم مطلوب']" />
+                  <TextInput v-model="form.nameAr" :placeholder="t('form.fields.nameAr.placeholder')" :hide-details="false"
+                    :rules="[required()]" />
                 </template>
               </LanguageTabs>
             </div>
 
             <!-- Main Test Group -->
-            <SelectWithIconInput v-model="form.mainTestGroup" :items="mainTestGroupItems" placeholder="اختر"
-              label="مجموعة الاختبار الرئيسية" :hide-details="false" :loading="loadingParentGroups" />
+            <SelectWithIconInput v-model="form.mainTestGroup" :items="mainTestGroupItems" :placeholder="t('common.form.choose')"
+              :label="t('pages.testGroup.form.mainTestGroup')" :hide-details="false" :loading="loadingParentGroups" />
 
             <!-- Description (Bilingual) -->
             <div class="md:col-span-2">
-              <LanguageTabs :languages="availableLanguages" label="الوصف">
+              <LanguageTabs :languages="availableLanguages" :label="t('form.fields.description.label')">
                 <template #en>
-                  <TextareaInput v-model="form.descriptionEn" placeholder="Enter description" :hide-details="true" />
+                  <TextareaInput v-model="form.descriptionEn" :placeholder="t('form.fields.descriptionEnglish.placeholder')" :hide-details="true" />
                 </template>
                 <template #ar>
-                  <TextareaInput v-model="form.descriptionAr" placeholder="ادخل الوصف" :hide-details="true" />
+                  <TextareaInput v-model="form.descriptionAr" :placeholder="t('form.fields.descriptionArabic.placeholder')" :hide-details="true" />
                 </template>
               </LanguageTabs>
             </div>
 
             <!-- Status -->
             <div>
-              <label class="block text-sm font-semibold text-gray-700 mb-3">الحالة</label>
+              <label class="block text-sm font-semibold text-gray-700 mb-3">{{ t('form.fields.status.label') }}</label>
               <div class="flex items-center gap-3 mt-1">
                 <v-radio-group v-model="form.status" inline hide-details>
                   <v-radio :value="true" color="primary">
                     <template #label>
                       <span :class="form.status ? 'text-primary font-semibold' : 'text-gray-600'">
-                        فعال
+                        {{ t('common.status.active') }}
                       </span>
                     </template>
                   </v-radio>
                   <v-radio :value="false" color="primary">
                     <template #label>
                       <span :class="!form.status ? 'text-primary font-semibold' : 'text-gray-600'">
-                        غير فعال
+                        {{ t('common.status.inactive') }}
                       </span>
                     </template>
                   </v-radio>
@@ -230,11 +233,11 @@ onMounted(async () => {
           <!-- Action Buttons -->
             <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col">
               <ButtonWithIcon variant="flat" color="primary" rounded="4" height="48"
-                custom-class="min-w-56" :prepend-icon="saveIcon" label="حفظ" @click="handleSave" />
+                custom-class="min-w-56" :prepend-icon="saveIcon" :label="t('common.actions.save')" @click="handleSave" />
               
               <ButtonWithIcon prepend-icon="mdi-close" variant="flat" color="primary-50" rounded="4" height="48"
                 custom-class="font-semibold text-base text-primary-700 px-6 min-w-56"
-                label="إغلاق" @click="handleCancel" />
+                :label="t('common.actions.close')" @click="handleCancel" />
             </div>
         </v-form>
       </div>

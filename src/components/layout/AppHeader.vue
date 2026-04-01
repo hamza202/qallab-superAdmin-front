@@ -11,7 +11,7 @@
                     </h1>
                 </div> -->
                 <div class="flex items-center gap-5 flex-1">
-                    <textInput density="comfortable" variant="outlined" hide-details placeholder="Search"
+                    <textInput density="comfortable" variant="outlined" hide-details :placeholder="t('common.actions.search')"
                         class="max-w-md w-full flex-1 hidden sm:block">
                         <template #prepend-inner>
                             <span class="text-gray-500" v-html="searchIcon"></span>

@@ -3,7 +3,9 @@ import { ref, computed, onMounted } from "vue";
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router';
 import AddProductDialogFuelsQuotation, { type FuelQuotationProductToAdd } from '@/components/price-offers/AddProductDialogFuelsQuotation.vue';
+import EditProductsDialog from '@/components/price-offers/EditProductsDialog.vue';
 import TopHeader from '@/components/price-offers/TopHeader.vue';
+import AppFormBreadcrumb from '@/components/common/AppFormBreadcrumb.vue';
 import DatePickerInput from '@/components/common/forms/DatePickerInput.vue';
 import DateTimePickerInput from '@/components/common/forms/DateTimePickerInput.vue';
 import TelInput from '@/components/common/forms/TelInput.vue';
@@ -12,7 +14,7 @@ import { useCalculations } from "@/composables/useCalculations";
 import { fileIcon, mapMarkerIcon, messagePlusIcon, filePlusIcon, listIcon, CoinHandIcon, fileCheckIcon } from '@/components/icons/priceOffersIcons';
 import { returnIcon, saveIcon, rialIcon } from '@/components/icons/globalIcons';
 
-useI18n()
+const { t } = useI18n()
 const api = useApi();
 const route = useRoute();
 const router = useRouter();
@@ -158,21 +160,27 @@ const fetchFormData = async () => {
 
         // Populate products (items)
         if (Array.isArray(data.items) && data.items.length > 0) {
-            productTableItems.value = data.items.map((item: any) => ({
-                id: item.id,
-                item_id: Number(item.item_id),
-                item_name: item.item_name ?? '',
-                unit_id: item.unit_id ?? null,
-                unit_name: item.unit_name ?? '',
-                quantity: item.quantity ?? null,
-                item_using: item.item_using ?? null,
-                item_using_name: getItemUsingName(item.item_using),
-                unit_price: item.price_per_unit ?? null,
-                discount: item.discount_val ?? null,
-                discount_type: item.discount_type ?? 2, // 1 = percentage, 2 = fixed
-                tax_amount: item.total_tax ?? null,
-                notes: item.note ?? item.notes ?? '',
-            }));
+            productTableItems.value = data.items.map((item: any) => {
+                const itemId = Number(item.item_id);
+                if (item.id && itemId) {
+                    originalProductIds.value.set(itemId, item.id);
+                }
+                return {
+                    id: item.id,
+                    item_id: itemId,
+                    item_name: item.item_name ?? '',
+                    unit_id: item.unit_id ?? null,
+                    unit_name: item.unit_name ?? '',
+                    quantity: item.quantity ?? null,
+                    item_using: item.item_using ?? null,
+                    item_using_name: getItemUsingName(item.item_using),
+                    unit_price: item.price_per_unit ?? null,
+                    discount: item.discount_val ?? null,
+                    discount_type: item.discount_type ?? 2,
+                    tax_amount: item.total_tax ?? null,
+                    notes: item.note ?? item.notes ?? '',
+                };
+            });
         }
 
         if (productTableItems.value.length > 0) {
@@ -322,6 +330,8 @@ const formData = ref({
 // Products table items
 const productTableItems = ref<ProductTableItem[]>([]);
 
+const originalProductIds = ref<Map<number, number>>(new Map());
+
 // API-driven calculations via composable
 const { vatRate, fetchCalculations: _fetchCalc, summaryTotals } = useCalculations(productTableItems as any);
 
@@ -349,7 +359,7 @@ const fetchCalculations = async () => {
 const summaryData = computed(() => ({
     productsCount: productTableItems.value.length,
     payment_method: paymentMethodItems.value.find((i: any) => i.value === formData.value.payment_method)?.title || '',
-    upfront_payment: formData.value.upfront_payment ?? 'لا يوجد'
+    upfront_payment: formData.value.upfront_payment ?? t('sales.forms.common.misc.none')
 }));
 
 import { useNotification } from '@/composables/useNotification';
@@ -411,6 +421,7 @@ const handleProductSaved = async (products: FuelQuotationProductToAdd[]) => {
     const newItems: ProductTableItem[] = [];
     products.forEach(p => {
         const existing = productTableItems.value.find(existing => existing.item_id === p.item_id);
+        const restoredId = p.id || originalProductIds.value.get(p.item_id) || undefined;
         newItems.push({
             item_id: p.item_id,
             item_name: p.item_name,
@@ -421,11 +432,11 @@ const handleProductSaved = async (products: FuelQuotationProductToAdd[]) => {
             item_using_name: p.item_using_name,
             unit_price: p.unit_price ?? null,
             discount: p.discount ?? null,
-            discount_type: p.discount_type ?? 2, // 1 = percentage, 2 = fixed
+            discount_type: p.discount_type ?? 2,
             tax_amount: p.tax_amount ?? null,
             notes: existing?.notes || p.notes || '',
             isAdded: p.isAdded,
-            id: p.id,
+            id: restoredId,
         });
     });
     productTableItems.value = newItems;
@@ -466,6 +477,19 @@ const handleDeleteProduct = async (item: any) => {
         productTableItems.value.splice(index, 1);
         await fetchCalculations();
     }
+};
+
+const showEditProductsDialog = ref(false);
+
+const handleEditProductsBulk = async (updatedProducts: any[]) => {
+    productTableItems.value = updatedProducts.map(p => ({
+        ...p,
+        price_per_unit: p.unit_price ?? p.price_per_unit ?? null,
+        discount_val: p.discount ?? p.discount_val ?? null,
+        item_using_name: p.item_using_name || getItemUsingName(p.item_using ?? null),
+        id: p.id || originalProductIds.value.get(p.item_id) || undefined,
+    }));
+    await fetchCalculations();
 };
 
 import { useForm } from '@/composables/useForm';
@@ -582,13 +606,14 @@ const handleSubmit = async (afterSuccess?: 'reset' | 'navigate') => {
 
     locationError.value = null;
     if (!formData.value.target_location?.trim()) {
-        locationError.value = 'يجب تحديد موقع المشروع';
-        warning('يجب تحديد موقع المشروع');
+        const locMsg = t('sales.forms.common.validation.specifyProjectLocation');
+        locationError.value = locMsg;
+        warning(locMsg);
         return;
     }
 
     if (productTableItems.value.length === 0) {
-        warning('يجب إضافة منتج واحد على الأقل');
+        warning(t('sales.forms.common.validation.atLeastOneProduct'));
         return;
     }
 
@@ -606,7 +631,7 @@ const handleSubmit = async (afterSuccess?: 'reset' | 'navigate') => {
             }
         });
 
-        success(isEditMode.value ? 'تم تحديث عرض السعر بنجاح' : 'تم إنشاء عرض السعر بنجاح');
+        success(isEditMode.value ? t('sales.forms.common.messages.quotationUpdated') : t('sales.forms.common.messages.quotationCreated'));
 
         if (afterSuccess === 'reset') {
             resetForm();
@@ -615,7 +640,7 @@ const handleSubmit = async (afterSuccess?: 'reset' | 'navigate') => {
         }
     } catch (e: any) {
         console.error('Error submitting form:', e);
-        apiError(e, 'حدث خطأ أثناء حفظ عرض السعر');
+        apiError(e, t('sales.forms.common.messages.saveQuotationError'));
     } finally {
         isSubmitting.value = false;
     }
@@ -635,17 +660,17 @@ const openMapDialog = () => {
     showMapDialog.value = true;
 };
 
-const headers = [
-    { title: 'اسم المنتج', key: 'name' },
-    { title: 'الوحدة', key: 'unit' },
-    { title: 'الكمية', key: 'quantity' },
-    { title: 'الاستخدام', key: 'item_using_name' },
-    { title: 'سعر الوحدة', key: 'unit_price' },
-    { title: 'خصم', key: 'discount_display' },
-    { title: 'مبلغ الضريبة', key: 'tax_amount' },
-    { title: 'إجمالي المبلغ', key: 'total_amount' },
-    { title: 'ملاحظات', key: 'notes' },
-]
+const headers = computed(() => [
+    { title: t('common.form.productName'), key: 'name' },
+    { title: t('common.form.unit'), key: 'unit' },
+    { title: t('sales.forms.common.labels.quantity'), key: 'quantity' },
+    { title: t('sales.forms.common.labels.usage'), key: 'item_using_name' },
+    { title: t('sales.forms.tables.invoiceSales.pricePerUnit'), key: 'unit_price' },
+    { title: t('sales.forms.common.labels.discount'), key: 'discount_display' },
+    { title: t('sales.forms.tables.invoiceSales.totalTax'), key: 'tax_amount' },
+    { title: t('sales.forms.common.labels.totalAmount'), key: 'total_amount' },
+    { title: t('sales.forms.common.labels.notes'), key: 'notes' },
+])
 
 
 // Computed items for the DataTable
@@ -670,6 +695,15 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
 <template>
     <default-layout>
         <div class="request-material-product-page -mx-6 bg-qallab-dashboard-bg space-y-4">
+            <AppFormBreadcrumb
+                list-path="/sales/quotations/fuels/list"
+                module-root-key="breadcrumb.sales.root"
+                list-label-key="breadcrumb.sales.quotations.fuels.list"
+                create-label-key="breadcrumb.sales.quotations.fuels.create"
+                edit-label-key="breadcrumb.sales.quotations.fuels.edit"
+                :is-edit-mode="isEditMode"
+                :code="isEditMode ? (formData.code || '') : ''"
+            />
             <!-- Page Header -->
             <TopHeader :icon="filePlusIcon" title-key="pages.SalesQuotationsFuels.FormTitle"
                 description-key="pages.SalesQuotationsFuels.FormDescription" :show-action="false"
@@ -679,64 +713,64 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
             <div class="p-6 bg-white rounded-3xl border !border-gray-100">
                 <div class="flex items-center mb-6 gap-2 text-primary-600">
                     <span v-html="fileCheckIcon"></span>
-                    <h2 class="text-base font-bold">البيانات الأساسية</h2>
+                    <h2 class="text-base font-bold">{{ t('sales.forms.common.sections.basicData') }}</h2>
                 </div>
 
                 <v-form ref="formRef" v-model="isFormValid" @submit.prevent>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 items-end">
                         <!-- Customer Name -->
                         <div>
-                            <SelectInput v-model="formData.customer_id" :items="[]" label="اسم العميل"
+                            <SelectInput v-model="formData.customer_id" :items="[]" :label="t('sales.forms.common.labels.customerName')"
                                 item-title="title" :rules="[required()]" item-value="value" density="comfortable"
-                                placeholder="حدد العميل" :server-side="true" :fetch-function="fetchCustomers"
+                                :placeholder="t('sales.forms.common.placeholders.selectCustomer')" :server-side="true" :fetch-function="fetchCustomers"
                                 item-title-key="full_name" item-value-key="id" :debounce-time="500" />
                         </div>
 
                         <!-- Responsible Person -->
                         <div>
-                            <TextInput v-model="formData.responsible_person" placeholder="أدخل اسم المسؤول"
-                                label="اسم المسؤول" :rules="[required()]" density="comfortable" />
+                            <TextInput v-model="formData.responsible_person" :placeholder="t('sales.forms.common.placeholders.enterResponsibleName')"
+                                :label="t('sales.forms.common.labels.responsibleName')" :rules="[required()]" density="comfortable" />
                         </div>
 
                         <!-- Responsible Phone -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">هاتف المسؤول <span class="text-error-600">*</span></label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('sales.forms.common.labels.responsiblePhone') }} <span class="text-error-600">*</span></label>
                             <TelInput v-model="formData.responsible_phone" placeholder="5XX XXX XXXX"
                                 density="comfortable" :rules="[required()]" />
                         </div>
 
                         <!-- Quotation Name -->
                         <div>
-                            <TextInput v-model="formData.quotation_name" placeholder="أدخل الإسم"
-                                label="اسم عرض السعر" :rules="[required()]" density="comfortable" />
+                            <TextInput v-model="formData.quotation_name" :placeholder="t('sales.forms.common.placeholders.enterName')"
+                                :label="t('sales.forms.common.labels.quotationName')" :rules="[required()]" density="comfortable" />
                         </div>
 
                         <!-- Quotation Date -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">تاريخ العرض</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('sales.forms.common.labels.quotationDate') }}</label>
                             <DateTimePickerInput v-model="formData.quotations_datetime" density="comfortable"
-                                placeholder="اختر التاريخ والوقت" />
+                                :placeholder="t('sales.forms.common.placeholders.selectDateTime')" />
                         </div>
 
                         <!-- Quotation Validity -->
                         <div>
-                            <PriceInput v-model="formData.quotation_validity_no" placeholder="أدخل المدة بالأيام"
-                                label="صلاحية عرض السعر" :rules="[required()]" density="comfortable">
+                            <PriceInput v-model="formData.quotation_validity_no" :placeholder="t('sales.forms.common.placeholders.enterDays')"
+                                :label="t('sales.forms.common.labels.quotationValidity')" :rules="[required()]" density="comfortable">
                                 <template #append-inner>
-                                    <span class="text-gray-500 text-sm">يوم</span>
+                                    <span class="text-gray-500 text-sm">{{ t('sales.forms.common.misc.dayWord') }}</span>
                                 </template>
                             </PriceInput>
                         </div>
 
                         <!-- Project Location -->
                         <div class="relative">
-                            <label class="text-sm font-medium text-gray-700 mb-2 block">موقع المشروع <span class="text-error-600">*</span></label>
+                            <label class="text-sm font-medium text-gray-700 mb-2 block">{{ t('sales.ordersFuels.filters.projectLocation') }} <span class="text-error-600">*</span></label>
                             <div @click="openMapDialog"
                                 class="flex items-center justify-between px-4 py-2 min-h-[48px] border rounded-lg cursor-pointer transition-colors"
                                 :class="locationError ? '!border-error-500 bg-error-50' : '!border-blue-400 hover:bg-blue-100'">
                                 <span class="text-base font-medium whitespace-nowrap overflow-hidden text-ellipsis"
                                     :class="locationError ? 'text-error-700' : 'text-blue-900'">
-                                    {{ formData.target_location || 'حدد الموقع' }}
+                                    {{ formData.target_location || t('sales.forms.common.misc.pickLocation') }}
                                 </span>
                                 <div class="flex items-center gap-2">
                                     <span v-html="mapMarkerIcon"></span>
@@ -747,47 +781,47 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
 
                         <!-- Project Name -->
                         <div>
-                            <TextInput v-model="formData.project_name" label="اسم المشروع" placeholder="أدخل الإسم"
+                            <TextInput v-model="formData.project_name" :label="t('sales.forms.common.labels.projectName')" :placeholder="t('sales.forms.common.placeholders.enterName')"
                                 density="comfortable" />
                         </div>
 
                         <!-- From Date (تاريخ بدء التسليم) -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">تاريخ بدء التسليم</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('sales.forms.common.labels.deliveryStartDate') }}</label>
                             <DatePickerInput v-model="formData.quotation_from_date" type="date" density="comfortable"
-                                placeholder="اختر التاريخ" />
+                                :placeholder="t('sales.forms.common.placeholders.selectDate')" />
                         </div>
 
                         <!-- Supply Type -->
                         <div>
-                            <SelectInput v-model="formData.supply_type" :items="supplyTypeItems" label="نوع التوريد"
-                                item-title="title" item-value="value" density="comfortable" placeholder="حدد نوع التوريد" />
+                            <SelectInput v-model="formData.supply_type" :items="supplyTypeItems" :label="t('sales.forms.common.labels.supplyType')"
+                                item-title="title" item-value="value" density="comfortable" :placeholder="t('sales.forms.common.placeholders.selectSupplyType')" />
                         </div>
 
                         <!-- Supply Interval -->
                         <div>
-                            <TextInput v-model="formData.supply_interval" placeholder="أدخل المدة"
-                                label="مدة التوريد" type="number" density="comfortable">
+                            <TextInput v-model="formData.supply_interval" :placeholder="t('sales.forms.common.placeholders.enterDurationGeneric')"
+                                :label="t('sales.forms.common.labels.supplyDuration')" type="number" density="comfortable">
                                 <template #append-inner>
-                                    <span class="text-gray-500 text-sm">يوم</span>
+                                    <span class="text-gray-500 text-sm">{{ t('sales.forms.common.misc.dayWord') }}</span>
                                 </template>
                             </TextInput>
                         </div>
 
                         <!-- Delivered Interval -->
                         <div>
-                            <TextInput v-model="formData.delivered_interval" placeholder="أدخل المدة"
-                                label="مدة التسليم" type="number" density="comfortable">
+                            <TextInput v-model="formData.delivered_interval" :placeholder="t('sales.forms.common.placeholders.enterDurationGeneric')"
+                                :label="t('sales.forms.common.labels.deliveryDuration')" type="number" density="comfortable">
                                 <template #append-inner>
-                                    <span class="text-gray-500 text-sm">يوم</span>
+                                    <span class="text-gray-500 text-sm">{{ t('sales.forms.common.misc.dayWord') }}</span>
                                 </template>
                             </TextInput>
                         </div>
 
                         <!-- Delivered Method -->
                         <div>
-                            <SelectInput v-model="formData.delivered_method" :items="deliveryMethodItems" label="طريقة التسليم"
-                                item-title="title" item-value="value" density="comfortable" placeholder="حدد طريقة التسليم" />
+                            <SelectInput v-model="formData.delivered_method" :items="deliveryMethodItems" :label="t('sales.forms.common.labels.deliveryMethod')"
+                                item-title="title" item-value="value" density="comfortable" :placeholder="t('sales.forms.common.placeholders.selectDeliveryMethod')" />
                         </div>
                     </div>
                 </v-form>
@@ -798,9 +832,9 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
                 <div class="px-6 py-6">
                     <div class="flex items-center gap-2 mb-2">
                         <span v-html="listIcon"></span>
-                        <h2 class="text-base font-bold text-primary-600">جدول عناصر عرض السعر</h2>
+                        <h2 class="text-base font-bold text-primary-600">{{ t('sales.forms.common.sections.quotationItemsTable') }}</h2>
                     </div>
-                    <p class="text-emerald-500 text-sm font-bold ms-7">** الأسعار شاملة للنقل</p>
+                    <p class="text-emerald-500 text-sm font-bold ms-7">{{ t('sales.forms.common.misc.pricesIncludeTransport') }}</p>
                 </div>
 
                 <!-- Products Table -->
@@ -821,7 +855,7 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
                             <template #activator="{ props }">
                                 <div class="flex items-center gap-2 cursor-pointer" v-bind="props">
                                     <v-icon size="20" color="primary" v-html="messagePlusIcon"></v-icon>
-                                    <span class="text-gray-900">{{ item.notes || 'أضف ملاحظة' }}</span>
+                                    <span class="text-gray-900">{{ item.notes || t('sales.forms.common.misc.addNote') }}</span>
                                 </div>
                             </template>
 
@@ -830,7 +864,7 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
                                 <div class="!flex flex-nowrap items-center gap-3">
                                     <TextInput
                                         v-model="productTableItems[productTableItems.findIndex(p => p.item_id === item.item_id)].notes"
-                                        placeholder="أضف ملاحظة" variant="outlined" density="comfortable" hide-details
+                                        :placeholder="t('sales.forms.common.misc.addNote')" variant="outlined" density="comfortable" hide-details
                                         autofocus class="flex-1" />
                                     <ButtonWithIcon :icon="messagePlusIcon" color="primary" icon-only size="x-small" />
                                 </div>
@@ -839,11 +873,16 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
                     </template>
                 </DataTable>
 
-                <!-- Add Product Button -->
-                <div class="flex justify-center my-6">
-                    <ButtonWithIcon color="primary-100" variant="flat" class="!text-primary-900 font-bold w-75"
+                <!-- Add / Edit Product Buttons -->
+                <div class="flex justify-center gap-3 md:w-3/4 mx-auto my-6">
+                    <ButtonWithIcon color="primary-100" variant="flat" class="!text-primary-900 font-bold flex-1"
                         @click="handleAddProduct">
-                        + إضافة منتج جديد
+                        {{ t('sales.forms.common.misc.addProductLine') }}
+                    </ButtonWithIcon>
+                    <ButtonWithIcon v-if="productTableItems.length > 0" color="primary-100" variant="flat"
+                        class="!text-primary-900 font-bold flex-1"
+                        @click="showEditProductsDialog = true">
+                        {{ t('sales.forms.common.misc.editProducts') }}
                     </ButtonWithIcon>
                 </div>
             </div>
@@ -853,43 +892,43 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
                 <div class="bg-white rounded-2xl xl:col-span-2">
                     <div class="flex items-center gap-2 p-6 border-b !border-gray-200">
                         <span v-html="CoinHandIcon"></span>
-                        <h2 class="text-base font-bold text-primary-600">بيانات الدفع</h2>
+                        <h2 class="text-base font-bold text-primary-600">{{ t('sales.forms.common.sections.paymentData') }}</h2>
                     </div>
                     <div class="p-6">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <!-- Payment Method -->
                             <SelectInput v-model="formData.payment_method" :items="paymentMethodItems" density="comfortable"
-                                placeholder="حدد طريقة الدفع" label="طريقة الدفع" />
+                                :placeholder="t('sales.forms.common.placeholders.selectPaymentMethod')" :label="t('sales.forms.common.labels.paymentMethod')" />
                             <!-- Upfront Payment -->
                             <PriceInput showRialIcon v-model="formData.upfront_payment" density="comfortable"
-                                label="دفعة مقدمة" placeholder="أدخل قيمة الدفعة" />
+                                :label="t('sales.forms.common.labels.advancePayment')" :placeholder="t('sales.forms.common.placeholders.advancePaymentValue')" />
 
                             <!-- Invoice Interval -->
-                            <PriceInput label="مدة رفع المستخلص" v-model="formData.invoice_interval"
-                                placeholder="أدخل المدة بالأيام" density="comfortable">
+                            <PriceInput :label="t('sales.forms.common.labels.invoiceUploadExtract')" v-model="formData.invoice_interval"
+                                :placeholder="t('sales.forms.common.placeholders.enterDays')" density="comfortable">
                                 <template #append-inner>
-                                    <span class="text-gray-500 text-sm">يوم</span>
+                                    <span class="text-gray-500 text-sm">{{ t('sales.forms.common.misc.dayWord') }}</span>
                                 </template>
                             </PriceInput>
                             <!-- Payment Term -->
-                            <PriceInput label="مدة السداد" v-model="formData.payment_term_no"
-                                placeholder="أدخل المدة بالأيام" density="comfortable">
+                            <PriceInput :label="t('sales.forms.common.labels.paymentTerm')" v-model="formData.payment_term_no"
+                                :placeholder="t('sales.forms.common.placeholders.enterDays')" density="comfortable">
                                 <template #append-inner>
-                                    <span class="text-gray-500 text-sm">يوم</span>
+                                    <span class="text-gray-500 text-sm">{{ t('sales.forms.common.misc.dayWord') }}</span>
                                 </template>
                             </PriceInput>
 
                             <!-- Late Fee -->
                             <TextInputWithSelect v-model="formData.late_fee"
-                                v-model:selectValue="formData.late_fee_type" label="غرامة التأخير"
-                                placeholder="أدخل المبلغ" type="number" select-width="110px"
-                                :select-items="feeTypeItems" select-placeholder="اختر" />
+                                v-model:selectValue="formData.late_fee_type" :label="t('sales.forms.common.labels.lateFee')"
+                                :placeholder="t('sales.forms.common.placeholders.enterAmount')" type="number" select-width="110px"
+                                :select-items="feeTypeItems" :select-placeholder="t('common.form.choose')" />
 
                             <!-- Cancel Fee -->
                             <TextInputWithSelect v-model="formData.cancel_fee"
-                                v-model:selectValue="formData.cancel_fee_type" label="غرامة الإلغاء"
-                                placeholder="أدخل المبلغ" type="number" select-width="110px"
-                                :select-items="feeTypeItems" select-placeholder="اختر" />
+                                v-model:selectValue="formData.cancel_fee_type" :label="t('sales.forms.common.labels.cancelFee')"
+                                :placeholder="t('sales.forms.common.placeholders.enterAmount')" type="number" select-width="110px"
+                                :select-items="feeTypeItems" :select-placeholder="t('common.form.choose')" />
                         </div>
                     </div>
                 </div>
@@ -899,17 +938,17 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
                         <thead>
                             <tr class="bg-primary-400">
                                 <th class="text-white font-semibold text-base py-3 px-4 text-center border-l !border-gray-200">
-                                    العنصر
+                                    {{ t('sales.forms.stats.item') }}
                                 </th>
                                 <th class="text-white font-semibold text-base py-3 px-4 text-center">
-                                    المبلغ
+                                    {{ t('sales.forms.stats.amount') }}
                                 </th>
                             </tr>
                         </thead>
                         <tbody class="text-sm bg-primary-25">
                             <tr class="border-b !border-gray-200">
                                 <td class="py-5 px-4 text-center font-bold text-gray-900 border-l !border-gray-200">
-                                    المجموع قبل الخصم
+                                    {{ t('sales.forms.stats.preDiscountSubtotal') }}
                                 </td>
                                 <td class="py-5 px-4 text-center text-gray-600">
                                     {{ summaryTotals.subtotalBeforeDiscount }}
@@ -918,7 +957,7 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
 
                             <tr class="border-b !border-gray-200">
                                 <td class="py-5 px-4 text-center font-bold text-gray-900 border-l !border-gray-200">
-                                    الخصم
+                                    {{ t('sales.forms.stats.discountTotal') }}
                                 </td>
                                 <td class="py-5 px-4 text-center text-gray-600">
                                     {{ summaryTotals.totalDiscount }}
@@ -927,7 +966,7 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
 
                             <tr class="border-b !border-gray-200">
                                 <td class="py-5 px-4 text-center font-bold text-gray-900 border-l !border-gray-200">
-                                    المجموع بعد الخصم
+                                    {{ t('sales.forms.stats.postDiscountSubtotal') }}
                                 </td>
                                 <td class="py-5 px-4 text-center text-gray-600">
                                     {{ summaryTotals.subtotalAfterDiscount }}
@@ -936,7 +975,7 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
 
                             <tr class="border-b !border-gray-200">
                                 <td class="py-5 px-4 text-center font-bold text-gray-900 border-l !border-gray-200">
-                                    الضريبة
+                                    {{ t('sales.forms.stats.tax') }}
                                 </td>
                                 <td class="py-5 px-4 text-center text-gray-600">
                                     {{ vatRate != null ? `${vatRate * 100}%` : '—' }}
@@ -945,7 +984,7 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
 
                             <tr class="border-b !border-gray-200">
                                 <td class="py-5 px-4 text-center font-bold text-gray-900 border-l !border-gray-200">
-                                    اجمالي الضريبة
+                                    {{ t('sales.forms.stats.vatTotalGross') }}
                                 </td>
                                 <td class="py-5 px-4 text-center text-gray-600">
                                     {{ summaryTotals.totalTaxAmount }}
@@ -954,7 +993,7 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
 
                             <tr>
                                 <td class="py-5 px-4 text-center font-bold text-gray-900 border-l !border-gray-200">
-                                    الإجمالي النهائي
+                                    {{ t('sales.forms.stats.grandTotalFinal') }}
                                 </td>
                                 <td class="py-5 px-4 font-bold text-center text-gray-900">
                                     {{ summaryTotals.finalTotal }}
@@ -970,13 +1009,13 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
                 <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col">
                     <ButtonWithIcon variant="flat" color="primary" height="48" rounded="4"
                         custom-class="font-semibold text-base px-6 md:!px-10" :prepend-icon="returnIcon"
-                        label="حفظ والعودة للرئيسية"
+                        :label="t('sales.forms.common.actions.saveBackHome')"
                         :loading="isSubmitting"
                         @click="handleSubmit('navigate')" />
 
                     <ButtonWithIcon variant="flat" color="primary-50" height="48" rounded="4"
                         custom-class="font-semibold text-base text-primary-700 px-6 md:!px-10" :prepend-icon="saveIcon"
-                        label="حفظ وإنشاء جديد"
+                        :label="t('sales.forms.common.actions.saveCreateNew')"
                         :loading="isSubmitting"
                         @click="handleSubmit('reset')" />
                 </div>
@@ -988,14 +1027,24 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
 
         <!-- Add Product Dialog -->
         <AddProductDialogFuelsQuotation v-model="showAddProductDialog"
+            :material-type="0"
             :item-using-options="itemUsingItems"
             :unit-items="unitItems"
             :discount-type-options="discountTypeItems"
-            items-endpoint="/items/supplier-items?material_type=2"
             :edit-product="editProductForDialog"
             :existing-products="existingProductsForDialog"
             @saved="handleProductSaved"
             @product-updated="handleProductUpdated" />
+
+        <!-- Edit Products Dialog -->
+        <EditProductsDialog v-model="showEditProductsDialog"
+            request-type="fuel"
+            variant="sales"
+            :showUnitPriceAndDiscount="true"
+            :products="productTableItems"
+            :unit-items="unitItems"
+            :discount-type-items="discountTypeItems"
+            @products-updated="handleEditProductsBulk" />
     </default-layout>
 </template>
 

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import { useApi } from '@/composables/useApi';
+import { useI18n } from "vue-i18n";
 
 interface OrderItem {
   id?: number;
@@ -36,6 +37,7 @@ const emit = defineEmits<{
 }>();
 
 const api = useApi();
+const { t } = useI18n();
 
 const internalOpen = computed({
   get: () => props.modelValue,
@@ -247,7 +249,7 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
         <span class="!bg-gray-50 border border-gray-100 rounded px-1 py-0.5 text-gray-600">
           <span v-html="cubeIcon"></span>
         </span>
-        {{ isEditMode ? 'تعديل منتج' : 'إضافة منتج' }}
+        {{ isEditMode ? t('common.productDialog.editProduct') : t('common.productDialog.addProduct') }}
       </div>
     </template>
 
@@ -281,7 +283,7 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
             <TextInput 
               v-model="editProductData.quantity" 
               type="number" 
-              placeholder="الكمية" 
+              :placeholder="t('common.productDialog.quantity')" 
               density="compact"
               class="min-w-[170px]" 
             />
@@ -292,7 +294,7 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
             <SelectInput 
               v-model="editProductData.unit_id" 
               :items="unitItemsList" 
-              placeholder="الوحدة" 
+              :placeholder="t('common.productDialog.unit')" 
               density="compact"
               class="min-w-[170px]" 
               item-title="title" 
@@ -306,14 +308,14 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
     <!-- No Products State -->
     <div v-else-if="!isEditMode && orderItems.length === 0" class="flex flex-col items-center justify-center py-20 text-gray-500">
       <v-icon size="64" color="gray-400">mdi-package-variant-closed</v-icon>
-      <p class="mt-4 text-lg font-medium">لا توجد منتجات في هذا الطلب</p>
+      <p class="mt-4 text-lg font-medium">{{ t('common.productDialog.noProductsInRequest') }}</p>
     </div>
 
     <!-- Add Mode Content -->
     <template v-else-if="!isEditMode">
       <!-- Search -->
       <div class="mb-3">
-        <TextInput v-model="searchQuery" placeholder="ابحث في المنتجات ..." density="comfortable">
+        <TextInput v-model="searchQuery" :placeholder="t('common.productDialog.searchProducts')" density="comfortable">
           <template #prepend-inner>
             <v-icon v-html="searchIcon"></v-icon>
           </template>
@@ -356,7 +358,7 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
                 <TextInput 
                   v-model="product.quantity" 
                   type="number" 
-                  placeholder="الكمية" 
+                  :placeholder="t('common.productDialog.quantity')" 
                   density="compact"
                   class="min-w-[170px]" 
                   :disabled="product.isAdded"
@@ -368,7 +370,7 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
                 <SelectInput 
                   v-model="product.unit_id" 
                   :items="unitItemsList" 
-                  placeholder="الوحدة" 
+                  :placeholder="t('common.productDialog.unit')" 
                   density="compact"
                   class="min-w-[170px]" 
                   item-title="title" 
@@ -389,7 +391,7 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
           color="primary" 
           size="large" 
           custom-class="px-8" 
-          :label="isEditMode ? 'حفظ التعديلات' : 'تم'"
+          :label="isEditMode ? t('common.productDialog.saveChanges') : t('common.productDialog.done')"
           @click="handleDone" 
           :disabled="!!(isEditMode && editProductData && !canAddProduct(editProductData))"
         />
@@ -400,7 +402,7 @@ const editIconDisabled = `<svg width="18" height="18" viewBox="0 0 18 18" fill="
           border="gray-300" 
           size="large" 
           custom-class="px-4"
-          label="إلغاء" 
+          :label="t('common.actions.cancel')" 
           @click="handleCancel" 
         />
       </div>

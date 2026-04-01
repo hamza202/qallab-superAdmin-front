@@ -9,11 +9,11 @@
           </router-link>
           <span class="text-lg text-gray-300">/</span>
           <router-link to="/purchases" class="text-gray-600 hover:text-primary-600">
-            المشتريات
+            {{ t('purchases.views.shared.purchasesBreadcrumb') }}
           </router-link>
           <span class="text-lg text-gray-300">/</span>
           <router-link to="/purchases/orders/logistics/list" class="text-gray-600 hover:text-primary-600">
-            طلبية خدمة النقل
+            {{ t('purchases.views.shared.listOrdersLogistics') }}
           </router-link>
           <span class="text-lg text-gray-300">/</span>
           <span class="text-primary-700 font-medium bg-primary-50 px-2 py-1 rounded-md">{{ orderCode }}</span>
@@ -27,55 +27,55 @@
             </div>
             <div>
               <h1 class="text-lg font-bold text-gray-900 mb-1">{{ orderCode }}</h1>
-              <p class="text-sm text-gray-600">تفاصيل الطلبية والمعلومات الخاصة بها</p>
+              <p class="text-sm text-gray-600">{{ t('purchases.views.shared.orderSubtitle') }}</p>
             </div>
           </div>
         </div>
 
         <!-- البيانات الأساسية -->
         <div class="p-6 border-b !border-gray-200">
-          <h2 class="text-lg font-bold text-primary-900 mb-6">البيانات الأساسية</h2>
+          <h2 class="text-lg font-bold text-primary-900 mb-6">{{ t('purchases.views.shared.basicDataSection') }}</h2>
           <div class="flex flex-wrap gap-4">
             <div class="info-item-bordered flex-1 px-6 py-4">
-              <label class="font-semibold text-sm text-gray-500 mb-2 block">اسم المسؤول</label>
+              <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('purchases.shared.forms.common.labels.responsibleName') }}</label>
               <p class="text-base font-semibold text-gray-900">{{ orderData?.responsible_person || '—' }}</p>
             </div>
             <v-divider vertical class="my-6"></v-divider>
             <div class="info-item-bordered flex-1 px-6 py-4">
-              <label class="font-semibold text-sm text-gray-500 mb-2 block">هاتف المسؤول</label>
+              <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('purchases.shared.forms.common.labels.responsiblePhone') }}</label>
               <p class="text-base font-semibold text-gray-900 dir-ltr text-end">{{ orderData?.responsible_phone || '—'
                 }}</p>
             </div>
             <v-divider vertical class="my-6"></v-divider>
             <div class="info-item-bordered flex-1 px-6 py-4">
-              <label class="font-semibold text-sm text-gray-500 mb-2 block">تاريخ الطلبية</label>
+              <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('purchases.orders.shared.labels.poDate') }}</label>
               <p class="text-base font-semibold text-gray-900">{{ orderData?.po_datetime || '—' }}</p>
             </div>
             <v-divider vertical class="my-6"></v-divider>
             <div class="info-item-bordered flex-1 px-6 py-4">
-              <label class="font-semibold text-sm text-gray-500 mb-2 block">اسم المشروع</label>
+              <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('purchases.requests.logistics.form.labels.projectName') }}</label>
               <p class="text-base font-semibold text-gray-900">{{ orderData?.project_name || '—' }}</p>
             </div>
             <v-divider vertical class="my-6"></v-divider>
             <div class="info-item-bordered flex-1 px-6 py-4">
-              <label class="font-semibold text-sm text-gray-500 mb-2 block">طريقة الدفع</label>
+              <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('purchases.shared.forms.common.labels.paymentMethod') }}</label>
               <p class="text-base font-semibold text-gray-900">{{ paymentMethodLabel }}</p>
             </div>
             <v-divider vertical class="my-6"></v-divider>
             <div class="info-item-bordered flex-1 px-6 py-4">
-              <label class="font-semibold text-sm text-gray-500 mb-2 block">دفعة مقدمة</label>
+              <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('purchases.shared.forms.common.labels.advancePayment') }}</label>
               <p class="text-base font-semibold text-gray-900 flex gap-1 items-center">
                 {{ orderData?.upfront_payment ?? 0 }}  <span v-html="rialIcon"></span>
               </p>
             </div>
             <v-divider vertical class="my-6"></v-divider>
             <div class="info-item-bordered flex-1 px-6 py-4">
-              <label class="font-semibold text-sm text-gray-500 mb-2 block">موقع مصدر المواد</label>
+              <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('purchases.requests.logistics.form.labels.sourceMaterialsLocation') }}</label>
               <p class="text-base font-semibold text-gray-900">{{ orderData?.source_location || '—' }}</p>
             </div>
             <v-divider vertical class="my-6"></v-divider>
             <div class="info-item-bordered flex-1 px-6 py-4">
-              <label class="font-semibold text-sm text-gray-500 mb-2 block">موقع المشروع</label>
+              <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('purchases.requests.logistics.form.labels.projectLocation') }}</label>
               <p class="text-base font-semibold text-gray-900">{{ orderData?.target_location || '—' }}</p>
             </div>
           </div>
@@ -86,73 +86,73 @@
           <div class="bg-primary-50 px-6 py-4">
             <div class="flex items-center gap-2 text-primary-900 font-bold">
               <span v-html="truckIcon"></span>
-              <h2 class="text-base">تفاصيل النقل</h2>
+              <h2 class="text-base">{{ t('purchases.requests.logistics.form.transportDetails') }}</h2>
             </div>
           </div>
           <div v-for="(detail, index) in logisticsDetails" :key="index" class="p-4">
             <div class="flex flex-wrap gap-4">
               <div class="info-item-bordered flex-1 px-6 py-4">
-                <label class="font-semibold text-sm text-gray-500 mb-2 block">نوع المواد المنقولة</label>
+                <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('purchases.views.shared.materialMovedType') }}</label>
                 <p class="text-base font-semibold text-gray-900">{{ getCategoryName(detail.material_type) }}</p>
               </div>
               <v-divider vertical class="my-6"></v-divider>
               <div class="info-item-bordered flex-1 px-6 py-4">
-                <label class="font-semibold text-sm text-gray-500 mb-2 block">تاريخ بدء النقل</label>
+                <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('purchases.views.shared.transportFromDate') }}</label>
                 <p class="text-base font-semibold text-gray-900">{{ detail.from_date || '—' }}</p>
               </div>
               <v-divider vertical class="my-6"></v-divider>
               <div class="info-item-bordered flex-1 px-6 py-4">
-                <label class="font-semibold text-sm text-gray-500 mb-2 block">تاريخ انتهاء النقل</label>
+                <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('purchases.views.shared.transportToDate') }}</label>
                 <p class="text-base font-semibold text-gray-900">{{ detail.to_date || '—' }}</p>
               </div>
               <v-divider vertical class="my-6"></v-divider>
               <div class="info-item-bordered flex-1 px-6 py-4">
-                <label class="font-semibold text-sm text-gray-500 mb-2 block">مدة التنفيذ (يوم)</label>
+                <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('purchases.views.shared.executionDurationDaysShort') }}</label>
                 <p class="text-base font-semibold text-gray-900">{{ detail.actual_execution_interval ?? '—' }}</p>
               </div>
               <v-divider vertical class="my-6"></v-divider>
               <div class="info-item-bordered flex-1 px-6 py-4">
-                <label class="font-semibold text-sm text-gray-500 mb-2 block">أوقات النقل</label>
+                <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('purchases.views.shared.workHoursTransport') }}</label>
                 <p class="text-base font-semibold text-gray-900">{{ getAmPmLabel(detail.am_pm_interval) }}</p>
               </div>
               <v-divider vertical class="my-6"></v-divider>
               <div class="info-item-bordered flex-1 px-6 py-4">
-                <label class="font-semibold text-sm text-gray-500 mb-2 block">نوع مركبة النقل</label>
+                <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('purchases.requests.logistics.form.detailCard.vehicleType') }}</label>
                 <p class="text-base font-semibold text-gray-900">{{ getTransportTypeName(detail.transport_type) }}</p>
               </div>
               <v-divider vertical class="my-6"></v-divider>
               <div class="info-item-bordered flex-1 px-6 py-4">
-                <label class="font-semibold text-sm text-gray-500 mb-2 block">عدد مركبات النقل</label>
+                <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('purchases.requests.logistics.form.detailCard.vehicleCount') }}</label>
                 <p class="text-base font-semibold text-gray-900">{{ detail.transport_no ?? '—' }}</p>
               </div>
               <v-divider vertical class="my-6"></v-divider>
               <div class="info-item-bordered flex-1 px-6 py-4">
-                <label class="font-semibold text-sm text-gray-500 mb-2 block">عدد الرحلات</label>
-                <p class="text-base font-semibold text-gray-900">{{ detail.trip_no }} رحلة</p>
+                <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('purchases.requests.logistics.form.detailCard.tripCount') }}</label>
+                <p class="text-base font-semibold text-gray-900">{{ t('purchases.views.shared.tripsWithUnit', { n: detail.trip_no }) }}</p>
               </div>
               <v-divider vertical class="my-6"></v-divider>
               <div class="info-item-bordered flex-1 px-6 py-4">
-                <label class="font-semibold text-sm text-gray-500 mb-2 block">مبلغ النقل</label>
+                <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('purchases.orders.shared.labels.logisticsTransportAmount') }}</label>
                 <p class="text-base font-semibold text-gray-900">{{ detail.transport_amount ?? '—' }}</p>
               </div>
               <v-divider vertical class="my-6"></v-divider>
               <div class="info-item-bordered flex-1 px-6 py-4">
-                <label class="font-semibold text-sm text-gray-500 mb-2 block">مسؤول التحميل</label>
+                <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('purchases.requests.logistics.form.detailCard.loadingResponsible') }}</label>
                 <p class="text-base font-semibold text-gray-900">{{ detail.loading_responsible_party || '—' }}</p>
               </div>
               <v-divider vertical class="my-6"></v-divider>
               <div class="info-item-bordered flex-1 px-6 py-4">
-                <label class="font-semibold text-sm text-gray-500 mb-2 block">مسؤول التفريغ</label>
+                <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('purchases.requests.logistics.form.detailCard.unloadingResponsible') }}</label>
                 <p class="text-base font-semibold text-gray-900">{{ detail.downloading_responsible_party || '—' }}</p>
               </div>
               <v-divider vertical class="my-6"></v-divider>
               <div class="info-item-bordered flex-1 px-6 py-4">
-                <label class="font-semibold text-sm text-gray-500 mb-2 block">موقع الاستلام</label>
+                <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('purchases.requests.logistics.form.map.pickup') }}</label>
                 <p class="text-sm font-semibold text-gray-900">{{ detail.source_location || '—' }}</p>
               </div>
               <v-divider vertical class="my-6"></v-divider>
               <div class="info-item-bordered flex-1 px-6 py-4">
-                <label class="font-semibold text-sm text-gray-500 mb-2 block">موقع التسليم</label>
+                <label class="font-semibold text-sm text-gray-500 mb-2 block">{{ t('purchases.requests.logistics.form.map.delivery') }}</label>
                 <p class="text-sm font-semibold text-gray-900">{{ detail.target_location || '—' }}</p>
               </div>
             </div>
@@ -164,7 +164,7 @@
           <div class="bg-primary-50 px-6 py-4">
             <div class="flex items-center gap-2 text-primary-900 font-bold">
               <span v-html="packageIcon"></span>
-              <h2 class="text-base">المنتجات</h2>
+              <h2 class="text-base">{{ t('purchases.views.shared.productsSection') }}</h2>
             </div>
           </div>
           <div class="mb-8">
@@ -177,7 +177,7 @@
           <div class="bg-primary-50 px-6 py-4">
             <div class="flex items-center gap-2 text-primary-900 font-bold">
               <span v-html="busIcon"></span>
-              <h2 class="text-base">تفاصيل الرحلات</h2>
+              <h2 class="text-base">{{ t('purchases.orders.shared.labels.tripDetailsSection') }}</h2>
             </div>
           </div>
           <div class="p-6">
@@ -196,6 +196,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { useApi } from '@/composables/useApi';
 import { useNotification } from '@/composables/useNotification';
 import { archiveIcon, homeIcon, busIcon, rialIcon} from '@/components/icons/globalIcons';
@@ -204,6 +205,7 @@ import { truckIcon, packageIcon } from '@/components/icons/priceOffersIcons';
 const route = useRoute();
 const api = useApi();
 const { error } = useNotification();
+const { t } = useI18n();
 
 const isLoading = ref(false);
 const orderData = ref<any>(null);
@@ -229,7 +231,7 @@ const fetchOrderData = async () => {
     orderData.value = res.data;
   } catch (e: any) {
     console.error('Error fetching order data:', e);
-    error(e?.response?.data?.message || 'فشل تحميل بيانات الطلبية');
+    error(e?.response?.data?.message || t('purchases.views.shared.loadOrderError'));
   } finally {
     isLoading.value = false;
   }
@@ -250,8 +252,8 @@ const orderCode = computed(() => orderData.value?.code || '—');
 
 const paymentMethodLabel = computed(() => {
   const method = orderData.value?.payment_method;
-  if (method === 'cash') return 'نقدي';
-  if (method === 'deferred') return 'آجل';
+  if (method === 'cash') return t('purchases.views.shared.paymentNaqd');
+  if (method === 'deferred') return t('purchases.views.shared.paymentDeferred');
   return '—';
 });
 
@@ -269,8 +271,8 @@ const getTransportTypeName = (types: number[]) => {
   if (!types || types.length === 0) return '—';
   const transportTypes = constantsData.value?.transport_types || [];
   return types.map((typeId: number) => {
-    const t = transportTypes.find((x: any) => x.key == typeId);
-    return t?.label || typeId.toString();
+    const matched = transportTypes.find((x: any) => x.key == typeId);
+    return matched?.label || typeId.toString();
   }).join(', ');
 };
 
@@ -278,7 +280,7 @@ const getAmPmLabel = (key: string | null | undefined) => {
   if (!key) return '—';
   const options = constantsData.value?.am_pm_interval || [];
   const item = options.find((x: any) => x.key === key);
-  return item?.label ?? (key === 'am' ? 'صباحاً' : key === 'pm' ? 'مساءً' : key);
+  return item?.label ?? (key === 'am' ? t('purchases.views.shared.timeInterval.am') : key === 'pm' ? t('purchases.views.shared.timeInterval.pm') : key);
 };
 
 const itemsData = computed(() => {
@@ -298,34 +300,34 @@ const itemsData = computed(() => {
 const tripDetails = computed(() => {
   const trips = orderData.value?.po_trip_details;
   if (!trips || !Array.isArray(trips)) return [];
-  return trips.map((t: any) => ({
-    id: t.id,
-    item_name: t.item_name || '—',
-    unit_name: t.unit_name || '—',
-    quantity: t.quantity ?? 0,
-    trip_date: t.trip_date || '—',
-    trip_price: t.trip_price ?? '—',
-    transport_type_names: getTransportTypeName(Array.isArray(t.transport_type) ? t.transport_type : (t.transport_type != null ? [t.transport_type] : [])),
+  return trips.map((tripRow: any) => ({
+    id: tripRow.id,
+    item_name: tripRow.item_name || '—',
+    unit_name: tripRow.unit_name || '—',
+    quantity: tripRow.quantity ?? 0,
+    trip_date: tripRow.trip_date || '—',
+    trip_price: tripRow.trip_price ?? '—',
+    transport_type_names: getTransportTypeName(Array.isArray(tripRow.transport_type) ? tripRow.transport_type : (tripRow.transport_type != null ? [tripRow.transport_type] : [])),
   }));
 });
 
-const itemHeaders = [
-  { title: 'اسم المنتج', key: 'item_name' },
-  { title: 'الوحدة', key: 'unit_name' },
-  { title: 'الكمية', key: 'quantity' },
-  { title: 'تاريخ بداية النقل', key: 'from_date' },
-  { title: 'عدد الرحلات', key: 'trip_no' },
-  { title: 'نوع الناقلة', key: 'transport_type' },
-];
+const itemHeaders = computed(() => [
+  { title: t('purchases.link.shared.table.productName'), key: 'item_name' },
+  { title: t('purchases.shared.forms.common.tableHeaders.unit'), key: 'unit_name' },
+  { title: t('purchases.link.shared.table.quantity'), key: 'quantity' },
+  { title: t('purchases.orders.shared.tableHeaders.transportStartDate'), key: 'from_date' },
+  { title: t('purchases.orders.shared.tableHeaders.tripCount'), key: 'trip_no' },
+  { title: t('purchases.views.shared.transportCarrierType'), key: 'transport_type' },
+]);
 
-const tripHeaders = [
-  { title: 'اسم المنتج', key: 'item_name' },
-  { title: 'الوحدة', key: 'unit_name' },
-  { title: 'الكمية', key: 'quantity' },
-  { title: 'تاريخ الرحلة', key: 'trip_date' },
-  { title: 'سعر الرحلة', key: 'trip_price' },
-  { title: 'نوع المركبات', key: 'transport_type_names' },
-];
+const tripHeaders = computed(() => [
+  { title: t('purchases.link.shared.table.productName'), key: 'item_name' },
+  { title: t('purchases.shared.forms.common.tableHeaders.unit'), key: 'unit_name' },
+  { title: t('purchases.link.shared.table.quantity'), key: 'quantity' },
+  { title: t('purchases.orders.shared.tableHeaders.tripDate'), key: 'trip_date' },
+  { title: t('purchases.orders.shared.tableHeaders.tripPrice'), key: 'trip_price' },
+  { title: t('purchases.orders.shared.tableHeaders.transportTypes'), key: 'transport_type_names' },
+]);
 
 onMounted(() => {
   fetchConstants();

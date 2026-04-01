@@ -2,6 +2,9 @@
 import { ref, computed, onMounted, reactive } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useApi } from "@/composables/useApi";
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 import BasicInfoTab from "./components/BasicInfoTab.vue";
 import FinancialInfoTab, { CrusherBankAccount } from './components/FinancialInfoTab.vue';
 import CommercialInfoTab from "./components/CommercialInfoTab.vue";
@@ -34,7 +37,7 @@ const checkCircleIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
 </svg>`;
 
 const isEditing = computed(() => !!route.params.id);
-const pageTitle = computed(() => isEditing.value ? "تعديل الكسارة" : "إضافة كسارة");
+const pageTitle = computed(() => isEditing.value ? t('pages.crushers.form.editTitle') : t('pages.crushers.form.addTitle'));
 const crusherId = ref<number | null>(null);
 
 const formRef = ref<any>(null);
@@ -43,13 +46,13 @@ const formErrors = reactive<Record<string, string>>({});
 const hasValidationErrors = ref(false);
 
 const activeTab = ref(0);
-const tabs = [
-    { title: "البيانات الاساسية", value: 0 },
-    { title: "البيانات المالية", value: 1 },
-    { title: "البيانات التجارية", value: 2 },
-    { title: "المعلومات التشغيلية", value: 3 },
-    // { title: "المستندات", value: 4 },
-];
+const tabs = computed(() => [
+    { title: t('pages.crushers.form.tabs.basicInfo'), value: 0 },
+    { title: t('pages.crushers.form.tabs.financialInfo'), value: 1 },
+    { title: t('pages.crushers.form.tabs.commercialInfo'), value: 2 },
+    { title: t('pages.crushers.form.tabs.operationalInfo'), value: 3 },
+    // { title: t('form.contractors.tabs.documents'), value: 4 },
+]);
 
 const isTabActive = (value: number) => activeTab.value === value;
 
@@ -161,7 +164,7 @@ const handleSave = async () => {
         // Step 2: Financial Info
         if (step === 2) {
             if (!isEditing.value) {
-                toast.error('يجب حفظ البيانات الأساسية أولاً');
+                toast.error(t('common.messages.general.completeStep1First'));
                 saving.value = false;
                 return;
             }
@@ -186,7 +189,7 @@ const handleSave = async () => {
         // Step 3: Commercial Info
         if (step === 3) {
             if (!isEditing.value) {
-                toast.error('يجب حفظ البيانات الأساسية أولاً');
+                toast.error(t('common.messages.general.completeStep1First'));
                 saving.value = false;
                 return;
             }
@@ -204,7 +207,7 @@ const handleSave = async () => {
         // Step 4: Operational Info
         if (step === 4) {
             if (!isEditing.value) {
-                toast.error('يجب حفظ البيانات الأساسية أولاً');
+                toast.error(t('common.messages.general.completeStep1First'));
                 saving.value = false;
                 return;
             }
@@ -233,10 +236,10 @@ const handleSave = async () => {
 
         // Show success message based on step
         const stepMessages = [
-            'تم حفظ البيانات الأساسية بنجاح',
-            'تم حفظ البيانات المالية بنجاح',
-            'تم حفظ البيانات التجارية بنجاح',
-            'تم حفظ المعلومات التشغيلية بنجاح'
+            t('common.messages.general.saveSuccess'),
+            t('common.messages.general.saveSuccess'),
+            t('common.messages.general.saveSuccess'),
+            t('common.messages.general.saveSuccess')
         ];
         // Clear validation errors on successful save
         hasValidationErrors.value = false;
@@ -261,9 +264,9 @@ const handleSave = async () => {
             Object.keys(apiErrors).forEach(key => {
                 formErrors[key] = apiErrors[key][0];
             });
-            toast.error(err?.response?.data?.message || 'يرجى تصحيح الأخطاء في النموذج');
+            toast.error(err?.response?.data?.message || t('common.messages.general.saveError'));
         } else {
-            toast.error(err?.response?.data?.message || 'فشل حفظ الكسارة');
+            toast.error(err?.response?.data?.message || t('common.messages.general.saveError'));
         }
     } finally {
         saving.value = false;
@@ -409,7 +412,7 @@ const fetchCrusherData = async () => {
         managerEmail.value = data.manager_email || '';
     } catch (err: any) {
         console.error('Error fetching crusher:', err);
-        toast.error(err?.response?.data?.message || 'فشل تحميل بيانات الكسارة');
+        toast.error(err?.response?.data?.message || t('common.messages.general.loadDataFailed'));
     }
 };
 
@@ -584,10 +587,10 @@ onMounted(async () => {
 
             <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col">
                 <ButtonWithIcon variant="flat" color="primary" rounded="4" height="48" custom-class="min-w-56"
-                    :prepend-icon="saveIcon" label="حفظ التعديلات" @click="handleSave" :loading="saving" />
+                    :prepend-icon="saveIcon" :label="t('common.actions.save')" @click="handleSave" :loading="saving" />
 
                 <ButtonWithIcon prepend-icon="mdi-close" variant="flat" color="primary-50" rounded="4" height="48"
-                    custom-class="font-semibold text-base text-primary-700 px-6 min-w-56" label="إغلاق"
+                    custom-class="font-semibold text-base text-primary-700 px-6 min-w-56" :label="t('common.actions.close')"
                     :disabled="saving" @click="handleCancel" />
             </div>
         </div>

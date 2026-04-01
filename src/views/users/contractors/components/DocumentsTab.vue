@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 interface Document {
   id: number;
@@ -74,26 +77,26 @@ const eyeIcon = `<svg width="20" height="14" viewBox="0 0 20 14" fill="none" xml
 
 <template>
   <div class="mb-6 bg-gray-50 rounded-lg p-6">
-    <h2 class="text-lg font-bold text-primary-900 mb-4">المستندات</h2>
+    <h2 class="text-lg font-bold text-primary-900 mb-4">{{ t('form.contractor.documents.sectionTitle') }}</h2>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-      <TextInput v-model="documentName" label="اسم الملف" placeholder="ادخل الاسم" />
-      <SelectWithIconInput v-model="documentType" label="نوع الملف" placeholder="اختر" :items="documentTypeItems" />
-      <FileUploadInput v-model="documentFile" label="ارفق ملف" hint="Click to upload or drag and drop" />
+      <TextInput v-model="documentName" :label="t('form.contractor.documents.documentName.label')" :placeholder="t('form.contractor.documents.documentName.placeholder')" />
+      <SelectWithIconInput v-model="documentType" :label="t('form.contractor.documents.documentType.label')" :placeholder="t('form.contractor.documents.documentType.placeholder')" :items="documentTypeItems" />
+      <FileUploadInput v-model="documentFile" :label="t('form.contractor.documents.fileUpload.label')" :hint="t('form.contractor.documents.fileUpload.hint')" />
     </div>
 
     <ButtonWithIcon variant="flat" color="primary" custom-class="mb-6"
-      label="إضافة" @click="addDocument" />
+      :label="t('form.contractor.documents.addButton.label')" @click="addDocument" />
 
     <div v-if="documents.length > 0" class="mt-6">
       <v-table class="bg-white rounded-lg">
         <thead>
           <tr class="bg-gray-100">
-            <th class="text-right font-semibold text-gray-700 py-3 px-4">اسم المرفق</th>
-            <th class="text-right font-semibold text-gray-700 py-3 px-4">تاريخ المرفق</th>
-            <th class="text-right font-semibold text-gray-700 py-3 px-4">نوع المرفق</th>
-            <th class="text-right font-semibold text-gray-700 py-3 px-4">الملف</th>
-            <th class="text-right font-semibold text-gray-700 py-3 px-4">الإجراءات</th>
+            <th class="text-start font-semibold text-gray-700 py-3 px-4">{{ t('form.contractor.documents.tableHeaders.attachmentName') }}</th>
+            <th class="text-start font-semibold text-gray-700 py-3 px-4">{{ t('form.contractor.documents.tableHeaders.attachmentDate') }}</th>
+            <th class="text-start font-semibold text-gray-700 py-3 px-4">{{ t('form.contractor.documents.tableHeaders.attachmentType') }}</th>
+            <th class="text-start font-semibold text-gray-700 py-3 px-4">{{ t('form.contractor.documents.tableHeaders.file') }}</th>
+            <th class="text-start font-semibold text-gray-700 py-3 px-4">{{ t('form.contractor.documents.tableHeaders.actions') }}</th>
           </tr>
         </thead>
         <tbody>
@@ -103,7 +106,7 @@ const eyeIcon = `<svg width="20" height="14" viewBox="0 0 20 14" fill="none" xml
             <td class="py-3 px-4">{{ doc.type }}</td>
             <td class="py-3 px-4">
               <ButtonWithIcon size="small" variant="text" color="primary"
-                label="اسم المرفق" />
+                :label="t('form.contractor.documents.tableHeaders.attachmentName')" />
             </td>
             <td class="py-3 px-4">
               <div class="flex items-center gap-2">

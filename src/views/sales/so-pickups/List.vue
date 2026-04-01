@@ -131,7 +131,7 @@ const fetchList = async (append = false) => {
         nextCursor.value = res.pagination?.next_cursor ?? null;
     } catch (err: any) {
         console.error('Error fetching SO pickups list:', err);
-        error(err?.response?.data?.message || 'فشل تحميل قائمة حجوزات التسليم');
+        error(err?.response?.data?.message || t('sales.soPickups.messages.loadListError'));
     } finally {
         loading.value = false;
         loadingMore.value = false;
@@ -162,7 +162,7 @@ const cleanupInfiniteScroll = () => {
 // Toggle column and persist
 const handleToggleHeader = async (headerKey: string) => {
     await toggleHeader(headerKey).catch((err: any) => {
-        error(err?.response?.data?.message || 'فشل تحديث الأعمدة');
+        error(err?.response?.data?.message || t('sales.soPickups.messages.columnsUpdateError'));
     });
 };
 
@@ -193,13 +193,13 @@ const confirmDelete = async () => {
     try {
         deleteLoading.value = true;
         await api.delete(`/sales/so-pickups/${uuid}`);
-        success('تم حذف حجز التسليم بنجاح');
+        success(t('sales.soPickups.messages.deleteSuccess'));
         showDeleteDialog.value = false;
         itemToDelete.value = null;
         await fetchList();
     } catch (err: any) {
         console.error('Error deleting pickup:', err);
-        error(err?.response?.data?.message || 'فشل حذف حجز التسليم');
+        error(err?.response?.data?.message || t('sales.soPickups.messages.deleteError'));
     } finally {
         deleteLoading.value = false;
     }
@@ -267,12 +267,12 @@ const confirmBulkDelete = async () => {
             formData.append(`ids[${index}]`, id);
         });
         await api.post('/sales/so-pickups/bulk-delete', formData);
-        success(`تم حذف ${selectedRequests.value.length} حجز تسليم بنجاح`);
+        success(t('sales.soPickups.messages.bulkDeleteSuccess', { count: selectedRequests.value.length }));
         selectedRequests.value = [];
         await fetchList();
     } catch (err: any) {
         console.error('Error bulk deleting pickups:', err);
-        error(err?.response?.data?.message || 'فشل الحذف الجماعي');
+        error(err?.response?.data?.message || t('sales.soPickups.messages.bulkDeleteError'));
     } finally {
         deleteLoading.value = false;
         showBulkDeleteDialog.value = false;
@@ -297,17 +297,17 @@ onBeforeUnmount(() => {
 <template>
     <default-layout>
         <div class="so-pickups-page">
-            <PageHeader :icon="GridIcon" title-key="pages.SalesSoPickups.title"
-                description-key="pages.SalesSoPickups.description" />
+            <PageHeader :icon="GridIcon" title-key="sales.soPickups.list.title"
+                description-key="sales.soPickups.list.description" />
 
             <div
                 class="flex justify-end items-stretch rounded border border-gray-300 w-fit ms-auto mb-4 overflow-hidden bg-white text-sm">
                 <ButtonWithIcon variant="flat" height="40" rounded="0"
                     custom-class="font-semibold text-base border-gray-300 bg-primary-100 !text-primary-900"
-                    :prepend-icon="importIcon" :label="t('common.import')" />
+                    :prepend-icon="importIcon" :label="t('common.action.import')" />
                 <ButtonWithIcon variant="flat" height="40" rounded="0"
                     custom-class="font-semibold text-base border-gray-300 bg-primary-50 !text-primary-900"
-                    :prepend-icon="exportIcon" :label="t('common.export')" />
+                    :prepend-icon="exportIcon" :label="t('common.action.export')" />
             </div>
 
             <div class="bg-gray-50 rounded-md -mx-6">
@@ -318,12 +318,12 @@ onBeforeUnmount(() => {
                         class="flex flex-wrap items-stretch rounded overflow-hidden border border-gray-200 bg-white text-sm">
                         <ButtonWithIcon variant="flat" height="40" rounded="0"
                             custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-                            :prepend-icon="trash_1_icon" color="white" :label="t('common.delete')"
+                            :prepend-icon="trash_1_icon" color="white" :label="t('common.action.delete')"
                             @click="handleBulkDelete" />
                         <div class="w-px bg-gray-200"></div>
                         <ButtonWithIcon variant="flat" height="40" rounded="0"
                             custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-                            :prepend-icon="trash_2_icon" color="white" :label="t('common.deleteAll')"
+                            :prepend-icon="trash_2_icon" color="white" :label="t('common.action.deleteAll')"
                             @click="handleBulkDelete" />
                     </div>
 
@@ -334,7 +334,7 @@ onBeforeUnmount(() => {
                                 <ButtonWithIcon v-bind="menuProps" variant="outlined" append-icon="mdi-chevron-down"
                                     rounded="4" color="gray-500" height="40"
                                     custom-class="font-semibold text-base border-gray-400" :prepend-icon="columnIcon"
-                                    :label="t('common.columns')">
+                                    :label="t('common.table.columns')">
                                     <template #append>
                                         <v-icon>mdi-chevron-down</v-icon>
                                     </template>
@@ -355,7 +355,7 @@ onBeforeUnmount(() => {
 
                         <ButtonWithIcon variant="flat" color="primary-500" height="40" rounded="4"
                             custom-class="px-7 font-semibold text-base text-white border !border-primary-200"
-                            :prepend-icon="searchIcon" :label="t('common.advancedSearch')"
+                            :prepend-icon="searchIcon" :label="t('common.table.advancedSearch')"
                             @click="toggleAdvancedFilters" />
                     </div>
                 </div>
@@ -366,7 +366,7 @@ onBeforeUnmount(() => {
                     <div class="flex gap-2 items-center">
                         <ButtonWithIcon variant="flat" color="primary-500" rounded="4" height="40"
                             custom-class="px-5 font-semibold !text-white text-sm sm:text-base"
-                            :prepend-icon="searchIcon" label="ابحث" @click="fetchList" />
+                            :prepend-icon="searchIcon" :label="t('sales.soPickups.search')" @click="fetchList" />
                     </div>
                 </div>
 
@@ -398,7 +398,7 @@ onBeforeUnmount(() => {
                 <div ref="loadMoreTrigger" class="h-4"></div>
                 <div v-if="loadingMore" class="flex justify-center items-center py-4">
                     <v-progress-circular indeterminate color="primary" size="32" />
-                    <span class="mr-2 text-gray-600">جاري تحميل المزيد...</span>
+                    <span class="ms-2 text-gray-600">{{ t('common.ui.loadingMore') }}</span>
                 </div>
             </div>
         </div>
@@ -407,16 +407,21 @@ onBeforeUnmount(() => {
             v-model="showChangeStatusDialog"
             :item="itemToChangeStatus"
             :change-status-url="`/sales/so-pickups/${itemToChangeStatus?.uuid}/change-status`"
+            :title="t('common.statusChange.title')"
+            :message="t('common.statusChange.message')"
             @success="fetchList"
         />
 
         <!-- Single Delete Confirmation Dialog -->
-        <DeleteConfirmDialog v-model="showDeleteDialog" :loading="deleteLoading" title="حذف حجز التسليم"
-            message="هل أنت متأكد من حذف حجز التسليم؟" @confirm="confirmDelete" />
+        <DeleteConfirmDialog v-model="showDeleteDialog" :loading="deleteLoading"
+            :title="t('sales.soPickups.delete.titleSingle')"
+            :message="t('sales.soPickups.delete.messageSingle')" @confirm="confirmDelete" />
 
         <!-- Bulk Delete Confirmation Dialog -->
-        <DeleteConfirmDialog v-model="showBulkDeleteDialog" :loading="deleteLoading" title="حذف حجوزات التسليم"
-            :message="`هل أنت متأكد من حذف ${selectedRequests.length} حجز تسليم؟`" @confirm="confirmBulkDelete" />
+        <DeleteConfirmDialog v-model="showBulkDeleteDialog" :loading="deleteLoading"
+            :title="t('sales.soPickups.delete.titleBulk')"
+            :message="t('sales.soPickups.delete.messageBulk', { count: selectedRequests.length })"
+            @confirm="confirmBulkDelete" />
     </default-layout>
 </template>
 

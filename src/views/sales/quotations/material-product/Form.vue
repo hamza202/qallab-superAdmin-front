@@ -1,13 +1,18 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
+import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import AddProductDialog from '@/components/price-offers/AddProductDialog.vue';
+import EditProductsDialog from '@/components/price-offers/EditProductsDialog.vue';
 import EditSupplyDetailsDialog from '@/components/price-offers/EditSupplyDetailsDialog.vue';
 import TopHeader from '@/components/price-offers/TopHeader.vue';
+import AppFormBreadcrumb from '@/components/common/AppFormBreadcrumb.vue';
 import { useApi } from '@/composables/useApi';
 import { useCalculations } from "@/composables/useCalculations";
 import { fileIcon, mapMarkerIcon, messagePlusIcon, filePlusIcon, busIcon, listIcon, CoinHandIcon, fileCheckIcon } from '@/components/icons/priceOffersIcons';
 import { returnIcon, saveIcon, rialIcon } from '@/components/icons/globalIcons';
+
+const { t } = useI18n();
 const api = useApi();
 const route = useRoute();
 const router = useRouter();
@@ -180,6 +185,13 @@ const fetchFormData = async () => {
                 const transportTypeName = vehicleTypes.length
                     ? vehicleTypes.map((id: number) => getTransportTypeName(id)).filter(Boolean).join(', ')
                     : '';
+
+                if (item.id && itemId) {
+                    originalProductIds.value.set(itemId, item.id);
+                }
+                if (log?.id && itemId) {
+                    originalLogisticsDetailIds.value.set(itemId, log.id);
+                }
 
                 return {
                     id: item.id,
@@ -389,6 +401,10 @@ const formData = ref({
 // Products table items (dynamically populated from dialog)
 const productTableItems = ref<ProductTableItem[]>([]);
 
+// Maps item_id → server id from original response, used to restore id on re-add
+const originalProductIds = ref<Map<number, number>>(new Map());
+const originalLogisticsDetailIds = ref<Map<number, number>>(new Map());
+
 // API-driven calculations via composable
 const { vatRate, fetchCalculations: _fetchCalc, summaryTotals } = useCalculations(productTableItems);
 
@@ -431,16 +447,18 @@ const handleAddProduct = () => {
 };
 
 const handleProductSaved = async (products: any[]) => {
-    // Merge new products while preserving existing notes
     const newItems: ProductTableItem[] = [];
 
     products.forEach(p => {
-        // Find if this product already exists in the table
         const existing = productTableItems.value.find(existing => existing.item_id === p.item_id);
+        const restoredId = p.id || originalProductIds.value.get(p.item_id) || null;
+        const restoredLogisticsId = p.logistics_detail_id || originalLogisticsDetailIds.value.get(p.item_id) || null;
 
         newItems.push({
             ...p,
-            notes: existing?.notes || p.notes || '' // Preserve existing notes
+            id: restoredId,
+            logistics_detail_id: restoredLogisticsId,
+            notes: existing?.notes || p.notes || '',
         });
     });
 
@@ -486,6 +504,18 @@ const handleDeleteProduct = async (item: any) => {
     }
 };
 
+const showEditProductsDialog = ref(false);
+
+const handleEditProductsBulk = async (updatedProducts: any[]) => {
+    productTableItems.value = updatedProducts.map(p => ({
+        ...p,
+        price_per_unit: p.unit_price ?? p.price_per_unit ?? null,
+        discount_val: p.discount ?? p.discount_val ?? null,
+        id: p.id || originalProductIds.value.get(p.item_id) || null,
+        logistics_detail_id: p.logistics_detail_id || originalLogisticsDetailIds.value.get(p.item_id) || null,
+    }));
+    await fetchCalculations();
+};
 
 const handleNewRequest = () => {
     console.log('New Request clicked');
@@ -675,7 +705,7 @@ const handleSubmit = async (afterSuccess?: 'reset' | 'navigate') => {
     if (!await validate()) return;
 
     if (productTableItems.value.length === 0) {
-        warning('يجب إضافة منتج واحد على الأقل');
+        warning(t('sales.forms.common.validation.atLeastOneProduct'));
         return;
     }
 
@@ -693,7 +723,7 @@ const handleSubmit = async (afterSuccess?: 'reset' | 'navigate') => {
             }
         });
 
-        success(isEditMode.value ? 'تم تحديث عرض السعر بنجاح' : 'تم إنشاء عرض السعر بنجاح');
+        success(isEditMode.value ? t('sales.forms.common.messages.quotationUpdated') : t('sales.forms.common.messages.quotationCreated'));
 
         if (afterSuccess === 'reset') {
             resetForm();
@@ -702,7 +732,7 @@ const handleSubmit = async (afterSuccess?: 'reset' | 'navigate') => {
         }
     } catch (e: any) {
         console.error('Error submitting form:', e);
-        apiError(e, 'حدث خطأ أثناء حفظ عرض السعر');
+        apiError(e, t('sales.forms.common.messages.saveQuotationError'));
     } finally {
         isSubmitting.value = false;
     }
@@ -785,16 +815,16 @@ const openMapDialog = () => {
     showMapDialog.value = true;
 };
 
-const headers = [
-    { title: 'اسم المنتج', key: 'name' },
-    { title: 'الوحدة', key: 'unit' },
-    { title: 'الكمية', key: 'quantity' },
-    { title: 'سعر الوحدة', key: 'unit_price' },
-    { title: 'خصم', key: 'discount_display' },
-    { title: 'مبلغ الضريبة', key: 'tax_amount' },
-    { title: 'إجمالي المبلغ', key: 'total_amount' },
-    { title: 'ملاحظات', key: 'notes' },
-]
+const headers = computed(() => [
+    { title: t('common.form.productName'), key: 'name' },
+    { title: t('common.form.unit'), key: 'unit' },
+    { title: t('sales.forms.common.labels.quantity'), key: 'quantity' },
+    { title: t('sales.forms.tables.invoiceSales.pricePerUnit'), key: 'unit_price' },
+    { title: t('sales.forms.common.labels.discount'), key: 'discount_display' },
+    { title: t('sales.forms.tables.invoiceSales.totalTax'), key: 'tax_amount' },
+    { title: t('sales.forms.common.labels.totalAmount'), key: 'total_amount' },
+    { title: t('sales.forms.common.labels.notes'), key: 'notes' },
+])
 
 
 
@@ -815,13 +845,13 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
 })));
 
 // جدول تفاصيل التوريد: يعكس المنتجات المضافة أعلاه (المنتج، الكمية، تاريخ بداية النقل، نوع المركبة، عدد الرحلات)
-const ServicesHeaders = [
-    { title: 'المنتج', key: 'product_name' },
-    { title: 'الكمية', key: 'quantity_display' },
-    { title: 'تاريخ بداية النقل', key: 'transport_start_date' },
-    { title: 'نوع مركبة النقل', key: 'transport_type_name' },
-    { title: 'عدد الرحلات', key: 'trip_no' },
-];
+const ServicesHeaders = computed(() => [
+    { title: t('sales.forms.common.labels.product'), key: 'product_name' },
+    { title: t('sales.forms.common.labels.quantityDisplay'), key: 'quantity_display' },
+    { title: t('sales.forms.common.labels.transportStart'), key: 'transport_start_date' },
+    { title: t('sales.forms.common.labels.transportVehicleType'), key: 'transport_type_name' },
+    { title: t('sales.forms.common.labels.tripsCount'), key: 'trip_no' },
+]);
 
 // عناصر الجدول مبنية على جدول المنتجات: كل منتج = صف واحد (زر التعديل فقط، بدون حذف)
 const serviceTableItems = computed(() =>
@@ -848,6 +878,15 @@ const serviceTableItems = computed(() =>
 <template>
     <default-layout>
         <div class="request-material-product-page -mx-6 bg-qallab-dashboard-bg space-y-4">
+            <AppFormBreadcrumb
+                list-path="/sales/quotations/material-product/list"
+                module-root-key="breadcrumb.sales.root"
+                list-label-key="breadcrumb.sales.quotations.materialProduct.list"
+                create-label-key="breadcrumb.sales.quotations.materialProduct.create"
+                edit-label-key="breadcrumb.sales.quotations.materialProduct.edit"
+                :is-edit-mode="isEditMode"
+                :code="isEditMode ? (formData.code || '') : ''"
+            />
             <!-- Page Header -->
             <TopHeader :icon="filePlusIcon" title-key="pages.PricesOffersMaterialProduct.FormTitle"
                 description-key="pages.PricesOffersMaterialProduct.FormDescription" :show-action="false"
@@ -857,29 +896,29 @@ const serviceTableItems = computed(() =>
             <div class="p-6 bg-white rounded-3xl border !border-gray-100 ">
                 <div class="flex items-center mb-6 gap-2 text-primary-600">
                     <span v-html="fileCheckIcon"></span>
-                    <h2 class="text-base font-bold">البيانات الأساسية</h2>
+                    <h2 class="text-base font-bold">{{ t('sales.forms.common.sections.basicData') }}</h2>
                 </div>
 
                 <v-form ref="formRef" v-model="isFormValid" @submit.prevent>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 items-end">
                         <!-- Customer Name -->
                         <div>
-                            <SelectInput v-model="formData.customer_id" :items="[]" label="اسم العميل"
+                            <SelectInput v-model="formData.customer_id" :items="[]" :label="t('sales.forms.common.labels.customerName')"
                                 item-title="title" :rules="[required()]" item-value="value" density="comfortable"
-                                placeholder="حدد العميل" :server-side="true" :fetch-function="fetchCustomers"
+                                :placeholder="t('sales.forms.common.placeholders.selectCustomer')" :server-side="true" :fetch-function="fetchCustomers"
                                 item-title-key="full_name" item-value-key="id" :debounce-time="500" />
                         </div>
 
                         <!-- quotation_name: اسم عرض السعر -->
                         <div>
-                            <TextInput v-model="formData.quotation_name" placeholder="أدخل الإسم"
-                                label="اسم عرض السعر" :rules="[required()]" density="comfortable" />
+                            <TextInput v-model="formData.quotation_name" :placeholder="t('sales.forms.common.placeholders.enterName')"
+                                :label="t('sales.forms.common.labels.quotationName')" :rules="[required()]" density="comfortable" />
                         </div>
 
                         <!-- quotations_datetime: تاريخ العرض (في الإضافة يُخفى ويُرسل تلقائياً عند الحفظ، في التعديل عرض فقط) -->
                         <div v-if="isEditMode">
                             <TextInput :model-value="formData.quotations_datetime" type="text" disabled
-                                label="تاريخ العرض" density="comfortable" hide-details
+                                :label="t('sales.forms.common.labels.quotationDate')" density="comfortable" hide-details
                                 :input-props="{ readonly: true }">
                                 <template #prepend-inner>
                                     <span class="text-gray-500" v-html="dateIconSvg"></span>
@@ -889,11 +928,11 @@ const serviceTableItems = computed(() =>
 
                         <!-- quotation_validity_no: تاريخ صلاحية عرض السعر (أيام) -->
                         <div>
-                            <TextInput v-model="formData.quotation_validity_no" placeholder="أدخل المدة بالأيام"
-                                label="تاريخ صلاحية عرض السعر" :rules="[required(), numeric()]" density="comfortable">
+                            <TextInput v-model="formData.quotation_validity_no" :placeholder="t('sales.forms.common.placeholders.enterDays')"
+                                :label="t('sales.forms.common.labels.quotationValidityDate')" :rules="[required(), numeric()]" density="comfortable">
                                 <template #append-inner>
                                     <span class="text-gray-500 text-sm">
-                                        يوم
+                                        {{ t('sales.forms.common.misc.dayWord') }}
                                     </span>
                                 </template>
                             </TextInput>
@@ -902,12 +941,12 @@ const serviceTableItems = computed(() =>
 
                         <!-- Project Location -->
                         <div class="relative">
-                            <label class="text-sm font-medium text-gray-700 mb-2 block">موقع المشروع</label>
+                            <label class="text-sm font-medium text-gray-700 mb-2 block">{{ t('sales.ordersFuels.filters.projectLocation') }}</label>
                             <div @click="openMapDialog"
                                 class="flex items-center justify-between px-4 py-2 min-h-[48px] border !border-blue-400 rounded-lg cursor-pointer hover:bg-blue-100 transition-colors">
                                 <span
                                     class="text-base font-medium text-blue-900 whitespace-nowrap overflow-hidden text-ellipsis ">
-                                    {{ formData.target_location || 'حدد الموقع' }}
+                                    {{ formData.target_location || t('sales.forms.common.misc.pickLocation') }}
                                 </span>
                                 <div class="flex items-center gap-2">
                                     <span v-html="mapMarkerIcon"></span>
@@ -918,15 +957,15 @@ const serviceTableItems = computed(() =>
 
                         <!-- project name -->
                         <div>
-                            <TextInput v-model="formData.project_name" label="اسم المشروع" placeholder="أدخل الإسم"
+                            <TextInput v-model="formData.project_name" :label="t('sales.forms.common.labels.projectName')" :placeholder="t('sales.forms.common.placeholders.enterName')"
                                 :rules="[required()]" density="comfortable" />
                         </div>
 
                         <!-- quotation_type: نوع الطلب -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2"></label>
-                            <SelectInput v-model="formData.quotation_type" :items="requestTypeItems" label="نوع الطلب"
-                                density="comfortable" placeholder="حدد نوع الطلب" />
+                            <SelectInput v-model="formData.quotation_type" :items="requestTypeItems" :label="t('sales.forms.common.labels.requestType')"
+                                density="comfortable" :placeholder="t('sales.forms.common.placeholders.selectQuotationType')" />
                         </div>
                     </div>
                 </v-form>
@@ -937,9 +976,9 @@ const serviceTableItems = computed(() =>
                 <div class="px-6 py-6">
                     <div class="flex items-center gap-2 mb-2">
                         <span v-html="listIcon"></span>
-                        <h2 class="text-base font-bold text-primary-600">جدول عناصر عرض السعر</h2>
+                        <h2 class="text-base font-bold text-primary-600">{{ t('sales.forms.common.sections.quotationItemsTable') }}</h2>
                     </div>
-                    <p class="text-emerald-500 text-sm font-bold ms-7">** الأسعار شاملة للنقل</p>
+                    <p class="text-emerald-500 text-sm font-bold ms-7">{{ t('sales.forms.common.misc.pricesIncludeTransport') }}</p>
                 </div>
 
                 <!-- Products Table -->
@@ -960,7 +999,7 @@ const serviceTableItems = computed(() =>
                             <template #activator="{ props }">
                                 <div class="flex items-center gap-2 cursor-pointer" v-bind="props">
                                     <v-icon size="20" color="primary" v-html="messagePlusIcon"></v-icon>
-                                    <span class="text-gray-900">{{ item.notes || 'أضف ملاحظة' }}</span>
+                                    <span class="text-gray-900">{{ item.notes || t('sales.forms.common.misc.addNote') }}</span>
                                 </div>
                             </template>
 
@@ -970,7 +1009,7 @@ const serviceTableItems = computed(() =>
                                 <div class="!flex flex-nowrap items-center gap-3">
                                     <TextInput
                                         v-model="productTableItems[productTableItems.findIndex(p => p.item_id === item.item_id)].notes"
-                                        placeholder="أضف ملاحظة" variant="outlined" density="comfortable" hide-details
+                                        :placeholder="t('sales.forms.common.misc.addNote')" variant="outlined" density="comfortable" hide-details
                                         autofocus class="flex-1" />
                                     <ButtonWithIcon :icon="messagePlusIcon" color="primary" icon-only size="x-small" />
 
@@ -980,11 +1019,16 @@ const serviceTableItems = computed(() =>
                     </template>
                 </DataTable>
 
-                <!-- Add Product Button -->
-                <div class="flex justify-center my-6 ">
-                    <ButtonWithIcon color="primary-100" variant="flat" class="!text-primary-900 font-bold w-75"
+                <!-- Add / Edit Product Buttons -->
+                <div class="flex justify-center gap-3 w-75 mx-auto my-6">
+                    <ButtonWithIcon color="primary-100" variant="flat" class="!text-primary-900 font-bold flex-1"
                         @click="handleAddProduct">
-                        + إضافة منتج جديد
+                        {{ t('sales.forms.common.misc.addProductLine') }}
+                    </ButtonWithIcon>
+                    <ButtonWithIcon v-if="productTableItems.length > 0" color="primary-100" variant="flat"
+                        class="!text-primary-900 font-bold flex-1"
+                        @click="showEditProductsDialog = true">
+                        {{ t('sales.forms.common.misc.editProducts') }}
                     </ButtonWithIcon>
                 </div>
             </div>
@@ -994,7 +1038,7 @@ const serviceTableItems = computed(() =>
                 <div class="px-6 py-6">
                     <div class="flex items-center gap-2">
                         <span v-html="busIcon"></span>
-                        <h2 class="text-base font-bold text-primary-600">تفاصيل التوريد</h2>
+                        <h2 class="text-base font-bold text-primary-600">{{ t('sales.forms.common.sections.supplyDetails') }}</h2>
                     </div>
                 </div>
 
@@ -1009,7 +1053,7 @@ const serviceTableItems = computed(() =>
                         :disabled="productTableItems.length === 0"
                         @click="handleAddSupply"
                     >
-                        + تعديل تفاصيل التوريد
+                        {{ t('sales.forms.common.misc.editSupplyDetailsBtn') }}
                     </ButtonWithIcon>
                 </div>
             </div>
@@ -1019,47 +1063,47 @@ const serviceTableItems = computed(() =>
                 <div class="bg-white rounded-2xl xl:col-span-2">
                     <div class="flex items-center gap-2 p-6 border-b !border-gray-200">
                         <span v-html="CoinHandIcon"></span>
-                        <h2 class="text-base font-bold text-primary-600">بيانات الدفع</h2>
+                        <h2 class="text-base font-bold text-primary-600">{{ t('sales.forms.common.sections.paymentData') }}</h2>
                     </div>
                     <div class="p-6">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <!-- payment_method: طريقة الدفع -->
                             <SelectInput v-model="formData.payment_method" :items="paymentMethodItems" density="comfortable"
-                                placeholder="حدد طريقة الدفع" label="طريقة الدفع" />
+                                :placeholder="t('sales.forms.common.placeholders.selectPaymentMethod')" :label="t('sales.forms.common.labels.paymentMethod')" />
                             <!-- upfront_payment: دفعة مقدمة -->
                             <PriceInput showRialIcon v-model="formData.upfront_payment" density="comfortable"
-                                label="دفعة مقدمة" placeholder="أدخل قيمة الدفعة" />
+                                :label="t('sales.forms.common.labels.advancePayment')" :placeholder="t('sales.forms.common.placeholders.advancePaymentValue')" />
 
                             <!-- invoice_interval: مدة رفع المستخلص -->
-                            <PriceInput label="مدة رفع المستخلص" v-model="formData.invoice_interval"
-                                placeholder="أدخل المدة بالأيام" :rules="[required(), numeric()]" density="comfortable">
+                            <PriceInput :label="t('sales.forms.common.labels.invoiceUploadExtract')" v-model="formData.invoice_interval"
+                                :placeholder="t('sales.forms.common.placeholders.enterDays')" :rules="[required(), numeric()]" density="comfortable">
                                 <template #append-inner>
                                     <span class="text-gray-500 text-sm">
-                                        يوم
+                                        {{ t('sales.forms.common.misc.dayWord') }}
                                     </span>
                                 </template>
                             </PriceInput>
                             <!-- payment_term_no: مدة السداد -->
-                            <PriceInput label="مدة السداد" v-model="formData.payment_term_no"
-                                placeholder="أدخل المدة بالأيام" :rules="[required(), numeric()]" density="comfortable">
+                            <PriceInput :label="t('sales.forms.common.labels.paymentTerm')" v-model="formData.payment_term_no"
+                                :placeholder="t('sales.forms.common.placeholders.enterDays')" :rules="[required(), numeric()]" density="comfortable">
                                 <template #append-inner>
                                     <span class="text-gray-500 text-sm">
-                                        يوم
+                                        {{ t('sales.forms.common.misc.dayWord') }}
                                     </span>
                                 </template>
                             </PriceInput>
 
                             <!-- late_fee / late_fee_type: غرامة التأخير -->
                             <TextInputWithSelect v-model="formData.late_fee"
-                                v-model:selectValue="formData.late_fee_type" label="غرامة التأخير"
-                                placeholder="أدخل المبلغ" type="number" :rules="[numeric(), positive()]" select-width="110px"
-                                :select-items="feeTypeItems" select-placeholder="اختر" />
+                                v-model:selectValue="formData.late_fee_type" :label="t('sales.forms.common.labels.lateFee')"
+                                :placeholder="t('sales.forms.common.placeholders.enterAmount')" type="number" :rules="[numeric(), positive()]" select-width="110px"
+                                :select-items="feeTypeItems" :select-placeholder="t('common.form.choose')" />
 
                             <!-- cancel_fee / cancel_fee_type: غرامة الإلغاء -->
                             <TextInputWithSelect v-model="formData.cancel_fee"
-                                v-model:selectValue="formData.cancel_fee_type" label="غرامة الإلغاء"
-                                placeholder="أدخل المبلغ" type="number" :rules="[numeric(), positive()]" select-width="110px"
-                                :select-items="feeTypeItems" select-placeholder="اختر" />
+                                v-model:selectValue="formData.cancel_fee_type" :label="t('sales.forms.common.labels.cancelFee')"
+                                :placeholder="t('sales.forms.common.placeholders.enterAmount')" type="number" :rules="[numeric(), positive()]" select-width="110px"
+                                :select-items="feeTypeItems" :select-placeholder="t('common.form.choose')" />
                         </div>
                     </div>
                 </div>
@@ -1071,10 +1115,10 @@ const serviceTableItems = computed(() =>
                             <tr class="bg-primary-400">
                                 <th
                                     class="text-white font-semibold text-base py-3 px-4 text-center border-l !border-gray-200">
-                                    العنصر
+                                    {{ t('sales.forms.stats.item') }}
                                 </th>
                                 <th class="text-white font-semibold text-base py-3 px-4 text-center">
-                                    المبلغ
+                                    {{ t('sales.forms.stats.amount') }}
                                 </th>
                             </tr>
                         </thead>
@@ -1082,7 +1126,7 @@ const serviceTableItems = computed(() =>
                         <tbody class="text-sm bg-primary-25">
                             <tr class="border-b !border-gray-200">
                                 <td class="py-5 px-4 text-center font-bold text-gray-900 border-l !border-gray-200">
-                                    المجموع قبل الخصم
+                                    {{ t('sales.forms.stats.preDiscountSubtotal') }}
                                 </td>
                                 <td class="py-5 px-4 text-center text-gray-600">
                                     {{ summaryTotals.subtotalBeforeDiscount }}
@@ -1091,7 +1135,7 @@ const serviceTableItems = computed(() =>
 
                             <tr class="border-b !border-gray-200">
                                 <td class="py-5 px-4 text-center font-bold text-gray-900 border-l !border-gray-200">
-                                    الخصم
+                                    {{ t('sales.forms.stats.discountTotal') }}
                                 </td>
                                 <td class="py-5 px-4 text-center text-gray-600">
                                     {{ summaryTotals.totalDiscount }}
@@ -1100,7 +1144,7 @@ const serviceTableItems = computed(() =>
 
                             <tr class="border-b !border-gray-200">
                                 <td class="py-5 px-4 text-center font-bold text-gray-900 border-l !border-gray-200">
-                                    المجموع بعد الخصم
+                                    {{ t('sales.forms.stats.postDiscountSubtotal') }}
                                 </td>
                                 <td class="py-5 px-4 text-center text-gray-600">
                                     {{ summaryTotals.subtotalAfterDiscount }}
@@ -1109,7 +1153,7 @@ const serviceTableItems = computed(() =>
 
                             <tr class="border-b !border-gray-200">
                                 <td class="py-5 px-4 text-center font-bold text-gray-900 border-l !border-gray-200">
-                                    الضريبة
+                                    {{ t('sales.forms.stats.tax') }}
                                 </td>
                                 <td class="py-5 px-4 text-center text-gray-600">
                                     {{ vatRate != null ? `${vatRate * 100}%` : '—' }}
@@ -1118,7 +1162,7 @@ const serviceTableItems = computed(() =>
 
                             <tr class="border-b !border-gray-200">
                                 <td class="py-5 px-4 text-center font-bold text-gray-900 border-l !border-gray-200">
-                                    اجمالي الضريبة
+                                    {{ t('sales.forms.stats.vatTotalGross') }}
                                 </td>
                                 <td class="py-5 px-4 text-center text-gray-600">
                                     {{ summaryTotals.totalTaxAmount }}
@@ -1127,7 +1171,7 @@ const serviceTableItems = computed(() =>
 
                             <tr>
                                 <td class="py-5 px-4 text-center font-bold text-gray-900 border-l !border-gray-200">
-                                    الإجمالي النهائي
+                                    {{ t('sales.forms.stats.grandTotalFinal') }}
                                 </td>
                                 <td class="py-5 px-4 font-bold text-center text-gray-900">
                                     {{ summaryTotals.finalTotal }}
@@ -1144,13 +1188,13 @@ const serviceTableItems = computed(() =>
                 <div class="flex justify-center gap-5 mt-6 lg:flex-row flex-col">
                     <ButtonWithIcon variant="flat" color="primary" height="48" rounded="4"
                         custom-class="font-semibold text-base px-6 md:!px-10" :prepend-icon="returnIcon"
-                        label="حفظ والعودة للرئيسية"
+                        :label="t('sales.forms.common.actions.saveBackHome')"
                         :loading="isSubmitting"
                         @click="handleSubmit('navigate')" />
 
                     <ButtonWithIcon variant="flat" color="primary-50" height="48" rounded="4"
                         custom-class="font-semibold text-base text-primary-700 px-6 md:!px-10" :prepend-icon="saveIcon"
-                        label="حفظ وإنشاء جديد"
+                        :label="t('sales.forms.common.actions.saveCreateNew')"
                         :loading="isSubmitting"
                         @click="handleSubmit('reset')" />
                 </div>
@@ -1168,6 +1212,16 @@ const serviceTableItems = computed(() =>
             :transport-types="transportTypeItems" :unit-items="unitItems" :customer-id="formData.customer_id"
             :edit-product="editingProduct" :existing-products="productTableItems" @saved="handleProductSaved"
             @product-updated="handleProductUpdated" />
+
+        <!-- Edit Products Dialog -->
+        <EditProductsDialog v-model="showEditProductsDialog"
+            request-type="raw_materials"
+            variant="sales"
+            :showUnitPriceAndDiscount="true"
+            :products="productTableItems"
+            :transport-types="transportTypeItems"
+            :unit-items="unitItems"
+            @products-updated="handleEditProductsBulk" />
 
         <!-- Edit Supply Details Dialog -->
         <EditSupplyDetailsDialog

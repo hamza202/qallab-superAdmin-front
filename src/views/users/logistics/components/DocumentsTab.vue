@@ -108,11 +108,11 @@ const saveIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xm
         <v-table v-if="documents.length > 0" class="bg-white rounded-lg mt-6">
             <thead>
                 <tr class="bg-gray-100">
-                    <th class="text-right font-semibold text-gray-700 py-3 px-4">اسم المرفوق</th>
-                    <th class="text-right font-semibold text-gray-700 py-3 px-4">تاريخ المرفوق</th>
-                    <th class="text-right font-semibold text-gray-700 py-3 px-4">نوع المرفوق</th>
-                    <th class="text-right font-semibold text-gray-700 py-3 px-4">الملف</th>
-                    <th class="text-right font-semibold text-gray-700 py-3 px-4">الإجراءات</th>
+                    <th class="text-start font-semibold text-gray-700 py-3 px-4">اسم المرفوق</th>
+                    <th class="text-start font-semibold text-gray-700 py-3 px-4">تاريخ المرفوق</th>
+                    <th class="text-start font-semibold text-gray-700 py-3 px-4">نوع المرفوق</th>
+                    <th class="text-start font-semibold text-gray-700 py-3 px-4">الملف</th>
+                    <th class="text-start font-semibold text-gray-700 py-3 px-4">الإجراءات</th>
                 </tr>
             </thead>
             <tbody>

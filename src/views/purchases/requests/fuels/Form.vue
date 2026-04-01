@@ -3,15 +3,17 @@ import { ref, computed, onMounted } from "vue";
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router';
 import AddProductDialogFuels, { type FuelProductToAdd } from '@/components/price-offers/AddProductDialogFuels.vue';
+import EditProductsDialog from '@/components/price-offers/EditProductsDialog.vue';
 import TopHeader from '@/components/price-offers/TopHeader.vue';
 import VoiceRecorder from '@/components/common/forms/VoiceRecorder.vue';
 import DatePickerInput from '@/components/common/forms/DatePickerInput.vue';
 import DateTimePickerInput from '@/components/common/forms/DateTimePickerInput.vue';
 import TelInput from '@/components/common/forms/TelInput.vue';
 import { useApi } from '@/composables/useApi';
+import AppFormBreadcrumb from '@/components/common/AppFormBreadcrumb.vue';
 import { fileIcon, fileCheckIcon, mapMarkerIcon, downloadIcon, packageIcon, UploadedFileIcon, fileQuestionIcon, messagePlusIcon } from '@/components/icons/priceOffersIcons';
 
-useI18n()
+const { t } = useI18n()
 const api = useApi();
 const route = useRoute();
 const router = useRouter();
@@ -174,9 +176,13 @@ const fetchFormData = async () => {
             if (data.items && Array.isArray(data.items)) {
                 productTableItems.value = data.items.map((item: any) => {
                     const transportType = item.filling ?? item.transport_type;
+                    const itemId = Number(item.item_id);
+                    if (item.id && itemId) {
+                        originalProductIds.value[itemId] = item.id;
+                    }
                     return {
                         id: item.id,
-                        item_id: item.item_id,
+                        item_id: itemId,
                         item_name: item.item_name || '',
                         unit_id: item.unit_id,
                         unit_name: item.unit_name || '',
@@ -261,13 +267,17 @@ const formData = ref({
 
 // Products table items (dynamically populated from dialog)
 const productTableItems = ref<ProductTableItem[]>([]);
+const originalProductIds = ref<Record<number, number>>({});
 
 // Summary data
 const summaryData = computed(() => ({
     productsCount: productTableItems.value.length,
     servicesCount: 0,
     paymentMethod: paymentMethodItems.value.find((i: any) => i.value === formData.value.paymentMethod)?.title || '',
-    advancePayment: formData.value.advancePayment != null && formData.value.advancePayment !== '' ? String(formData.value.advancePayment) : 'لا يوجد'
+    advancePayment:
+        formData.value.advancePayment != null && formData.value.advancePayment !== ''
+            ? String(formData.value.advancePayment)
+            : t('purchases.shared.forms.common.none'),
 }));
 
 
@@ -278,18 +288,12 @@ import { required } from '@/utils/validators';
 const { success, warning, apiError } = useNotification();
 
 const showAddProductDialog = ref(false);
+const showEditProductsDialog = ref(false);
 const editingProduct = ref<ProductTableItem | null>(null);
-
-// Items endpoint for modal: same pattern as material-product (supplier items by supplier_id)
-const fuelsItemsEndpoint = computed(() =>
-    formData.value.supplier_id
-        ? `/items/supplier-items?supplier_id=${formData.value.supplier_id}&material_type=2`
-        : ''
-);
 
 const handleAddProduct = () => {
     if (!formData.value.supplier_id) {
-        warning('يجب عليك اختيار اسم المورد أولاً');
+        warning(t('purchases.shared.forms.common.warnings.selectSupplierFirst'));
         return;
     }
     editingProduct.value = null; // Reset edit mode
@@ -297,21 +301,35 @@ const handleAddProduct = () => {
 };
 
 const handleProductSaved = (products: FuelProductToAdd[]) => {
-    const newItems: ProductTableItem[] = [];
-    products.forEach(p => {
-        const existing = productTableItems.value.find(existing => existing.item_id === p.item_id);
-        newItems.push({
+    const newItems: ProductTableItem[] = products.map(p => {
+        const existing = productTableItems.value.find(e => e.item_id === p.item_id);
+        const restoredId = p.id ?? originalProductIds.value[p.item_id] ?? undefined;
+        return {
             ...p,
-            // Recalculate names to ensure fresh data
-            transport_type_name: getFillingName(p.transport_type),
+            transport_type_name: getFillingName(p.transport_type) || getTransportTypeName(p.transport_type),
             supply_type_name: supplyTypeItems.value.find((s: any) => s.value === p.supply_type)?.title || '',
             trip_no: p.trip_no ?? null,
             unit_price: p.unit_price ?? null,
             discount: p.discount ?? null,
-            notes: existing?.notes || p.notes || ''
-        });
+            notes: existing?.notes || p.notes || '',
+            id: restoredId,
+        } as ProductTableItem;
     });
     productTableItems.value = newItems;
+};
+
+const handleEditProductsBulk = (updatedProducts: any[]) => {
+    productTableItems.value = updatedProducts.map((p: any) => ({
+        ...p,
+        transport_type_name: getFillingName(p.transport_type) || getTransportTypeName(p.transport_type),
+        supply_type_name: supplyTypeItems.value.find((s: any) => s.value === p.supply_type)?.title || p.supply_type_name || '',
+        trip_no: p.trip_no ?? null,
+        unit_price: p.unit_price ?? null,
+        discount: p.discount ?? null,
+        id: productTableItems.value.find(x => x.item_id === p.item_id)?.id
+            ?? originalProductIds.value[p.item_id]
+            ?? p.id,
+    }));
 };
 
 const handleEditProduct = (item: any) => {
@@ -327,15 +345,18 @@ const handleProductUpdated = (updatedProduct: FuelProductToAdd) => {
     const index = productTableItems.value.findIndex(p => p.item_id === updatedProduct.item_id);
     if (index !== -1) {
         const existingNotes = productTableItems.value[index].notes;
+        const preservedId = productTableItems.value[index].id
+            ?? originalProductIds.value[updatedProduct.item_id]
+            ?? updatedProduct.id;
         productTableItems.value[index] = {
             ...updatedProduct,
-            // Ensure names are correct using local lookup
-            transport_type_name: getFillingName(updatedProduct.transport_type),
+            transport_type_name: getFillingName(updatedProduct.transport_type) || getTransportTypeName(updatedProduct.transport_type),
             supply_type_name: supplyTypeItems.value.find((s: any) => s.value === updatedProduct.supply_type)?.title || '',
             trip_no: updatedProduct.trip_no ?? null,
             unit_price: updatedProduct.unit_price ?? null,
             discount: updatedProduct.discount ?? null,
-            notes: existingNotes || updatedProduct.notes || ''
+            notes: existingNotes || updatedProduct.notes || '',
+            id: preservedId,
         };
     }
     editingProduct.value = null;
@@ -432,13 +453,13 @@ const handleSubmit = async () => {
     
     locationError.value = null;
     if (!formData.value.target_location?.trim()) {
-        locationError.value = 'يجب تحديد موقع تسليم المواد';
-        warning('يجب تحديد موقع تسليم المواد');
+        locationError.value = t('purchases.shared.forms.common.warnings.deliveryLocationRequired');
+        warning(t('purchases.shared.forms.common.warnings.deliveryLocationRequired'));
         return;
     }
     
     if (productTableItems.value.length === 0) {
-        warning('يجب إضافة منتج واحد على الأقل');
+        warning(t('purchases.shared.forms.common.warnings.atLeastOneProduct'));
         return;
     }
     
@@ -463,7 +484,11 @@ const handleSubmit = async () => {
             });
         }
         
-        success(isEditMode.value ? 'تم تحديث الطلب بنجاح' : 'تم إنشاء الطلب بنجاح');
+        success(
+            isEditMode.value
+                ? t('purchases.shared.forms.common.success.requestUpdated')
+                : t('purchases.shared.forms.common.success.requestCreated')
+        );
         
         // Navigate back to fuels list
         router.push({ name: 'RequestForQuotationFuelList' });
@@ -501,14 +526,14 @@ const openSourceMapDialog = () => {
     showSourceMapDialog.value = true;
 };
 
-const headers = [
-    { title: 'اسم المنتج', key: 'name' },
-    { title: 'الكمية', key: 'quantity' },
-    { title: 'الوحدة', key: 'unit' },
-    { title: 'التعبئة', key: 'packaging' },
-    { title: 'نوع التوريد', key: 'supply_type' },
-    { title: 'ملاحظات', key: 'notes' },
-]
+const headers = computed(() => [
+    { title: t('purchases.shared.forms.common.tableHeaders.productName'), key: 'name' },
+    { title: t('purchases.shared.forms.common.tableHeaders.quantity'), key: 'quantity' },
+    { title: t('purchases.shared.forms.common.tableHeaders.unit'), key: 'unit' },
+    { title: t('purchases.requests.fuels.form.tableHeaders.packaging'), key: 'packaging' },
+    { title: t('purchases.requests.fuels.form.tableHeaders.supplyType'), key: 'supply_type' },
+    { title: t('purchases.shared.forms.common.tableHeaders.notes'), key: 'notes' },
+]);
 
 // Computed items for the DataTable (mapped from productTableItems; packaging = transport_type_name, supply_type from item)
 const tableItems = computed(() => productTableItems.value.map(item => ({
@@ -527,16 +552,26 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
 <template>
     <default-layout>
         <div class="request-material-product-page -mx-6">
+            <AppFormBreadcrumb
+                list-path="/purchases/requests/fuels/list"
+                module-root-key="breadcrumb.purchases.root"
+                list-label-key="breadcrumb.purchases.requests.fuels.list"
+                create-label-key="breadcrumb.purchases.requests.fuels.create"
+                edit-label-key="breadcrumb.purchases.requests.fuels.edit"
+                :is-edit-mode="isEditMode"
+                :code="isEditMode ? (formData.code ? '#' + formData.code : '') : ''"
+            />
             <!-- Page Header (كود العرض #124098) -->
             <TopHeader :icon="fileQuestionIcon" title-key="pages.PurchasesRequestsFuels.FormTitle"
                 description-key="pages.PurchasesRequestsFuels.FormDescription" :show-action="false"
+                code-label-key="purchases.shared.forms.common.labels.requestCode"
                 :code="isEditMode ? (formData.code ? '#' + formData.code : '') : ''" :code-icon="fileIcon" />
 
             <!-- البيانات الأساسية -->
             <div class="p-6 bg-white rounded-3xl border !border-gray-100">
                 <div class="flex items-center mb-6 gap-2 text-primary-600">
                     <span v-html="fileCheckIcon"></span>
-                    <h2 class="text-base font-bold">البيانات الأساسية</h2>
+                    <h2 class="text-base font-bold">{{ t('purchases.shared.forms.common.sections.basicInfo') }}</h2>
                 </div>
 
                 <v-form ref="formRef" v-model="isFormValid" @submit.prevent>
@@ -544,63 +579,63 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
                         <!-- Row 1: تاريخ الطلب, اسم المورد, اسم المسؤول*, هاتف المسؤول* -->
                         <div>
                             <DateTimePickerInput v-model="formData.request_datetime"
-                                label="تاريخ الطلب"
+                                :label="t('purchases.shared.forms.common.labels.requestDate')"
                                 density="comfortable"
-                                placeholder="اختر التاريخ والوقت"
+                                :placeholder="t('purchases.shared.forms.common.placeholders.selectDateTime')"
                             />
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">اسم المورد <span class="text-error-600">*</span></label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('purchases.shared.forms.common.labels.supplierName') }} <span class="text-error-600">*</span></label>
                             <SelectInput v-model="formData.supplier_id"
                                 :items="[]" item-title="title" item-value="value"
-                                placeholder="حدد المورد" density="comfortable" :rules="[required()]"
+                                :placeholder="t('purchases.shared.forms.common.placeholders.selectSupplier')" density="comfortable" :rules="[required()]"
                                 :server-side="true" :fetch-function="fetchSuppliers"
                                 item-title-key="full_name" item-value-key="id" :debounce-time="500" />
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">اسم المسؤول <span class="text-error-600">*</span></label>
-                            <TextInput v-model="formData.responsibleName" placeholder="أدخل اسم المسؤول"
+                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('purchases.shared.forms.common.labels.responsibleName') }} <span class="text-error-600">*</span></label>
+                            <TextInput v-model="formData.responsibleName" :placeholder="t('purchases.shared.forms.common.placeholders.enterResponsibleName')"
                                 density="comfortable" :rules="[required()]" hide-details />
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">هاتف المسؤول <span class="text-error-600">*</span></label>
-                            <TelInput v-model="formData.responsiblePhone" placeholder="5XX XXX XXXX"
+                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('purchases.shared.forms.common.labels.responsiblePhone') }} <span class="text-error-600">*</span></label>
+                            <TelInput v-model="formData.responsiblePhone" :placeholder="t('purchases.shared.forms.common.placeholders.phoneSample')"
                                 density="comfortable" :rules="[required()]" />
                         </div>
 
                         <!-- Row 2: طريقة الدفع*, دفعة مقدمة, طريقة التسليم, موقع تسليم المواد* -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">طريقة الدفع <span class="text-error-600">*</span></label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('purchases.shared.forms.common.labels.paymentMethod') }} <span class="text-error-600">*</span></label>
                             <SelectInput v-model="formData.paymentMethod"
-                                :items="paymentMethodItems" item-title="title" placeholder="حدد طريقة الدفع"
+                                :items="paymentMethodItems" item-title="title" :placeholder="t('purchases.shared.forms.common.placeholders.selectPaymentMethod')"
                                 :rules="[required()]"
                                 item-value="value" density="comfortable" />
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">دفعة مقدمة</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('purchases.shared.forms.common.labels.advancePayment') }}</label>
                             <PriceInput showRialIcon v-model="formData.advancePayment" density="comfortable"
-                                class="flex-1" placeholder="أدخل قيمة الدفعة" />
+                                class="flex-1" :placeholder="t('purchases.shared.forms.common.placeholders.enterAdvanceAmount')" />
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">طريقة التسليم</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('purchases.requests.fuels.form.labels.deliveryMethod') }}</label>
                             <SelectInput v-model="formData.deliveryMethod"
-                                :items="deliveryMethodItems" item-title="title" placeholder="حدد طريقة التسليم"
+                                :items="deliveryMethodItems" item-title="title" :placeholder="t('purchases.requests.fuels.form.placeholders.selectDeliveryMethod')"
                                 item-value="value" density="comfortable" />
                         </div>
 
                         <div class="relative">
-                            <label class="text-sm font-medium text-gray-700 mb-2 block">موقع تسليم المواد <span class="text-error-600">*</span></label>
+                            <label class="text-sm font-medium text-gray-700 mb-2 block">{{ t('purchases.requests.fuels.form.labels.deliveryLocation') }} <span class="text-error-600">*</span></label>
                             <div @click="openMapDialog"
                                 class="flex items-center justify-between px-4 py-2 min-h-[48px] border rounded-lg cursor-pointer transition-colors"
                                 :class="locationError ? '!border-error-500 bg-error-50' : '!border-blue-400 hover:bg-blue-100'">
                                 <span class="text-base font-medium whitespace-nowrap overflow-hidden text-ellipsis"
                                     :class="locationError ? 'text-error-700' : 'text-blue-900'">
-                                    {{ formData.target_location || 'حدد الموقع' }}
+                                    {{ formData.target_location || t('purchases.shared.forms.common.pickLocation') }}
                                 </span>
                                 <div class="flex items-center gap-2">
                                     <span v-html="mapMarkerIcon"></span>
@@ -611,11 +646,11 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
 
                         <!-- موقع استلام المواد -->
                         <div class="relative">
-                            <label class="text-sm font-medium text-gray-700 mb-2 block">موقع استلام المواد</label>
+                            <label class="text-sm font-medium text-gray-700 mb-2 block">{{ t('purchases.requests.fuels.form.labels.sourceLocation') }}</label>
                             <div @click="openSourceMapDialog"
                                 class="flex items-center justify-between px-4 py-2 min-h-[48px] border rounded-lg cursor-pointer transition-colors !border-blue-400 hover:bg-blue-100">
                                 <span class="text-base font-medium text-blue-900 whitespace-nowrap overflow-hidden text-ellipsis">
-                                    {{ formData.source_location || 'حدد الموقع' }}
+                                    {{ formData.source_location || t('purchases.shared.forms.common.pickLocation') }}
                                 </span>
                                 <div class="flex items-center gap-2">
                                     <span v-html="mapMarkerIcon"></span>
@@ -625,43 +660,43 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
 
                         <!-- Row 3: تاريخ بدء التسليم*, نوع التوريد*, مدة التوريد, مدة التسليم -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">تاريخ بدء التسليم <span class="text-error-600">*</span></label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('purchases.requests.fuels.form.labels.deliveryStartDate') }} <span class="text-error-600">*</span></label>
                             <DatePickerInput v-model="formData.deliveryStartDate" type="date" density="comfortable"
-                                placeholder="اختر التاريخ" :rules="[required()]" />
+                                :placeholder="t('purchases.shared.forms.common.placeholders.selectDate')" :rules="[required()]" />
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">نوع التوريد <span class="text-error-600">*</span></label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('purchases.requests.fuels.form.labels.supplyType') }} <span class="text-error-600">*</span></label>
                             <SelectInput v-model="formData.supplyType"
-                                :items="supplyTypeItems" item-title="title" placeholder="حدد نوع التوريد"
+                                :items="supplyTypeItems" item-title="title" :placeholder="t('purchases.requests.fuels.form.placeholders.selectSupplyType')"
                                 :rules="[required()]"
                                 item-value="value" density="comfortable" />
                         </div>
 
                         <div>
                             <PriceInput
-                                label="مدة التوريد"
+                                :label="t('purchases.requests.fuels.form.labels.supplyDuration')"
                                 v-model="formData.supplyDuration"
-                                placeholder="أدخل المدة"
+                                :placeholder="t('purchases.requests.fuels.form.placeholders.enterDuration')"
                                 density="comfortable"
                                 hide-details
                             >
                                 <template #append-inner>
-                                    <span class="text-gray-500 text-sm"> يوم </span>
+                                    <span class="text-gray-500 text-sm"> {{ t('purchases.shared.forms.common.day') }} </span>
                                 </template>
                             </PriceInput>
                         </div>
 
                         <div>
                             <PriceInput
-                                label="مدة التسليم"
+                                :label="t('purchases.requests.fuels.form.labels.deliveryDuration')"
                                 v-model="formData.deliveryDuration"
-                                placeholder="أدخل المدة"
+                                :placeholder="t('purchases.requests.fuels.form.placeholders.enterDuration')"
                                 density="comfortable"
                                 hide-details
                             >
                                 <template #append-inner>
-                                    <span class="text-gray-500 text-sm"> يوم </span>
+                                    <span class="text-gray-500 text-sm"> {{ t('purchases.shared.forms.common.day') }} </span>
                                 </template>
                             </PriceInput>
                         </div>
@@ -674,11 +709,11 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
                 <div class="flex flex-wrap gap-3 items-center justify-between bg-primary-50 px-6 py-3">
                     <div class="flex items-center gap-2">
                         <span v-html="packageIcon"></span>
-                        <h2 class="text-xl font-bold text-primary-900">المنتجات</h2>
+                        <h2 class="text-xl font-bold text-primary-900">{{ t('purchases.shared.forms.common.sections.products') }}</h2>
                     </div>
                     <ButtonWithIcon color="primary-100" variant="flat" :prepend-icon="downloadIcon"
                         class="!text-primary-900 font-bold">
-                        استيراد من ملف إكسل
+                        {{ t('purchases.shared.forms.common.actions.importExcel') }}
                     </ButtonWithIcon>
                 </div>
 
@@ -693,7 +728,7 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
                                 <template #activator="{ props }">
                                     <div class="flex items-center gap-2 cursor-pointer" v-bind="props">
                                         <v-icon size="20" color="primary" v-html="messagePlusIcon"></v-icon>
-                                        <span class="text-gray-900">{{ item.notes || 'أضف ملاحظة' }}</span>
+                                        <span class="text-gray-900">{{ item.notes || t('purchases.shared.forms.common.placeholders.addNote') }}</span>
                                     </div>
                                 </template>
 
@@ -703,7 +738,7 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
                                     color="white" rounded="lg" width="300">
                                     <div class="!flex flex-nowrap items-center gap-3">
                                         <TextInput v-model="productTableItems[productTableItems.findIndex(p => p.item_id === item.item_id)].notes" 
-                                            placeholder="أضف ملاحظة" variant="outlined"
+                                            :placeholder="t('purchases.shared.forms.common.placeholders.addNote')" variant="outlined"
                                             density="comfortable" hide-details autofocus class="flex-1" />
                                         <ButtonWithIcon :icon="messagePlusIcon" color="primary" icon-only
                                             size="x-small" />
@@ -715,11 +750,20 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
                     </DataTable>
                 </div>
 
-                <!-- Add Product Button -->
-                <div class="flex justify-center">
-                    <ButtonWithIcon color="primary-100" variant="flat" class="!text-primary-900 font-bold w-75"
+                <!-- Add / Edit Product Buttons -->
+                <div class="flex justify-center gap-3 mx-auto md:w-3/4">
+                    <ButtonWithIcon color="primary-100" variant="flat" class="!text-primary-900 font-bold flex-1"
                         @click="handleAddProduct">
-                        + إضافة منتج جديد
+                        {{ t('purchases.shared.forms.common.actions.addProduct') }}
+                    </ButtonWithIcon>
+                    <ButtonWithIcon
+                        v-if="productTableItems.length > 0"
+                        color="primary-100"
+                        variant="flat"
+                        class="!text-primary-900 font-bold flex-1"
+                        @click="showEditProductsDialog = true"
+                    >
+                        {{ t('purchases.shared.forms.common.actions.editProducts') }}
                     </ButtonWithIcon>
                 </div>
             </div>
@@ -730,21 +774,25 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
                 <div class=" p-6">
                     <div class="flex items-center gap-2 mb-6 px-6 py-4 bg-primary-500 rounded-lg text-white">
                         <span v-html="UploadedFileIcon"></span>
-                        <h3 class="text-lg font-bold">مرفقات</h3>
+                        <h3 class="text-lg font-bold">{{ t('purchases.shared.forms.common.sections.attachments') }}</h3>
                     </div>
 
                     <!-- Voice Message -->
 
                     <!-- Voice Message -->
-                    <VoiceRecorder v-model="formData.voice_attachment" />
+                    <VoiceRecorder v-model="formData.voice_attachment"
+                        :title="t('purchases.shared.forms.common.voiceRecorder.title')"
+                        :hint-attach-notes="t('purchases.shared.forms.common.voiceRecorder.hintAttachNotes')"
+                        :hint-record-prompt="t('purchases.shared.forms.common.voiceRecorder.hintRecordPrompt')"
+                        :recording-in-progress="t('purchases.shared.forms.common.voiceRecorder.recordingInProgress')" />
 
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-2">
                         <!-- Text Note -->
                         <div class="rounded-xl bg-white lg:col-span-2">
-                            <p class="text-primary-600 font-bold text-sm mb-2 px-4 mt-2">ملاحظة نصية</p>
+                            <p class="text-primary-600 font-bold text-sm mb-2 px-4 mt-2">{{ t('purchases.shared.forms.common.textNote.title') }}</p>
                             <TextareaInput v-model="formData.textNote" density="comfortable"
                                 :input-props="{ class: '!rounded-none' }"
-                                placeholder="هل تود إرفاق بعض الملاحظات، قم بكتابتها هنا من فضلك وسيتم إرفاقها مع طلب عرض السعر المرسل" />
+                                :placeholder="t('purchases.shared.forms.common.textNote.placeholder')" />
                         </div>
 
                         <FileUploadInput v-model="formData.image" :multiple="false" class="!mb-0 h-full"
@@ -756,31 +804,31 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
                 <div class=" p-6">
                     <div class="flex items-center gap-2 mb-2 px-6 py-4 bg-primary-500 rounded-lg text-white">
                         <span v-html="fileCheckIcon"></span>
-                        <h3 class="text-lg font-bold">ملخص الطلب</h3>
+                        <h3 class="text-lg font-bold">{{ t('purchases.shared.forms.common.sections.requestSummary') }}</h3>
                     </div>
 
                     <div class="space-y-0 bg-white border border-slate-100 rounded-lg !text-blue-900 text-lg font-bold">
                         <div class="flex justify-between items-center py-4 px-6 border-b border-gray-200 ">
-                            <span class="">المنتجات</span>
+                            <span class="">{{ t('purchases.shared.forms.common.labels.products') }}</span>
                             <span class="">{{ summaryData.productsCount }}</span>
                         </div>
                         <div class="flex justify-between items-center py-4 px-6 border-b border-gray-200">
-                            <span class="">الخدمات</span>
+                            <span class="">{{ t('purchases.shared.forms.common.labels.services') }}</span>
                             <span class="">{{ summaryData.servicesCount }}</span>
                         </div>
                         <div class="flex justify-between items-center py-4 px-6 border-b border-gray-200">
-                            <span class="">طريقة الدفع</span>
+                            <span class="">{{ t('purchases.shared.forms.common.labels.paymentMethod') }}</span>
                             <span class="">{{ summaryData.paymentMethod }}</span>
                         </div>
                         <div class="flex justify-between items-center py-4 px-6">
-                            <span class="">دفعة مقدمة</span>
+                            <span class="">{{ t('purchases.shared.forms.common.labels.advancePayment') }}</span>
                             <span class="">{{ summaryData.advancePayment }}</span>
                         </div>
                     </div>
 
                     <!-- Action Buttons -->
                     <div class="mt-3">
-                        <ButtonWithIcon color="primary" class="w-full" label="إرسال الطلب" height="48" size="large"
+                        <ButtonWithIcon color="primary" class="w-full" :label="t('purchases.shared.forms.common.actions.submitRequest')" height="48" size="large"
                             @click="handleSubmit" />
                     </div>
                 </div>
@@ -800,17 +848,31 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
             :address="formData.source_location"
             @location-selected="handleSourceLocationSelected" />
 
-        <!-- Add Product Dialog (items based on supplier_id, same as material-product) -->
-        <AddProductDialogFuels v-model="showAddProductDialog"
+        <!-- Add Product Dialog: material_type=0, supplier_id on categories + supplier-items -->
+        <AddProductDialogFuels
+            v-model="showAddProductDialog"
+            :material-type="0"
+            :supplier-id="formData.supplier_id"
+            items-endpoint="/items/supplier-items"
             :fillings-options="fillingsItems"
             :unit-items="unitItems"
-
             :supply-type-options="supplyTypeItems"
-            :items-endpoint="fuelsItemsEndpoint"
             :edit-product="editingProduct"
             :existing-products="productTableItems"
             @saved="handleProductSaved"
-            @product-updated="handleProductUpdated" />
+            @product-updated="handleProductUpdated"
+        />
+
+        <EditProductsDialog
+            v-model="showEditProductsDialog"
+            request-type="fuel"
+            :products="productTableItems"
+            :transport-types="transportTypeItems"
+            :unit-items="unitItems"
+            :fillings-items="fillingsItems"
+            :supply-type-items="supplyTypeItems"
+            @products-updated="handleEditProductsBulk"
+        />
 
     </default-layout>
 </template>

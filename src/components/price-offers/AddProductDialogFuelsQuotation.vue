@@ -1,16 +1,11 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import { useApi } from '@/composables/useApi';
+import { useI18n } from "vue-i18n";
 
 interface Category {
   id: number;
   name: string;
-}
-
-interface ApiItem {
-  id: number;
-  name: string;
-  category?: Category;
 }
 
 export interface FuelQuotationProductToAdd {
@@ -19,24 +14,23 @@ export interface FuelQuotationProductToAdd {
   unit_id: number | null;
   unit_name: string;
   quantity: number | null;
-  item_using: string | null; // الاستخدام (from constants - heavy_equipment, etc.)
+  item_using: string | null;
   item_using_name?: string;
-  unit_price: number | null; // سعر الوحدة
-  discount: number | null; // الخصم
-  discount_type: number | string | null; // نوع الخصم (1 = percentage, 2 = fixed)
-  tax_amount: number | null; // الضريبة
+  unit_price: number | null;
+  discount: number | null;
+  discount_type: number | string | null;
+  tax_amount: number | null;
   notes: string;
   isAdded?: boolean;
   id?: number;
+  _categoryId?: number;
 }
 
 const props = defineProps<{
   modelValue: boolean;
-  itemsEndpoint?: string;
+  materialType?: number;
   unitItems?: any[];
-  /** Options for الاستخدام (item_using) from constants.fillings */
   itemUsingOptions?: any[];
-  /** Options for discount type */
   discountTypeOptions?: any[];
   editProduct?: FuelQuotationProductToAdd | null;
   existingProducts?: FuelQuotationProductToAdd[];
@@ -49,6 +43,7 @@ const emit = defineEmits<{
 }>();
 
 const api = useApi();
+const { t } = useI18n();
 
 const internalOpen = computed({
   get: () => props.modelValue,
@@ -57,36 +52,26 @@ const internalOpen = computed({
 
 const isEditMode = computed(() => !!props.editProduct);
 
-const loading = ref(false);
-const items = ref<ApiItem[]>([]);
+const categoriesLoading = ref(false);
+const itemsLoading = ref(false);
 const categories = ref<Category[]>([]);
 const activeTabId = ref<number | null>(null);
 const searchQuery = ref('');
 const showFullCategory = ref(false);
 const visibleTabsCount = 6;
+const loadedCategoryIds = ref<Set<number>>(new Set());
 
 const productsList = ref<FuelQuotationProductToAdd[]>([]);
 const editProductData = ref<FuelQuotationProductToAdd | null>(null);
 
-// Track manually unchecked products (to prevent auto-check)
 const manuallyUnchecked = ref<Set<number>>(new Set());
 
 const unitItemsList = computed(() => props.unitItems || []);
 const itemUsingOptionsList = computed(() => props.itemUsingOptions || []);
 const discountTypeOptionsList = computed(() => props.discountTypeOptions || [
   { title: '%', value: 1 },
-  { title: 'ريال', value: 2 },
+  { title: t('purchases.orders.shared.labels.currencyRial'), value: 2 },
 ]);
-
-const extractCategories = (list: ApiItem[]): Category[] => {
-  const categoryMap = new Map<number, Category>();
-  list.forEach(item => {
-    if (item.category && !categoryMap.has(item.category.id)) {
-      categoryMap.set(item.category.id, item.category);
-    }
-  });
-  return Array.from(categoryMap.values());
-};
 
 const displayedTabs = computed(() => {
   if (showFullCategory.value) return categories.value;
@@ -96,10 +81,7 @@ const displayedTabs = computed(() => {
 const filteredProducts = computed(() => {
   let filtered = productsList.value;
   if (activeTabId.value !== null) {
-    filtered = filtered.filter(product => {
-      const item = items.value.find(i => i.id === product.item_id);
-      return item?.category?.id === activeTabId.value;
-    });
+    filtered = filtered.filter(product => product._categoryId === activeTabId.value);
   }
   if (searchQuery.value.trim()) {
     const query = searchQuery.value.trim().toLowerCase();
@@ -108,8 +90,6 @@ const filteredProducts = computed(() => {
   return filtered;
 });
 
-const addedProducts = computed(() => productsList.value.filter(p => p.isAdded));
-
 const canAddProduct = (product: FuelQuotationProductToAdd): boolean => {
   const hasQty = product.quantity != null && Number(product.quantity) > 0;
   const hasUnit = !!product.unit_id;
@@ -117,8 +97,6 @@ const canAddProduct = (product: FuelQuotationProductToAdd): boolean => {
   return !!(hasQty && hasUnit && hasPrice);
 };
 
-// Calculate total for a product
-// discount_type: 1 = percentage, 2 = fixed
 const calculateTotal = (product: FuelQuotationProductToAdd): number => {
   const qty = Number(product.quantity) || 0;
   const price = Number(product.unit_price) || 0;
@@ -128,50 +106,115 @@ const calculateTotal = (product: FuelQuotationProductToAdd): number => {
   return Math.max(0, subtotal - discountAmount);
 };
 
-const fetchItems = async () => {
-  loading.value = true;
+const fetchCategories = async () => {
+  categoriesLoading.value = true;
   try {
-    const url = props.itemsEndpoint || '/items/active-list?with_category=true';
-    const res = await api.get<any>(url);
-    const data = Array.isArray(res.data) ? res.data : res.data?.data ?? [];
-    items.value = data;
-    categories.value = extractCategories(data);
+    const mt = props.materialType ?? 0;
+    const res = await api.get<any>(`/categories/list?material_type=${mt}`);
+    if (Array.isArray(res.data)) {
+      const allCategories: Category[] = res.data;
 
-    const mappedProducts = data.map((item: ApiItem) => {
-      const existing = props.existingProducts?.find(p => p.item_id === item.id);
-      if (existing) return { ...existing, isAdded: true };
-      return {
-        item_id: item.id,
-        item_name: item.name,
-        unit_id: null,
-        unit_name: '',
-        quantity: null,
-        item_using: null,
-        item_using_name: '',
-        unit_price: null,
-        discount: null,
-        discount_type: 2, // default to fixed (2)
-        tax_amount: null,
-        notes: '',
-        isAdded: false,
-      } as FuelQuotationProductToAdd;
-    });
+      const results = await Promise.all(
+        allCategories.map(async (cat) => {
+          try {
+            const itemsRes = await api.get<any>(`/items/list?material_type=${mt}&category_id=${cat.id}`);
+            const items: any[] = Array.isArray(itemsRes.data) ? itemsRes.data : [];
+            const available = items.filter(
+              (item: any) => !props.existingProducts?.some(p => p.item_id === item.id)
+            );
+            return { category: cat, available };
+          } catch {
+            return { category: cat, available: [] as any[] };
+          }
+        })
+      );
 
-    // Sort on dialog open: products with values (isAdded) come first
-    productsList.value = mappedProducts.sort((a: FuelQuotationProductToAdd, b: FuelQuotationProductToAdd) => {
-      if (a.isAdded && !b.isAdded) return -1;
-      if (!a.isAdded && b.isAdded) return 1;
-      return 0;
-    });
+      const nonEmpty = results.filter(r => r.available.length > 0);
+      categories.value = nonEmpty.map(r => r.category);
 
-    if (categories.value.length > 0) activeTabId.value = categories.value[0].id;
+      nonEmpty.forEach(({ category, available }) => {
+        loadedCategoryIds.value.add(category.id);
+        available.forEach((item: any) => {
+          if (!productsList.value.some(p => p.item_id === item.id)) {
+            productsList.value.push({
+              item_id: item.id,
+              item_name: item.name,
+              unit_id: null,
+              unit_name: '',
+              quantity: null,
+              item_using: null,
+              item_using_name: '',
+              unit_price: null,
+              discount: null,
+              discount_type: 2,
+              tax_amount: null,
+              notes: '',
+              isAdded: false,
+              _categoryId: category.id,
+            });
+          }
+        });
+      });
+
+      if (categories.value.length > 0) {
+        activeTabId.value = categories.value[0].id;
+      }
+    }
   } catch (e) {
-    console.error('Error fetching items:', e);
-    items.value = [];
+    console.error('Error fetching categories:', e);
     categories.value = [];
-    productsList.value = [];
   } finally {
-    loading.value = false;
+    categoriesLoading.value = false;
+  }
+};
+
+const fetchCategoryItems = async (categoryId: number) => {
+  if (loadedCategoryIds.value.has(categoryId)) return;
+
+  itemsLoading.value = true;
+  try {
+    const mt = props.materialType ?? 0;
+    const res = await api.get<any>(`/items/list?material_type=${mt}&category_id=${categoryId}`);
+    if (Array.isArray(res.data)) {
+      const newProducts: FuelQuotationProductToAdd[] = [];
+      res.data.forEach((item: any) => {
+        const isAlreadyInTable = props.existingProducts?.some(p => p.item_id === item.id);
+        if (isAlreadyInTable) return;
+
+        if (!productsList.value.some(p => p.item_id === item.id)) {
+          const product: FuelQuotationProductToAdd = {
+            item_id: item.id,
+            item_name: item.name,
+            unit_id: null,
+            unit_name: '',
+            quantity: null,
+            item_using: null,
+            item_using_name: '',
+            unit_price: null,
+            discount: null,
+            discount_type: 2,
+            tax_amount: null,
+            notes: '',
+            isAdded: false,
+            _categoryId: categoryId,
+          };
+          newProducts.push(product);
+          productsList.value.push(product);
+        }
+      });
+      loadedCategoryIds.value.add(categoryId);
+
+      if (newProducts.length === 0) {
+        categories.value = categories.value.filter(c => c.id !== categoryId);
+        if (activeTabId.value === categoryId && categories.value.length > 0) {
+          activeTabId.value = categories.value[0].id;
+        }
+      }
+    }
+  } catch (e) {
+    console.error('Error fetching category items:', e);
+  } finally {
+    itemsLoading.value = false;
   }
 };
 
@@ -180,8 +223,14 @@ watch(() => props.modelValue, (newVal) => {
     if (isEditMode.value && props.editProduct) {
       editProductData.value = { ...props.editProduct };
     } else {
-      fetchItems();
+      fetchCategories();
     }
+  }
+});
+
+watch(activeTabId, (newId) => {
+  if (newId !== null && !isEditMode.value) {
+    fetchCategoryItems(newId);
   }
 });
 
@@ -239,7 +288,6 @@ const handleEditSave = () => {
 };
 
 const resetForm = () => {
-  items.value = [];
   categories.value = [];
   productsList.value = [];
   activeTabId.value = null;
@@ -247,6 +295,7 @@ const resetForm = () => {
   showFullCategory.value = false;
   editProductData.value = null;
   manuallyUnchecked.value.clear();
+  loadedCategoryIds.value.clear();
 };
 
 const closeDialog = () => {
@@ -258,9 +307,10 @@ const handleDone = () => {
   if (isEditMode.value) {
     handleEditSave();
   } else {
-    // Only save products that are explicitly marked as added (isAdded = true)
-    const productsToSave = productsList.value.filter(p => p.isAdded);
-    
+    const newlyAdded = productsList.value.filter(p => p.isAdded);
+    const existing = (props.existingProducts || []).map(ep => ({ ...ep, isAdded: true as boolean | undefined }));
+    const productsToSave = [...existing, ...newlyAdded];
+
     emit('saved', productsToSave);
     closeDialog();
   }
@@ -300,11 +350,11 @@ const plusIconDisabled = `<svg width="16" height="16" viewBox="0 0 16 16" fill="
         <span class="!bg-gray-50 border border-gray-100 rounded px-1 py-0.5 text-gray-600">
           <span v-html="cubeIcon"></span>
         </span>
-        {{ isEditMode ? 'تعديل منتج' : 'إضافة منتج' }}
+        {{ isEditMode ? t('common.productDialog.editProduct') : t('common.productDialog.addProduct') }}
       </div>
     </template>
 
-    <div v-if="loading" class="flex items-center justify-center py-20">
+    <div v-if="categoriesLoading" class="flex items-center justify-center py-20">
       <v-progress-circular indeterminate color="primary" />
     </div>
 
@@ -329,13 +379,13 @@ const plusIconDisabled = `<svg width="16" height="16" viewBox="0 0 16 16" fill="
           <!-- Row 1: الوحدة، الكمية، سعر الوحدة -->
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
-              <SelectInput v-model="editProductData.unit_id" :items="unitItemsList" placeholder="الوحدة" density="compact" item-title="title" item-value="value" />
+              <SelectInput v-model="editProductData.unit_id" :items="unitItemsList" :placeholder="t('common.productDialog.unit')" density="compact" item-title="title" item-value="value" />
             </div>
             <div>
-              <TextInput v-model="editProductData.quantity" type="number" placeholder="الكمية" density="compact" />
+              <TextInput v-model="editProductData.quantity" type="number" :placeholder="t('common.productDialog.quantity')" density="compact" />
             </div>
             <div>
-              <TextInput v-model="editProductData.unit_price" type="number" placeholder="سعر الوحدة" density="compact" />
+              <TextInput v-model="editProductData.unit_price" type="number" :placeholder="t('purchases.orders.shared.tableHeaders.unitPrice')" density="compact" />
             </div>
           </div>
           <!-- Row 2: الخصم، الإجمالي، الاستخدام -->
@@ -344,28 +394,28 @@ const plusIconDisabled = `<svg width="16" height="16" viewBox="0 0 16 16" fill="
               <TextInputWithSelect
                 v-model="editProductData.discount"
                 v-model:selectValue="editProductData.discount_type"
-                placeholder="الخصم"
+                :placeholder="t('purchases.orders.shared.tableHeaders.discount')"
                 type="number"
                 density="compact"
                 select-width="80px"
                 :select-items="discountTypeOptionsList"
-                select-placeholder="اختر"
+                :select-placeholder="t('purchases.shared.forms.common.select')"
               />
             </div>
             <div>
-              <TextInput :model-value="calculateTotal(editProductData)" type="number" placeholder="الإجمالي" density="compact" disabled />
+              <TextInput :model-value="calculateTotal(editProductData)" type="number" :placeholder="t('purchases.views.shared.finalTotal')" density="compact" disabled />
             </div>
             <div>
-              <SelectInput v-model="editProductData.item_using" :items="itemUsingOptionsList" placeholder="الاستخدام" clearable density="compact" item-title="title" item-value="value" />
+              <SelectInput v-model="editProductData.item_using" :items="itemUsingOptionsList" :placeholder="t('purchases.orders.shared.labels.supplyType')" clearable density="compact" item-title="title" item-value="value" />
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <div v-else-if="!isEditMode && items.length === 0" class="flex flex-col items-center justify-center py-20 text-gray-500">
+    <div v-else-if="!isEditMode && categories.length === 0" class="flex flex-col items-center justify-center py-20 text-gray-500">
       <v-icon size="64" color="gray-400">mdi-package-variant-closed</v-icon>
-      <p class="mt-4 text-lg font-medium">لا توجد منتجات</p>
+      <p class="mt-4 text-lg font-medium">{{ t('common.ui.noData') }}</p>
     </div>
 
     <template v-else-if="!isEditMode">
@@ -397,14 +447,18 @@ const plusIconDisabled = `<svg width="16" height="16" viewBox="0 0 16 16" fill="
       </div>
 
       <div class="mb-3">
-        <TextInput v-model="searchQuery" placeholder="ابحث في المنتجات ..." density="comfortable">
+        <TextInput v-model="searchQuery" :placeholder="t('common.productDialog.searchProducts')" density="comfortable">
           <template #prepend-inner>
             <v-icon v-html="searchIcon"></v-icon>
           </template>
         </TextInput>
       </div>
 
-      <div class="space-y-3 max-h-[400px] min-h-[250px] overflow-auto custom-scroll">
+      <div v-if="itemsLoading" class="flex items-center justify-center py-10 min-h-[250px]">
+        <v-progress-circular indeterminate color="primary" size="32" />
+      </div>
+
+      <div v-else class="space-y-3 max-h-[400px] min-h-[250px] overflow-auto custom-scroll">
         <div v-for="product in filteredProducts" :key="product.item_id">
           <div class="flex gap-3 rounded-lg border !border-gray-100 p-4 bg-white">
             <div class="col-span-1 flex items-center justify-center gap-1">
@@ -444,13 +498,13 @@ const plusIconDisabled = `<svg width="16" height="16" viewBox="0 0 16 16" fill="
               <!-- Row 1: الوحدة، الكمية، سعر الوحدة -->
               <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
-                  <SelectInput v-model="product.unit_id" :items="unitItemsList" placeholder="الوحدة" density="compact" item-title="title" item-value="value" />
+                  <SelectInput v-model="product.unit_id" :items="unitItemsList" :placeholder="t('common.productDialog.unit')" density="compact" item-title="title" item-value="value" />
                 </div>
                 <div>
-                  <TextInput v-model="product.quantity" type="number" placeholder="الكمية" density="compact" />
+                  <TextInput v-model="product.quantity" type="number" :placeholder="t('common.productDialog.quantity')" density="compact" />
                 </div>
                 <div>
-                  <TextInput v-model="product.unit_price" type="number" placeholder="سعر الوحدة" density="compact" />
+                  <TextInput v-model="product.unit_price" type="number" :placeholder="t('purchases.orders.shared.tableHeaders.unitPrice')" density="compact" />
                 </div>
               </div>
               <!-- Row 2: الخصم، الإجمالي، الاستخدام -->
@@ -459,19 +513,19 @@ const plusIconDisabled = `<svg width="16" height="16" viewBox="0 0 16 16" fill="
                   <TextInputWithSelect
                     v-model="product.discount"
                     v-model:selectValue="product.discount_type"
-                    placeholder="الخصم"
+                    :placeholder="t('purchases.orders.shared.tableHeaders.discount')"
                     type="number"
                     density="compact"
                     select-width="80px"
                     :select-items="discountTypeOptionsList"
-                    select-placeholder="اختر"
+                    :select-placeholder="t('purchases.shared.forms.common.select')"
                   />
                 </div>
                 <div>
-                  <TextInput :model-value="calculateTotal(product)" type="number" placeholder="الإجمالي" density="compact" disabled />
+                  <TextInput :model-value="calculateTotal(product)" type="number" :placeholder="t('purchases.views.shared.finalTotal')" density="compact" disabled />
                 </div>
                 <div>
-                  <SelectInput v-model="product.item_using" :items="itemUsingOptionsList" placeholder="الاستخدام" density="compact" item-title="title" item-value="value" />
+                  <SelectInput v-model="product.item_using" :items="itemUsingOptionsList" :placeholder="t('purchases.orders.shared.labels.supplyType')" density="compact" item-title="title" item-value="value" />
                 </div>
               </div>
             </div>
@@ -487,11 +541,11 @@ const plusIconDisabled = `<svg width="16" height="16" viewBox="0 0 16 16" fill="
           color="primary"
           size="large"
           custom-class="px-8"
-          :label="isEditMode ? 'حفظ التعديلات' : '+ أضف منتجات'"
+          :label="isEditMode ? t('common.productDialog.saveChanges') : t('purchases.shared.forms.common.actions.addProduct')"
           @click="handleDone"
           :disabled="!!(isEditMode && editProductData && !canAddProduct(editProductData))"
         />
-        <ButtonWithIcon variant="outlined" color="gray-700" border="gray-300" size="large" custom-class="px-4" label="إلغاء" @click="handleCancel" />
+        <ButtonWithIcon variant="outlined" color="gray-700" border="gray-300" size="large" custom-class="px-4" :label="t('common.actions.cancel')" @click="handleCancel" />
       </div>
     </template>
   </AppDialog>
