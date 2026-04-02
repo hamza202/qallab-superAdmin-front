@@ -617,6 +617,45 @@ export const settingsRoutes: RouteRecordRaw[] = [
       },
     ],
   },
+  {
+    path: "/settings/drivers-data",
+    name: "DriversData",
+    redirect: "/settings/drivers-data/list",
+    children: [
+      {
+        path: "list",
+        name: "DriversDataList",
+        component: () => import("@/views/settings/drivers-data/List.vue"),
+        meta: {
+          title: "إدارة بيانات السائقين",
+        },
+      },
+      {
+        path: "create",
+        name: "DriversDataCreate",
+        component: () => import("@/views/settings/drivers-data/Form.vue"),
+        meta: {
+          title: "إدارة بيانات السائقين",
+        },
+      },
+      {
+        path: "edit/:id",
+        name: "DriversDataEdit",
+        component: () => import("@/views/settings/drivers-data/Form.vue"),
+        meta: {
+          title: "إدارة بيانات السائقين",
+        },
+      },
+      {
+        path: "view/:id",
+        name: "DriversDataView",
+        component: () => import("@/views/settings/drivers-data/Form.vue"),
+        meta: {
+          title: "إدارة بيانات السائقين",
+        },
+      },
+    ],
+  },
 ];
 
 export default settingsRoutes;
