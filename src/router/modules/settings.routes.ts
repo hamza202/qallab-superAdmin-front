@@ -544,6 +544,30 @@ export const settingsRoutes: RouteRecordRaw[] = [
           title: "pages.pricingPerTon.title",
         },
       },
+      {
+        path: "create",
+        name: "PricingPerTonCreate",
+        component: () => import("@/views/settings/pricing-per-ton/Form.vue"),
+        meta: {
+          title: "pages.pricingPerTon.title",
+        },
+      },
+      {
+        path: "edit/:id",
+        name: "PricingPerTonEdit",
+        component: () => import("@/views/settings/pricing-per-ton/Form.vue"),
+        meta: {
+          title: "pages.pricingPerTon.title",
+        },
+      },
+      {
+        path: "view/:id",
+        name: "PricingPerTonView",
+        component: () => import("@/views/settings/pricing-per-ton/Form.vue"),
+        meta: {
+          title: "pages.pricingPerTon.title",
+        },
+      },
     ],
   },
   {
@@ -555,6 +579,30 @@ export const settingsRoutes: RouteRecordRaw[] = [
         path: "list",
         name: "CustomPricingList",
         component: () => import("@/views/settings/custom-pricing/List.vue"),
+        meta: {
+          title: "pages.customPricing.title",
+        },
+      },
+      {
+        path: "create",
+        name: "CustomPricingCreate",
+        component: () => import("@/views/settings/custom-pricing/Form.vue"),
+        meta: {
+          title: "pages.customPricing.title",
+        },
+      },
+      {
+        path: "edit/:id",
+        name: "CustomPricingEdit",
+        component: () => import("@/views/settings/custom-pricing/Form.vue"),
+        meta: {
+          title: "pages.customPricing.title",
+        },
+      },
+      {
+        path: "view/:id",
+        name: "CustomPricingView",
+        component: () => import("@/views/settings/custom-pricing/Form.vue"),
         meta: {
           title: "pages.customPricing.title",
         },

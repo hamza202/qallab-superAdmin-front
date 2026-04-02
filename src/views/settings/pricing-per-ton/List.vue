@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router';
 import DeleteConfirmDialog from "@/components/common/DeleteConfirmDialog.vue";
 import StatusChangeDialog from "@/components/common/StatusChangeDialog.vue";
-
+const router = useRouter();
 const { t } = useI18n()
 
 interface PricingPerTon {
@@ -206,13 +207,11 @@ const toggleHeader = (headerKey: string) => {
 };
 
 const openCreateForm = () => {
-  editingItemId.value = null;
-  showFormDialog.value = true;
+  router.push('/settings/pricing-per-ton/create');
 };
 
 const handleEdit = (item: PricingPerTon) => {
-  editingItemId.value = item.id;
-  showFormDialog.value = true;
+  router.push(`/settings/pricing-per-ton/edit/${item.id}`);
 };
 
 const handleDelete = async (item: PricingPerTon) => {
