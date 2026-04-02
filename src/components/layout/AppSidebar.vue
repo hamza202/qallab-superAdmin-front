@@ -1004,22 +1004,6 @@
                   ]">
                     {{ t('navigation.sidebar.settings.basic.geoZones') }}</router-link>
                 </li>
-                <li class="relative">
-                  <router-link to="/settings/pricing-per-ton/list" :class="[
-                    isMenuItemActive('/settings/pricing-per-ton/list')
-                      ? 'font-bold text-qallab-yellow'
-                      : 'text-white hover:text-qallab-yellow',
-                  ]">
-                    {{ t('navigation.sidebar.settings.basic.pricingPerTon') }}</router-link>
-                </li>
-                <li class="relative">
-                  <router-link to="/settings/custom-pricing/list" :class="[
-                    isMenuItemActive('/settings/custom-pricing/list')
-                      ? 'font-bold text-qallab-yellow'
-                      : 'text-white hover:text-qallab-yellow',
-                  ]">
-                    {{ t('navigation.sidebar.settings.basic.customPricing') }}</router-link>
-                </li>
               </ul>
               <h2 v-if="showSettingsTaxesSection" class="text-sm font-medium leading-5 my-2">{{ t('navigation.sidebar.settings.taxes.title') }}</h2>
               <ul v-if="showSettingsTaxesSection" class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
@@ -1144,6 +1128,24 @@
                       : 'text-white hover:text-qallab-yellow',
                   ]">
                     تسعير بالشاحنة
+                  </router-link>
+                </li>
+                <li class="relative">
+                  <router-link to="/settings/drivers-data" :class="[
+                    isMenuItemActive('/settings/drivers-data')
+                      ? 'font-bold text-qallab-yellow'
+                      : 'text-white hover:text-qallab-yellow',
+                  ]">
+                    إدارة بيانات السائقين
+                  </router-link>
+                </li>
+                <li class="relative">
+                  <router-link to="/settings/vehicles-data" :class="[
+                    isMenuItemActive('/settings/vehicles-data')
+                      ? 'font-bold text-qallab-yellow'
+                      : 'text-white hover:text-qallab-yellow',
+                  ]">
+                    إدارة بيانات المركبات
                   </router-link>
                 </li>
                 <li class="relative">

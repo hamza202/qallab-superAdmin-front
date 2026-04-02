@@ -617,6 +617,84 @@ export const settingsRoutes: RouteRecordRaw[] = [
       },
     ],
   },
+  {
+    path: "/settings/drivers-data",
+    name: "DriversData",
+    redirect: "/settings/drivers-data/list",
+    children: [
+      {
+        path: "list",
+        name: "DriversDataList",
+        component: () => import("@/views/settings/drivers-data/List.vue"),
+        meta: {
+          title: "إدارة بيانات السائقين",
+        },
+      },
+      {
+        path: "create",
+        name: "DriversDataCreate",
+        component: () => import("@/views/settings/drivers-data/Form.vue"),
+        meta: {
+          title: "إدارة بيانات السائقين",
+        },
+      },
+      {
+        path: "edit/:id",
+        name: "DriversDataEdit",
+        component: () => import("@/views/settings/drivers-data/Form.vue"),
+        meta: {
+          title: "إدارة بيانات السائقين",
+        },
+      },
+      {
+        path: "view/:id",
+        name: "DriversDataView",
+        component: () => import("@/views/settings/drivers-data/Form.vue"),
+        meta: {
+          title: "إدارة بيانات السائقين",
+        },
+      },
+    ],
+  },
+  {
+    path: "/settings/vehicles-data",
+    name: "VehiclesData",
+    redirect: "/settings/vehicles-data/list",
+    children: [
+      {
+        path: "list",
+        name: "VehiclesDataList",
+        component: () => import("@/views/settings/vehicles-data/List.vue"),
+        meta: {
+          title: "إدارة بيانات المركبات",
+        },
+      },
+      {
+        path: "create",
+        name: "VehiclesDataCreate",
+        component: () => import("@/views/settings/vehicles-data/Form.vue"),
+        meta: {
+          title: "إدارة بيانات المركبات",
+        },
+      },
+      {
+        path: "edit/:id",
+        name: "VehiclesDataEdit",
+        component: () => import("@/views/settings/vehicles-data/Form.vue"),
+        meta: {
+          title: "إدارة بيانات المركبات",
+        },
+      },
+      {
+        path: "view/:id",
+        name: "VehiclesDataView",
+        component: () => import("@/views/settings/vehicles-data/Form.vue"),
+        meta: {
+          title: "إدارة بيانات المركبات",
+        },
+      },
+    ],
+  },
 ];
 
 export default settingsRoutes;
