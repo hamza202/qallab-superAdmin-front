@@ -1,14 +1,15 @@
 <script setup lang="ts">
-import { computed, reactive, ref, watch } from "vue";
+import { computed, reactive, ref, watch, onMounted } from "vue";
 import { CheckCircleIcon } from '@/components/icons/globalIcons.ts'
+import zoneService from '@/services/api/zone.service'
 
 const formErrors = reactive<Record<string, string>>({});
 
 interface PathForm {
     id?: number;
-    centralLocation: string | null;
-    city: string | null;
-    status: boolean;
+    geographical_zone_id: number | null;
+    city_id: number | null;
+    is_active: boolean;
 }
 
 const props = defineProps<{
@@ -31,55 +32,65 @@ const isFormValid = ref(false);
 const saving = ref(false);
 
 const form = reactive<PathForm>({
-    centralLocation: null,
-    city: null,
-    status: true,
+    geographical_zone_id: null,
+    city_id: null,
+    is_active: true,
 });
 
-// Demo data for dropdowns
-const centralLocations = [
-    { title: "الرياض - المركز الرئيسي", value: "riyadh-main" },
-    { title: "جدة - المركز الغربي", value: "jeddah-west" },
-    { title: "الدمام - المركز الشرقي", value: "dammam-east" },
-    { title: "مكة المكرمة - المركز الديني", value: "makkah-religious" },
-];
+// Dropdown data
+const geographicalZones = ref<Array<{ title: string; value: number }>>([]);
+const cities = ref<Array<{ title: string; value: number }>>([]);
+const loadingZones = ref(false);
+const loadingCities = ref(false);
 
-const cities = [
-    { title: "الرياض", value: "riyadh" },
-    { title: "جدة", value: "jeddah" },
-    { title: "مكة المكرمة", value: "makkah" },
-    { title: "المدينة المنورة", value: "madinah" },
-    { title: "الدمام", value: "dammam" },
-    { title: "الخبر", value: "khobar" },
-    { title: "الطائف", value: "taif" },
-    { title: "تبوك", value: "tabuk" },
-    { title: "أبها", value: "abha" },
-    { title: "حائل", value: "hail" },
-];
+const fetchGeographicalZones = async () => {
+    try {
+        loadingZones.value = true;
+        const response = await zoneService.getGeographicalZones();
+        geographicalZones.value = response.data.map((item) => ({
+            title: item.name,
+            value: item.id,
+        }));
+    } catch (err: any) {
+        toast.error(err?.response?.data?.message || 'حدث خطأ أثناء تحميل المناطق الجغرافية');
+    } finally {
+        loadingZones.value = false;
+    }
+};
 
-// Demo data for existing paths
-const demoPaths = [
-    { id: 1, centralLocation: "riyadh-main", city: "riyadh", status: true },
-    { id: 2, centralLocation: "jeddah-west", city: "jeddah", status: true },
-    { id: 3, centralLocation: "dammam-east", city: "dammam", status: false },
-    { id: 4, centralLocation: "makkah-religious", city: "makkah", status: true },
-];
+const fetchCities = async () => {
+    try {
+        loadingCities.value = true;
+        const response = await zoneService.getCities();
+        cities.value = response.data.map((item) => ({
+            title: item.name,
+            value: item.id,
+        }));
+    } catch (err: any) {
+        toast.error(err?.response?.data?.message || 'حدث خطأ أثناء تحميل المدن');
+    } finally {
+        loadingCities.value = false;
+    }
+};
 
-const fetchPathData = (pathId: number) => {
-    const path = demoPaths.find(p => p.id === pathId);
-    if (path) {
-        form.id = path.id;
-        form.centralLocation = path.centralLocation;
-        form.city = path.city;
-        form.status = path.status;
+const fetchPathData = async (pathId: number) => {
+    try {
+        const response = await zoneService.getById(pathId);
+        const data = response.data;
+        form.id = data.id;
+        form.geographical_zone_id = data.geographical_zone_id;
+        form.city_id = data.city_id;
+        form.is_active = data.is_active;
+    } catch (err: any) {
+        toast.error(err?.response?.data?.message || 'حدث خطأ أثناء تحميل البيانات');
     }
 };
 
 const resetForm = () => {
     delete form.id;
-    form.centralLocation = null;
-    form.city = null;
-    form.status = true;
+    form.geographical_zone_id = null;
+    form.city_id = null;
+    form.is_active = true;
 };
 
 const closeDialog = () => {
@@ -99,12 +110,19 @@ const handleSave = async () => {
     try {
         saving.value = true;
 
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 500));
-
         if (form.id) {
+            const formData = new FormData();
+            formData.append('geographical_zone_id', String(form.geographical_zone_id));
+            formData.append('city_id', String(form.city_id));
+            formData.append('is_active', form.is_active ? 'true' : 'false');
+            await zoneService.update(form.id, formData);
             toast.success('تم تحديث المسار المركزي بنجاح');
         } else {
+            await zoneService.create({
+                geographical_zone_id: form.geographical_zone_id!,
+                city_id: form.city_id!,
+                is_active: form.is_active,
+            });
             toast.success('تم إضافة المسار المركزي بنجاح');
         }
 
@@ -112,12 +130,23 @@ const handleSave = async () => {
         closeDialog();
         resetForm();
     } catch (err: any) {
-        console.error('Error saving path:', err);
-        toast.error('حدث خطأ أثناء حفظ المسار المركزي');
+        if (err?.response?.data?.errors) {
+            const errors = err.response.data.errors;
+            Object.keys(errors).forEach(key => {
+                formErrors[key] = Array.isArray(errors[key]) ? errors[key][0] : errors[key];
+            });
+        } else {
+            toast.error(err?.response?.data?.message || 'حدث خطأ أثناء حفظ المسار المركزي');
+        }
     } finally {
         saving.value = false;
     }
 };
+
+onMounted(() => {
+    fetchGeographicalZones();
+    fetchCities();
+});
 
 watch(
     () => props.modelValue,
@@ -146,42 +175,44 @@ watch(
 
         <v-form ref="formRef" v-model="isFormValid" @submit.prevent>
             <div class="space-y-4">
-                <SelectWithIconInput 
-                    v-model="form.centralLocation" 
+                <SelectWithIconInput
+                    v-model="form.geographical_zone_id"
                     label="الموقع المركزي"
                     placeholder="اختر الموقع المركزي"
-                    :items="centralLocations"
+                    :items="geographicalZones"
+                    :loading="loadingZones"
                     :rules="[required()]"
                     :hide-details="false"
-                    :error-messages="formErrors['centralLocation']"
-                    @update:model-value="delete formErrors['centralLocation']"
+                    :error-messages="formErrors['geographical_zone_id']"
+                    @update:model-value="delete formErrors['geographical_zone_id']"
                 />
 
-                <SelectWithIconInput 
-                    v-model="form.city" 
+                <SelectWithIconInput
+                    v-model="form.city_id"
                     label="المدينة"
                     placeholder="اختر المدينة"
                     :items="cities"
+                    :loading="loadingCities"
                     :rules="[required()]"
                     :hide-details="false"
-                    :error-messages="formErrors['city']"
-                    @update:model-value="delete formErrors['city']"
+                    :error-messages="formErrors['city_id']"
+                    @update:model-value="delete formErrors['city_id']"
                 />
 
                 <div>
                     <span class="text-sm font-semibold text-gray-700 block mb-1">الحالة</span>
                     <div class="flex items-center gap-3">
-                        <v-radio-group v-model="form.status" inline hide-details>
+                        <v-radio-group v-model="form.is_active" inline hide-details>
                             <v-radio :value="true" color="primary">
                                 <template #label>
-                                    <span :class="form.status ? 'text-primary font-semibold' : 'text-gray-600'">
+                                    <span :class="form.is_active ? 'text-primary font-semibold' : 'text-gray-600'">
                                         فعال
                                     </span>
                                 </template>
                             </v-radio>
                             <v-radio :value="false" color="primary">
                                 <template #label>
-                                    <span :class="!form.status ? 'text-primary font-semibold' : 'text-gray-600'">
+                                    <span :class="!form.is_active ? 'text-primary font-semibold' : 'text-gray-600'">
                                         غير فعال
                                     </span>
                                 </template>

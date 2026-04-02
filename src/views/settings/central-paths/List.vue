@@ -1,16 +1,25 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
+import { useApi } from "@/composables/useApi";
 import CentralPathFormDialog from "@/views/settings/central-paths/components/CentralPathFormDialog.vue";
 import { SettingsIcon, trash_1_icon, trash_2_icon, columnIcon, exportIcon, plusIcon, searchIcon } from "@/components/icons/globalIcons";
 
+const router = useRouter();
+const api = useApi();
+
+// Types
 interface CentralPath {
     id: number;
-    centralLocation: string;
-    centralLocationName: string;
+    geographical_zone: string;
     city: string;
-    cityName: string;
     is_active: boolean;
+    actions?: {
+        can_update: boolean;
+        can_delete: boolean;
+        can_view: boolean;
+        can_change_status: boolean;
+    };
 }
 
 interface TableHeader {
@@ -19,68 +28,51 @@ interface TableHeader {
     sortable?: boolean;
 }
 
-// Demo data
-const demoPaths: CentralPath[] = [
-    {
-        id: 1,
-        centralLocation: "riyadh-main",
-        centralLocationName: "الرياض - المركز الرئيسي",
-        city: "riyadh",
-        cityName: "الرياض",
-        is_active: true
-    },
-    {
-        id: 2,
-        centralLocation: "jeddah-west",
-        centralLocationName: "جدة - المركز الغربي",
-        city: "jeddah",
-        cityName: "جدة",
-        is_active: true
-    },
-    {
-        id: 3,
-        centralLocation: "dammam-east",
-        centralLocationName: "الدمام - المركز الشرقي",
-        city: "dammam",
-        cityName: "الدمام",
-        is_active: false
-    },
-    {
-        id: 4,
-        centralLocation: "makkah-religious",
-        centralLocationName: "مكة المكرمة - المركز الديني",
-        city: "makkah",
-        cityName: "مكة المكرمة",
-        is_active: true
-    },
-    {
-        id: 5,
-        centralLocation: "riyadh-main",
-        centralLocationName: "الرياض - المركز الرئيسي",
-        city: "khobar",
-        cityName: "الخبر",
-        is_active: true
-    },
-    {
-        id: 6,
-        centralLocation: "jeddah-west",
-        centralLocationName: "جدة - المركز الغربي",
-        city: "taif",
-        cityName: "الطائف",
-        is_active: false
-    },
-];
+interface Pagination {
+    current_page: number;
+    next_cursor: string | null;
+    prev_cursor: string | null;
+    per_page: number;
+}
 
-const tableItems = ref<CentralPath[]>([...demoPaths]);
-const allHeaders = ref<TableHeader[]>([
-    { key: "centralLocationName", title: "الموقع المركزي", sortable: true },
-    { key: "cityName", title: "المدينة", sortable: true },
-    { key: "is_active", title: "الحالة", sortable: false },
-]);
-const shownHeaders = ref<TableHeader[]>([...allHeaders.value]);
-const canCreate = ref(true);
+interface ZonesResponse {
+    status: number;
+    code: number;
+    locale: string;
+    message: string;
+    data: CentralPath[];
+    pagination: Pagination;
+    header_table: string;
+    headers: TableHeader[];
+    shownHeaders: TableHeader[];
+    actions: {
+        can_create: boolean;
+        can_bulk_delete?: boolean;
+    };
+}
+
+interface FilterParams {
+    per_page?: number;
+    cursor?: string | null;
+    name?: string;
+    status?: number | null;
+}
+
+// API Data
+const tableItems = ref<CentralPath[]>([]);
+const allHeaders = ref<TableHeader[]>([]);
+const shownHeaders = ref<TableHeader[]>([]);
+const canCreate = ref(false);
 const canBulkDelete = ref(true);
+const header_table = ref('');
 const loading = ref(false);
+const loadingMore = ref(false);
+
+// Pagination
+const nextCursor = ref<string | null>(null);
+const previousCursor = ref<string | null>(null);
+const perPage = ref(15);
+const hasMoreData = computed(() => nextCursor.value !== null);
 
 const tableHeaders = computed(() => shownHeaders.value);
 
@@ -96,8 +88,7 @@ const headerCheckStates = computed(() => {
 });
 
 const showAdvancedFilters = ref(false);
-const filterCentralLocation = ref("");
-const filterCity = ref("");
+const filterName = ref("");
 const filterStatus = ref<number | null>(null);
 
 const StatusList = [
@@ -118,40 +109,73 @@ const editingPathId = ref<number | null>(null);
 const selectedPaths = ref<number[]>([]);
 const hasSelectedPaths = computed(() => selectedPaths.value.length > 0);
 
-const fetchCentralPaths = async () => {
+// Fetch zones from API
+const fetchCentralPaths = async (append = false) => {
     try {
-        loading.value = true;
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 300));
-        
-        // Apply filters
-        let filteredData = [...demoPaths];
-        
-        if (filterCentralLocation.value) {
-            filteredData = filteredData.filter(item => 
-                item.centralLocationName.includes(filterCentralLocation.value)
-            );
+        if (append) {
+            loadingMore.value = true;
+        } else {
+            loading.value = true;
         }
-        
-        if (filterCity.value) {
-            filteredData = filteredData.filter(item => 
-                item.cityName.includes(filterCity.value)
-            );
+
+        const filters: FilterParams = {
+            per_page: perPage.value,
+            cursor: append ? nextCursor.value : null,
+        };
+
+        if (filterName.value) filters.name = filterName.value;
+        if (filterStatus.value !== null) filters.status = filterStatus.value;
+
+        const params = new URLSearchParams();
+        Object.entries(filters).forEach(([key, value]) => {
+            if (value !== null && value !== undefined && value !== '') {
+                params.append(key, String(value));
+            }
+        });
+
+        const queryString = params.toString();
+        const url = queryString ? `/zones?${queryString}` : '/zones';
+
+        const response = await api.get<ZonesResponse>(url);
+
+        const normalizedData = response.data.map(item => ({
+            ...item,
+            is_active: Boolean(item.is_active)
+        }));
+
+        if (append) {
+            tableItems.value = [...tableItems.value, ...normalizedData];
+        } else {
+            tableItems.value = normalizedData;
+            if (response.headers) {
+                allHeaders.value = response.headers.filter(h => h.key !== 'id' && h.key !== 'actions');
+                shownHeaders.value = response.shownHeaders.filter(h => h.key !== 'id' && h.key !== 'actions');
+            }
+            if (response.actions) {
+                canCreate.value = response.actions.can_create;
+                canBulkDelete.value = response.actions.can_bulk_delete ?? false;
+            }
+            if (response.header_table) {
+                header_table.value = response.header_table;
+            }
         }
-        
-        if (filterStatus.value !== null) {
-            filteredData = filteredData.filter(item => 
-                item.is_active === Boolean(filterStatus.value)
-            );
+
+        if (response.pagination) {
+            nextCursor.value = response.pagination.next_cursor;
+            previousCursor.value = response.pagination.prev_cursor;
         }
-        
-        tableItems.value = filteredData;
     } catch (err: any) {
-        console.error('Error fetching central paths:', err);
-        toast.error('حدث خطأ أثناء تحميل البيانات');
+        console.error('Error fetching zones:', err);
+        toast.error(err?.response?.data?.message || 'حدث خطأ أثناء تحميل البيانات');
     } finally {
         loading.value = false;
+        loadingMore.value = false;
     }
+};
+
+const loadMore = async () => {
+    if (!hasMoreData.value || loadingMore.value) return;
+    await fetchCentralPaths(true);
 };
 
 const applyFilters = () => {
@@ -159,13 +183,12 @@ const applyFilters = () => {
 };
 
 const resetFilters = () => {
-    filterCentralLocation.value = '';
-    filterCity.value = '';
+    filterName.value = '';
     filterStatus.value = null;
     fetchCentralPaths();
 };
 
-const toggleHeader = (headerKey: string) => {
+const toggleHeader = async (headerKey: string) => {
     const isCurrentlyShown = shownHeaders.value.some(h => h.key === headerKey);
 
     if (isCurrentlyShown) {
@@ -176,14 +199,34 @@ const toggleHeader = (headerKey: string) => {
             shownHeaders.value.push(headerToAdd);
         }
     }
+
+    await updateHeadersOnServer();
+};
+
+const updateHeadersOnServer = async () => {
+    try {
+        updatingHeaders.value = true;
+        const headerKeys = shownHeaders.value.map(h => h.key);
+
+        const formData = new FormData();
+        formData.append('table', header_table.value);
+        headerKeys.forEach((header, index) => {
+            formData.append(`header[${index}]`, header);
+        });
+
+        await api.post('/headers', formData);
+    } catch (err: any) {
+        console.error('Error updating headers:', err);
+        toast.error(err?.response?.data?.message || 'حدث خطأ أثناء حفظ الأعمدة');
+    } finally {
+        updatingHeaders.value = false;
+    }
 };
 
 const openCreatePath = () => {
     editingPathId.value = null;
     showPathDialog.value = true;
 };
-
-const router = useRouter();
 
 const handleViewPath = (item: any) => {
     router.push(`/settings/central-paths/${item.id}`);
@@ -196,14 +239,12 @@ const handleEditPath = (item: any) => {
 
 const handleDeletePath = async (item: any) => {
     try {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 300));
-        
-        tableItems.value = tableItems.value.filter(p => p.id !== item.id);
+        await api.delete(`/zones/${item.id}`);
         toast.success('تم حذف المسار المركزي بنجاح');
+        await fetchCentralPaths();
     } catch (err: any) {
-        console.error('Error deleting central path:', err);
-        toast.error('حدث خطأ أثناء حذف المسار المركزي');
+        console.error('Error deleting zone:', err);
+        toast.error(err?.response?.data?.message || 'حدث خطأ أثناء حذف المسار المركزي');
     }
 };
 
@@ -219,8 +260,7 @@ const confirmStatusChange = async () => {
         statusChangeLoading.value = true;
         const newStatus = !itemToChangeStatus.value.is_active;
 
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 300));
+        await api.patch(`/zones/${itemToChangeStatus.value.id}/change-status`, { status: newStatus });
 
         toast.success(newStatus ? 'تم تفعيل المسار المركزي بنجاح' : 'تم تعطيل المسار المركزي بنجاح');
 
@@ -230,7 +270,7 @@ const confirmStatusChange = async () => {
         }
     } catch (err: any) {
         console.error('Error changing status:', err);
-        toast.error('حدث خطأ أثناء تغيير حالة المسار المركزي');
+        toast.error(err?.response?.data?.message || 'حدث خطأ أثناء تغيير حالة المسار المركزي');
     } finally {
         statusChangeLoading.value = false;
         showStatusChangeDialog.value = false;
@@ -248,16 +288,13 @@ const confirmBulkDelete = async () => {
 
     try {
         deleteLoading.value = true;
-        
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 300));
-        
-        tableItems.value = tableItems.value.filter(item => !selectedPaths.value.includes(item.id));
+        await api.post('/zones/bulk-delete', { ids: selectedPaths.value });
         toast.success(`تم حذف ${selectedPaths.value.length} مسار مركزي بنجاح`);
         selectedPaths.value = [];
+        await fetchCentralPaths();
     } catch (err: any) {
-        console.error('Error deleting central paths:', err);
-        toast.error('حدث خطأ أثناء حذف المسارات المركزية');
+        console.error('Error deleting zones:', err);
+        toast.error(err?.response?.data?.message || 'حدث خطأ أثناء حذف المسارات المركزية');
     } finally {
         deleteLoading.value = false;
         showDeleteDialog.value = false;
@@ -294,7 +331,6 @@ const toggleAdvancedFilters = () => {
 onMounted(() => {
     fetchCentralPaths();
 });
-
 </script>
 
 <template>
@@ -360,11 +396,8 @@ onMounted(() => {
                 <div v-if="showAdvancedFilters" class="border-b border-gray-300 px-4 sm:px-6 py-4 bg-white">
                     <div class="flex flex-wrap gap-3 justify-between">
                         <div class="flex gap-3 flex-wrap">
-                            <TextInput v-model="filterCentralLocation" density="comfortable" variant="outlined" hide-details
-                                placeholder="الموقع المركزي" class="w-full sm:w-40 bg-white"
-                                @keyup.enter="applyFilters" />
-                            <TextInput v-model="filterCity" density="comfortable" variant="outlined" hide-details
-                                placeholder="المدينة" class="w-full sm:w-40 bg-white"
+                            <TextInput v-model="filterName" density="comfortable" variant="outlined" hide-details
+                                placeholder="بحث بالاسم" class="w-full sm:w-40 bg-white"
                                 @keyup.enter="applyFilters" />
                             <SelectInput v-model="filterStatus" :items="StatusList" item-title="title"
                                 item-value="value" density="comfortable" variant="outlined" hide-details
@@ -386,7 +419,8 @@ onMounted(() => {
 
                 <DataTable :headers="tableHeaders" :items="tableItems" :loading="loading" :show-checkbox="canBulkDelete"
                     show-actions @delete="handleDeletePath" @edit="handleEditPath" @view="handleViewPath" @select="handleSelectPath" forceShowView forceShowDelete forceShowEdit
-                    @selectAll="handleSelectAllPaths" :confirm-delete="true">
+                    @selectAll="handleSelectAllPaths" :confirm-delete="true"
+                    @load-more="loadMore" :loading-more="loadingMore" :has-more-data="hasMoreData">
                     <template #item.is_active="{ item }">
                         <v-switch :model-value="item.is_active" hide-details inset density="compact" color="primary"
                             class="small-switch" @update:model-value="() => handleStatusChange(item)" />
@@ -399,7 +433,7 @@ onMounted(() => {
             :message="`هل أنت متأكد من حذف ${selectedPaths.length} مسار مركزي؟`" @confirm="confirmBulkDelete" />
 
         <StatusChangeDialog v-model="showStatusChangeDialog" :loading="statusChangeLoading"
-            :item-name="itemToChangeStatus?.centralLocationName + ' - ' + itemToChangeStatus?.cityName" :current-status="itemToChangeStatus?.is_active"
+            :item-name="(itemToChangeStatus?.geographical_zone || '') + ' - ' + (itemToChangeStatus?.city || '')" :current-status="itemToChangeStatus?.is_active"
             @confirm="confirmStatusChange" />
 
         <CentralPathFormDialog v-model="showPathDialog" :path-id="editingPathId" @saved="handleSavePath" />
