@@ -213,15 +213,15 @@ const handleViewRoute = (item: any) => {
 }
 
 const handlePricingByTon = (item: any) => {
-    router.push(`/settings/pricing-by-ton/${item.id}`)
+    router.push(`/settings/pricing-per-ton/create`)
 }
 
 const handlePricingByTruck = (item: any) => {
-    router.push(`/settings/pricing-by-truck/${item.id}`)
+    router.push(`/settings/pricing-by-truck/create`)
 }
 
 const handleCustomPricing = (item: any) => {
-    router.push(`/settings/custom-pricing/${item.id}`)
+    router.push(`/settings/custom-pricing/create`)
 }
 
 onMounted(() => {

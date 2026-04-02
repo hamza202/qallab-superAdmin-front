@@ -1146,6 +1146,24 @@
                     تسعير بالشاحنة
                   </router-link>
                 </li>
+                <li class="relative">
+                  <router-link to="/settings/pricing-per-ton" :class="[
+                    isMenuItemActive('/settings/pricing-per-ton')
+                      ? 'font-bold text-qallab-yellow'
+                      : 'text-white hover:text-qallab-yellow',
+                  ]">
+                    تسعير بالطن
+                  </router-link>
+                </li>
+                <li class="relative">
+                  <router-link to="/settings/custom-pricing" :class="[
+                    isMenuItemActive('/settings/custom-pricing')
+                      ? 'font-bold text-qallab-yellow'
+                      : 'text-white hover:text-qallab-yellow',
+                  ]">
+                    تسعير مخصص
+                  </router-link>
+                </li>
                 <li v-if="canViewSystemStatuses" class="relative">
                   <router-link to="/settings/system-statuses/list" :class="[
                     isMenuItemActive('/settings/system-statuses/list')
