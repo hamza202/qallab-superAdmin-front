@@ -447,6 +447,14 @@ export const settingsRoutes: RouteRecordRaw[] = [
           title: "المسارات المركزية",
         },
       },
+      {
+        path: ":id",
+        name: "CentralPathView",
+        component: () => import("@/views/settings/central-paths/View.vue"),
+        meta: {
+          title: "عرض المسار المركزي",
+        },
+      },
     ],
   },
   {

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
+import { useRouter } from "vue-router";
 import CentralPathFormDialog from "@/views/settings/central-paths/components/CentralPathFormDialog.vue";
 import { SettingsIcon, trash_1_icon, trash_2_icon, columnIcon, exportIcon, plusIcon, searchIcon } from "@/components/icons/globalIcons";
 
@@ -180,6 +181,12 @@ const toggleHeader = (headerKey: string) => {
 const openCreatePath = () => {
     editingPathId.value = null;
     showPathDialog.value = true;
+};
+
+const router = useRouter();
+
+const handleViewPath = (item: any) => {
+    router.push(`/settings/central-paths/${item.id}`);
 };
 
 const handleEditPath = (item: any) => {
@@ -378,7 +385,7 @@ onMounted(() => {
                 </div>
 
                 <DataTable :headers="tableHeaders" :items="tableItems" :loading="loading" :show-checkbox="canBulkDelete"
-                    show-actions @delete="handleDeletePath" @edit="handleEditPath" @select="handleSelectPath" forceShowView forceShowDelete forceShowEdit
+                    show-actions @delete="handleDeletePath" @edit="handleEditPath" @view="handleViewPath" @select="handleSelectPath" forceShowView forceShowDelete forceShowEdit
                     @selectAll="handleSelectAllPaths" :confirm-delete="true">
                     <template #item.is_active="{ item }">
                         <v-switch :model-value="item.is_active" hide-details inset density="compact" color="primary"
