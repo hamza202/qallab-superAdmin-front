@@ -1,9 +1,13 @@
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
+import { useI18n } from 'vue-i18n';
+import { useApi } from '@/composables/useApi';
 
 const router = useRouter();
 const route = useRoute();
+const { t } = useI18n();
+const api = useApi();
 
 const formRef = ref<any>(null);
 const isFormValid = ref(false);
@@ -17,147 +21,164 @@ const icon = `<svg width="48" height="43" viewBox="0 0 48 43" fill="none" xmlns=
 
 interface VehicleForm {
     id?: number;
-    vehicleNumber: string;
-    plateNumber: string;
-    vehicleType: string | null;
-    vehicleCategory: string | null;
-    manufacturer: string | null;
-    loadType: string | null;
-    loadCapacity: string;
-    manufacturingYear: string;
-    gpsTracking: string | null;
-    operationalReadiness: string | null;
-    vehicleOwnership: string | null;
-    fuelType: string | null;
-    drivingLicense: string | null;
-    insuranceStatus: string | null;
-    maintenanceDate: string;
-    status: boolean;
-    notes: string;
+    vehicle_number: string;
+    plate_number: string;
+    vehicle_type: string | null;
+    vehicle_category: string | null;
+    cargo_type: string | null;
+    manufacturer_id: number | null;
+    manufacturing_year: string | null;
+    cargo_capacity: number | null;
+    fuel_type: string | null;
+    gps_tracking: string | null;
+    operational_readiness: string | null;
+    vehicle_ownership: string | null;
+    last_maintenance_date: string;
+    insurance_status: string | null;
+    driving_license_number: string;
+    notes: string | null;
+    is_active: boolean;
+    chassis_number: string;
+    logistics_company_id: number | null;
 }
 
-const form = reactive<VehicleForm>({
-    vehicleNumber: '',
-    plateNumber: '',
-    vehicleType: null,
-    vehicleCategory: null,
-    manufacturer: null,
-    loadType: null,
-    loadCapacity: '',
-    manufacturingYear: '',
-    gpsTracking: null,
-    operationalReadiness: null,
-    vehicleOwnership: null,
-    fuelType: null,
-    drivingLicense: null,
-    insuranceStatus: null,
-    maintenanceDate: '',
-    status: true,
-    notes: '',
+interface ConstantOption {
+    title: string;
+    value: string;
+}
+
+interface ConstantsResponse {
+    status: number;
+    code: number;
+    locale: string;
+    message: string;
+    data: {
+        vehicle_types: Array<{ key: string; label: string }>;
+        vehicle_categories: Array<{ key: string; label: string }>;
+        cargo_types: Array<{ key: string; label: string }>;
+        fuel_types: Array<{ key: string; label: string }>;
+        gps_tracking_options: Array<{ key: string; label: string }>;
+        operational_readiness_options: Array<{ key: string; label: string }>;
+        vehicle_ownership_options: Array<{ key: string; label: string }>;
+        insurance_status_options: Array<{ key: string; label: string }>;
+    };
+}
+
+const formData = ref<VehicleForm>({
+    vehicle_number: '',
+    plate_number: '',
+    vehicle_type: null,
+    vehicle_category: null,
+    cargo_type: null,
+    manufacturer_id: null,
+    manufacturing_year: null,
+    cargo_capacity: null,
+    fuel_type: null,
+    gps_tracking: null,
+    operational_readiness: null,
+    vehicle_ownership: null,
+    last_maintenance_date: '',
+    insurance_status: null,
+    driving_license_number: '',
+    notes: null,
+    is_active: true,
+    chassis_number: '',
+    logistics_company_id: null,
 });
+
+const isFormDataLoaded = ref(false);
 
 const formErrors = reactive<Record<string, string>>({});
 
-// Demo data for dropdowns
-const vehicleTypes = [
-    { title: "شاحنة", value: "truck" },
-    { title: "فان", value: "van" },
-    { title: "معدات ثقيلة", value: "heavy_equipment" },
-];
+const vehicleTypes = ref<ConstantOption[]>([]);
+const vehicleCategories = ref<ConstantOption[]>([]);
+const cargoTypes = ref<ConstantOption[]>([]);
+const fuelTypes = ref<ConstantOption[]>([]);
+const gpsTrackingOptions = ref<ConstantOption[]>([]);
+const operationalReadinessOptions = ref<ConstantOption[]>([]);
+const vehicleOwnershipOptions = ref<ConstantOption[]>([]);
+const insuranceStatusOptions = ref<ConstantOption[]>([]);
 
-const vehicleCategories = [
-    { title: "شاحنات ثقيلة", value: "heavy_trucks" },
-    { title: "بضائع عامة", value: "general" },
-    { title: "إنشاءات", value: "construction" },
-];
+const isEditMode = computed(() => !!route.params.id);
 
-const manufacturers = [
-    { title: "فولفو", value: "volvo" },
-    { title: "سكانيا", value: "scania" },
-    { title: "مرسيدس", value: "mercedes" },
-];
-
-const loadTypes = [
-    { title: "حمولة جافة", value: "bulk" },
-    { title: "حمولة عامة", value: "general" },
-    { title: "مواد خطرة", value: "hazardous" },
-];
-
-const fuelTypes = [
-    { title: "ديزل", value: "diesel" },
-    { title: "بنزين", value: "petrol" },
-    { title: "كهرباء", value: "electric" },
-];
-
-const gpsTrackingOptions = [
-    { title: "مثبت", value: "installed" },
-    { title: "غير مثبت", value: "not_installed" },
-];
-
-const operationalReadinessOptions = [
-    { title: "جاهزة", value: "ready" },
-    { title: "غير جاهزة", value: "not_ready" },
-];
-
-const vehicleOwnershipOptions = [
-    { title: "خاصة", value: "private" },
-    { title: "مستأجرة", value: "rented" },
-];
-
-const drivingLicenseOptions = [
-    { title: "DRIV-2024-001", value: "driv_2024_001" },
-    { title: "DRIV-2024-002", value: "driv_2024_002" },
-];
-
-const insuranceStatusOptions = [
-    { title: "ساري", value: "active" },
-    { title: "منتهي", value: "expired" },
-];
-
-// Demo data for existing records
-const demoVehicles = [
-    {
-        id: 1,
-        vehicleNumber: "VEH-001",
-        plateNumber: "SA-2154",
-        vehicleType: "truck",
-        vehicleCategory: "heavy_trucks",
-        manufacturer: "volvo",
-        loadType: "bulk",
-        loadCapacity: "15",
-        manufacturingYear: "2022",
-        gpsTracking: "installed",
-        operationalReadiness: "ready",
-        vehicleOwnership: "private",
-        fuelType: "diesel",
-        drivingLicense: "driv_2024_001",
-        insuranceStatus: "active",
-        maintenanceDate: "2024-02-15",
-        status: true,
-        notes: "مركبة في حالة ممتازة"
-    },
-];
-
-const isEditing = computed(() => !!route.params.id);
+const fetchConstants = async () => {
+    try {
+        const response = await api.get<ConstantsResponse>('/vehicles/constants');
+        vehicleTypes.value = response.data.vehicle_types?.map((i: any) => ({ title: i.label, value: i.key })) || [];
+        vehicleCategories.value = response.data.vehicle_categories?.map((i: any) => ({ title: i.label, value: i.key })) || [];
+        cargoTypes.value = response.data.cargo_types?.map((i: any) => ({ title: i.label, value: i.key })) || [];
+        fuelTypes.value = response.data.fuel_types?.map((i: any) => ({ title: i.label, value: i.key })) || [];
+        gpsTrackingOptions.value = response.data.gps_tracking_options?.map((i: any) => ({ title: i.label, value: i.key })) || [];
+        operationalReadinessOptions.value = response.data.operational_readiness_options?.map((i: any) => ({ title: i.label, value: i.key })) || [];
+        vehicleOwnershipOptions.value = response.data.vehicle_ownership_options?.map((i: any) => ({ title: i.label, value: i.key })) || [];
+        insuranceStatusOptions.value = response.data.insurance_status_options?.map((i: any) => ({ title: i.label, value: i.key })) || [];
+    } catch (err: any) {
+        console.error('Error fetching constants:', err);
+        toast.error(err?.response?.data?.message || t('common.messages.general.loadDataFailed'));
+    }
+};
 
 const fetchVehicleData = async () => {
     if (!route.params.id) return;
 
     try {
         loading.value = true;
-
-        await new Promise(resolve => setTimeout(resolve, 300));
-
-        const vehicle = demoVehicles.find(v => v.id === Number(route.params.id));
-        if (vehicle) {
-            Object.assign(form, vehicle);
-        }
+        const response = await api.get(`/vehicles/${route.params.id}`);
+        formData.value = response.data;
+        isFormDataLoaded.value = true;
     } catch (err: any) {
         console.error('Error fetching vehicle data:', err);
-        toast.error('حدث خطأ أثناء تحميل البيانات');
+        toast.error(err?.response?.data?.message || t('common.messages.general.loadDataFailed'));
     } finally {
         loading.value = false;
     }
+};
+
+const waitForSupplierData = async () => {
+    if (!isEditMode.value) return;
+
+    if (isFormDataLoaded.value && formData.value.logistics_company_id) {
+        return;
+    }
+
+    await new Promise(resolve => {
+        const checkInterval = setInterval(() => {
+            if (isFormDataLoaded.value && formData.value.logistics_company_id) {
+                clearInterval(checkInterval);
+                clearTimeout(timeoutId);
+                resolve(true);
+            }
+        }, 10);
+
+        const timeoutId = setTimeout(() => {
+            clearInterval(checkInterval);
+            resolve(true);
+        }, 5000);
+    });
+};
+
+const fetchSuppliers = async (search = '', cursor?: string, perPage = 15) => {
+    if (isEditMode.value) {
+        await waitForSupplierData();
+    }
+
+    const params: any = { per_page: perPage, service_type: 'logistic_company' };
+    if (search) {
+        params.name = search;
+    }
+    if (cursor) {
+        params.cursor = cursor;
+    }
+    if (formData.value.logistics_company_id) {
+        params.order_by_id = formData.value.logistics_company_id;
+    }
+
+    const res = await api.get<any>('/suppliers/list', { params });
+
+    return {
+        data: res.data || [],
+        next_cursor: res.pagination?.next_cursor || null,
+    };
 };
 
 const handleSave = async () => {
@@ -171,18 +192,43 @@ const handleSave = async () => {
     try {
         saving.value = true;
 
-        await new Promise(resolve => setTimeout(resolve, 500));
+        const payload = {
+            vehicle_number: formData.value.vehicle_number,
+            plate_number: formData.value.plate_number,
+            vehicle_type: formData.value.vehicle_type,
+            vehicle_category: formData.value.vehicle_category,
+            cargo_type: formData.value.cargo_type,
+            manufacturer_id: formData.value.manufacturer_id,
+            manufacturing_year: formData.value.manufacturing_year,
+            cargo_capacity: formData.value.cargo_capacity,
+            fuel_type: formData.value.fuel_type,
+            gps_tracking: formData.value.gps_tracking,
+            operational_readiness: formData.value.operational_readiness,
+            vehicle_ownership: formData.value.vehicle_ownership,
+            last_maintenance_date: formData.value.last_maintenance_date,
+            insurance_status: formData.value.insurance_status,
+            driving_license_number: formData.value.driving_license_number,
+            notes: formData.value.notes,
+            is_active: formData.value.is_active,
+            chassis_number: formData.value.chassis_number,
+            logistics_company_id: formData.value.logistics_company_id,
+        };
 
-        if (isEditing.value) {
-            toast.success('تم تحديث بيانات المركبة بنجاح');
+        if (isEditMode.value) {
+            await api.put(`/vehicles/${route.params.id}`, payload);
+            toast.success(t('common.messages.general.updateSuccess'));
         } else {
-            toast.success('تم إضافة بيانات المركبة بنجاح');
+            await api.post('/vehicles', payload);
+            toast.success(t('common.messages.general.createSuccess'));
         }
 
         router.push('/settings/vehicles-data/list');
     } catch (err: any) {
         console.error('Error saving vehicle:', err);
-        toast.error('حدث خطأ أثناء حفظ بيانات المركبة');
+        if (err?.response?.data?.errors) {
+            Object.assign(formErrors, err.response.data.errors);
+        }
+        toast.error(err?.response?.data?.message || t('common.messages.general.saveError'));
     } finally {
         saving.value = false;
     }
@@ -192,9 +238,12 @@ const handleCancel = () => {
     router.push('/settings/vehicles-data/list');
 };
 
-onMounted(() => {
-    if (isEditing.value) {
-        fetchVehicleData();
+onMounted(async () => {
+    await fetchConstants();
+    if (isEditMode.value) {
+        await fetchVehicleData();
+    } else {
+        isFormDataLoaded.value = true;
     }
 });
 </script>
@@ -202,7 +251,7 @@ onMounted(() => {
 <template>
     <default-layout>
         <div class="vehicles-data-form-page">
-            <PageHeader :icon="icon" :title-key="isEditing ? 'تعديل بيانات المركبة' : 'إضافة بيانات المركبة'"
+            <PageHeader :icon="icon" :title-key="isEditMode ? 'تعديل بيانات المركبة' : 'إضافة بيانات المركبة'"
                 description-key="تمكنك من إدارة وإضافة بيانات المركبات" />
 
             <div class="bg-white rounded-lg shadow-sm p-6">
@@ -215,96 +264,99 @@ onMounted(() => {
                         <h3 class="text-lg font-bold text-primary-900 mb-6">بيانات المركبة</h3>
 
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                            <TextInput v-model="form.vehicleNumber" label="رقم المركبة"
-                                placeholder="ادخل رقم المركبة مثل: VEH-001" :rules="[required()]" :hide-details="false"
-                                :error-messages="formErrors['vehicleNumber']"
-                                @input="delete formErrors['vehicleNumber']" />
+                            <TextInput v-model="formData.vehicle_number" label="رقم المركبة"
+                                placeholder="ادخل رقم المركبة" :rules="[required()]"
+                                :error-messages="formErrors['vehicle_number']"
+                                @input="delete formErrors['vehicle_number']" density="comfortable" />
 
-                            <TextInput v-model="form.plateNumber" label="رقم اللوحة"
-                                placeholder="ادخل رقم اللوحة مثل: أ ب ح 2 1234" :rules="[required()]"
-                                :hide-details="false" :error-messages="formErrors['plateNumber']"
-                                @input="delete formErrors['plateNumber']" />
+                            <TextInput v-model="formData.plate_number" label="رقم اللوحة"
+                                placeholder="ادخل رقم اللوحة" :rules="[required()]"
+                                :error-messages="formErrors['plate_number']" @input="delete formErrors['plate_number']"
+                                density="comfortable" />
 
-                            <SelectWithIconInput v-model="form.vehicleType" label="نوع المركبة"
-                                placeholder="اختر نوع المركبة مثل: شاحنة" :items="vehicleTypes" :rules="[required()]"
-                                :hide-details="false" :error-messages="formErrors['vehicleType']"
-                                @update:model-value="delete formErrors['vehicleType']" />
+                            <SelectWithIconInput v-model="formData.vehicle_type" label="نوع المركبة"
+                                placeholder="اختر نوع المركبة" :items="vehicleTypes" :rules="[required()]"
+                                :error-messages="formErrors['vehicle_type']" @update:model-value="delete formErrors['vehicle_type']"
+                                density="comfortable" />
 
-                            <SelectWithIconInput v-model="form.vehicleCategory" label="فئة المركبة"
-                                placeholder="اختر فئة المركبة مثل: بضائع" :items="vehicleCategories"
-                                :rules="[required()]" :hide-details="false"
-                                :error-messages="formErrors['vehicleCategory']"
-                                @update:model-value="delete formErrors['vehicleCategory']" />
+                            <SelectWithIconInput v-model="formData.vehicle_category" label="فئة المركبة"
+                                placeholder="اختر فئة المركبة" :items="vehicleCategories" :rules="[required()]"
+                                :error-messages="formErrors['vehicle_category']"
+                                @update:model-value="delete formErrors['vehicle_category']" density="comfortable" />
 
-                            <SelectWithIconInput v-model="form.manufacturer" label="الشركة المصنعة"
-                                placeholder="ادخل اسم الشركة المصنعة مثل: فيات" :items="manufacturers"
-                                :rules="[required()]" :hide-details="false" :error-messages="formErrors['manufacturer']"
-                                @update:model-value="delete formErrors['manufacturer']" />
+                            <SelectWithIconInput v-model="formData.cargo_type" label="نوع الحمولة"
+                                placeholder="اختر نوع الحمولة" :items="cargoTypes" :rules="[required()]"
+                                :error-messages="formErrors['cargo_type']" @update:model-value="delete formErrors['cargo_type']"
+                                density="comfortable" />
 
-                            <SelectWithIconInput v-model="form.loadType" label="نوع الحمولة"
-                                placeholder="اختر نوع الحمولة مثل: حمولة جافة" :items="loadTypes" :rules="[required()]"
-                                :hide-details="false" :error-messages="formErrors['loadType']"
-                                @update:model-value="delete formErrors['loadType']" />
+                            <SelectInput v-model="formData.logistics_company_id" label="شركة النقل" :items="[]"
+                                item-title="title" :rules="[required()]" item-value="value" density="comfortable"
+                                placeholder="اختر شركة النقل" :server-side="true" :fetch-function="fetchSuppliers"
+                                item-title-key="full_name" item-value-key="id" :debounce-time="500"
+                                :error-messages="formErrors['logistics_company_id']"
+                                @update:model-value="delete formErrors['logistics_company_id']" />
 
-                            <TextInput v-model="form.loadCapacity" label="سعة الحمولة (طن)"
-                                placeholder="ادخل سعة الحمولة مثل: 10" :rules="[required()]" :hide-details="false"
-                                :error-messages="formErrors['loadCapacity']"
-                                @input="delete formErrors['loadCapacity']" />
+                            <DatePickerInput v-model="formData.manufacturing_year" label="سنة الصنع"
+                                placeholder="ادخل سنة الصنع" :rules="[required()]" :year-only="true"
+                                :error-messages="formErrors['manufacturing_year']"
+                                @update:model-value="delete formErrors['manufacturing_year']" density="comfortable" />
 
-                            <TextInput v-model="form.manufacturingYear" label="سنة الصنع"
-                                placeholder="اختر سنة الصنع مثل: 2022" :rules="[required()]" :hide-details="false"
-                                :error-messages="formErrors['manufacturingYear']"
-                                @input="delete formErrors['manufacturingYear']" />
+                            <TextInput v-model="formData.cargo_capacity" label="سعة الحمولة (طن)"
+                                placeholder="ادخل سعة الحمولة" type="number" :rules="[required()]"
+                                :error-messages="formErrors['cargo_capacity']" @input="delete formErrors['cargo_capacity']"
+                                density="comfortable" />
 
-                            <SelectWithIconInput v-model="form.gpsTracking" label="نظام تتبع GPS"
-                                placeholder="اختر نظام التتبع مثل: مثبت" :items="gpsTrackingOptions"
-                                :rules="[required()]" :hide-details="false" :error-messages="formErrors['gpsTracking']"
-                                @update:model-value="delete formErrors['gpsTracking']" />
+                            <SelectWithIconInput v-model="formData.fuel_type" label="نوع الوقود"
+                                placeholder="اختر نوع الوقود" :items="fuelTypes" :rules="[required()]"
+                                :error-messages="formErrors['fuel_type']" @update:model-value="delete formErrors['fuel_type']"
+                                density="comfortable" />
 
-                            <SelectWithIconInput v-model="form.operationalReadiness" label="جاهزية التشغيل"
-                                placeholder="اختر الجاهزية مثل: جاهزة" :items="operationalReadinessOptions"
-                                :rules="[required()]" :hide-details="false"
-                                :error-messages="formErrors['operationalReadiness']"
-                                @update:model-value="delete formErrors['operationalReadiness']" />
+                            <SelectWithIconInput v-model="formData.gps_tracking" label="نظام تتبع GPS"
+                                placeholder="اختر نظام التتبع" :items="gpsTrackingOptions" :rules="[required()]"
+                                :error-messages="formErrors['gps_tracking']" @update:model-value="delete formErrors['gps_tracking']"
+                                density="comfortable" />
 
-                            <SelectWithIconInput v-model="form.vehicleOwnership" label="ملكية المركبة"
-                                placeholder="اختر الملكية مثل: خاصة" :items="vehicleOwnershipOptions"
-                                :rules="[required()]" :hide-details="false"
-                                :error-messages="formErrors['vehicleOwnership']"
-                                @update:model-value="delete formErrors['vehicleOwnership']" />
+                            <SelectWithIconInput v-model="formData.operational_readiness" label="جاهزية التشغيل"
+                                placeholder="اختر الجاهزية" :items="operationalReadinessOptions" :rules="[required()]"
+                                :error-messages="formErrors['operational_readiness']"
+                                @update:model-value="delete formErrors['operational_readiness']" density="comfortable" />
 
-                            <SelectWithIconInput v-model="form.fuelType" label="نوع الوقود"
-                                placeholder="اختر نوع الوقود مثل: ديزل" :items="fuelTypes" :rules="[required()]"
-                                :hide-details="false" :error-messages="formErrors['fuelType']"
-                                @update:model-value="delete formErrors['fuelType']" />
+                            <SelectWithIconInput v-model="formData.vehicle_ownership" label="ملكية المركبة"
+                                placeholder="اختر الملكية" :items="vehicleOwnershipOptions" :rules="[required()]"
+                                :error-messages="formErrors['vehicle_ownership']"
+                                @update:model-value="delete formErrors['vehicle_ownership']" density="comfortable" />
 
-                            <SelectWithIconInput v-model="form.drivingLicense" label="رخصة السير"
-                                placeholder="ادخل رقم الرخصة مثل: DRIV-2024-001" :items="drivingLicenseOptions"
-                                :rules="[required()]" :hide-details="false"
-                                :error-messages="formErrors['drivingLicense']"
-                                @update:model-value="delete formErrors['drivingLicense']" />
+                            <DatePickerInput v-model="formData.last_maintenance_date" label="تاريخ آخر صيانة"
+                                placeholder="اختر تاريخ آخر صيانة" :rules="[required()]"
+                                :error-messages="formErrors['last_maintenance_date']"
+                                @update:model-value="delete formErrors['last_maintenance_date']" density="comfortable" />
 
-                            <SelectWithIconInput v-model="form.insuranceStatus" label="حالة التأمين"
-                                placeholder="اختر حالة التأمين مثل: ساري" :items="insuranceStatusOptions"
-                                :rules="[required()]" :hide-details="false"
-                                :error-messages="formErrors['insuranceStatus']"
-                                @update:model-value="delete formErrors['insuranceStatus']" />
+                            <SelectWithIconInput v-model="formData.insurance_status" label="حالة التأمين"
+                                placeholder="اختر حالة التأمين" :items="insuranceStatusOptions" :rules="[required()]"
+                                :error-messages="formErrors['insurance_status']"
+                                @update:model-value="delete formErrors['insurance_status']" density="comfortable" />
 
-                            <DatePickerInput v-model="form.maintenanceDate" label="تاريخ آخر صيانة"
-                                placeholder="اختر تاريخ آخر صيانة مثل: 15-02-2024" :rules="[required()]"
-                                :hide-details="false" :error-messages="formErrors['maintenanceDate']"
-                                @update:model-value="delete formErrors['maintenanceDate']" />
-                            <TextareaInput class="md:col-span-2" v-model="form.notes" label="ملاحظات"
-                                placeholder="ادخل الملاحظات هنا" :hide-details="false" rows="4" />
+                            <TextInput v-model="formData.driving_license_number" label="رقم رخصة السير"
+                                placeholder="ادخل رقم رخصة السير" :rules="[required()]"
+                                :error-messages="formErrors['driving_license_number']"
+                                @input="delete formErrors['driving_license_number']" density="comfortable" />
+
+                            <TextInput v-model="formData.chassis_number" label="رقم الشاسيه"
+                                placeholder="ادخل رقم الشاسيه" :rules="[required()]"
+                                :error-messages="formErrors['chassis_number']" @input="delete formErrors['chassis_number']"
+                                density="comfortable" />
+
+                            <TextareaInput class="md:col-span-2" v-model="formData.notes" label="ملاحظات"
+                                placeholder="ادخل الملاحظات هنا" rows="4" />
 
                             <div>
                                 <span class="text-sm font-semibold text-gray-700 block mb-2">الحالة</span>
                                 <div class="flex items-center gap-3">
-                                    <v-radio-group v-model="form.status" inline hide-details>
+                                    <v-radio-group v-model="formData.is_active" inline hide-details>
                                         <v-radio :value="true" color="primary">
                                             <template #label>
                                                 <span
-                                                    :class="form.status ? 'text-primary font-semibold' : 'text-gray-600'">
+                                                    :class="formData.is_active ? 'text-primary font-semibold' : 'text-gray-600'">
                                                     فعال
                                                 </span>
                                             </template>
@@ -312,7 +364,7 @@ onMounted(() => {
                                         <v-radio :value="false" color="primary">
                                             <template #label>
                                                 <span
-                                                    :class="!form.status ? 'text-primary font-semibold' : 'text-gray-600'">
+                                                    :class="!formData.is_active ? 'text-primary font-semibold' : 'text-gray-600'">
                                                     غير فعال
                                                 </span>
                                             </template>
@@ -320,9 +372,6 @@ onMounted(() => {
                                     </v-radio-group>
                                 </div>
                             </div>
-                        </div>
-
-                        <div class="mb-6">
                         </div>
 
                         <div class="flex gap-3 justify-center pt-4">

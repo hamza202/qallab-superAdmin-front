@@ -1,9 +1,13 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
+import { useApi } from "@/composables/useApi";
 import { SettingsIcon, trash_1_icon, trash_2_icon, columnIcon, exportIcon, plusIcon, searchIcon } from "@/components/icons/globalIcons";
 
 const router = useRouter();
+const { t } = useI18n();
+const api = useApi();
 
 const icon = `<svg width="48" height="43" viewBox="0 0 48 43" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M38.8333 17.1667V8.93333C38.8333 6.50644 38.8333 5.29299 38.361 4.36604C37.9456 3.55067 37.2827 2.88776 36.4673 2.47231C35.5403 2 34.3269 2 31.9 2H15.4333C13.0064 2 11.793 2 10.866 2.47231C10.0507 2.88776 9.38776 3.55067 8.9723 4.36604C8.5 5.29299 8.5 6.50644 8.5 8.93333V17.1667M8.5 15H2V12.8333M38.8333 15H45.3333V12.8333M10.6667 24.75H10.6883M36.6667 24.75H36.6883M12.4 17.1667H34.9333C38.5737 17.1667 40.3938 17.1667 41.7843 17.8751C43.0073 18.4983 44.0017 19.4927 44.6249 20.7157C45.3333 22.1062 45.3333 23.9263 45.3333 27.5667V34.5C45.3333 36.5191 45.3333 37.5286 45.0035 38.325C44.5637 39.3867 43.7201 40.2303 42.6583 40.6701C41.862 41 40.8524 41 38.8333 41H37.5333C36.7282 41 36.3256 41 35.9888 40.9466C34.1346 40.653 32.6804 39.1988 32.3867 37.3446C32.3333 37.0077 32.3333 36.6051 32.3333 35.8C32.3333 35.5987 32.3333 35.4981 32.32 35.4139C32.2466 34.9503 31.883 34.5868 31.4195 34.5133C31.3353 34.5 31.2346 34.5 31.0333 34.5H16.3C16.0987 34.5 15.9981 34.5 15.9139 34.5133C15.4503 34.5868 15.0868 34.9503 15.0133 35.4139C15 35.4981 15 35.5987 15 35.8C15 36.6051 15 37.0077 14.9466 37.3446C14.653 39.1988 13.1987 40.653 11.3445 40.9466C11.0077 41 10.6051 41 9.8 41H8.5C6.48092 41 5.47138 41 4.67504 40.6701C3.61325 40.2303 2.76966 39.3867 2.32986 38.325C2 37.5286 2 36.5191 2 34.5V27.5667C2 23.9263 2 22.1062 2.70846 20.7157C3.33163 19.4927 4.32601 18.4983 5.54906 17.8751C6.93949 17.1667 8.75966 17.1667 12.4 17.1667ZM11.75 24.75C11.75 25.3483 11.265 25.8333 10.6667 25.8333C10.0684 25.8333 9.58333 25.3483 9.58333 24.75C9.58333 24.1517 10.0684 23.6667 10.6667 23.6667C11.265 23.6667 11.75 24.1517 11.75 24.75ZM37.75 24.75C37.75 25.3483 37.265 25.8333 36.6667 25.8333C36.0684 25.8333 35.5833 25.3483 35.5833 24.75C35.5833 24.1517 36.0684 23.6667 36.6667 23.6667C37.265 23.6667 37.75 24.1517 37.75 24.75Z" stroke="#1570EF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
@@ -12,15 +16,32 @@ const icon = `<svg width="48" height="43" viewBox="0 0 48 43" fill="none" xmlns=
 
 interface VehicleData {
     id: number;
-    vehicleNumber: string;
-    plateNumber: string;
-    vehicleType: string;
-    vehicleCategory: string;
-    loadType: string;
-    manufacturer: string;
-    manufacturingYear: string;
-    loadCapacity: string;
+    vehicle_number: string;
+    plate_number: string;
+    vehicle_type: string;
+    vehicle_category: string;
+    cargo_type: string;
+    manufacturer_id: number | null;
+    manufacturing_year: number;
+    cargo_capacity: number;
+    fuel_type: string;
+    gps_tracking: string;
+    operational_readiness: string;
+    vehicle_ownership: string;
+    last_maintenance_date: string;
+    insurance_status: string;
+    driving_license_number: string;
+    chassis_number: string;
     is_active: boolean;
+    logistics_company?: {
+        id: number;
+        full_name: string;
+    };
+    actions?: {
+        can_change_status?: boolean;
+        can_edit?: boolean;
+        can_delete?: boolean;
+    };
 }
 
 interface TableHeader {
@@ -29,62 +50,50 @@ interface TableHeader {
     sortable?: boolean;
 }
 
-// Demo data
-const demoVehicles: VehicleData[] = [
-    {
-        id: 1,
-        vehicleNumber: "2154B416",
-        plateNumber: "SA-2154",
-        vehicleType: "Truck",
-        vehicleCategory: "Heavy Trucks",
-        loadType: "Bulk",
-        manufacturer: "Volvo",
-        manufacturingYear: "2015",
-        loadCapacity: "15 tons",
-        is_active: true
-    },
-    {
-        id: 2,
-        vehicleNumber: "2154B416",
-        plateNumber: "AB-B416",
-        vehicleType: "Van",
-        vehicleCategory: "Construction",
-        loadType: "General",
-        manufacturer: "Scania",
-        manufacturingYear: "2020",
-        loadCapacity: "20 RD",
-        is_active: false
-    },
-    {
-        id: 3,
-        vehicleNumber: "2154B416",
-        plateNumber: "XD-4B416",
-        vehicleType: "Truck",
-        vehicleCategory: "Heavy Trucks",
-        loadType: "Hazardous",
-        manufacturer: "Volvo",
-        manufacturingYear: "2023",
-        loadCapacity: "30 m^3",
-        is_active: true
-    },
-];
+interface Pagination {
+    current_page: number;
+    next_cursor: string | null;
+    prev_cursor: string | null;
+    per_page: number;
+}
 
-const tableItems = ref<VehicleData[]>([...demoVehicles]);
-const allHeaders = ref<TableHeader[]>([
-    { key: "vehicleNumber", title: "رقم المركبة", sortable: true },
-    { key: "plateNumber", title: "رقم اللوحة", sortable: true },
-    { key: "vehicleType", title: "نوع المركبة", sortable: true },
-    { key: "vehicleCategory", title: "فئة المركبة", sortable: true },
-    { key: "loadType", title: "نوع الحمولة", sortable: true },
-    { key: "manufacturer", title: "الشركة المصنعة", sortable: true },
-    { key: "manufacturingYear", title: "سنة الصنع", sortable: true },
-    { key: "loadCapacity", title: "سعة الحمولة", sortable: true },
-    { key: "is_active", title: "الحالة", sortable: true },
-]);
-const shownHeaders = ref<TableHeader[]>([...allHeaders.value]);
-const canCreate = ref(true);
+interface VehiclesResponse {
+    status: boolean;
+    code: number;
+    message: string;
+    data: VehicleData[];
+    pagination: Pagination;
+    header_table: string;
+    headers: TableHeader[];
+    shownHeaders: TableHeader[];
+    actions: {
+        can_create: boolean;
+        can_bulk_delete?: boolean;
+    };
+}
+
+interface FilterParams {
+    per_page?: number;
+    cursor?: string | null;
+    vehicle_number?: string;
+    plate_number?: string;
+    vehicle_type?: string;
+    status?: number | boolean;
+}
+
+const tableItems = ref<VehicleData[]>([]);
+const allHeaders = ref<TableHeader[]>([]);
+const shownHeaders = ref<TableHeader[]>([]);
+const canCreate = ref(false);
 const canBulkDelete = ref(true);
+const header_table = ref('');
 const loading = ref(false);
+const loadingMore = ref(false);
+
+const nextCursor = ref<string | null>(null);
+const previousCursor = ref<string | null>(null);
+const perPage = ref(5);
+const hasMoreData = computed(() => nextCursor.value !== null);
 
 const tableHeaders = computed(() => shownHeaders.value);
 
@@ -103,47 +112,85 @@ const showAdvancedFilters = ref(false);
 const filterVehicleNumber = ref("");
 const filterPlateNumber = ref("");
 const filterVehicleType = ref("");
+const filterStatus = ref<number | null>(null);
+
+const StatusList = [
+    { title: 'فعال', value: 1 },
+    { title: 'غير فعال', value: 0 }
+];
 
 const showDeleteDialog = ref(false);
 const deleteLoading = ref(false);
 
+const showStatusChangeDialog = ref(false);
+const statusChangeLoading = ref(false);
+const itemToChangeStatus = ref<VehicleData | null>(null);
+
 const selectedVehicles = ref<number[]>([]);
 const hasSelectedVehicles = computed(() => selectedVehicles.value.length > 0);
 
-const fetchVehicles = async () => {
+const loadMoreTrigger = ref<HTMLElement | null>(null);
+
+const fetchVehicles = async (append = false) => {
     try {
-        loading.value = true;
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 300));
-        
-        // Apply filters
-        let filteredData = [...demoVehicles];
-        
-        if (filterVehicleNumber.value) {
-            filteredData = filteredData.filter(item => 
-                item.vehicleNumber.includes(filterVehicleNumber.value)
-            );
+        if (append) {
+            loadingMore.value = true;
+        } else {
+            loading.value = true;
         }
-        
-        if (filterPlateNumber.value) {
-            filteredData = filteredData.filter(item => 
-                item.plateNumber.includes(filterPlateNumber.value)
-            );
+
+        const filters: FilterParams = {
+            per_page: perPage.value,
+            cursor: append ? nextCursor.value : null,
+        };
+
+        if (filterVehicleNumber.value) filters.vehicle_number = filterVehicleNumber.value;
+        if (filterPlateNumber.value) filters.plate_number = filterPlateNumber.value;
+        if (filterVehicleType.value) filters.vehicle_type = filterVehicleType.value;
+        if (filterStatus.value !== null) filters.status = filterStatus.value;
+
+        const params = new URLSearchParams();
+        Object.entries(filters).forEach(([key, value]) => {
+            if (value !== null && value !== undefined && value !== '') {
+                params.append(key, String(value));
+            }
+        });
+
+        const queryString = params.toString();
+        const url = queryString ? `/vehicles?${queryString}` : '/vehicles';
+
+        const response = await api.get<VehiclesResponse>(url);
+
+        const normalizedData = response.data.map(item => ({
+            ...item,
+            is_active: Boolean(item.is_active)
+        }));
+
+        if (append) {
+            tableItems.value = [...tableItems.value, ...normalizedData];
+        } else {
+            tableItems.value = normalizedData;
+            allHeaders.value = response.headers.filter(h => h.key !== 'id' && h.key !== 'actions');
+            shownHeaders.value = response.shownHeaders.filter(h => h.key !== 'id' && h.key !== 'actions');
+            canCreate.value = response.actions.can_create;
+            canBulkDelete.value = response.actions.can_bulk_delete ?? false;
+            header_table.value = response.header_table;
         }
-        
-        if (filterVehicleType.value) {
-            filteredData = filteredData.filter(item => 
-                item.vehicleType.includes(filterVehicleType.value)
-            );
-        }
-        
-        tableItems.value = filteredData;
+
+        nextCursor.value = response.pagination.next_cursor;
+        previousCursor.value = response.pagination.prev_cursor;
     } catch (err: any) {
         console.error('Error fetching vehicles:', err);
-        toast.error('حدث خطأ أثناء تحميل البيانات');
+        toast.error(err?.response?.data?.message || t('common.messages.general.loadDataFailed'));
     } finally {
         loading.value = false;
+        loadingMore.value = false;
     }
+};
+
+const loadMore = async () => {
+    if (!hasMoreData.value || loadingMore.value) return;
+    await fetchVehicles(true);
 };
 
 const applyFilters = () => {
@@ -154,10 +201,11 @@ const resetFilters = () => {
     filterVehicleNumber.value = '';
     filterPlateNumber.value = '';
     filterVehicleType.value = '';
+    filterStatus.value = null;
     fetchVehicles();
 };
 
-const toggleHeader = (headerKey: string) => {
+const toggleHeader = async (headerKey: string) => {
     const isCurrentlyShown = shownHeaders.value.some(h => h.key === headerKey);
 
     if (isCurrentlyShown) {
@@ -167,6 +215,28 @@ const toggleHeader = (headerKey: string) => {
         if (headerToAdd) {
             shownHeaders.value.push(headerToAdd);
         }
+    }
+
+    await updateHeadersOnServer();
+};
+
+const updateHeadersOnServer = async () => {
+    try {
+        updatingHeaders.value = true;
+        const headerKeys = shownHeaders.value.map(h => h.key);
+
+        const formData = new FormData();
+        formData.append('table', header_table.value);
+        headerKeys.forEach((header, index) => {
+            formData.append(`header[${index}]`, header);
+        });
+
+        await api.post('/headers', formData);
+    } catch (err: any) {
+        console.error('Error updating headers:', err);
+        toast.error(err?.response?.data?.message || t('common.messages.general.saveError'));
+    } finally {
+        updatingHeaders.value = false;
     }
 };
 
@@ -180,14 +250,42 @@ const handleEditVehicle = (item: any) => {
 
 const handleDeleteVehicle = async (item: any) => {
     try {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 300));
-        
-        tableItems.value = tableItems.value.filter(v => v.id !== item.id);
-        toast.success('تم حذف بيانات المركبة بنجاح');
+        await api.delete(`/vehicles/${item.id}`);
+        toast.success(t('common.messages.general.deleteSuccess'));
+        await fetchVehicles();
     } catch (err: any) {
         console.error('Error deleting vehicle:', err);
-        toast.error('حدث خطأ أثناء حذف بيانات المركبة');
+        toast.error(err?.response?.data?.message || t('common.messages.general.deleteError'));
+    }
+};
+
+const handleStatusChange = (item: any) => {
+    itemToChangeStatus.value = { ...item };
+    showStatusChangeDialog.value = true;
+};
+
+const confirmStatusChange = async () => {
+    if (!itemToChangeStatus.value) return;
+
+    try {
+        statusChangeLoading.value = true;
+        const newStatus = !itemToChangeStatus.value.is_active;
+
+        await api.patch(`/vehicles/${itemToChangeStatus.value.id}/change-status`, { status: newStatus });
+
+        toast.success(t(`common.messages.general.${newStatus ? 'activateSuccess' : 'deactivateSuccess'}`));
+
+        const index = tableItems.value.findIndex(t => t.id === itemToChangeStatus.value!.id);
+        if (index !== -1) {
+            tableItems.value[index].is_active = newStatus;
+        }
+    } catch (err: any) {
+        console.error('Error changing status:', err);
+        toast.error(err?.response?.data?.message || t('common.messages.general.changeStatusError'));
+    } finally {
+        statusChangeLoading.value = false;
+        showStatusChangeDialog.value = false;
+        itemToChangeStatus.value = null;
     }
 };
 
@@ -201,16 +299,13 @@ const confirmBulkDelete = async () => {
 
     try {
         deleteLoading.value = true;
-        
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 300));
-        
-        tableItems.value = tableItems.value.filter(item => !selectedVehicles.value.includes(item.id));
-        toast.success(`تم حذف ${selectedVehicles.value.length} مركبة بنجاح`);
+        await api.post('/vehicles/bulk-delete', { ids: selectedVehicles.value });
+        toast.success(t('common.messages.general.bulkDeleteSuccess', { count: selectedVehicles.value.length }));
         selectedVehicles.value = [];
+        await fetchVehicles();
     } catch (err: any) {
         console.error('Error deleting vehicles:', err);
-        toast.error('حدث خطأ أثناء حذف المركبات');
+        toast.error(err?.response?.data?.message || t('common.messages.general.deleteError'));
     } finally {
         deleteLoading.value = false;
         showDeleteDialog.value = false;
@@ -241,6 +336,19 @@ const toggleAdvancedFilters = () => {
 
 onMounted(() => {
     fetchVehicles();
+
+    const observer = new IntersectionObserver(
+        (entries) => {
+            if (entries[0].isIntersecting && hasMoreData.value && !loadingMore.value) {
+                loadMore();
+            }
+        },
+        { threshold: 0.1 }
+    );
+
+    if (loadMoreTrigger.value) {
+        observer.observe(loadMoreTrigger.value);
+    }
 });
 
 </script>
@@ -317,6 +425,10 @@ onMounted(() => {
                             <TextInput v-model="filterVehicleType" density="comfortable" variant="outlined" hide-details
                                 placeholder="نوع المركبة" class="w-full sm:w-40 bg-white"
                                 @keyup.enter="applyFilters" />
+                            <SelectInput v-model="filterStatus" :items="StatusList" item-title="title"
+                                item-value="value" density="comfortable" variant="outlined" hide-details
+                                placeholder="الحالة" class="w-full sm:w-40 bg-white"
+                                @update:model-value="applyFilters" />
                         </div>
 
                         <div class="flex gap-2 items-center">
@@ -333,17 +445,27 @@ onMounted(() => {
 
                 <DataTable :headers="tableHeaders" :items="tableItems" :loading="loading" :show-checkbox="canBulkDelete"
                     show-actions @delete="handleDeleteVehicle" @edit="handleEditVehicle" @select="handleSelectVehicle"
-                    @selectAll="handleSelectAllVehicles" :confirm-delete="true" forceShowDelete forceShowEdit>
+                    @selectAll="handleSelectAllVehicles" :confirm-delete="true">
                     <template #item.is_active="{ item }">
                         <v-switch :model-value="item.is_active" hide-details inset density="compact" color="primary"
-                            class="small-switch" />
+                            class="small-switch" @update:model-value="() => handleStatusChange(item)"
+                            v-if="item.actions?.can_change_status" />
+                        <span v-else class="text-sm text-gray-600">--</span>
                     </template>
                 </DataTable>
+
+                <div ref="loadMoreTrigger" class="flex justify-center py-8">
+                    <v-progress-circular v-if="loadingMore" indeterminate color="primary" size="32" />
+                </div>
             </div>
         </div>
 
-        <DeleteConfirmDialog v-model="showDeleteDialog" :loading="deleteLoading" title="حذف بيانات المركبات"
-            :message="`هل أنت متأكد من حذف ${selectedVehicles.length} مركبة؟`" @confirm="confirmBulkDelete" />
+        <DeleteConfirmDialog v-model="showDeleteDialog" :loading="deleteLoading" :title="$t('common.dialogs.delete.title')"
+            :message="$t('common.messages.general.bulkDeleteConfirm', { count: selectedVehicles.length })" @confirm="confirmBulkDelete" />
+
+        <StatusChangeDialog v-model="showStatusChangeDialog" :loading="statusChangeLoading"
+            :item-name="itemToChangeStatus?.vehicle_number" :current-status="itemToChangeStatus?.is_active"
+            @confirm="confirmStatusChange" />
     </default-layout>
 </template>
 

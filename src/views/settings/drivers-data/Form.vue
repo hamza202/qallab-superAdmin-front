@@ -2,9 +2,13 @@
 import { SettingsIcon } from '@/components/icons/globalIcons';
 import { ref, reactive, computed, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
+import { useI18n } from 'vue-i18n';
+import { useApi } from '@/composables/useApi';
 
 const router = useRouter();
 const route = useRoute();
+const { t } = useI18n();
+const api = useApi();
 
 const formRef = ref<any>(null);
 const isFormValid = ref(false);
@@ -17,82 +21,139 @@ const icon = `<svg width="48" height="43" viewBox="0 0 48 43" fill="none" xmlns=
 `
 interface DriverForm {
     id?: number;
-    tripNumber: string;
-    driverName: string;
-    identityNumber: string;
-    tripType: string | null;
-    tripEndDate: string;
-    hasDangerousMaterials: boolean;
-    inspectionRating: string;
-    currentInspectionDate: string;
-    driverStatus: string | null;
+    license_number: string;
+    logistics_company_id: number | null;
+    name: string;
+    national_id: string;
+    country_id: number | null;
+    license_type: string[];
+    license_expires_at: string;
+    hazardous_material_qualified: boolean;
+    is_active: boolean;
+    medical_exam_date: string;
+    rating: number | null;
 }
 
-const form = reactive<DriverForm>({
-    tripNumber: '',
-    driverName: '',
-    identityNumber: '',
-    tripType: null,
-    tripEndDate: '',
-    hasDangerousMaterials: false,
-    inspectionRating: '',
-    currentInspectionDate: '',
-    driverStatus: null,
+interface LicenseType {
+    title: string;
+    value: string;
+}
+
+interface ConstantsResponse {
+    status: number;
+    code: number;
+    locale: string;
+    message: string;
+    data: {
+        license_types: LicenseType[];
+    };
+}
+
+const formData = ref<DriverForm>({
+    license_number: '',
+    logistics_company_id: null,
+    name: '',
+    national_id: '',
+    country_id: 1,
+    license_type: [],
+    license_expires_at: '',
+    hazardous_material_qualified: false,
+    is_active: true,
+    medical_exam_date: '',
+    rating: null,
 });
+
+const isFormDataLoaded = ref(false);
 
 const formErrors = reactive<Record<string, string>>({});
 
-// Demo data for dropdowns
-const tripTypes = [
-    { title: "Forklift", value: "forklift" },
-    { title: "Truck", value: "truck" },
-    { title: "Van", value: "van" },
-    { title: "Heavy Equipment", value: "heavy" },
+const licenseTypes = ref<LicenseType[]>([]);
+const countries = ref<any[]>([]);
+const ratings = [
+    { title: '1', value: 1 },
+    { title: '2', value: 2 },
+    { title: '3', value: 3 },
+    { title: '4', value: 4 },
+    { title: '5', value: 5 },
 ];
 
-const driverStatuses = [
-    { title: "نشط", value: "active" },
-    { title: "غير نشط", value: "inactive" },
-    { title: "معلق", value: "suspended" },
-];
+const isEditMode = computed(() => !!route.params.id);
 
-// Demo data for existing records
-const demoDrivers = [
-    {
-        id: 1,
-        tripNumber: "DRIV-2024-001",
-        driverName: "أحمد محمد",
-        identityNumber: "1234567890",
-        tripType: "forklift",
-        tripEndDate: "2024-12-31",
-        hasDangerousMaterials: true,
-        inspectionRating: "4.5",
-        currentInspectionDate: "2024-03-15",
-        driverStatus: "active"
-    },
-];
+const fetchConstants = async () => {
+    try {
+        const response = await api.get<ConstantsResponse>('/drivers/constants');
+        licenseTypes.value = response.data.license_types?.map((i: any) => ({ title: i.label, value: i.key })) || [];
 
-const isEditing = computed(() => !!route.params.id);
+    } catch (err: any) {
+        console.error('Error fetching constants:', err);
+        toast.error(err?.response?.data?.message || t('common.messages.general.loadDataFailed'));
+    }
+};
 
 const fetchDriverData = async () => {
     if (!route.params.id) return;
 
     try {
         loading.value = true;
-        
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 300));
-        
-        const driver = demoDrivers.find(d => d.id === Number(route.params.id));
-        if (driver) {
-            Object.assign(form, driver);
-        }
+        const response = await api.get(`/drivers/${route.params.id}`);
+        formData.value = {
+            ...response.data,
+            license_type: response.data.license_type || [],
+        };
+        isFormDataLoaded.value = true;
     } catch (err: any) {
         console.error('Error fetching driver data:', err);
-        toast.error('حدث خطأ أثناء تحميل البيانات');
+        toast.error(err?.response?.data?.message || t('common.messages.general.loadDataFailed'));
     } finally {
         loading.value = false;
     }
+};
+
+const waitForSupplierData = async () => {
+    if (!isEditMode.value) return;
+
+    if (isFormDataLoaded.value && formData.value.logistics_company_id) {
+        return;
+    }
+
+    await new Promise(resolve => {
+        const checkInterval = setInterval(() => {
+            if (isFormDataLoaded.value && formData.value.logistics_company_id) {
+                clearInterval(checkInterval);
+                clearTimeout(timeoutId);
+                resolve(true);
+            }
+        }, 10);
+
+        const timeoutId = setTimeout(() => {
+            clearInterval(checkInterval);
+            resolve(true);
+        }, 5000);
+    });
+};
+
+const fetchSuppliers = async (search = '', cursor?: string, perPage = 15) => {
+    if (isEditMode.value) {
+        await waitForSupplierData();
+    }
+
+    const params: any = { per_page: perPage, service_type: 'logistic_company' };
+    if (search) {
+        params.name = search;
+    }
+    if (cursor) {
+        params.cursor = cursor;
+    }
+    if (formData.value.logistics_company_id) {
+        params.order_by_id = formData.value.logistics_company_id;
+    }
+
+    const res = await api.get<any>('/suppliers/list', { params });
+
+    return {
+        data: res.data || [],
+        next_cursor: res.pagination?.next_cursor || null,
+    };
 };
 
 const handleSave = async () => {
@@ -106,19 +167,35 @@ const handleSave = async () => {
     try {
         saving.value = true;
 
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 500));
+        const payload = {
+            license_number: Number(formData.value.license_number),
+            logistics_company_id: formData.value.logistics_company_id,
+            name: formData.value.name,
+            national_id: Number(formData.value.national_id),
+            country_id: formData.value.country_id,
+            license_type: formData.value.license_type,
+            license_expires_at: formData.value.license_expires_at,
+            hazardous_material_qualified: formData.value.hazardous_material_qualified,
+            is_active: formData.value.is_active,
+            medical_exam_date: formData.value.medical_exam_date,
+            rating: formData.value.rating,
+        };
 
-        if (isEditing.value) {
-            toast.success('تم تحديث بيانات السائق بنجاح');
+        if (isEditMode.value) {
+            await api.put(`/drivers/${route.params.id}`, payload);
+            toast.success(t('common.messages.general.updateSuccess'));
         } else {
-            toast.success('تم إضافة بيانات السائق بنجاح');
+            await api.post('/drivers', payload);
+            toast.success(t('common.messages.general.createSuccess'));
         }
 
         router.push('/settings/drivers-data/list');
     } catch (err: any) {
         console.error('Error saving driver:', err);
-        toast.error('حدث خطأ أثناء حفظ بيانات السائق');
+        if (err?.response?.data?.errors) {
+            Object.assign(formErrors, err.response.data.errors);
+        }
+        toast.error(err?.response?.data?.message || t('common.messages.general.saveError'));
     } finally {
         saving.value = false;
     }
@@ -128,9 +205,12 @@ const handleCancel = () => {
     router.push('/settings/drivers-data/list');
 };
 
-onMounted(() => {
-    if (isEditing.value) {
-        fetchDriverData();
+onMounted(async () => {
+    await fetchConstants();
+    if (isEditMode.value) {
+        await fetchDriverData();
+    } else {
+        isFormDataLoaded.value = true;
     }
 });
 </script>
@@ -138,11 +218,8 @@ onMounted(() => {
 <template>
     <default-layout>
         <div class="drivers-data-form-page">
-            <PageHeader 
-                :icon="icon" 
-                :title-key="isEditing ? 'تعديل بيانات السائق' : 'إضافة بيانات السائق'"
-                description-key="تمكنك من إدارة وإضافة بيانات السائقين" 
-            />
+            <PageHeader :icon="icon" :title-key="isEditMode ? 'تعديل بيانات السائق' : 'إضافة بيانات السائق'"
+                description-key="تمكنك من إدارة وإضافة بيانات السائقين" />
 
             <div class="bg-white rounded-lg shadow-sm p-6">
                 <v-form ref="formRef" v-model="isFormValid" @submit.prevent>
@@ -152,73 +229,66 @@ onMounted(() => {
 
                     <div v-else>
                         <h3 class="text-lg font-bold text-primary-900 mb-6">بيانات السائق</h3>
-                        
+
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                            <TextInput 
-                                v-model="form.tripNumber" 
-                                label="رقم رخصة السائق"
-                                placeholder="أدخل رقم الرخصة مثل: DRIV-2024-001"
-                                :rules="[required()]"
-                                :hide-details="false"
-                                :error-messages="formErrors['tripNumber']"
-                                @input="delete formErrors['tripNumber']"
-                            />
+                            <TextInput v-model="formData.license_number" label="رقم رخصة السائق"
+                                placeholder="أدخل رقم الرخصة" :rules="[required()]"
+                                :error-messages="formErrors['license_number']"
+                                @input="delete formErrors['license_number']" density="comfortable" />
 
-                            <TextInput 
-                                v-model="form.driverName" 
-                                label="الاسم"
-                                placeholder="أدخل الاسم مثل: محمد أحمد"
-                                :rules="[required()]"
-                                :hide-details="false"
-                                :error-messages="formErrors['driverName']"
-                                @input="delete formErrors['driverName']"
-                            />
+                            <SelectInput v-model="formData.logistics_company_id" label="شركة النقل" :items="[]"
+                                item-title="title" :rules="[required()]" item-value="value" density="comfortable"
+                                placeholder="اختر شركة النقل" :server-side="true" :fetch-function="fetchSuppliers"
+                                item-title-key="full_name" item-value-key="id" :debounce-time="500"
+                                :error-messages="formErrors['logistics_company_id']"
+                                @update:model-value="delete formErrors['logistics_company_id']" />
 
-                            <TextInput 
-                                v-model="form.identityNumber" 
-                                label="رقم الهوية / الإقامة"
-                                placeholder="أدخل رقم الهوية مثل: 1234567890"
-                                :rules="[required()]"
-                                :hide-details="false"
-                                :error-messages="formErrors['identityNumber']"
-                                @input="delete formErrors['identityNumber']"
-                            />
+                            <TextInput v-model="formData.name" label="الاسم" placeholder="أدخل الاسم"
+                                :rules="[required()]" :error-messages="formErrors['name']"
+                                @input="delete formErrors['name']" density="comfortable" />
 
-                            <SelectWithIconInput 
-                                v-model="form.tripType" 
-                                label="نوع الرخصة"
-                                placeholder="اختر نوع الرخصة مثل: نشط"
-                                :items="tripTypes"
-                                :rules="[required()]"
-                                :hide-details="false"
-                                :error-messages="formErrors['tripType']"
-                                @update:model-value="delete formErrors['tripType']"
-                            />
+                            <TextInput v-model="formData.national_id" label="رقم الهوية / الإقامة"
+                                placeholder="أدخل رقم الهوية" :rules="[required()]"
+                                :error-messages="formErrors['national_id']" @input="delete formErrors['national_id']"
+                                density="comfortable" />
 
-                            <DatePickerInput 
-                                v-model="form.tripEndDate" 
-                                label="تاريخ انتهاء الرخصة"
-                                placeholder="اختر تاريخ الانتهاء مثل: 31-12-2024"
-                                :rules="[required()]"
-                                :hide-details="false"
-                                :error-messages="formErrors['tripEndDate']"
-                                @update:model-value="delete formErrors['tripEndDate']"
-                            />
+                            <MultipleSelectInput v-model="formData.license_type" label="نوع الرخصة"
+                                placeholder="اختر نوع الرخصة" :items="licenseTypes" item-title="label" item-value="key"
+                                multiple chips closable-chips :rules="[required()]"
+                                :error-messages="formErrors['license_type']"
+                                @update:model-value="delete formErrors['license_type']" density="comfortable" />
+
+                            <DatePickerInput v-model="formData.license_expires_at" label="تاريخ انتهاء الرخصة"
+                                placeholder="اختر تاريخ الانتهاء" :rules="[required()]"
+                                :error-messages="formErrors['license_expires_at']"
+                                @update:model-value="delete formErrors['license_expires_at']" density="comfortable" />
+
+                            <SelectWithIconInput v-model="formData.rating" label="تقييم السائق"
+                                placeholder="اختر التقييم" :items="ratings" :rules="[required()]"
+                                :error-messages="formErrors['rating']" @update:model-value="delete formErrors['rating']"
+                                density="comfortable" />
+
+                            <DatePickerInput v-model="formData.medical_exam_date" label="تاريخ الفحص الطبي"
+                                placeholder="اختر تاريخ الفحص" :rules="[required()]"
+                                :error-messages="formErrors['medical_exam_date']"
+                                @update:model-value="delete formErrors['medical_exam_date']" density="comfortable" />
 
                             <div>
                                 <span class="text-sm font-semibold text-gray-700 block mb-2">مؤهل لنقل مواد خطرة</span>
                                 <div class="flex items-center gap-3">
-                                    <v-radio-group v-model="form.hasDangerousMaterials" inline hide-details>
+                                    <v-radio-group v-model="formData.hazardous_material_qualified" inline hide-details>
                                         <v-radio :value="true" color="primary">
                                             <template #label>
-                                                <span :class="form.hasDangerousMaterials ? 'text-primary font-semibold' : 'text-gray-600'">
+                                                <span
+                                                    :class="formData.hazardous_material_qualified ? 'text-primary font-semibold' : 'text-gray-600'">
                                                     نعم
                                                 </span>
                                             </template>
                                         </v-radio>
                                         <v-radio :value="false" color="primary">
                                             <template #label>
-                                                <span :class="!form.hasDangerousMaterials ? 'text-primary font-semibold' : 'text-gray-600'">
+                                                <span
+                                                    :class="!formData.hazardous_material_qualified ? 'text-primary font-semibold' : 'text-gray-600'">
                                                     لا
                                                 </span>
                                             </template>
@@ -227,62 +297,39 @@ onMounted(() => {
                                 </div>
                             </div>
 
-                            <TextInput 
-                                v-model="form.inspectionRating" 
-                                label="تقييم السائق"
-                                placeholder="أدخل التقييم مثل: ممتاز"
-                                :rules="[required()]"
-                                :hide-details="false"
-                                :error-messages="formErrors['inspectionRating']"
-                                @input="delete formErrors['inspectionRating']"
-                            />
-
-                            <DatePickerInput 
-                                v-model="form.currentInspectionDate" 
-                                label="تاريخ الفحص الحالي"
-                                placeholder="اختر تاريخ الفحص مثل: 15-03-2024"
-                                :rules="[required()]"
-                                :hide-details="false"
-                                :error-messages="formErrors['currentInspectionDate']"
-                                @update:model-value="delete formErrors['currentInspectionDate']"
-                            />
-
-                            <SelectWithIconInput 
-                                v-model="form.driverStatus" 
-                                label="حالة السائق"
-                                placeholder="اختر الحالة مثل: نشط"
-                                :items="driverStatuses"
-                                :rules="[required()]"
-                                :hide-details="false"
-                                :error-messages="formErrors['driverStatus']"
-                                @update:model-value="delete formErrors['driverStatus']"
-                            />
+                            <div>
+                                <span class="text-sm font-semibold text-gray-700 block mb-2">حالة السائق</span>
+                                <div class="flex items-center gap-3">
+                                    <v-radio-group v-model="formData.is_active" inline hide-details>
+                                        <v-radio :value="true" color="primary">
+                                            <template #label>
+                                                <span
+                                                    :class="formData.is_active ? 'text-primary font-semibold' : 'text-gray-600'">
+                                                    فعال
+                                                </span>
+                                            </template>
+                                        </v-radio>
+                                        <v-radio :value="false" color="primary">
+                                            <template #label>
+                                                <span
+                                                    :class="!formData.is_active ? 'text-primary font-semibold' : 'text-gray-600'">
+                                                    غير فعال
+                                                </span>
+                                            </template>
+                                        </v-radio>
+                                    </v-radio-group>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="flex gap-3 justify-center pt-4">
-                            <ButtonWithIcon 
-                                variant="flat" 
-                                color="primary" 
-                                height="44" 
-                                rounded="4"
-                                custom-class="font-semibold text-base px-8" 
-                                label="حفظ" 
-                                prepend-icon="mdi-content-save" 
-                                @click="handleSave"
-                                :loading="saving" 
-                                :disabled="saving" 
-                            />
+                            <ButtonWithIcon variant="flat" color="primary" height="44" rounded="4"
+                                custom-class="font-semibold text-base px-8" label="حفظ" prepend-icon="mdi-content-save"
+                                @click="handleSave" :loading="saving" :disabled="saving" />
 
-                            <ButtonWithIcon 
-                                variant="flat" 
-                                color="primary-50" 
-                                height="44" 
-                                rounded="4"
-                                custom-class="font-semibold text-base text-primary-700 px-8" 
-                                label="إلغاء" 
-                                prepend-icon="mdi-close"
-                                @click="handleCancel" 
-                            />
+                            <ButtonWithIcon variant="flat" color="primary-50" height="44" rounded="4"
+                                custom-class="font-semibold text-base text-primary-700 px-8" label="إلغاء"
+                                prepend-icon="mdi-close" @click="handleCancel" />
                         </div>
                     </div>
                 </v-form>
