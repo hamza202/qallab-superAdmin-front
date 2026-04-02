@@ -531,6 +531,36 @@ export const settingsRoutes: RouteRecordRaw[] = [
       },
     ],
   },
+  {
+    path: "/settings/pricing-per-ton",
+    name: "PricingPerTon",
+    redirect: "/settings/pricing-per-ton/list",
+    children: [
+      {
+        path: "list",
+        name: "PricingPerTonList",
+        component: () => import("@/views/settings/pricing-per-ton/List.vue"),
+        meta: {
+          title: "pages.pricingPerTon.title",
+        },
+      },
+    ],
+  },
+  {
+    path: "/settings/custom-pricing",
+    name: "CustomPricing",
+    redirect: "/settings/custom-pricing/list",
+    children: [
+      {
+        path: "list",
+        name: "CustomPricingList",
+        component: () => import("@/views/settings/custom-pricing/List.vue"),
+        meta: {
+          title: "pages.customPricing.title",
+        },
+      },
+    ],
+  },
 ];
 
 export default settingsRoutes;
