@@ -1027,7 +1027,7 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
 
         <!-- Add Product Dialog -->
         <AddProductDialogFuelsQuotation v-model="showAddProductDialog"
-            :material-type="0"
+            :material-type="2"
             :item-using-options="itemUsingItems"
             :unit-items="unitItems"
             :discount-type-options="discountTypeItems"

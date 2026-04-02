@@ -1194,7 +1194,7 @@ const tableItems = computed(() =>
         <!-- إضافة منتجات وقود: material_type=0 + supplier_id على التصنيفات و /items/supplier-items -->
         <AddProductDialogFuels
             v-model="showAddProductDialog"
-            :material-type="0"
+            :material-type="2"
             :supplier-id="formData.supplier_id"
             items-endpoint="/items/supplier-items"
             show-unit-price-and-discount
