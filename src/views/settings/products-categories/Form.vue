@@ -53,6 +53,7 @@ const categoryNameAr = ref("");
 const categoryNameEn = ref("");
 const parentCategory = ref<number | null>(null);
 const unit = ref<string | null>(null);
+const materialType = ref<number | null>(null);
 const categoryDescriptionEn = ref("");
 const categoryDescriptionAr = ref("");
 const categoryImage = ref<File[] | null>(null);
@@ -69,6 +70,7 @@ const categoriesList = ref<Array<{ title: string; value: number | string }>>([])
 const unitItems = ref<Array<{ title: string; value: number | string }>>([]);
 const taxNameItems = ref<Array<{ title: string; value: number | string }>>([]);
 const taxesData = ref<Array<any>>([]);
+const MaterialTypeItems = ref<Array<{ title: string; value: number | string }>>([]);
 
 const priorityItems = ref<Array<{ title: string; value: number | string }>>([]);
 
@@ -181,6 +183,7 @@ const resetForm = () => {
   categoryNameEn.value = "";
   parentCategory.value = null;
   unit.value = null;
+  materialType.value = null;
   categoryDescriptionEn.value = "";
   categoryDescriptionAr.value = "";
   categoryImage.value = null;
@@ -205,6 +208,16 @@ const fetchConstants = async () => {
         value: priority.key,
       })),
     ];
+
+    // Populate material types dropdown
+    if (response.data.material_types) {
+      MaterialTypeItems.value = [
+        ...response.data.material_types.map((type: any) => ({
+          title: type.label,
+          value: type.key,
+        })),
+      ];
+    }
   } catch (error) {
     console.error('Failed to fetch constants:', error);
     toast.error(t('common.messages.general.loadConstantsFailed'));
@@ -287,6 +300,7 @@ const fetchCategoryDetails = async (id: number) => {
       parentCategory.value = cat.parent_id;
       isActive.value = Boolean(cat.is_active);
       unit.value = cat.unit_id;
+      materialType.value = cat.material_type;
 
       // Transform taxes from API structure
       if (cat.taxes) {
@@ -335,6 +349,7 @@ const handleSave = async () => {
       },
       parent_id: parentCategory.value,
       unit_id: unit.value ? parseInt(unit.value.toString()) : 1,
+      material_type: materialType.value,
       image: categoryImage.value?.[0] || null,
       is_active: isActive.value,
       taxes: taxRules.value.map((tax) => {
@@ -364,6 +379,7 @@ const handleSave = async () => {
         formData.append('description[en]', payload.description.en);
         if (payload.parent_id) formData.append('parent_id', payload.parent_id.toString());
         formData.append('unit_id', payload.unit_id.toString());
+        if (payload.material_type !== null) formData.append('material_type', payload.material_type.toString());
         formData.append('is_active', payload.is_active ? '1' : '0');
         formData.append('image', payload.image);
 
@@ -392,6 +408,7 @@ const handleSave = async () => {
         formData.append('description[en]', payload.description.en);
         if (payload.parent_id) formData.append('parent_id', payload.parent_id.toString());
         formData.append('unit_id', payload.unit_id.toString());
+        if (payload.material_type !== null) formData.append('material_type', payload.material_type.toString());
         formData.append('is_active', payload.is_active ? '1' : '0');
         formData.append('image', payload.image);
 
@@ -562,6 +579,10 @@ const saveIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xm
 
               <SelectWithIconInput show-add-button v-model="unit" clearable :label="t('common.form.unit')" :placeholder="t('form.product.unit.placeholder')"
                 :items="unitItems" :hide-details="false" />
+
+              <SelectWithIconInput :rules="[required()]" clearable v-model="materialType"
+                :label="t('pages.ProductsCategories.form.labels.materialType')"
+                :placeholder="t('pages.ProductsCategories.form.placeholders.selectMaterialType')" :items="MaterialTypeItems" :hide-details="false" />
 
               <div>
                 <span class="text-sm font-semibold text-gray-700 mb-2 block">{{ t('common.form.status') }} </span>
