@@ -1118,7 +1118,7 @@ const tableItems = computed(() =>
         <!-- Add Product Dialog (Material Type = 0 for Fuels) -->
         <AddProductDialog
             v-model="showAddProductDialog"
-            :items-query-params="{ material_type: 0 }"
+            :items-query-params="{ material_type: 2 }"
             request-type="raw_materials"
             show-unit-price-and-discount
             hide-trip-no
