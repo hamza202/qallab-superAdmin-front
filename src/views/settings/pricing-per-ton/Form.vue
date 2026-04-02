@@ -2,10 +2,16 @@
 import { SettingsIcon } from '@/components/icons/globalIcons';
 import { ref, reactive, computed, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
+import TopHeader from '@/components/price-offers/TopHeader.vue';
+import AppFormBreadcrumb from '@/components/common/AppFormBreadcrumb.vue';
 
 const router = useRouter();
 const route = useRoute();
 
+const coins = `<svg width="48" height="43" viewBox="0 0 48 43" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M25.8333 6.33333C25.8333 8.72657 20.4981 10.6667 13.9167 10.6667C7.33527 10.6667 2 8.72657 2 6.33333M25.8333 6.33333C25.8333 3.9401 20.4981 2 13.9167 2C7.33527 2 2 3.9401 2 6.33333M25.8333 6.33333V9.58333M2 6.33333V32.3333C2 34.7266 7.33527 36.6667 13.9167 36.6667M13.9167 19.3333C13.5515 19.3333 13.1901 19.3274 12.8333 19.3157C6.75962 19.1166 2 17.2604 2 15M13.9167 28C7.33527 28 2 26.0599 2 23.6667M45.3333 20.4167C45.3333 22.8099 39.9981 24.75 33.4167 24.75C26.8353 24.75 21.5 22.8099 21.5 20.4167M45.3333 20.4167C45.3333 18.0234 39.9981 16.0833 33.4167 16.0833C26.8353 16.0833 21.5 18.0234 21.5 20.4167M45.3333 20.4167V36.6667C45.3333 39.0599 39.9981 41 33.4167 41C26.8353 41 21.5 39.0599 21.5 36.6667V20.4167M45.3333 28.5417C45.3333 30.9349 39.9981 32.875 33.4167 32.875C26.8353 32.875 21.5 30.9349 21.5 28.5417" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+`
 const formRef = ref<any>(null);
 const isFormValid = ref(false);
 const saving = ref(false);
@@ -13,8 +19,6 @@ const loading = ref(false);
 
 interface PricingPerTonForm {
     id?: number;
-    centralLocation: string | null;
-    city: string | null;
     minDistance: string;
     maxDistance: string;
     tripDuration: string;
@@ -26,8 +30,6 @@ interface PricingPerTonForm {
 }
 
 const form = reactive<PricingPerTonForm>({
-    centralLocation: null,
-    city: null,
     minDistance: '',
     maxDistance: '',
     tripDuration: '',
@@ -41,24 +43,6 @@ const form = reactive<PricingPerTonForm>({
 const formErrors = reactive<Record<string, string>>({});
 
 // Demo data for dropdowns
-const centralLocations = [
-    { title: "الرياض - المركز الرئيسي", value: "riyadh-main" },
-    { title: "جدة - المركز الغربي", value: "jeddah-west" },
-    { title: "الدمام - المركز الشرقي", value: "dammam-east" },
-    { title: "مكة المكرمة - المركز الديني", value: "makkah-religious" },
-];
-
-const cities = [
-    { title: "الرياض", value: "riyadh" },
-    { title: "جدة", value: "jeddah" },
-    { title: "مكة المكرمة", value: "makkah" },
-    { title: "المدينة المنورة", value: "madinah" },
-    { title: "الدمام", value: "dammam" },
-    { title: "الخبر", value: "khobar" },
-    { title: "الطائف", value: "taif" },
-    { title: "تبوك", value: "tabuk" },
-];
-
 const tripTimes = [
     { title: "صباحاً", value: "morning" },
     { title: "ظهراً", value: "noon" },
@@ -84,8 +68,6 @@ const roadTypes = [
 const demoPricings = [
     {
         id: 1,
-        centralLocation: "riyadh-main",
-        city: "riyadh",
         minDistance: "50",
         maxDistance: "100",
         tripDuration: "2",
@@ -104,10 +86,10 @@ const fetchPricingData = async () => {
 
     try {
         loading.value = true;
-        
+
         // Simulate API call
         await new Promise(resolve => setTimeout(resolve, 300));
-        
+
         const pricing = demoPricings.find(p => p.id === Number(route.params.id));
         if (pricing) {
             Object.assign(form, pricing);
@@ -162,12 +144,13 @@ onMounted(() => {
 
 <template>
     <default-layout>
-        <div class="pricing-per-ton-form-page">
-            <PageHeader 
-                :icon="SettingsIcon" 
-                :title-key="isEditing ? 'تعديل التسعير بالطن' : 'إضافة تسعير بالطن'"
-                description-key="إدارة أسعار التوصيل بالطن" 
-            />
+        <div class="pricing-per-ton-form-page -mx-6">
+            <AppFormBreadcrumb list-path="/settings/pricing-per-ton/list" module-root-key="الإعدادات"
+                list-label-key="إدارة المسارات المركزية" create-label-key="مجمع العد" edit-label-key="مجمع العد"
+                :is-edit-mode="isEditing" />
+
+            <TopHeader :icon="coins" title-key="إضافة تسعيرة بالطن" description-key="تحكم في إضافة تسعيرة بالطن"
+                :show-action="false" />
 
             <div class="bg-white rounded-lg shadow-sm p-6">
                 <v-form ref="formRef" v-model="isFormValid" @submit.prevent>
@@ -176,142 +159,77 @@ onMounted(() => {
                     </div>
 
                     <div v-else class="space-y-6">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <SelectWithIconInput 
-                                v-model="form.centralLocation" 
-                                label="الموقع المركزي"
-                                placeholder="اختر الموقع المركزي"
-                                :items="centralLocations"
-                                :rules="[required()]"
-                                :hide-details="false"
-                                :error-messages="formErrors['centralLocation']"
-                                @update:model-value="delete formErrors['centralLocation']"
-                            />
+                        <h2 class="text-xl font-bold text-primary-800 mb-6">معلومات التسعيرة</h2>
 
-                            <SelectWithIconInput 
-                                v-model="form.city" 
-                                label="المدينة"
-                                placeholder="اختر المدينة"
-                                :items="cities"
-                                :rules="[required()]"
-                                :hide-details="false"
-                                :error-messages="formErrors['city']"
-                                @update:model-value="delete formErrors['city']"
-                            />
+                        <div class="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+                            <TextInput v-model="form.minDistance" label="أدنى مسافة" placeholder="12" type="number"
+                                :rules="[required()]" :error-messages="formErrors['minDistance']"
+                                @input="delete formErrors['minDistance']" density="comfortable">
+                                <template #append-inner>
+                                    <span class="text-gray-500 text-sm">كم</span>
+                                </template>
+                            </TextInput>
 
-                            <TextInput 
-                                v-model="form.minDistance" 
-                                label="أدنى مسافة بال كم"
-                                placeholder="أدخل أدنى مسافة"
-                                type="number"
-                                :rules="[required()]"
-                                :hide-details="false"
-                                :error-messages="formErrors['minDistance']"
-                                @input="delete formErrors['minDistance']"
-                            />
+                            <TextInput v-model="form.maxDistance" label="أقصى مسافة" placeholder="12" type="number"
+                                :rules="[required()]" :error-messages="formErrors['maxDistance']"
+                                @input="delete formErrors['maxDistance']" density="comfortable">
+                                <template #append-inner>
+                                    <span class="text-gray-500 text-sm">كم</span>
+                                </template>
+                            </TextInput>
 
-                            <TextInput 
-                                v-model="form.maxDistance" 
-                                label="أقصى مسافة بال كم"
-                                placeholder="أدخل أقصى مسافة"
-                                type="number"
-                                :rules="[required()]"
-                                :hide-details="false"
-                                :error-messages="formErrors['maxDistance']"
-                                @input="delete formErrors['maxDistance']"
-                            />
+                            <TextInput v-model="form.tripDuration" label="زمن الرحلة" placeholder="2" type="number"
+                                :rules="[required()]" :error-messages="formErrors['tripDuration']"
+                                @input="delete formErrors['tripDuration']" density="comfortable">
+                                <template #append-inner>
+                                    <span class="text-gray-500 text-sm">ساعة</span>
+                                </template>
+                            </TextInput>
 
-                            <TextInput 
-                                v-model="form.tripDuration" 
-                                label="زمن الرحلة (ساعة)"
-                                placeholder="أدخل زمن الرحلة بالساعات"
-                                type="number"
-                                :rules="[required()]"
-                                :hide-details="false"
-                                :error-messages="formErrors['tripDuration']"
-                                @input="delete formErrors['tripDuration']"
-                            />
+                            <SelectWithIconInput v-model="form.tripTime" label="وقت الرحلة" placeholder="صباحاً"
+                                :items="tripTimes" :rules="[required()]" :error-messages="formErrors['tripTime']"
+                                @update:model-value="delete formErrors['tripTime']" density="comfortable" />
 
-                            <SelectWithIconInput 
-                                v-model="form.tripTime" 
-                                label="وقت الرحلة"
-                                placeholder="اختر وقت الرحلة"
-                                :items="tripTimes"
-                                :rules="[required()]"
-                                :hide-details="false"
-                                :error-messages="formErrors['tripTime']"
-                                @update:model-value="delete formErrors['tripTime']"
-                            />
-
-                            <SelectWithIconInput 
-                                v-model="form.materialType" 
-                                label="نوع المادة"
-                                placeholder="اختر نوع المادة"
-                                :items="materialTypes"
-                                :rules="[required()]"
-                                :hide-details="false"
+                            <SelectWithIconInput v-model="form.materialType" label="نوع المادة" placeholder="رمل"
+                                :items="materialTypes" :rules="[required()]"
                                 :error-messages="formErrors['materialType']"
-                                @update:model-value="delete formErrors['materialType']"
-                            />
+                                @update:model-value="delete formErrors['materialType']" density="comfortable" />
 
-                            <TextInput 
-                                v-model="form.price" 
-                                label="السعر"
-                                placeholder="أدخل السعر"
-                                type="number"
-                                :rules="[required()]"
-                                :hide-details="false"
-                                :error-messages="formErrors['price']"
-                                @input="delete formErrors['price']"
-                            />
+                            <PriceInput v-model="form.price" label="السعر" placeholder="5000" showRialIcon type="number"
+                                :rules="[required()]" :error-messages="formErrors['price']"
+                                @input="delete formErrors['price']" density="comfortable">
+                                <template #append-inner>
+                                    <span class="text-gray-500 text-sm">ر</span>
+                                </template>
+                            </PriceInput>
 
-                            <SelectWithIconInput 
-                                v-model="form.roadType" 
-                                label="نوع الطريق"
-                                placeholder="اختر نوع الطريق"
-                                :items="roadTypes"
-                                :rules="[required()]"
-                                :hide-details="false"
-                                :error-messages="formErrors['roadType']"
-                                @update:model-value="delete formErrors['roadType']"
-                            />
+                            <SelectWithIconInput v-model="form.roadType" label="نوع الطريق" placeholder="اختر النوع"
+                                :items="roadTypes" :rules="[required()]" :error-messages="formErrors['roadType']"
+                                @update:model-value="delete formErrors['roadType']" density="comfortable" />
 
-                            <TextInput 
-                                v-model="form.waitingTime" 
-                                label="وقت الانتظار (ساعة)"
-                                placeholder="أدخل وقت الانتظار بالساعات"
-                                type="number"
-                                :rules="[required()]"
-                                :hide-details="false"
-                                :error-messages="formErrors['waitingTime']"
-                                @input="delete formErrors['waitingTime']"
-                            />
+                            <TextInput v-model="form.waitingTime" label="وقت الانتظار" placeholder="2" type="number"
+                                :rules="[required()]" :error-messages="formErrors['waitingTime']"
+                                @input="delete formErrors['waitingTime']" density="comfortable">
+                                <template #append-inner>
+                                    <span class="text-gray-500 text-sm">ساعة</span>
+                                </template>
+                            </TextInput>
                         </div>
 
-                        <div class="flex gap-3 justify-end pt-4">
-                            <ButtonWithIcon 
-                                variant="flat" 
-                                color="primary" 
-                                height="44" 
-                                rounded="4"
-                                custom-class="font-semibold text-base px-8" 
-                                label="حفظ" 
-                                prepend-icon="mdi-content-save" 
-                                @click="handleSave"
-                                :loading="saving" 
-                                :disabled="saving" 
-                            />
+                        <div class="flex gap-3 justify-center pt-4 sm:w-[75%] mx-auto mt-12">
+                            <ButtonWithIcon variant="flat" color="primary" height="44" rounded="4"
+                                custom-class="font-semibold text-base px-12 flex-1"
+                                label="حفظ والعودة إلى قائمة المسارات" @click="handleSave" :loading="saving"
+                                :disabled="saving" />
 
-                            <ButtonWithIcon 
-                                variant="flat" 
-                                color="primary-50" 
-                                height="44" 
-                                rounded="4"
-                                custom-class="font-semibold text-base text-primary-700 px-8" 
-                                label="إلغاء" 
-                                prepend-icon="mdi-close"
-                                @click="handleCancel" 
-                            />
+                            <ButtonWithIcon variant="flat" color="primary" height="44" rounded="4"
+                                custom-class="font-semibold text-base px-12 flex-1"
+                                label="حفظ والعودة إلى قائمة التسعيرة بالطن" @click="handleSave" :loading="saving"
+                                :disabled="saving" />
+
+                            <ButtonWithIcon variant="outlined" color="primary" height="44" rounded="4"
+                                custom-class="font-semibold text-base px-12 flex-1" label="إلغاء"
+                                @click="handleCancel" />
                         </div>
                     </div>
                 </v-form>
