@@ -116,7 +116,9 @@
         "factories": "Factories",
         "brands": "Brands",
         "geoRegions": "Geographical Regions",
-        "geoZones": "Geographical Zones"
+        "geoZones": "Geographical Zones",
+        "pricingPerTon": "Pricing Per Ton",
+        "customPricing": "Custom Pricing"
       },
       "taxes": {
         "title": "Tax Management",

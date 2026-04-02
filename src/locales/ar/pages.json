@@ -2130,6 +2130,45 @@
       "receiptVoucherTitle": "سندات القبض",
       "paymentVoucherTitle": "سندات الصرف",
       "description": "تمكنك من ادارة  السندات المالية "
+    },
+    "pricingPerTon": {
+      "title": "تسعير بالطن",
+      "description": "تمكنك من إدارة أسعار التوصيل بالطن",
+      "list": {
+        "filters": {
+          "centralLocation": "الموقع المركزي",
+          "city": "المدينة",
+          "materialType": "نوع المادة"
+        }
+      },
+      "deleteDialog": {
+        "title": "حذف التسعير",
+        "message": "هل أنت متأكد من حذف {count} تسعير؟"
+      },
+      "messages": {
+        "deleteSuccess": "تم حذف التسعير بنجاح",
+        "bulkDeleteSuccess": "تم حذف {count} تسعير بنجاح"
+      }
+    },
+    "customPricing": {
+      "title": "تسعير مخصص",
+      "description": "تمكنك من إدارة التسعير المخصص للشاحنات والمواد",
+      "list": {
+        "filters": {
+          "centralLocation": "الموقع المركزي",
+          "city": "المدينة",
+          "materialType": "نوع المواد",
+          "truckType": "نوع الشاحنات"
+        }
+      },
+      "deleteDialog": {
+        "title": "حذف التسعير المخصص",
+        "message": "هل أنت متأكد من حذف {count} تسعير مخصص؟"
+      },
+      "messages": {
+        "deleteSuccess": "تم حذف التسعير المخصص بنجاح",
+        "bulkDeleteSuccess": "تم حذف {count} تسعير مخصص بنجاح"
+      }
     }
   }
 }
