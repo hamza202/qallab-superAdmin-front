@@ -1121,6 +1121,15 @@
                     المسارات المركزية
                   </router-link>
                 </li>
+                <li class="relative">
+                  <router-link to="/settings/pricing-by-truck" :class="[
+                    isMenuItemActive('/settings/pricing-by-truck')
+                      ? 'font-bold text-qallab-yellow'
+                      : 'text-white hover:text-qallab-yellow',
+                  ]">
+                    تسعير بالشاحنة
+                  </router-link>
+                </li>
                 <li v-if="canViewSystemStatuses" class="relative">
                   <router-link to="/settings/system-statuses/list" :class="[
                     isMenuItemActive('/settings/system-statuses/list')

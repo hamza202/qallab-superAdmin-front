@@ -450,6 +450,45 @@ export const settingsRoutes: RouteRecordRaw[] = [
     ],
   },
   {
+    path: "/settings/pricing-by-truck",
+    name: "PricingByTruck",
+    redirect: "/settings/pricing-by-truck/list",
+    children: [
+      {
+        path: "list",
+        name: "PricingByTruckList",
+        component: () => import("@/views/settings/pricing-by-truck/List.vue"),
+        meta: {
+          title: "التسعير بالشاحنة",
+        },
+      },
+      {
+        path: "create",
+        name: "PricingByTruckCreate",
+        component: () => import("@/views/settings/pricing-by-truck/Form.vue"),
+        meta: {
+          title: "التسعير بالشاحنة",
+        },
+      },
+      {
+        path: "edit/:id",
+        name: "PricingByTruckEdit",
+        component: () => import("@/views/settings/pricing-by-truck/Form.vue"),
+        meta: {
+          title: "التسعير بالشاحنة",
+        },
+      },
+      {
+        path: "view/:id",
+        name: "PricingByTruckView",
+        component: () => import("@/views/settings/pricing-by-truck/Form.vue"),
+        meta: {
+          title: "التسعير بالشاحنة",
+        },
+      },
+    ],
+  },
+  {
     path: "/settings/doc-status-transitions",
     name: "DocStatusTransitions",
     redirect: "/settings/doc-status-transitions/list",
