@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch, onMounted, reactive } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useApi } from '@/composables/useApi';
 import CategoryTreeItem from './components/CategoryTreeItem.vue';
 
@@ -52,6 +53,7 @@ const availableLanguages = ref([
   { code: "ar", name: "AR", flag: "/img/sa.svg", dir: "rtl" as const },
 ]);
 
+const { t } = useI18n();
 const api = useApi();
 
 const formErrors = reactive<Record<string, string>>({});
@@ -440,7 +442,7 @@ const fetchConstants = async () => {
     ];
   } catch (error) {
     console.error('Failed to fetch constants:', error);
-    toast.error('حدث خطأ أثناء تحميل البيانات');
+    toast.error(t('pages.ServicesCategories.tree.messages.loadDataFailed'));
   }
 };
 
@@ -461,7 +463,7 @@ const fetchTaxes = async () => {
     ];
   } catch (error) {
     console.error('Failed to fetch constants:', error);
-    toast.error('حدث خطأ أثناء تحميل البيانات');
+    toast.error(t('pages.ServicesCategories.tree.messages.loadDataFailed'));
   }
 };
 
@@ -479,7 +481,7 @@ const fetchCategoriesList = async () => {
     ];
   } catch (error) {
     console.error('Failed to fetch categories:', error);
-    toast.error('حدث خطأ أثناء تحميل البيانات');
+    toast.error(t('pages.ServicesCategories.tree.messages.loadDataFailed'));
   }
 };
 
@@ -497,7 +499,7 @@ const fetchUnits = async () => {
     ];
   } catch (error) {
     console.error('Failed to fetch categories:', error);
-    toast.error('حدث خطأ أثناء تحميل البيانات');
+    toast.error(t('pages.ServicesCategories.tree.messages.loadDataFailed'));
   }
 };
 
@@ -523,7 +525,7 @@ const fetchCategoriesTree = async () => {
 
   } catch (error) {
     console.error('Failed to fetch categories:', error);
-    toast.error('حدث خطأ أثناء تحميل التصنيفات');
+    toast.error(t('pages.ServicesCategories.tree.messages.loadCategoriesFailed'));
   } finally {
     isLoading.value = false;
   }
@@ -562,7 +564,7 @@ const fetchCategoryDetails = async (id: number) => {
     }
   } catch (error) {
     console.error('Failed to fetch category details:', error);
-    toast.error('حدث خطأ أثناء تحميل بيانات التصنيف');
+    toast.error(t('pages.ServicesCategories.tree.messages.loadCategoryFailed'));
   } finally {
     isLoading.value = false;
   }
@@ -675,7 +677,7 @@ const handleSave = async () => {
       };
 
       await api.post('/service-categories/tree/tax-bulk', payload);
-      toast.success(`تم تطبيق الضرائب على ${selectedCategoryIds.value.length} تصنيف بنجاح`);
+      toast.success(t('pages.ServicesCategories.tree.messages.bulkTaxApplied', { count: selectedCategoryIds.value.length }));
 
       selectedCategoryIds.value = [];
       taxRules.value = [];
@@ -737,7 +739,7 @@ const handleSave = async () => {
         } else {
           await api.put(`/service-categories/${selectedCategory.value.id}`, payload);
         }
-        toast.success('تم تحديث التصنيف بنجاح');
+        toast.success(t('pages.ServicesCategories.tree.messages.updated'));
       } else {
         // Create new category
         if (payload.image) {
@@ -763,7 +765,7 @@ const handleSave = async () => {
           await api.post('/service-categories', payload);
         }
 
-        toast.success(isSubcategoryMode.value ? 'تم إضافة التصنيف الفرعي بنجاح' : 'تم إضافة التصنيف بنجاح');
+        toast.success(isSubcategoryMode.value ? t('pages.ServicesCategories.tree.messages.createdSub') : t('pages.ServicesCategories.tree.messages.created'));
       }
     }
 
@@ -786,9 +788,9 @@ const handleSave = async () => {
       Object.keys(apiErrors).forEach(key => {
         formErrors[key] = apiErrors[key][0];
       });
-      toast.error(err?.response?.data?.message || 'يرجى تصحيح الأخطاء في النموذج');
+      toast.error(err?.response?.data?.message || t('pages.ServicesCategories.tree.messages.validationFailed'));
     } else {
-      toast.error('حدث خطأ أثناء حفظ التصنيف');
+      toast.error(err?.response?.data?.message || t('pages.ServicesCategories.tree.messages.saveFailed'));
     }
   } finally {
     isSaving.value = false;
@@ -831,7 +833,7 @@ const confirmBulkDelete = async () => {
 
   try {
     await api.post('/service-categories/bulk-delete', { ids: selectedCategoryIds.value });
-    toast.success(`تم حذف ${selectedCategoryIds.value.length} تصنيف بنجاح`);
+    toast.success(t('pages.ServicesCategories.tree.messages.bulkDeleted', { count: selectedCategoryIds.value.length }));
 
     // Refresh categories list
     await fetchCategoriesTree();
@@ -846,7 +848,7 @@ const confirmBulkDelete = async () => {
 
   } catch (err) {
     console.error('Failed to bulk delete categories:', err);
-    toast.error('حدث خطأ أثناء حذف التصنيفات');
+    toast.error(t('pages.ServicesCategories.tree.messages.bulkDeleteFailed'));
   } finally {
     isDeleting.value = false;
   }
@@ -860,7 +862,7 @@ const confirmDelete = async () => {
 
   try {
     await api.delete(`/service-categories/${selectedCategory.value.id}`);
-    toast.success('تم حذف التصنيف بنجاح');
+    toast.success(t('pages.ServicesCategories.tree.messages.deleted'));
 
     // Refresh categories list
     await fetchCategoriesTree();
@@ -876,7 +878,7 @@ const confirmDelete = async () => {
 
   } catch (err) {
     console.error('Failed to delete category:', err);
-    toast.error('حدث خطأ أثناء حذف التصنيف');
+    toast.error(t('pages.ServicesCategories.tree.messages.deleteFailed'));
   } finally {
     isDeleting.value = false;
   }
@@ -942,12 +944,12 @@ const editIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xm
         <div class="flex flex-wrap gap-3 mb-6">
           <!-- Add New Category Button - visible when not editing -->
           <ButtonWithIcon v-if="showAddCategoryButton" variant="flat" color="primary" height="44" rounded="4"
-            custom-class="font-semibold text-base px-8" label="إضافة تصنيف جديد" prepend-icon="mdi-plus-circle-outline"
+            custom-class="font-semibold text-base px-8" :label="t('pages.ServicesCategories.tree.buttons.addCategory')" prepend-icon="mdi-plus-circle-outline"
             @click="handleAddNewCategory" />
 
           <!-- Add Subcategory Button - visible only when a main category is selected -->
           <ButtonWithIcon v-if="showAddSubcategoryButton" variant="flat" rounded="4" color="primary-50" height="44"
-            custom-class="font-semibold text-base text-primary-700 px-8" label="إضافة تصنيف فرعي جديد"
+            custom-class="font-semibold text-base text-primary-700 px-8" :label="t('pages.ServicesCategories.tree.buttons.addSubcategory')"
             prepend-icon="mdi-plus-circle-outline" @click="handleAddSubcategory" />
         </div>
       </div>
@@ -958,8 +960,8 @@ const editIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xm
           <div class="bg-white rounded-lg shadow-sm">
             <!-- Header -->
             <div class="px-6">
-              <h2 class="text-base font-bold text-gray-900 mb-1">شجرة التصنيفات</h2>
-              <p class="text-xs text-gray-600">اختر تصنيف لعرض التفاصيل</p>
+              <h2 class="text-base font-bold text-gray-900 mb-1">{{ t('pages.ServicesCategories.tree.sidebar.title') }}</h2>
+              <p class="text-xs text-gray-600">{{ t('pages.ServicesCategories.tree.sidebar.subtitle') }}</p>
             </div>
 
             <!-- Loading indicator -->
@@ -971,7 +973,7 @@ const editIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xm
               <!-- Search Box -->
               <div class="px-6 pt-4">
                 <TextInput v-model="categoriesSearch" density="comfortable" variant="outlined" hide-details
-                  placeholder="بحث" class="mb-4 !text-gray-500" bg-color="gray-50" rounded="lg">
+                  :placeholder="t('pages.ServicesCategories.tree.sidebar.searchPlaceholder')" class="mb-4 !text-gray-500" bg-color="gray-50" rounded="lg">
                   <template #prepend-inner>
                     <span class="text-gray-500" v-html="searchIcon"></span>
                   </template>
@@ -995,7 +997,7 @@ const editIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xm
                 />
                 <!-- Empty state -->
                 <div v-if="!filteredCategories.length" class="text-center text-gray-500 py-8">
-                  لا توجد تصنيفات
+                  {{ t('pages.ServicesCategories.tree.sidebar.emptyCategories') }}
                 </div>
               </div>
             </template>
@@ -1008,10 +1010,10 @@ const editIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xm
                 <v-icon color="primary" size="24">mdi-checkbox-multiple-marked</v-icon>
                 <div>
                   <h3 class="text-base font-bold text-primary-800">
-                    تم تحديد {{ selectedCategoryIds.length }} تصنيف
+                    {{ t('pages.ServicesCategories.tree.bulkBanner.title', { count: selectedCategoryIds.length }) }}
                   </h3>
                   <p class="text-sm text-primary-600">
-                    سيتم تطبيق الضرائب على جميع التصنيفات المحددة
+                    {{ t('pages.ServicesCategories.tree.bulkBanner.subtitle') }}
                   </p>
                 </div>
               </div>
@@ -1020,45 +1022,45 @@ const editIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xm
             <!-- Single Category Form - hidden in bulk mode -->
             <div v-if="!isBulkMode" class="bg-gray-50 rounded-md p-4 sm:p-6">
               <div class="mb-4">
-                <h2 class="text-lg font-bold text-primary-900">التصنيفات</h2>
+                <h2 class="text-lg font-bold text-primary-900">{{ t('pages.ServicesCategories.tree.formPanel.title') }}</h2>
               </div>
 
               <div class="grid gap-6 mb-4 grid-cols-1 md:grid-cols-2">
-                <LanguageTabs :languages="availableLanguages" label="الإسم">
+                <LanguageTabs :languages="availableLanguages" :label="t('pages.ServicesCategories.tree.labels.name')">
                   <template #en>
-                    <TextInput v-model="categoryNameEn" placeholder="Enter name in English"
+                    <TextInput v-model="categoryNameEn" :placeholder="t('pages.ServicesCategories.tree.placeholders.nameEn')"
                       :rules="[required(), minLength(2), maxLength(100)]" :hide-details="false"
                       :error-messages="formErrors['name.en']" @input="delete formErrors['name.en']" />
                   </template>
                   <template #ar>
-                    <TextInput v-model="categoryNameAr" placeholder="ادخل الاسم بالعربية"
+                    <TextInput v-model="categoryNameAr" :placeholder="t('pages.ServicesCategories.tree.placeholders.nameAr')"
                       :rules="[required(), minLength(2), maxLength(100)]" :hide-details="false"
                       :error-messages="formErrors['name.ar']" @input="delete formErrors['name.ar']" />
                   </template>
                 </LanguageTabs>
 
-                <SelectWithIconInput show-add-button clearable v-model="parentCategory" label="التصنيف الرئيسي"
-                  placeholder="اختر التصنيف الرئيسي" :items="CategoryDropdownItems" :hide-details="false"
+                <SelectWithIconInput show-add-button clearable v-model="parentCategory" :label="t('pages.ServicesCategories.tree.labels.parentCategory')"
+                  :placeholder="t('pages.ServicesCategories.tree.placeholders.parentCategory')" :items="CategoryDropdownItems" :hide-details="false"
                   :disabled="isSubcategoryMode" v-if="isSubcategoryMode" />
 
-                <SelectWithIconInput show-add-button clearable v-model="unit" label="الوحدة" placeholder="اختر الوحدة"
+                <SelectWithIconInput show-add-button clearable v-model="unit" :label="t('pages.ServicesCategories.tree.labels.unit')" :placeholder="t('pages.ServicesCategories.tree.placeholders.unit')"
                   :items="unitItems" :hide-details="false" />
 
                 <div>
-                  <span class="text-sm font-semibold text-gray-700 mb-2 block">الحالة </span>
+                  <span class="text-sm font-semibold text-gray-700 mb-2 block">{{ t('pages.ServicesCategories.tree.labels.status') }}</span>
                   <div class="flex items-center gap-3 mt-1">
                     <v-radio-group v-model="isActive" inline hide-details>
                       <v-radio :value="true" color="primary">
                         <template #label>
                           <span :class="isActive ? 'text-primary font-semibold' : 'text-gray-600'">
-                            فعال
+                            {{ t('pages.ServicesCategories.tree.labels.active') }}
                           </span>
                         </template>
                       </v-radio>
                       <v-radio :value="false" color="primary">
                         <template #label>
                           <span :class="!isActive ? 'text-primary font-semibold' : 'text-gray-600'">
-                            غير فعال
+                            {{ t('pages.ServicesCategories.tree.labels.inactive') }}
                           </span>
                         </template>
                       </v-radio>
@@ -1069,14 +1071,14 @@ const editIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xm
 
               <div>
                 <!-- Description with Language Tabs -->
-                <LanguageTabs :languages="availableLanguages" label="تفاصيل التصنيف" class="mb-[20px]">
+                <LanguageTabs :languages="availableLanguages" :label="t('pages.ServicesCategories.tree.labels.categoryDetails')" class="mb-[20px]">
                   <template #en>
-                    <TextareaInput v-model="categoryDescriptionEn" placeholder="Enter Category Description in English"
+                    <TextareaInput v-model="categoryDescriptionEn" :placeholder="t('pages.ServicesCategories.tree.placeholders.descriptionEn')"
                       min-height="120px" :hide-details="false" :rules="[required()]"
                       :error-messages="formErrors['description.en']" @input="delete formErrors['description.en']" />
                   </template>
                   <template #ar>
-                    <TextareaInput v-model="categoryDescriptionAr" placeholder="ادخل تفاصيل التصنيف بالعربية"
+                    <TextareaInput v-model="categoryDescriptionAr" :placeholder="t('pages.ServicesCategories.tree.placeholders.descriptionAr')"
                       min-height="120px" :hide-details="false" :rules="[required()]"
                       :error-messages="formErrors['description.ar']" @input="delete formErrors['description.ar']" />
                   </template>
@@ -1084,7 +1086,7 @@ const editIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xm
               </div>
 
               <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <FileUploadInput v-model="categoryImage" label="أرفق صورة" hint="PNG, JPG or GIF (max. 400x400px)"
+                <FileUploadInput v-model="categoryImage" :label="t('pages.ServicesCategories.tree.labels.attachImage')" :hint="t('pages.ServicesCategories.tree.labels.imageHint')"
                   :max-files="1" />
               </div>
             </div>
@@ -1093,52 +1095,52 @@ const editIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xm
             <div class="bg-gray-50 rounded-md p-4 sm:p-6">
               <div class="flex items-center justify-between mb-4">
                 <h2 class="text-lg font-bold text-primary-900">
-                  {{ isBulkMode ? 'الضرائب للتصنيفات المحددة' : 'الضرائب' }}
+                  {{ isBulkMode ? t('pages.ServicesCategories.tree.labels.taxesBulkTitle') : t('pages.ServicesCategories.tree.labels.taxesTitle') }}
                 </h2>
                 <div class="w-auto flex justify-start lg:justify-end">
                   <ButtonWithIcon variant="flat" color="primary" height="40"
-                    custom-class="font-semibold text-sm px-4 w-full lg:w-auto" label="إضافة ضريبة"
+                    custom-class="font-semibold text-sm px-4 w-full lg:w-auto" :label="t('pages.ServicesCategories.tree.buttons.addTax')"
                     :disabled="!isNewTaxValid" @click="addTaxRule" append-icon="mdi-plus" />
                 </div>
               </div>
 
               <div class="grid grid-cols-1 xl:grid-cols-2 gap-4 mb-6">
                 <div class="w-full lg:w-auto lg:flex-1 min-w-[250px]">
-                  <SelectWithIconInput v-model="newTaxRule.tax_id" label="الضريبة" placeholder="اختر الضريبة"
+                  <SelectWithIconInput v-model="newTaxRule.tax_id" :label="t('pages.ServicesCategories.tree.labels.tax')" :placeholder="t('pages.ServicesCategories.tree.placeholders.selectTax')"
                     :items="taxNameItems" show-add-button :hide-details="false" clearable
                     :error-messages="formErrors['taxes']" @update:model-value="delete formErrors['taxes']" />
                 </div>
 
                 <div class="w-full sm:flex-1 lg:w-auto min-w-[100px]">
-                  <TextInput v-model="newTaxRule.percentage" label="النسبة" placeholder="قم باختيار الضريبة"
+                  <TextInput v-model="newTaxRule.percentage" :label="t('pages.ServicesCategories.tree.labels.percentage')" :placeholder="t('pages.ServicesCategories.tree.placeholders.taxDerived')"
                     :hide-details="false" readonly disabled />
                 </div>
 
                 <div class="w-full sm:flex-1 lg:w-auto min-w-[140px]">
-                  <TextInput v-model="newTaxRule.minValue" label="أقل قيمة" placeholder="قم باختيار الضريبة"
+                  <TextInput v-model="newTaxRule.minValue" :label="t('pages.ServicesCategories.tree.labels.minValue')" :placeholder="t('pages.ServicesCategories.tree.placeholders.taxDerived')"
                     :hide-details="false" readonly disabled />
                 </div>
 
                 <div class="w-full sm:flex-1 lg:w-auto min-w-[140px]">
-                  <SelectWithIconInput v-model="newTaxRule.priority" label="الأولوية" placeholder="اختر الأولوية"
+                  <SelectWithIconInput v-model="newTaxRule.priority" :label="t('pages.ServicesCategories.tree.labels.priority')" :placeholder="t('pages.ServicesCategories.tree.placeholders.selectPriority')"
                     :items="priorityItems" :hide-details="false" />
                 </div>
               </div>
-              <p v-if="formErrors['taxes'] && newTaxRule.tax_id" class="text-xs text-error-500"> يجب إدخال قيم الضريبة المدخلة على الجدول أدناه </p>
+              <p v-if="formErrors['taxes'] && newTaxRule.tax_id" class="text-xs text-error-500">{{ t('pages.ServicesCategories.tree.taxError') }}</p>
               <div
                 class="mt-4 bg-white !rounded-xl shadow-[0px_1px_2px_0px_rgba(16,24,40,0.06)] shadow-[0px_1px_3px_0px_rgba(16,24,40,0.10)] outline outline-1 outline-offset-[-1px] outline-slate-200 overflow-hidden">
                 <h3 class="text-base sm:text-lg font-bold text-gray-900 px-6 py-5">
-                  الضرائب المطبقة على التصنيف
+                  {{ t('pages.ServicesCategories.tree.labels.appliedTaxesTitle') }}
                 </h3>
 
                 <v-table class="rounded-none overflow-hidden border border-gray-200">
                   <thead>
                     <tr class="bg-gray-50 text-gray-600">
-                      <th class="!font-bold">الضريبة</th>
-                      <th class="!font-bold">النسبة</th>
-                      <th class="!font-bold">أقل قيمة</th>
-                      <th class="!font-bold">الأولوية</th>
-                      <th class="text-center w-[120px] !font-bold">إجراءات</th>
+                      <th class="!font-bold">{{ t('pages.ServicesCategories.tree.labels.tax') }}</th>
+                      <th class="!font-bold">{{ t('pages.ServicesCategories.tree.labels.percentage') }}</th>
+                      <th class="!font-bold">{{ t('pages.ServicesCategories.tree.labels.minValue') }}</th>
+                      <th class="!font-bold">{{ t('pages.ServicesCategories.tree.labels.priority') }}</th>
+                      <th class="text-center w-[120px] !font-bold">{{ t('pages.ServicesCategories.tree.labels.actions') }}</th>
                     </tr>
                   </thead>
                   <tbody class="bg-white">
@@ -1168,7 +1170,7 @@ const editIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xm
 
                     <tr v-if="!taxRules.length">
                       <td colspan="5" class="text-center text-gray-500 py-4">
-                        لا توجد ضرائب مضافة بعد
+                        {{ t('pages.ServicesCategories.tree.taxTable.empty') }}
                       </td>
                     </tr>
                   </tbody>
@@ -1180,25 +1182,25 @@ const editIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xm
               <!-- Save/Apply Button -->
               <ButtonWithIcon variant="flat" color="primary" height="48" rounded="4"
                 custom-class="sm:flex-1 font-semibold text-base" :prepend-icon="saveIcon"
-                :label="isBulkMode ? 'تطبيق على المحدد' : (isEditing ? 'تحديث' : 'حفظ')" @click="handleSave"
+                :label="isBulkMode ? t('pages.ServicesCategories.tree.buttons.applyToSelected') : (isEditing ? t('pages.ServicesCategories.tree.buttons.update') : t('pages.ServicesCategories.tree.buttons.save'))" @click="handleSave"
                 :loading="isSaving" :disabled="isSaving || isDeleting || (isBulkMode && !taxRules.length)" />
 
               <!-- Close/Cancel Button -->
               <ButtonWithIcon variant="flat" color="primary-50" height="48" rounded="4"
                 custom-class="sm:flex-1 font-semibold text-base text-primary-700"
-                :label="isBulkMode ? 'إلغاء التحديد' : 'إغلاق'" prepend-icon="mdi-close"
+                :label="isBulkMode ? t('pages.ServicesCategories.tree.buttons.clearSelection') : t('pages.ServicesCategories.tree.buttons.close')" prepend-icon="mdi-close"
                 :disabled="isSaving || isDeleting" @click="handleClose" />
 
               <!-- Bulk Delete Button - visible when multiple categories selected -->
               <ButtonWithIcon v-if="isBulkMode" variant="flat" color="error-50" height="48" rounded="4"
                 custom-class="sm:flex-1 font-semibold text-base text-error-700" :prepend-icon="deleteIcon"
-                label="حذف المحدد" @click="openBulkDeleteDialog" :loading="isDeleting"
+                :label="t('pages.ServicesCategories.tree.buttons.bulkDelete')" @click="openBulkDeleteDialog" :loading="isDeleting"
                 :disabled="isSaving || isDeleting" />
 
               <!-- Delete Button - only visible when editing single category -->
               <ButtonWithIcon v-if="isEditing && selectedCategory && !isBulkMode" variant="flat" color="error-50"
                 height="48" rounded="4" custom-class="sm:flex-1 font-semibold text-base text-error-700"
-                :prepend-icon="deleteIcon" label="حذف" @click="openDeleteDialog" :loading="isDeleting"
+                :prepend-icon="deleteIcon" :label="t('pages.ServicesCategories.tree.buttons.delete')" @click="openDeleteDialog" :loading="isDeleting"
                 :disabled="isSaving || isDeleting" />
             </div>
           </div>
@@ -1208,12 +1210,12 @@ const editIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xm
     <!-- Delete Confirmation Dialog -->
     <DeleteConfirmDialog v-model="showDeleteDialog" :loading="isDeleting" :persistent="true" @confirm="confirmDelete">
       <p class="text-gray-700 text-center">
-        هل أنت متأكد من حذف التصنيف
-        <strong class="text-primary-700">{{ selectedCategory?.name }}</strong>؟
+        {{ t('pages.ServicesCategories.tree.deleteDialog.intro') }}
+        <strong class="text-primary-700">{{ selectedCategory?.name }}</strong>{{ t('pages.ServicesCategories.tree.deleteDialog.outro') }}
       </p>
       <p v-if="selectedCategory?.children?.length" class="text-error-600 text-sm mt-2 text-center">
         <v-icon size="16" class="me-1">mdi-information-outline</v-icon>
-        سيتم حذف جميع التصنيفات الفرعية المرتبطة بهذا التصنيف.
+        {{ t('pages.ServicesCategories.tree.deleteDialog.childrenWarning') }}
       </p>
     </DeleteConfirmDialog>
 
@@ -1221,13 +1223,13 @@ const editIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xm
     <DeleteConfirmDialog v-model="showBulkDeleteDialog" :loading="isDeleting" :persistent="true"
       @confirm="confirmBulkDelete">
       <p class="text-gray-700 text-center">
-        هل أنت متأكد من حذف
+        {{ t('pages.ServicesCategories.tree.bulkDeleteDialog.intro') }}
         <strong class="text-error-700">{{ selectedCategoryIds.length }}</strong>
-        تصنيف؟
+        {{ t('pages.ServicesCategories.tree.bulkDeleteDialog.outro') }}
       </p>
       <p class="text-error-600 text-sm mt-2 text-center">
         <v-icon size="16" class="me-1">mdi-alert-circle-outline</v-icon>
-        سيتم حذف جميع التصنيفات المحددة وجميع التصنيفات الفرعية المرتبطة بها.
+        {{ t('pages.ServicesCategories.tree.bulkDeleteDialog.warning') }}
       </p>
     </DeleteConfirmDialog>
 

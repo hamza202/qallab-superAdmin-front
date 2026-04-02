@@ -988,6 +988,100 @@
           "message": "هل أنت متأكد من حذف {count} تصنيف؟"
         }
       },
+      "form": {
+        "labels": {
+          "materialType": "نوع المواد"
+        },
+        "placeholders": {
+          "selectMaterialType": "اختر نوع المواد"
+        }
+      },
+      "tree": {
+        "buttons": {
+          "addCategory": "إضافة تصنيف جديد",
+          "addSubcategory": "إضافة تصنيف فرعي جديد",
+          "addTax": "إضافة ضريبة",
+          "save": "حفظ",
+          "update": "تحديث",
+          "applyToSelected": "تطبيق على المحدد",
+          "close": "إغلاق",
+          "clearSelection": "إلغاء التحديد",
+          "bulkDelete": "حذف المحدد",
+          "delete": "حذف"
+        },
+        "sidebar": {
+          "title": "شجرة التصنيفات",
+          "subtitle": "اختر تصنيف لعرض التفاصيل",
+          "searchPlaceholder": "بحث",
+          "emptyCategories": "لا توجد تصنيفات"
+        },
+        "bulkBanner": {
+          "title": "تم تحديد {count} تصنيف",
+          "subtitle": "سيتم تطبيق الضرائب على جميع التصنيفات المحددة"
+        },
+        "formPanel": {
+          "title": "التصنيفات"
+        },
+        "labels": {
+          "name": "الإسم",
+          "parentCategory": "التصنيف الرئيسي",
+          "unit": "الوحدة",
+          "status": "الحالة",
+          "active": "فعال",
+          "inactive": "غير فعال",
+          "categoryDetails": "تفاصيل التصنيف",
+          "attachImage": "أرفق صورة",
+          "imageHint": "PNG, JPG or GIF (max. 400x400px)",
+          "taxesTitle": "الضرائب",
+          "taxesBulkTitle": "الضرائب للتصنيفات المحددة",
+          "tax": "الضريبة",
+          "percentage": "النسبة",
+          "minValue": "أقل قيمة",
+          "priority": "الأولوية",
+          "actions": "إجراءات",
+          "appliedTaxesTitle": "الضرائب المطبقة على التصنيف"
+        },
+        "placeholders": {
+          "nameEn": "Enter name in English",
+          "nameAr": "ادخل الاسم بالعربية",
+          "parentCategory": "اختر التصنيف الرئيسي",
+          "unit": "اختر الوحدة",
+          "descriptionEn": "Enter Category Description in English",
+          "descriptionAr": "ادخل تفاصيل التصنيف بالعربية",
+          "selectTax": "اختر الضريبة",
+          "taxDerived": "قم باختيار الضريبة",
+          "selectPriority": "اختر الأولوية"
+        },
+        "taxTable": {
+          "empty": "لا توجد ضرائب مضافة بعد"
+        },
+        "taxError": "يجب إدخال قيم الضريبة المدخلة على الجدول أدناه",
+        "messages": {
+          "loadDataFailed": "حدث خطأ أثناء تحميل البيانات",
+          "loadCategoriesFailed": "حدث خطأ أثناء تحميل التصنيفات",
+          "loadCategoryFailed": "حدث خطأ أثناء تحميل بيانات التصنيف",
+          "updated": "تم تحديث التصنيف بنجاح",
+          "created": "تم إضافة التصنيف بنجاح",
+          "createdSub": "تم إضافة التصنيف الفرعي بنجاح",
+          "validationFailed": "يرجى تصحيح الأخطاء في النموذج",
+          "saveFailed": "حدث خطأ أثناء حفظ التصنيف",
+          "bulkDeleteFailed": "حدث خطأ أثناء حذف التصنيفات",
+          "deleted": "تم حذف التصنيف بنجاح",
+          "deleteFailed": "حدث خطأ أثناء حذف التصنيف",
+          "bulkDeleted": "تم حذف {count} تصنيف بنجاح",
+          "bulkTaxApplied": "تم تطبيق الضرائب على {count} تصنيف بنجاح"
+        },
+        "deleteDialog": {
+          "intro": "هل أنت متأكد من حذف التصنيف",
+          "outro": "؟",
+          "childrenWarning": "سيتم حذف جميع التصنيفات الفرعية المرتبطة بهذا التصنيف."
+        },
+        "bulkDeleteDialog": {
+          "intro": "هل أنت متأكد من حذف",
+          "outro": "تصنيف؟",
+          "warning": "سيتم حذف جميع التصنيفات المحددة وجميع التصنيفات الفرعية المرتبطة بها."
+        }
+      },
       "view": {
         "generalInfo": "المعلومات العامة للتصنيف",
         "addedTaxes": "الضرائب المضافة",
@@ -1549,6 +1643,92 @@
         "deleteDialog": {
           "title": "حذف تصنيفات الخدمات",
           "message": "هل أنت متأكد من حذف {count} التصنيف"
+        }
+      },
+      "tree": {
+        "buttons": {
+          "addCategory": "إضافة تصنيف جديد",
+          "addSubcategory": "إضافة تصنيف فرعي جديد",
+          "addTax": "إضافة ضريبة",
+          "save": "حفظ",
+          "update": "تحديث",
+          "applyToSelected": "تطبيق على المحدد",
+          "close": "إغلاق",
+          "clearSelection": "إلغاء التحديد",
+          "bulkDelete": "حذف المحدد",
+          "delete": "حذف"
+        },
+        "sidebar": {
+          "title": "شجرة التصنيفات",
+          "subtitle": "اختر تصنيف لعرض التفاصيل",
+          "searchPlaceholder": "بحث",
+          "emptyCategories": "لا توجد تصنيفات"
+        },
+        "bulkBanner": {
+          "title": "تم تحديد {count} تصنيف",
+          "subtitle": "سيتم تطبيق الضرائب على جميع التصنيفات المحددة"
+        },
+        "formPanel": {
+          "title": "التصنيفات"
+        },
+        "labels": {
+          "name": "الإسم",
+          "parentCategory": "التصنيف الرئيسي",
+          "unit": "الوحدة",
+          "status": "الحالة",
+          "active": "فعال",
+          "inactive": "غير فعال",
+          "categoryDetails": "تفاصيل التصنيف",
+          "attachImage": "أرفق صورة",
+          "imageHint": "PNG, JPG or GIF (max. 400x400px)",
+          "taxesTitle": "الضرائب",
+          "taxesBulkTitle": "الضرائب للتصنيفات المحددة",
+          "tax": "الضريبة",
+          "percentage": "النسبة",
+          "minValue": "أقل قيمة",
+          "priority": "الأولوية",
+          "actions": "إجراءات",
+          "appliedTaxesTitle": "الضرائب المطبقة على التصنيف"
+        },
+        "placeholders": {
+          "nameEn": "Enter name in English",
+          "nameAr": "ادخل الاسم بالعربية",
+          "parentCategory": "اختر التصنيف الرئيسي",
+          "unit": "اختر الوحدة",
+          "descriptionEn": "Enter Category Description in English",
+          "descriptionAr": "ادخل تفاصيل التصنيف بالعربية",
+          "selectTax": "اختر الضريبة",
+          "taxDerived": "قم باختيار الضريبة",
+          "selectPriority": "اختر الأولوية"
+        },
+        "taxTable": {
+          "empty": "لا توجد ضرائب مضافة بعد"
+        },
+        "taxError": "يجب إدخال قيم الضريبة المدخلة على الجدول أدناه",
+        "messages": {
+          "loadDataFailed": "حدث خطأ أثناء تحميل البيانات",
+          "loadCategoriesFailed": "حدث خطأ أثناء تحميل التصنيفات",
+          "loadCategoryFailed": "حدث خطأ أثناء تحميل بيانات التصنيف",
+          "updated": "تم تحديث التصنيف بنجاح",
+          "created": "تم إضافة التصنيف بنجاح",
+          "createdSub": "تم إضافة التصنيف الفرعي بنجاح",
+          "validationFailed": "يرجى تصحيح الأخطاء في النموذج",
+          "saveFailed": "حدث خطأ أثناء حفظ التصنيف",
+          "bulkDeleteFailed": "حدث خطأ أثناء حذف التصنيفات",
+          "deleted": "تم حذف التصنيف بنجاح",
+          "deleteFailed": "حدث خطأ أثناء حذف التصنيف",
+          "bulkDeleted": "تم حذف {count} تصنيف بنجاح",
+          "bulkTaxApplied": "تم تطبيق الضرائب على {count} تصنيف بنجاح"
+        },
+        "deleteDialog": {
+          "intro": "هل أنت متأكد من حذف التصنيف",
+          "outro": "؟",
+          "childrenWarning": "سيتم حذف جميع التصنيفات الفرعية المرتبطة بهذا التصنيف."
+        },
+        "bulkDeleteDialog": {
+          "intro": "هل أنت متأكد من حذف",
+          "outro": "تصنيف؟",
+          "warning": "سيتم حذف جميع التصنيفات المحددة وجميع التصنيفات الفرعية المرتبطة بها."
         }
       },
       "view": {

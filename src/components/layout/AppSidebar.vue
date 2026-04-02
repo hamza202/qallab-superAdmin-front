@@ -1128,6 +1128,15 @@
                     {{ t('navigation.sidebar.settings.advanced.sampleTypes') }}
                   </router-link>
                 </li>
+                <li class="relative">
+                  <router-link to="/settings/central-paths" :class="[
+                    isMenuItemActive('/settings/central-paths')
+                      ? 'font-bold text-qallab-yellow'
+                      : 'text-white hover:text-qallab-yellow',
+                  ]">
+                    المسارات المركزية
+                  </router-link>
+                </li>
                 <li v-if="canViewSystemStatuses" class="relative">
                   <router-link to="/settings/system-statuses/list" :class="[
                     isMenuItemActive('/settings/system-statuses/list')

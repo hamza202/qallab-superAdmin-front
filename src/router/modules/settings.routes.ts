@@ -435,6 +435,21 @@ export const settingsRoutes: RouteRecordRaw[] = [
     ],
   },
   {
+    path: "/settings/central-paths",
+    name: "CentralPaths",
+    redirect: "/settings/central-paths/list",
+    children: [
+      {
+        path: "list",
+        name: "CentralPathsList",
+        component: () => import("@/views/settings/central-paths/List.vue"),
+        meta: {
+          title: "المسارات المركزية",
+        },
+      },
+    ],
+  },
+  {
     path: "/settings/doc-status-transitions",
     name: "DocStatusTransitions",
     redirect: "/settings/doc-status-transitions/list",
