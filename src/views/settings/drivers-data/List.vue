@@ -1,9 +1,13 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
+import { useApi } from "@/composables/useApi";
 import { SettingsIcon, trash_1_icon, trash_2_icon, columnIcon, exportIcon, plusIcon, searchIcon } from "@/components/icons/globalIcons";
 
 const router = useRouter();
+const { t } = useI18n();
+const api = useApi();
 
 const icon = `<svg width="48" height="43" viewBox="0 0 48 43" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M38.8333 17.1667V8.93333C38.8333 6.50644 38.8333 5.29299 38.361 4.36604C37.9456 3.55067 37.2827 2.88776 36.4673 2.47231C35.5403 2 34.3269 2 31.9 2H15.4333C13.0064 2 11.793 2 10.866 2.47231C10.0507 2.88776 9.38776 3.55067 8.9723 4.36604C8.5 5.29299 8.5 6.50644 8.5 8.93333V17.1667M8.5 15H2V12.8333M38.8333 15H45.3333V12.8333M10.6667 24.75H10.6883M36.6667 24.75H36.6883M12.4 17.1667H34.9333C38.5737 17.1667 40.3938 17.1667 41.7843 17.8751C43.0073 18.4983 44.0017 19.4927 44.6249 20.7157C45.3333 22.1062 45.3333 23.9263 45.3333 27.5667V34.5C45.3333 36.5191 45.3333 37.5286 45.0035 38.325C44.5637 39.3867 43.7201 40.2303 42.6583 40.6701C41.862 41 40.8524 41 38.8333 41H37.5333C36.7282 41 36.3256 41 35.9888 40.9466C34.1346 40.653 32.6804 39.1988 32.3867 37.3446C32.3333 37.0077 32.3333 36.6051 32.3333 35.8C32.3333 35.5987 32.3333 35.4981 32.32 35.4139C32.2466 34.9503 31.883 34.5868 31.4195 34.5133C31.3353 34.5 31.2346 34.5 31.0333 34.5H16.3C16.0987 34.5 15.9981 34.5 15.9139 34.5133C15.4503 34.5868 15.0868 34.9503 15.0133 35.4139C15 35.4981 15 35.5987 15 35.8C15 36.6051 15 37.0077 14.9466 37.3446C14.653 39.1988 13.1987 40.653 11.3445 40.9466C11.0077 41 10.6051 41 9.8 41H8.5C6.48092 41 5.47138 41 4.67504 40.6701C3.61325 40.2303 2.76966 39.3867 2.32986 38.325C2 37.5286 2 36.5191 2 34.5V27.5667C2 23.9263 2 22.1062 2.70846 20.7157C3.33163 19.4927 4.32601 18.4983 5.54906 17.8751C6.93949 17.1667 8.75966 17.1667 12.4 17.1667ZM11.75 24.75C11.75 25.3483 11.265 25.8333 10.6667 25.8333C10.0684 25.8333 9.58333 25.3483 9.58333 24.75C9.58333 24.1517 10.0684 23.6667 10.6667 23.6667C11.265 23.6667 11.75 24.1517 11.75 24.75ZM37.75 24.75C37.75 25.3483 37.265 25.8333 36.6667 25.8333C36.0684 25.8333 35.5833 25.3483 35.5833 24.75C35.5833 24.1517 36.0684 23.6667 36.6667 23.6667C37.265 23.6667 37.75 24.1517 37.75 24.75Z" stroke="#1570EF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
@@ -12,14 +16,23 @@ const icon = `<svg width="48" height="43" viewBox="0 0 48 43" fill="none" xmlns=
 
 interface DriverData {
     id: number;
-    tripNumber: string;
-    driverName: string;
-    identityNumber: string;
-    tripType: string;
-    currentInspectionDate: string;
-    inspectionStatus: string;
-    inspectionRating: number;
+    license_number: string;
+    name: string;
+    national_id: string;
+    license_type: string[];
+    license_expires_at: string;
+    medical_exam_date: string;
+    rating: number;
     is_active: boolean;
+    logistics_company?: {
+        id: number;
+        full_name: string;
+    };
+    actions?: {
+        can_change_status?: boolean;
+        can_edit?: boolean;
+        can_delete?: boolean;
+    };
 }
 
 interface TableHeader {
@@ -28,79 +41,50 @@ interface TableHeader {
     sortable?: boolean;
 }
 
-// Demo data
-const demoDrivers: DriverData[] = [
-    {
-        id: 1,
-        tripNumber: "12345668",
-        driverName: "أحمد محمد",
-        identityNumber: "254879632",
-        tripType: "Forklift",
-        currentInspectionDate: "2024-03-15",
-        inspectionStatus: "نشط",
-        inspectionRating: 4.5,
-        is_active: true
-    },
-    {
-        id: 2,
-        tripNumber: "12345668",
-        driverName: "محمد محمود",
-        identityNumber: "5454842135",
-        tripType: "Forklift",
-        currentInspectionDate: "2024-03-10",
-        inspectionStatus: "غير نشط",
-        inspectionRating: 5.0,
-        is_active: false
-    },
-    {
-        id: 3,
-        tripNumber: "12345668",
-        driverName: "أحمد محمد",
-        identityNumber: "5652326459",
-        tripType: "Forklift",
-        currentInspectionDate: "2024-03-20",
-        inspectionStatus: "نشط",
-        inspectionRating: 4.8,
-        is_active: true
-    },
-    {
-        id: 4,
-        tripNumber: "12345669",
-        driverName: "خالد أحمد",
-        identityNumber: "1234567890",
-        tripType: "Truck",
-        currentInspectionDate: "2024-03-18",
-        inspectionStatus: "نشط",
-        inspectionRating: 4.2,
-        is_active: true
-    },
-    {
-        id: 5,
-        tripNumber: "12345670",
-        driverName: "علي حسن",
-        identityNumber: "9876543210",
-        tripType: "Forklift",
-        currentInspectionDate: "2024-03-12",
-        inspectionStatus: "غير نشط",
-        inspectionRating: 3.8,
-        is_active: false
-    },
-];
+interface Pagination {
+    current_page: number;
+    next_cursor: string | null;
+    prev_cursor: string | null;
+    per_page: number;
+}
 
-const tableItems = ref<DriverData[]>([...demoDrivers]);
-const allHeaders = ref<TableHeader[]>([
-    { key: "tripNumber", title: "رقم رخصة السائق", sortable: true },
-    { key: "driverName", title: "اسم السائق", sortable: true },
-    { key: "identityNumber", title: "رقم الهوية", sortable: true },
-    { key: "tripType", title: "نوع الرخصة", sortable: true },
-    { key: "inspectionRating", title: "تقييم السائق", sortable: true },
-    { key: "inspectionStatus", title: "الحالة", sortable: false },
-    { key: "is_active", title: "الإجراءات", sortable: false },
-]);
-const shownHeaders = ref<TableHeader[]>([...allHeaders.value]);
-const canCreate = ref(true);
+interface DriversResponse {
+    status: boolean;
+    code: number;
+    message: string;
+    data: DriverData[];
+    pagination: Pagination;
+    header_table: string;
+    headers: TableHeader[];
+    shownHeaders: TableHeader[];
+    actions: {
+        can_create: boolean;
+        can_bulk_delete?: boolean;
+    };
+}
+
+interface FilterParams {
+    per_page?: number;
+    cursor?: string | null;
+    name?: string;
+    national_id?: string;
+    license_number?: string;
+    status?: number | boolean;
+}
+
+const tableItems = ref<DriverData[]>([]);
+const allHeaders = ref<TableHeader[]>([]);
+const shownHeaders = ref<TableHeader[]>([]);
+const canCreate = ref(false);
 const canBulkDelete = ref(true);
+const header_table = ref('');
 const loading = ref(false);
+const loadingMore = ref(false);
+
+const nextCursor = ref<string | null>(null);
+const previousCursor = ref<string | null>(null);
+const perPage = ref(5);
+const hasMoreData = computed(() => nextCursor.value !== null);
 
 const tableHeaders = computed(() => shownHeaders.value);
 
@@ -116,50 +100,88 @@ const headerCheckStates = computed(() => {
 });
 
 const showAdvancedFilters = ref(false);
-const filterDriverName = ref("");
-const filterIdentityNumber = ref("");
-const filterTripType = ref("");
+const filterName = ref("");
+const filterNationalId = ref("");
+const filterLicenseNumber = ref("");
+const filterStatus = ref<number | null>(null);
+
+const StatusList = [
+    { title: 'فعال', value: 1 },
+    { title: 'غير فعال', value: 0 }
+];
 
 const showDeleteDialog = ref(false);
 const deleteLoading = ref(false);
 
+const showStatusChangeDialog = ref(false);
+const statusChangeLoading = ref(false);
+const itemToChangeStatus = ref<DriverData | null>(null);
+
 const selectedDrivers = ref<number[]>([]);
 const hasSelectedDrivers = computed(() => selectedDrivers.value.length > 0);
 
-const fetchDrivers = async () => {
+const loadMoreTrigger = ref<HTMLElement | null>(null);
+
+const fetchDrivers = async (append = false) => {
     try {
-        loading.value = true;
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 300));
-        
-        // Apply filters
-        let filteredData = [...demoDrivers];
-        
-        if (filterDriverName.value) {
-            filteredData = filteredData.filter(item => 
-                item.driverName.includes(filterDriverName.value)
-            );
+        if (append) {
+            loadingMore.value = true;
+        } else {
+            loading.value = true;
         }
-        
-        if (filterIdentityNumber.value) {
-            filteredData = filteredData.filter(item => 
-                item.identityNumber.includes(filterIdentityNumber.value)
-            );
+
+        const filters: FilterParams = {
+            per_page: perPage.value,
+            cursor: append ? nextCursor.value : null,
+        };
+
+        if (filterName.value) filters.name = filterName.value;
+        if (filterNationalId.value) filters.national_id = filterNationalId.value;
+        if (filterLicenseNumber.value) filters.license_number = filterLicenseNumber.value;
+        if (filterStatus.value !== null) filters.status = filterStatus.value;
+
+        const params = new URLSearchParams();
+        Object.entries(filters).forEach(([key, value]) => {
+            if (value !== null && value !== undefined && value !== '') {
+                params.append(key, String(value));
+            }
+        });
+
+        const queryString = params.toString();
+        const url = queryString ? `/drivers?${queryString}` : '/drivers';
+
+        const response = await api.get<DriversResponse>(url);
+
+        const normalizedData = response.data.map(item => ({
+            ...item,
+            is_active: Boolean(item.is_active)
+        }));
+
+        if (append) {
+            tableItems.value = [...tableItems.value, ...normalizedData];
+        } else {
+            tableItems.value = normalizedData;
+            allHeaders.value = response.headers.filter(h => h.key !== 'id' && h.key !== 'actions');
+            shownHeaders.value = response.shownHeaders.filter(h => h.key !== 'id' && h.key !== 'actions');
+            canCreate.value = response.actions.can_create;
+            canBulkDelete.value = response.actions.can_bulk_delete ?? false;
+            header_table.value = response.header_table;
         }
-        
-        if (filterTripType.value) {
-            filteredData = filteredData.filter(item => 
-                item.tripType.includes(filterTripType.value)
-            );
-        }
-        
-        tableItems.value = filteredData;
+
+        nextCursor.value = response.pagination.next_cursor;
+        previousCursor.value = response.pagination.prev_cursor;
     } catch (err: any) {
         console.error('Error fetching drivers:', err);
-        toast.error('حدث خطأ أثناء تحميل البيانات');
+        toast.error(err?.response?.data?.message || t('common.messages.general.loadDataFailed'));
     } finally {
         loading.value = false;
+        loadingMore.value = false;
     }
+};
+
+const loadMore = async () => {
+    if (!hasMoreData.value || loadingMore.value) return;
+    await fetchDrivers(true);
 };
 
 const applyFilters = () => {
@@ -167,13 +189,14 @@ const applyFilters = () => {
 };
 
 const resetFilters = () => {
-    filterDriverName.value = '';
-    filterIdentityNumber.value = '';
-    filterTripType.value = '';
+    filterName.value = '';
+    filterNationalId.value = '';
+    filterLicenseNumber.value = '';
+    filterStatus.value = null;
     fetchDrivers();
 };
 
-const toggleHeader = (headerKey: string) => {
+const toggleHeader = async (headerKey: string) => {
     const isCurrentlyShown = shownHeaders.value.some(h => h.key === headerKey);
 
     if (isCurrentlyShown) {
@@ -183,6 +206,28 @@ const toggleHeader = (headerKey: string) => {
         if (headerToAdd) {
             shownHeaders.value.push(headerToAdd);
         }
+    }
+
+    await updateHeadersOnServer();
+};
+
+const updateHeadersOnServer = async () => {
+    try {
+        updatingHeaders.value = true;
+        const headerKeys = shownHeaders.value.map(h => h.key);
+
+        const formData = new FormData();
+        formData.append('table', header_table.value);
+        headerKeys.forEach((header, index) => {
+            formData.append(`header[${index}]`, header);
+        });
+
+        await api.post('/headers', formData);
+    } catch (err: any) {
+        console.error('Error updating headers:', err);
+        toast.error(err?.response?.data?.message || t('common.messages.general.saveError'));
+    } finally {
+        updatingHeaders.value = false;
     }
 };
 
@@ -196,14 +241,42 @@ const handleEditDriver = (item: any) => {
 
 const handleDeleteDriver = async (item: any) => {
     try {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 300));
-        
-        tableItems.value = tableItems.value.filter(d => d.id !== item.id);
-        toast.success('تم حذف بيانات السائق بنجاح');
+        await api.delete(`/drivers/${item.id}`);
+        toast.success(t('common.messages.general.deleteSuccess'));
+        await fetchDrivers();
     } catch (err: any) {
         console.error('Error deleting driver:', err);
-        toast.error('حدث خطأ أثناء حذف بيانات السائق');
+        toast.error(err?.response?.data?.message || t('common.messages.general.deleteError'));
+    }
+};
+
+const handleStatusChange = (item: any) => {
+    itemToChangeStatus.value = { ...item };
+    showStatusChangeDialog.value = true;
+};
+
+const confirmStatusChange = async () => {
+    if (!itemToChangeStatus.value) return;
+
+    try {
+        statusChangeLoading.value = true;
+        const newStatus = !itemToChangeStatus.value.is_active;
+
+        await api.patch(`/drivers/${itemToChangeStatus.value.id}/change-status`, { status: newStatus });
+
+        toast.success(t(`common.messages.general.${newStatus ? 'activateSuccess' : 'deactivateSuccess'}`));
+
+        const index = tableItems.value.findIndex(t => t.id === itemToChangeStatus.value!.id);
+        if (index !== -1) {
+            tableItems.value[index].is_active = newStatus;
+        }
+    } catch (err: any) {
+        console.error('Error changing status:', err);
+        toast.error(err?.response?.data?.message || t('common.messages.general.changeStatusError'));
+    } finally {
+        statusChangeLoading.value = false;
+        showStatusChangeDialog.value = false;
+        itemToChangeStatus.value = null;
     }
 };
 
@@ -217,16 +290,13 @@ const confirmBulkDelete = async () => {
 
     try {
         deleteLoading.value = true;
-        
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 300));
-        
-        tableItems.value = tableItems.value.filter(item => !selectedDrivers.value.includes(item.id));
-        toast.success(`تم حذف ${selectedDrivers.value.length} سائق بنجاح`);
+        await api.post('/drivers/bulk-delete', { ids: selectedDrivers.value });
+        toast.success(t('common.messages.general.bulkDeleteSuccess', { count: selectedDrivers.value.length }));
         selectedDrivers.value = [];
+        await fetchDrivers();
     } catch (err: any) {
         console.error('Error deleting drivers:', err);
-        toast.error('حدث خطأ أثناء حذف السائقين');
+        toast.error(err?.response?.data?.message || t('common.messages.general.deleteError'));
     } finally {
         deleteLoading.value = false;
         showDeleteDialog.value = false;
@@ -257,6 +327,19 @@ const toggleAdvancedFilters = () => {
 
 onMounted(() => {
     fetchDrivers();
+
+    const observer = new IntersectionObserver(
+        (entries) => {
+            if (entries[0].isIntersecting && hasMoreData.value && !loadingMore.value) {
+                loadMore();
+            }
+        },
+        { threshold: 0.1 }
+    );
+
+    if (loadMoreTrigger.value) {
+        observer.observe(loadMoreTrigger.value);
+    }
 });
 
 </script>
@@ -324,15 +407,19 @@ onMounted(() => {
                 <div v-if="showAdvancedFilters" class="border-b border-gray-300 px-4 sm:px-6 py-4 bg-white">
                     <div class="flex flex-wrap gap-3 justify-between">
                         <div class="flex gap-3 flex-wrap">
-                            <TextInput v-model="filterDriverName" density="comfortable" variant="outlined" hide-details
+                            <TextInput v-model="filterName" density="comfortable" variant="outlined" hide-details
                                 placeholder="اسم السائق" class="w-full sm:w-40 bg-white"
                                 @keyup.enter="applyFilters" />
-                            <TextInput v-model="filterIdentityNumber" density="comfortable" variant="outlined" hide-details
+                            <TextInput v-model="filterNationalId" density="comfortable" variant="outlined" hide-details
                                 placeholder="رقم الهوية" class="w-full sm:w-40 bg-white"
                                 @keyup.enter="applyFilters" />
-                            <TextInput v-model="filterTripType" density="comfortable" variant="outlined" hide-details
-                                placeholder="نوع الرخصة" class="w-full sm:w-40 bg-white"
+                            <TextInput v-model="filterLicenseNumber" density="comfortable" variant="outlined" hide-details
+                                placeholder="رقم الرخصة" class="w-full sm:w-40 bg-white"
                                 @keyup.enter="applyFilters" />
+                            <SelectInput v-model="filterStatus" :items="StatusList" item-title="title"
+                                item-value="value" density="comfortable" variant="outlined" hide-details
+                                placeholder="الحالة" class="w-full sm:w-40 bg-white"
+                                @update:model-value="applyFilters" />
                         </div>
 
                         <div class="flex gap-2 items-center">
@@ -349,23 +436,33 @@ onMounted(() => {
 
                 <DataTable :headers="tableHeaders" :items="tableItems" :loading="loading" :show-checkbox="canBulkDelete"
                     show-actions @delete="handleDeleteDriver" @edit="handleEditDriver" @select="handleSelectDriver"
-                    @selectAll="handleSelectAllDrivers" :confirm-delete="true" forceShowDelete forceShowEdit>
+                    @selectAll="handleSelectAllDrivers" :confirm-delete="true">
                     <template #item.is_active="{ item }">
                         <v-switch :model-value="item.is_active" hide-details inset density="compact" color="primary"
-                            class="small-switch" />
+                            class="small-switch" @update:model-value="() => handleStatusChange(item)"
+                            v-if="item.actions?.can_change_status" />
+                        <span v-else class="text-sm text-gray-600">--</span>
                     </template>
-                    <template #item.inspectionRating="{ item }">
-                        <span class="font-semibold text-primary-600">{{ item.inspectionRating }}</span>
+                    <template #item.rating="{ item }">
+                        <span class="font-semibold text-primary-600">{{ item.rating }}</span>
                     </template>
-                    <template #item.inspectionStatus="{ item }">
-                        <span :class="item.is_active ? 'text-success-600' : 'text-gray-600'">{{ item.inspectionStatus }}</span>
+                    <template #item.license_type="{ item }">
+                        <span>{{ item.license_type?.join(', ') || '--' }}</span>
                     </template>
                 </DataTable>
+
+                <div ref="loadMoreTrigger" class="flex justify-center py-8">
+                    <v-progress-circular v-if="loadingMore" indeterminate color="primary" size="32" />
+                </div>
             </div>
         </div>
 
-        <DeleteConfirmDialog v-model="showDeleteDialog" :loading="deleteLoading" title="حذف بيانات السائقين"
-            :message="`هل أنت متأكد من حذف ${selectedDrivers.length} سائق؟`" @confirm="confirmBulkDelete" />
+        <DeleteConfirmDialog v-model="showDeleteDialog" :loading="deleteLoading" :title="$t('common.dialogs.delete.title')"
+            :message="$t('common.messages.general.bulkDeleteConfirm', { count: selectedDrivers.length })" @confirm="confirmBulkDelete" />
+
+        <StatusChangeDialog v-model="showStatusChangeDialog" :loading="statusChangeLoading"
+            :item-name="itemToChangeStatus?.name" :current-status="itemToChangeStatus?.is_active"
+            @confirm="confirmStatusChange" />
     </default-layout>
 </template>
 

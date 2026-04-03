@@ -24,6 +24,7 @@ interface DatePickerInputProps {
     max?: string;
     labelClass?: string;
     showCalendarIcon?: boolean;
+    yearOnly?: boolean;
 }
 
 const datepickerIcon = `<svg width="17" height="19" viewBox="0 0 17 19" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -38,6 +39,7 @@ const props = withDefaults(defineProps<DatePickerInputProps>(), {
     clearable: false,
     labelClass: "",
     showCalendarIcon: true,
+    yearOnly: false,
 });
 
 const localeStore = useLocaleStore();
@@ -50,33 +52,51 @@ const emit = defineEmits<{
 const menu = ref(false);
 
 const internalValue = computed({
-    get: () => props.modelValue,
+    get: () => {
+        if (props.yearOnly && props.modelValue) {
+            // For year-only mode, convert year string to a date
+            return `${props.modelValue}-01-01`;
+        }
+        return props.modelValue;
+    },
     set: (val) => {
         if (!val) {
             emit("update:modelValue", null);
             return;
         }
         const date = new Date(val);
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
         const year = date.getFullYear();
-        const formattedValue = `${year}-${month}-${day}`;
-        emit("update:modelValue", formattedValue);
+        
+        if (props.yearOnly) {
+            // For year-only mode, emit just the year as a string
+            emit("update:modelValue", String(year));
+            // Close the menu immediately after year selection
+            menu.value = false;
+        } else {
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const formattedValue = `${year}-${month}-${day}`;
+            emit("update:modelValue", formattedValue);
+        }
     },
 });
 
 // Format date for display (optional, can be customized)
 const formattedDate = computed(() => {
-    if (!internalValue.value) return "";
+    if (!props.modelValue) return "";
     try {
-        const date = new Date(internalValue.value);
+        if (props.yearOnly) {
+            // For year-only mode, just display the year
+            return props.modelValue;
+        }
+        const date = new Date(props.modelValue);
         return date.toLocaleDateString("en-US", {
             year: "numeric",
             month: "2-digit",
             day: "2-digit",
         });
     } catch {
-        return internalValue.value;
+        return props.modelValue;
     }
 });
 </script>
@@ -104,7 +124,7 @@ const formattedDate = computed(() => {
                 </v-text-field>
             </template>
             <v-date-picker v-model="internalValue" :color="color" :min="min" :max="max"
-                @update:model-value="menu = false" scrollable>
+                @update:model-value="menu = false" scrollable :view-mode="yearOnly ? 'year' : 'month'">
             </v-date-picker>
         </v-menu>
     </div>
