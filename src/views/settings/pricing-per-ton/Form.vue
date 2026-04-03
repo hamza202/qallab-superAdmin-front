@@ -19,35 +19,35 @@ const loading = ref(false);
 
 interface PricingPerTonForm {
     id?: number;
-    minDistance: string;
-    maxDistance: string;
-    tripDuration: string;
-    tripTime: string | null;
-    materialType: string | null;
-    price: string;
-    roadType: string | null;
-    waitingTime: string;
+    central_location: string;
+    city: string;
+    direction: string | null;
+    min_distance_km: string;
+    max_distance_km: string;
+    material_type: string | null;
+    weight_ton: string;
+    price_per_ton: string;
 }
 
 const form = reactive<PricingPerTonForm>({
-    minDistance: '',
-    maxDistance: '',
-    tripDuration: '',
-    tripTime: null,
-    materialType: null,
-    price: '',
-    roadType: null,
-    waitingTime: '',
+    central_location: '',
+    city: '',
+    direction: null,
+    min_distance_km: '',
+    max_distance_km: '',
+    material_type: null,
+    weight_ton: '',
+    price_per_ton: '',
 });
 
 const formErrors = reactive<Record<string, string>>({});
 
 // Demo data for dropdowns
-const tripTimes = [
-    { title: "صباحاً", value: "morning" },
-    { title: "ظهراً", value: "noon" },
-    { title: "مساءً", value: "evening" },
-    { title: "ليلاً", value: "night" },
+const directions = [
+    { title: "شمال", value: "north" },
+    { title: "جنوب", value: "south" },
+    { title: "شرق", value: "east" },
+    { title: "غرب", value: "west" },
 ];
 
 const materialTypes = [
@@ -68,14 +68,14 @@ const roadTypes = [
 const demoPricings = [
     {
         id: 1,
-        minDistance: "50",
-        maxDistance: "100",
-        tripDuration: "2",
-        tripTime: "morning",
-        materialType: "general",
-        price: "500",
-        roadType: "highway",
-        waitingTime: "1"
+        central_location: 'مجمع الحمر',
+        city: 'جدة',
+        direction: 'north',
+        min_distance_km: 10,
+        max_distance_km: 50,
+        material_type: 'رمل',
+        weight_ton: 1000,
+        price_per_ton: 150,
     },
 ];
 
@@ -162,58 +162,54 @@ onMounted(() => {
                         <h2 class="text-xl font-bold text-primary-800 mb-6">معلومات التسعيرة</h2>
 
                         <div class="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-6">
-                            <TextInput v-model="form.minDistance" label="أدنى مسافة" placeholder="12" type="number"
-                                :rules="[required()]" :error-messages="formErrors['minDistance']"
-                                @input="delete formErrors['minDistance']" density="comfortable">
+                            <TextInput v-model="form.central_location" label="الموقع المركزي" placeholder="مجمع العد"
+                                :rules="[required()]" :error-messages="formErrors['central_location']"
+                                @input="delete formErrors['central_location']" density="comfortable" />
+
+                            <TextInput v-model="form.city" label="المدينة" placeholder="الرياض"
+                                :rules="[required()]" :error-messages="formErrors['city']"
+                                @input="delete formErrors['city']" density="comfortable" />
+
+                            <SelectWithIconInput v-model="form.direction" label="الاتجاه" placeholder="اختر الاتجاه"
+                                :items="directions" :rules="[required()]" :error-messages="formErrors['direction']"
+                                @update:model-value="delete formErrors['direction']" density="comfortable" />
+
+                            <TextInput v-model="form.min_distance_km" label="أقل مسافة (كم)" placeholder="10" type="number"
+                                :rules="[required()]" :error-messages="formErrors['min_distance_km']"
+                                @input="delete formErrors['min_distance_km']" density="comfortable">
                                 <template #append-inner>
                                     <span class="text-gray-500 text-sm">كم</span>
                                 </template>
                             </TextInput>
 
-                            <TextInput v-model="form.maxDistance" label="أقصى مسافة" placeholder="12" type="number"
-                                :rules="[required()]" :error-messages="formErrors['maxDistance']"
-                                @input="delete formErrors['maxDistance']" density="comfortable">
+                            <TextInput v-model="form.max_distance_km" label="أقصى مسافة (كم)" placeholder="50" type="number"
+                                :rules="[required()]" :error-messages="formErrors['max_distance_km']"
+                                @input="delete formErrors['max_distance_km']" density="comfortable">
                                 <template #append-inner>
                                     <span class="text-gray-500 text-sm">كم</span>
                                 </template>
                             </TextInput>
 
-                            <TextInput v-model="form.tripDuration" label="زمن الرحلة" placeholder="2" type="number"
-                                :rules="[required()]" :error-messages="formErrors['tripDuration']"
-                                @input="delete formErrors['tripDuration']" density="comfortable">
-                                <template #append-inner>
-                                    <span class="text-gray-500 text-sm">ساعة</span>
-                                </template>
-                            </TextInput>
-
-                            <SelectWithIconInput v-model="form.tripTime" label="وقت الرحلة" placeholder="صباحاً"
-                                :items="tripTimes" :rules="[required()]" :error-messages="formErrors['tripTime']"
-                                @update:model-value="delete formErrors['tripTime']" density="comfortable" />
-
-                            <SelectWithIconInput v-model="form.materialType" label="نوع المادة" placeholder="رمل"
+                            <SelectWithIconInput v-model="form.material_type" label="نوع المادة" placeholder="رمل"
                                 :items="materialTypes" :rules="[required()]"
-                                :error-messages="formErrors['materialType']"
-                                @update:model-value="delete formErrors['materialType']" density="comfortable" />
+                                :error-messages="formErrors['material_type']"
+                                @update:model-value="delete formErrors['material_type']" density="comfortable" />
 
-                            <PriceInput v-model="form.price" label="السعر" placeholder="5000" showRialIcon type="number"
-                                :rules="[required()]" :error-messages="formErrors['price']"
-                                @input="delete formErrors['price']" density="comfortable">
+                            <TextInput v-model="form.weight_ton" label="الوزن (طن)" placeholder="1000" type="number"
+                                :rules="[required()]" :error-messages="formErrors['weight_ton']"
+                                @input="delete formErrors['weight_ton']" density="comfortable">
+                                <template #append-inner>
+                                    <span class="text-gray-500 text-sm">طن</span>
+                                </template>
+                            </TextInput>
+
+                            <PriceInput v-model="form.price_per_ton" label="السعر/طن" placeholder="150" showRialIcon type="number"
+                                :rules="[required()]" :error-messages="formErrors['price_per_ton']"
+                                @input="delete formErrors['price_per_ton']" density="comfortable">
                                 <template #append-inner>
                                     <span class="text-gray-500 text-sm">ر</span>
                                 </template>
                             </PriceInput>
-
-                            <SelectWithIconInput v-model="form.roadType" label="نوع الطريق" placeholder="اختر النوع"
-                                :items="roadTypes" :rules="[required()]" :error-messages="formErrors['roadType']"
-                                @update:model-value="delete formErrors['roadType']" density="comfortable" />
-
-                            <TextInput v-model="form.waitingTime" label="وقت الانتظار" placeholder="2" type="number"
-                                :rules="[required()]" :error-messages="formErrors['waitingTime']"
-                                @input="delete formErrors['waitingTime']" density="comfortable">
-                                <template #append-inner>
-                                    <span class="text-gray-500 text-sm">ساعة</span>
-                                </template>
-                            </TextInput>
                         </div>
 
                         <div class="flex gap-3 justify-center pt-4 sm:w-[75%] mx-auto mt-12">

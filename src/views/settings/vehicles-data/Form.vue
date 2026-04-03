@@ -173,7 +173,27 @@ const fetchSuppliers = async (search = '', cursor?: string, perPage = 15) => {
         params.order_by_id = formData.value.logistics_company_id;
     }
 
-    const res = await api.get<any>('/suppliers/list', { params });
+    const res = await api.get<any>('/logistics-companies/list', { params });
+
+    return {
+        data: res.data || [],
+        next_cursor: res.pagination?.next_cursor || null,
+    };
+};
+
+const fetchManufacturers = async (search = '', cursor?: string, perPage = 15) => {
+    const params: any = { per_page: perPage };
+    if (search) {
+        params.name = search;
+    }
+    if (cursor) {
+        params.cursor = cursor;
+    }
+    if (formData.value.manufacturer_id) {
+        params.order_by_id = formData.value.manufacturer_id;
+    }
+
+    const res = await api.get<any>('/manufacturers/list', { params });
 
     return {
         data: res.data || [],
@@ -264,12 +284,12 @@ onMounted(async () => {
                         <h3 class="text-lg font-bold text-primary-900 mb-6">بيانات المركبة</h3>
 
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                            <TextInput v-model="formData.vehicle_number" label="رقم المركبة"
+                            <PriceInput v-model="formData.vehicle_number" label="رقم المركبة"
                                 placeholder="ادخل رقم المركبة" :rules="[required()]"
                                 :error-messages="formErrors['vehicle_number']"
                                 @input="delete formErrors['vehicle_number']" density="comfortable" />
 
-                            <TextInput v-model="formData.plate_number" label="رقم اللوحة"
+                            <PriceInput v-model="formData.plate_number" label="رقم اللوحة"
                                 placeholder="ادخل رقم اللوحة" :rules="[required()]"
                                 :error-messages="formErrors['plate_number']" @input="delete formErrors['plate_number']"
                                 density="comfortable" />
@@ -289,10 +309,17 @@ onMounted(async () => {
                                 :error-messages="formErrors['cargo_type']" @update:model-value="delete formErrors['cargo_type']"
                                 density="comfortable" />
 
+                            <SelectInput v-model="formData.manufacturer_id" label="الشركة المصنعة" :items="[]"
+                                item-title="title" :rules="[required()]" item-value="value" density="comfortable"
+                                placeholder="اختر الشركة المصنعة" :server-side="true" :fetch-function="fetchManufacturers"
+                                item-title-key="name" item-value-key="id" :debounce-time="500"
+                                :error-messages="formErrors['manufacturer_id']"
+                                @update:model-value="delete formErrors['manufacturer_id']" />
+
                             <SelectInput v-model="formData.logistics_company_id" label="شركة النقل" :items="[]"
                                 item-title="title" :rules="[required()]" item-value="value" density="comfortable"
                                 placeholder="اختر شركة النقل" :server-side="true" :fetch-function="fetchSuppliers"
-                                item-title-key="full_name" item-value-key="id" :debounce-time="500"
+                                item-title-key="name" item-value-key="id" :debounce-time="500"
                                 :error-messages="formErrors['logistics_company_id']"
                                 @update:model-value="delete formErrors['logistics_company_id']" />
 
@@ -336,12 +363,12 @@ onMounted(async () => {
                                 :error-messages="formErrors['insurance_status']"
                                 @update:model-value="delete formErrors['insurance_status']" density="comfortable" />
 
-                            <TextInput v-model="formData.driving_license_number" label="رقم رخصة السير"
+                            <PriceInput v-model="formData.driving_license_number" label="رقم رخصة السير"
                                 placeholder="ادخل رقم رخصة السير" :rules="[required()]"
                                 :error-messages="formErrors['driving_license_number']"
                                 @input="delete formErrors['driving_license_number']" density="comfortable" />
 
-                            <TextInput v-model="formData.chassis_number" label="رقم الشاسيه"
+                            <PriceInput v-model="formData.chassis_number" label="رقم الشاسيه"
                                 placeholder="ادخل رقم الشاسيه" :rules="[required()]"
                                 :error-messages="formErrors['chassis_number']" @input="delete formErrors['chassis_number']"
                                 density="comfortable" />

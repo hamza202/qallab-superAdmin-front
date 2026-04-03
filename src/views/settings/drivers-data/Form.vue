@@ -148,7 +148,7 @@ const fetchSuppliers = async (search = '', cursor?: string, perPage = 15) => {
         params.order_by_id = formData.value.logistics_company_id;
     }
 
-    const res = await api.get<any>('/suppliers/list', { params });
+    const res = await api.get<any>('/logistics-companies/list', { params });
 
     return {
         data: res.data || [],
@@ -171,7 +171,7 @@ const handleSave = async () => {
             license_number: Number(formData.value.license_number),
             logistics_company_id: formData.value.logistics_company_id,
             name: formData.value.name,
-            national_id: Number(formData.value.national_id),
+            national_id: String(formData.value.national_id),
             country_id: formData.value.country_id,
             license_type: formData.value.license_type,
             license_expires_at: formData.value.license_expires_at,
@@ -231,7 +231,7 @@ onMounted(async () => {
                         <h3 class="text-lg font-bold text-primary-900 mb-6">بيانات السائق</h3>
 
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                            <TextInput v-model="formData.license_number" label="رقم رخصة السائق"
+                            <PriceInput v-model="formData.license_number" label="رقم رخصة السائق"
                                 placeholder="أدخل رقم الرخصة" :rules="[required()]"
                                 :error-messages="formErrors['license_number']"
                                 @input="delete formErrors['license_number']" density="comfortable" />
@@ -239,7 +239,7 @@ onMounted(async () => {
                             <SelectInput v-model="formData.logistics_company_id" label="شركة النقل" :items="[]"
                                 item-title="title" :rules="[required()]" item-value="value" density="comfortable"
                                 placeholder="اختر شركة النقل" :server-side="true" :fetch-function="fetchSuppliers"
-                                item-title-key="full_name" item-value-key="id" :debounce-time="500"
+                                item-title-key="name" item-value-key="id" :debounce-time="500"
                                 :error-messages="formErrors['logistics_company_id']"
                                 @update:model-value="delete formErrors['logistics_company_id']" />
 
@@ -247,8 +247,8 @@ onMounted(async () => {
                                 :rules="[required()]" :error-messages="formErrors['name']"
                                 @input="delete formErrors['name']" density="comfortable" />
 
-                            <TextInput v-model="formData.national_id" label="رقم الهوية / الإقامة"
-                                placeholder="أدخل رقم الهوية" :rules="[required()]"
+                            <PriceInput v-model="formData.national_id" label="رقم الهوية / الإقامة"
+                                placeholder="أدخل رقم الهوية" :rules="[required(),numeric()]"
                                 :error-messages="formErrors['national_id']" @input="delete formErrors['national_id']"
                                 density="comfortable" />
 

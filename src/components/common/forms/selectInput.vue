@@ -282,6 +282,10 @@ watch(() => displayItems.value.length, async () => {
                     </v-list-item-title>
                 </v-list-item>
             </template>
+            <template #item="{ item, props: itemProps }">
+                <v-list-item v-bind="itemProps" :title="item.raw.title || item.raw.name || item.raw[itemTitleKey]">
+                </v-list-item>
+            </template>
         </v-select>
     </div>
 </template>

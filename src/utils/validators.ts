@@ -348,6 +348,19 @@ export function useValidators() {
     };
   };
 
+  /**
+   * Saudi National ID: optional; when provided must be exactly 10 digits
+   */
+  const nationalId = (message?: string): ValidationRule => {
+    return (value: any) => {
+      if (value === null || value === undefined || value === '') return true;
+      const str = String(value).trim();
+      if (!str) return true;
+      const pattern = /^\d{10}$/;
+      return pattern.test(str) || message || msg('nationalId');
+    };
+  };
+
 
   return {
     required,
@@ -365,6 +378,7 @@ export function useValidators() {
     saudiPhone,
     unifiedLoginId,
     taxNo,
+    nationalId,
     arabicOnly,
     englishOnly,
     noSpecialChars,
@@ -406,6 +420,7 @@ export const englishOnly = (message?: string) => getValidators().englishOnly(mes
 export const noSpecialChars = (message?: string) => getValidators().noSpecialChars(message);
 export const taxNo = (message?: string) => getValidators().taxNo(message);
 export const unifiedLoginId = (message?: string) => getValidators().unifiedLoginId(message);
+export const nationalId = (message?: string) => getValidators().nationalId(message);
 export const url = (message?: string) => getValidators().url(message);
 export const strongPassword = (message?: string) => getValidators().strongPassword(message);
 export const confirmPassword = (password: string, message?: string) => getValidators().confirmPassword(password, message);
