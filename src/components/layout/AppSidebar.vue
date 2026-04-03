@@ -1131,24 +1131,6 @@
                   </router-link>
                 </li>
                 <li class="relative">
-                  <router-link to="/settings/drivers-data" :class="[
-                    isMenuItemActive('/settings/drivers-data')
-                      ? 'font-bold text-qallab-yellow'
-                      : 'text-white hover:text-qallab-yellow',
-                  ]">
-                    إدارة بيانات السائقين
-                  </router-link>
-                </li>
-                <li class="relative">
-                  <router-link to="/settings/vehicles-data" :class="[
-                    isMenuItemActive('/settings/vehicles-data')
-                      ? 'font-bold text-qallab-yellow'
-                      : 'text-white hover:text-qallab-yellow',
-                  ]">
-                    إدارة بيانات المركبات
-                  </router-link>
-                </li>
-                <li class="relative">
                   <router-link to="/settings/pricing-per-ton" :class="[
                     isMenuItemActive('/settings/pricing-per-ton')
                       ? 'font-bold text-qallab-yellow'
@@ -1166,6 +1148,25 @@
                     تسعير مخصص
                   </router-link>
                 </li>
+                <li class="relative">
+                  <router-link to="/settings/drivers-data" :class="[
+                    isMenuItemActive('/settings/drivers-data')
+                      ? 'font-bold text-qallab-yellow'
+                      : 'text-white hover:text-qallab-yellow',
+                  ]">
+                    إدارة بيانات السائقين
+                  </router-link>
+                </li>
+                <li class="relative">
+                  <router-link to="/settings/vehicles-data" :class="[
+                    isMenuItemActive('/settings/vehicles-data')
+                      ? 'font-bold text-qallab-yellow'
+                      : 'text-white hover:text-qallab-yellow',
+                  ]">
+                    إدارة بيانات المركبات
+                  </router-link>
+                </li>
+                
                 <li v-if="canViewSystemStatuses" class="relative">
                   <router-link to="/settings/system-statuses/list" :class="[
                     isMenuItemActive('/settings/system-statuses/list')
