@@ -28,6 +28,8 @@ export interface Permissions {
     users?: PermissionsGroup;
     reports?: PermissionsGroup;
     settings?: PermissionsGroup;
+    vehicles?: PermissionsGroup;
+    drivers?: PermissionsGroup;
     [key: string]: PermissionsGroup | undefined;
 }
 
@@ -146,6 +148,8 @@ const routePermissionMap: Record<string, { group: string; key: string | string[]
     '/settings/account-types': { group: 'settings', key: 'account-types' },
     '/settings/system-statuses': { group: 'settings', key: 'system-statuses' },
     '/settings/doc-status-transitions': { group: 'settings', key: 'document-status-transitions' },
+    '/settings/vehicles-data': { group: 'settings', key: 'vehicles' },
+    '/settings/drivers-data': { group: 'settings', key: 'drivers' },
 };
 
 export function usePermissions() {
@@ -337,6 +341,8 @@ export function usePermissions() {
     const canViewAccountTypes = computed(() => hasPermission('settings', 'account-types'));
     const canViewSystemStatuses = computed(() => hasPermission('settings', 'system-statuses'));
     const canViewDocStatusTransitions = computed(() => hasPermission('settings', 'document-status-transitions'));
+    const canViewVehicles = computed(() => hasPermission('settings', 'vehicles'));
+    const canViewDrivers = computed(() => hasPermission('settings', 'drivers'));
 
     /**
      * Check if any product permission is available
@@ -483,6 +489,8 @@ export function usePermissions() {
         canViewCodesSettings.value ||
         canViewAccountTypes.value || 
         canViewDocStatusTransitions.value ||
+        canViewVehicles.value || 
+        canViewDrivers.value ||
         canViewSystemStatuses.value
     );
 
@@ -678,6 +686,8 @@ export function usePermissions() {
         canViewSystemStatuses,
         canViewDocStatusTransitions,
         hasAnySettingsPermission,
+        canViewVehicles,
+        canViewDrivers,
 
         // Sidebar section visibility
         showProductSettingsSection,

@@ -1148,7 +1148,7 @@
                     تسعير مخصص
                   </router-link>
                 </li>
-                <li class="relative">
+                <li v-if="canViewDrivers" class="relative">
                   <router-link to="/settings/drivers-data" :class="[
                     isMenuItemActive('/settings/drivers-data')
                       ? 'font-bold text-qallab-yellow'
@@ -1157,7 +1157,7 @@
                     إدارة بيانات السائقين
                   </router-link>
                 </li>
-                <li class="relative">
+                <li v-if="canViewVehicles" class="relative">
                   <router-link to="/settings/vehicles-data" :class="[
                     isMenuItemActive('/settings/vehicles-data')
                       ? 'font-bold text-qallab-yellow'
@@ -1340,6 +1340,8 @@ const {
   canViewCodesSettings,
   canViewAccountTypes,
   hasAnySettingsPermission,
+  canViewVehicles,
+  canViewDrivers,
   // Sidebar section visibility
   showProductSettingsSection,
   showSalesCustomersSection,
