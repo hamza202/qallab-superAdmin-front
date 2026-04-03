@@ -1,24 +1,35 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from "vue-router";
 import { useApi } from "@/composables/useApi";
-import { SettingsIcon, trash_1_icon, trash_2_icon, columnIcon, exportIcon, searchIcon } from "@/components/icons/globalIcons";
-import DeleteConfirmDialog from "@/components/common/DeleteConfirmDialog.vue";
-import StatusChangeDialog from "@/components/common/StatusChangeDialog.vue";
+import Map from "@/components/common/Map.vue";
+import { SettingsIcon, columnIcon, exportIcon, searchIcon } from "@/components/icons/globalIcons";
 
+const route = useRoute();
 const router = useRouter();
 const api = useApi();
 
-interface PricingByTruck {
+const zoneId = computed(() => route.params.zoneId);
+
+// Types
+interface SiteTrack {
     id: number;
+    zone_id: number;
+    name: string;
+    direction_code: string;
+    coordinates: string | null;
+    latitude: string | null;
+    longitude: string | null;
+    address: string | null;
     is_active: boolean;
     actions?: {
-        can_update: boolean;
-        can_delete: boolean;
         can_view: boolean;
+        can_update: boolean;
         can_change_status: boolean;
+        pricing_ton?: { zone_site_track_id: number; can_access: boolean };
+        pricing_km_truck?: { zone_site_track_id: number; can_access: boolean };
+        pricing_custom?: { zone_site_track_id: number; can_access: boolean };
     };
-    [key: string]: any;
 }
 
 interface TableHeader {
@@ -33,14 +44,15 @@ interface Pagination {
     per_page: number;
 }
 
-const tableItems = ref<PricingByTruck[]>([]);
+// API Data
+const tableItems = ref<SiteTrack[]>([]);
 const allHeaders = ref<TableHeader[]>([]);
 const shownHeaders = ref<TableHeader[]>([]);
 const header_table = ref('');
-const canBulkDelete = ref(false);
 const loading = ref(false);
 const loadingMore = ref(false);
 
+// Pagination
 const nextCursor = ref<string | null>(null);
 const previousCursor = ref<string | null>(null);
 const perPage = ref(15);
@@ -68,17 +80,20 @@ const StatusList = [
     { title: 'غير فعال', value: 0 }
 ];
 
-const showDeleteDialog = ref(false);
-const deleteLoading = ref(false);
-
+// Status change
 const showStatusChangeDialog = ref(false);
 const statusChangeLoading = ref(false);
-const itemToChangeStatus = ref<PricingByTruck | null>(null);
+const itemToChangeStatus = ref<SiteTrack | null>(null);
 
-const selectedPricings = ref<number[]>([]);
-const hasSelectedPricings = computed(() => selectedPricings.value.length > 0);
+// Map dialog
+const showMapDialog = ref(false);
+const mapLatitude = ref<string | null>(null);
+const mapLongitude = ref<string | null>(null);
+const mapAddress = ref<string | null>(null);
+const editingItem = ref<SiteTrack | null>(null);
 
-const fetchPricings = async (append = false) => {
+// Fetch site tracks
+const fetchSiteTracks = async (append = false) => {
     try {
         if (append) {
             loadingMore.value = true;
@@ -87,19 +102,20 @@ const fetchPricings = async (append = false) => {
         }
 
         const params = new URLSearchParams();
+        params.append('zone_id', String(zoneId.value));
         params.append('per_page', String(perPage.value));
-        if (append && nextCursor.value) params.append('cursor', nextCursor.value);
+
+        if (append && nextCursor.value) {
+            params.append('cursor', nextCursor.value);
+        }
         if (filterName.value) params.append('name', filterName.value);
         if (filterStatus.value !== null) params.append('status', String(filterStatus.value));
 
-        const queryString = params.toString();
-        const url = `/zone-km-truck-pricings?${queryString}`;
+        const response = await api.get<any>(`/zone-site-tracks?${params.toString()}`);
 
-        const response = await api.get<any>(url);
-
-        const normalizedData = (response.data || []).map((item: any) => ({
+        const normalizedData = response.data.map((item: any) => ({
             ...item,
-            is_active: Boolean(item.is_active),
+            is_active: Boolean(item.is_active)
         }));
 
         if (append) {
@@ -109,9 +125,6 @@ const fetchPricings = async (append = false) => {
             if (response.headers) {
                 allHeaders.value = response.headers.filter((h: TableHeader) => h.key !== 'id' && h.key !== 'actions');
                 shownHeaders.value = response.shownHeaders.filter((h: TableHeader) => h.key !== 'id' && h.key !== 'actions');
-            }
-            if (response.actions) {
-                canBulkDelete.value = response.actions.can_bulk_delete ?? false;
             }
             if (response.header_table) {
                 header_table.value = response.header_table;
@@ -123,7 +136,7 @@ const fetchPricings = async (append = false) => {
             previousCursor.value = response.pagination.previous_cursor;
         }
     } catch (err: any) {
-        console.error('Error fetching pricings:', err);
+        console.error('Error fetching site tracks:', err);
         toast.error(err?.response?.data?.message || 'حدث خطأ أثناء تحميل البيانات');
     } finally {
         loading.value = false;
@@ -133,17 +146,17 @@ const fetchPricings = async (append = false) => {
 
 const loadMore = async () => {
     if (!hasMoreData.value || loadingMore.value) return;
-    await fetchPricings(true);
+    await fetchSiteTracks(true);
 };
 
 const applyFilters = () => {
-    fetchPricings();
+    fetchSiteTracks();
 };
 
 const resetFilters = () => {
     filterName.value = '';
     filterStatus.value = null;
-    fetchPricings();
+    fetchSiteTracks();
 };
 
 const toggleHeader = async (headerKey: string) => {
@@ -181,26 +194,8 @@ const updateHeadersOnServer = async () => {
     }
 };
 
-const handleEditPricing = (item: any) => {
-    router.push(`/settings/pricing-by-truck/edit/${item.id}`);
-};
-
-const handleViewPricing = (item: any) => {
-    router.push(`/settings/pricing-by-truck/view/${item.id}`);
-};
-
-const handleDeletePricing = async (item: any) => {
-    try {
-        await api.delete(`/zone-km-truck-pricings/${item.id}`);
-        toast.success('تم حذف التسعير بنجاح');
-        await fetchPricings();
-    } catch (err: any) {
-        console.error('Error deleting pricing:', err);
-        toast.error(err?.response?.data?.message || 'حدث خطأ أثناء حذف التسعير');
-    }
-};
-
-const handleStatusChange = (item: any) => {
+// Status change
+const handleStatusChange = (item: SiteTrack) => {
     itemToChangeStatus.value = { ...item };
     showStatusChangeDialog.value = true;
 };
@@ -210,16 +205,14 @@ const confirmStatusChange = async () => {
 
     try {
         statusChangeLoading.value = true;
-        const newStatus = !itemToChangeStatus.value.is_active;
-
-        await api.patch(`/zone-km-truck-pricings/${itemToChangeStatus.value.id}/change-status`, { status: newStatus });
-
-        toast.success(newStatus ? 'تم تفعيل التسعير بنجاح' : 'تم تعطيل التسعير بنجاح');
+        await api.patch(`/zone-site-tracks/${itemToChangeStatus.value.id}/change-status`);
 
         const index = tableItems.value.findIndex(t => t.id === itemToChangeStatus.value!.id);
         if (index !== -1) {
-            tableItems.value[index].is_active = newStatus;
+            tableItems.value[index].is_active = !tableItems.value[index].is_active;
         }
+
+        toast.success(tableItems.value[index]?.is_active ? 'تم تفعيل المسار بنجاح' : 'تم تعطيل المسار بنجاح');
     } catch (err: any) {
         console.error('Error changing status:', err);
         toast.error(err?.response?.data?.message || 'حدث خطأ أثناء تغيير الحالة');
@@ -230,44 +223,72 @@ const confirmStatusChange = async () => {
     }
 };
 
-const handleBulkDelete = () => {
-    if (selectedPricings.value.length === 0) return;
-    showDeleteDialog.value = true;
+// Edit (Map dialog)
+const handleEditSiteTrack = (item: SiteTrack) => {
+    editingItem.value = item;
+    mapLatitude.value = item.latitude || null;
+    mapLongitude.value = item.longitude || null;
+    mapAddress.value = item.address || null;
+    showMapDialog.value = true;
 };
 
-const confirmBulkDelete = async () => {
-    if (deleteLoading.value) return;
+const handleLocationSelected = async (data: { latitude: string; longitude: string; address: string }) => {
+    if (!editingItem.value) return;
 
     try {
-        deleteLoading.value = true;
-        await api.post('/zone-km-truck-pricings/bulk-delete', { ids: selectedPricings.value });
-        toast.success(`تم حذف ${selectedPricings.value.length} تسعير بنجاح`);
-        selectedPricings.value = [];
-        await fetchPricings();
-    } catch (err: any) {
-        console.error('Error deleting pricings:', err);
-        toast.error(err?.response?.data?.message || 'حدث خطأ أثناء حذف التسعيرات');
-    } finally {
-        deleteLoading.value = false;
-        showDeleteDialog.value = false;
-    }
-};
+        const formData = new FormData();
+        formData.append('_method', 'PUT');
+        formData.append('latitude', data.latitude);
+        formData.append('longitude', data.longitude);
+        formData.append('address', data.address);
 
-const handleSelectPricing = (item: any, selected: boolean) => {
-    if (selected) {
-        if (!selectedPricings.value.includes(item.id)) {
-            selectedPricings.value.push(item.id);
+        await api.post(`/zone-site-tracks/${editingItem.value.id}`, formData);
+
+        const index = tableItems.value.findIndex(t => t.id === editingItem.value!.id);
+        if (index !== -1) {
+            tableItems.value[index].latitude = data.latitude;
+            tableItems.value[index].longitude = data.longitude;
+            tableItems.value[index].address = data.address;
+            tableItems.value[index].coordinates = `${data.latitude} \\ ${data.longitude}`;
         }
-    } else {
-        selectedPricings.value = selectedPricings.value.filter((id) => id !== item.id);
+
+        toast.success('تم تحديث الموقع بنجاح');
+    } catch (err: any) {
+        console.error('Error updating site track:', err);
+        toast.error(err?.response?.data?.message || 'حدث خطأ أثناء تحديث الموقع');
+    } finally {
+        editingItem.value = null;
     }
 };
 
-const handleSelectAllPricings = (selected: boolean) => {
-    if (selected) {
-        selectedPricings.value = tableItems.value.map((item) => item.id);
-    } else {
-        selectedPricings.value = [];
+// Navigation to pricing pages
+const handlePricingByTon = (item: SiteTrack) => {
+    const trackId = item.actions?.pricing_ton?.zone_site_track_id;
+    if (trackId) {
+        router.push({
+            path: '/settings/pricing-per-ton/create',
+            query: { zone_site_track_id: trackId, zone_id: String(zoneId.value) },
+        });
+    }
+};
+
+const handlePricingByTruck = (item: SiteTrack) => {
+    const trackId = item.actions?.pricing_km_truck?.zone_site_track_id;
+    if (trackId) {
+        router.push({
+            path: '/settings/pricing-by-truck/create',
+            query: { zone_site_track_id: trackId, zone_id: String(zoneId.value) },
+        });
+    }
+};
+
+const handleCustomPricing = (item: SiteTrack) => {
+    const trackId = item.actions?.pricing_custom?.zone_site_track_id;
+    if (trackId) {
+        router.push({
+            path: '/settings/custom-pricing/create',
+            query: { zone_site_track_id: trackId, zone_id: String(zoneId.value) },
+        });
     }
 };
 
@@ -276,15 +297,16 @@ const toggleAdvancedFilters = () => {
 };
 
 onMounted(() => {
-    fetchPricings();
+    fetchSiteTracks();
 });
 </script>
 
 <template>
     <default-layout>
-        <div class="pricing-by-truck-page">
-            <PageHeader :icon="SettingsIcon" title-key="التسعير بالشاحنة"
-                description-key="إدارة أسعار الشحن حسب الشاحنة والمسافة والمواد" />
+        <div class="site-tracks-page">
+            <PageHeader :icon="SettingsIcon" title-key="مسارات الموقع"
+                description-key="إدارة مسارات الموقع للمنطقة الجغرافية" />
+
             <div
                 class="flex justify-end items-stretch rounded border border-gray-300 w-fit ms-auto mb-4 overflow-hidden bg-white text-sm">
                 <ButtonWithIcon variant="flat" height="40" rounded="0"
@@ -293,21 +315,7 @@ onMounted(() => {
             </div>
 
             <div class="bg-gray-50 rounded-md -mx-6">
-                <div :class="hasSelectedPricings ? 'justify-between' : 'justify-end'"
-                    class="flex flex-wrap items-center gap-3 border-y border-y-slate-300 px-4 sm:px-6 py-3">
-                    <div v-if="hasSelectedPricings"
-                        class="flex flex-wrap items-stretch rounded overflow-hidden border border-gray-200 bg-white text-sm">
-                        <ButtonWithIcon variant="flat" height="40" rounded="0"
-                            custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-                            :prepend-icon="trash_1_icon" color="white" label="حذف المحدد"
-                            @click="handleBulkDelete" />
-                        <div class="w-px bg-gray-200"></div>
-                        <ButtonWithIcon variant="flat" height="40" rounded="0"
-                            custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-                            :prepend-icon="trash_2_icon" color="white" label="حذف"
-                            @click="handleBulkDelete" />
-                    </div>
-
+                <div class="flex flex-wrap items-center gap-3 justify-end border-y border-y-slate-300 px-4 sm:px-6 py-3">
                     <div class="flex flex-wrap gap-3">
                         <v-menu v-model="showHeadersMenu" :close-on-content-click="false">
                             <template v-slot:activator="{ props }">
@@ -333,7 +341,6 @@ onMounted(() => {
                             custom-class="px-7 font-semibold text-base text-white border !border-primary-200"
                             :prepend-icon="searchIcon" label="بحث متقدم"
                             @click="toggleAdvancedFilters" />
-
                     </div>
                 </div>
 
@@ -361,32 +368,48 @@ onMounted(() => {
                     </div>
                 </div>
 
-                <DataTable :headers="tableHeaders" :items="tableItems" :loading="loading" :show-checkbox="canBulkDelete"
-                    show-actions @delete="handleDeletePricing" @edit="handleEditPricing" @view="handleViewPricing"
-                    @select="handleSelectPricing" @selectAll="handleSelectAllPricings" :confirm-delete="true"
+                <DataTable :headers="tableHeaders" :items="tableItems" :loading="loading" :show-checkbox="false"
+                    show-actions @edit="handleEditSiteTrack" forceShowEdit
                     @load-more="loadMore" :loading-more="loadingMore" :has-more-data="hasMoreData">
                     <template #item.is_active="{ item }">
-                        <v-switch v-if="item.actions?.can_change_status" :model-value="item.is_active" hide-details inset
-                            density="compact" color="primary" class="small-switch"
-                            @update:model-value="() => handleStatusChange(item)" />
-                        <span v-else class="text-sm text-gray-600">--</span>
+                        <v-switch :model-value="item.is_active" hide-details inset density="compact" color="primary"
+                            class="small-switch" @update:model-value="() => handleStatusChange(item)" />
                     </template>
-                    <template #item.status="{ item }">
-                        <v-switch v-if="item.actions?.can_change_status" :model-value="item.is_active" hide-details inset
-                            density="compact" color="primary" class="small-switch"
-                            @update:model-value="() => handleStatusChange(item)" />
-                        <span v-else class="text-sm text-gray-600">--</span>
+                    <template #custom-actions="{ item }">
+                        <v-btn v-if="item.actions?.pricing_ton?.can_access"
+                            variant="outlined" size="small" color="primary"
+                            class="text-xs font-semibold !rounded"
+                            @click="handlePricingByTon(item)">
+                            تسعير بالطن
+                        </v-btn>
+                        <v-btn v-if="item.actions?.pricing_km_truck?.can_access"
+                            variant="outlined" size="small" color="primary"
+                            class="text-xs font-semibold !rounded"
+                            @click="handlePricingByTruck(item)">
+                            تسعير بالشاحنة
+                        </v-btn>
+                        <v-btn v-if="item.actions?.pricing_custom?.can_access"
+                            variant="outlined" size="small" color="primary"
+                            class="text-xs font-semibold !rounded"
+                            @click="handleCustomPricing(item)">
+                            تسعير مخصص
+                        </v-btn>
                     </template>
                 </DataTable>
             </div>
         </div>
 
-        <DeleteConfirmDialog v-model="showDeleteDialog" :loading="deleteLoading" title="حذف التسعيرات"
-            :message="`هل أنت متأكد من حذف ${selectedPricings.length} تسعير؟`" @confirm="confirmBulkDelete" />
-
         <StatusChangeDialog v-model="showStatusChangeDialog" :loading="statusChangeLoading"
-            :item-name="'التسعير'" :current-status="itemToChangeStatus?.is_active"
+            :item-name="itemToChangeStatus?.name || ''" :current-status="itemToChangeStatus?.is_active"
             @confirm="confirmStatusChange" />
+
+        <Map
+            v-model="showMapDialog"
+            :latitude="mapLatitude"
+            :longitude="mapLongitude"
+            :address="mapAddress"
+            @location-selected="handleLocationSelected"
+        />
     </default-layout>
 </template>
 

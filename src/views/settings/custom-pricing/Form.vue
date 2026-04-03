@@ -1,12 +1,13 @@
 <script setup lang="ts">
-import { SettingsIcon } from '@/components/icons/globalIcons';
 import { ref, reactive, computed, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
+import { useApi } from '@/composables/useApi';
 import TopHeader from '@/components/price-offers/TopHeader.vue';
 import AppFormBreadcrumb from '@/components/common/AppFormBreadcrumb.vue';
 
 const router = useRouter();
 const route = useRoute();
+const api = useApi();
 
 const coins = `<svg width="48" height="43" viewBox="0 0 48 43" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M25.8333 6.33333C25.8333 8.72657 20.4981 10.6667 13.9167 10.6667C7.33527 10.6667 2 8.72657 2 6.33333M25.8333 6.33333C25.8333 3.9401 20.4981 2 13.9167 2C7.33527 2 2 3.9401 2 6.33333M25.8333 6.33333V9.58333M2 6.33333V32.3333C2 34.7266 7.33527 36.6667 13.9167 36.6667M13.9167 19.3333C13.5515 19.3333 13.1901 19.3274 12.8333 19.3157C6.75962 19.1166 2 17.2604 2 15M13.9167 28C7.33527 28 2 26.0599 2 23.6667M45.3333 20.4167C45.3333 22.8099 39.9981 24.75 33.4167 24.75C26.8353 24.75 21.5 22.8099 21.5 20.4167M45.3333 20.4167C45.3333 18.0234 39.9981 16.0833 33.4167 16.0833C26.8353 16.0833 21.5 18.0234 21.5 20.4167M45.3333 20.4167V36.6667C45.3333 39.0599 39.9981 41 33.4167 41C26.8353 41 21.5 39.0599 21.5 36.6667V20.4167M45.3333 28.5417C45.3333 30.9349 39.9981 32.875 33.4167 32.875C26.8353 32.875 21.5 30.9349 21.5 28.5417" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
@@ -18,87 +19,99 @@ const isFormValid = ref(false);
 const saving = ref(false);
 const loading = ref(false);
 
+const zoneSiteTrackId = computed(() => route.query.zone_site_track_id as string || '');
+const zoneId = computed(() => route.query.zone_id as string || '');
+
 interface CustomPricingForm {
     id?: number;
-    minDistance: string;
-    maxDistance: string;
-    minWeight: string;
-    maxWeight: string;
-    materialType: string | null;
-    truckTypes: string[];
-    truckCount: string;
-    tripTime: string | null;
-    tripDuration: string;
-    waitingTime: string;
-    roadType: string | null;
-    price: string;
+    zone_site_track_id: string;
+    min_distance_km: string;
+    max_distance_km: string;
+    trip_time_slot: string | null;
+    trip_duration_hours: string;
+    road_type: string | null;
+    waiting_time_hours: string;
+    item_ids: number[];
+    transport_type: number[];
+    transports_no: string;
+    weight: string;
+    unit_id: number | null;
+    price_amount: string;
+    is_active: boolean;
 }
 
 const form = reactive<CustomPricingForm>({
-    minDistance: '',
-    maxDistance: '',
-    minWeight: '',
-    maxWeight: '',
-    materialType: null,
-    truckTypes: [],
-    truckCount: '',
-    tripTime: null,
-    tripDuration: '',
-    waitingTime: '',
-    roadType: null,
-    price: '',
+    zone_site_track_id: '',
+    min_distance_km: '',
+    max_distance_km: '',
+    trip_time_slot: null,
+    trip_duration_hours: '',
+    road_type: null,
+    waiting_time_hours: '',
+    item_ids: [],
+    transport_type: [],
+    transports_no: '',
+    weight: '',
+    unit_id: null,
+    price_amount: '',
+    is_active: true,
 });
 
 const formErrors = reactive<Record<string, string>>({});
 
-// Demo data for dropdowns
-const materialTypes = [
-    { title: "منتجات عامة", value: "general" },
-    { title: "مواد بناء أولية", value: "construction" },
-    { title: "محروقات", value: "fuel" },
-    { title: "قطع غيار", value: "spare-parts" },
-];
+// Constants from API
+const tripTimeSlots = ref<{ title: string; value: string }[]>([]);
+const roadTypes = ref<{ title: string; value: string }[]>([]);
+const transportTypes = ref<{ title: string; value: number }[]>([]);
 
-const truckTypes = [
-    { title: "شاحنة صغيرة", value: "small" },
-    { title: "شاحنة متوسطة", value: "medium" },
-    { title: "شاحنة كبيرة", value: "large" },
-    { title: "شاحنة قلاب", value: "dump" },
-    { title: "شاحنة مقطورة", value: "trailer" },
-];
+// Units
+const unitItems = ref<{ title: string; value: number }[]>([]);
 
-const tripTimes = [
-    { title: "صباحاً", value: "morning" },
-    { title: "ظهراً", value: "noon" },
-    { title: "مساءً", value: "evening" },
-    { title: "ليلاً", value: "night" },
-];
+const fetchConstants = async () => {
+    try {
+        const res = await api.get<any>('/zone-pricing/constants');
+        if (res.data) {
+            tripTimeSlots.value = (res.data.trip_time_slots || []).map((item: any) => ({
+                title: item.label,
+                value: item.key,
+            }));
+            roadTypes.value = (res.data.road_types || []).map((item: any) => ({
+                title: item.label,
+                value: item.key,
+            }));
+            transportTypes.value = (res.data.transport_types || []).map((item: any) => ({
+                title: item.label,
+                value: item.key,
+            }));
+        }
+    } catch (err: any) {
+        console.error('Error fetching constants:', err);
+    }
+};
 
-const roadTypes = [
-    { title: "طريق سريع", value: "highway" },
-    { title: "طريق رئيسي", value: "main" },
-    { title: "طريق فرعي", value: "secondary" },
-    { title: "طريق داخلي", value: "internal" },
-];
+const fetchUnits = async () => {
+    try {
+        const res = await api.get<any>('/units/list');
+        if (Array.isArray(res.data)) {
+            unitItems.value = res.data.map((i: any) => ({ title: i.name, value: i.id }));
+        }
+    } catch (err: any) {
+        console.error('Error fetching units:', err);
+    }
+};
 
-// Demo data for existing records
-const demoPricings = [
-    {
-        id: 1,
-        minDistance: "50",
-        maxDistance: "100",
-        minWeight: "5",
-        maxWeight: "10",
-        materialType: "general",
-        truckTypes: ["small", "medium"],
-        truckCount: "5",
-        tripTime: "morning",
-        tripDuration: "2",
-        waitingTime: "1",
-        roadType: "highway",
-        price: "500"
-    },
-];
+// Items lazy loading
+const fetchItemsList = async (search = '', cursor?: string, perPage = 15) => {
+    const params: any = { per_page: perPage };
+    if (search) params.name = search;
+    if (cursor) params.cursor = cursor;
+
+    const res = await api.get<any>('/items/list', { params });
+    return {
+        data: res.data || [],
+        next_cursor: res.pagination?.next_cursor || null,
+    };
+};
 
 const isEditing = computed(() => !!route.params.id);
 
@@ -107,23 +120,52 @@ const fetchPricingData = async () => {
 
     try {
         loading.value = true;
-
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 300));
-
-        const pricing = demoPricings.find(p => p.id === Number(route.params.id));
-        if (pricing) {
-            Object.assign(form, pricing);
+        const res = await api.get<any>(`/zone-custom-pricings/${route.params.id}`);
+        if (res.data) {
+            const d = res.data;
+            form.zone_site_track_id = String(d.zone_site_track_id || '');
+            form.min_distance_km = String(d.min_distance_km ?? '');
+            form.max_distance_km = String(d.max_distance_km ?? '');
+            form.trip_time_slot = d.trip_time_slot || null;
+            form.trip_duration_hours = String(d.trip_duration_hours ?? '');
+            form.road_type = d.road_type || null;
+            form.waiting_time_hours = String(d.waiting_time_hours ?? '');
+            form.item_ids = d.item_ids || [];
+            form.transport_type = d.transport_type || [];
+            form.transports_no = String(d.transports_no ?? '');
+            form.weight = String(d.weight ?? '');
+            form.unit_id = d.unit_id || null;
+            form.price_amount = String(d.price_amount ?? '');
+            form.is_active = Boolean(d.is_active);
         }
     } catch (err: any) {
         console.error('Error fetching pricing data:', err);
-        toast.error('حدث خطأ أثناء تحميل البيانات');
+        toast.error(err?.response?.data?.message || 'حدث خطأ أثناء تحميل البيانات');
     } finally {
         loading.value = false;
     }
 };
 
-const handleSave = async () => {
+const buildPayload = () => {
+    return {
+        zone_site_track_id: Number(form.zone_site_track_id || zoneSiteTrackId.value),
+        min_distance_km: Number(form.min_distance_km),
+        max_distance_km: Number(form.max_distance_km),
+        trip_time_slot: form.trip_time_slot,
+        trip_duration_hours: Number(form.trip_duration_hours),
+        road_type: form.road_type,
+        waiting_time_hours: Number(form.waiting_time_hours),
+        item_ids: form.item_ids,
+        transport_type: form.transport_type,
+        transports_no: Number(form.transports_no),
+        weight: Number(form.weight),
+        unit_id: form.unit_id,
+        price_amount: Number(form.price_amount),
+        is_active: form.is_active,
+    };
+};
+
+const handleSave = async (navigateTo: 'tracks' | 'list') => {
     Object.keys(formErrors).forEach(key => delete formErrors[key]);
 
     if (formRef.value && typeof formRef.value.validate === "function") {
@@ -133,32 +175,48 @@ const handleSave = async () => {
 
     try {
         saving.value = true;
-
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 500));
+        const payload = buildPayload();
 
         if (isEditing.value) {
+            await api.put(`/zone-custom-pricings/${route.params.id}`, payload);
             toast.success('تم تحديث التسعير المخصص بنجاح');
         } else {
+            await api.post('/zone-custom-pricings', payload);
             toast.success('تم إضافة التسعير المخصص بنجاح');
         }
 
-        router.push('/settings/custom-pricing/list');
+        if (navigateTo === 'tracks' && zoneId.value) {
+            router.push(`/settings/central-paths/${zoneId.value}/site-tracks`);
+        } else {
+            router.push('/settings/custom-pricing/list');
+        }
     } catch (err: any) {
         console.error('Error saving pricing:', err);
-        toast.error('حدث خطأ أثناء حفظ التسعير المخصص');
+        if (err?.response?.data?.errors) {
+            Object.entries(err.response.data.errors).forEach(([key, messages]: any) => {
+                formErrors[key] = Array.isArray(messages) ? messages[0] : messages;
+            });
+        }
+        toast.error(err?.response?.data?.message || 'حدث خطأ أثناء حفظ التسعير المخصص');
     } finally {
         saving.value = false;
     }
 };
 
 const handleCancel = () => {
-    router.push('/settings/custom-pricing/list');
+    if (zoneId.value) {
+        router.push(`/settings/central-paths/${zoneId.value}/site-tracks`);
+    } else {
+        router.push('/settings/custom-pricing/list');
+    }
 };
 
-onMounted(() => {
+onMounted(async () => {
+    await Promise.all([fetchConstants(), fetchUnits()]);
     if (isEditing.value) {
-        fetchPricingData();
+        await fetchPricingData();
+    } else {
+        form.zone_site_track_id = zoneSiteTrackId.value;
     }
 });
 </script>
@@ -167,7 +225,7 @@ onMounted(() => {
     <default-layout>
         <div class="custom-pricing-form-page -mx-6">
             <AppFormBreadcrumb list-path="/settings/custom-pricing/list" module-root-key="الإعدادات"
-                list-label-key="إدارة المسارات المركزية" create-label-key="مجمع العد" edit-label-key="مجمع العد"
+                list-label-key="إدارة المسارات المركزية" create-label-key="إضافة تسعيرة مخصصة" edit-label-key="تعديل تسعيرة مخصصة"
                 :is-edit-mode="isEditing" />
 
             <TopHeader :icon="coins" title-key="إضافة تسعيرة مخصصة" description-key="تحكم من إضافة تسعيرة مخصصة"
@@ -183,77 +241,83 @@ onMounted(() => {
                         <h2 class="text-xl font-bold text-primary-800 mb-6">معلومات التسعيرة</h2>
 
                         <div class="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-6">
-                            <TextInput v-model="form.minDistance" label="أدنى مسافة" placeholder="12" type="number"
-                                :rules="[required()]" :error-messages="formErrors['minDistance']"
-                                @input="delete formErrors['minDistance']" density="comfortable">
+                            <TextInput v-model="form.min_distance_km" label="أدنى مسافة" placeholder="0" type="number"
+                                :rules="[required()]" :error-messages="formErrors['min_distance_km']"
+                                @input="delete formErrors['min_distance_km']" density="comfortable">
                                 <template #append-inner>
                                     <span class="text-gray-500 text-sm">كم</span>
                                 </template>
                             </TextInput>
 
-                            <TextInput v-model="form.maxDistance" label="أقصى مسافة" placeholder="12" type="number"
-                                :rules="[required()]" :error-messages="formErrors['maxDistance']"
-                                @input="delete formErrors['maxDistance']" density="comfortable">
+                            <TextInput v-model="form.max_distance_km" label="أقصى مسافة" placeholder="30" type="number"
+                                :rules="[required()]" :error-messages="formErrors['max_distance_km']"
+                                @input="delete formErrors['max_distance_km']" density="comfortable">
                                 <template #append-inner>
                                     <span class="text-gray-500 text-sm">كم</span>
                                 </template>
                             </TextInput>
 
-                            <TextInput v-model="form.tripDuration" label="زمن الرحلة" placeholder="2" type="number"
-                                :rules="[required()]" :error-messages="formErrors['tripDuration']"
-                                @input="delete formErrors['tripDuration']" density="comfortable">
+                            <TextInput v-model="form.trip_duration_hours" label="زمن الرحلة" placeholder="1" type="number"
+                                :rules="[required()]" :error-messages="formErrors['trip_duration_hours']"
+                                @input="delete formErrors['trip_duration_hours']" density="comfortable">
                                 <template #append-inner>
                                     <span class="text-gray-500 text-sm">ساعة</span>
                                 </template>
                             </TextInput>
 
-                            <SelectWithIconInput v-model="form.tripTime" label="وقت الرحلة" placeholder="صباحاً"
-                                :items="tripTimes" :rules="[required()]" :error-messages="formErrors['tripTime']"
-                                @update:model-value="delete formErrors['tripTime']" density="comfortable" />
+                            <SelectWithIconInput v-model="form.trip_time_slot" label="وقت الرحلة" placeholder="صباحاً"
+                                :items="tripTimeSlots" :rules="[required()]" :error-messages="formErrors['trip_time_slot']"
+                                @update:model-value="delete formErrors['trip_time_slot']" density="comfortable" />
 
-                            <SelectWithIconInput v-model="form.roadType" label="نوع الطريق" placeholder="اختر النوع"
-                                :items="roadTypes" :rules="[required()]" :error-messages="formErrors['roadType']"
-                                @update:model-value="delete formErrors['roadType']" density="comfortable" />
+                            <SelectWithIconInput v-model="form.road_type" label="نوع الطريق" placeholder="اختر النوع"
+                                :items="roadTypes" :rules="[required()]" :error-messages="formErrors['road_type']"
+                                @update:model-value="delete formErrors['road_type']" density="comfortable" />
 
-                            <PriceInput v-model="form.price" label="السعر" placeholder="5000" showRialIcon type="number"
-                                :rules="[required()]" :error-messages="formErrors['price']"
-                                @input="delete formErrors['price']" density="comfortable" />
+                            <PriceInput v-model="form.price_amount" label="السعر" placeholder="500" showRialIcon type="number"
+                                :rules="[required()]" :error-messages="formErrors['price_amount']"
+                                @input="delete formErrors['price_amount']" density="comfortable" />
 
-                            <TextInput v-model="form.waitingTime" label="وقت الانتظار" placeholder="2" type="number"
-                                :rules="[required()]" :error-messages="formErrors['waitingTime']"
-                                @input="delete formErrors['waitingTime']" density="comfortable">
+                            <TextInput v-model="form.waiting_time_hours" label="وقت الانتظار" placeholder="0" type="number"
+                                :rules="[required()]" :error-messages="formErrors['waiting_time_hours']"
+                                @input="delete formErrors['waiting_time_hours']" density="comfortable">
                                 <template #append-inner>
                                     <span class="text-gray-500 text-sm">ساعة</span>
                                 </template>
                             </TextInput>
 
-                            <SelectWithIconInput v-model="form.truckTypes" label="نوع الشاحنة" placeholder="اختر النوع"
-                                :items="truckTypes" :rules="[required()]" multiple chips closable-chips
-                                :error-messages="formErrors['truckTypes']"
-                                @update:model-value="delete formErrors['truckTypes']" density="comfortable" />
+                            <SelectWithIconInput v-model="form.transport_type" label="نوع الشاحنة" placeholder="اختر النوع"
+                                :items="transportTypes" :rules="[required()]" multiple chips
+                                :error-messages="formErrors['transport_type']"
+                                @update:model-value="delete formErrors['transport_type']" density="comfortable" />
 
-                            <TextInput v-model="form.minWeight" label="الوزن" placeholder="23" type="number"
-                                :rules="[required()]" :error-messages="formErrors['minWeight']"
-                                @input="delete formErrors['minWeight']" density="comfortable" />
+                            <SelectInput v-model="form.item_ids" :items="[]" label="المواد" placeholder="اختر المواد"
+                                :rules="[required()]" :error-messages="formErrors['item_ids']"
+                                @update:model-value="delete formErrors['item_ids']" density="comfortable"
+                                :server-side="true" :fetch-function="fetchItemsList" multiple
+                                item-title-key="name" item-value-key="id" :debounce-time="500" />
 
-                            <TextInput v-model="form.truckCount" label="عدد الشاحنات" placeholder="2" type="number"
-                                :rules="[required()]" :error-messages="formErrors['truckCount']"
-                                @input="delete formErrors['truckCount']" density="comfortable" />
+                            <TextInput v-model="form.weight" label="الوزن" placeholder="10" type="number"
+                                :rules="[required()]" :error-messages="formErrors['weight']"
+                                @input="delete formErrors['weight']" density="comfortable" />
 
-                            <SelectWithIconInput v-model="form.maxWeight" label="الوزن" placeholder="طن" :items="[]"
-                                density="comfortable" />
+                            <TextInput v-model="form.transports_no" label="عدد الشاحنات" placeholder="1" type="number"
+                                :rules="[required()]" :error-messages="formErrors['transports_no']"
+                                @input="delete formErrors['transports_no']" density="comfortable" />
 
+                            <SelectWithIconInput v-model="form.unit_id" label="الوحدة" placeholder="اختر الوحدة"
+                                :items="unitItems" :error-messages="formErrors['unit_id']"
+                                @update:model-value="delete formErrors['unit_id']" density="comfortable" />
                         </div>
 
                         <div class="flex gap-3 justify-center pt-4 sm:w-[75%] mx-auto mt-12">
                             <ButtonWithIcon variant="flat" color="primary" height="44" rounded="4"
                                 custom-class="font-semibold text-base px-12 flex-1"
-                                label="حفظ والعودة إلى قائمة المسارات" @click="handleSave" :loading="saving"
+                                label="حفظ والعودة إلى قائمة المسارات" @click="handleSave('tracks')" :loading="saving"
                                 :disabled="saving" />
 
                             <ButtonWithIcon variant="flat" color="primary" height="44" rounded="4"
                                 custom-class="font-semibold text-base px-12 flex-1"
-                                label="حفظ والعودة إلى قائمة التسعيرة المخصصة" @click="handleSave" :loading="saving"
+                                label="حفظ والعودة إلى قائمة التسعيرة المخصصة" @click="handleSave('list')" :loading="saving"
                                 :disabled="saving" />
 
                             <ButtonWithIcon variant="outlined" color="primary" height="44" rounded="4"

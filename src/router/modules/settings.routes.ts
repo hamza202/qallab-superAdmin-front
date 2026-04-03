@@ -455,6 +455,15 @@ export const settingsRoutes: RouteRecordRaw[] = [
           title: "عرض المسار المركزي",
         },
       },
+      {
+        path: ":zoneId/site-tracks",
+        name: "ZoneSiteTracks",
+        component: () =>
+          import("@/views/settings/central-paths/site-tracks.vue"),
+        meta: {
+          title: "مسارات الموقع",
+        },
+      },
     ],
   },
   {
