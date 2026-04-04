@@ -177,6 +177,10 @@
         "transitionCreate": "Add status transition",
         "transitionEdit": "Edit status transition",
         "workflow": "Transition workflow"
+      },
+      "vehiclesData": {
+        "list": "Vehicle data",
+        "view": "Vehicle details"
       }
     }
   }

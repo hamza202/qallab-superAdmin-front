@@ -809,6 +809,92 @@
         }
       }
     },
+    "vehiclesData": {
+      "title": "بيانات المركبات",
+      "description": "تمكنك من إدارة وإضافة بيانات المركبات",
+      "list": {
+        "filters": {
+          "vehicleNumber": "رقم المركبة",
+          "plateNumber": "رقم اللوحة",
+          "vehicleType": "نوع المركبة",
+          "status": "الحالة"
+        }
+      },
+      "form": {
+        "sectionTitle": "بيانات المركبة",
+        "editTitle": "تعديل بيانات المركبة",
+        "addTitle": "إضافة بيانات المركبة",
+        "labels": {
+          "vehicleNumber": "رقم المركبة",
+          "plateNumber": "رقم اللوحة",
+          "vehicleType": "نوع المركبة",
+          "vehicleCategory": "فئة المركبة",
+          "cargoType": "نوع الحمولة",
+          "manufacturer": "الشركة المصنعة",
+          "logisticsCompany": "شركة النقل",
+          "manufacturingYear": "سنة الصنع",
+          "cargoCapacity": "سعة الحمولة (طن)",
+          "fuelType": "نوع الوقود",
+          "gpsTracking": "نظام تتبع GPS",
+          "operationalReadiness": "جاهزية التشغيل",
+          "vehicleOwnership": "ملكية المركبة",
+          "lastMaintenanceDate": "تاريخ آخر صيانة",
+          "insuranceStatus": "حالة التأمين",
+          "drivingLicenseNumber": "رقم رخصة السير",
+          "chassisNumber": "رقم الشاسيه",
+          "notes": "ملاحظات",
+          "status": "الحالة"
+        },
+        "placeholders": {
+          "vehicleNumber": "ادخل رقم المركبة",
+          "plateNumber": "ادخل رقم اللوحة",
+          "vehicleType": "اختر نوع المركبة",
+          "vehicleCategory": "اختر فئة المركبة",
+          "cargoType": "اختر نوع الحمولة",
+          "manufacturer": "اختر الشركة المصنعة",
+          "logisticsCompany": "اختر شركة النقل",
+          "manufacturingYear": "ادخل سنة الصنع",
+          "cargoCapacity": "ادخل سعة الحمولة",
+          "fuelType": "اختر نوع الوقود",
+          "gpsTracking": "اختر نظام التتبع",
+          "operationalReadiness": "اختر الجاهزية",
+          "vehicleOwnership": "اختر الملكية",
+          "lastMaintenanceDate": "اختر تاريخ آخر صيانة",
+          "insuranceStatus": "اختر حالة التأمين",
+          "drivingLicenseNumber": "ادخل رقم رخصة السير",
+          "chassisNumber": "ادخل رقم الشاسيه",
+          "notes": "ادخل الملاحظات هنا"
+        },
+        "status": {
+          "active": "فعال",
+          "inactive": "غير فعال"
+        }
+      },
+      "view": {
+        "pageTitle": "تفاصيل المركبة",
+        "vehicleDataSection": "بيانات المركبة",
+        "licenseValid": "ساري",
+        "fields": {
+          "vehicleNumber": "رقم المركبة",
+          "plateNumber": "رقم اللوحة",
+          "vehicleType": "نوع المركبة",
+          "vehicleCategory": "فئة المركبة",
+          "cargoType": "نوع الحمولة",
+          "manufacturer": "الشركة المصنعة",
+          "manufacturingYear": "سنة الصنع",
+          "cargoCapacity": "سعة الحمولة (طن)",
+          "fuelType": "نوع الوقود",
+          "operationalReadiness": "جاهزية التشغيل",
+          "gpsTracking": "نظام التتبع GPS",
+          "vehicleOwnership": "ملكية المركبة",
+          "lastMaintenanceDate": "تاريخ آخر صيانة",
+          "insuranceStatus": "حالة التأمين",
+          "drivingLicense": "رخصة السير",
+          "status": "الحالة",
+          "notes": "ملاحظات"
+        }
+      }
+    },
     "materialMerchants": {
       "title": "تجار المواد",
       "sidebarTitle": "إدارة تجار المواد",

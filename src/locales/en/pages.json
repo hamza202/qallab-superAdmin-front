@@ -543,6 +543,92 @@
         }
       }
     },
+    "vehiclesData": {
+      "title": "Vehicle data",
+      "description": "Manage vehicle records and add new vehicles",
+      "list": {
+        "filters": {
+          "vehicleNumber": "Vehicle number",
+          "plateNumber": "Plate number",
+          "vehicleType": "Vehicle type",
+          "status": "Status"
+        }
+      },
+      "form": {
+        "sectionTitle": "Vehicle data",
+        "editTitle": "Edit vehicle",
+        "addTitle": "Add vehicle",
+        "labels": {
+          "vehicleNumber": "Vehicle number",
+          "plateNumber": "Plate number",
+          "vehicleType": "Vehicle type",
+          "vehicleCategory": "Vehicle category",
+          "cargoType": "Cargo type",
+          "manufacturer": "Manufacturer",
+          "logisticsCompany": "Transport company",
+          "manufacturingYear": "Manufacturing year",
+          "cargoCapacity": "Cargo capacity (tons)",
+          "fuelType": "Fuel type",
+          "gpsTracking": "GPS tracking",
+          "operationalReadiness": "Operational readiness",
+          "vehicleOwnership": "Vehicle ownership",
+          "lastMaintenanceDate": "Last maintenance date",
+          "insuranceStatus": "Insurance status",
+          "drivingLicenseNumber": "Driving license number",
+          "chassisNumber": "Chassis number",
+          "notes": "Notes",
+          "status": "Status"
+        },
+        "placeholders": {
+          "vehicleNumber": "Enter vehicle number",
+          "plateNumber": "Enter plate number",
+          "vehicleType": "Select vehicle type",
+          "vehicleCategory": "Select vehicle category",
+          "cargoType": "Select cargo type",
+          "manufacturer": "Select manufacturer",
+          "logisticsCompany": "Select transport company",
+          "manufacturingYear": "Enter manufacturing year",
+          "cargoCapacity": "Enter cargo capacity",
+          "fuelType": "Select fuel type",
+          "gpsTracking": "Select tracking option",
+          "operationalReadiness": "Select readiness",
+          "vehicleOwnership": "Select ownership",
+          "lastMaintenanceDate": "Select last maintenance date",
+          "insuranceStatus": "Select insurance status",
+          "drivingLicenseNumber": "Enter driving license number",
+          "chassisNumber": "Enter chassis number",
+          "notes": "Enter notes here"
+        },
+        "status": {
+          "active": "Active",
+          "inactive": "Inactive"
+        }
+      },
+      "view": {
+        "pageTitle": "Vehicle details",
+        "vehicleDataSection": "Vehicle data",
+        "licenseValid": "Valid",
+        "fields": {
+          "vehicleNumber": "Vehicle number",
+          "plateNumber": "Plate number",
+          "vehicleType": "Vehicle type",
+          "vehicleCategory": "Vehicle category",
+          "cargoType": "Cargo type",
+          "manufacturer": "Manufacturer",
+          "manufacturingYear": "Manufacturing year",
+          "cargoCapacity": "Cargo capacity (tons)",
+          "fuelType": "Fuel type",
+          "operationalReadiness": "Operational readiness",
+          "gpsTracking": "GPS tracking",
+          "vehicleOwnership": "Vehicle ownership",
+          "lastMaintenanceDate": "Last maintenance date",
+          "insuranceStatus": "Insurance status",
+          "drivingLicense": "Driving license",
+          "status": "Status",
+          "notes": "Notes"
+        }
+      }
+    },
     "materialMerchants": {
       "title": "Material Merchants",
       "sidebarTitle": "Material Merchants Management",
