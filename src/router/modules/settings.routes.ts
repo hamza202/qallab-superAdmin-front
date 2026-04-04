@@ -435,6 +435,77 @@ export const settingsRoutes: RouteRecordRaw[] = [
     ],
   },
   {
+    path: "/settings/central-paths",
+    name: "CentralPaths",
+    redirect: "/settings/central-paths/list",
+    children: [
+      {
+        path: "list",
+        name: "CentralPathsList",
+        component: () => import("@/views/settings/central-paths/List.vue"),
+        meta: {
+          title: "المسارات المركزية",
+        },
+      },
+      {
+        path: ":id",
+        name: "CentralPathView",
+        component: () => import("@/views/settings/central-paths/View.vue"),
+        meta: {
+          title: "عرض المسار المركزي",
+        },
+      },
+      {
+        path: ":zoneId/site-tracks",
+        name: "ZoneSiteTracks",
+        component: () =>
+          import("@/views/settings/central-paths/site-tracks.vue"),
+        meta: {
+          title: "مسارات الموقع",
+        },
+      },
+    ],
+  },
+  {
+    path: "/settings/pricing-by-truck",
+    name: "PricingByTruck",
+    redirect: "/settings/pricing-by-truck/list",
+    children: [
+      {
+        path: "list",
+        name: "PricingByTruckList",
+        component: () => import("@/views/settings/pricing-by-truck/List.vue"),
+        meta: {
+          title: "التسعير بالشاحنة",
+        },
+      },
+      {
+        path: "create",
+        name: "PricingByTruckCreate",
+        component: () => import("@/views/settings/pricing-by-truck/Form.vue"),
+        meta: {
+          title: "التسعير بالشاحنة",
+        },
+      },
+      {
+        path: "edit/:id",
+        name: "PricingByTruckEdit",
+        component: () => import("@/views/settings/pricing-by-truck/Form.vue"),
+        meta: {
+          title: "التسعير بالشاحنة",
+        },
+      },
+      {
+        path: "view/:id",
+        name: "PricingByTruckView",
+        component: () => import("@/views/settings/pricing-by-truck/Form.vue"),
+        meta: {
+          title: "التسعير بالشاحنة",
+        },
+      },
+    ],
+  },
+  {
     path: "/settings/doc-status-transitions",
     name: "DocStatusTransitions",
     redirect: "/settings/doc-status-transitions/list",
@@ -473,6 +544,162 @@ export const settingsRoutes: RouteRecordRaw[] = [
           import("@/views/settings/doc-status-transitions/StatusTransitions.vue"),
         meta: {
           title: "pages.docStatusTransitions.title",
+        },
+      },
+    ],
+  },
+  {
+    path: "/settings/pricing-per-ton",
+    name: "PricingPerTon",
+    redirect: "/settings/pricing-per-ton/list",
+    children: [
+      {
+        path: "list",
+        name: "PricingPerTonList",
+        component: () => import("@/views/settings/pricing-per-ton/List.vue"),
+        meta: {
+          title: "pages.pricingPerTon.title",
+        },
+      },
+      {
+        path: "create",
+        name: "PricingPerTonCreate",
+        component: () => import("@/views/settings/pricing-per-ton/Form.vue"),
+        meta: {
+          title: "pages.pricingPerTon.title",
+        },
+      },
+      {
+        path: "edit/:id",
+        name: "PricingPerTonEdit",
+        component: () => import("@/views/settings/pricing-per-ton/Form.vue"),
+        meta: {
+          title: "pages.pricingPerTon.title",
+        },
+      },
+      {
+        path: "view/:id",
+        name: "PricingPerTonView",
+        component: () => import("@/views/settings/pricing-per-ton/Form.vue"),
+        meta: {
+          title: "pages.pricingPerTon.title",
+        },
+      },
+    ],
+  },
+  {
+    path: "/settings/custom-pricing",
+    name: "CustomPricing",
+    redirect: "/settings/custom-pricing/list",
+    children: [
+      {
+        path: "list",
+        name: "CustomPricingList",
+        component: () => import("@/views/settings/custom-pricing/List.vue"),
+        meta: {
+          title: "pages.customPricing.title",
+        },
+      },
+      {
+        path: "create",
+        name: "CustomPricingCreate",
+        component: () => import("@/views/settings/custom-pricing/Form.vue"),
+        meta: {
+          title: "pages.customPricing.title",
+        },
+      },
+      {
+        path: "edit/:id",
+        name: "CustomPricingEdit",
+        component: () => import("@/views/settings/custom-pricing/Form.vue"),
+        meta: {
+          title: "pages.customPricing.title",
+        },
+      },
+      {
+        path: "view/:id",
+        name: "CustomPricingView",
+        component: () => import("@/views/settings/custom-pricing/Form.vue"),
+        meta: {
+          title: "pages.customPricing.title",
+        },
+      },
+    ],
+  },
+  {
+    path: "/settings/drivers-data",
+    name: "DriversData",
+    redirect: "/settings/drivers-data/list",
+    children: [
+      {
+        path: "list",
+        name: "DriversDataList",
+        component: () => import("@/views/settings/drivers-data/List.vue"),
+        meta: {
+          title: "إدارة بيانات السائقين",
+        },
+      },
+      {
+        path: "create",
+        name: "DriversDataCreate",
+        component: () => import("@/views/settings/drivers-data/Form.vue"),
+        meta: {
+          title: "إدارة بيانات السائقين",
+        },
+      },
+      {
+        path: "edit/:id",
+        name: "DriversDataEdit",
+        component: () => import("@/views/settings/drivers-data/Form.vue"),
+        meta: {
+          title: "إدارة بيانات السائقين",
+        },
+      },
+      {
+        path: "view/:id",
+        name: "DriversDataView",
+        component: () => import("@/views/settings/drivers-data/Form.vue"),
+        meta: {
+          title: "إدارة بيانات السائقين",
+        },
+      },
+    ],
+  },
+  {
+    path: "/settings/vehicles-data",
+    name: "VehiclesData",
+    redirect: "/settings/vehicles-data/list",
+    children: [
+      {
+        path: "list",
+        name: "VehiclesDataList",
+        component: () => import("@/views/settings/vehicles-data/List.vue"),
+        meta: {
+          title: "إدارة بيانات المركبات",
+        },
+      },
+      {
+        path: "create",
+        name: "VehiclesDataCreate",
+        component: () => import("@/views/settings/vehicles-data/Form.vue"),
+        meta: {
+          title: "إدارة بيانات المركبات",
+        },
+      },
+      {
+        path: "edit/:id",
+        name: "VehiclesDataEdit",
+        component: () => import("@/views/settings/vehicles-data/Form.vue"),
+        meta: {
+          title: "إدارة بيانات المركبات",
+        },
+      },
+      {
+        path: "view/:id",
+        name: "VehiclesDataView",
+        component: () => import("@/views/settings/vehicles-data/Form.vue"),
+        meta: {
+          title: "إدارة بيانات المركبات",
         },
       },
     ],

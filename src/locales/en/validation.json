@@ -32,6 +32,7 @@
     "pattern": "Invalid value",
     "select": "Please select a value",
     "unifiedLoginId": "Unified number must start with 700 and consist of 10 digits",
-    "taxNo": "Tax number must consist of 15 digits, starting with 3 and ending with 3"
+    "taxNo": "Tax number must consist of 15 digits, starting with 3 and ending with 3",
+    "nationalId": "Must be a valid Saudi national ID (10 digits)."
   }
 }

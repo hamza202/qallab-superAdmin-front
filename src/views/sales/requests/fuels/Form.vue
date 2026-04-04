@@ -840,7 +840,7 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
             :address="formData.source_location" @location-selected="handleSourceLocationSelected" />
 
         <!-- Add Product Dialog -->
-        <AddProductDialogFuels v-model="showAddProductDialog" :material-type="0"
+        <AddProductDialogFuels v-model="showAddProductDialog" :material-type="2"
             :fillings-options="fillingsItems" :unit-items="unitItems"
             :supply-type-options="supplyTypeItems"
             :edit-product="editingProduct" :existing-products="productTableItems" @saved="handleProductSaved"

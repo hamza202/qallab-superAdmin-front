@@ -1112,6 +1112,61 @@
                     {{ t('navigation.sidebar.settings.advanced.sampleTypes') }}
                   </router-link>
                 </li>
+                <li class="relative">
+                  <router-link to="/settings/central-paths" :class="[
+                    isMenuItemActive('/settings/central-paths')
+                      ? 'font-bold text-qallab-yellow'
+                      : 'text-white hover:text-qallab-yellow',
+                  ]">
+                    المسارات المركزية
+                  </router-link>
+                </li>
+                <li class="relative">
+                  <router-link to="/settings/pricing-by-truck" :class="[
+                    isMenuItemActive('/settings/pricing-by-truck')
+                      ? 'font-bold text-qallab-yellow'
+                      : 'text-white hover:text-qallab-yellow',
+                  ]">
+                    تسعير بالشاحنة
+                  </router-link>
+                </li>
+                <li class="relative">
+                  <router-link to="/settings/pricing-per-ton" :class="[
+                    isMenuItemActive('/settings/pricing-per-ton')
+                      ? 'font-bold text-qallab-yellow'
+                      : 'text-white hover:text-qallab-yellow',
+                  ]">
+                    تسعير بالطن
+                  </router-link>
+                </li>
+                <li class="relative">
+                  <router-link to="/settings/custom-pricing" :class="[
+                    isMenuItemActive('/settings/custom-pricing')
+                      ? 'font-bold text-qallab-yellow'
+                      : 'text-white hover:text-qallab-yellow',
+                  ]">
+                    تسعير مخصص
+                  </router-link>
+                </li>
+                <li v-if="canViewDrivers" class="relative">
+                  <router-link to="/settings/drivers-data" :class="[
+                    isMenuItemActive('/settings/drivers-data')
+                      ? 'font-bold text-qallab-yellow'
+                      : 'text-white hover:text-qallab-yellow',
+                  ]">
+                    إدارة بيانات السائقين
+                  </router-link>
+                </li>
+                <li v-if="canViewVehicles" class="relative">
+                  <router-link to="/settings/vehicles-data" :class="[
+                    isMenuItemActive('/settings/vehicles-data')
+                      ? 'font-bold text-qallab-yellow'
+                      : 'text-white hover:text-qallab-yellow',
+                  ]">
+                    إدارة بيانات المركبات
+                  </router-link>
+                </li>
+                
                 <li v-if="canViewSystemStatuses" class="relative">
                   <router-link to="/settings/system-statuses/list" :class="[
                     isMenuItemActive('/settings/system-statuses/list')
@@ -1285,6 +1340,8 @@ const {
   canViewCodesSettings,
   canViewAccountTypes,
   hasAnySettingsPermission,
+  canViewVehicles,
+  canViewDrivers,
   // Sidebar section visibility
   showProductSettingsSection,
   showSalesCustomersSection,

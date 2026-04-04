@@ -851,7 +851,7 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
         <!-- Add Product Dialog: material_type=0, supplier_id on categories + supplier-items -->
         <AddProductDialogFuels
             v-model="showAddProductDialog"
-            :material-type="0"
+            :material-type="2"
             :supplier-id="formData.supplier_id"
             items-endpoint="/items/supplier-items"
             :fillings-options="fillingsItems"

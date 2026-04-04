@@ -1451,6 +1451,45 @@
       "receiptVoucherTitle": "Receipt Vouchers",
       "paymentVoucherTitle": "Payment Vouchers",
       "description": "Enables you to manage financial vouchers"
+    },
+    "pricingPerTon": {
+      "title": "Pricing Per Ton",
+      "description": "Manage delivery pricing per ton",
+      "list": {
+        "filters": {
+          "centralLocation": "Central Location",
+          "city": "City",
+          "materialType": "Material Type"
+        }
+      },
+      "deleteDialog": {
+        "title": "Delete Pricing",
+        "message": "Are you sure you want to delete {count} pricing records?"
+      },
+      "messages": {
+        "deleteSuccess": "Pricing deleted successfully",
+        "bulkDeleteSuccess": "{count} pricing records deleted successfully"
+      }
+    },
+    "customPricing": {
+      "title": "Custom Pricing",
+      "description": "Manage custom pricing for trucks and materials",
+      "list": {
+        "filters": {
+          "centralLocation": "Central Location",
+          "city": "City",
+          "materialType": "Material Type",
+          "truckType": "Truck Type"
+        }
+      },
+      "deleteDialog": {
+        "title": "Delete Custom Pricing",
+        "message": "Are you sure you want to delete {count} custom pricing records?"
+      },
+      "messages": {
+        "deleteSuccess": "Custom pricing deleted successfully",
+        "bulkDeleteSuccess": "{count} custom pricing records deleted successfully"
+      }
     }
   }
 }

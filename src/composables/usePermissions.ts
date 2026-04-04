@@ -28,6 +28,8 @@ export interface Permissions {
     users?: PermissionsGroup;
     reports?: PermissionsGroup;
     settings?: PermissionsGroup;
+    vehicles?: PermissionsGroup;
+    drivers?: PermissionsGroup;
     [key: string]: PermissionsGroup | undefined;
 }
 
@@ -139,13 +141,15 @@ const routePermissionMap: Record<string, { group: string; key: string | string[]
     '/settings/services-categories/view': { group: 'settings', key: 'service-categories' },
     '/settings/services-categories/tree': { group: 'settings', key: 'tree-service-categories' },
     '/settings/basic': { group: 'settings', key: 'basic-settings' },
-    '/settings/geo-areas': { group: 'settings', key: 'geo-regions' },
+    '/settings/geo-areas': { group: 'settings', key: 'geographical-zones' },
     '/settings/geo-segments': { group: 'settings', key: 'geo-zones' },
     '/sales/currencies': { group: 'settings', key: 'currencies' },
     '/settings/codes': { group: 'settings', key: 'codes-settings' },
     '/settings/account-types': { group: 'settings', key: 'account-types' },
     '/settings/system-statuses': { group: 'settings', key: 'system-statuses' },
     '/settings/doc-status-transitions': { group: 'settings', key: 'document-status-transitions' },
+    '/settings/vehicles-data': { group: 'settings', key: 'vehicles' },
+    '/settings/drivers-data': { group: 'settings', key: 'drivers' },
 };
 
 export function usePermissions() {
@@ -329,7 +333,7 @@ export function usePermissions() {
     const canViewServiceCategories = computed(() => hasPermission('settings', 'service-categories'));
     const canViewTreeServiceCategories = computed(() => hasPermission('settings', 'tree-service-categories'));
     const canViewBasicSettings = computed(() => hasPermission('settings', 'basic-settings'));
-    const canViewGeoRegions = computed(() => hasPermission('settings', 'geo-regions'));
+    const canViewGeoRegions = computed(() => hasPermission('settings', 'geographical-zones'));
     const canViewGeoZones = computed(() => hasPermission('settings', 'geo-zones'));
     const canViewCurrencies = computed(() => hasPermission('settings', 'currencies'));
     const canViewAdvancedSettings = computed(() => hasPermission('settings', 'advanced-settings'));
@@ -337,6 +341,8 @@ export function usePermissions() {
     const canViewAccountTypes = computed(() => hasPermission('settings', 'account-types'));
     const canViewSystemStatuses = computed(() => hasPermission('settings', 'system-statuses'));
     const canViewDocStatusTransitions = computed(() => hasPermission('settings', 'document-status-transitions'));
+    const canViewVehicles = computed(() => hasPermission('settings', 'vehicles'));
+    const canViewDrivers = computed(() => hasPermission('settings', 'drivers'));
 
     /**
      * Check if any product permission is available
@@ -483,6 +489,8 @@ export function usePermissions() {
         canViewCodesSettings.value ||
         canViewAccountTypes.value || 
         canViewDocStatusTransitions.value ||
+        canViewVehicles.value || 
+        canViewDrivers.value ||
         canViewSystemStatuses.value
     );
 
@@ -678,6 +686,8 @@ export function usePermissions() {
         canViewSystemStatuses,
         canViewDocStatusTransitions,
         hasAnySettingsPermission,
+        canViewVehicles,
+        canViewDrivers,
 
         // Sidebar section visibility
         showProductSettingsSection,

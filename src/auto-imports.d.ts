@@ -52,6 +52,7 @@ declare global {
   const maxValue: typeof import('@/utils/validators').maxValue
   const minLength: typeof import('@/utils/validators').minLength
   const minValue: typeof import('@/utils/validators').minValue
+  const nationalId: typeof import('@/utils/validators').nationalId
   const nextTick: typeof import('vue').nextTick
   const noSpecialChars: typeof import('@/utils/validators').noSpecialChars
   const numeric: typeof import('@/utils/validators').numeric
