@@ -177,6 +177,10 @@
         "transitionCreate": "إضافة انتقال حالة",
         "transitionEdit": "تعديل انتقال حالة",
         "workflow": "مسار عمل الانتقال"
+      },
+      "vehiclesData": {
+        "list": "بيانات المركبات",
+        "view": "تفاصيل المركبة"
       }
     }
   }

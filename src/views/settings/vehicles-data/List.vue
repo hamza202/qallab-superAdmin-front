@@ -114,10 +114,10 @@ const filterPlateNumber = ref("");
 const filterVehicleType = ref("");
 const filterStatus = ref<number | null>(null);
 
-const StatusList = [
-    { title: 'فعال', value: 1 },
-    { title: 'غير فعال', value: 0 }
-];
+const StatusList = computed(() => [
+    { title: t('common.status.active'), value: 1 },
+    { title: t('common.status.inactive'), value: 0 }
+]);
 
 const showDeleteDialog = ref(false);
 const deleteLoading = ref(false);
@@ -243,6 +243,11 @@ const updateHeadersOnServer = async () => {
 const openCreateVehicle = () => {
     router.push('/settings/vehicles-data/create');
 };
+
+const handleView = (item: any) => {
+    router.push({ name: "VehiclesDataView", params: { id: item.id } });
+};
+
 
 const handleEditVehicle = (item: any) => {
     router.push(`/settings/vehicles-data/edit/${item.id}`);
@@ -372,12 +377,12 @@ onMounted(() => {
                         class="flex flex-wrap items-stretch rounded overflow-hidden border border-gray-200 bg-white text-sm">
                         <ButtonWithIcon variant="flat" height="40" rounded="0"
                             custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-                            :prepend-icon="trash_1_icon" color="white" label="حذف المحدد"
+                            :prepend-icon="trash_1_icon" color="white" :label="t('common.table.deleteSelected')"
                             @click="handleBulkDelete" />
                         <div class="w-px bg-gray-200"></div>
                         <ButtonWithIcon variant="flat" height="40" rounded="0"
                             custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-                            :prepend-icon="trash_2_icon" color="white" label="حذف"
+                            :prepend-icon="trash_2_icon" color="white" :label="t('common.actions.delete')"
                             @click="handleBulkDelete" />
                     </div>
 
@@ -386,7 +391,7 @@ onMounted(() => {
                             <template v-slot:activator="{ props }">
                                 <ButtonWithIcon v-bind="props" variant="outlined" rounded="4" color="gray-500"
                                     height="40" custom-class="font-semibold text-base border-gray-400"
-                                    :prepend-icon="columnIcon" label="الأعمدة"
+                                    :prepend-icon="columnIcon" :label="t('common.table.columns')"
                                     append-icon="mdi-chevron-down" />
                             </template>
                             <v-list>
@@ -404,12 +409,12 @@ onMounted(() => {
 
                         <ButtonWithIcon variant="flat" color="primary-500" height="40" rounded="4"
                             custom-class="px-7 font-semibold text-base text-white border !border-primary-200"
-                            :prepend-icon="searchIcon" label="بحث متقدم"
+                            :prepend-icon="searchIcon" :label="t('common.table.advancedSearch')"
                             @click="toggleAdvancedFilters" />
 
                         <ButtonWithIcon v-if="canCreate" variant="flat" color="primary-100" height="40" rounded="4"
                             custom-class="px-7 font-semibold text-base !text-primary-800 border !border-primary-200"
-                            :prepend-icon="plusIcon" label="إضافة جديد" @click="openCreateVehicle" />
+                            :prepend-icon="plusIcon" :label="t('common.form.addNew')" @click="openCreateVehicle" />
                     </div>
                 </div>
 
@@ -417,34 +422,34 @@ onMounted(() => {
                     <div class="flex flex-wrap gap-3 justify-between">
                         <div class="flex gap-3 flex-wrap">
                             <TextInput v-model="filterVehicleNumber" density="comfortable" variant="outlined" hide-details
-                                placeholder="رقم المركبة" class="w-full sm:w-40 bg-white"
+                                :placeholder="t('pages.vehiclesData.list.filters.vehicleNumber')" class="w-full sm:w-40 bg-white"
                                 @keyup.enter="applyFilters" />
                             <TextInput v-model="filterPlateNumber" density="comfortable" variant="outlined" hide-details
-                                placeholder="رقم اللوحة" class="w-full sm:w-40 bg-white"
+                                :placeholder="t('pages.vehiclesData.list.filters.plateNumber')" class="w-full sm:w-40 bg-white"
                                 @keyup.enter="applyFilters" />
                             <TextInput v-model="filterVehicleType" density="comfortable" variant="outlined" hide-details
-                                placeholder="نوع المركبة" class="w-full sm:w-40 bg-white"
+                                :placeholder="t('pages.vehiclesData.list.filters.vehicleType')" class="w-full sm:w-40 bg-white"
                                 @keyup.enter="applyFilters" />
                             <SelectInput v-model="filterStatus" :items="StatusList" item-title="title"
                                 item-value="value" density="comfortable" variant="outlined" hide-details
-                                placeholder="الحالة" class="w-full sm:w-40 bg-white"
+                                :placeholder="t('pages.vehiclesData.list.filters.status')" class="w-full sm:w-40 bg-white"
                                 @update:model-value="applyFilters" />
                         </div>
 
                         <div class="flex gap-2 items-center">
                             <ButtonWithIcon variant="flat" color="primary-500" rounded="4" height="40"
                                 custom-class="px-5 font-semibold !text-white text-sm sm:text-base"
-                                :prepend-icon="searchIcon" label="بحث" @click="applyFilters" />
+                                :prepend-icon="searchIcon" :label="t('common.actions.search')" @click="applyFilters" />
 
                             <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4" border="sm"
                                 custom-class="px-5 font-semibold text-sm sm:text-base !text-primary-800 !border-primary-200"
-                                prepend-icon="mdi-refresh" label="إعادة تعيين" @click="resetFilters" />
+                                prepend-icon="mdi-refresh" :label="t('common.actions.reset')" @click="resetFilters" />
                         </div>
                     </div>
                 </div>
 
                 <DataTable :headers="tableHeaders" :items="tableItems" :loading="loading" :show-checkbox="canBulkDelete"
-                    show-actions @delete="handleDeleteVehicle" @edit="handleEditVehicle" @select="handleSelectVehicle"
+                    show-actions @delete="handleDeleteVehicle" @view="handleView" @edit="handleEditVehicle" @select="handleSelectVehicle"
                     @selectAll="handleSelectAllVehicles" :confirm-delete="true">
                     <template #item.is_active="{ item }">
                         <v-switch :model-value="item.is_active" hide-details inset density="compact" color="primary"

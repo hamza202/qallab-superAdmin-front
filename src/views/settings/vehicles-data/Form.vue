@@ -271,8 +271,8 @@ onMounted(async () => {
 <template>
     <default-layout>
         <div class="vehicles-data-form-page">
-            <PageHeader :icon="icon" :title-key="isEditMode ? 'تعديل بيانات المركبة' : 'إضافة بيانات المركبة'"
-                description-key="تمكنك من إدارة وإضافة بيانات المركبات" />
+            <PageHeader :icon="icon" :title-key="isEditMode ? 'pages.vehiclesData.form.editTitle' : 'pages.vehiclesData.form.addTitle'"
+                description-key="pages.vehiclesData.description" />
 
             <div class="bg-white rounded-lg shadow-sm p-6">
                 <v-form ref="formRef" v-model="isFormValid" @submit.prevent>
@@ -281,110 +281,110 @@ onMounted(async () => {
                     </div>
 
                     <div v-else>
-                        <h3 class="text-lg font-bold text-primary-900 mb-6">بيانات المركبة</h3>
+                        <h3 class="text-lg font-bold text-primary-900 mb-6">{{ t('pages.vehiclesData.form.sectionTitle') }}</h3>
 
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                            <PriceInput v-model="formData.vehicle_number" label="رقم المركبة"
-                                placeholder="ادخل رقم المركبة" :rules="[required()]"
+                            <PriceInput v-model="formData.vehicle_number" :label="t('pages.vehiclesData.form.labels.vehicleNumber')"
+                                :placeholder="t('pages.vehiclesData.form.placeholders.vehicleNumber')" :rules="[required()]"
                                 :error-messages="formErrors['vehicle_number']"
                                 @input="delete formErrors['vehicle_number']" density="comfortable" />
 
-                            <PriceInput v-model="formData.plate_number" label="رقم اللوحة"
-                                placeholder="ادخل رقم اللوحة" :rules="[required()]"
+                            <PriceInput v-model="formData.plate_number" :label="t('pages.vehiclesData.form.labels.plateNumber')"
+                                :placeholder="t('pages.vehiclesData.form.placeholders.plateNumber')" :rules="[required()]"
                                 :error-messages="formErrors['plate_number']" @input="delete formErrors['plate_number']"
                                 density="comfortable" />
 
-                            <SelectWithIconInput v-model="formData.vehicle_type" label="نوع المركبة"
-                                placeholder="اختر نوع المركبة" :items="vehicleTypes" :rules="[required()]"
+                            <SelectWithIconInput v-model="formData.vehicle_type" :label="t('pages.vehiclesData.form.labels.vehicleType')"
+                                :placeholder="t('pages.vehiclesData.form.placeholders.vehicleType')" :items="vehicleTypes" :rules="[required()]"
                                 :error-messages="formErrors['vehicle_type']" @update:model-value="delete formErrors['vehicle_type']"
                                 density="comfortable" />
 
-                            <SelectWithIconInput v-model="formData.vehicle_category" label="فئة المركبة"
-                                placeholder="اختر فئة المركبة" :items="vehicleCategories" :rules="[required()]"
+                            <SelectWithIconInput v-model="formData.vehicle_category" :label="t('pages.vehiclesData.form.labels.vehicleCategory')"
+                                :placeholder="t('pages.vehiclesData.form.placeholders.vehicleCategory')" :items="vehicleCategories" :rules="[required()]"
                                 :error-messages="formErrors['vehicle_category']"
                                 @update:model-value="delete formErrors['vehicle_category']" density="comfortable" />
 
-                            <SelectWithIconInput v-model="formData.cargo_type" label="نوع الحمولة"
-                                placeholder="اختر نوع الحمولة" :items="cargoTypes" :rules="[required()]"
+                            <SelectWithIconInput v-model="formData.cargo_type" :label="t('pages.vehiclesData.form.labels.cargoType')"
+                                :placeholder="t('pages.vehiclesData.form.placeholders.cargoType')" :items="cargoTypes" :rules="[required()]"
                                 :error-messages="formErrors['cargo_type']" @update:model-value="delete formErrors['cargo_type']"
                                 density="comfortable" />
 
-                            <SelectInput v-model="formData.manufacturer_id" label="الشركة المصنعة" :items="[]"
+                            <SelectInput v-model="formData.manufacturer_id" :label="t('pages.vehiclesData.form.labels.manufacturer')" :items="[]"
                                 item-title="title" :rules="[required()]" item-value="value" density="comfortable"
-                                placeholder="اختر الشركة المصنعة" :server-side="true" :fetch-function="fetchManufacturers"
+                                :placeholder="t('pages.vehiclesData.form.placeholders.manufacturer')" :server-side="true" :fetch-function="fetchManufacturers"
                                 item-title-key="name" item-value-key="id" :debounce-time="500"
                                 :error-messages="formErrors['manufacturer_id']"
                                 @update:model-value="delete formErrors['manufacturer_id']" />
 
-                            <SelectInput v-model="formData.logistics_company_id" label="شركة النقل" :items="[]"
+                            <SelectInput v-model="formData.logistics_company_id" :label="t('pages.vehiclesData.form.labels.logisticsCompany')" :items="[]"
                                 item-title="title" :rules="[required()]" item-value="value" density="comfortable"
-                                placeholder="اختر شركة النقل" :server-side="true" :fetch-function="fetchSuppliers"
+                                :placeholder="t('pages.vehiclesData.form.placeholders.logisticsCompany')" :server-side="true" :fetch-function="fetchSuppliers"
                                 item-title-key="name" item-value-key="id" :debounce-time="500"
                                 :error-messages="formErrors['logistics_company_id']"
                                 @update:model-value="delete formErrors['logistics_company_id']" />
 
-                            <DatePickerInput v-model="formData.manufacturing_year" label="سنة الصنع"
-                                placeholder="ادخل سنة الصنع" :rules="[required()]" :year-only="true"
+                            <DatePickerInput v-model="formData.manufacturing_year" :label="t('pages.vehiclesData.form.labels.manufacturingYear')"
+                                :placeholder="t('pages.vehiclesData.form.placeholders.manufacturingYear')" :rules="[required()]" :year-only="true"
                                 :error-messages="formErrors['manufacturing_year']"
                                 @update:model-value="delete formErrors['manufacturing_year']" density="comfortable" />
 
-                            <TextInput v-model="formData.cargo_capacity" label="سعة الحمولة (طن)"
-                                placeholder="ادخل سعة الحمولة" type="number" :rules="[required()]"
+                            <TextInput v-model="formData.cargo_capacity" :label="t('pages.vehiclesData.form.labels.cargoCapacity')"
+                                :placeholder="t('pages.vehiclesData.form.placeholders.cargoCapacity')" type="number" :rules="[required()]"
                                 :error-messages="formErrors['cargo_capacity']" @input="delete formErrors['cargo_capacity']"
                                 density="comfortable" />
 
-                            <SelectWithIconInput v-model="formData.fuel_type" label="نوع الوقود"
-                                placeholder="اختر نوع الوقود" :items="fuelTypes" :rules="[required()]"
+                            <SelectWithIconInput v-model="formData.fuel_type" :label="t('pages.vehiclesData.form.labels.fuelType')"
+                                :placeholder="t('pages.vehiclesData.form.placeholders.fuelType')" :items="fuelTypes" :rules="[required()]"
                                 :error-messages="formErrors['fuel_type']" @update:model-value="delete formErrors['fuel_type']"
                                 density="comfortable" />
 
-                            <SelectWithIconInput v-model="formData.gps_tracking" label="نظام تتبع GPS"
-                                placeholder="اختر نظام التتبع" :items="gpsTrackingOptions" :rules="[required()]"
+                            <SelectWithIconInput v-model="formData.gps_tracking" :label="t('pages.vehiclesData.form.labels.gpsTracking')"
+                                :placeholder="t('pages.vehiclesData.form.placeholders.gpsTracking')" :items="gpsTrackingOptions" :rules="[required()]"
                                 :error-messages="formErrors['gps_tracking']" @update:model-value="delete formErrors['gps_tracking']"
                                 density="comfortable" />
 
-                            <SelectWithIconInput v-model="formData.operational_readiness" label="جاهزية التشغيل"
-                                placeholder="اختر الجاهزية" :items="operationalReadinessOptions" :rules="[required()]"
+                            <SelectWithIconInput v-model="formData.operational_readiness" :label="t('pages.vehiclesData.form.labels.operationalReadiness')"
+                                :placeholder="t('pages.vehiclesData.form.placeholders.operationalReadiness')" :items="operationalReadinessOptions" :rules="[required()]"
                                 :error-messages="formErrors['operational_readiness']"
                                 @update:model-value="delete formErrors['operational_readiness']" density="comfortable" />
 
-                            <SelectWithIconInput v-model="formData.vehicle_ownership" label="ملكية المركبة"
-                                placeholder="اختر الملكية" :items="vehicleOwnershipOptions" :rules="[required()]"
+                            <SelectWithIconInput v-model="formData.vehicle_ownership" :label="t('pages.vehiclesData.form.labels.vehicleOwnership')"
+                                :placeholder="t('pages.vehiclesData.form.placeholders.vehicleOwnership')" :items="vehicleOwnershipOptions" :rules="[required()]"
                                 :error-messages="formErrors['vehicle_ownership']"
                                 @update:model-value="delete formErrors['vehicle_ownership']" density="comfortable" />
 
-                            <DatePickerInput v-model="formData.last_maintenance_date" label="تاريخ آخر صيانة"
-                                placeholder="اختر تاريخ آخر صيانة" :rules="[required()]"
+                            <DatePickerInput v-model="formData.last_maintenance_date" :label="t('pages.vehiclesData.form.labels.lastMaintenanceDate')"
+                                :placeholder="t('pages.vehiclesData.form.placeholders.lastMaintenanceDate')" :rules="[required()]"
                                 :error-messages="formErrors['last_maintenance_date']"
                                 @update:model-value="delete formErrors['last_maintenance_date']" density="comfortable" />
 
-                            <SelectWithIconInput v-model="formData.insurance_status" label="حالة التأمين"
-                                placeholder="اختر حالة التأمين" :items="insuranceStatusOptions" :rules="[required()]"
+                            <SelectWithIconInput v-model="formData.insurance_status" :label="t('pages.vehiclesData.form.labels.insuranceStatus')"
+                                :placeholder="t('pages.vehiclesData.form.placeholders.insuranceStatus')" :items="insuranceStatusOptions" :rules="[required()]"
                                 :error-messages="formErrors['insurance_status']"
                                 @update:model-value="delete formErrors['insurance_status']" density="comfortable" />
 
-                            <PriceInput v-model="formData.driving_license_number" label="رقم رخصة السير"
-                                placeholder="ادخل رقم رخصة السير" :rules="[required()]"
+                            <PriceInput v-model="formData.driving_license_number" :label="t('pages.vehiclesData.form.labels.drivingLicenseNumber')"
+                                :placeholder="t('pages.vehiclesData.form.placeholders.drivingLicenseNumber')" :rules="[required()]"
                                 :error-messages="formErrors['driving_license_number']"
                                 @input="delete formErrors['driving_license_number']" density="comfortable" />
 
-                            <PriceInput v-model="formData.chassis_number" label="رقم الشاسيه"
-                                placeholder="ادخل رقم الشاسيه" :rules="[required()]"
+                            <PriceInput v-model="formData.chassis_number" :label="t('pages.vehiclesData.form.labels.chassisNumber')"
+                                :placeholder="t('pages.vehiclesData.form.placeholders.chassisNumber')" :rules="[required()]"
                                 :error-messages="formErrors['chassis_number']" @input="delete formErrors['chassis_number']"
                                 density="comfortable" />
 
-                            <TextareaInput class="md:col-span-2" v-model="formData.notes" label="ملاحظات"
-                                placeholder="ادخل الملاحظات هنا" rows="4" />
+                            <TextareaInput class="md:col-span-2" v-model="formData.notes" :label="t('pages.vehiclesData.form.labels.notes')"
+                                :placeholder="t('pages.vehiclesData.form.placeholders.notes')" rows="4" />
 
                             <div>
-                                <span class="text-sm font-semibold text-gray-700 block mb-2">الحالة</span>
+                                <span class="text-sm font-semibold text-gray-700 block mb-2">{{ t('pages.vehiclesData.form.labels.status') }}</span>
                                 <div class="flex items-center gap-3">
                                     <v-radio-group v-model="formData.is_active" inline hide-details>
                                         <v-radio :value="true" color="primary">
                                             <template #label>
                                                 <span
                                                     :class="formData.is_active ? 'text-primary font-semibold' : 'text-gray-600'">
-                                                    فعال
+                                                    {{ t('pages.vehiclesData.form.status.active') }}
                                                 </span>
                                             </template>
                                         </v-radio>
@@ -392,7 +392,7 @@ onMounted(async () => {
                                             <template #label>
                                                 <span
                                                     :class="!formData.is_active ? 'text-primary font-semibold' : 'text-gray-600'">
-                                                    غير فعال
+                                                    {{ t('pages.vehiclesData.form.status.inactive') }}
                                                 </span>
                                             </template>
                                         </v-radio>
@@ -403,11 +403,11 @@ onMounted(async () => {
 
                         <div class="flex gap-3 justify-center pt-4">
                             <ButtonWithIcon variant="flat" color="primary" height="44" rounded="4"
-                                custom-class="font-semibold text-base px-8" label="حفظ" prepend-icon="mdi-content-save"
+                                custom-class="font-semibold text-base px-8" :label="t('common.actions.save')" prepend-icon="mdi-content-save"
                                 @click="handleSave" :loading="saving" :disabled="saving" />
 
                             <ButtonWithIcon variant="flat" color="primary-50" height="44" rounded="4"
-                                custom-class="font-semibold text-base text-primary-700 px-8" label="إلغاء"
+                                custom-class="font-semibold text-base text-primary-700 px-8" :label="t('common.actions.cancel')"
                                 prepend-icon="mdi-close" @click="handleCancel" />
                         </div>
                     </div>

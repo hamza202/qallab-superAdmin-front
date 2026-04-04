@@ -238,6 +238,9 @@ const openCreateDriver = () => {
 const handleEditDriver = (item: any) => {
     router.push(`/settings/drivers-data/edit/${item.id}`);
 };
+const handleView = (item: any) => {
+    router.push({ name: "DriversDataView", params: { id: item.id } });
+};
 
 const handleDeleteDriver = async (item: any) => {
     try {
@@ -435,7 +438,7 @@ onMounted(() => {
                 </div>
 
                 <DataTable :headers="tableHeaders" :items="tableItems" :loading="loading" :show-checkbox="canBulkDelete"
-                    show-actions @delete="handleDeleteDriver" @edit="handleEditDriver" @select="handleSelectDriver"
+                    show-actions @delete="handleDeleteDriver" @view="handleView" @edit="handleEditDriver" @select="handleSelectDriver"
                     @selectAll="handleSelectAllDrivers" :confirm-delete="true">
                     <template #item.is_active="{ item }">
                         <v-switch :model-value="item.is_active" hide-details inset density="compact" color="primary"

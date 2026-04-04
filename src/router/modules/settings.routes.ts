@@ -658,7 +658,7 @@ export const settingsRoutes: RouteRecordRaw[] = [
       {
         path: "view/:id",
         name: "DriversDataView",
-        component: () => import("@/views/settings/drivers-data/Form.vue"),
+        component: () => import("@/views/settings/drivers-data/view.vue"),
         meta: {
           title: "إدارة بيانات السائقين",
         },
@@ -675,7 +675,7 @@ export const settingsRoutes: RouteRecordRaw[] = [
         name: "VehiclesDataList",
         component: () => import("@/views/settings/vehicles-data/List.vue"),
         meta: {
-          title: "إدارة بيانات المركبات",
+          title: "pages.vehiclesData.title",
         },
       },
       {
@@ -683,7 +683,7 @@ export const settingsRoutes: RouteRecordRaw[] = [
         name: "VehiclesDataCreate",
         component: () => import("@/views/settings/vehicles-data/Form.vue"),
         meta: {
-          title: "إدارة بيانات المركبات",
+          title: "pages.vehiclesData.title",
         },
       },
       {
@@ -691,15 +691,15 @@ export const settingsRoutes: RouteRecordRaw[] = [
         name: "VehiclesDataEdit",
         component: () => import("@/views/settings/vehicles-data/Form.vue"),
         meta: {
-          title: "إدارة بيانات المركبات",
+          title: "pages.vehiclesData.title",
         },
       },
       {
         path: "view/:id",
         name: "VehiclesDataView",
-        component: () => import("@/views/settings/vehicles-data/Form.vue"),
+        component: () => import("@/views/settings/vehicles-data/view.vue"),
         meta: {
-          title: "إدارة بيانات المركبات",
+          title: "pages.vehiclesData.view.pageTitle",
         },
       },
     ],
