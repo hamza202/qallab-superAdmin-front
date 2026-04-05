@@ -118,7 +118,11 @@
         "geoRegions": "تقسيمات المناطق الجغرافية",
         "geoZones": "تقسيمات النطاقات الجغرافية",
         "pricingPerTon": "تسعير بالطن",
-        "customPricing": "تسعير مخصص"
+        "customPricing": "تسعير مخصص",
+        "centralPaths": "المسارات المركزية",
+        "pricingByTruck": "تسعير بالشاحنة",
+        "driversData": "إدارة بيانات السائقين",
+        "vehiclesData": "إدارة بيانات المركبات"
       },
       "taxes": {
         "title": "إدارة الضرائب",

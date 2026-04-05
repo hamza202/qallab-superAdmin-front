@@ -96,9 +96,11 @@ const fetchDriverData = async () => {
     try {
         loading.value = true;
         const response = await api.get(`/drivers/${route.params.id}`);
+        const raw: any = response;
+        const payload = raw?.data !== undefined ? raw.data : raw;
         formData.value = {
-            ...response.data,
-            license_type: response.data.license_type || [],
+            ...payload,
+            license_type: payload.license_type || [],
         };
         isFormDataLoaded.value = true;
     } catch (err: any) {
@@ -218,8 +220,8 @@ onMounted(async () => {
 <template>
     <default-layout>
         <div class="drivers-data-form-page">
-            <PageHeader :icon="icon" :title-key="isEditMode ? 'تعديل بيانات السائق' : 'إضافة بيانات السائق'"
-                description-key="تمكنك من إدارة وإضافة بيانات السائقين" />
+            <PageHeader :icon="icon" :title-key="isEditMode ? 'pages.driversData.form.editTitle' : 'pages.driversData.form.addTitle'"
+                description-key="pages.driversData.description" />
 
             <div class="bg-white rounded-lg shadow-sm p-6">
                 <v-form ref="formRef" v-model="isFormValid" @submit.prevent>
@@ -228,60 +230,60 @@ onMounted(async () => {
                     </div>
 
                     <div v-else>
-                        <h3 class="text-lg font-bold text-primary-900 mb-6">بيانات السائق</h3>
+                        <h3 class="text-lg font-bold text-primary-900 mb-6">{{ t('pages.driversData.form.sectionTitle') }}</h3>
 
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                            <PriceInput v-model="formData.license_number" label="رقم رخصة السائق"
-                                placeholder="أدخل رقم الرخصة" :rules="[required()]"
+                            <PriceInput v-model="formData.license_number" :label="t('pages.driversData.form.labels.licenseNumber')"
+                                :placeholder="t('pages.driversData.form.placeholders.licenseNumber')" :rules="[required()]"
                                 :error-messages="formErrors['license_number']"
                                 @input="delete formErrors['license_number']" density="comfortable" />
 
-                            <SelectInput v-model="formData.logistics_company_id" label="شركة النقل" :items="[]"
+                            <SelectInput v-model="formData.logistics_company_id" :label="t('pages.driversData.form.labels.logisticsCompany')" :items="[]"
                                 item-title="title" :rules="[required()]" item-value="value" density="comfortable"
-                                placeholder="اختر شركة النقل" :server-side="true" :fetch-function="fetchSuppliers"
+                                :placeholder="t('pages.driversData.form.placeholders.logisticsCompany')" :server-side="true" :fetch-function="fetchSuppliers"
                                 item-title-key="name" item-value-key="id" :debounce-time="500"
                                 :error-messages="formErrors['logistics_company_id']"
                                 @update:model-value="delete formErrors['logistics_company_id']" />
 
-                            <TextInput v-model="formData.name" label="الاسم" placeholder="أدخل الاسم"
+                            <TextInput v-model="formData.name" :label="t('pages.driversData.form.labels.name')" :placeholder="t('pages.driversData.form.placeholders.name')"
                                 :rules="[required()]" :error-messages="formErrors['name']"
                                 @input="delete formErrors['name']" density="comfortable" />
 
-                            <PriceInput v-model="formData.national_id" label="رقم الهوية / الإقامة"
-                                placeholder="أدخل رقم الهوية" :rules="[required(),numeric()]"
+                            <PriceInput v-model="formData.national_id" :label="t('pages.driversData.form.labels.nationalId')"
+                                :placeholder="t('pages.driversData.form.placeholders.nationalId')" :rules="[required(),numeric()]"
                                 :error-messages="formErrors['national_id']" @input="delete formErrors['national_id']"
                                 density="comfortable" />
 
-                            <MultipleSelectInput v-model="formData.license_type" label="نوع الرخصة"
-                                placeholder="اختر نوع الرخصة" :items="licenseTypes" item-title="label" item-value="key"
+                            <MultipleSelectInput v-model="formData.license_type" :label="t('pages.driversData.form.labels.licenseType')"
+                                :placeholder="t('pages.driversData.form.placeholders.licenseType')" :items="licenseTypes" item-title="label" item-value="key"
                                 multiple chips closable-chips :rules="[required()]"
                                 :error-messages="formErrors['license_type']"
                                 @update:model-value="delete formErrors['license_type']" density="comfortable" />
 
-                            <DatePickerInput v-model="formData.license_expires_at" label="تاريخ انتهاء الرخصة"
-                                placeholder="اختر تاريخ الانتهاء" :rules="[required()]"
+                            <DatePickerInput v-model="formData.license_expires_at" :label="t('pages.driversData.form.labels.licenseExpiresAt')"
+                                :placeholder="t('pages.driversData.form.placeholders.licenseExpiresAt')" :rules="[required()]"
                                 :error-messages="formErrors['license_expires_at']"
                                 @update:model-value="delete formErrors['license_expires_at']" density="comfortable" />
 
-                            <SelectWithIconInput v-model="formData.rating" label="تقييم السائق"
-                                placeholder="اختر التقييم" :items="ratings" :rules="[required()]"
+                            <SelectWithIconInput v-model="formData.rating" :label="t('pages.driversData.form.labels.rating')"
+                                :placeholder="t('pages.driversData.form.placeholders.rating')" :items="ratings" :rules="[required()]"
                                 :error-messages="formErrors['rating']" @update:model-value="delete formErrors['rating']"
                                 density="comfortable" />
 
-                            <DatePickerInput v-model="formData.medical_exam_date" label="تاريخ الفحص الطبي"
-                                placeholder="اختر تاريخ الفحص" :rules="[required()]"
+                            <DatePickerInput v-model="formData.medical_exam_date" :label="t('pages.driversData.form.labels.medicalExamDate')"
+                                :placeholder="t('pages.driversData.form.placeholders.medicalExamDate')" :rules="[required()]"
                                 :error-messages="formErrors['medical_exam_date']"
                                 @update:model-value="delete formErrors['medical_exam_date']" density="comfortable" />
 
                             <div>
-                                <span class="text-sm font-semibold text-gray-700 block mb-2">مؤهل لنقل مواد خطرة</span>
+                                <span class="text-sm font-semibold text-gray-700 block mb-2">{{ t('pages.driversData.form.labels.hazardousMaterial') }}</span>
                                 <div class="flex items-center gap-3">
                                     <v-radio-group v-model="formData.hazardous_material_qualified" inline hide-details>
                                         <v-radio :value="true" color="primary">
                                             <template #label>
                                                 <span
                                                     :class="formData.hazardous_material_qualified ? 'text-primary font-semibold' : 'text-gray-600'">
-                                                    نعم
+                                                    {{ t('common.options.yes') }}
                                                 </span>
                                             </template>
                                         </v-radio>
@@ -289,7 +291,7 @@ onMounted(async () => {
                                             <template #label>
                                                 <span
                                                     :class="!formData.hazardous_material_qualified ? 'text-primary font-semibold' : 'text-gray-600'">
-                                                    لا
+                                                    {{ t('common.options.no') }}
                                                 </span>
                                             </template>
                                         </v-radio>
@@ -298,14 +300,14 @@ onMounted(async () => {
                             </div>
 
                             <div>
-                                <span class="text-sm font-semibold text-gray-700 block mb-2">حالة السائق</span>
+                                <span class="text-sm font-semibold text-gray-700 block mb-2">{{ t('pages.driversData.form.labels.driverStatus') }}</span>
                                 <div class="flex items-center gap-3">
                                     <v-radio-group v-model="formData.is_active" inline hide-details>
                                         <v-radio :value="true" color="primary">
                                             <template #label>
                                                 <span
                                                     :class="formData.is_active ? 'text-primary font-semibold' : 'text-gray-600'">
-                                                    فعال
+                                                    {{ t('pages.driversData.form.status.active') }}
                                                 </span>
                                             </template>
                                         </v-radio>
@@ -313,7 +315,7 @@ onMounted(async () => {
                                             <template #label>
                                                 <span
                                                     :class="!formData.is_active ? 'text-primary font-semibold' : 'text-gray-600'">
-                                                    غير فعال
+                                                    {{ t('pages.driversData.form.status.inactive') }}
                                                 </span>
                                             </template>
                                         </v-radio>
@@ -324,11 +326,11 @@ onMounted(async () => {
 
                         <div class="flex gap-3 justify-center pt-4">
                             <ButtonWithIcon variant="flat" color="primary" height="44" rounded="4"
-                                custom-class="font-semibold text-base px-8" label="حفظ" prepend-icon="mdi-content-save"
+                                custom-class="font-semibold text-base px-8" :label="t('common.actions.save')" prepend-icon="mdi-content-save"
                                 @click="handleSave" :loading="saving" :disabled="saving" />
 
                             <ButtonWithIcon variant="flat" color="primary-50" height="44" rounded="4"
-                                custom-class="font-semibold text-base text-primary-700 px-8" label="إلغاء"
+                                custom-class="font-semibold text-base text-primary-700 px-8" :label="t('common.actions.cancel')"
                                 prepend-icon="mdi-close" @click="handleCancel" />
                         </div>
                     </div>

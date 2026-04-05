@@ -1335,9 +1335,9 @@ watch(activeTab, async (newTab) => {
                     <!-- Price Fields -->
                     <div class="flex flex-col gap-[20px]">
                       <PriceInput v-model="purchasePrice" :label="t('pages.simpleProducts.form.labels.purchasePrice')" :placeholder="t('pages.simpleProducts.form.labels.pricePlaceholder')"
-                        :rules="[required(), numeric(), positive()]" :hide-details="false" />
+                        :rules="[numeric(), positive()]" :hide-details="false" />
                       <PriceInput v-model="salePrice" :label="t('pages.simpleProducts.form.labels.salePrice')" :placeholder="t('pages.simpleProducts.form.labels.pricePlaceholder')"
-                        :rules="[required(), numeric(), positive()]" :hide-details="false" />
+                        :rules="[numeric(), positive()]" :hide-details="false" />
                       <div class="grid grid-cols-2 gap-[14px]">
                         <PriceInput v-model="minSalePrice" :label="t('pages.simpleProducts.form.labels.minSalePrice')" :placeholder="t('pages.simpleProducts.form.labels.pricePlaceholder')"
                           :rules="[numeric(), positive()]" :hide-details="false" />

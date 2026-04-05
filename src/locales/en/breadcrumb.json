@@ -181,6 +181,10 @@
       "vehiclesData": {
         "list": "Vehicle data",
         "view": "Vehicle details"
+      },
+      "driversData": {
+        "list": "Drivers data",
+        "view": "Driver details"
       }
     }
   }

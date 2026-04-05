@@ -2,7 +2,7 @@
   "pages": {
     "accountTypes": {
       "title": "Account Types",
-      "description": "Enables you to manage account types",
+      "description": "Allows you to manage account types",
       "list": {
         "filters": {
           "accountName": "Account Name",
@@ -12,19 +12,19 @@
     },
     "banks": {
       "title": "Banks Management",
-      "description": "Enables you to manage banks and their accounts",
+      "description": "Allows you to manage banks and their accounts",
       "list": "Banks List",
       "create": "Add New Bank",
-      "formDescription": "Enables you to add a new bank and its details",
+      "formDescription": "Allows you to add a new bank and its details",
       "edit": "Edit Bank"
     },
     "banksAndTreasuries": {
       "title": "Banks and Treasuries",
-      "description": "Enables you to manage banks and treasuries",
+      "description": "Allows you to manage banks and treasuries",
       "banks": {
         "title": "Banks Management",
         "addButton": "Add New Bank",
-        "emptyState": "No banks",
+        "emptyState": "No banks available",
         "deleteDialog": {
           "title": "Delete Bank"
         }
@@ -32,7 +32,7 @@
       "treasuries": {
         "title": "Treasuries Management",
         "addButton": "Add New Treasury",
-        "emptyState": "No treasuries",
+        "emptyState": "No treasuries available",
         "deleteDialog": {
           "title": "Delete Treasury"
         }
@@ -40,7 +40,7 @@
     },
     "brands": {
       "title": "Brands",
-      "description": "Enables you to manage brands",
+      "description": "Allows you to manage brands",
       "list": {
         "deleteDialog": {
           "title": "Delete Brands",
@@ -54,11 +54,11 @@
     },
     "cities": {
       "title": "Cities",
-      "description": "Enables you to manage cities",
+      "description": "Allows you to manage cities",
       "list": {
         "deleteDialog": {
           "title": "Delete Cities",
-          "message": "Are you sure you want to delete {count} city(s)?"
+          "message": "Are you sure you want to delete {count} city/cities?"
         },
         "messages": {
           "deleteSuccess": "City deleted successfully",
@@ -67,17 +67,17 @@
       }
     },
     "codes": {
-      "title": "Codes Settings",
-      "description": "Enables you to add code settings"
+      "title": "Code Settings",
+      "description": "Allows you to add code settings"
     },
     "compositeProducts": {
       "title": "Composite Products",
-      "description": "Enables you to add composite products"
+      "description": "Allows you to add composite products"
     },
     "contractors": {
       "title": "Contractors",
-      "description": "Enables you to manage contractors",
-      "editDescription": "You can edit contractor details here",
+      "description": "Allows you to manage contractors",
+      "editDescription": "You can edit contractor data from here",
       "list": {
         "deleteDialog": {
           "title": "Delete Contractors",
@@ -96,17 +96,17 @@
         "editTitle": "Edit Contractor",
         "addTitle": "Add Contractor",
         "tabs": {
-          "basicInfo": "Basic Info",
-          "financialInfo": "Financial Info",
-          "commercialInfo": "Commercial Info",
-          "operationalInfo": "Operational Info"
+          "basicInfo": "Basic Data",
+          "financialInfo": "Financial Data",
+          "commercialInfo": "Commercial Data",
+          "operationalInfo": "Operational Information"
         },
         "messages": {
-          "saveBasicFirst": "Basic info must be saved first",
-          "basicInfoSaved": "Basic info saved successfully",
-          "financialInfoSaved": "Financial info saved successfully",
-          "commercialInfoSaved": "Commercial info saved successfully",
-          "operationalInfoSaved": "Operational info saved successfully",
+          "saveBasicFirst": "Basic data must be saved first",
+          "basicInfoSaved": "Basic data saved successfully",
+          "financialInfoSaved": "Financial data saved successfully",
+          "commercialInfoSaved": "Commercial data saved successfully",
+          "operationalInfoSaved": "Operational information saved successfully",
           "validationError": "Please correct the errors in the form",
           "saveError": "Failed to save contractor",
           "loadError": "Failed to load contractor data"
@@ -115,11 +115,11 @@
     },
     "countries": {
       "title": "Countries",
-      "description": "Enables you to manage countries",
+      "description": "Allows you to manage countries",
       "list": {
         "deleteDialog": {
           "title": "Delete Countries",
-          "message": "Are you sure you want to delete {count} country?"
+          "message": "Are you sure you want to delete {count} country/countries?"
         },
         "messages": {
           "deleteSuccess": "Country deleted successfully",
@@ -129,8 +129,8 @@
     },
     "crushers": {
       "title": "Crushers",
-      "description": "Enables you to manage crushers",
-      "editDescription": "You can edit crusher details here",
+      "description": "Allows you to manage crushers",
+      "editDescription": "You can edit crusher data from here",
       "addTitle": "Add Crusher",
       "editTitle": "Edit Crusher",
       "list": {
@@ -158,17 +158,17 @@
         "editTitle": "Edit Crusher",
         "addTitle": "Add Crusher",
         "tabs": {
-          "basicInfo": "Basic Info",
-          "financialInfo": "Financial Info",
-          "commercialInfo": "Commercial Info",
-          "operationalInfo": "Operational Info"
+          "basicInfo": "Basic Data",
+          "financialInfo": "Financial Data",
+          "commercialInfo": "Commercial Data",
+          "operationalInfo": "Operational Information"
         },
         "messages": {
-          "saveBasicFirst": "Basic info must be saved first",
-          "basicInfoSaved": "Basic info saved successfully",
-          "financialInfoSaved": "Financial info saved successfully",
-          "commercialInfoSaved": "Commercial info saved successfully",
-          "operationalInfoSaved": "Operational info saved successfully",
+          "saveBasicFirst": "Basic data must be saved first",
+          "basicInfoSaved": "Basic data saved successfully",
+          "financialInfoSaved": "Financial data saved successfully",
+          "commercialInfoSaved": "Commercial data saved successfully",
+          "operationalInfoSaved": "Operational information saved successfully",
           "validationError": "Please correct the errors in the form",
           "saveError": "Failed to save crusher",
           "loadError": "Failed to load crusher data"
@@ -177,25 +177,29 @@
     },
     "customers": {
       "title": "Customers",
-      "description": "Enables you to manage customers",
+      "description": "Allows you to manage customers",
       "list": {
         "addButton": "Add Customer",
         "deleteDialog": {
           "title": "Delete Customers",
-          "message": "Are you sure you want to delete {count} customer?"
+          "message": "Are you sure you want to delete {count} customer(s)?"
         },
         "messages": {
           "loadError": "Failed to load customers list",
           "deleteSuccess": "Customer deleted successfully",
           "deleteError": "Failed to delete customer",
           "bulkDeleteSuccess": "{count} customers deleted successfully",
-          "bulkDeleteError": "Failed bulk delete",
+          "bulkDeleteError": "Bulk deletion failed",
           "statusChangeSuccess": "Customer {status} successfully",
           "statusChangeError": "Failed to change customer status",
           "columnsUpdateError": "Failed to update columns"
         }
       },
       "form": {
+        "tabs": {
+          "basicInfo": "Basic Information",
+          "accountingInfo": "Accounting Information"
+        },
         "subTabs": {
           "addressInfo": "Address Information",
           "contactList": "Contact List"
@@ -204,29 +208,98 @@
           "customerData": "Customer Data",
           "balances": "Balances"
         },
-        "contacts": {
-          "firstName": "First Name",
-          "lastName": "Last Name",
-          "email": "Email",
-          "telephone": "Telephone",
+        "labels": {
+          "accountType": "Customer Account Type",
+          "fullName": "Full Name",
+          "fullNamePlaceholderEn": "Full name (English)",
+          "fullNamePlaceholderAr": "Full name in Arabic",
+          "code": "Code",
           "mobile": "Mobile",
-          "actions": "Actions"
+          "phone": "Phone",
+          "email": "Email",
+          "emailPlaceholder": "e.g. {email}",
+          "commercialName": "Commercial Name",
+          "commercialNamePlaceholderEn": "Trade name (English)",
+          "commercialNamePlaceholderAr": "Commercial name in Arabic",
+          "legalName": "Legal Name",
+          "legalNamePlaceholder": "Enter legal name",
+          "entityType": "Entity Type",
+          "entityTypePlaceholder": "Select entity type",
+          "taxNumber": "Commercial Registration",
+          "taxNumberPlaceholder": "Enter commercial registration number",
+          "country": "Country",
+          "countryPlaceholder": "Select country",
+          "city": "City",
+          "cityPlaceholder": "Select city",
+          "postalCode": "Postal Code",
+          "postalCodePlaceholder": "e.g. 12345",
+          "district": "District Name",
+          "districtPlaceholder": "Enter district name",
+          "streetName": "Street Name",
+          "streetNamePlaceholder": "Enter street name",
+          "buildingNumber": "Building Number",
+          "buildingNumberPlaceholder": "Enter building number",
+          "nationalAddress": "National Address",
+          "nationalAddressPlaceholder": "Enter full national address",
+          "nationalAddressTooltip": "National Address",
+          "address2": "Address 2",
+          "address2Placeholder": "Additional address details",
+          "minimumCredit": "Minimum Limit (Credit)",
+          "minimumCreditPlaceholder": "Enter minimum credit limit",
+          "maximumCredit": "Maximum Limit (Credit)",
+          "maximumCreditPlaceholder": "Enter maximum credit limit",
+          "minimumDebit": "Minimum Limit (Debit)",
+          "minimumDebitPlaceholder": "Enter minimum debit limit",
+          "maximumDebit": "Maximum Limit (Debit)",
+          "maximumDebitPlaceholder": "Enter maximum debit limit"
+        },
+        "contacts": {
+          "title": "Customer's Customers List",
+          "addButton": "Add Customer",
+          "firstName": "First Name",
+          "firstNamePlaceholder": "Enter first name",
+          "lastName": "Last Name",
+          "lastNamePlaceholder": "Enter last name",
+          "email": "Email",
+          "emailPlaceholder": "Enter email",
+          "telephone": "Phone",
+          "mobile": "Mobile",
+          "actions": "Actions",
+          "emptyState": "No contacts available. Click \"Add\" to add a new contact."
         },
         "accounting": {
           "priceType": "Price Type",
+          "priceTypePlaceholder": "Select price type",
           "customerClassification": "Customer Classification",
+          "customerClassificationPlaceholder": "Select customer classification",
           "salesRepresentative": "Sales Representative",
-          "createAccountInTree": "Create a special account in the accounting tree",
+          "salesRepresentativePlaceholder": "Select sales representative",
+          "createAccountInTree": "Create a dedicated account in the accounting tree",
           "account": "Account",
+          "accountPlaceholder": "Select account",
           "relatedCustomers": "Related Customers",
+          "relatedCustomersPlaceholder": "Select related customers",
           "defaultStatus": "Default Status"
         },
         "balance": {
-          "debit": "Debit",
-          "credit": "Credit",
+          "title": "Balances",
+          "emptyState": "No balances available",
+          "debit": "Credit",
+          "credit": "Debit",
           "balance": "Balance",
           "lastAmount": "Last Amount",
           "lastUpdate": "Last Update"
+        },
+        "buttons": {
+          "save": "Save",
+          "close": "Close"
+        },
+        "messages": {
+          "saveSuccess": "Customer saved successfully",
+          "saveError": "Failed to save customer",
+          "validationError": "Please correct the errors in the form",
+          "completeBasicInfo": "Basic information must be completed first",
+          "fetchError": "Failed to fetch customer data"
         }
       },
       "create": "Add Customer",
@@ -234,22 +307,22 @@
     },
     "DeliveryDocs": {
       "title": "Delivery Documents Table",
-      "description": "Enables you to manage delivery documents",
-      "edit": "Enables you to edit a delivery document",
-      "create": "Enables you to add a delivery document"
+      "description": "Allows you to manage delivery documents",
+      "edit": "Allows you to edit a delivery document",
+      "create": "Allows you to add a delivery document"
     },
     "DeliveryDocsLogistics": {
-      "title": "Logistics Delivery Documents Table",
-      "description": "Enables you to manage logistics delivery documents",
-      "edit": "Edit logistics delivery document",
-      "view": "View logistics delivery document",
-      "create": "Add logistics delivery document"
+      "title": "Transport Service Delivery Documents Table",
+      "description": "Allows you to manage transport service delivery documents",
+      "edit": "Edit Transport Service Delivery Document",
+      "view": "View Transport Service Delivery Document",
+      "create": "Add Transport Service Delivery Document"
     },
     "docStatusTransitions": {
-      "title": "Document and Status Management",
-      "description": "Enables you to manage documents and statuses",
-      "FormTitle": "Documents Workflow Management",
-      "FormDescription": "Enables you to add statuses and transitions",
+      "title": "Documents and Statuses Management",
+      "description": "Allows you to manage documents and statuses",
+      "FormTitle": "Document Workflow Management",
+      "FormDescription": "Allows you to add statuses and transitions",
       "statusTransitionsTitle": "Status Transition Management",
       "form": {
         "basicData": "Basic Data",
@@ -259,10 +332,10 @@
         "statusName": "Status Name",
         "otherOptions": "Other Options",
         "required": "Required",
-        "autoAction": "Apply Auto Action",
+        "autoAction": "Apply Automatic Action",
         "requiresApproval": "Requires Approval",
         "selectDocument": "Select Document",
-        "selectDocumentPlaceholder": "Please select document",
+        "selectDocumentPlaceholder": "Select a document",
         "selectStatusLevel": "Select Status Level",
         "selectStatusName": "Select Status Name"
       },
@@ -277,8 +350,8 @@
     },
     "factories": {
       "title": "Factories",
-      "description": "Enables you to manage factories",
-      "editDescription": "You can edit factory details here",
+      "description": "Allows you to manage factories",
+      "editDescription": "You can edit factory data from here",
       "addTitle": "Add Factory",
       "editTitle": "Edit Factory",
       "list": {
@@ -290,7 +363,7 @@
         },
         "deleteDialog": {
           "title": "Delete Factories",
-          "message": "Are you sure you want to delete {count} factory(s)?"
+          "message": "Are you sure you want to delete {count} factory/factories?"
         },
         "messages": {
           "loadingConstantsError": "Failed to load constants",
@@ -307,18 +380,18 @@
         "editTitle": "Edit Factory",
         "addTitle": "Add Factory",
         "tabs": {
-          "basicInfo": "Basic Info",
-          "financialInfo": "Financial Info",
-          "commercialInfo": "Commercial Info",
-          "operationalInfo": "Operational Info",
+          "basicInfo": "Basic Data",
+          "financialInfo": "Financial Data",
+          "commercialInfo": "Commercial Data",
+          "operationalInfo": "Operational Information",
           "documents": "Documents"
         },
         "messages": {
-          "saveBasicFirst": "Basic info must be saved first",
-          "basicInfoSaved": "Basic info saved successfully",
-          "financialInfoSaved": "Financial info saved successfully",
-          "commercialInfoSaved": "Commercial info saved successfully",
-          "operationalInfoSaved": "Operational info saved successfully",
+          "saveBasicFirst": "Basic data must be saved first",
+          "basicInfoSaved": "Basic data saved successfully",
+          "financialInfoSaved": "Financial data saved successfully",
+          "commercialInfoSaved": "Commercial data saved successfully",
+          "operationalInfoSaved": "Operational information saved successfully",
           "documentsSaved": "Documents saved successfully",
           "validationError": "Please correct the errors in the form",
           "saveError": "Failed to save factory",
@@ -327,35 +400,80 @@
       }
     },
     "GeneralProductPriceList": {
-      "title": "General Products Price List",
-      "description": "Enables you to manage general products prices"
+      "title": "General Product Price List",
+      "description": "Allows you to manage general product prices",
+      "form": {
+        "sections": {
+          "bulkEdit": "Edit All",
+          "pageTitle": "General Product Price List"
+        },
+        "bulkEdit": {
+          "modes": {
+            "percentage": "Percentage",
+            "value": "Value"
+          },
+          "directions": {
+            "increase": "Increase",
+            "decrease": "Decrease"
+          }
+        },
+        "placeholders": {
+          "searchByCode": "Search by code",
+          "filterByCategory": "Fetch products by specific category"
+        },
+        "table": {
+          "product": "Product",
+          "minPrice": "Minimum Price",
+          "maxPrice": "Maximum Price"
+        },
+        "messages": {
+          "fetchCategoriesError": "Failed to fetch categories",
+          "fetchItemsError": "Failed to fetch price list items",
+          "selectProductsFirst": "Please select products to apply the edit",
+          "enterValidValue": "Please enter a valid value",
+          "bulkEditApplied": "Edit applied to {count} products",
+          "saveSuccess": "Price list saved successfully",
+          "saveError": "Failed to save price list"
+        }
+      }
     },
     "GeneralProductsPriceLists": {
-      "title": "General Products Price Lists",
-      "description": "Enables you to manage general products prices"
+      "title": "General Product Price Lists",
+      "description": "Allows you to manage general product prices",
+      "list": {
+        "filters": {
+          "listName": "List Name"
+        },
+        "messages": {
+          "fetchError": "Failed to load data",
+          "statusChangeSuccess": "Price list {status} successfully",
+          "statusChangeError": "Failed to change price list status",
+          "columnsUpdateError": "Failed to update columns"
+        }
+      }
     },
     "geoAreas": {
-      "title": "Geographical Regions",
-      "description": "Enables you to manage geographical regions",
-      "FormTitle": "Geographical Regions",
-      "FormDescription": "Enables you to add geographical regions",
+      "title": "Geographic Area Divisions",
+      "description": "Allows you to manage geographic area divisions",
+      "FormTitle": "Geographic Area Divisions",
+      "FormDescription": "Allows you to add geographic area divisions",
       "form": {
         "basicData": "Basic Data",
-        "zoneType": "Zone Type",
-        "selectZoneType": "Select Zone Type",
-        "parentZone": "Parent Zone",
-        "selectParentZone": "Select Parent Zone",
-        "autoFilledFromMap": "Auto-filled from map"
+        "zoneType": "Division Type",
+        "selectZoneType": "Select division type",
+        "parentZone": "Parent Division",
+        "selectParentZone": "Select parent division",
+        "autoFilledFromMap": "Selected from map"
       }
     },
     "geoSegments": {
-      "title": "Geographic Segments",
-      "description": "Enables you to manage geographic segments",
-      "tableTitle": "Geographic Segments Division"
+      "title": "Geographic Segment Divisions",
+      "description": "Allows you to manage geographic segment divisions",
+      "tableTitle": "Geographic Segment Divisions"
     },
     "groupProducts": {
       "title": "Group Products",
-      "description": "Enables you to manage added group products and add other group products",
+      "description": "Allows you to manage added group products and add new ones",
       "list": "Group Products List",
       "create": "Add Group Product",
       "edit": "Edit Group Product",
@@ -368,17 +486,16 @@
         },
         "sections": {
           "prices": "Prices",
-          "productInfo": "Product Information",
+          "productInfo": "Product Data",
           "taxData": "Tax Data",
-          "supplyRelations": "Supply and Internal Relations",
+          "supplyRelations": "Supply and Internal Product Relations",
           "advancedAttributes": "Advanced Product Attributes",
           "tests": "Tests List",
-          "subProducts": "Sub Products",
-          "productVariants": "Product Variants"
+          "subProducts": "Sub-Products"
         },
         "labels": {
           "productCode": "Product Code",
-          "copyProductCode": "Copy code",
+          "copyProductCode": "Copy Code",
           "description": "Description",
           "category": "Category",
           "unit": "Unit",
@@ -386,9 +503,9 @@
           "materialType": "Material Type",
           "minQuantity": "Minimum Quantity",
           "purchasePrice": "Purchase Price",
-          "sellPrice": "Sell Price",
-          "minSellPrice": "Minimum Sell Price",
-          "maxSellPrice": "Maximum Sell Price",
+          "sellPrice": "Selling Price",
+          "minSellPrice": "Minimum Selling Price",
+          "maxSellPrice": "Maximum Selling Price",
           "wholesalePrice": "Wholesale Price",
           "semiWholesalePrice": "Semi-Wholesale Price",
           "discountType": "Discount Type",
@@ -396,10 +513,10 @@
           "profitMargin": "Profit Margin",
           "productImage": "Product Image",
           "productImageHint": "Max size: 10MB - Supported formats: JPG, PNG",
-          "nameAr": "Arabic Name",
-          "nameEn": "English Name",
-          "descriptionAr": "Arabic Description",
-          "descriptionEn": "English Description",
+          "nameAr": "Name in Arabic",
+          "nameEn": "Name in English",
+          "descriptionAr": "Description in Arabic",
+          "descriptionEn": "Description in English",
           "taxType": "Tax Type",
           "taxPercentage": "Percentage",
           "taxMinValue": "Minimum Value",
@@ -414,21 +531,21 @@
           "attributes": {
             "returnable": "Returnable",
             "rentable": "Rentable",
-            "sellNegative": "Allow Negative Sales",
-            "manufacturingProduct": "Manufacturable",
-            "availableForPurchase": "Available for Projects",
+            "sellNegative": "Negative Sales",
+            "manufacturingProduct": "Manufacturing Product",
+            "availableForPurchase": "Available for Purchase",
             "availableForRent": "Available for Rent",
             "availableForReturn": "Available for Return",
-            "availableForSelling": "Available for Sale",
-            "availableForBuying": "Available for Purchase",
+            "availableForSelling": "Available for Selling",
+            "availableForBuying": "Available for Buying",
             "availableForManufacturing": "Available for Manufacturing",
-            "availableForRefund": "Refundable",
-            "availableForOffset": "Offsettable"
+            "availableForRefund": "Available for Refund",
+            "availableForOffset": "Available for Offset"
           },
           "tests": {
             "testName": "Test",
-            "testsCount": "Tests Count",
-            "samplesCount": "Samples Count",
+            "testsCount": "Number of Tests",
+            "samplesCount": "Number of Samples",
             "sampleQuantity": "Sample Quantity",
             "status": "Status"
           }
@@ -441,7 +558,7 @@
           "selectCategory": "Select category",
           "selectUnit": "Select unit",
           "selectMaterialType": "Select material type",
-          "enterMinQuantity": "Enter minimum",
+          "enterMinQuantity": "Enter minimum quantity",
           "enterDescriptionEn": "Enter description in English",
           "enterDescriptionAr": "Enter description in Arabic",
           "selectCountry": "Select country",
@@ -459,49 +576,198 @@
           },
           "tests": {
             "testName": "Test",
-            "testsCount": "Tests Count",
-            "samplesCount": "Samples Count",
+            "testsCount": "Number of Tests",
+            "samplesCount": "Number of Samples",
             "sampleQuantity": "Sample Quantity",
             "status": "Status"
           },
           "subProducts": {
-            "name": "Sub Product Name",
+            "name": "Sub-Product Name",
             "sku": "Code",
-            "sellPrice": "Sell Price",
+            "sellPrice": "Selling Price",
             "purchasePrice": "Purchase Price"
           }
         },
         "buttons": {
-          "saveAndReturn": "Save & Return",
-          "saveAndCreate": "Save & Create New",
-          "saveAndContinue": "Save & Continue",
-          "addLanguage": "Add new language",
+          "saveAndReturn": "Save and Return to Home",
+          "saveAndCreate": "Save and Create New",
+          "saveAndContinue": "Save and Continue",
+          "addLanguage": "Add New Language",
           "add": "Add",
-          "update": "Update",
+          "update": "Edit",
           "cancel": "Cancel",
-          "generateSubProducts": "Generate sub products"
+          "generateSubProducts": "Generate Sub-Products"
         },
         "messages": {
           "copySuccess": "Product code copied successfully",
-          "selectCategoryFirst": "You must select a category to add a group product",
+          "selectCategoryFirst": "You must select a category to add a product group",
           "selectAspectsFirst": "Please select variable values first",
-          "noSubProductNamesReturned": "No sub product names were returned",
-          "subProductsGenerated": "Sub products generated successfully",
-          "subProductsGenerateFailed": "Failed to generate sub products",
+          "noSubProductNamesReturned": "No sub-product names were returned",
+          "subProductsGenerated": "Sub-products generated successfully",
+          "subProductsGenerateFailed": "Failed to generate sub-products",
           "selectTaxTypeAndPriority": "Please select tax type and priority",
-          "saveError": "Error while saving",
-          "completeStep1": "Please complete the first step first",
-          "fetchError": "Failed to fetch product data"
+          "saveError": "An error occurred while saving"
         },
         "defaults": {
           "product": "Product",
           "test": "Test"
         }
+      },
+      "view": {
+        "breadcrumb": {
+          "products": "Products",
+          "productsList": "Group Products Table"
+        },
+        "tabs": {
+          "general": "General Product Information",
+          "tests": "Product Tests"
+        },
+        "sections": {
+          "generalInfo": "General Information",
+          "prices": "Prices",
+          "addedTaxes": "Added Taxes",
+          "supplyRelations": "Supply and Internal Product Relations",
+          "advancedAttributes": "Advanced Product Attributes",
+          "attachments": "Attachments"
+        },
+        "subSections": {
+          "taxNumber": "Tax {number}"
+        },
+        "labels": {
+          "nameAr": "Name in Arabic",
+          "nameEn": "Name in English",
+          "productCode": "Product Code",
+          "productStatus": "Product Status",
+          "productType": "Product Type",
+          "productCategory": "Product Category",
+          "descriptionAr": "Description in Arabic",
+          "descriptionEn": "Description in English",
+          "sellPrice": "Selling Price",
+          "maxSellPrice": "Maximum Selling Price",
+          "minSellPrice": "Minimum Selling Price",
+          "wholesalePrice": "Wholesale Price",
+          "semiWholesalePrice": "Semi-Wholesale Price",
+          "discountType": "Discount Type",
+          "discountValue": "Discount Value",
+          "tax": "Tax",
+          "taxName": "Added Tax Name",
+          "taxValue": "Tax Value",
+          "taxPriority": "Priority",
+          "taxMinimum": "Minimum",
+          "brand": "Brand",
+          "manufacturer": "Manufacturer",
+          "originCountry": "Country of Origin",
+          "alternativeProducts": "Alternative Products",
+          "attachedProducts": "Attached Products",
+          "relatedProducts": "Related Products",
+          "bestSuppliers": "Best Suppliers",
+          "testsCount": "Number of Tests",
+          "samplesCount": "Number of Samples",
+          "sampleQuantity": "Sample Quantity"
+        },
+        "attachments": {
+          "fileName": "Project Houses File",
+          "fileMeta": "200 KB - 100% uploaded"
+        },
+        "tests": {
+          "gradation": "Granularity Test",
+          "hardness": "Hardness Test",
+          "endurance": "Endurance Test"
+        },
+        "mock": {
+          "product": {
+            "name": "Building Materials Product",
+            "description": "Building materials product by Qallab",
+            "descriptionAr": "Included in the 'Infrastructure Development' project, the latest various building construction materials in formats to meet diverse architectural and structural requirements as well as modern environmental requirements",
+            "productType": "Brick",
+            "category": "Building Materials",
+            "purchasePrice": "1200 SAR",
+            "sellPrice": "100 SAR",
+            "discountType": "Percentage",
+            "tax1Name": "Value Added Tax",
+            "tax1Priority": "Applied",
+            "tax2Name": "Added Tax Name",
+            "tax2Value": "Tax Value",
+            "tax2Priority": "Priority",
+            "brand": "Makkah Build",
+            "manufacturer": "Makkah Factory",
+            "originCountry": "Saudi Arabia",
+            "alternativeProducts": "Brick",
+            "accessoryProducts": "Steel",
+            "relatedProducts": "Steel, Gravel",
+            "bestSuppliers": "Qallab"
+          },
+          "tests": {
+            "testCount": "5 tests",
+            "sampleCount": "10 samples",
+            "sampleQuantity": "Approximately 50 kg per sample"
+          }
+        },
+        "values": {
+          "active": "Active",
+          "inactive": "Inactive",
+          "manufacturable": "Manufacturing Product",
+          "sellable": "Available for Sale",
+          "purchasable": "Available for Purchase",
+          "barterable": "Barterable",
+          "clearable": "Available for Offset",
+          "rentable": "Rentable",
+          "allowNegativeSales": "Negative Sales",
+          "noDescription": "No description"
+        }
+      },
+      "listPage": {
+        "deleteDialog": {
+          "titleSingle": "Delete Product",
+          "titleBulk": "Delete Products",
+          "messageSingle": "Are you sure you want to delete {name}?",
+          "messageBulk": "Are you sure you want to delete {count} product(s)?"
+        },
+        "buttons": {
+          "bulkDelete": "Delete Selected",
+          "deleteAll": "Delete All",
+          "searchNow": "Search Now",
+          "reset": "Reset"
+        },
+        "messages": {
+          "deleteSuccess": "Product deleted successfully",
+          "bulkDeleteSuccess": "Selected products deleted successfully",
+          "deleteError": "An error occurred while deleting",
+          "fetchError": "An error occurred while fetching data",
+          "statusChangeSuccess": "Product {status} successfully",
+          "subItemStatusChangeSuccess": "Sub-product {status} successfully",
+          "activate": "Activate",
+          "deactivate": "Deactivate",
+          "statusChangeError": "An error occurred while changing status",
+          "subItemStatusChangeError": "An error occurred while changing sub-product status",
+          "loadingMore": "Loading more..."
+        },
+        "table": {
+          "name": "Name",
+          "code": "Code",
+          "unit": "Unit",
+          "category": "Category",
+          "purchasePrice": "Purchase Price",
+          "sellPrice": "Selling Price",
+          "status": "Status"
+        },
+        "subItemsTable": {
+          "name": "Sub-Product Name",
+          "code": "Code",
+          "sellPrice": "Selling Price",
+          "purchasePrice": "Purchase Price",
+          "quantity": "Quantity",
+          "totalAmount": "Total Amount"
+        },
+        "filters": {
+          "active": "Active",
+          "inactive": "Inactive"
+        }
       }
     },
     "logistics": {
       "title": "Logistics Companies",
-      "description": "Enables you to manage logistics companies data",
+      "description": "Allows you to manage logistics companies data",
       "sidebarTitle": "Transport Companies Management",
       "list": {
         "filters": {
@@ -512,7 +778,7 @@
         },
         "deleteDialog": {
           "title": "Delete Transport Companies",
-          "message": "Are you sure you want to delete {count} transport company?"
+          "message": "Are you sure you want to delete {count} transport company/companies?"
         },
         "messages": {
           "loadingConstantsError": "Failed to load constants",
@@ -523,59 +789,80 @@
         }
       },
       "form": {
-        "editTitle": "Edit Logistics Company",
-        "addTitle": "Add Logistics Company",
+        "editTitle": "Edit Transport Company",
+        "addTitle": "Add Transport Company",
         "tabs": {
-          "basicInfo": "Basic Information",
-          "financialInfo": "Financial Information",
-          "commercialInfo": "Commercial Information",
+          "basicInfo": "Basic Data",
+          "financialInfo": "Financial Data",
+          "commercialInfo": "Commercial Data",
           "operationalInfo": "Operational Information"
         },
         "messages": {
-          "saveBasicFirst": "You must save the basic information first",
-          "basicInfoSaved": "Basic information saved successfully",
-          "financialInfoSaved": "Financial information saved successfully",
-          "commercialInfoSaved": "Commercial information saved successfully",
+          "saveBasicFirst": "Basic data must be saved first",
+          "basicInfoSaved": "Basic data saved successfully",
+          "financialInfoSaved": "Financial data saved successfully",
+          "commercialInfoSaved": "Commercial data saved successfully",
           "operationalInfoSaved": "Operational information saved successfully",
           "validationError": "Please correct the errors in the form",
-          "saveError": "Failed to save logistics company",
-          "loadError": "Failed to load logistics company data"
+          "saveError": "Failed to save transport company",
+          "loadError": "Failed to load transport company data"
         }
       }
     },
     "vehiclesData": {
-      "title": "Vehicle data",
-      "description": "Manage vehicle records and add new vehicles",
+      "title": "Vehicles Data",
+      "description": "Allows you to manage and add vehicle data",
       "list": {
         "filters": {
-          "vehicleNumber": "Vehicle number",
-          "plateNumber": "Plate number",
-          "vehicleType": "Vehicle type",
+          "vehicleNumber": "Vehicle Number",
+          "plateNumber": "Plate Number",
+          "vehicleType": "Vehicle Type",
+          "status": "Status"
+        },
+        "tableHeaders": {
+          "vehicle_number": "Vehicle Number",
+          "plate_number": "Plate Number",
+          "vehicle_type": "Vehicle Type",
+          "vehicle_category": "Vehicle Category",
+          "cargo_type": "Cargo Type",
+          "manufacturer": "Manufacturer",
+          "manufacturing_year": "Manufacturing Year",
+          "cargo_capacity": "Cargo Capacity (tons)",
+          "fuel_type": "Fuel Type",
+          "gps_tracking": "GPS Tracking System",
+          "operational_readiness": "Operational Readiness",
+          "vehicle_ownership": "Vehicle Ownership",
+          "last_maintenance_date": "Last Maintenance Date",
+          "insurance_status": "Insurance Status",
+          "driving_license_number": "Driving License",
+          "logistics_company": "Transport Company",
+          "chassis_number": "Chassis Number",
+          "is_active": "Status",
           "status": "Status"
         }
       },
       "form": {
-        "sectionTitle": "Vehicle data",
-        "editTitle": "Edit vehicle",
-        "addTitle": "Add vehicle",
+        "sectionTitle": "Vehicle Data",
+        "editTitle": "Edit Vehicle Data",
+        "addTitle": "Add Vehicle Data",
         "labels": {
-          "vehicleNumber": "Vehicle number",
-          "plateNumber": "Plate number",
-          "vehicleType": "Vehicle type",
-          "vehicleCategory": "Vehicle category",
-          "cargoType": "Cargo type",
+          "vehicleNumber": "Vehicle Number",
+          "plateNumber": "Plate Number",
+          "vehicleType": "Vehicle Type",
+          "vehicleCategory": "Vehicle Category",
+          "cargoType": "Cargo Type",
           "manufacturer": "Manufacturer",
-          "logisticsCompany": "Transport company",
-          "manufacturingYear": "Manufacturing year",
-          "cargoCapacity": "Cargo capacity (tons)",
-          "fuelType": "Fuel type",
-          "gpsTracking": "GPS tracking",
-          "operationalReadiness": "Operational readiness",
-          "vehicleOwnership": "Vehicle ownership",
-          "lastMaintenanceDate": "Last maintenance date",
-          "insuranceStatus": "Insurance status",
-          "drivingLicenseNumber": "Driving license number",
-          "chassisNumber": "Chassis number",
+          "logisticsCompany": "Transport Company",
+          "manufacturingYear": "Manufacturing Year",
+          "cargoCapacity": "Cargo Capacity (tons)",
+          "fuelType": "Fuel Type",
+          "gpsTracking": "GPS Tracking System",
+          "operationalReadiness": "Operational Readiness",
+          "vehicleOwnership": "Vehicle Ownership",
+          "lastMaintenanceDate": "Last Maintenance Date",
+          "insuranceStatus": "Insurance Status",
+          "drivingLicenseNumber": "Driving License Number",
+          "chassisNumber": "Chassis Number",
           "notes": "Notes",
           "status": "Status"
         },
@@ -590,7 +877,7 @@
           "manufacturingYear": "Enter manufacturing year",
           "cargoCapacity": "Enter cargo capacity",
           "fuelType": "Select fuel type",
-          "gpsTracking": "Select tracking option",
+          "gpsTracking": "Select tracking system",
           "operationalReadiness": "Select readiness",
           "vehicleOwnership": "Select ownership",
           "lastMaintenanceDate": "Select last maintenance date",
@@ -605,39 +892,114 @@
         }
       },
       "view": {
-        "pageTitle": "Vehicle details",
-        "vehicleDataSection": "Vehicle data",
+        "pageTitle": "Vehicle Details",
+        "vehicleDataSection": "Vehicle Data",
         "licenseValid": "Valid",
         "fields": {
-          "vehicleNumber": "Vehicle number",
-          "plateNumber": "Plate number",
-          "vehicleType": "Vehicle type",
-          "vehicleCategory": "Vehicle category",
-          "cargoType": "Cargo type",
+          "vehicleNumber": "Vehicle Number",
+          "plateNumber": "Plate Number",
+          "vehicleType": "Vehicle Type",
+          "vehicleCategory": "Vehicle Category",
+          "cargoType": "Cargo Type",
           "manufacturer": "Manufacturer",
-          "manufacturingYear": "Manufacturing year",
-          "cargoCapacity": "Cargo capacity (tons)",
-          "fuelType": "Fuel type",
-          "operationalReadiness": "Operational readiness",
-          "gpsTracking": "GPS tracking",
-          "vehicleOwnership": "Vehicle ownership",
-          "lastMaintenanceDate": "Last maintenance date",
-          "insuranceStatus": "Insurance status",
-          "drivingLicense": "Driving license",
+          "manufacturingYear": "Manufacturing Year",
+          "cargoCapacity": "Cargo Capacity (tons)",
+          "fuelType": "Fuel Type",
+          "operationalReadiness": "Operational Readiness",
+          "gpsTracking": "GPS Tracking System",
+          "vehicleOwnership": "Vehicle Ownership",
+          "lastMaintenanceDate": "Last Maintenance Date",
+          "insuranceStatus": "Insurance Status",
+          "drivingLicense": "Driving License",
           "status": "Status",
           "notes": "Notes"
+        }
+      }
+    },
+    "driversData": {
+      "title": "Drivers Data",
+      "description": "Allows you to manage and add driver data",
+      "list": {
+        "filters": {
+          "name": "Driver Name",
+          "nationalId": "ID Number",
+          "licenseNumber": "License Number",
+          "status": "Status"
+        },
+        "tableHeaders": {
+          "name": "Name",
+          "license_number": "License Number",
+          "national_id": "ID Number",
+          "license_type": "License Type",
+          "license_expires_at": "License Expiry Date",
+          "medical_exam_date": "Medical Exam Date",
+          "hazardous_material_qualified": "Qualified for Hazardous Materials Transport",
+          "rating": "Rating",
+          "logistics_company": "Transport Company",
+          "country": "Country",
+          "is_active": "Status",
+          "status": "Status"
+        }
+      },
+      "form": {
+        "sectionTitle": "Driver Data",
+        "editTitle": "Edit Driver Data",
+        "addTitle": "Add Driver Data",
+        "labels": {
+          "licenseNumber": "Driver License Number",
+          "logisticsCompany": "Transport Company",
+          "name": "Name",
+          "nationalId": "ID / Residency Number",
+          "licenseType": "License Type",
+          "licenseExpiresAt": "License Expiry Date",
+          "rating": "Driver Rating",
+          "medicalExamDate": "Medical Exam Date",
+          "hazardousMaterial": "Qualified for Hazardous Materials Transport",
+          "driverStatus": "Driver Status",
+          "country": "Country"
+        },
+        "placeholders": {
+          "licenseNumber": "Enter license number",
+          "logisticsCompany": "Select transport company",
+          "name": "Enter name",
+          "nationalId": "Enter ID number",
+          "licenseType": "Select license type",
+          "licenseExpiresAt": "Select expiry date",
+          "rating": "Select rating",
+          "medicalExamDate": "Select exam date"
+        },
+        "status": {
+          "active": "Active",
+          "inactive": "Inactive"
+        }
+      },
+      "view": {
+        "pageTitle": "Driver Details",
+        "driverDataSection": "Driver Data",
+        "fields": {
+          "name": "Name",
+          "licenseNumber": "License Number",
+          "nationalId": "ID Number",
+          "licenseType": "License Type",
+          "licenseExpiresAt": "License Expiry Date",
+          "medicalExamDate": "Medical Exam Date",
+          "hazardousMaterial": "Qualified for Hazardous Materials Transport",
+          "status": "Status",
+          "country": "Country",
+          "logisticsCompany": "Transport Company",
+          "rating": "Rating"
         }
       }
     },
     "materialMerchants": {
       "title": "Material Merchants",
       "sidebarTitle": "Material Merchants Management",
-      "description": "Enables you to manage material merchants",
-      "editDescription": "You can edit material merchants data here",
+      "description": "Allows you to manage material merchants",
+      "editDescription": "You can edit material merchants data from here",
       "list": {
         "deleteDialog": {
           "title": "Delete Material Merchants",
-          "message": "Are you sure you want to delete {count} material merchant?"
+          "message": "Are you sure you want to delete {count} material merchant(s)?"
         },
         "messages": {
           "loadingError": "Failed to load material merchants",
@@ -653,13 +1015,13 @@
         "editTitle": "Edit Material Merchant",
         "addTitle": "Add Material Merchant",
         "tabs": {
-          "basicInfo": "Basic Information",
-          "financialInfo": "Financial Information"
+          "basicInfo": "Basic Data",
+          "financialInfo": "Financial Data"
         },
         "messages": {
-          "saveBasicFirst": "You must save the basic information first",
-          "basicInfoSaved": "Basic information saved successfully",
-          "financialInfoSaved": "Financial information saved successfully",
+          "saveBasicFirst": "Basic data must be saved first",
+          "basicInfoSaved": "Basic data saved successfully",
+          "financialInfoSaved": "Financial data saved successfully",
           "validationError": "Please correct the errors in the form",
           "saveError": "Failed to save material merchant",
           "loadError": "Failed to load material merchant data"
@@ -668,59 +1030,242 @@
     },
     "OrdersFuels": {
       "title": "Fuel Purchase Orders Table",
-      "description": "Enables you to manage fuel purchase orders",
+      "description": "Allows you to manage fuel purchase orders",
       "FormTitle": "Fuel Order",
-      "FormDescriptionCreate": "Enables you to add a fuel order",
-      "FormDescriptionEdit": "Enables you to edit a fuel order"
+      "FormDescriptionCreate": "Allows you to add a fuel order",
+      "FormDescriptionEdit": "Allows you to edit a fuel order"
     },
     "OrdersLogistics": {
-      "title": "Logistics Service Orders List",
-      "description": "You can view logistics service orders and perform actions on them",
-      "FormTitle": "Logistics Service Order",
-      "FormDescription": "Issue a logistics service order",
-      "edit": "Edit logistics service order",
-      "view": "View logistics service order"
+      "title": "Transport Service Orders List",
+      "description": "You can view and manage transport service orders",
+      "FormTitle": "Transport Service Order",
+      "FormDescription": "Issue a transport service order",
+      "edit": "Edit Transport Service Order",
+      "view": "View Transport Service Order"
     },
     "OrdersMaterialProduct": {
-      "title": "Raw Material Purchase Orders Table",
-      "description": "Enables you to manage raw material purchase orders",
-      "FormTitle": "Raw Building Material Purchase Order",
-      "FormDescription": "Issue a building material purchase order",
-      "edit": "Edit purchase order"
+      "title": "Raw Building Materials Purchase Orders Table",
+      "description": "Allows you to manage raw building materials purchase orders",
+      "FormTitle": "Raw Building Materials Purchase Order",
+      "FormDescription": "Issue a building materials purchase order",
+      "edit": "Edit Purchase Order"
     },
     "PricesOffersMaterialProduct": {
-      "title": "Raw Building Material Quotations List",
-      "description": "You can view raw building material quotations and perform actions on them",
-      "FormTitle": "Raw Building Material Quotation",
-      "FormDescription": "You can add a raw building material quotation"
+      "title": "Raw Building Materials Price Offers List",
+      "description": "You can view and manage raw building materials price offers",
+      "FormTitle": "Raw Building Materials Price Offer",
+      "FormDescription": "Allows you to add a raw building materials price offer"
     },
     "productionCapacityList": {
       "title": "Production Capacity List",
-      "description": "Enables you to manage products production capacity"
+      "description": "Allows you to manage product production capacity",
+      "form": {
+        "placeholders": {
+          "filterByCategory": "Fetch products by specific category"
+        },
+        "labels": {
+          "productsCount": "Product Count: {count}"
+        },
+        "table": {
+          "product": "Product",
+          "min": "Minimum",
+          "max": "Maximum",
+          "tonPerHour": {
+            "title": "Production Quantity (tons/hour)"
+          },
+          "tonPerDay": {
+            "title": "Production Quantity (tons/day)"
+          },
+          "tonPerWeek": {
+            "title": "Production Quantity (tons/week)"
+          },
+          "tonPerMonth": {
+            "title": "Production Quantity (tons/month)"
+          }
+        },
+        "messages": {
+          "fetchItemsError": "Failed to fetch production capacity items",
+          "fetchCategoriesError": "Failed to fetch categories",
+          "missingId": "Production capacity ID not found",
+          "noChanges": "No items were modified",
+          "saveSuccess": "Changes saved successfully",
+          "saveError": "Failed to save production capacity"
+        }
+      }
     },
     "productionCapacityLists": {
       "title": "Production Capacity Lists",
-      "description": "Enables you to manage products production capacity"
+      "description": "Allows you to manage product production capacity",
+      "list": {
+        "columns": {
+          "supplier": "Supplier"
+        },
+        "messages": {
+          "fetchError": "An error occurred while fetching data",
+          "generalError": "An error occurred",
+          "statusChangeSuccess": "Production capacity {status} successfully",
+          "statusChangeError": "An error occurred while changing status",
+          "loadingMore": "Loading more..."
+        }
+      }
     },
     "ProductsBuildingMaterialPriceList": {
-      "title": "Raw Building Material Products Price List",
-      "description": "Enables you to manage raw building material products prices"
+      "title": "Raw Building Materials Product Price List",
+      "description": "Allows you to manage raw building materials product prices",
+      "form": {
+        "sections": {
+          "bulkEdit": "Edit All",
+          "pageTitle": "Building Materials Product Price List"
+        },
+        "bulkEdit": {
+          "modes": {
+            "percentage": "Percentage",
+            "value": "Value"
+          },
+          "directions": {
+            "increase": "Increase",
+            "decrease": "Decrease"
+          }
+        },
+        "placeholders": {
+          "searchByCode": "Search by code",
+          "filterByCategory": "Fetch products by specific category"
+        },
+        "table": {
+          "product": "Product",
+          "salePrice": "Sale Price"
+        },
+        "messages": {
+          "fetchCategoriesError": "Failed to fetch categories",
+          "fetchItemsError": "Failed to fetch price list items",
+          "selectProductsFirst": "Please select products to apply the edit",
+          "enterValidValue": "Please enter a valid value",
+          "bulkEditApplied": "Edit applied to {count} products",
+          "saveSuccess": "Price list saved successfully",
+          "saveError": "Failed to save price list"
+        }
+      }
     },
     "ProductsBuildingMaterialPriceLists": {
-      "title": "Raw Building Material Products Price Lists",
-      "description": "Enables you to manage raw building material products prices"
+      "title": "Raw Building Materials Product Price Lists",
+      "description": "Allows you to manage raw building materials product prices",
+      "list": {
+        "filters": {
+          "listName": "List Name"
+        },
+        "messages": {
+          "fetchError": "Failed to load data",
+          "statusChangeSuccess": "Price list {status} successfully",
+          "statusChangeError": "Failed to change price list status",
+          "columnsUpdateError": "Failed to update columns"
+        }
+      }
     },
     "ProductsCategories": {
       "title": "Product Categories",
-      "description": "Enables you to manage product categories",
+      "description": "Allows you to manage product categories",
       "list": {
         "deleteDialog": {
           "title": "Delete Categories",
-          "message": "Are you sure you want to delete {count} category?"
+          "message": "Are you sure you want to delete {count} category/categories?"
+        }
+      },
+      "form": {
+        "labels": {
+          "materialType": "Material Type"
+        },
+        "placeholders": {
+          "selectMaterialType": "Select material type"
+        }
+      },
+      "tree": {
+        "buttons": {
+          "addCategory": "Add New Category",
+          "addSubcategory": "Add New Subcategory",
+          "addTax": "Add Tax",
+          "save": "Save",
+          "update": "Update",
+          "applyToSelected": "Apply to Selected",
+          "close": "Close",
+          "clearSelection": "Clear Selection",
+          "bulkDelete": "Delete Selected",
+          "delete": "Delete"
+        },
+        "sidebar": {
+          "title": "Categories Tree",
+          "subtitle": "Select a category to view details",
+          "searchPlaceholder": "Search",
+          "emptyCategories": "No categories available"
+        },
+        "bulkBanner": {
+          "title": "{count} categories selected",
+          "subtitle": "Taxes will be applied to all selected categories"
+        },
+        "formPanel": {
+          "title": "Categories"
+        },
+        "labels": {
+          "name": "Name",
+          "parentCategory": "Main Category",
+          "unit": "Unit",
+          "status": "Status",
+          "active": "Active",
+          "inactive": "Inactive",
+          "categoryDetails": "Category Details",
+          "attachImage": "Attach Image",
+          "imageHint": "PNG, JPG or GIF (max. 400x400px)",
+          "taxesTitle": "Taxes",
+          "taxesBulkTitle": "Taxes for Selected Categories",
+          "tax": "Tax",
+          "percentage": "Percentage",
+          "minValue": "Minimum Value",
+          "priority": "Priority",
+          "actions": "Actions",
+          "appliedTaxesTitle": "Taxes Applied to Category"
+        },
+        "placeholders": {
+          "nameEn": "Enter name in English",
+          "nameAr": "Enter name in Arabic",
+          "parentCategory": "Select main category",
+          "unit": "Select unit",
+          "descriptionEn": "Enter Category Description in English",
+          "descriptionAr": "Enter category details in Arabic",
+          "selectTax": "Select tax",
+          "taxDerived": "Select tax",
+          "selectPriority": "Select priority"
+        },
+        "taxTable": {
+          "empty": "No taxes added yet"
+        },
+        "taxError": "Tax values in the table below must be entered",
+        "messages": {
+          "loadDataFailed": "An error occurred while loading data",
+          "loadCategoriesFailed": "An error occurred while loading categories",
+          "loadCategoryFailed": "An error occurred while loading category data",
+          "updated": "Category updated successfully",
+          "created": "Category added successfully",
+          "createdSub": "Subcategory added successfully",
+          "validationFailed": "Please correct the errors in the form",
+          "saveFailed": "An error occurred while saving the category",
+          "bulkDeleteFailed": "An error occurred while deleting categories",
+          "deleted": "Category deleted successfully",
+          "deleteFailed": "An error occurred while deleting the category",
+          "bulkDeleted": "{count} categories deleted successfully",
+          "bulkTaxApplied": "Taxes applied to {count} categories successfully"
+        },
+        "deleteDialog": {
+          "intro": "Are you sure you want to delete the category",
+          "outro": "?",
+          "childrenWarning": "All subcategories associated with this category will also be deleted."
+        },
+        "bulkDeleteDialog": {
+          "intro": "Are you sure you want to delete",
+          "outro": "category/categories?",
+          "warning": "All selected categories and all their associated subcategories will be deleted."
         }
       },
       "view": {
-        "generalInfo": "General Category Information",
+        "generalInfo": "Category General Information",
         "addedTaxes": "Added Taxes",
         "attachments": "Attachments",
         "attachedDocuments": "Attached Documents",
@@ -732,24 +1277,24 @@
     },
     "productVariables": {
       "title": "Product Variables",
-      "description": "Enables you to manage product variables",
+      "description": "Allows you to manage product variables",
       "list": {
         "filters": {
-          "variableName": "Variable name"
+          "variableName": "Variable Name"
         },
         "buttons": {
-          "deleteSelected": "Delete selected",
-          "deleteAll": "Delete all"
+          "deleteSelected": "Delete Selected",
+          "deleteAll": "Delete All"
         },
         "deleteDialog": {
-          "title": "Delete variables",
+          "title": "Delete Variables",
           "message": "Are you sure you want to delete {count} variable(s)?"
         },
         "messages": {
           "fetchError": "Failed to load data",
           "deleteSuccess": "Variable deleted successfully",
           "deleteError": "Failed to delete variable",
-          "bulkDeleteSuccess": "{count} variable(s) deleted successfully",
+          "bulkDeleteSuccess": "{count} variables deleted successfully",
           "bulkDeleteError": "Failed to delete variables",
           "statusChangeSuccess": "Variable {status} successfully",
           "statusChangeError": "Failed to change variable status",
@@ -758,35 +1303,35 @@
       },
       "form": {
         "sections": {
-          "basicInfo": "Basic information",
-          "values": "Variable values"
+          "basicInfo": "Basic Information",
+          "values": "Variable Values"
         },
         "labels": {
-          "variableName": "Product variable name",
-          "valueType": "Value type",
+          "variableName": "Product Variable Name",
+          "valueType": "Element Type",
           "notes": "Notes"
         },
         "placeholders": {
           "variableNameEn": "Enter variable name in English",
           "variableNameAr": "Enter variable name in Arabic",
           "selectCategory": "Select category",
-          "selectValueType": "Select value type",
-          "notes": "Write notes here...",
+          "selectValueType": "Select element type",
+          "notes": "Enter notes here...",
           "value": "Enter value"
         },
         "buttons": {
-          "addValue": "Add new"
+          "addValue": "Add New"
         },
         "emptyState": {
           "title": "No variable values",
-          "description": "Click \"Add new\" to add a new value"
+          "description": "Click \"Add New\" to add a new value"
         },
         "defaults": {
           "value": "Value"
         },
         "messages": {
           "validationError": "Please correct the errors in the form",
-          "createSuccess": "Variable created successfully",
+          "createSuccess": "Variable added successfully",
           "updateSuccess": "Variable updated successfully",
           "saveError": "Failed to save data",
           "loadConstantsError": "Failed to load constants",
@@ -797,12 +1342,12 @@
     },
     "profile": {
       "title": "Profile Settings",
-      "description": "You can edit your personal data here"
+      "description": "You can edit your personal data from here"
     },
     "projects": {
       "title": "Projects Table",
-      "description": "View projects",
-      "formDescription": "Enables you to manage projects",
+      "description": "View Projects",
+      "formDescription": "Allows you to manage projects",
       "list": {
         "addButton": "Add Project"
       },
@@ -811,123 +1356,123 @@
     },
     "PurchaseInvoices": {
       "title": "Purchase Invoices Table",
-      "description": "Enables you to manage purchase invoices",
-      "FormTitle": "Issue Raw Building Material Purchase Invoice",
-      "FormDescription": "Issue building material purchase order invoice",
-      "edit": "Edit receiving document"
+      "description": "Allows you to manage purchase invoices",
+      "FormTitle": "Issue Raw Building Materials Purchase Invoice",
+      "FormDescription": "Issue a building materials purchase order invoice",
+      "edit": "Edit Receiving Document"
     },
     "PurchaseInvoicesLogistics": {
-      "title": "Logistics Service Purchase Invoices Table",
-      "description": "Enables you to manage logistics service purchase invoices",
-      "FormTitle": "Issue Logistics Service Purchase Invoice",
-      "FormDescription": "Issue logistics service purchase order invoice"
+      "title": "Transport Service Purchase Invoices Table",
+      "description": "Allows you to manage transport service purchase invoices",
+      "FormTitle": "Issue Transport Service Purchase Invoice",
+      "FormDescription": "Issue a transport service purchase order invoice"
     },
     "purchasesLogistics": {
-      "title": "Logistics Service Quotation Requests List",
-      "description": "You can view logistics service quotation requests and perform actions on them",
-      "list": "Logistics Service Quotation Requests List",
-      "create": "Request Logistics Service Quotation",
-      "createDescription": "Enables you to add a logistics service quotation request",
-      "edit": "Edit logistics service request",
-      "view": "View logistics service request"
+      "title": "Transport Service Price Offer Requests List",
+      "description": "You can view and manage transport service price offer requests",
+      "list": "Transport Service Price Offer Requests List",
+      "create": "Transport Service Price Offer Request",
+      "createDescription": "Allows you to add a transport service price offer request",
+      "edit": "Edit Logistics Service Request",
+      "view": "View Logistics Service Request"
     },
     "PurchasesRequests": {
       "title": "Purchase Orders Table",
-      "description": "Enables you to manage purchase orders",
-      "FormTitle": "Raw Building Material Purchase Order",
-      "FormDescription": "Issue building material purchase order"
+      "description": "Allows you to manage purchase orders",
+      "FormTitle": "Raw Building Materials Purchase Order",
+      "FormDescription": "Issue a building materials purchase order"
     },
     "PurchasesRequestsFuels": {
-      "title": "Fuel Quotation Requests",
-      "description": "You can view fuel quotation requests and perform actions on them",
-      "FormTitle": "Fuel Quotation Request",
-      "FormDescription": "Enables you to add a fuel quotation request",
-      "edit": "Edit fuel quotation request",
-      "view": "View fuel quotation request"
+      "title": "Fuel Price Offer Requests",
+      "description": "You can view and manage fuel price offer requests",
+      "FormTitle": "Fuel Price Offer Request",
+      "FormDescription": "Allows you to add a fuel price offer request",
+      "edit": "Edit Fuel Price Offer Request",
+      "view": "View Fuel Price Offer Request"
     },
     "PurchasesRequestsMaterialProduct": {
-      "title": "Raw Building Material Quotation Requests List",
-      "description": "You can view raw building material quotation requests and perform actions on them",
-      "FormTitle": "Raw Building Material Quotation Request",
-      "FormDescription": "Enables you to add a raw building material quotation request",
-      "edit": "Edit raw building material quotation request",
-      "view": "View raw building material quotation request"
+      "title": "Raw Building Materials Price Offer Requests List",
+      "description": "You can view and manage raw building materials price offer requests",
+      "FormTitle": "Raw Building Materials Price Offer Request",
+      "FormDescription": "Allows you to add a raw building materials price offer",
+      "edit": "Edit Raw Building Materials Price Offer Request",
+      "view": "View Raw Building Materials Price Offer Request"
     },
     "QuotationsLogistics": {
-      "title": "Logistics Services Quotations",
-      "description": "You can view logistics services quotations and perform actions on them",
-      "view": "View logistics service quotation"
+      "title": "Transport Service Price Offers",
+      "description": "You can view and manage transport service price offers",
+      "view": "View Transport Service Price Offer"
     },
     "QuotationsMaterialProduct": {
-      "title": "Raw Material Quotations",
-      "description": "You can view raw building material quotations in purchases",
-      "view": "View raw material quotation"
+      "title": "Raw Materials Price Offers",
+      "description": "You can view raw building materials price offers in purchases",
+      "view": "View Raw Materials Price Offer"
     },
     "ReceiptVouchers": {
       "title": "Receiving Documents Table",
-      "description": "Enables you to manage purchase orders",
+      "description": "Allows you to manage purchase orders",
       "FormTitle": "Add Receiving Document",
       "FormDescription": "Create a receiving document for a purchase order",
-      "edit": "Edit receiving document"
+      "edit": "Edit Receiving Document"
     },
     "ReceivingDocs": {
       "title": "Receiving Documents Table",
-      "description": "Enables you to manage receiving documents",
+      "description": "Allows you to manage receiving documents",
       "tableTitle": "Receiving Document Items Table",
-      "edit": "Edit receiving document",
-      "view": "View receiving document",
-      "create": "Add receiving document",
+      "edit": "Edit Receiving Document",
+      "view": "View Receiving Document",
+      "create": "Add Receiving Document",
       "docCode": "Document Code"
     },
     "ReceivingDocsLogistics": {
-      "title": "Logistics Service Receiving Documents Table",
-      "description": "Enables you to manage logistics service receiving documents",
-      "edit": "Edit logistics service receiving document",
-      "view": "View logistics service receiving document",
-      "create": "Add logistics service receiving document",
+      "title": "Transport Service Receiving Documents Table",
+      "description": "Allows you to manage transport service receiving documents",
+      "edit": "Edit Transport Service Receiving Document",
+      "view": "View Transport Service Receiving Document",
+      "create": "Add Transport Service Receiving Document",
       "docCode": "Document Code"
     },
     "requestForQuotation": {
       "title": "Request for Quotation",
-      "description": "Simply choose the product or service you need and enter the required details",
-      "list": "Requests for Quotation List",
-      "create": "Add quotation request",
-      "edit": "Edit quotation request",
-      "view": "View quotation request"
+      "description": "Select the product or service you need and enter the required details simply",
+      "list": "Quotation Requests List",
+      "create": "Add Quotation Request",
+      "edit": "Edit Quotation Request",
+      "view": "View Quotation Request"
     },
     "requestForQuotationFuel": {
-      "title": "Fuel Quotation Requests List",
-      "description": "You can view fuel quotation requests and perform actions on them",
-      "FormTitle": "Fuel Quotation Request",
-      "FormDescription": "Enables you to add a fuel quotation request",
-      "create": "Add fuel quotation request",
-      "edit": "Edit fuel quotation request",
-      "view": "View fuel quotation request"
+      "title": "Fuel Price Offer Requests List",
+      "description": "You can view and manage fuel price offer requests",
+      "FormTitle": "Fuel Price Offer Request",
+      "FormDescription": "Allows you to add a fuel price offer request",
+      "create": "Add Fuel Price Offer Request",
+      "edit": "Edit Fuel Price Offer Request",
+      "view": "View Fuel Price Offer Request"
     },
     "requestForQuotationMaterialProduct": {
-      "title": "Raw Building Material Quotation Requests List",
-      "description": "You can view raw building material quotation requests and perform actions on them",
-      "FormTitle": "Raw Material Quotation",
-      "FormDescription": "Enables you to add a raw material quotation",
-      "create": "Add physical product quotation request",
-      "edit": "Edit physical product quotation request",
-      "view": "View physical product quotation request"
+      "title": "Raw Building Materials Price Offer Requests List",
+      "description": "You can view and manage raw building materials price offer requests",
+      "FormTitle": "Raw Materials Price Offer",
+      "FormDescription": "Allows you to add a raw materials price offer",
+      "create": "Add Material Product Price Offer Request",
+      "edit": "Edit Material Product Price Offer Request",
+      "view": "View Material Product Price Offer Request"
     },
     "roles": {
       "title": "Roles and Permissions",
-      "description": "Manage user roles and their permissions",
+      "description": "Manage user roles and permissions",
       "list": {
         "pageTitle": "Users and Roles",
-        "pageDescription": "Enables you to view and edit users and their roles",
+        "pageDescription": "Allows you to view and edit users and their roles",
         "tabs": {
           "users": "Users",
           "roles": "Roles"
         },
-        "activeRoles": "Active Roles :",
-        "rolesAndPermissions": "Roles and Permissions :",
+        "activeRoles": "Active Roles:",
+        "rolesAndPermissions": "Roles and Permissions:",
         "addNewRole": "Add New Role",
         "emptyState": {
-          "title": "No roles",
+          "title": "No roles found",
           "description": "No roles matching the search were found"
         },
         "messages": {
@@ -978,99 +1523,107 @@
     },
     "SalesInvoices": {
       "title": "Sales Invoices Table",
-      "description": "Enables you to manage sales invoices",
-      "FormTitle": "Issue Raw Building Material Sales Invoice",
-      "FormDescription": "Issue building material sales order invoice"
+      "description": "Allows you to manage sales invoices",
+      "FormTitle": "Issue Raw Building Materials Sales Invoice",
+      "FormDescription": "Issue a building materials sales order invoice"
     },
     "SalesLogisticsInvoices": {
-      "title": "Logistics Service Sales Invoices Table",
-      "description": "Enables you to manage logistics service sales invoices",
-      "FormTitle": "Issue Logistics Service Sales Invoice",
-      "FormDescription": "Issue logistics service sales order invoice",
-      "FormTitleEdit": "Edit Logistics Service Sales Invoice",
-      "FormDescriptionEdit": "Edit logistics service sales order invoice",
+      "title": "Transport Service Sales Invoices Table",
+      "description": "Allows you to manage transport service sales invoices",
+      "FormTitle": "Issue Transport Service Sales Invoice",
+      "FormDescription": "Issue a transport service sales order invoice",
+      "FormTitleEdit": "Edit Transport Service Sales Invoice",
+      "FormDescriptionEdit": "Edit a transport service sales order invoice",
       "print": "Print Invoice"
     },
     "SalesOrdersFuels": {
       "title": "Fuel Sales Orders Table",
-      "description": "Enables you to manage fuel sales orders",
+      "description": "Allows you to manage fuel sales orders",
       "FormTitle": "Fuel Sales Order",
-      "FormDescriptionCreate": "Enables you to add a fuel sales order",
-      "FormDescriptionEdit": "Enables you to edit a fuel sales order",
-      "edit": "Edit fuel sales order",
-      "view": "View fuel sales order"
+      "FormDescriptionCreate": "Allows you to add a fuel sales order",
+      "FormDescriptionEdit": "Allows you to edit a fuel sales order",
+      "edit": "Edit Fuel Sales Order",
+      "view": "View Fuel Sales Order"
     },
     "SalesOrdersLogistics": {
-      "title": "Logistics Service Sales Orders Table",
-      "description": "Enables you to manage logistics service sales orders",
-      "FormTitle": "Logistics Service Order",
-      "FormDescriptionCreate": "Enables you to add a logistics service order",
-      "FormDescriptionEdit": "Enables you to edit a logistics service order",
-      "edit": "Edit logistics service order",
-      "view": "View logistics service order"
+      "title": "Transport Service Orders Table",
+      "description": "Allows you to manage transport service orders",
+      "FormTitle": "Transport Service Order",
+      "FormDescriptionCreate": "Allows you to add a transport service order",
+      "FormDescriptionEdit": "Allows you to edit a transport service order",
+      "edit": "Edit Transport Service Order",
+      "view": "View Transport Service Order"
     },
     "SalesOrdersMaterialProduct": {
-      "pickupTitle": "Add Delivery Booking",
-      "pickupDescr": "Add delivery booking action"
+      "pickupTitle": "Add Delivery Appointment Reservation",
+      "pickupDescr": "Add a delivery appointment reservation action"
     },
     "SalesPayments": {
       "title": "Sales Payments Table",
-      "description": "View sales payments",
-      "FormTitle": "Pay Financial Installment",
-      "FormDescription": "Enter financial payment data",
+      "description": "View Sales Payments",
+      "FormTitle": "Process Payment",
+      "FormDescription": "Enter payment data",
       "print": "Print Payment",
       "view": "Payment Details",
-      "viewDescription": "View all details of the payment"
+      "viewDescription": "View all payment details"
     },
     "SalesQuotationsFuels": {
-      "title": "Fuel Quotations",
-      "description": "Manage fuel quotations",
-      "FormTitle": "Fuel Quotation",
-      "FormDescription": "Create a new fuel quotation",
-      "edit": "Edit fuel quotation",
-      "view": "View fuel quotation"
+      "title": "Fuel Price Offers",
+      "description": "Manage fuel price offers",
+      "FormTitle": "Fuel Price Offer",
+      "FormDescription": "Create a new fuel price offer",
+      "edit": "Edit Fuel Price Offer",
+      "view": "View Fuel Price Offer"
     },
     "SalesQuotationsLogistics": {
-      "title": "Logistics Service Quotations",
-      "description": "Manage logistics service quotations",
-      "FormTitle": "Logistics Service Quotation",
-      "FormDescription": "Create a new logistics service quotation",
-      "edit": "Edit logistics service quotation",
-      "view": "View logistics service quotation"
+      "title": "Transport Service Price Offers",
+      "description": "Manage transport service price offers",
+      "FormTitle": "Transport Service Price Offer",
+      "FormDescription": "Create a new transport service price offer",
+      "edit": "Edit Transport Service Price Offer",
+      "view": "View Transport Service Price Offer"
+    },
+    "QuotationsFuels": {
+      "title": "Fuel Price Offers",
+      "description": "Manage fuel price offers",
+      "FormTitle": "Fuel Price Offer",
+      "FormDescription": "Create a new fuel price offer",
+      "edit": "Edit Fuel Price Offer",
+      "view": "View Fuel Price Offer"
     },
     "SalesRequests": {
       "title": "Sales Orders Table",
-      "description": "Enables you to manage sales orders",
-      "FormTitle": "Raw Building Material Sales Order",
-      "FormDescription": "Issue building material sales order"
+      "description": "Allows you to manage sales orders",
+      "FormTitle": "Raw Building Materials Sales Order",
+      "FormDescription": "Issue a building materials sales order"
     },
     "SalesRequestsFuels": {
-      "title": "Fuel Quotation Requests",
-      "description": "Manage fuel quotation requests",
-      "FormTitle": "Fuel Quotation Request",
-      "FormDescription": "Create a new fuel quotation request",
-      "edit": "Edit fuel quotation request",
-      "view": "View fuel quotation request"
+      "title": "Fuel Price Offer Requests",
+      "description": "Manage fuel price offer requests",
+      "FormTitle": "Fuel Price Offer Request",
+      "FormDescription": "Create a new fuel price offer request",
+      "edit": "Edit Fuel Price Offer Request",
+      "view": "View Fuel Price Offer Request"
     },
     "SalesRequestsLogistics": {
-      "title": "Logistics Service Quotation Requests",
-      "description": "Manage logistics service quotation requests",
-      "FormTitle": "Logistics Service Quotation Request",
-      "FormDescription": "Create a new logistics service quotation request",
-      "edit": "Edit logistics service quotation request",
-      "view": "View logistics service quotation request"
+      "title": "Transport Service Price Offer Requests",
+      "description": "Manage transport service price offer requests",
+      "FormTitle": "Transport Service Price Offer Request",
+      "FormDescription": "Create a new transport service price offer request",
+      "edit": "Edit Transport Service Price Offer Request",
+      "view": "View Transport Service Price Offer Request"
     },
     "SalesSoPickups": {
-      "title": "Delivery Bookings",
-      "description": "Manage delivery bookings",
-      "edit": "Edit delivery booking",
-      "view": "View delivery booking",
+      "title": "Delivery Reservations",
+      "description": "Manage delivery reservations",
+      "edit": "Edit Delivery Reservation",
+      "view": "View Delivery Reservation",
       "viewPage": {
         "retry": "Retry",
-        "headerSubtitle": "Delivery booking details and information",
+        "headerSubtitle": "Delivery reservation details and related information",
         "breadcrumb": {
           "sales": "Sales",
-          "pickupsList": "Delivery Bookings"
+          "pickupsList": "Delivery Reservations"
         },
         "labels": {
           "morning": "Morning",
@@ -1080,7 +1633,7 @@
           "title": "Order Information",
           "transportCompany": "Transport Company",
           "date": "Date",
-          "coordinatesSendCount": "Frequency of sending coordinates",
+          "coordinatesSendCount": "Number of Coordinate Transmissions",
           "tripTiming": "Trip Timing",
           "loadingResponsible": "Loading Responsible",
           "driver": "Driver",
@@ -1098,26 +1651,26 @@
           "productName": "Product Name",
           "quantity": "Quantity",
           "unit": "Unit",
-          "vehicleType": "Carrier Type",
-          "tripsCount": "Number of Carriers",
+          "vehicleType": "Transporter Type",
+          "tripsCount": "Number of Transporters",
           "notes": "Notes"
         },
         "errors": {
-          "loadFailed": "Failed to load delivery booking details"
+          "loadFailed": "Failed to load delivery reservation details"
         }
       }
     },
     "SalesTrips": {
       "title": "Trips",
-      "description": "Enables you to manage trips",
+      "description": "Allows you to manage trips",
       "list": "Trips List",
       "create": "Create Trip",
-      "createDescription": "Enables you to create trips",
-      "edit": "Edit trip"
+      "createDescription": "Allows you to create trips",
+      "edit": "Edit Trip"
     },
     "sampleTypes": {
       "title": "Sample Types",
-      "description": "Enables you to manage sample types",
+      "description": "Allows you to manage sample types",
       "form": {
         "add": "New Sample Type",
         "edit": "Edit Sample Type",
@@ -1126,17 +1679,17 @@
       }
     },
     "servicePricesList": {
-      "title": "Service Prices List",
-      "description": "Enables you to manage service prices"
+      "title": "Services Price List",
+      "description": "Allows you to manage service prices"
     },
     "services": {
       "title": "Services",
-      "description": "Enables you to manage services",
+      "description": "Allows you to manage services",
       "list": {
         "addButton": "Add Service",
         "deleteDialog": {
           "title": "Delete Services",
-          "message": "Are you sure you want to delete {count} service?"
+          "message": "Are you sure you want to delete {count} service(s)?"
         },
         "messages": {
           "deleteSuccess": "Service deleted successfully",
@@ -1147,13 +1700,13 @@
       },
       "form": {
         "tabs": {
-          "basicInfo": "Basic Information",
+          "basicInfo": "Basic Data",
           "operationalData": "Operational Data"
         },
         "basicInfo": {
           "name": "Name",
           "namePlaceholderEn": "Enter name in English",
-          "namePlaceholderAr": "ادخل الاسم بالعربية",
+          "namePlaceholderAr": "Enter name in Arabic",
           "serviceCode": "Service Code",
           "serviceCodePlaceholder": "Enter service code",
           "serviceCategory": "Service Category",
@@ -1164,8 +1717,8 @@
           "serviceStatusPlaceholder": "Select status",
           "description": "Description",
           "descriptionPlaceholderEn": "Enter description in English",
-          "descriptionPlaceholderAr": "ادخل الوصف بالعربية",
-          "unit": "Unit of Measurement",
+          "descriptionPlaceholderAr": "Enter description in Arabic",
+          "unit": "Unit of Measure",
           "unitPlaceholder": "Select unit",
           "unitPrice": "Unit Price",
           "unitPricePlaceholder": "Enter unit price",
@@ -1182,7 +1735,7 @@
           "no": "No"
         },
         "operationalData": {
-          "appointmentSection": "Appointment and Duration?",
+          "appointmentSection": "Schedule and Duration?",
           "requiresScheduling": "Requires Appointment?",
           "serviceDuration": "Service Duration",
           "serviceDurationPlaceholder": "Enter duration",
@@ -1190,7 +1743,7 @@
           "serviceStatusSection": "Service Status?",
           "requiresApproval": "Requires Approval",
           "isBarter": "Barterable",
-          "isPartialAllowed": "Partial Allowed",
+          "isPartialAllowed": "Divisible",
           "salesEnabled": "Available for Sale",
           "purchaseEnabled": "Available for Purchase",
           "projectEnabled": "Available for Projects",
@@ -1216,29 +1769,29 @@
         "loading": "Loading service data...",
         "breadcrumbs": {
           "services": "Services",
-          "servicesList": "Services List"
+          "servicesList": "Services Table"
         },
         "sections": {
           "generalInfo": "General Information",
-          "appointmentDuration": "Appointment and Duration",
+          "appointmentDuration": "Schedule and Duration",
           "serviceStatus": "Service Status",
           "additionalData": "Additional Data"
         },
         "labels": {
-          "arabicName": "Arabic Name",
-          "englishName": "English Name",
+          "arabicName": "Name in Arabic",
+          "englishName": "Name in English",
           "serviceCode": "Service Code",
           "status": "Service Status",
           "category": "Service Category",
           "serviceType": "Service Type",
-          "englishDescription": "English Description",
-          "arabicDescription": "Arabic Description",
+          "englishDescription": "Description in English",
+          "arabicDescription": "Description in Arabic",
           "requiresScheduling": "Requires Appointment",
           "serviceDuration": "Service Duration",
           "activationDate": "Activation Date",
           "requiresApproval": "Requires Approval",
           "isBarter": "Barterable",
-          "isPartialAllowed": "Partial Allowed",
+          "isPartialAllowed": "Divisible",
           "salesEnabled": "Available for Sale",
           "purchaseEnabled": "Available for Purchase",
           "projectEnabled": "Available for Projects",
@@ -1248,7 +1801,7 @@
         "values": {
           "active": "Active",
           "inactive": "Inactive",
-          "notSpecified": "Not Specified",
+          "notSpecified": "Not specified",
           "internal": "Internal",
           "external": "External",
           "fixed": "Fixed",
@@ -1267,15 +1820,101 @@
     },
     "ServicesCategories": {
       "title": "Service Categories",
-      "description": "Enables you to manage service categories",
+      "description": "Allows you to manage service categories",
       "list": {
         "deleteDialog": {
           "title": "Delete Service Categories",
-          "message": "Are you sure you want to delete {count} Service Category?"
+          "message": "Are you sure you want to delete {count} category/categories?"
+        }
+      },
+      "tree": {
+        "buttons": {
+          "addCategory": "Add New Category",
+          "addSubcategory": "Add New Subcategory",
+          "addTax": "Add Tax",
+          "save": "Save",
+          "update": "Update",
+          "applyToSelected": "Apply to Selected",
+          "close": "Close",
+          "clearSelection": "Clear Selection",
+          "bulkDelete": "Delete Selected",
+          "delete": "Delete"
+        },
+        "sidebar": {
+          "title": "Categories Tree",
+          "subtitle": "Select a category to view details",
+          "searchPlaceholder": "Search",
+          "emptyCategories": "No categories available"
+        },
+        "bulkBanner": {
+          "title": "{count} categories selected",
+          "subtitle": "Taxes will be applied to all selected categories"
+        },
+        "formPanel": {
+          "title": "Categories"
+        },
+        "labels": {
+          "name": "Name",
+          "parentCategory": "Main Category",
+          "unit": "Unit",
+          "status": "Status",
+          "active": "Active",
+          "inactive": "Inactive",
+          "categoryDetails": "Category Details",
+          "attachImage": "Attach Image",
+          "imageHint": "PNG, JPG or GIF (max. 400x400px)",
+          "taxesTitle": "Taxes",
+          "taxesBulkTitle": "Taxes for Selected Categories",
+          "tax": "Tax",
+          "percentage": "Percentage",
+          "minValue": "Minimum Value",
+          "priority": "Priority",
+          "actions": "Actions",
+          "appliedTaxesTitle": "Taxes Applied to Category"
+        },
+        "placeholders": {
+          "nameEn": "Enter name in English",
+          "nameAr": "Enter name in Arabic",
+          "parentCategory": "Select main category",
+          "unit": "Select unit",
+          "descriptionEn": "Enter Category Description in English",
+          "descriptionAr": "Enter category details in Arabic",
+          "selectTax": "Select tax",
+          "taxDerived": "Select tax",
+          "selectPriority": "Select priority"
+        },
+        "taxTable": {
+          "empty": "No taxes added yet"
+        },
+        "taxError": "Tax values in the table below must be entered",
+        "messages": {
+          "loadDataFailed": "An error occurred while loading data",
+          "loadCategoriesFailed": "An error occurred while loading categories",
+          "loadCategoryFailed": "An error occurred while loading category data",
+          "updated": "Category updated successfully",
+          "created": "Category added successfully",
+          "createdSub": "Subcategory added successfully",
+          "validationFailed": "Please correct the errors in the form",
+          "saveFailed": "An error occurred while saving the category",
+          "bulkDeleteFailed": "An error occurred while deleting categories",
+          "deleted": "Category deleted successfully",
+          "deleteFailed": "An error occurred while deleting the category",
+          "bulkDeleted": "{count} categories deleted successfully",
+          "bulkTaxApplied": "Taxes applied to {count} categories successfully"
+        },
+        "deleteDialog": {
+          "intro": "Are you sure you want to delete the category",
+          "outro": "?",
+          "childrenWarning": "All subcategories associated with this category will also be deleted."
+        },
+        "bulkDeleteDialog": {
+          "intro": "Are you sure you want to delete",
+          "outro": "category/categories?",
+          "warning": "All selected categories and all their associated subcategories will be deleted."
         }
       },
       "view": {
-        "generalInfo": "General Category Information",
+        "generalInfo": "Category General Information",
         "addedTaxes": "Added Taxes",
         "attachments": "Attachments",
         "attachedDocuments": "Attached Documents",
@@ -1286,8 +1925,8 @@
       }
     },
     "servicesPricesList": {
-      "title": "Service Prices Lists",
-      "description": "Enables you to manage service prices",
+      "title": "Services Price Lists",
+      "description": "Allows you to manage service prices",
       "form": {
         "categories": {
           "all": "All Categories",
@@ -1299,24 +1938,262 @@
     },
     "servicesSettings": {
       "title": "Services Settings",
-      "description": "Enables you to manage services settings"
+      "description": "Allows you to manage service settings"
     },
     "simpleProducts": {
       "title": "Simple Products",
-      "description": "Enables you to manage added simple products and add other simple products",
-      "list": "Simple Products List",
+      "description": "Allows you to manage added simple products and add new ones",
       "create": "Add Simple Product",
-      "edit": "Edit Simple Product"
+      "edit": "Edit Simple Product",
+      "form": {
+        "tabs": {
+          "basicData": "Basic Data",
+          "taxData": "Tax Data",
+          "additionalData": "Additional Data",
+          "testsList": "Tests List"
+        },
+        "sections": {
+          "prices": "Prices",
+          "productInfo": "General Product Information",
+          "taxesApplied": "Taxes Applied to Product",
+          "supplyRelations": "Supply and Internal Product Relations",
+          "advancedAttributes": "Advanced Product Attributes",
+          "testsList": "Tests List"
+        },
+        "labels": {
+          "productCode": "Product Code",
+          "name": "Name",
+          "namePlaceholderEn": "Enter name in English",
+          "namePlaceholderAr": "Enter name in Arabic",
+          "category": "Category",
+          "categoryPlaceholder": "Select category",
+          "unit": "Unit",
+          "unitPlaceholder": "Select unit",
+          "minUnit": "Minimum Unit",
+          "materialType": "Material Type",
+          "materialTypePlaceholder": "Select material type",
+          "minQuantity": "Minimum Quantity",
+          "minQuantityPlaceholder": "Enter minimum",
+          "description": "Description",
+          "descriptionPlaceholderEn": "Enter description in English",
+          "descriptionPlaceholderAr": "Enter description in Arabic",
+          "productImage": "Product Image",
+          "productImageHint": "PNG, JPG or GIF (max. 400x400px)",
+          "purchasePrice": "Purchase Price",
+          "salePrice": "Sale Price",
+          "minSalePrice": "Minimum Selling Price",
+          "maxSalePrice": "Maximum Selling Price",
+          "wholesalePrice": "Wholesale Price",
+          "halfWholesalePrice": "Semi-Wholesale Price",
+          "discountType": "Discount Type",
+          "discountTypePlaceholder": "Select discount type",
+          "discountValue": "Discount Value",
+          "discountValuePlaceholder": "Enter discount value",
+          "profitMargin": "Profit Margin",
+          "profitMarginPlaceholder": "Enter profit margin",
+          "pricePlaceholder": "Enter price",
+          "taxType": "Select Type",
+          "taxPercentage": "Percentage",
+          "taxMinValue": "Minimum Tax Value",
+          "taxPriority": "Select Priority",
+          "originCountry": "Country of Origin",
+          "originCountryPlaceholder": "Select country",
+          "manufacturer": "Manufacturer",
+          "manufacturerPlaceholder": "Select manufacturer",
+          "brand": "Brand",
+          "brandPlaceholder": "Enter brand",
+          "relatedProducts": "Related Products",
+          "relatedProductsPlaceholder": "Select product",
+          "attachedProducts": "Attached Products",
+          "attachedProductsPlaceholder": "Select product",
+          "alternativeProducts": "Alternative Products",
+          "alternativeProductsPlaceholder": "Select product",
+          "bestSuppliers": "Best Suppliers",
+          "bestSuppliersPlaceholder": "Select supplier"
+        },
+        "attributes": {
+          "manufacturingProduct": "Manufacturing Product",
+          "sellNegative": "Negative Sales",
+          "availableForRent": "Rentable",
+          "availableForReturn": "Barterable",
+          "availableForRefund": "Returnable",
+          "availableForOffset": "Available for Offset",
+          "availableForSelling": "Available for Sale",
+          "availableForBuying": "Available for Purchase",
+          "availableForPurchase": "Available for Projects"
+        },
+        "tests": {
+          "test": "Test",
+          "testPlaceholder": "Select",
+          "testsCount": "Number of Tests",
+          "testsCountPlaceholder": "Number of Tests",
+          "samplesCount": "Number of Samples",
+          "samplesCountPlaceholder": "Number of Samples",
+          "sampleQuantity": "Sample Quantity",
+          "sampleQuantityPlaceholder": "Sample Quantity",
+          "status": "Status"
+        },
+        "taxTable": {
+          "tax": "Tax",
+          "percentage": "Percentage",
+          "minValue": "Minimum Value",
+          "priority": "Priority"
+        },
+        "testsTable": {
+          "test": "Test",
+          "testsCount": "Number of Tests",
+          "samplesCount": "Number of Samples",
+          "sampleQuantity": "Sample Quantity",
+          "status": "Status"
+        },
+        "buttons": {
+          "addLanguage": "Add New Language",
+          "addTax": "Add Tax",
+          "editTax": "Edit Tax",
+          "cancelTax": "Cancel",
+          "addTest": "Add New",
+          "saveAndReturn": "Save and Return to Home",
+          "saveAndCreate": "Save and Create New",
+          "saveAndContinue": "Save and Continue",
+          "close": "Close",
+          "copyCode": "Copy Code"
+        },
+        "messages": {
+          "selectTaxAndPriority": "Please select tax type and priority",
+          "codeCopied": "Product code copied successfully",
+          "saveError": "An error occurred while saving",
+          "editSuccess": "Edited successfully",
+          "createSuccess": "Created successfully",
+          "saveSuccess": "Saved successfully",
+          "taxSaveSuccess": "Tax data saved successfully",
+          "additionalDataSaveSuccess": "Additional data saved successfully",
+          "completeStep1": "Please complete the first step first",
+          "fetchError": "Failed to fetch product data"
+        }
+      },
+      "view": {
+        "tabs": {
+          "generalInfo": "General Information",
+          "tests": "Tests"
+        },
+        "sections": {
+          "generalInfo": "General Information",
+          "taxInfo": "Tax Information",
+          "productRelations": "Supply and Internal Product Relations",
+          "supplyRelations": "Supply and Internal Product Relations",
+          "advancedAttributes": "Advanced Product Attributes",
+          "additionalInfo": "Additional Information",
+          "productImage": "Product Image",
+          "noProductImage": "No image available",
+          "pricingInfo": "Pricing Information",
+          "priceInfo": "Pricing Information",
+          "noTaxInfo": "No tax information available"
+        },
+        "labels": {
+          "nameAr": "Name in Arabic",
+          "nameEn": "Name in English",
+          "productCode": "Product Code",
+          "productStatus": "Product Status",
+          "parentProduct": "Parent Product",
+          "hasChildren": "Has Sub-Products",
+          "descriptionEn": "Description in English",
+          "descriptionAr": "Description in Arabic",
+          "taxName": "Tax Name",
+          "taxPercentage": "Tax Percentage",
+          "taxMinimum": "Minimum Tax Value",
+          "taxPriority": "Priority",
+          "priority": "Priority",
+          "brand": "Brand",
+          "originCountry": "Country of Origin",
+          "countryOfOrigin": "Country of Origin",
+          "childProducts": "Sub-Products",
+          "childrenCount": "Number of Sub-Products",
+          "purchasePrice": "Purchase Price",
+          "sellPrice": "Selling Price",
+          "minSellPrice": "Minimum Selling Price",
+          "maxSellPrice": "Maximum Selling Price",
+          "branchPrice": "Branch Price",
+          "wholesalePrice": "Wholesale Price",
+          "semiWholesalePrice": "Semi-Wholesale Price",
+          "halfWholesalePrice": "Semi-Wholesale Price",
+          "discountType": "Discount Type",
+          "discountValue": "Discount Value",
+          "testsCount": "Number of Tests",
+          "samplesCount": "Number of Samples",
+          "sampleQuantity": "Sample Quantity"
+        },
+        "values": {
+          "active": "Active",
+          "inactive": "Inactive",
+          "yes": "Yes",
+          "no": "No",
+          "noDescription": "No description",
+          "noTaxInfo": "No tax information available",
+          "noImage": "No image available",
+          "tests": "tests",
+          "samples": "samples",
+          "approxPerSample": "kg approximately per sample",
+          "manufacturable": "Manufacturing Product",
+          "allowNegativeSales": "Negative Sales",
+          "rentable": "Rentable"
+        },
+        "breadcrumb": {
+          "products": "Products",
+          "productsList": "Products Table"
+        },
+        "errors": {
+          "loadError": "An error occurred while loading data",
+          "fetchError": "Failed to load product data",
+          "generalError": "An error occurred while loading data",
+          "retry": "Retry"
+        }
+      },
+      "list": {
+        "deleteDialog": {
+          "titleSingle": "Delete Product",
+          "titleBulk": "Delete Products",
+          "messageSingle": "Are you sure you want to delete {name}?",
+          "messageBulk": "Are you sure you want to delete {count} product(s)?"
+        },
+        "buttons": {
+          "bulkDelete": "Delete Selected",
+          "deleteAll": "Delete All",
+          "searchNow": "Search Now",
+          "reset": "Reset"
+        },
+        "messages": {
+          "deleteSuccess": "Product deleted successfully",
+          "bulkDeleteSuccess": "Selected products deleted successfully",
+          "statusChangeSuccess": "Product {status} successfully",
+          "activateSuccess": "Activate",
+          "deactivateSuccess": "Deactivate",
+          "fetchError": "An error occurred while fetching data",
+          "deleteError": "An error occurred while deleting",
+          "statusChangeError": "An error occurred while changing status",
+          "loadingMore": "Loading more..."
+        },
+        "table": {
+          "name": "Name",
+          "code": "Code",
+          "unit": "Unit",
+          "category": "Category",
+          "purchasePrice": "Purchase Price",
+          "sellPrice": "Selling Price",
+          "minQuantity": "Minimum Quantity",
+          "updatedAt": "Updated At",
+          "status": "Status"
+        }
+      }
     },
     "suppliers": {
       "title": "Suppliers",
-      "description": "Enables you to manage suppliers",
+      "description": "Allows you to manage suppliers",
       "view": "Supplier Data",
       "list": {
         "addButton": "Add Supplier",
         "deleteDialog": {
           "title": "Delete Suppliers",
-          "message": "Are you sure you want to delete {count} supplier?"
+          "message": "Are you sure you want to delete {count} supplier(s)?"
         },
         "messages": {
           "deleteSuccess": "Supplier deleted successfully",
@@ -1326,15 +2203,93 @@
         }
       },
       "form": {
+        "tabs": {
+          "basicInfo": "Basic Information",
+          "accountingInfo": "Accounting Information"
+        },
+        "subTabs": {
+          "addressInfo": "Address Information",
+          "contactList": "Contact List"
+        },
+        "sections": {
+          "supplierData": "Supplier Data"
+        },
+        "labels": {
+          "businessName": "Business Name",
+          "businessNamePlaceholderEn": "Enter business name in English",
+          "businessNamePlaceholderAr": "Enter business name in Arabic",
+          "firstName": "First Name",
+          "firstNamePlaceholderEn": "Enter first name in English",
+          "firstNamePlaceholderAr": "Enter first name in Arabic",
+          "lastName": "Last Name",
+          "lastNamePlaceholderEn": "Enter last name in English",
+          "lastNamePlaceholderAr": "Enter last name in Arabic",
+          "supplierCode": "Supplier Code",
+          "defaultCurrency": "Default Currency",
+          "defaultCurrencyPlaceholder": "Saudi Riyal",
+          "mobile": "Mobile",
+          "phone": "Phone",
+          "email": "Email",
+          "emailPlaceholder": "{email}",
+          "businessNumber": "Commercial Registration Number",
+          "businessNumberPlaceholder": "Enter number",
+          "businessNumberTooltip": "Supplier's commercial registration number",
+          "taxNumber": "Tax Number",
+          "taxNumberPlaceholder": "Enter number",
+          "taxNumberTooltip": "Supplier's tax number",
+          "status": "Status",
+          "country": "Country",
+          "countryPlaceholder": "Country",
+          "city": "City",
+          "cityPlaceholder": "City",
+          "postalCode": "Postal Code",
+          "postalCodePlaceholder": "Postal Code",
+          "district": "District Name",
+          "districtPlaceholder": "District Name",
+          "streetName": "Street Name",
+          "streetNamePlaceholder": "Street Name",
+          "buildingNumber": "Building Number",
+          "buildingNumberPlaceholder": "Building Number",
+          "nationalAddress": "Enter National Address",
+          "nationalAddressPlaceholder": "National Address",
+          "address2": "Address 2",
+          "address2Placeholder": "Additional Address",
+          "account": "Account",
+          "accountPlaceholder": "Account"
+        },
+        "contacts": {
+          "title": "Contacts List",
+          "addButton": "Add Contact",
+          "firstName": "First Name",
+          "firstNamePlaceholder": "First Name",
+          "lastName": "Last Name",
+          "lastNamePlaceholder": "Last Name",
+          "email": "Email",
+          "emailPlaceholder": "{email}",
+          "telephone": "Phone",
+          "mobile": "Mobile",
+          "actions": "Actions",
+          "emptyState": "No contacts available. Click \"Add\" to add a new contact."
+        },
         "balances": {
           "label": "Balances",
           "noBalances": "No balances available",
           "headers": {
             "balance": "Balance",
-            "dueAmount": "Due Amount",
+            "dueAmount": "Amount Due",
             "currency": "Currency",
             "lastValidationDate": "Last Audit Date"
           }
+        },
+        "buttons": {
+          "save": "Save",
+          "close": "Close"
+        },
+        "messages": {
+          "saveSuccess": "Supplier saved successfully",
+          "saveError": "Failed to save supplier",
+          "validationError": "Please correct the errors in the form",
+          "fetchError": "Failed to fetch supplier data"
         }
       },
       "create": "Add Supplier",
@@ -1342,11 +2297,11 @@
     },
     "systemStatuses": {
       "title": "System Statuses Management",
-      "description": "Enables you to manage system statuses",
+      "description": "Allows you to manage system statuses",
       "list": {
         "deleteDialog": {
           "title": "Delete System Statuses",
-          "message": "Are you sure you want to delete {count} system status?"
+          "message": "Are you sure you want to delete {count} system status(es)?"
         }
       },
       "form": {
@@ -1357,11 +2312,11 @@
     },
     "taxes": {
       "title": "Taxes",
-      "description": "Enables you to manage taxes",
+      "description": "Allows you to manage taxes",
       "list": {
         "deleteDialog": {
           "title": "Delete Taxes",
-          "message": "Are you sure you want to delete {count} tax?"
+          "message": "Are you sure you want to delete {count} tax(es)?"
         },
         "messages": {
           "deleteSuccess": "Tax deleted successfully",
@@ -1371,29 +2326,29 @@
     },
     "taxRules": {
       "title": "Tax Rules",
-      "description": "Enables you to manage tax rules"
+      "description": "Allows you to manage tax rules"
     },
     "testGroup": {
       "title": "Test Groups",
-      "description": "Enables you to manage test groups",
+      "description": "Allows you to manage test groups",
       "tableTitle": "Test Groups Table",
       "form": {
         "add": "Add Test Group",
         "edit": "Edit Test Group",
         "addDescription": "Add a new test group",
         "editDescription": "Edit test group data",
-        "generalInfo": "General Group Information",
+        "generalInfo": "Group General Information",
         "mainTestGroup": "Main Test Group"
       }
     },
     "testMethodology": {
       "title": "Test Methodologies",
-      "description": "Enables you to manage test methodologies",
+      "description": "Allows you to manage test methodologies",
       "tableTitle": "Test Methodologies Table",
       "list": {
         "deleteDialog": {
           "title": "Delete Test Methodologies",
-          "message": "Are you sure you want to delete {count} methodology?"
+          "message": "Are you sure you want to delete {count} methodology/methodologies?"
         }
       },
       "form": {
@@ -1401,17 +2356,17 @@
         "edit": "Edit Test Methodology",
         "addDescription": "Add a new test methodology",
         "editDescription": "Edit test methodology data",
-        "generalInfo": "General Methodology Information"
+        "generalInfo": "Methodology General Information"
       }
     },
     "tests": {
       "title": "Tests",
-      "description": "Enables you to manage tests",
+      "description": "Allows you to manage tests",
       "tableTitle": "Tests Table"
     },
     "treasuries": {
       "title": "Treasuries Management",
-      "description": "Enables you to manage treasuries and their accounts",
+      "description": "Allows you to manage treasuries and their accounts",
       "list": "Treasuries List",
       "create": "Add New Treasury",
       "formDescription": "Add a financial treasury and its details",
@@ -1419,11 +2374,11 @@
     },
     "units": {
       "title": "Units",
-      "description": "Enables you to manage units",
+      "description": "Allows you to manage units",
       "list": {
         "deleteDialog": {
           "title": "Delete Units",
-          "message": "Are you sure you want to delete {count} unit?"
+          "message": "Are you sure you want to delete {count} unit(s)?"
         },
         "messages": {
           "deleteSuccess": "Unit deleted successfully",
@@ -1433,19 +2388,19 @@
     },
     "users": {
       "title": "Users",
-      "description": "Manage users in the system",
+      "description": "Manage system users",
       "list": {
         "pageTitle": "Users and Roles",
-        "pageDescription": "Enables you to view and edit users and their roles",
+        "pageDescription": "Allows you to view and edit users and their roles",
         "tabs": {
           "users": "Users",
           "roles": "Roles"
         },
-        "activeUsers": "Active Users :",
-        "usersAndRoles": "Users and Roles :",
+        "activeUsers": "Active Users:",
+        "usersAndRoles": "Users and Roles:",
         "addNewUser": "Add New User",
         "emptyState": {
-          "title": "No Users",
+          "title": "No users found",
           "description": "No users matching the search were found"
         },
         "messages": {
@@ -1458,7 +2413,7 @@
           "services": "Services",
           "purchases": "Purchases",
           "finance": "Finance",
-          "clearing": "Clearing and Barter",
+          "clearing": "Clearing and Bartering",
           "accounting": "Accounting",
           "users": "Users",
           "projectManagement": "Project Management",
@@ -1484,7 +2439,7 @@
         "confirmPassword": "Confirm Password",
         "confirmPasswordPlaceholder": "Confirm Password",
         "roles": "Roles",
-        "rolesPlaceholder": "Select Roles",
+        "rolesPlaceholder": "Select roles",
         "status": "Status",
         "saveChanges": "Save Changes",
         "addNewUserButton": "Add New User",
@@ -1497,7 +2452,7 @@
         }
       },
       "filters": {
-        "userName": "User Name",
+        "userName": "Username",
         "roles": "Roles",
         "status": "Status",
         "searchNow": "Search Now",
@@ -1506,12 +2461,12 @@
     },
     "vouchers": {
       "title": "Financial Dashboard",
-      "description": "Enables you to manage financial vouchers",
+      "description": "Allows you to manage financial vouchers",
       "list": {
         "voucherTypes": {
           "receipt": "Receipt",
           "payment": "Payment",
-          "entry": "Journal Entry"
+          "entry": "Entry"
         },
         "units": {
           "customer": "Customer",
@@ -1536,11 +2491,11 @@
       "title": "Financial Dashboard",
       "receiptVoucherTitle": "Receipt Vouchers",
       "paymentVoucherTitle": "Payment Vouchers",
-      "description": "Enables you to manage financial vouchers"
+      "description": "Allows you to manage financial vouchers"
     },
     "pricingPerTon": {
-      "title": "Pricing Per Ton",
-      "description": "Manage delivery pricing per ton",
+      "title": "Pricing per Ton",
+      "description": "Allows you to manage delivery prices per ton",
       "list": {
         "filters": {
           "centralLocation": "Central Location",
@@ -1550,7 +2505,7 @@
       },
       "deleteDialog": {
         "title": "Delete Pricing",
-        "message": "Are you sure you want to delete {count} pricing records?"
+        "message": "Are you sure you want to delete {count} pricing record(s)?"
       },
       "messages": {
         "deleteSuccess": "Pricing deleted successfully",
@@ -1559,7 +2514,7 @@
     },
     "customPricing": {
       "title": "Custom Pricing",
-      "description": "Manage custom pricing for trucks and materials",
+      "description": "Allows you to manage custom pricing for trucks and materials",
       "list": {
         "filters": {
           "centralLocation": "Central Location",
@@ -1570,7 +2525,7 @@
       },
       "deleteDialog": {
         "title": "Delete Custom Pricing",
-        "message": "Are you sure you want to delete {count} custom pricing records?"
+        "message": "Are you sure you want to delete {count} custom pricing record(s)?"
       },
       "messages": {
         "deleteSuccess": "Custom pricing deleted successfully",

@@ -1118,7 +1118,7 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
-                    المسارات المركزية
+                    {{ $t('navigation.sidebar.settings.basic.centralPaths') }}
                   </router-link>
                 </li>
                 <li class="relative">
@@ -1127,7 +1127,7 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
-                    تسعير بالشاحنة
+                    {{ $t('navigation.sidebar.settings.basic.pricingByTruck') }}
                   </router-link>
                 </li>
                 <li class="relative">
@@ -1136,7 +1136,7 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
-                    تسعير بالطن
+                    {{ $t('navigation.sidebar.settings.basic.pricingPerTon') }}
                   </router-link>
                 </li>
                 <li class="relative">
@@ -1145,7 +1145,7 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
-                    تسعير مخصص
+                    {{ $t('navigation.sidebar.settings.basic.customPricing') }}
                   </router-link>
                 </li>
                 <li v-if="canViewDrivers" class="relative">
@@ -1154,7 +1154,7 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
-                    إدارة بيانات السائقين
+                    {{ $t('navigation.sidebar.settings.basic.driversData') }}
                   </router-link>
                 </li>
                 <li v-if="canViewVehicles" class="relative">
@@ -1163,7 +1163,7 @@
                       ? 'font-bold text-qallab-yellow'
                       : 'text-white hover:text-qallab-yellow',
                   ]">
-                    إدارة بيانات المركبات
+                    {{ $t('navigation.sidebar.settings.basic.vehiclesData') }}
                   </router-link>
                 </li>
                 

@@ -129,6 +129,7 @@ const fetchSuppliers = async (search = '', cursor?: string, perPage = 15) => {
   }
 
   const params: any = { per_page: perPage };
+  params.business_type = "material_merchant,crusher"
   if (search) {
     params.name = search;
   }

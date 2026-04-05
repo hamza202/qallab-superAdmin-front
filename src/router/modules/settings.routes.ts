@@ -636,7 +636,7 @@ export const settingsRoutes: RouteRecordRaw[] = [
         name: "DriversDataList",
         component: () => import("@/views/settings/drivers-data/List.vue"),
         meta: {
-          title: "إدارة بيانات السائقين",
+          title: "pages.driversData.title",
         },
       },
       {
@@ -644,7 +644,7 @@ export const settingsRoutes: RouteRecordRaw[] = [
         name: "DriversDataCreate",
         component: () => import("@/views/settings/drivers-data/Form.vue"),
         meta: {
-          title: "إدارة بيانات السائقين",
+          title: "pages.driversData.title",
         },
       },
       {
@@ -652,7 +652,7 @@ export const settingsRoutes: RouteRecordRaw[] = [
         name: "DriversDataEdit",
         component: () => import("@/views/settings/drivers-data/Form.vue"),
         meta: {
-          title: "إدارة بيانات السائقين",
+          title: "pages.driversData.title",
         },
       },
       {
@@ -660,7 +660,7 @@ export const settingsRoutes: RouteRecordRaw[] = [
         name: "DriversDataView",
         component: () => import("@/views/settings/drivers-data/view.vue"),
         meta: {
-          title: "إدارة بيانات السائقين",
+          title: "pages.driversData.view.pageTitle",
         },
       },
     ],

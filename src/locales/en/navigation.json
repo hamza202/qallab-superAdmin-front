@@ -118,7 +118,11 @@
         "geoRegions": "Geographical Regions",
         "geoZones": "Geographical Zones",
         "pricingPerTon": "Pricing Per Ton",
-        "customPricing": "Custom Pricing"
+        "customPricing": "Custom Pricing",
+        "centralPaths": "Central Paths",
+        "pricingByTruck": "Pricing Per Truck",
+        "driversData": "Drivers Data Management",
+        "vehiclesData": "Vehicles Data Management"
       },
       "taxes": {
         "title": "Tax Management",
