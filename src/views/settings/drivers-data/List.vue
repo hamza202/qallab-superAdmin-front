@@ -6,7 +6,13 @@ import { useApi } from "@/composables/useApi";
 import { SettingsIcon, trash_1_icon, trash_2_icon, columnIcon, exportIcon, plusIcon, searchIcon } from "@/components/icons/globalIcons";
 
 const router = useRouter();
-const { t } = useI18n();
+const { t, te } = useI18n();
+
+const headerTitle = (header: TableHeader) => {
+    const path = `pages.driversData.list.tableHeaders.${header.key}`;
+    return te(path) ? t(path) : header.title;
+};
+
 const api = useApi();
 
 const icon = `<svg width="48" height="43" viewBox="0 0 48 43" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -20,13 +26,16 @@ interface DriverData {
     name: string;
     national_id: string;
     license_type: string[];
+    license_type_labels?: string[];
+    license_type_label?: string;
     license_expires_at: string;
     medical_exam_date: string;
     rating: number;
     is_active: boolean;
     logistics_company?: {
         id: number;
-        full_name: string;
+        name?: string;
+        full_name?: string;
     };
     actions?: {
         can_change_status?: boolean;
@@ -86,7 +95,12 @@ const previousCursor = ref<string | null>(null);
 const perPage = ref(5);
 const hasMoreData = computed(() => nextCursor.value !== null);
 
-const tableHeaders = computed(() => shownHeaders.value);
+const tableHeaders = computed(() =>
+    shownHeaders.value.map((h) => ({
+        ...h,
+        title: headerTitle(h),
+    }))
+);
 
 const showHeadersMenu = ref(false);
 const updatingHeaders = ref(false);
@@ -105,10 +119,16 @@ const filterNationalId = ref("");
 const filterLicenseNumber = ref("");
 const filterStatus = ref<number | null>(null);
 
-const StatusList = [
-    { title: 'فعال', value: 1 },
-    { title: 'غير فعال', value: 0 }
-];
+const StatusList = computed(() => [
+    { title: t('common.status.active'), value: 1 },
+    { title: t('common.status.inactive'), value: 0 }
+]);
+
+const licenseTypeDisplay = (item: DriverData) => {
+    if (item.license_type_label) return item.license_type_label;
+    if (item.license_type_labels?.length) return item.license_type_labels.join('، ');
+    return item.license_type?.join(', ') || '--';
+};
 
 const showDeleteDialog = ref(false);
 const deleteLoading = ref(false);
@@ -350,13 +370,13 @@ onMounted(() => {
 <template>
     <default-layout>
         <div class="drivers-data-page">
-            <PageHeader :icon="icon" title-key="إدارة بيانات السائقين"
-                description-key="تمكنك من إدارة وإضافة بيانات السائقين" />
+            <PageHeader :icon="icon" title-key="pages.driversData.title"
+                description-key="pages.driversData.description" />
             <div
                 class="flex justify-end items-stretch rounded border border-gray-300 w-fit ms-auto mb-4 overflow-hidden bg-white text-sm">
                 <ButtonWithIcon variant="flat" height="40" rounded="0"
                     custom-class="font-semibold text-base border-gray-300 bg-primary-50 !text-primary-900"
-                    :prepend-icon="exportIcon" label="تصدير" />
+                    :prepend-icon="exportIcon" :label="t('common.actions.export')" />
             </div>
 
             <div class="bg-gray-50 rounded-md -mx-6">
@@ -366,12 +386,12 @@ onMounted(() => {
                         class="flex flex-wrap items-stretch rounded overflow-hidden border border-gray-200 bg-white text-sm">
                         <ButtonWithIcon variant="flat" height="40" rounded="0"
                             custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-                            :prepend-icon="trash_1_icon" color="white" label="حذف المحدد"
+                            :prepend-icon="trash_1_icon" color="white" :label="t('common.table.deleteSelected')"
                             @click="handleBulkDelete" />
                         <div class="w-px bg-gray-200"></div>
                         <ButtonWithIcon variant="flat" height="40" rounded="0"
                             custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-                            :prepend-icon="trash_2_icon" color="white" label="حذف"
+                            :prepend-icon="trash_2_icon" color="white" :label="t('common.actions.delete')"
                             @click="handleBulkDelete" />
                     </div>
 
@@ -380,7 +400,7 @@ onMounted(() => {
                             <template v-slot:activator="{ props }">
                                 <ButtonWithIcon v-bind="props" variant="outlined" rounded="4" color="gray-500"
                                     height="40" custom-class="font-semibold text-base border-gray-400"
-                                    :prepend-icon="columnIcon" label="الأعمدة"
+                                    :prepend-icon="columnIcon" :label="t('common.table.columns')"
                                     append-icon="mdi-chevron-down" />
                             </template>
                             <v-list>
@@ -391,19 +411,19 @@ onMounted(() => {
                                             :disabled="updatingHeaders"
                                             @click.stop="toggleHeader(header.key)"></v-checkbox-btn>
                                     </template>
-                                    <v-list-item-title>{{ header.title }}</v-list-item-title>
+                                    <v-list-item-title>{{ headerTitle(header) }}</v-list-item-title>
                                 </v-list-item>
                             </v-list>
                         </v-menu>
 
                         <ButtonWithIcon variant="flat" color="primary-500" height="40" rounded="4"
                             custom-class="px-7 font-semibold text-base text-white border !border-primary-200"
-                            :prepend-icon="searchIcon" label="بحث متقدم"
+                            :prepend-icon="searchIcon" :label="t('common.table.advancedSearch')"
                             @click="toggleAdvancedFilters" />
 
                         <ButtonWithIcon v-if="canCreate" variant="flat" color="primary-100" height="40" rounded="4"
                             custom-class="px-7 font-semibold text-base !text-primary-800 border !border-primary-200"
-                            :prepend-icon="plusIcon" label="إضافة جديد" @click="openCreateDriver" />
+                            :prepend-icon="plusIcon" :label="t('common.form.addNew')" @click="openCreateDriver" />
                     </div>
                 </div>
 
@@ -411,28 +431,28 @@ onMounted(() => {
                     <div class="flex flex-wrap gap-3 justify-between">
                         <div class="flex gap-3 flex-wrap">
                             <TextInput v-model="filterName" density="comfortable" variant="outlined" hide-details
-                                placeholder="اسم السائق" class="w-full sm:w-40 bg-white"
+                                :placeholder="t('pages.driversData.list.filters.name')" class="w-full sm:w-40 bg-white"
                                 @keyup.enter="applyFilters" />
                             <TextInput v-model="filterNationalId" density="comfortable" variant="outlined" hide-details
-                                placeholder="رقم الهوية" class="w-full sm:w-40 bg-white"
+                                :placeholder="t('pages.driversData.list.filters.nationalId')" class="w-full sm:w-40 bg-white"
                                 @keyup.enter="applyFilters" />
                             <TextInput v-model="filterLicenseNumber" density="comfortable" variant="outlined" hide-details
-                                placeholder="رقم الرخصة" class="w-full sm:w-40 bg-white"
+                                :placeholder="t('pages.driversData.list.filters.licenseNumber')" class="w-full sm:w-40 bg-white"
                                 @keyup.enter="applyFilters" />
                             <SelectInput v-model="filterStatus" :items="StatusList" item-title="title"
                                 item-value="value" density="comfortable" variant="outlined" hide-details
-                                placeholder="الحالة" class="w-full sm:w-40 bg-white"
+                                :placeholder="t('pages.driversData.list.filters.status')" class="w-full sm:w-40 bg-white"
                                 @update:model-value="applyFilters" />
                         </div>
 
                         <div class="flex gap-2 items-center">
                             <ButtonWithIcon variant="flat" color="primary-500" rounded="4" height="40"
                                 custom-class="px-5 font-semibold !text-white text-sm sm:text-base"
-                                :prepend-icon="searchIcon" label="بحث" @click="applyFilters" />
+                                :prepend-icon="searchIcon" :label="t('common.actions.search')" @click="applyFilters" />
 
                             <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4" border="sm"
                                 custom-class="px-5 font-semibold text-sm sm:text-base !text-primary-800 !border-primary-200"
-                                prepend-icon="mdi-refresh" label="إعادة تعيين" @click="resetFilters" />
+                                prepend-icon="mdi-refresh" :label="t('common.actions.reset')" @click="resetFilters" />
                         </div>
                     </div>
                 </div>
@@ -450,7 +470,10 @@ onMounted(() => {
                         <span class="font-semibold text-primary-600">{{ item.rating }}</span>
                     </template>
                     <template #item.license_type="{ item }">
-                        <span>{{ item.license_type?.join(', ') || '--' }}</span>
+                        <span>{{ licenseTypeDisplay(item) }}</span>
+                    </template>
+                    <template #item.logistics_company="{ item }">
+                        <span>{{ item.logistics_company?.name || item.logistics_company?.full_name || '--' }}</span>
                     </template>
                 </DataTable>
 

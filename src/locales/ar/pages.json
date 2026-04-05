@@ -818,6 +818,27 @@
           "plateNumber": "رقم اللوحة",
           "vehicleType": "نوع المركبة",
           "status": "الحالة"
+        },
+        "tableHeaders": {
+          "vehicle_number": "رقم المركبة",
+          "plate_number": "رقم اللوحة",
+          "vehicle_type": "نوع المركبة",
+          "vehicle_category": "فئة المركبة",
+          "cargo_type": "نوع الحمولة",
+          "manufacturer": "الشركة المصنعة",
+          "manufacturing_year": "سنة الصنع",
+          "cargo_capacity": "سعة الحمولة (طن)",
+          "fuel_type": "نوع الوقود",
+          "gps_tracking": "نظام التتبع GPS",
+          "operational_readiness": "جاهزية التشغيل",
+          "vehicle_ownership": "ملكية المركبة",
+          "last_maintenance_date": "تاريخ آخر صيانة",
+          "insurance_status": "حالة التأمين",
+          "driving_license_number": "رخصة السير",
+          "logistics_company": "شركة النقل",
+          "chassis_number": "رقم الشاسيه",
+          "is_active": "الحالة",
+          "status": "الحالة"
         }
       },
       "form": {
@@ -892,6 +913,81 @@
           "drivingLicense": "رخصة السير",
           "status": "الحالة",
           "notes": "ملاحظات"
+        }
+      }
+    },
+    "driversData": {
+      "title": "بيانات السائقين",
+      "description": "تمكنك من إدارة وإضافة بيانات السائقين",
+      "list": {
+        "filters": {
+          "name": "اسم السائق",
+          "nationalId": "رقم الهوية",
+          "licenseNumber": "رقم الرخصة",
+          "status": "الحالة"
+        },
+        "tableHeaders": {
+          "name": "الاسم",
+          "license_number": "رقم الرخصة",
+          "national_id": "رقم الهوية",
+          "license_type": "نوع الرخصة",
+          "license_expires_at": "تاريخ انتهاء الرخصة",
+          "medical_exam_date": "تاريخ الفحص الطبي",
+          "hazardous_material_qualified": "مؤهل نقل مواد خطرة",
+          "rating": "التقييم",
+          "logistics_company": "شركة النقل",
+          "country": "الدولة",
+          "is_active": "الحالة",
+          "status": "الحالة"
+        }
+      },
+      "form": {
+        "sectionTitle": "بيانات السائق",
+        "editTitle": "تعديل بيانات السائق",
+        "addTitle": "إضافة بيانات السائق",
+        "labels": {
+          "licenseNumber": "رقم رخصة السائق",
+          "logisticsCompany": "شركة النقل",
+          "name": "الاسم",
+          "nationalId": "رقم الهوية / الإقامة",
+          "licenseType": "نوع الرخصة",
+          "licenseExpiresAt": "تاريخ انتهاء الرخصة",
+          "rating": "تقييم السائق",
+          "medicalExamDate": "تاريخ الفحص الطبي",
+          "hazardousMaterial": "مؤهل لنقل مواد خطرة",
+          "driverStatus": "حالة السائق",
+          "country": "الدولة"
+        },
+        "placeholders": {
+          "licenseNumber": "أدخل رقم الرخصة",
+          "logisticsCompany": "اختر شركة النقل",
+          "name": "أدخل الاسم",
+          "nationalId": "أدخل رقم الهوية",
+          "licenseType": "اختر نوع الرخصة",
+          "licenseExpiresAt": "اختر تاريخ الانتهاء",
+          "rating": "اختر التقييم",
+          "medicalExamDate": "اختر تاريخ الفحص"
+        },
+        "status": {
+          "active": "فعال",
+          "inactive": "غير فعال"
+        }
+      },
+      "view": {
+        "pageTitle": "تفاصيل السائق",
+        "driverDataSection": "بيانات السائق",
+        "fields": {
+          "name": "الاسم",
+          "licenseNumber": "رقم الرخصة",
+          "nationalId": "رقم الهوية",
+          "licenseType": "نوع الرخصة",
+          "licenseExpiresAt": "تاريخ انتهاء الرخصة",
+          "medicalExamDate": "تاريخ الفحص الطبي",
+          "hazardousMaterial": "مؤهل نقل مواد خطرة",
+          "status": "الحالة",
+          "country": "الدولة",
+          "logisticsCompany": "شركة النقل",
+          "rating": "التقييم"
         }
       }
     },

@@ -612,12 +612,12 @@ const saveIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xm
                 <!-- Description with Language Tabs -->
                 <LanguageTabs :languages="availableLanguages" :label="t('form.product.categoryDetails.label')" class="mb-[20px]">
                   <template #en>
-                    <TextareaInput :rules="[required()]" v-model="categoryDescriptionEn" :placeholder="t('form.product.categoryDetails.placeholder')"
+                    <TextareaInput :rules="[required()]" v-model="categoryDescriptionEn" :placeholder="t('form.product.categoryDetails.placeholderEn')"
                       min-height="120px" :hide-details="false"
                       :error-messages="formErrors['description.en']" @input="delete formErrors['description.en']" />
                   </template>
                   <template #ar>
-                    <TextareaInput :rules="[required()]" v-model="categoryDescriptionAr" :placeholder="t('form.product.categoryDetails.placeholderEn')"
+                    <TextareaInput :rules="[required()]" v-model="categoryDescriptionAr" :placeholder="t('form.product.categoryDetails.placeholder')"
                       min-height="120px" :hide-details="false"
                       :error-messages="formErrors['description.ar']" @input="delete formErrors['description.ar']" />
                   </template>

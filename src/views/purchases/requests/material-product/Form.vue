@@ -43,32 +43,54 @@ const fetchConstants = async () => {
     }
 }
 
-const fetchSuppliers = async (search: string = '', cursor?: string, perPage: number = 20) => {
-    try {
-        const params: any = { per_page: perPage };
-        if (search) {
-            params.name = search;
-        }
-        if (cursor) {
-            params.cursor = cursor;
-        }
-        if (formData.value.supplier_id) {
-            params.order_by_id = formData.value.supplier_id;
-        }
+const waitForSupplierData = async () => {
+    if (!isEditMode.value) return;
 
-        const res = await api.get<any>('/suppliers/list', { params });
-        console.log('[Form] Suppliers API response:', res);
-
-        return {
-            data: res.data || [],
-            next_cursor: res.pagination?.next_cursor || null,
-            pagination: res.pagination
-        };
-    } catch (e) {
-        console.error('Error fetching suppliers:', e);
-        return { data: [], next_cursor: null };
+    if (isFormDataLoaded.value && formData.value.supplier_id) {
+        return;
     }
-}
+
+    await new Promise(resolve => {
+        const checkInterval = setInterval(() => {
+            if (isFormDataLoaded.value && formData.value.supplier_id) {
+                clearInterval(checkInterval);
+                clearTimeout(timeoutId);
+                resolve(true);
+            }
+        }, 10);
+
+        const timeoutId = setTimeout(() => {
+            clearInterval(checkInterval);
+            resolve(true);
+        }, 5000);
+    });
+};
+
+const fetchSuppliers = async (search = '', cursor?: string, perPage = 15) => {
+    if (isEditMode.value) {
+        await waitForSupplierData();
+    }
+
+    const params: any = { per_page: perPage };
+    params.business_type = "material_merchant,crusher"
+    if (search) {
+        params.name = search;
+    }
+    if (cursor) {
+        params.cursor = cursor;
+    }
+    if (formData.value.supplier_id) {
+        params.order_by_id = formData.value.supplier_id;
+    }
+
+    const res = await api.get<any>('/suppliers/list', { params });
+
+    return {
+        data: res.data || [],
+        next_cursor: res.pagination?.next_cursor || null,
+    };
+};
+
 
 const fetchUnits = async () => {
     try {
@@ -695,15 +717,12 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
 <template>
     <default-layout>
         <div class="request-material-product-page -mx-6">
-            <AppFormBreadcrumb
-                list-path="/purchases/requests/material-product/list"
+            <AppFormBreadcrumb list-path="/purchases/requests/material-product/list"
                 module-root-key="breadcrumb.purchases.root"
                 list-label-key="breadcrumb.purchases.requests.materialProduct.list"
                 create-label-key="breadcrumb.purchases.requests.materialProduct.create"
-                edit-label-key="breadcrumb.purchases.requests.materialProduct.edit"
-                :is-edit-mode="isEditMode"
-                :code="isEditMode ? (formData.code || '') : ''"
-            />
+                edit-label-key="breadcrumb.purchases.requests.materialProduct.edit" :is-edit-mode="isEditMode"
+                :code="isEditMode ? (formData.code || '') : ''" />
             <!-- Page Header -->
             <TopHeader :icon="formIcon" title-key="pages.PurchasesRequestsMaterialProduct.FormTitle"
                 description-key="pages.requestForQuotationMaterialProduct.FormDescription" :show-action="false"
@@ -713,24 +732,28 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
             <!-- Request Information Section -->
             <div class="p-6">
                 <div class="flex items-center justify-between mb-6">
-                    <h2 class="text-lg font-bold text-primary-900">{{ t('purchases.requests.materialProduct.form.requestInfoTitle') }}</h2>
+                    <h2 class="text-lg font-bold text-primary-900">{{
+                        t('purchases.requests.materialProduct.form.requestInfoTitle') }}</h2>
                 </div>
 
                 <v-form ref="formRef" v-model="isFormValid" @submit.prevent>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                         <!-- Request Type -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('purchases.requests.materialProduct.form.labels.requestType') }}</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">{{
+                                t('purchases.requests.materialProduct.form.labels.requestType') }}</label>
                             <SelectInput v-model="formData.requestType" :items="requestTypeItems"
-                                :placeholder="t('purchases.requests.materialProduct.form.placeholders.selectRequestType')" :rules="[required()]" item-title="title" item-value="value"
-                                density="comfortable" />
+                                :placeholder="t('purchases.requests.materialProduct.form.placeholders.selectRequestType')"
+                                :rules="[required()]" item-title="title" item-value="value" density="comfortable" />
                         </div>
 
                         <!-- Supplier Name -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('purchases.shared.forms.common.labels.supplierName') }}</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">{{
+                                t('purchases.shared.forms.common.labels.supplierName') }}</label>
                             <SelectInput v-model="formData.supplier_id" :items="[]" item-title="title"
-                                :rules="[required()]" item-value="value" density="comfortable" :placeholder="t('purchases.shared.forms.common.placeholders.selectSupplier')"
+                                :rules="[required()]" item-value="value" density="comfortable"
+                                :placeholder="t('purchases.shared.forms.common.placeholders.selectSupplier')"
                                 :server-side="true" :fetch-function="fetchSuppliers" item-title-key="full_name"
                                 item-value-key="id" :debounce-time="500" />
                         </div>
@@ -738,8 +761,8 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
                         <!-- تاريخ إصدار الطلب: يظهر في التعديل فقط (عرض فقط)، ويُرسل تلقائياً عند الحفظ -->
                         <div v-if="isEditMode">
                             <TextInput :model-value="formData.request_datetime" type="text" disabled
-                                :label="t('purchases.requests.materialProduct.form.labels.issueDate')" density="comfortable" hide-details
-                                :input-props="{ readonly: true }">
+                                :label="t('purchases.requests.materialProduct.form.labels.issueDate')"
+                                density="comfortable" hide-details :input-props="{ readonly: true }">
                                 <template #prepend-inner>
                                     <span class="text-gray-500" v-html="dateIconSvg"></span>
                                 </template>
@@ -748,7 +771,8 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
 
                         <!-- Project Location -->
                         <div class="relative">
-                            <label class="text-sm font-medium text-gray-700 mb-2 block">{{ t('purchases.requests.materialProduct.form.labels.projectLocation') }}</label>
+                            <label class="text-sm font-medium text-gray-700 mb-2 block">{{
+                                t('purchases.requests.materialProduct.form.labels.projectLocation') }}</label>
                             <div @click="openMapDialog"
                                 class="flex items-center justify-between px-4 py-2 min-h-[48px] border !border-blue-400 rounded-lg cursor-pointer hover:bg-blue-100 transition-colors">
                                 <span
@@ -763,18 +787,21 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
 
                         <!-- Payment Method -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('purchases.shared.forms.common.labels.paymentMethod') }}</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">{{
+                                t('purchases.shared.forms.common.labels.paymentMethod') }}</label>
                             <SelectInput v-model="formData.paymentMethod" :items="paymentMethodItems" item-title="title"
-                                :placeholder="t('purchases.shared.forms.common.placeholders.selectPaymentMethod')" :rules="[required()]" item-value="value"
-                                density="comfortable" />
+                                :placeholder="t('purchases.shared.forms.common.placeholders.selectPaymentMethod')"
+                                :rules="[required()]" item-value="value" density="comfortable" />
                         </div>
 
                         <!-- Advance Payment -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('purchases.shared.forms.common.labels.advancePayment') }}</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">{{
+                                t('purchases.shared.forms.common.labels.advancePayment') }}</label>
                             <div class="flex items-center gap-2">
                                 <PriceInput showRialIcon v-model="formData.advancePayment" density="comfortable"
-                                    class="flex-1" :placeholder="t('purchases.shared.forms.common.placeholders.enterAdvanceAmount')" />
+                                    class="flex-1"
+                                    :placeholder="t('purchases.shared.forms.common.placeholders.enterAdvanceAmount')" />
                             </div>
                         </div>
                     </div>
@@ -786,7 +813,9 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
                 <div class="flex flex-wrap gap-3 items-center justify-between bg-primary-50 px-6 py-3">
                     <div class="flex items-center gap-2">
                         <span v-html="packageIcon"></span>
-                        <h2 class="text-xl font-bold text-primary-900">{{ t('purchases.shared.forms.common.sections.products') }}</h2>
+                        <h2 class="text-xl font-bold text-primary-900">{{
+                            t('purchases.shared.forms.common.sections.products') }}
+                        </h2>
                     </div>
                     <ButtonWithIcon color="primary-100" variant="flat" :prepend-icon="downloadIcon"
                         class="!text-primary-900 font-bold">
@@ -804,7 +833,8 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
                                 <template #activator="{ props }">
                                     <div class="flex items-center gap-2 cursor-pointer" v-bind="props">
                                         <v-icon size="20" color="primary" v-html="messagePlusIcon"></v-icon>
-                                        <span class="text-gray-900">{{ item.notes || t('purchases.shared.forms.common.placeholders.addNote') }}</span>
+                                        <span class="text-gray-900">{{ item.notes ||
+                                            t('purchases.shared.forms.common.placeholders.addNote') }}</span>
                                     </div>
                                 </template>
 
@@ -815,8 +845,9 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
                                     <div class="!flex flex-nowrap items-center gap-3">
                                         <TextInput
                                             v-model="productTableItems[productTableItems.findIndex(p => p.item_id === item.item_id)].notes"
-                                            :placeholder="t('purchases.shared.forms.common.placeholders.addNote')" variant="outlined" density="comfortable"
-                                            hide-details autofocus class="flex-1" />
+                                            :placeholder="t('purchases.shared.forms.common.placeholders.addNote')"
+                                            variant="outlined" density="comfortable" hide-details autofocus
+                                            class="flex-1" />
                                         <ButtonWithIcon :icon="messagePlusIcon" color="primary" icon-only
                                             size="x-small" />
 
@@ -833,13 +864,8 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
                         @click="handleAddProduct">
                         {{ t('purchases.shared.forms.common.actions.addProduct') }}
                     </ButtonWithIcon>
-                    <ButtonWithIcon
-                        v-if="productTableItems.length > 0"
-                        color="primary-100"
-                        variant="flat"
-                        class="!text-primary-900 font-bold flex-1"
-                        @click="showEditProductsDialog = true"
-                    >
+                    <ButtonWithIcon v-if="productTableItems.length > 0" color="primary-100" variant="flat"
+                        class="!text-primary-900 font-bold flex-1" @click="showEditProductsDialog = true">
                         {{ t('purchases.shared.forms.common.actions.editProducts') }}
                     </ButtonWithIcon>
                 </div>
@@ -850,7 +876,8 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
                 <div class="flex flex-wrap gap-3 items-center justify-between bg-primary-50 px-6 py-3">
                     <div class="flex items-center gap-2">
                         <span v-html="truckIcon"></span>
-                        <h2 class="text-xl font-bold text-primary-900">{{ t('purchases.requests.materialProduct.form.transportService') }}</h2>
+                        <h2 class="text-xl font-bold text-primary-900">{{
+                            t('purchases.requests.materialProduct.form.transportService') }}</h2>
                     </div>
                     <ButtonWithIcon color="primary-100" variant="flat" :prepend-icon="downloadIcon"
                         class="!text-primary-900 font-bold">
@@ -895,7 +922,8 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-2">
                         <!-- Text Note -->
                         <div class="rounded-xl bg-white lg:col-span-2">
-                            <p class="text-primary-600 font-bold text-sm mb-2 px-4 mt-2">{{ t('purchases.shared.forms.common.textNote.title') }}</p>
+                            <p class="text-primary-600 font-bold text-sm mb-2 px-4 mt-2">{{
+                                t('purchases.shared.forms.common.textNote.title') }}</p>
                             <TextareaInput v-model="formData.textNote" density="comfortable"
                                 :input-props="{ class: '!rounded-none' }"
                                 :placeholder="t('purchases.shared.forms.common.textNote.placeholder')" />
@@ -910,7 +938,8 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
                 <div class=" p-6">
                     <div class="flex items-center gap-2 mb-2 px-6 py-4 bg-primary-500 rounded-lg text-white">
                         <span v-html="fileCheckIcon"></span>
-                        <h3 class="text-lg font-bold">{{ t('purchases.shared.forms.common.sections.requestSummary') }}</h3>
+                        <h3 class="text-lg font-bold">{{ t('purchases.shared.forms.common.sections.requestSummary') }}
+                        </h3>
                     </div>
 
                     <div class="space-y-0 bg-white border border-slate-100 rounded-lg !text-blue-900 text-lg font-bold">
@@ -936,7 +965,8 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
                     <div class="mt-3 flex items-center gap-3">
                         <!-- <ButtonWithIcon color="primary-50" class="flex-1 text-primary-700" height="48" size="large"
                             @click="handleConvertToPrice" label="تحويل إلى عرض سعر" /> -->
-                        <ButtonWithIcon color="primary" class="flex-1" :label="t('purchases.shared.forms.common.actions.submitRequest')" height="48" size="large"
+                        <ButtonWithIcon color="primary" class="flex-1"
+                            :label="t('purchases.shared.forms.common.actions.submitRequest')" height="48" size="large"
                             @click="handleSubmit" />
                     </div>
                 </div>
@@ -948,29 +978,16 @@ const messagePlusIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
             :address="formData.target_location" @location-selected="handleLocationSelected" />
 
         <!-- Add Product Dialog -->
-        <AddProductDialog
-            v-model="showAddProductDialog"
-            request-type="raw_materials"
-            :transport-types="transportTypeItems"
-            :unit-items="unitItems"
-            :supplier-id="formData.supplier_id"
-            :edit-product="editingProduct"
-            :existing-products="productTableItems"
-            items-endpoint="/items/supplier-items"
+        <AddProductDialog v-model="showAddProductDialog" request-type="raw_materials"
+            :transport-types="transportTypeItems" :unit-items="unitItems" :supplier-id="formData.supplier_id"
+            :edit-product="editingProduct" :existing-products="productTableItems" items-endpoint="/items/supplier-items"
             :items-query-params="{ material_type: 1, supplier_id: formData.supplier_id ?? '' }"
-            @saved="handleProductSaved"
-            @product-updated="handleProductUpdated"
-        />
+            @saved="handleProductSaved" @product-updated="handleProductUpdated" />
 
         <!-- Edit Products Dialog -->
-        <EditProductsDialog
-            v-model="showEditProductsDialog"
-            :products="productTableItems"
-            :unit-items="unitItems"
-            :transport-types="transportTypeItems"
-            request-type="raw_materials"
-            @products-updated="handleEditProductsBulk"
-        />
+        <EditProductsDialog v-model="showEditProductsDialog" :products="productTableItems" :unit-items="unitItems"
+            :transport-types="transportTypeItems" request-type="raw_materials"
+            @products-updated="handleEditProductsBulk" />
 
         <!-- Add Transport Service Dialog -->
         <AddTransportServiceDialog v-model="showAddTransportServiceDialog" :transport-types="transportTypeItems"

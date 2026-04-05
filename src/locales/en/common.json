@@ -1,4 +1,10 @@
 {
+  "action": {
+    "import": "Import",
+    "export": "Export",
+    "delete": "Delete",
+    "deleteAll": "Delete all"
+  },
   "actions": {
     "save": "Save",
     "cancel": "Cancel",
@@ -11,6 +17,7 @@
     "reset": "Reset",
     "activate": "Activate",
     "deactivate": "Deactivate",
+    "refresh": "Refresh",
     "import": "Import",
     "export": "Export"
   },
@@ -37,11 +44,11 @@
     "noOption": "No"
   },
   "financial": {
-    "totalTrips": "Total Trips",
-    "totalExcludingTax": "Total (Excluding Tax)",
-    "totalDiscounts": "Total Discounts",
-    "totalTaxable": "Total Taxable",
-    "totalAmountDue": "Total Amount Due"
+    "totalTrips": "Total trips",
+    "totalExcludingTax": "Total (excluding tax)",
+    "totalDiscounts": "Total discounts",
+    "totalTaxable": "Total taxable",
+    "totalAmountDue": "Total amount due"
   },
   "filters": {
     "from": "From",
@@ -50,10 +57,10 @@
   "table": {
     "actions": "Actions",
     "columns": "Columns",
-    "advancedSearch": "Advanced Search",
+    "advancedSearch": "Advanced search",
     "searchNow": "Search now",
     "deleteAll": "Delete all",
-    "deleteSelected": "Delete Selected",
+    "deleteSelected": "Delete selected",
     "loadingMore": "Loading more..."
   },
   "form": {
@@ -69,10 +76,56 @@
     "name": "Name",
     "noDescription": "No description",
     "choose": "Choose",
-    "settings": "Settings"
+    "settings": "Settings",
+    "phoneNumber": "Phone number",
+    "enterPrice": "Enter price",
+    "requestCode": "Request code"
+  },
+  "uploads": {
+    "attachFile": "Attach file",
+    "attachImage": "Attach image",
+    "attachedFile": "Attached file"
+  },
+  "voiceRecorder": {
+    "title": "Voice message",
+    "hintAttachNotes": "Would you like to attach notes?",
+    "hintRecordPrompt": "Record your voice message to",
+    "recordingInProgress": "Recording..."
+  },
+  "map": {
+    "selectLocationTitle": "Select location",
+    "loadingAddress": "Loading address...",
+    "addressLabel": "Address",
+    "addressPlaceholder": "Enter address"
+  },
+  "statusChange": {
+    "title": "Change status",
+    "message": "Change status:"
+  },
+  "productDialog": {
+    "addProduct": "Add product",
+    "editProduct": "Edit product",
+    "quantity": "Quantity",
+    "unit": "Unit",
+    "searchProducts": "Search products...",
+    "noProductsInRequest": "No products in this request",
+    "saveChanges": "Save changes",
+    "done": "Done"
+  },
+  "trips": {
+    "tripDetails": "Trip details",
+    "editTripDetail": "Edit trip detail",
+    "editTripDetails": "Edit trip details",
+    "noDetailsToEdit": "No details to edit",
+    "addProductsFirst": "Add products first to display their details here",
+    "transportVehicleType": "Transport vehicle type",
+    "price": "Price",
+    "noAvailableProducts": "No available products",
+    "addTripDetails": "Add trip details"
   },
   "dialogs": {
     "confirmStatusChange": "Confirm status change",
+    "statusChangePrompt": "Are you sure you want to change the status?",
     "statusChangeMessage": "Are you sure you want to change the status of '{name}' to '{status}'?",
     "confirmDelete": "Are you sure you want to delete",
     "deleteConfirm": {
@@ -105,15 +158,24 @@
       "activateSuccess": "Activated successfully",
       "deactivateSuccess": "Deactivated successfully",
       "changeStatusSuccess": "Status changed successfully",
-      "changeStatusError": "Error while Changign Status",
-      "deleteError": "Error while Deleting",
+      "changeStatusError": "Error while changing status",
+      "deleteError": "Error while deleting",
       "completeStep1First": "Please complete the first step first",
       "taxDataSaved": "Tax data saved successfully",
       "saveDataFailed": "Failed to save data",
-      "loadDataFailed": "Failed to load Data",
+      "loadDataFailed": "Failed to load data",
       "loadConstantsFailed": "Failed to load constants",
       "loadCategoriesFailed": "Failed to load categories",
-      "fetchCategoriesFailed": "Failed to fetch categories"
+      "fetchCategoriesFailed": "Failed to fetch categories",
+      "copyCodeSuccess": "Code copied successfully"
+    },
+    "success": {
+      "updated": "Updated successfully",
+      "created": "Created successfully"
+    },
+    "error": {
+      "saveFailed": "Failed to save",
+      "validationFailed": "Please correct the errors in the form"
     }
   }
 }

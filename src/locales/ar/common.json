@@ -168,6 +168,14 @@
       "loadCategoriesFailed": "فشل تحميل الفئات",
       "fetchCategoriesFailed": "فشل في جلب التصنيفات",
       "copyCodeSuccess": "تم نسخ الكود بنجاح"
+    },
+    "success": {
+      "updated": "تم التحديث بنجاح",
+      "created": "تم الإنشاء بنجاح"
+    },
+    "error": {
+      "saveFailed": "فشل الحفظ",
+      "validationFailed": "يرجى تصحيح الأخطاء في النموذج"
     }
   }
 }

@@ -6,7 +6,12 @@ import { useApi } from "@/composables/useApi";
 import { SettingsIcon, trash_1_icon, trash_2_icon, columnIcon, exportIcon, plusIcon, searchIcon } from "@/components/icons/globalIcons";
 
 const router = useRouter();
-const { t } = useI18n();
+const { t, te } = useI18n();
+
+const headerTitle = (header: TableHeader) => {
+    const path = `pages.vehiclesData.list.tableHeaders.${header.key}`;
+    return te(path) ? t(path) : header.title;
+};
 const api = useApi();
 
 const icon = `<svg width="48" height="43" viewBox="0 0 48 43" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -95,7 +100,12 @@ const previousCursor = ref<string | null>(null);
 const perPage = ref(5);
 const hasMoreData = computed(() => nextCursor.value !== null);
 
-const tableHeaders = computed(() => shownHeaders.value);
+const tableHeaders = computed(() =>
+    shownHeaders.value.map((h) => ({
+        ...h,
+        title: headerTitle(h),
+    }))
+);
 
 const showHeadersMenu = ref(false);
 const updatingHeaders = ref(false);
@@ -361,13 +371,13 @@ onMounted(() => {
 <template>
     <default-layout>
         <div class="vehicles-data-page">
-            <PageHeader :icon="icon" title-key="إدارة بيانات المركبات"
-                description-key="تمكنك من إدارة وإضافة بيانات المركبات" />
+            <PageHeader :icon="icon" title-key="pages.vehiclesData.title"
+                description-key="pages.vehiclesData.description" />
             <div
                 class="flex justify-end items-stretch rounded border border-gray-300 w-fit ms-auto mb-4 overflow-hidden bg-white text-sm">
                 <ButtonWithIcon variant="flat" height="40" rounded="0"
                     custom-class="font-semibold text-base border-gray-300 bg-primary-50 !text-primary-900"
-                    :prepend-icon="exportIcon" label="تصدير" />
+                    :prepend-icon="exportIcon" :label="t('common.actions.export')" />
             </div>
 
             <div class="bg-gray-50 rounded-md -mx-6">
@@ -402,7 +412,7 @@ onMounted(() => {
                                             :disabled="updatingHeaders"
                                             @click.stop="toggleHeader(header.key)"></v-checkbox-btn>
                                     </template>
-                                    <v-list-item-title>{{ header.title }}</v-list-item-title>
+                                    <v-list-item-title>{{ headerTitle(header) }}</v-list-item-title>
                                 </v-list-item>
                             </v-list>
                         </v-menu>

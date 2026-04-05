@@ -552,6 +552,27 @@
           "plateNumber": "Plate number",
           "vehicleType": "Vehicle type",
           "status": "Status"
+        },
+        "tableHeaders": {
+          "vehicle_number": "Vehicle number",
+          "plate_number": "Plate number",
+          "vehicle_type": "Vehicle type",
+          "vehicle_category": "Vehicle category",
+          "cargo_type": "Cargo type",
+          "manufacturer": "Manufacturer",
+          "manufacturing_year": "Manufacturing year",
+          "cargo_capacity": "Cargo capacity (ton)",
+          "fuel_type": "Fuel type",
+          "gps_tracking": "GPS tracking",
+          "operational_readiness": "Operational readiness",
+          "vehicle_ownership": "Vehicle ownership",
+          "last_maintenance_date": "Last maintenance date",
+          "insurance_status": "Insurance status",
+          "driving_license_number": "Driving license",
+          "logistics_company": "Logistics company",
+          "chassis_number": "Chassis number",
+          "is_active": "Status",
+          "status": "Status"
         }
       },
       "form": {
@@ -626,6 +647,81 @@
           "drivingLicense": "Driving license",
           "status": "Status",
           "notes": "Notes"
+        }
+      }
+    },
+    "driversData": {
+      "title": "Drivers data",
+      "description": "Manage driver records and add new drivers",
+      "list": {
+        "filters": {
+          "name": "Driver name",
+          "nationalId": "National ID",
+          "licenseNumber": "License number",
+          "status": "Status"
+        },
+        "tableHeaders": {
+          "name": "Name",
+          "license_number": "License number",
+          "national_id": "National ID",
+          "license_type": "License type",
+          "license_expires_at": "License expiry",
+          "medical_exam_date": "Medical exam date",
+          "hazardous_material_qualified": "Hazardous material qualified",
+          "rating": "Rating",
+          "logistics_company": "Logistics company",
+          "country": "Country",
+          "is_active": "Status",
+          "status": "Status"
+        }
+      },
+      "form": {
+        "sectionTitle": "Driver data",
+        "editTitle": "Edit driver",
+        "addTitle": "Add driver",
+        "labels": {
+          "licenseNumber": "Driver license number",
+          "logisticsCompany": "Transport company",
+          "name": "Name",
+          "nationalId": "National ID / residency",
+          "licenseType": "License type",
+          "licenseExpiresAt": "License expiry date",
+          "rating": "Driver rating",
+          "medicalExamDate": "Medical exam date",
+          "hazardousMaterial": "Qualified for hazardous material transport",
+          "driverStatus": "Driver status",
+          "country": "Country"
+        },
+        "placeholders": {
+          "licenseNumber": "Enter license number",
+          "logisticsCompany": "Select transport company",
+          "name": "Enter name",
+          "nationalId": "Enter national ID",
+          "licenseType": "Select license type",
+          "licenseExpiresAt": "Select expiry date",
+          "rating": "Select rating",
+          "medicalExamDate": "Select medical exam date"
+        },
+        "status": {
+          "active": "Active",
+          "inactive": "Inactive"
+        }
+      },
+      "view": {
+        "pageTitle": "Driver details",
+        "driverDataSection": "Driver data",
+        "fields": {
+          "name": "Name",
+          "licenseNumber": "License number",
+          "nationalId": "National ID",
+          "licenseType": "License type",
+          "licenseExpiresAt": "License expiry date",
+          "medicalExamDate": "Medical exam date",
+          "hazardousMaterial": "Hazardous material qualified",
+          "status": "Status",
+          "country": "Country",
+          "logisticsCompany": "Transport company",
+          "rating": "Rating"
         }
       }
     },
