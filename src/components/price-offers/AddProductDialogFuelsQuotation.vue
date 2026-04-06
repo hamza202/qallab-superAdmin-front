@@ -406,7 +406,7 @@ const plusIconDisabled = `<svg width="16" height="16" viewBox="0 0 16 16" fill="
               <TextInput :model-value="calculateTotal(editProductData)" type="number" :placeholder="t('purchases.views.shared.finalTotal')" density="compact" disabled />
             </div>
             <div>
-              <SelectInput v-model="editProductData.item_using" :items="itemUsingOptionsList" :placeholder="t('purchases.orders.shared.labels.supplyType')" clearable density="compact" item-title="title" item-value="value" />
+              <SelectInput v-model="editProductData.item_using" :items="itemUsingOptionsList" :placeholder="t('sales.forms.common.labels.usage')" clearable density="compact" item-title="title" item-value="value" />
             </div>
           </div>
         </div>
@@ -525,7 +525,7 @@ const plusIconDisabled = `<svg width="16" height="16" viewBox="0 0 16 16" fill="
                   <TextInput :model-value="calculateTotal(product)" type="number" :placeholder="t('purchases.views.shared.finalTotal')" density="compact" disabled />
                 </div>
                 <div>
-                  <SelectInput v-model="product.item_using" :items="itemUsingOptionsList" :placeholder="t('purchases.orders.shared.labels.supplyType')" density="compact" item-title="title" item-value="value" />
+                  <SelectInput v-model="product.item_using" :items="itemUsingOptionsList" :placeholder="t('sales.forms.common.labels.usage')" density="compact" item-title="title" item-value="value" />
                 </div>
               </div>
             </div>
