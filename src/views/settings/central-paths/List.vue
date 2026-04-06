@@ -1,12 +1,16 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
 import { useApi } from "@/composables/useApi";
 import CentralPathFormDialog from "@/views/settings/central-paths/components/CentralPathFormDialog.vue";
-import { SettingsIcon, trash_1_icon, trash_2_icon, columnIcon, exportIcon, plusIcon, searchIcon } from "@/components/icons/globalIcons";
+import { SettingsIcon, trash_1_icon, trash_2_icon, columnIcon, exportIcon, plusIcon, searchIcon, mapIcon } from "@/components/icons/globalIcons";
 
 const router = useRouter();
 const api = useApi();
+const { t } = useI18n();
+
+const centralPathIsActiveSlotName = "item.is_active";
 
 // Types
 interface CentralPath {
@@ -23,8 +27,33 @@ interface CentralPath {
             zone_id: number;
             can_access: boolean;
         };
+        zone_city_suburb?: {
+            can_access: boolean;
+            /** Required for zone suburbs route; provided by zones list API */
+            city_id?: number;
+            zone_id?: number;
+
+        };
     };
 }
+
+const goToZoneSuburbs = (item: CentralPath | Record<string, unknown>) => {
+    const row = item as CentralPath;
+    const zoneId = row.actions?.zone_city_suburb?.zone_id;
+    const cityId = row.actions?.zone_city_suburb?.city_id;
+    if (cityId == null || Number.isNaN(Number(cityId))) {
+        toast.error(t("pages.centralPaths.zoneSuburbs.messages.missingCityId"));
+        return;
+    }
+    router.push({
+        name: "ZoneCitySuburbs",
+        params: { zoneId: String(zoneId), cityId: String(cityId) },
+        query: {
+            zone: row.geographical_zone,
+            city: row.city,
+        },
+    });
+};
 
 interface TableHeader {
     key: string;
@@ -236,8 +265,9 @@ const handleViewPath = (item: any) => {
     router.push(`/settings/central-paths/${item.id}`);
 };
 
-const handleSiteTracks = (item: CentralPath) => {
-    const zoneId = item.actions?.zone_site_track?.zone_id;
+const handleSiteTracks = (item: CentralPath | Record<string, unknown>) => {
+    const row = item as CentralPath;
+    const zoneId = row.actions?.zone_site_track?.zone_id;
     if (zoneId) {
         router.push(`/settings/central-paths/${zoneId}/site-tracks`);
     }
@@ -367,13 +397,11 @@ onMounted(() => {
                         class="flex flex-wrap items-stretch rounded overflow-hidden border border-gray-200 bg-white text-sm">
                         <ButtonWithIcon variant="flat" height="40" rounded="0"
                             custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-                            :prepend-icon="trash_1_icon" color="white" label="حذف المحدد"
-                            @click="handleBulkDelete" />
+                            :prepend-icon="trash_1_icon" color="white" label="حذف المحدد" @click="handleBulkDelete" />
                         <div class="w-px bg-gray-200"></div>
                         <ButtonWithIcon variant="flat" height="40" rounded="0"
                             custom-class="px-4 font-semibold text-error-600 hover:bg-error-50/40 !rounded-none"
-                            :prepend-icon="trash_2_icon" color="white" label="حذف"
-                            @click="handleBulkDelete" />
+                            :prepend-icon="trash_2_icon" color="white" label="حذف" @click="handleBulkDelete" />
                     </div>
 
                     <div class="flex flex-wrap gap-3">
@@ -381,8 +409,7 @@ onMounted(() => {
                             <template v-slot:activator="{ props }">
                                 <ButtonWithIcon v-bind="props" variant="outlined" rounded="4" color="gray-500"
                                     height="40" custom-class="font-semibold text-base border-gray-400"
-                                    :prepend-icon="columnIcon" label="الأعمدة"
-                                    append-icon="mdi-chevron-down" />
+                                    :prepend-icon="columnIcon" label="الأعمدة" append-icon="mdi-chevron-down" />
                             </template>
                             <v-list>
                                 <v-list-item v-for="header in allHeaders" :key="header.key"
@@ -399,8 +426,7 @@ onMounted(() => {
 
                         <ButtonWithIcon variant="flat" color="primary-500" height="40" rounded="4"
                             custom-class="px-7 font-semibold text-base text-white border !border-primary-200"
-                            :prepend-icon="searchIcon" label="بحث متقدم"
-                            @click="toggleAdvancedFilters" />
+                            :prepend-icon="searchIcon" label="بحث متقدم" @click="toggleAdvancedFilters" />
 
                         <ButtonWithIcon v-if="canCreate" variant="flat" color="primary-100" height="40" rounded="4"
                             custom-class="px-7 font-semibold text-base !text-primary-800 border !border-primary-200"
@@ -412,8 +438,7 @@ onMounted(() => {
                     <div class="flex flex-wrap gap-3 justify-between">
                         <div class="flex gap-3 flex-wrap">
                             <TextInput v-model="filterName" density="comfortable" variant="outlined" hide-details
-                                placeholder="بحث بالاسم" class="w-full sm:w-40 bg-white"
-                                @keyup.enter="applyFilters" />
+                                placeholder="بحث بالاسم" class="w-full sm:w-40 bg-white" @keyup.enter="applyFilters" />
                             <SelectInput v-model="filterStatus" :items="StatusList" item-title="title"
                                 item-value="value" density="comfortable" variant="outlined" hide-details
                                 placeholder="الحالة" class="w-full sm:w-40 bg-white"
@@ -433,10 +458,11 @@ onMounted(() => {
                 </div>
 
                 <DataTable :headers="tableHeaders" :items="tableItems" :loading="loading" :show-checkbox="canBulkDelete"
-                    show-actions @delete="handleDeletePath" @edit="handleEditPath" @view="handleViewPath" @select="handleSelectPath" forceShowView forceShowDelete forceShowEdit
-                    @selectAll="handleSelectAllPaths" :confirm-delete="true"
-                    @load-more="loadMore" :loading-more="loadingMore" :has-more-data="hasMoreData">
-                    <template #item.is_active="{ item }">
+                    show-actions @delete="handleDeletePath" @edit="handleEditPath" @view="handleViewPath"
+                    @select="handleSelectPath" forceShowView forceShowDelete forceShowEdit
+                    @selectAll="handleSelectAllPaths" :confirm-delete="true" @load-more="loadMore"
+                    :loading-more="loadingMore" :has-more-data="hasMoreData">
+                    <template v-slot:[centralPathIsActiveSlotName]="{ item }">
                         <v-switch :model-value="item.is_active" hide-details inset density="compact" color="primary"
                             class="small-switch" @update:model-value="() => handleStatusChange(item)" />
                     </template>
@@ -445,6 +471,11 @@ onMounted(() => {
                             @click="handleSiteTracks(item)" title="مسارات الموقع">
                             <span v-html="siteTrackIcon"></span>
                         </v-btn>
+                        <v-btn v-if="item.actions?.zone_city_suburb?.can_access" icon variant="text" size="small"
+                            :title="t('pages.centralPaths.zoneSuburbs.openFromList')" @click="goToZoneSuburbs(item)">
+                            <span v-html="mapIcon" class="text-[#F6AF0C]"></span>
+                        </v-btn>
+
                     </template>
                 </DataTable>
             </div>
@@ -454,8 +485,8 @@ onMounted(() => {
             :message="`هل أنت متأكد من حذف ${selectedPaths.length} مسار مركزي؟`" @confirm="confirmBulkDelete" />
 
         <StatusChangeDialog v-model="showStatusChangeDialog" :loading="statusChangeLoading"
-            :item-name="(itemToChangeStatus?.geographical_zone || '') + ' - ' + (itemToChangeStatus?.city || '')" :current-status="itemToChangeStatus?.is_active"
-            @confirm="confirmStatusChange" />
+            :item-name="(itemToChangeStatus?.geographical_zone || '') + ' - ' + (itemToChangeStatus?.city || '')"
+            :current-status="itemToChangeStatus?.is_active" @confirm="confirmStatusChange" />
 
         <CentralPathFormDialog v-model="showPathDialog" :path-id="editingPathId" @saved="handleSavePath" />
     </default-layout>

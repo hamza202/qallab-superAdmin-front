@@ -56,6 +56,7 @@
       "title": "المدن",
       "description": "تمكنك من ادارة المدن",
       "list": {
+        "openSuburbs": "أحياء المدينة",
         "deleteDialog": {
           "title": "حذف المدن",
           "message": "هل أنت متأكد من حذف {count} مدينة"
@@ -63,6 +64,54 @@
         "messages": {
           "deleteSuccess": "تم حذف المدينة بنجاح",
           "bulkDeleteSuccess": "تم حذف {count} مدينة بنجاح"
+        }
+      }
+    },
+    "citySuburbs": {
+      "title": "الأحياء",
+      "description": "إدارة أحياء هذه المدينة",
+      "breadcrumbCityId": "المدينة #{id}",
+      "tableTitle": "جدول الأحياء",
+      "columns": {
+        "name": "اسم الحي",
+        "suburbNo": "رقم الحي",
+        "cityName": "المدينة",
+        "status": "الحالة"
+      },
+      "form": {
+        "addNew": "إضافة جديد",
+        "cancelEdit": "إلغاء التعديل",
+        "suburbNo": "رقم الحي",
+        "suburbNoPlaceholder": "مثال: 32545",
+        "nameEn": "الاسم (إنجليزي)",
+        "nameAr": "الاسم (عربي)",
+        "nameEnPlaceholder": "أدخل الاسم بالإنجليزية",
+        "nameArPlaceholder": "أدخل الاسم بالعربية"
+      },
+      "viewDialog": {
+        "title": "تفاصيل الحي"
+      }
+    },
+    "centralPaths": {
+      "zoneSuburbs": {
+        "title": "الأحياء",
+        "description": "إدارة الأحياء المرتبطة بهذا المسار المركزي",
+        "descriptionFallback": "إدارة الأحياء المرتبطة بهذا المسار المركزي",
+        "breadcrumbZoneFallback": "المنطقة #{id}",
+        "tableTitle": "جدول الأحياء",
+        "openFromList": "أحياء المسار المركزي",
+        "columns": {
+          "name": "اسم الحي",
+          "status": "الحالة"
+        },
+        "form": {
+          "suburbsLabel": "الحي",
+          "suburbsPlaceholder": "ابحث واختر أحد الأحياء أو أكثر",
+          "save": "حفظ"
+        },
+        "messages": {
+          "missingZone": "بيانات المنطقة غير متوفرة. يرجى إعادة تحميل الصفحة.",
+          "missingCityId": "المدينة غير متوفرة لهذا المسار. تعذر فتح الأحياء."
         }
       }
     },

@@ -163,6 +163,14 @@ export const settingsRoutes: RouteRecordRaw[] = [
           title: "pages.cities.title",
         },
       },
+      {
+        path: ":cityId/suburbs",
+        name: "CitySuburbs",
+        component: () => import("@/views/settings/cities/Suburbs.vue"),
+        meta: {
+          title: "pages.citySuburbs.title",
+        },
+      },
     ],
   },
   {
@@ -445,6 +453,15 @@ export const settingsRoutes: RouteRecordRaw[] = [
         component: () => import("@/views/settings/central-paths/List.vue"),
         meta: {
           title: "المسارات المركزية",
+        },
+      },
+      {
+        path: ":zoneId/:cityId/zone-suburbs",
+        name: "ZoneCitySuburbs",
+        component: () =>
+          import("@/views/settings/central-paths/ZoneCitySuburbs.vue"),
+        meta: {
+          title: "pages.centralPaths.zoneSuburbs.title",
         },
       },
       {

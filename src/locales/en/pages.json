@@ -56,6 +56,7 @@
       "title": "Cities",
       "description": "Allows you to manage cities",
       "list": {
+        "openSuburbs": "City suburbs",
         "deleteDialog": {
           "title": "Delete Cities",
           "message": "Are you sure you want to delete {count} city/cities?"
@@ -63,6 +64,54 @@
         "messages": {
           "deleteSuccess": "City deleted successfully",
           "bulkDeleteSuccess": "{count} cities deleted successfully"
+        }
+      }
+    },
+    "citySuburbs": {
+      "title": "Suburbs",
+      "description": "Manage suburbs for this city",
+      "breadcrumbCityId": "City #{id}",
+      "tableTitle": "Suburbs table",
+      "columns": {
+        "name": "Suburb name",
+        "suburbNo": "Suburb no.",
+        "cityName": "City",
+        "status": "Status"
+      },
+      "form": {
+        "addNew": "Add new",
+        "cancelEdit": "Cancel edit",
+        "suburbNo": "Suburb no.",
+        "suburbNoPlaceholder": "e.g. 32545",
+        "nameEn": "Name (English)",
+        "nameAr": "Name (Arabic)",
+        "nameEnPlaceholder": "Enter name in English",
+        "nameArPlaceholder": "Enter name in Arabic"
+      },
+      "viewDialog": {
+        "title": "Suburb details"
+      }
+    },
+    "centralPaths": {
+      "zoneSuburbs": {
+        "title": "Suburbs",
+        "description": "Manage suburbs linked to this central path",
+        "descriptionFallback": "Manage suburbs linked to this central path",
+        "breadcrumbZoneFallback": "Zone #{id}",
+        "tableTitle": "Suburbs table",
+        "openFromList": "Central path suburbs",
+        "columns": {
+          "name": "Suburb name",
+          "status": "Status"
+        },
+        "form": {
+          "suburbsLabel": "Suburb",
+          "suburbsPlaceholder": "Search and select one or more suburbs",
+          "save": "Save"
+        },
+        "messages": {
+          "missingZone": "Zone data is missing. Please reload the page.",
+          "missingCityId": "City is missing for this path. Cannot open suburbs."
         }
       }
     },
