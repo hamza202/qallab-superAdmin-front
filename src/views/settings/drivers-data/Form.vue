@@ -1,14 +1,15 @@
 <script setup lang="ts">
-import { SettingsIcon } from '@/components/icons/globalIcons';
-import { ref, reactive, computed, onMounted } from 'vue';
+import { ref, reactive, computed, onMounted, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useApi } from '@/composables/useApi';
+import { useLazyCountryCityLists } from '@/composables/useLazyCountryCityLists';
 
 const router = useRouter();
 const route = useRoute();
 const { t } = useI18n();
 const api = useApi();
+const { buildCountriesFetcher } = useLazyCountryCityLists();
 
 const formRef = ref<any>(null);
 const isFormValid = ref(false);
@@ -54,7 +55,7 @@ const formData = ref<DriverForm>({
     logistics_company_id: null,
     name: '',
     national_id: '',
-    country_id: 1,
+    country_id: null,
     license_type: [],
     license_expires_at: '',
     hazardous_material_qualified: false,
@@ -68,7 +69,6 @@ const isFormDataLoaded = ref(false);
 const formErrors = reactive<Record<string, string>>({});
 
 const licenseTypes = ref<LicenseType[]>([]);
-const countries = ref<any[]>([]);
 const ratings = [
     { title: '1', value: 1 },
     { title: '2', value: 2 },
@@ -78,6 +78,30 @@ const ratings = [
 ];
 
 const isEditMode = computed(() => !!route.params.id);
+
+/** After mount + optional fetch — lazy country list can use order_by_id in edit mode. */
+const driverFormReadyForCountryList = ref(false);
+
+async function waitForDriverFormReadyForCountry() {
+    if (!isEditMode.value) return;
+    await new Promise<void>((resolve) => {
+        if (driverFormReadyForCountryList.value) {
+            resolve();
+            return;
+        }
+        const stop = watch(driverFormReadyForCountryList, (ok) => {
+            if (ok) {
+                stop();
+                resolve();
+            }
+        });
+    });
+}
+
+const fetchCountriesList = buildCountriesFetcher({
+    getSelectedCountryId: () => formData.value.country_id ?? undefined,
+    waitForReady: waitForDriverFormReadyForCountry,
+});
 
 const fetchConstants = async () => {
     try {
@@ -101,6 +125,7 @@ const fetchDriverData = async () => {
         formData.value = {
             ...payload,
             license_type: payload.license_type || [],
+            country_id: payload.country_id ?? null,
         };
         isFormDataLoaded.value = true;
     } catch (err: any) {
@@ -208,12 +233,14 @@ const handleCancel = () => {
 };
 
 onMounted(async () => {
+    driverFormReadyForCountryList.value = false;
     await fetchConstants();
     if (isEditMode.value) {
         await fetchDriverData();
     } else {
         isFormDataLoaded.value = true;
     }
+    driverFormReadyForCountryList.value = true;
 });
 </script>
 
@@ -253,6 +280,24 @@ onMounted(async () => {
                                 :placeholder="t('pages.driversData.form.placeholders.nationalId')" :rules="[required(),numeric()]"
                                 :error-messages="formErrors['national_id']" @input="delete formErrors['national_id']"
                                 density="comfortable" />
+
+                            <SelectInput
+                                v-model="formData.country_id"
+                                :items="[]"
+                                :label="t('pages.driversData.form.labels.country')"
+                                :placeholder="t('pages.driversData.form.placeholders.country')"
+                                density="comfortable"
+                                clearable
+                                :rules="[required()]"
+                                :hide-details="false"
+                                :server-side="true"
+                                :fetch-function="fetchCountriesList"
+                                item-title-key="name"
+                                item-value-key="id"
+                                :debounce-time="500"
+                                :error-messages="formErrors['country_id']"
+                                @update:model-value="delete formErrors['country_id']"
+                            />
 
                             <MultipleSelectInput v-model="formData.license_type" :label="t('pages.driversData.form.labels.licenseType')"
                                 :placeholder="t('pages.driversData.form.placeholders.licenseType')" :items="licenseTypes" item-title="label" item-value="key"

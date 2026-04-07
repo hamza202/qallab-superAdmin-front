@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, reactive } from "vue";
+import { ref, computed, onMounted, reactive, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useApi } from "@/composables/useApi";
 import { useI18n } from 'vue-i18n';
@@ -35,6 +35,25 @@ const checkCircleIcon = `<svg width="18" height="18" viewBox="0 0 18 18" fill="n
 const isEditing = computed(() => !!route.params.id);
 const pageTitle = computed(() => isEditing.value ? t('pages.logistics.form.editTitle') : t('pages.logistics.form.addTitle'));
 const logisticId = ref<number | null>(null);
+
+/** When true, logistic payload (incl. country_id / city_id) is applied — safe for lazy lists. */
+const logisticAddressListsReady = ref(false);
+
+async function waitForLogisticAddressLists() {
+    if (!isEditing.value) return;
+    await new Promise<void>((resolve) => {
+        if (logisticAddressListsReady.value) {
+            resolve();
+            return;
+        }
+        const stop = watch(logisticAddressListsReady, (ok) => {
+            if (ok) {
+                stop();
+                resolve();
+            }
+        });
+    });
+}
 
 const formRef = ref<any>(null);
 const isFormValid = ref(false);
@@ -130,8 +149,6 @@ const documentType = ref<string | null>(null);
 const documentFile = ref<File[] | null>(null);
 const pageLoading = ref(false)
 
-const countryItems = ref<Array<{ title: string; value: number }>>([]);
-const cityItems = ref<Array<{ title: string; value: number }>>([]);
 const languageItems = ref<Array<{ title: string; value: number }>>([]);
 const bankItems = ref<Array<{ title: string; value: number }>>([]);
 const rockTypeItems = ref<Array<{ title: string; value: string }>>([]);
@@ -614,47 +631,16 @@ const fetchLanguagesList = async () => {
     }
 };
 
-const fetchCountriesList = async () => {
-    try {
-        const response = await api.get('/countries/list');
-        if (response.data && Array.isArray(response.data)) {
-            countryItems.value = response.data.map((country: any) => ({
-                title: country.name || country.title,
-                value: country.id
-            }));
-        }
-    } catch (err: any) {
-        console.error('Error fetching countries list:', err);
-    }
-};
-
-const fetchCitiesList = async (countryIdParam?: number) => {
-    try {
-        const url = countryIdParam
-            ? `/cities/list?country_id=${countryIdParam}`
-            : '/cities/list';
-        const response = await api.get(url);
-        if (response.data && Array.isArray(response.data)) {
-            cityItems.value = response.data.map((city: any) => ({
-                title: city.name || city.title,
-                value: city.id
-            }));
-        }
-    } catch (err: any) {
-        console.error('Error fetching cities list:', err);
-    }
-};
-
 onMounted(async () => {
     pageLoading.value = true
+    logisticAddressListsReady.value = false
     await Promise.all([
         fetchConstants(),
         fetchBanksList(),
-        fetchLanguagesList(),
-        fetchCountriesList(),
-        fetchCitiesList()
+        fetchLanguagesList()
     ]);
     await fetchLogisticData();
+    logisticAddressListsReady.value = true
     pageLoading.value = false
 });
 
@@ -689,7 +675,8 @@ onMounted(async () => {
                             :buisnessno="buisnessno" :taxno="taxno" :unifiedLoginId="unifiedLoginId" :countryId="countryId" :cityId="cityId"
                             :neighborhood="neighborhood" :streetName="streetName" :postalCode="postalCode"
                             :buildingNumber="buildingNumber" :address1="address1" :languageId="languageId"
-                            :countryItems="countryItems" :cityItems="cityItems" :languageItems="languageItems"
+                            :languageItems="languageItems"
+                            :wait-for-address-lists-ready="waitForLogisticAddressLists"
                             :formErrors="formErrors" @update:formData="handleBasicInfoUpdate"
                             @clear:error="clearFieldError" />
                     </v-tabs-window-item>

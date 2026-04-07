@@ -11,6 +11,7 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    AddressCountryCitySelects: typeof import('./components/common/AddressCountryCitySelects.vue')['default']
     AppDialog: typeof import('./components/common/AppDialog.vue')['default']
     AppFormBreadcrumb: typeof import('./components/common/AppFormBreadcrumb.vue')['default']
     AuthLayout: typeof import('./layouts/AuthLayout.vue')['default']

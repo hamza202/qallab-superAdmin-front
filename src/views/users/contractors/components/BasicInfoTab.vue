@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { taxNo, unifiedLoginId, email } from '@/utils/validators';
+import { taxNo, unifiedLoginId, email, required } from '@/utils/validators';
+import AddressCountryCitySelects from '@/components/common/AddressCountryCitySelects.vue';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
@@ -32,8 +33,8 @@ interface Props {
   address1: string;
   entityTypeItems: Array<{ title: string; value: string }>;
   languageItems: Array<{ title: string; value: number }>;
-  countryItems: Array<{ title: string; value: number }>;
-  cityItems: Array<{ title: string; value: number }>;
+  /** Wait until parent finished loading entity (so lazy country/city get correct order_by_id). */
+  waitForAddressListsReady?: () => void | Promise<void>;
   formErrors?: Record<string, string>;
 }
 
@@ -180,12 +181,22 @@ const markIcon = `<svg width="18" height="22" viewBox="0 0 18 22" fill="none" xm
         :error-messages="props.formErrors?.['email']" />
       <h2 class="text-lg font-bold text-primary-900 mt-6 mb-2 md:col-span-3">{{ t('form.address.sections.addressInfo') }}</h2>
 
-      <SelectWithIconInput clearable v-model="formData.countryId" @update:model-value="handleInputUpdate('country_id')"
-        :label="t('form.address.country.label')" :placeholder="t('form.address.country.placeholder')" :items="countryItems" :hide-details="false" :rules="[required()]"
-        :error-messages="props.formErrors?.['country_id']" />
-      <SelectWithIconInput clearable v-model="formData.cityId" @update:model-value="handleInputUpdate('city_id')"
-        :placeholder="t('form.address.city.placeholder')" :label="t('form.address.city.label')" :items="cityItems" :hide-details="false" :rules="[required()]"
-        :error-messages="props.formErrors?.['city_id']" />
+      <AddressCountryCitySelects
+        :country-id="formData.countryId"
+        :city-id="formData.cityId"
+        :country-label="t('form.address.country.label')"
+        :country-placeholder="t('form.address.country.placeholder')"
+        :city-label="t('form.address.city.label')"
+        :city-placeholder="t('form.address.city.placeholder')"
+        :country-error="props.formErrors?.['country_id']"
+        :city-error="props.formErrors?.['city_id']"
+        :country-rules="[required()]"
+        :city-rules="[required()]"
+        :wait-for-lists-ready="props.waitForAddressListsReady"
+        @update:country-id="(v) => { formData.countryId = v; handleInputUpdate('country_id'); }"
+        @update:city-id="(v) => { formData.cityId = v; handleInputUpdate('city_id'); }"
+        @clear:error="clearError"
+      />
       <TextInput v-model="formData.neighborhood" @input="emitUpdate" :label="t('form.address.district.label')" :placeholder="t('form.address.district.placeholder')" />
 
       <TextInput v-model="formData.streetName" @input="emitUpdate" :label="t('form.address.streetName.label')" :placeholder="t('form.address.streetName.placeholder')" />

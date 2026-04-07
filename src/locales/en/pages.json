@@ -1015,7 +1015,8 @@
           "licenseType": "Select license type",
           "licenseExpiresAt": "Select expiry date",
           "rating": "Select rating",
-          "medicalExamDate": "Select exam date"
+          "medicalExamDate": "Select exam date",
+          "country": "Select country"
         },
         "status": {
           "active": "Active",

@@ -46,10 +46,17 @@
 
                             <!-- Country Code -->
                             <div>
-                                <SelectInput v-model="formData.country_code" label="الدولة" placeholder="اختر"
-                                    :items="countryItems" density="comfortable" variant="outlined"
+                                <SelectInput
+                                    :model-value="formData.country_code != null && formData.country_code !== '' ? Number(formData.country_code) : null"
+                                    label="الدولة" placeholder="اختر"
+                                    :items="[]" density="comfortable" variant="outlined"
                                     :error-messages="formErrors['country_code']"
-                                    @update:model-value="delete formErrors['country_code']" />
+                                    :server-side="true"
+                                    :fetch-function="fetchCountriesLazy"
+                                    item-title-key="name"
+                                    item-value-key="id"
+                                    :debounce-time="500"
+                                    @update:model-value="onCountryCodeChange" />
                             </div>
 
                             <!-- Currency (Multiple) -->
@@ -100,7 +107,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
+import { useLazyCountryCityLists } from '@/composables/useLazyCountryCityLists'
 import { useRouter, useRoute } from 'vue-router'
 import { useApi } from '@/composables/useApi'
 import { useNotification } from '@/composables/useNotification'
@@ -158,22 +166,41 @@ const availableLanguages = ref<Language[]>([
 ])
 
 const currencyItems = ref<{ title: string; value: string | number }[]>([])
-const countryItems = ref<{ title: string; value: string | number }[]>([])
 
 const isEditMode = computed(() => !!route.params.id)
 
-const fetchCountriesList = async () => {
-    try {
-        const response = await api.get('/countries/list')
-        if (response.data && Array.isArray(response.data)) {
-            countryItems.value = response.data.map((country: any) => ({
-                title: country.name || country.title,
-                value: String(country.id ?? country.value ?? '')
-            }))
-        }
-    } catch (err: any) {
-        console.error('Error fetching countries list:', err)
-    }
+const bankFetchDone = ref(false)
+
+const { buildCountriesFetcher } = useLazyCountryCityLists()
+
+const fetchCountriesLazy = buildCountriesFetcher({
+    getSelectedCountryId: () => {
+        const v = formData.value.country_code
+        if (v == null || v === '') return undefined
+        const n = Number(v)
+        return Number.isFinite(n) ? n : undefined
+    },
+    waitForReady: async () => {
+        if (!isEditMode.value) return
+        await new Promise<void>((resolve) => {
+            if (bankFetchDone.value) {
+                resolve()
+                return
+            }
+            const stop = watch(bankFetchDone, (ok) => {
+                if (ok) {
+                    stop()
+                    resolve()
+                }
+            })
+        })
+    },
+})
+
+const onCountryCodeChange = (v: string | number | null) => {
+    delete formErrors.value['country_code']
+    formData.value.country_code =
+        v != null && v !== '' && !Number.isNaN(Number(v)) ? String(v) : null
 }
 
 const fetchCurrenciesList = async () => {
@@ -192,7 +219,10 @@ const fetchCurrenciesList = async () => {
 }
 
 const fetchBank = async () => {
-    if (!isEditMode.value) return
+    if (!isEditMode.value) {
+        bankFetchDone.value = true
+        return
+    }
 
     try {
         loading.value = true
@@ -232,6 +262,7 @@ const fetchBank = async () => {
         errorNotification(err?.response?.data?.message || 'حدث خطأ أثناء جلب البيانات')
     } finally {
         loading.value = false
+        bankFetchDone.value = true
     }
 }
 
@@ -286,7 +317,6 @@ const financeIcon = `<svg width="47" height="42" viewBox="0 0 47 42" fill="none"
 `
 
 onMounted(() => {
-    fetchCountriesList()
     fetchCurrenciesList()
     fetchBank()
 })

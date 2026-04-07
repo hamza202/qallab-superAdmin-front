@@ -6,6 +6,7 @@
 
 import { toast } from "vue3-toastify";
 import { useApi } from "@/composables/useApi";
+import { useLazyCountryCityLists } from "@/composables/useLazyCountryCityLists";
 import { useForm } from "@/composables/useForm";
 import { useRoute, useRouter } from "vue-router";
 import { onMounted, watch, reactive, ref, computed } from "vue";
@@ -150,11 +151,6 @@ interface ManufacturerItem {
   name: string;
 }
 
-interface CountryItem {
-  id: number;
-  name: string;
-}
-
 interface ItemListItem {
   id: number;
   name: string;
@@ -167,17 +163,35 @@ interface SupplierItem {
 }
 
 // Dynamic dropdown items from API
-const countryItems = ref<Array<{ title: string; value: number }>>([]);
 const manufacturerItems = ref<Array<{ title: string; value: number }>>([]);
 const brandItems = ref<Array<{ title: string; value: number }>>([]);
 const productItems = ref<Array<{ title: string; value: number }>>([]);
 const supplierItems = ref<Array<{ title: string; value: number }>>([]);
 
-// Handlers for new section
-const handleAddCountry = () => {
-  console.log("Add new country");
-};
+const countryListReady = ref(false);
 
+const { buildCountriesFetcher } = useLazyCountryCityLists();
+
+const fetchCountriesLazy = buildCountriesFetcher({
+  getSelectedCountryId: () => originCountry.value ?? undefined,
+  waitForReady: async () => {
+    if (!isEditMode.value) return;
+    await new Promise<void>((resolve) => {
+      if (countryListReady.value) {
+        resolve();
+        return;
+      }
+      const stop = watch(countryListReady, (ok) => {
+        if (ok) {
+          stop();
+          resolve();
+        }
+      });
+    });
+  },
+});
+
+// Handlers for new section
 const handleAddManufacturer = () => {
   console.log("Add new manufacturer");
 };
@@ -634,19 +648,6 @@ const fetchManufacturers = async () => {
     }));
   } catch (err: any) {
     console.error('Error fetching manufacturers:', err);
-  }
-};
-
-// Fetch countries from API
-const fetchCountries = async () => {
-  try {
-    const response = await api.get<{ data: CountryItem[] }>('/countries/list');
-    countryItems.value = response.data.map((item: CountryItem) => ({
-      title: item.name,
-      value: item.id,
-    }));
-  } catch (err: any) {
-    console.error('Error fetching countries:', err);
   }
 };
 
@@ -1220,7 +1221,6 @@ onMounted(async () => {
       // Step 3 APIs
       fetchBrands(),
       fetchManufacturers(),
-      fetchCountries(),
       fetchSuppliers(),
     ]);
 
@@ -1233,6 +1233,7 @@ onMounted(async () => {
       // Fetch item data for editing
       await fetchProduct(Number(route.params.id));
     }
+    countryListReady.value = true;
   } catch (err) {
     console.error('Error loading form data:', err);
   } finally {
@@ -1426,7 +1427,7 @@ watch(activeTab, async (newTab) => {
                       </div>
 
                       <div>
-                        <TextInput type="number" :rules="[required(), numeric(), positive()]" v-model="minQuantity" :label="t('pages.simpleProducts.form.labels.minQuantity')"
+                        <TextInput type="number" :rules="[numeric(), positive()]" v-model="minQuantity" :label="t('pages.simpleProducts.form.labels.minQuantity')"
                           :placeholder="t('pages.simpleProducts.form.labels.minQuantityPlaceholder')" :hide-details="false" />
                       </div>
                     </div>
@@ -1434,11 +1435,11 @@ watch(activeTab, async (newTab) => {
                     <!-- Description with Language Tabs -->
                     <LanguageTabs :languages="availableLanguages" :label="t('pages.simpleProducts.form.labels.description')" class="mb-[20px]">
                       <template #en>
-                        <TextareaInput :rules="[required()]" v-model="englishDescription"
+                        <TextareaInput  v-model="englishDescription"
                           :placeholder="t('pages.simpleProducts.form.labels.descriptionPlaceholderEn')" min-height="120px" :hide-details="false" />
                       </template>
                       <template #ar>
-                        <TextareaInput :rules="[required()]" v-model="arabicDescription"
+                        <TextareaInput v-model="arabicDescription"
                           :placeholder="t('pages.simpleProducts.form.labels.descriptionPlaceholderAr')" min-height="120px" :hide-details="false" />
                       </template>
                     </LanguageTabs>
@@ -1525,8 +1526,13 @@ watch(activeTab, async (newTab) => {
 
             <!-- Row 1: Country, Manufacturer, Brand -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-10 mb-6">
-              <SelectWithIconInput v-model="originCountry" :label="t('pages.simpleProducts.form.labels.originCountry')" :placeholder="t('pages.simpleProducts.form.labels.originCountryPlaceholder')"
-                :items="countryItems" :hide-details="false" show-add-button @add-click="handleAddCountry" />
+              <SelectInput v-model="originCountry" :label="t('pages.simpleProducts.form.labels.originCountry')" :placeholder="t('pages.simpleProducts.form.labels.originCountryPlaceholder')"
+                :items="[]" :hide-details="false"
+                :server-side="true"
+                :fetch-function="fetchCountriesLazy"
+                item-title-key="name"
+                item-value-key="id"
+                :debounce-time="500" />
               <SelectWithIconInput v-model="manufacturer" :label="t('pages.simpleProducts.form.labels.manufacturer')" :placeholder="t('pages.simpleProducts.form.labels.manufacturerPlaceholder')"
                 :items="manufacturerItems" :hide-details="false" show-add-button @add-click="handleAddManufacturer" />
               <SelectWithIconInput v-model="brand" :label="t('pages.simpleProducts.form.labels.brand')" :placeholder="t('pages.simpleProducts.form.labels.brandPlaceholder')"
