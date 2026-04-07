@@ -2561,6 +2561,10 @@
         "bulkDeleteSuccess": "تم حذف {count} تسعير بنجاح"
       }
     },
+    "pricingPerTonSuburbs": "تسعير بالطن للأحياء",
+    "pricingPerTonSuburbsDescription": "إدارة التسعير بالطن للأحياء.",
+    "pricingByTruckSuburbs": "تسعير بالشاحنة للأحياء",
+    "pricingByTruckSuburbsDescription": "إدارة التسعير بالشاحنة للأحياء.",
     "customPricing": {
       "title": "تسعير مخصص",
       "description": "تمكنك من إدارة التسعير المخصص للشاحنات والمواد",

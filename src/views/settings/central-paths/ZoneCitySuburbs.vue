@@ -53,11 +53,29 @@ interface Pagination {
   per_page?: number;
 }
 
+/** Suburb-level pricing shortcuts from zone-city-suburbs index */
+interface PricingBySuburbAction {
+  zone_city_suburb_id?: number;
+  can_access?: boolean;
+}
+
+/** Legacy site-track pricing (central paths tracks list) */
+interface PricingTrackAction {
+  zone_site_track_id?: number;
+  can_access?: boolean;
+}
+
 interface RowActions {
   can_update?: boolean;
   can_delete?: boolean;
   can_view?: boolean;
   can_change_status?: boolean;
+  pricing_ton_by_suburb?: PricingBySuburbAction;
+  pricing_km_truck_by_suburb?: PricingBySuburbAction;
+  pricing_custom_by_suburb?: PricingBySuburbAction;
+  pricing_ton?: PricingTrackAction;
+  pricing_km_truck?: PricingTrackAction;
+  pricing_custom?: PricingTrackAction;
 }
 
 interface ZoneSuburbRow {
@@ -327,6 +345,74 @@ const submitUpdate = async () => {
   }
 };
 
+const firstQueryString = (q: unknown): string => {
+  if (q == null) return "";
+  const v = Array.isArray(q) ? q[0] : q;
+  return typeof v === "string" ? v.trim() : String(v ?? "").trim();
+};
+
+const pricingCreateQuery = (zoneCitySuburbId: string): Record<string, string> => {
+  const out: Record<string, string> = {
+    zone_city_suburb_id: zoneCitySuburbId,
+    zone_id: zoneIdParam.value,
+    city_id: cityIdParam.value,
+  };
+  const zoneLabel = firstQueryString(route.query.zone);
+  if (zoneLabel) out.zone = zoneLabel;
+  return out;
+};
+
+/** Prefer API actions.zone_city_suburb_id; fallback to pivot row id (zone_city_suburbs.id). */
+const resolveZoneCitySuburbId = (
+  item: ZoneSuburbRow,
+  action?: PricingBySuburbAction | null
+): number => {
+  const fromAction = action?.zone_city_suburb_id;
+  if (fromAction != null && Number(fromAction) > 0) return Number(fromAction);
+  return item.id > 0 ? item.id : 0;
+};
+
+const canOpenPricingBySuburb = (bySuburb?: PricingBySuburbAction, legacy?: PricingTrackAction) =>
+  Boolean(bySuburb?.can_access || legacy?.can_access);
+
+// Navigation to pricing create (suburb-scoped)
+const handlePricingByTon = (item: ZoneSuburbRow) => {
+  const bySuburb = item.actions?.pricing_ton_by_suburb;
+  const legacy = item.actions?.pricing_ton;
+  if (!canOpenPricingBySuburb(bySuburb, legacy)) return;
+  const id = resolveZoneCitySuburbId(item, bySuburb);
+  if (!id) return;
+  router.push({
+    path: "/settings/pricing-per-ton-suburbs/create",
+    query: pricingCreateQuery(String(id)),
+  });
+};
+
+const handlePricingByTruck = (item: ZoneSuburbRow) => {
+  const bySuburb = item.actions?.pricing_km_truck_by_suburb;
+  const legacy = item.actions?.pricing_km_truck;
+  if (!canOpenPricingBySuburb(bySuburb, legacy)) return;
+  const id = resolveZoneCitySuburbId(item, bySuburb);
+  if (!id) return;
+  router.push({
+    path: "/settings/pricing-by-truck-suburbs/create",
+    query: pricingCreateQuery(String(id)),
+  });
+};
+
+const handleCustomPricing = (item: ZoneSuburbRow) => {
+  const bySuburb = item.actions?.pricing_custom_by_suburb;
+  const legacy = item.actions?.pricing_custom;
+  if (!canOpenPricingBySuburb(bySuburb, legacy)) return;
+  const id = resolveZoneCitySuburbId(item, bySuburb);
+  if (!id) return;
+  router.push({
+    path: "/settings/custom-pricing-suburbs/create",
+    query: pricingCreateQuery(String(id)),
+  });
+};
+
+
 const handleDelete = async (item: ZoneSuburbRow) => {
   try {
     await api.delete(`/zone-city-suburbs/${item.id}`);
@@ -527,6 +613,38 @@ onMounted(() => {
               v-if="item.actions?.can_change_status !== false"
             />
             <span v-else class="text-sm text-gray-600">--</span>
+          </template>
+          <template #custom-actions="{ item }">
+            <v-btn
+              v-if="item.actions?.pricing_ton_by_suburb?.can_access || item.actions?.pricing_ton?.can_access"
+              variant="outlined"
+              size="small"
+              color="primary"
+              class="text-xs font-semibold !rounded"
+              @click="handlePricingByTon(item)"
+            >
+              تسعير بالطن
+            </v-btn>
+            <v-btn
+              v-if="item.actions?.pricing_km_truck_by_suburb?.can_access || item.actions?.pricing_km_truck?.can_access"
+              variant="outlined"
+              size="small"
+              color="primary"
+              class="text-xs font-semibold !rounded"
+              @click="handlePricingByTruck(item)"
+            >
+              تسعير بالشاحنة
+            </v-btn>
+            <v-btn
+              v-if="item.actions?.pricing_custom_by_suburb?.can_access || item.actions?.pricing_custom?.can_access"
+              variant="outlined"
+              size="small"
+              color="primary"
+              class="text-xs font-semibold !rounded"
+              @click="handleCustomPricing(item)"
+            >
+              تسعير مخصص
+            </v-btn>
           </template>
         </DataTable>
 

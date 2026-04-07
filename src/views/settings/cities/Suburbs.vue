@@ -190,7 +190,7 @@ const handleToggleHeader = async (headerKey: string) => {
   } catch (err: unknown) {
     toast.error(
       (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
-        t("common.messages.general.saveError")
+      t("common.messages.general.saveError")
     );
   }
 };
@@ -357,6 +357,7 @@ const handleDelete = async (item: SuburbRow) => {
   }
 };
 
+
 const handleStatusChange = (item: SuburbRow) => {
   itemToChangeStatus.value = { ...item };
   showStatusChangeDialog.value = true;
@@ -493,8 +494,7 @@ onMounted(() => {
               <ButtonWithIcon v-if="editingId != null" variant="outlined" color="gray-500" height="44" rounded="4"
                 custom-class="font-semibold text-base" prepend-icon="mdi-close"
                 :label="t('pages.citySuburbs.form.cancelEdit')" @click="resetForm" />
-              <ButtonWithIcon variant="flat" color="primary" height="44" rounded="4"
-                size="large" custom-class="px-8"
+              <ButtonWithIcon variant="flat" color="primary" height="44" rounded="4" size="large" custom-class="px-8"
                 :prepend-icon="plusIcon"
                 :label="editingId != null ? t('common.actions.save') : t('pages.citySuburbs.form.addNew')"
                 :loading="saving" :disabled="saving || !canCreate" @click="submitForm" />
@@ -505,35 +505,22 @@ onMounted(() => {
       </div>
 
       <div class="bg-gray-50 rounded-md -mx-6">
-        <div
-          class="flex flex-wrap items-center gap-3 justify-between bg-primary-50 px-4 sm:px-6 py-3 bg-white"
-        >
+        <div class="flex flex-wrap items-center gap-3 justify-between bg-primary-50 px-4 sm:px-6 py-3 bg-white">
           <h2 class="font-bold text-lg text-primary-900 flex items-center gap-2 m-0 ">
             <span v-html="mapIcon"></span>
             {{ t("pages.citySuburbs.tableTitle") }}
           </h2>
           <v-menu v-model="showHeadersMenu" :close-on-content-click="false">
             <template #activator="{ props }">
-              <ButtonWithIcon
-                v-bind="props"
-                variant="outlined"
-                rounded="4"
-                color="gray-500"
-                height="40"
-                custom-class="font-semibold text-base border-gray-400"
-                :prepend-icon="columnIcon"
-                :label="t('common.table.columns')"
-                append-icon="mdi-chevron-down"
-              />
+              <ButtonWithIcon v-bind="props" variant="outlined" rounded="4" color="gray-500" height="40"
+                custom-class="font-semibold text-base border-gray-400" :prepend-icon="columnIcon"
+                :label="t('common.table.columns')" append-icon="mdi-chevron-down" />
             </template>
             <v-list class="py-2">
               <v-list-item v-for="header in allHeaders" :key="header.key" @click="handleToggleHeader(header.key)">
                 <template #prepend>
-                  <v-checkbox-btn
-                    :model-value="headerCheckStates[header.key]"
-                    :disabled="updatingHeaders"
-                    @click.stop="handleToggleHeader(header.key)"
-                  />
+                  <v-checkbox-btn :model-value="headerCheckStates[header.key]" :disabled="updatingHeaders"
+                    @click.stop="handleToggleHeader(header.key)" />
                 </template>
                 <v-list-item-title>{{ header.title }}</v-list-item-title>
               </v-list-item>

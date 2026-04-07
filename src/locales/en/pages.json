@@ -2561,6 +2561,10 @@
         "bulkDeleteSuccess": "{count} pricing records deleted successfully"
       }
     },
+    "pricingPerTonSuburbs": "Pricing Per Ton for Suburbs",
+    "pricingPerTonSuburbsDescription": "Manage delivery prices per ton for suburbs.",
+    "pricingByTruckSuburbs": "Pricing by Truck for Suburbs",
+    "pricingByTruckSuburbsDescription": "Manage delivery prices by truck type for suburbs.",
     "customPricing": {
       "title": "Custom Pricing",
       "description": "Allows you to manage custom pricing for trucks and materials",

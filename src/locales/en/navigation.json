@@ -120,9 +120,12 @@
         "pricingPerTon": "Pricing Per Ton",
         "customPricing": "Custom Pricing",
         "centralPaths": "Central Paths",
-        "pricingByTruck": "Pricing Per Truck",
+        "pricingByTruck": "Pricing By Truck",
         "driversData": "Drivers Data Management",
-        "vehiclesData": "Vehicles Data Management"
+        "vehiclesData": "Vehicles Data Management",
+        "pricingByTruckSuburbs": "Pricing By Truck for Suburbs",
+        "pricingPerTonSuburbs": "Pricing Per Ton for Suburbs",
+        "customPricingSuburbs": "Custom Pricing for Suburbs"
       },
       "taxes": {
         "title": "Tax Management",

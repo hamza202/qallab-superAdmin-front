@@ -644,6 +644,123 @@ export const settingsRoutes: RouteRecordRaw[] = [
     ],
   },
   {
+    path: "/settings/pricing-by-truck-suburbs",
+    name: "PricingByTruckSuburbs",
+    redirect: "/settings/pricing-by-truck-suburbs/list",
+    children: [
+      {
+        path: "list",
+        name: "PricingByTruckSuburbsList",
+        component: () => import("@/views/settings/pricing-by-truck-suburbs/List.vue"),
+        meta: {
+          title: "pages.pricingByTruckSuburbs",
+        },
+      },
+      {
+        path: "create",
+        name: "PricingByTruckSuburbsCreate",
+        component: () => import("@/views/settings/pricing-by-truck-suburbs/Form.vue"),
+        meta: {
+          title: "pages.pricingByTruckSuburbs",
+        },
+      },
+      {
+        path: "edit/:id",
+        name: "PricingByTruckSuburbsEdit",
+        component: () => import("@/views/settings/pricing-by-truck-suburbs/Form.vue"),
+        meta: {
+          title: "pages.pricingByTruckSuburbs",
+        },
+      },
+      {
+        path: "view/:id",
+        name: "PricingByTruckSuburbsView",
+        component: () => import("@/views/settings/pricing-by-truck-suburbs/Form.vue"),
+        meta: {
+          title: "pages.pricingByTruckSuburbs",
+        },
+      },
+    ],
+  },
+  {
+    path: "/settings/pricing-per-ton-suburbs",
+    name: "PricingPerTonSuburbs",
+    redirect: "/settings/pricing-per-ton-suburbs/list",
+    children: [
+      {
+        path: "list",
+        name: "PricingPerTonSuburbsList",
+        component: () => import("@/views/settings/pricing-per-ton-suburbs/List.vue"),
+        meta: {
+          title: "pages.pricingPerTonSuburbs",
+        },
+      },
+      {
+        path: "create",
+        name: "PricingPerTonSuburbsCreate",
+        component: () => import("@/views/settings/pricing-per-ton-suburbs/Form.vue"),
+        meta: {
+          title: "pages.pricingPerTonSuburbs",
+        },
+      },
+      {
+        path: "edit/:id",
+        name: "PricingPerTonSuburbsEdit",
+        component: () => import("@/views/settings/pricing-per-ton-suburbs/Form.vue"),
+        meta: {
+          title: "pages.pricingPerTonSuburbs",
+        },
+      },
+      {
+        path: "view/:id",
+        name: "PricingPerTonSuburbsView",
+        component: () => import("@/views/settings/pricing-per-ton-suburbs/Form.vue"),
+        meta: {
+          title: "pages.pricingPerTonSuburbs",
+        },
+      },
+    ],
+  },
+  {
+    path: "/settings/custom-pricing-suburbs",
+    name: "CustomPricingSuburbs",
+    redirect: "/settings/custom-pricing-suburbs/list",
+    children: [
+      {
+        path: "list",
+        name: "CustomPricingSuburbsList",
+        component: () => import("@/views/settings/custom-pricing-suburbs/List.vue"),
+        meta: {
+          title: "pages.customPricingSuburbs.title",
+        },
+      },
+      {
+        path: "create",
+        name: "CustomPricingSuburbsCreate",
+        component: () => import("@/views/settings/custom-pricing-suburbs/Form.vue"),
+        meta: {
+          title: "pages.customPricingSuburbs.title",
+        },
+      },
+      {
+        path: "edit/:id",
+        name: "CustomPricingSuburbsEdit",
+        component: () => import("@/views/settings/custom-pricing-suburbs/Form.vue"),
+        meta: {
+          title: "pages.customPricingSuburbs.title",
+        },
+      },
+      {
+        path: "view/:id",
+        name: "CustomPricingSuburbsView",
+        component: () => import("@/views/settings/custom-pricing-suburbs/Form.vue"),
+        meta: {
+          title: "pages.customPricingSuburbs.title",
+        },
+      },
+    ],
+  },
+  {
     path: "/settings/drivers-data",
     name: "DriversData",
     redirect: "/settings/drivers-data/list",
