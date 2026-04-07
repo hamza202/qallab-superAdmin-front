@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, reactive } from "vue";
+import { ref, computed, onMounted, reactive, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useApi } from "@/composables/useApi";
 import BasicInfoTab from "./components/BasicInfoTab.vue";
@@ -23,6 +23,27 @@ const factoryIcon = `<svg width="52" height="52" viewBox="0 0 52 52" fill="none"
 </svg>`;
 
 const factoryId = ref<number | null>(null);
+
+const isEditing = computed(() => !!route.params.id);
+
+/** When true, factory payload (incl. country_id / city_id) load attempt finished — safe for lazy lists. */
+const factoryAddressListsReady = ref(false);
+
+async function waitForFactoryAddressLists() {
+    if (!isEditing.value) return;
+    await new Promise<void>((resolve) => {
+        if (factoryAddressListsReady.value) {
+            resolve();
+            return;
+        }
+        const stop = watch(factoryAddressListsReady, (ok) => {
+            if (ok) {
+                stop();
+                resolve();
+            }
+        });
+    });
+}
 
 const formRef = ref<any>(null);
 const isFormValid = ref(false);
@@ -103,8 +124,6 @@ const pageLoading = ref(false);
 
 const constants = ref<any>({});
 
-const countryItems = ref<Array<{ title: string; value: number }>>([]);
-const cityItems = ref<Array<{ title: string; value: number }>>([]);
 const languageItems = ref<Array<{ title: string; value: number }>>([]);
 const bankItems = ref<Array<{ title: string; value: number }>>([]);
 const productTypesItems = ref<Array<{ title: string; value: number }>>([]);
@@ -475,37 +494,6 @@ const fetchLanguagesList = async () => {
     }
 };
 
-const fetchCountriesList = async () => {
-    try {
-        const response = await api.get('/countries/list');
-        if (response.data && Array.isArray(response.data)) {
-            countryItems.value = response.data.map((country: any) => ({
-                title: country.name || country.title,
-                value: country.id
-            }));
-        }
-    } catch (err: any) {
-        console.error('Error fetching countries list:', err);
-    }
-};
-
-const fetchCitiesList = async (countryIdParam?: number) => {
-    try {
-        const url = countryIdParam
-            ? `/cities/list?country_id=${countryIdParam}`
-            : '/cities/list';
-        const response = await api.get(url);
-        if (response.data && Array.isArray(response.data)) {
-            cityItems.value = response.data.map((city: any) => ({
-                title: city.name || city.title,
-                value: city.id
-            }));
-        }
-    } catch (err: any) {
-        console.error('Error fetching cities list:', err);
-    }
-};
-
 const fetchProductTypesList = async () => {
     try {
         const response = await api.get('/items/list');
@@ -522,15 +510,15 @@ const fetchProductTypesList = async () => {
 
 onMounted(async () => {
     pageLoading.value = true;
+    factoryAddressListsReady.value = false;
     await Promise.all([
         fetchConstants(),
         fetchBanksList(),
         fetchLanguagesList(),
-        fetchCountriesList(),
-        fetchCitiesList(),
         fetchProductTypesList()
     ]);
     await fetchFactoryData();
+    factoryAddressListsReady.value = true;
     pageLoading.value = false;
 });
 
@@ -567,7 +555,8 @@ onMounted(async () => {
                             :neighborhood="neighborhood" :streetName="streetName" :postalCode="postalCode"
                             :buildingNumber="buildingNumber" :address1="address1" :languageId="languageId"
                             :tradeNameTranslations="tradeNameTranslations"
-                            :countryItems="countryItems" :cityItems="cityItems" :languageItems="languageItems"
+                            :languageItems="languageItems"
+                            :wait-for-address-lists-ready="waitForFactoryAddressLists"
                             :formErrors="formErrors" @update:formData="handleBasicInfoUpdate"
                             @clear:error="clearFieldError" />
                     </v-tabs-window-item>

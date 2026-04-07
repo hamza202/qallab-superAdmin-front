@@ -2,6 +2,7 @@
 import { ref, computed, onMounted, reactive } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useApi } from "@/composables/useApi";
+import { useLazyCountryCityLists } from "@/composables/useLazyCountryCityLists";
 import { useNotification } from "@/composables/useNotification";
 import { infoCircleIcon } from "@/components/icons/globalIcons";
 import { useI18n } from "vue-i18n";
@@ -15,6 +16,7 @@ const availableLanguages = ref([
 const route = useRoute();
 const router = useRouter();
 const api = useApi();
+const { buildCountriesFetcher, buildCitiesFetcher } = useLazyCountryCityLists();
 const { success, error } = useNotification();
 const { t } = useI18n();
 
@@ -235,12 +237,13 @@ const customerBalances = ref<CustomerBalance[]>([]);
 const customerTypeItems = ref<{ title: string; value: string }[]>([]);
 const entityTypeItems = ref<{ title: string; value: string }[]>([]);
 const priceTypeItems = ref<{ title: string; value: string }[]>([]);
-const countryItems = ref<{ title: string; value: number }[]>([]);
-const cityItems = ref<{ title: string; value: number }[]>([]);
 const customerClassificationItems = ref<{ title: string; value: number }[]>([]);
 const salesRepresentativeItems = ref<{ title: string; value: number }[]>([]);
 const accountItems = ref<{ title: string; value: number }[]>([]);
 const relatedCustomersItems = ref<{ title: string; value: number }[]>([]);
+
+/** Edit mode: address refs are set only after fetchCustomerData completes */
+const customerDataLoaded = ref(!isEditing.value);
 
 // Sub-tabs for basic info section
 const basicInfoSubTab = ref(0);
@@ -273,29 +276,35 @@ const fetchConstants = async () => {
   }
 };
 
-const fetchCountries = async () => {
-  try {
-    const response = await api.get<{ data: ListItem[] }>('/countries/list');
-    countryItems.value = response.data.map(item => ({
-      title: item.name,
-      value: item.id
-    }));
-  } catch (err: any) {
-    console.error('Error fetching countries:', err);
-  }
+const waitForCustomerDataLoaded = async () => {
+  if (!isEditing.value) return;
+  if (customerDataLoaded.value) return;
+  await new Promise<void>((resolve) => {
+    const checkInterval = setInterval(() => {
+      if (customerDataLoaded.value) {
+        clearInterval(checkInterval);
+        clearTimeout(timeoutId);
+        resolve();
+      }
+    }, 10);
+    const timeoutId = setTimeout(() => {
+      clearInterval(checkInterval);
+      resolve();
+    }, 5000);
+  });
 };
 
-const fetchCities = async () => {
-  try {
-    const response = await api.get<{ data: ListItem[] }>(`/cities/list`);
-    cityItems.value = response.data.map(item => ({
-      title: item.name,
-      value: item.id
-    }));
-  } catch (err: any) {
-    console.error('Error fetching cities:', err);
-  }
-};
+const fetchCountriesList = buildCountriesFetcher({
+  getSelectedCountryId: () => country.value ?? undefined,
+  waitForReady: waitForCustomerDataLoaded,
+});
+
+const fetchCitiesList = buildCitiesFetcher({
+  getCountryId: () => country.value ?? undefined,
+  getSelectedCityId: () => city.value ?? undefined,
+  waitForReady: waitForCustomerDataLoaded,
+  requireCountry: false,
+});
 
 const fetchCustomerCategories = async () => {
   try {
@@ -411,6 +420,7 @@ const fetchCustomerData = async () => {
     error(err?.response?.data?.message || t('pages.customers.form.messages.fetchError'));
   } finally {
     loading.value = false;
+    customerDataLoaded.value = true;
   }
 };
 
@@ -570,19 +580,19 @@ const handleClose = () => {
 // Lifecycle
 onMounted(async () => {
   pageLoading.value = true;
-  await Promise.all([
-    fetchConstants(),
-    fetchCountries(),
-    fetchCities(),
-    fetchCustomerCategories(),
-    fetchSalesMans(),
-    fetchTreeChartCards()
-  ]);
-
-  if (isEditing.value) {
-    await fetchCustomerData();
+  try {
+    if (isEditing.value) {
+      await fetchCustomerData();
+    }
+    await Promise.all([
+      fetchConstants(),
+      fetchCustomerCategories(),
+      fetchSalesMans(),
+      fetchTreeChartCards(),
+    ]);
+  } finally {
+    pageLoading.value = false;
   }
-  pageLoading.value = false;
 });
 
 // Icons
@@ -751,12 +761,38 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
               <div v-if="basicInfoSubTab === 0" class="bg-gray-50 rounded-lg p-6 mt-4">
                 <!-- Row 1: Country, City, Postal Code -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                  <SelectInput v-model="country" :label="t('pages.customers.form.labels.country')" :placeholder="t('pages.customers.form.labels.countryPlaceholder')" :items="countryItems" clearable
-                    :hide-details="false" :error-messages="formErrors['address.country_id']"
-                    @update:model-value="delete formErrors['address.country_id']" />
-                  <SelectInput v-model="city" :label="t('pages.customers.form.labels.city')" :placeholder="t('pages.customers.form.labels.cityPlaceholder')" :items="cityItems" clearable
-                    :hide-details="false" :error-messages="formErrors['address.city_id']"
-                    @update:model-value="delete formErrors['address.city_id']" />
+                  <SelectInput
+                    v-model="country"
+                    :items="[]"
+                    :label="t('pages.customers.form.labels.country')"
+                    :placeholder="t('pages.customers.form.labels.countryPlaceholder')"
+                    density="comfortable"
+                    clearable
+                    :hide-details="false"
+                    :error-messages="formErrors['address.country_id']"
+                    :server-side="true"
+                    :fetch-function="fetchCountriesList"
+                    item-title-key="name"
+                    item-value-key="id"
+                    :debounce-time="500"
+                    @update:model-value="delete formErrors['address.country_id']"
+                  />
+                  <SelectInput
+                    v-model="city"
+                    :items="[]"
+                    :label="t('pages.customers.form.labels.city')"
+                    :placeholder="t('pages.customers.form.labels.cityPlaceholder')"
+                    density="comfortable"
+                    clearable
+                    :hide-details="false"
+                    :error-messages="formErrors['address.city_id']"
+                    :server-side="true"
+                    :fetch-function="fetchCitiesList"
+                    item-title-key="name"
+                    item-value-key="id"
+                    :debounce-time="500"
+                    @update:model-value="delete formErrors['address.city_id']"
+                  />
                   <TextInput v-model="postalCode" :label="t('pages.customers.form.labels.postalCode')" :placeholder="t('pages.customers.form.labels.postalCodePlaceholder')" :hide-details="false"
                     :error-messages="formErrors['address.postal_code']"
                     @input="delete formErrors['address.postal_code']" />

@@ -6,6 +6,7 @@
 
 import { toast } from "vue3-toastify";
 import { useApi } from "@/composables/useApi";
+import { useLazyCountryCityLists } from "@/composables/useLazyCountryCityLists";
 import { useForm } from "@/composables/useForm";
 import { useRoute, useRouter } from "vue-router";
 import { onMounted, watch } from "vue";
@@ -150,11 +151,6 @@ interface ManufacturerItem {
   name: string;
 }
 
-interface CountryItem {
-  id: number;
-  name: string;
-}
-
 interface ItemListItem {
   id: number;
   name: string;
@@ -167,7 +163,6 @@ interface SupplierItem {
 }
 
 // Dynamic dropdown items from API
-const countryItems = ref<Array<{ title: string; value: number }>>([]);
 const manufacturerItems = ref<Array<{ title: string; value: number }>>([]);
 const brandItems = ref<Array<{ title: string; value: number }>>([]);
 const productItems = ref<Array<{ title: string; value: number }>>([]);
@@ -198,11 +193,30 @@ const deleteSubProductRow = (item: any) => {
   }
 };
 
-// Handlers for new section
-const handleAddCountry = () => {
-  console.log("Add new country");
-};
+const countryListReady = ref(false);
 
+const { buildCountriesFetcher } = useLazyCountryCityLists();
+
+const fetchCountriesLazy = buildCountriesFetcher({
+  getSelectedCountryId: () => originCountry.value ?? undefined,
+  waitForReady: async () => {
+    if (!isEditMode.value) return;
+    await new Promise<void>((resolve) => {
+      if (countryListReady.value) {
+        resolve();
+        return;
+      }
+      const stop = watch(countryListReady, (ok) => {
+        if (ok) {
+          stop();
+          resolve();
+        }
+      });
+    });
+  },
+});
+
+// Handlers for new section
 const handleAddManufacturer = () => {
   console.log("Add new manufacturer");
 };
@@ -797,19 +811,6 @@ const fetchManufacturers = async () => {
     }));
   } catch (err: any) {
     console.error('Error fetching manufacturers:', err);
-  }
-};
-
-// Fetch countries from API
-const fetchCountries = async () => {
-  try {
-    const response = await api.get<{ data: CountryItem[] }>('/countries/list');
-    countryItems.value = response.data.map((item: CountryItem) => ({
-      title: item.name,
-      value: item.id,
-    }));
-  } catch (err: any) {
-    console.error('Error fetching countries:', err);
   }
 };
 
@@ -1433,7 +1434,6 @@ onMounted(async () => {
       // Step 3 APIs
       fetchBrands(),
       fetchManufacturers(),
-      fetchCountries(),
       fetchSuppliers(),
       // fetchAspects(), // Removed from here to be called by watch on category selection
     ]);
@@ -1447,6 +1447,7 @@ onMounted(async () => {
       // Fetch item data for editing
       await fetchProduct(Number(route.params.id));
     }
+    countryListReady.value = true;
   } catch (err) {
     console.error('Error loading form data:', err);
   } finally {
@@ -1665,7 +1666,7 @@ const trashIcon = `<svg width="17" height="19" viewBox="0 0 17 19" fill="none" x
                       </div>
 
                       <div>
-                        <PriceInput :rules="[required(),numeric(), positive()]" v-model="minQuantity"
+                        <PriceInput :rules="[numeric(), positive()]" v-model="minQuantity"
                           :label="t('pages.groupProducts.form.labels.minQuantity')"
                           :placeholder="t('pages.groupProducts.form.placeholders.enterMinQuantity')" :hide-details="false" />
                       </div>
@@ -1855,8 +1856,13 @@ const trashIcon = `<svg width="17" height="19" viewBox="0 0 17 19" fill="none" x
 
             <!-- Row 1: Country, Manufacturer, Brand -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-10 mb-6">
-              <SelectWithIconInput v-model="originCountry" :label="t('pages.groupProducts.form.labels.originCountry')" :placeholder="t('pages.groupProducts.form.placeholders.selectCountry')"
-                :items="countryItems" :hide-details="false" show-add-button @add-click="handleAddCountry" />
+              <SelectInput v-model="originCountry" :label="t('pages.groupProducts.form.labels.originCountry')" :placeholder="t('pages.groupProducts.form.placeholders.selectCountry')"
+                :items="[]" :hide-details="false"
+                :server-side="true"
+                :fetch-function="fetchCountriesLazy"
+                item-title-key="name"
+                item-value-key="id"
+                :debounce-time="500" />
               <SelectWithIconInput v-model="manufacturer" :label="t('pages.groupProducts.form.labels.manufacturer')" :placeholder="t('pages.groupProducts.form.placeholders.selectManufacturer')"
                 :items="manufacturerItems" :hide-details="false" show-add-button @add-click="handleAddManufacturer" />
               <SelectWithIconInput v-model="brand" :label="t('pages.groupProducts.form.labels.brand')" :placeholder="t('pages.groupProducts.form.placeholders.selectBrand')"

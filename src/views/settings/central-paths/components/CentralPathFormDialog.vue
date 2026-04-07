@@ -2,6 +2,7 @@
 import { computed, reactive, ref, watch, onMounted } from "vue";
 import { CheckCircleIcon } from '@/components/icons/globalIcons.ts'
 import zoneService from '@/services/api/zone.service'
+import { useLazyCountryCityLists } from '@/composables/useLazyCountryCityLists'
 
 const formErrors = reactive<Record<string, string>>({});
 
@@ -39,9 +40,31 @@ const form = reactive<PathForm>({
 
 // Dropdown data
 const geographicalZones = ref<Array<{ title: string; value: number }>>([]);
-const cities = ref<Array<{ title: string; value: number }>>([]);
 const loadingZones = ref(false);
-const loadingCities = ref(false);
+const pathDataReady = ref(false);
+
+const { buildCitiesFetcher } = useLazyCountryCityLists();
+
+const fetchCitiesLazy = buildCitiesFetcher({
+    getCountryId: () => undefined,
+    getSelectedCityId: () => form.city_id ?? undefined,
+    requireCountry: false,
+    waitForReady: async () => {
+        if (!props.pathId) return;
+        await new Promise<void>((resolve) => {
+            if (pathDataReady.value) {
+                resolve();
+                return;
+            }
+            const stop = watch(pathDataReady, (ok) => {
+                if (ok) {
+                    stop();
+                    resolve();
+                }
+            });
+        });
+    },
+});
 
 const fetchGeographicalZones = async () => {
     try {
@@ -58,21 +81,6 @@ const fetchGeographicalZones = async () => {
     }
 };
 
-const fetchCities = async () => {
-    try {
-        loadingCities.value = true;
-        const response = await zoneService.getCities();
-        cities.value = response.data.map((item) => ({
-            title: item.name,
-            value: item.id,
-        }));
-    } catch (err: any) {
-        toast.error(err?.response?.data?.message || 'حدث خطأ أثناء تحميل المدن');
-    } finally {
-        loadingCities.value = false;
-    }
-};
-
 const fetchPathData = async (pathId: number) => {
     try {
         const response = await zoneService.getById(pathId);
@@ -83,6 +91,8 @@ const fetchPathData = async (pathId: number) => {
         form.is_active = data.is_active;
     } catch (err: any) {
         toast.error(err?.response?.data?.message || 'حدث خطأ أثناء تحميل البيانات');
+    } finally {
+        pathDataReady.value = true;
     }
 };
 
@@ -145,18 +155,22 @@ const handleSave = async () => {
 
 onMounted(() => {
     fetchGeographicalZones();
-    fetchCities();
 });
 
 watch(
     () => props.modelValue,
     (open) => {
-        if (!open) return;
+        if (!open) {
+            pathDataReady.value = false;
+            return;
+        }
 
+        pathDataReady.value = false;
         if (props.pathId) {
             fetchPathData(props.pathId);
         } else {
             resetForm();
+            pathDataReady.value = true;
         }
     }
 );
@@ -187,12 +201,17 @@ watch(
                     @update:model-value="delete formErrors['geographical_zone_id']"
                 />
 
-                <SelectWithIconInput
+                <SelectInput
+                    :key="String(props.pathId ?? 'new')"
                     v-model="form.city_id"
                     label="المدينة"
                     placeholder="اختر المدينة"
-                    :items="cities"
-                    :loading="loadingCities"
+                    :items="[]"
+                    :server-side="true"
+                    :fetch-function="fetchCitiesLazy"
+                    item-title-key="name"
+                    item-value-key="id"
+                    :debounce-time="500"
                     :rules="[required()]"
                     :hide-details="false"
                     :error-messages="formErrors['city_id']"

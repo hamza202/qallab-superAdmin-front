@@ -109,8 +109,6 @@ const documentType = ref<string | null>(null);
 const documentFile = ref<File[] | null>(null);
 const pageLoading = ref(false)
 
-const countryItems = ref<Array<{ title: string; value: number }>>([]);
-const cityItems = ref<Array<{ title: string; value: number }>>([]);
 const languageItems = ref<Array<{ title: string; value: number }>>([]);
 const bankItems = ref<Array<{ title: string; value: number }>>([]);
 const rockTypeItems = ref<Array<{ title: string; value: string }>>([]);
@@ -474,48 +472,15 @@ const fetchLanguagesList = async () => {
     }
 };
 
-const fetchCountriesList = async () => {
-    try {
-        const response = await api.get('/countries/list');
-        if (response.data && Array.isArray(response.data)) {
-            countryItems.value = response.data.map((country: any) => ({
-                title: country.name || country.title,
-                value: country.id
-            }));
-        }
-    } catch (err: any) {
-        console.error('Error fetching countries list:', err);
-    }
-};
-
-const fetchCitiesList = async (countryIdParam?: number) => {
-    try {
-        const url = countryIdParam
-            ? `/cities/list?country_id=${countryIdParam}`
-            : '/cities/list';
-        const response = await api.get(url);
-        if (response.data && Array.isArray(response.data)) {
-            cityItems.value = response.data.map((city: any) => ({
-                title: city.name || city.title,
-                value: city.id
-            }));
-        }
-    } catch (err: any) {
-        console.error('Error fetching cities list:', err);
-    }
-};
-
 onMounted(async () => {
-    pageLoading.value = true
+    pageLoading.value = true;
     await Promise.all([
         fetchConstants(),
         fetchBanksList(),
         fetchLanguagesList(),
-        fetchCountriesList(),
-        fetchCitiesList()
     ]);
     await fetchCrusherData();
-    pageLoading.value = false
+    pageLoading.value = false;
 });
 
 </script>
@@ -549,7 +514,7 @@ onMounted(async () => {
                             :buisnessno="buisnessno" :taxno="taxno" :unifiedLoginId="unifiedLoginId" :countryId="countryId" :cityId="cityId"
                             :neighborhood="neighborhood" :streetName="streetName" :postalCode="postalCode"
                             :buildingNumber="buildingNumber" :address1="address1" :languageId="languageId"
-                            :countryItems="countryItems" :cityItems="cityItems" :languageItems="languageItems"
+                            :languageItems="languageItems"
                             :formErrors="formErrors" @update:formData="handleBasicInfoUpdate"
                             @clear:error="clearFieldError" />
                     </v-tabs-window-item>

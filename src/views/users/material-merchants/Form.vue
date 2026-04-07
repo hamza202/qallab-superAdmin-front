@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, reactive } from "vue";
+import { ref, computed, onMounted, reactive, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useApi } from "@/composables/useApi";
 import { useI18n } from 'vue-i18n';
@@ -23,7 +23,26 @@ const saveIcon = `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xm
 const isEditing = computed(() => route.params.id !== 'new');
 const pageTitle = computed(() => isEditing.value ? t('pages.materialMerchants.form.editTitle') : t('pages.materialMerchants.form.addTitle'));
 const materialMerchantId = ref<number | null>(null);
-const pageLoading = ref(false)
+const pageLoading = ref(false);
+
+/** When true, merchant payload (incl. country_id / city_id) is applied — safe for lazy lists. */
+const merchantAddressListsReady = ref(false);
+
+async function waitForMerchantAddressLists() {
+  if (!isEditing.value) return;
+  await new Promise<void>((resolve) => {
+    if (merchantAddressListsReady.value) {
+      resolve();
+      return;
+    }
+    const stop = watch(merchantAddressListsReady, (ok) => {
+      if (ok) {
+        stop();
+        resolve();
+      }
+    });
+  });
+}
 
 const formRef = ref<any>(null);
 const isFormValid = ref(false);
@@ -64,17 +83,9 @@ const creditLimit = ref<number | string | null>(null);
 const bankAccounts = ref<any[]>([]);
 
 const banks = ref<Array<{ id: number; name: string }>>([]);
-const countries = ref<Array<{ id: number; name: string }>>([]);
-const cities = ref<Array<{ id: number; name: string }>>([]);
 
 const bankItems = computed(() =>
   banks.value.map(bank => ({ title: bank.name, value: bank.id }))
-);
-const countryItems = computed(() =>
-  countries.value.map(country => ({ title: country.name, value: country.id }))
-);
-const cityItems = computed(() =>
-  cities.value.map(city => ({ title: city.name, value: city.id }))
 );
 
 const saving = ref(false);
@@ -264,34 +275,6 @@ const fetchBanks = async () => {
   }
 };
 
-const fetchCountries = async () => {
-  try {
-    const response = await api.get('/countries/list');
-    if (response.data && Array.isArray(response.data)) {
-      countries.value = response.data.map((country: any) => ({
-        id: country.id,
-        name: country.name || country.title
-      }));
-    }
-  } catch (err: any) {
-    console.error('Error fetching countries:', err);
-  }
-};
-
-const fetchCities = async () => {
-  try {
-    const response = await api.get('/cities/list');
-    if (response.data && Array.isArray(response.data)) {
-      cities.value = response.data.map((city: any) => ({
-        id: city.id,
-        name: city.name || city.title
-      }));
-    }
-  } catch (err: any) {
-    console.error('Error fetching cities:', err);
-  }
-};
-
 const fetchMaterialMerchantData = async () => {
   if (!isEditing.value) return;
 
@@ -329,12 +312,10 @@ const fetchMaterialMerchantData = async () => {
 
 onMounted(async () => {
   pageLoading.value = true
-  await Promise.all([
-    fetchBanks(),
-    fetchCountries(),
-    fetchCities(),
-  ]);
+  merchantAddressListsReady.value = false
+  await Promise.all([fetchBanks()]);
   await fetchMaterialMerchantData();
+  merchantAddressListsReady.value = true
   pageLoading.value = false
 });
 
@@ -365,7 +346,8 @@ onMounted(async () => {
             :ownerName="ownerName" :phone="phone" :email="email" :mobile="mobile" :unifiedLoginId="unifiedLoginId"
             :countryId="countryId" :cityId="cityId" :neighborhood="neighborhood" :streetName="streetName"
             :buildingNumber="buildingNumber" :postalCode="postalCode" :address1="address1"
-            :countryItems="countryItems" :cityItems="cityItems" :formErrors="formErrors"
+            :wait-for-address-lists-ready="waitForMerchantAddressLists"
+            :formErrors="formErrors"
             @update:formData="handleBasicInfoUpdate" @clear:error="clearError" />
         </v-tabs-window-item>
 

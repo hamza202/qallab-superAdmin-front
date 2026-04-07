@@ -1015,7 +1015,8 @@
           "licenseType": "اختر نوع الرخصة",
           "licenseExpiresAt": "اختر تاريخ الانتهاء",
           "rating": "اختر التقييم",
-          "medicalExamDate": "اختر تاريخ الفحص"
+          "medicalExamDate": "اختر تاريخ الفحص",
+          "country": "اختر الدولة"
         },
         "status": {
           "active": "فعال",
