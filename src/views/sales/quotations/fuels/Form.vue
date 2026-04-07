@@ -1038,9 +1038,10 @@ const tableItems = computed(() => productTableItems.value.map(item => ({
 
         <!-- Edit Products Dialog -->
         <EditProductsDialog v-model="showEditProductsDialog"
-            request-type="fuel"
+            request-type="fuel-quotations"
             variant="sales"
             :showUnitPriceAndDiscount="true"
+            :item-using-options="itemUsingItems"
             :products="productTableItems"
             :unit-items="unitItems"
             :discount-type-items="discountTypeItems"

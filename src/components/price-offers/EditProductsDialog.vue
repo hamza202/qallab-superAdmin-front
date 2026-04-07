@@ -3,7 +3,7 @@ import { computed, ref, watch } from "vue";
 import type { ProductToAdd } from './AddProductDialog.vue';
 import { useI18n } from "vue-i18n";
 
-type RequestType = 'raw_materials' | 'fuel' | 'transfer_service' | 'logistics' | 'trips' | 'logistics-trips';
+type RequestType = 'raw_materials' | 'fuel' | 'transfer_service' | 'logistics' | 'trips' | 'logistics-trips' | 'fuel-quotations';
 
 type ProductLike = Partial<ProductToAdd> & { item_id: number; item_name: string };
 
@@ -17,6 +17,7 @@ const props = defineProps<{
   variant?: 'purchases' | 'sales';
   discountTypeItems?: any[];
   fillingsItems?: any[];
+  itemUsingOptions?: any[];
   supplyTypeItems?: any[];
 }>();
 
@@ -38,6 +39,7 @@ const unitItemsList = computed(() => props.unitItems || []);
 const packageTypeItemsList = computed(() => props.transportTypes || []);
 const fillingsOptionsList = computed(() => props.fillingsItems || []);
 const supplyTypeOptionsList = computed(() => props.supplyTypeItems || []);
+const itemUsingOptionsList = computed(() => props.itemUsingOptions || []);
 const discountTypeOptionsList = computed(() => {
   if (props.discountTypeItems && props.discountTypeItems.length > 0) {
     return props.discountTypeItems;
@@ -86,6 +88,7 @@ watch(() => props.modelValue, (newVal) => {
         discount: p.discount ?? raw.discount_val ?? null,
         discount_type: matchDiscountType(p.discount_type),
         supply_type: raw.supply_type ?? null,
+        item_using: raw.item_using ?? null,
       } as ProductToAdd;
     });
   }
@@ -219,6 +222,18 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
               :placeholder="t('purchases.requests.fuels.form.tableHeaders.supplyType')"
               density="compact"
               class="min-w-[170px]"
+              item-title="title"
+              item-value="value"
+            />
+          </div>
+
+          <div v-if="requestType === 'fuel-quotations'">
+            <SelectInput
+              v-model="product.item_using"
+              :items="itemUsingOptionsList"
+              :placeholder="t('sales.forms.common.labels.usage')"
+              clearable
+              density="compact"
               item-title="title"
               item-value="value"
             />

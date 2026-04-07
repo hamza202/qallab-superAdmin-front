@@ -1166,6 +1166,33 @@
                     {{ $t('navigation.sidebar.settings.basic.vehiclesData') }}
                   </router-link>
                 </li>
+                <li class="relative">
+                  <router-link to="/settings/pricing-by-truck-suburbs" :class="[
+                    isMenuItemActive('/settings/pricing-by-truck-suburbs')
+                      ? 'font-bold text-qallab-yellow'
+                      : 'text-white hover:text-qallab-yellow',
+                  ]">
+                    {{ $t('navigation.sidebar.settings.basic.pricingByTruckSuburbs') }}
+                  </router-link>
+                </li>
+                <li class="relative">
+                  <router-link to="/settings/pricing-per-ton-suburbs" :class="[
+                    isMenuItemActive('/settings/pricing-per-ton-suburbs')
+                      ? 'font-bold text-qallab-yellow'
+                      : 'text-white hover:text-qallab-yellow',
+                  ]">
+                    {{ $t('navigation.sidebar.settings.basic.pricingPerTonSuburbs') }}
+                  </router-link>
+                </li>
+                <li class="relative">
+                  <router-link to="/settings/custom-pricing-suburbs" :class="[
+                    isMenuItemActive('/settings/custom-pricing-suburbs')
+                      ? 'font-bold text-qallab-yellow'
+                      : 'text-white hover:text-qallab-yellow',
+                  ]">
+                    {{ $t('navigation.sidebar.settings.basic.customPricingSuburbs') }}
+                  </router-link>
+                </li>
                 
                 <li v-if="canViewSystemStatuses" class="relative">
                   <router-link to="/settings/system-statuses/list" :class="[
@@ -1361,7 +1388,7 @@ const {
 } = usePermissions();
 
 // Define routes for each dropdown group
-const productsRoutes = ["/simple-products", "/group-products", "/products"];
+const productsRoutes = ["/simple-products", "/group-products", "/products", "product-variables"];
 const servicesRoutes = ["/services"];
 const salesRoutes = ["/customers", "/sales", "/price-offer-material-product"];
 const projectsRoutes = ["/projects"];
@@ -1422,9 +1449,9 @@ const isMenuItemActive = (menuLinkPath) => {
   const pathParts = menuLinkPath.split("/").filter((p) => p);
   if (pathParts.length === 0) return false;
 
-  // For nested routes like /products/building-material-products-prices
-  // Check if current path starts with the full menu link path
-  if (currentPath.startsWith(menuLinkPath)) {
+  // Match this link and its children only at a path segment boundary (e.g. /settings/custom-pricing
+  // must not match /settings/custom-pricing-suburbs/...)
+  if (currentPath.startsWith(menuLinkPath + "/")) {
     return true;
   }
 
@@ -1483,12 +1510,13 @@ const isMenuItemActive = (menuLinkPath) => {
       }
     }
 
-    // 1. For nested product/service price routes (e.g., /products/building-material-products-prices)
+    // 1. For nested product/service price routes (e.g. /products/building-material-products-prices)
+    // Segment boundary: /settings/pricing-per-ton must not match /settings/pricing-per-ton-suburbs
     if (pathParts.length > 1 && pathParts[1].includes("price")) {
-      // Build the full nested path from menu link
       const nestedPath = "/" + pathParts.join("/");
-      // Check if current path starts with this nested path
-      return currentPath.startsWith(nestedPath);
+      return (
+        currentPath === nestedPath || currentPath.startsWith(nestedPath + "/")
+      );
     }
 
     // 2. Main list routes (e.g., /services/list, /customers/list)
@@ -1517,7 +1545,9 @@ const isMenuItemActive = (menuLinkPath) => {
       (pathParts[1] === "scheduling" || pathParts[1] === "production-capacity")
     ) {
       const nestedPath = "/" + pathParts.join("/");
-      return currentPath.startsWith(nestedPath);
+      return (
+        currentPath === nestedPath || currentPath.startsWith(nestedPath + "/")
+      );
     }
 
     // 4. For simple paths without /list (like /codes)
@@ -1525,8 +1555,11 @@ const isMenuItemActive = (menuLinkPath) => {
       return currentPath.startsWith(basePath);
     }
 
-    // Default: match if same path structure
-    return currentPath.startsWith(menuLinkPath.replace("/list", ""));
+    // Default: same path structure, segment boundary (avoid prefix clashes)
+    const normalized = menuLinkPath.replace("/list", "");
+    return (
+      currentPath === normalized || currentPath.startsWith(normalized + "/")
+    );
   }
 
   return false;
