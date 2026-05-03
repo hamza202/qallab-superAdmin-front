@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<!--
+  Quotation PDF template — tuned for mPDF (table-first layout).
+  Embed Arabic-capable fonts in mPDF config if glyphs show as squares.
+-->
+<head>
+  <meta charset="UTF-8" />
+  <title>عرض سعر</title>
+  <style type="text/css">
+    /* Minimal rules; avoid flex/grid/absolute for mPDF */
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: DejaVu Sans, Arial, sans-serif;
+      font-size: 11pt;
+      color: #374151;
+      direction: rtl;
+    }
+    .page-wrap {
+      width: 100%;
+    }
+    /* Repeat table header when table spans pages */
+    thead {
+      display: table-header-group;
+    }
+    tfoot {
+      display: table-footer-group;
+    }
+    tr {
+      page-break-inside: avoid;
+    }
+    .header-box {
+      background-color: #f3f4f6;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+    }
+    .intro-box {
+      background-color: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+    }
+    .items-table thead th {
+      background-color: #1e40af;
+      color: #ffffff;
+      font-weight: bold;
+      text-align: center;
+      padding: 10px 6px;
+      border: 1px solid #1e3a8a;
+    }
+    .items-table tbody td {
+      padding: 10px 6px;
+      text-align: center;
+      border-bottom: 1px solid #e5e7eb;
+      vertical-align: middle;
+    }
+    .items-table tbody tr:nth-child(even) td {
+      background-color: #fafafa;
+    }
+    .summary-box {
+      background-color: #f3f4f6;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+    }
+    .grand-total-bar {
+      background-color: #1e40af;
+      color: #ffffff;
+      border-radius: 8px;
+    }
+    .accent-text {
+      color: #2563eb;
+    }
+    .notes-title {
+      color: #1e40af;
+      font-weight: bold;
+    }
+    .footer-line {
+      border-bottom: 4px solid #1e40af;
+    }
+    .muted {
+      color: #6b7280;
+      font-size: 9pt;
+    }
+    .hint {
+      page-break-after: avoid;
+    }
+    .keep-together {
+      page-break-inside: avoid;
+    }
+    .spacer-cell {
+      height: 12px;
+    }
+    .spacer-cell-sm {
+      height: 6px;
+    }
+  </style>
+</head>
+<body>
+
+<table class="page-wrap" width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation">
+  <!-- Header band -->
+  <tr>
+    <td>
+      <table class="header-box" width="100%" cellpadding="16" cellspacing="0" border="0" role="presentation">
+        <tr>
+          <!-- RTL: visually right column = company branding -->
+          <td width="42%" valign="top" align="center">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td align="center">
+                  <!-- Replace src with embedded image or absolute file path for mPDF -->
+                  <span style="font-size:14pt;font-weight:bold;color:#1e40af;">قَلاب</span><br />
+                  <span style="font-size:10pt;color:#64748b;">QALLAB</span>
+                </td>
+              </tr>
+              <tr><td class="spacer-cell-sm"></td></tr>
+              <tr>
+                <td align="center" class="muted">تاريخ عرض السعر : 2026/05/03</td>
+              </tr>
+            </table>
+          </td>
+          <td width="58%" valign="top">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td style="font-weight:bold;font-size:12pt;">Qallab Company</td>
+              </tr>
+              <tr><td class="spacer-cell-sm"></td></tr>
+              <tr>
+                <td class="muted">Phone No: +966 599 1454323 / Email: Info@qallab.sa</td>
+              </tr>
+              <tr>
+                <td class="muted">الرقم الضريبي : 3345323 / السجل التجاري : 3345323</td>
+              </tr>
+              <tr><td class="spacer-cell-sm"></td></tr>
+              <tr>
+                <td style="font-weight:bold;font-size:13pt;">رقم عرض سعر : #212431</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+
+  <tr><td class="spacer-cell"></td></tr>
+
+  <!-- Introduction -->
+  <tr>
+    <td>
+      <table class="intro-box keep-together" width="100%" cellpadding="14" cellspacing="0" border="0">
+        <tr>
+          <td align="center" style="line-height:1.7;">
+            السادة / <span class="accent-text">شركة بريكس للمقاولات</span> المحترمين تحية طيبة وبعد.
+          </td>
+        </tr>
+        <tr><td class="spacer-cell-sm"></td></tr>
+        <tr>
+          <td align="center" style="font-weight:bold;">
+            الموضوع: عرض سعر توريد مع نقل \ نقل فقط
+          </td>
+        </tr>
+        <tr><td class="spacer-cell-sm"></td></tr>
+        <tr>
+          <td align="center" style="line-height:1.8;font-size:10.5pt;">
+            تحية طيبة، نفيد سعادتكم بأن شركة <span class="accent-text">قالب</span> تتشرف بتقديم عرض أسعار لتوريد ونقل (دفان / بحص / صبيز وأعمال متعلقة) لمشروعكم الكريم الواقع في محافظة
+            <span class="accent-text">مكة المكرمة — حي الشرقية</span> وفق المواصفات والكميات الموضحة أدناه.
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+
+  <tr><td class="spacer-cell"></td></tr>
+
+  <!-- Line items: thead repeats on multipage splits -->
+  <tr>
+    <td>
+      <table class="items-table" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
+        <thead>
+          <tr>
+            <th width="42%">البند</th>
+            <th width="12%">الوحدة</th>
+            <th width="14%">الكمية</th>
+            <th width="16%">سعر الوحدة</th>
+            <th width="16%">السعر الإجمالي</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Sample row; duplicate <tr>...</tr> for more lines — long bodies flow to next pages -->
+          <tr>
+            <td style="text-align:right;padding-right:8px;">توريد ونقل \ نقل مادة ( دفان \ بحص \ صبيز \ غيره )</td>
+            <td>طن</td>
+            <td>23</td>
+            <td>32,312</td>
+            <td>123,235</td>
+          </tr>
+          <tr>
+            <td style="text-align:right;padding-right:8px;">توريد ونقل \ نقل مادة ( ردمية \ أساسات \ غيرها )</td>
+            <td>طن</td>
+            <td>10</td>
+            <td>1,250</td>
+            <td>12,500</td>
+          </tr>
+          <!-- Uncomment or paste additional rows below for pagination testing -->
+          <!--
+          <tr><td style="text-align:right;padding-right:8px;">بند تجريبي</td><td>طن</td><td>1</td><td>100</td><td>100</td></tr>
+          -->
+        </tbody>
+      </table>
+    </td>
+  </tr>
+
+  <tr><td class="spacer-cell"></td></tr>
+
+  <!-- Subtotals -->
+  <tr>
+    <td>
+      <table class="summary-box keep-together hint" width="100%" cellpadding="12" cellspacing="0" border="0">
+        <tr>
+          <td width="70%" align="right" style="font-weight:bold;padding:6px 8px;">
+            الإجمالي غير شامل ضريبة القيمة المضافة
+          </td>
+          <td width="30%" align="left" dir="ltr" style="padding:6px 8px;">15,520.00 ﷼</td>
+        </tr>
+        <tr>
+          <td align="right" style="font-weight:bold;padding:6px 8px;">ضريبة القيمة المضافة</td>
+          <td align="left" dir="ltr" style="padding:6px 8px;">230.00 ﷼</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+
+  <tr><td class="spacer-cell-sm"></td></tr>
+
+  <!-- Grand total bar -->
+  <tr>
+    <td>
+      <!-- First <td> = visual right under dir="rtl" -->
+      <table class="grand-total-bar keep-together hint" width="100%" cellpadding="14" cellspacing="0" border="0">
+        <tr>
+          <td width="36%" valign="middle" align="right" style="font-weight:bold;font-size:13pt;">
+            الإجمالي الكلي
+          </td>
+          <td width="34%" valign="middle" dir="ltr" align="center" style="font-weight:bold;font-size:13pt;">
+            15,750.00 ﷼
+          </td>
+          <td width="30%" valign="middle" align="center" style="font-size:9.5pt;">
+            ثلاثة آلاف وعشرون ريال
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+
+  <tr><td class="spacer-cell"></td></tr>
+
+  <!-- Closing line -->
+  <tr>
+    <td align="center" style="padding:4px 8px;line-height:1.8;font-size:10.5pt;" class="keep-together hint">
+      نأمل أن ينال عرض سعرنا قبولكم واستحسانكم، وللمزيد من الاستفسار نحن تحت الخدمة.
+    </td>
+  </tr>
+
+  <tr><td class="spacer-cell-sm"></td></tr>
+
+  <!-- Important notes -->
+  <tr>
+    <td>
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation">
+        <tr>
+          <td class="notes-title" align="right" style="padding-bottom:8px;">
+            ملاحظات هامة :
+          </td>
+        </tr>
+        <tr>
+          <td align="right" style="line-height:2;padding-right:18px;text-indent:-10px;font-size:10.5pt;">
+            • الأسعار أعلاه تشمل ضريبة القيمة المضافة<br />
+            • صلاحية عرض السعر 10 أيام<br />
+            • يتم رفع مستخلص كل 10 أيام على أن يتم سدادها بعد 14 يومًا<br />
+            • يتم بدء العمل فور الموافقة على عرض السعر وتحويله إلى طلبية مشتريات وتعميدها ورفعها على النظام
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+
+  <tr><td class="spacer-cell"></td></tr>
+
+  <!-- Courtesy closing -->
+  <tr>
+    <td align="center" style="line-height:1.8;font-size:10.5pt;" class="keep-together hint">
+      وتفضلوا بقبول فائق الاحترام والتحية
+    </td>
+  </tr>
+
+  <tr><td class="spacer-cell"></td></tr>
+
+  <!-- Signature / dept block -->
+  <tr>
+    <td align="center">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" class="keep-together hint">
+        <tr>
+          <td align="center" style="padding:8px 0;color:#1e40af;font-weight:bold;line-height:1.6;">
+            إدارة المبيعات<br />
+            منصة قلاب
+          </td>
+        </tr>
+        <tr>
+          <td align="center" class="muted" style="font-size:9pt;">
+            (مساحة ختم أو شعار — استبدل هذا السطر بالصورة عبر mPDF)
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+
+  <tr><td class="spacer-cell"></td></tr>
+
+  <!-- Bottom decorative bar -->
+  <tr class="footer-line">
+    <td style="height:4px;font-size:0;line-height:0;">&nbsp;</td>
+  </tr>
+</table>
+
+</body>
+</html>

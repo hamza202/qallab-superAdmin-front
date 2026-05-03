@@ -1584,7 +1584,17 @@
       "FormDescription": "Issue a transport service sales order invoice",
       "FormTitleEdit": "Edit Transport Service Sales Invoice",
       "FormDescriptionEdit": "Edit a transport service sales order invoice",
-      "print": "Print Invoice"
+      "SimpleFormTitle": "Issue Simple Transport Service Sales Invoice",
+      "SimpleFormTitleEdit": "Edit Simple Transport Service Sales Invoice",
+      "print": "Print Invoice",
+      "form": {
+        "datePlaceholder": "Select date",
+        "createdFromLabel": "From Date",
+        "createdToLabel": "To Date"
+      },
+      "list": {
+        "addSimpleInvoice": "Add Simple Invoice"
+      }
     },
     "SalesOrdersFuels": {
       "title": "Fuel Sales Orders Table",

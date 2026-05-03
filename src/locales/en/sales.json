@@ -709,6 +709,7 @@
         "transportCompanyName": "Transport Company Name",
         "orderCreatedDate": "Order Creation Date",
         "requestStatus": "Request Status",
+        "dateHint": "The approved date after purchase order confirmation",
         "tripTransportCount": "Number of Transports"
       },
       "validation": {

@@ -709,6 +709,7 @@
         "transportCompanyName": "اسم شركة النقل",
         "orderCreatedDate": "تاريخ انشاء الطلبية",
         "requestStatus": "حالة الطلب",
+        "dateHint": "التاريخ المعتمد بعد تعميد أمر الشراء",
         "tripTransportCount": "عدد النقلات"
       },
       "validation": {

@@ -191,7 +191,8 @@ const showSourceMapDialog = ref(false);
         <span class="!bg-gray-50 border border-gray-100 rounded px-1.5 py-1.5 text-gray-600">
           <span v-html="truckIcon"></span>
         </span>
-        {{ isEditMode ? t('sales.forms.logisticsDetailDialog.titleEdit') : t('sales.forms.logisticsDetailDialog.titleAdd') }}
+        {{ isEditMode ? t('sales.forms.logisticsDetailDialog.titleEdit') :
+          t('sales.forms.logisticsDetailDialog.titleAdd') }}
       </div>
     </template>
 
@@ -199,34 +200,46 @@ const showSourceMapDialog = ref(false);
       <div class="space-y-4">
         <!-- Row 1: Date Range -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <DatePickerInput :label="t('sales.forms.common.labels.transportStart')" v-model="form.from_date" :placeholder="t('common.form.choose')"
-            density="comfortable" :rules="[required()]" />
-          <DatePickerInput :label="t('sales.forms.common.labels.transportEnd')" v-model="form.to_date" :placeholder="t('common.form.choose')"
-            density="comfortable" :rules="[required()]" />
+          <span>
+            <DatePickerInput :label="t('sales.forms.common.labels.transportStart')" v-model="form.from_date"
+              :placeholder="t('common.form.choose')" density="comfortable" :rules="[required()]" />
+            <p class="text-sm text-gray-500 mt-1">{{ t('sales.forms.common.labels.dateHint') }}</p>
+          </span>
+          <DatePickerInput :label="t('sales.forms.common.labels.transportEnd')" v-model="form.to_date"
+            :placeholder="t('common.form.choose')" density="comfortable" :rules="[required()]" />
           <PriceInput :label="t('sales.forms.common.labels.executionDuration')" v-model="form.actual_execution_interval"
-            :placeholder="t('sales.forms.common.placeholders.executionDays')" density="comfortable" :rules="[required()]">
+            :placeholder="t('sales.forms.common.placeholders.executionDays')" density="comfortable"
+            :rules="[required()]">
             <template #append-inner>
               <span class="text-gray-500 text-sm"> {{ t('sales.forms.common.misc.dayWord') }} </span>
             </template>
           </PriceInput>
 
-          <SelectInput :label="t('sales.forms.logisticsDetailDialog.transportTimes')" v-model="form.am_pm_interval" :items="amPmIntervalList" :placeholder="t('common.form.choose')"
-           density="comfortable" :rules="[required()]" />
-          <MultipleSelectInput :label="t('sales.forms.common.labels.transportVehicleType')" v-model="form.transport_type" :items="transportTypesList"
-            :placeholder="t('sales.forms.logisticsDetailDialog.tipperPlaceholder')" item-title="title" item-value="value" :rules="[required()]" />
-
-          <PriceInput :label="t('sales.forms.common.labels.transportVehicleCount')" v-model="form.transport_no" :placeholder="t('sales.forms.common.placeholders.vehicleCount')" density="comfortable"
+          <SelectInput :label="t('sales.forms.logisticsDetailDialog.transportTimes')" v-model="form.am_pm_interval"
+            :items="amPmIntervalList" :placeholder="t('common.form.choose')" density="comfortable"
             :rules="[required()]" />
-          <MultipleSelectInput :label="t('sales.forms.logisticsDetailDialog.materialTypes')" v-model="form.material_type" :items="categoriesList"
-            :placeholder="t('common.form.choose')"  :rules="[required()]" />
+          <MultipleSelectInput :label="t('sales.forms.common.labels.transportVehicleType')"
+            v-model="form.transport_type" :items="transportTypesList"
+            :placeholder="t('sales.forms.logisticsDetailDialog.tipperPlaceholder')" item-title="title"
+            item-value="value" :rules="[required()]" />
 
-          <PriceInput :label="t('sales.forms.common.labels.tripsCount')" v-model="form.trip_no" :placeholder="t('sales.forms.common.placeholders.tripCount')" density="comfortable"
+          <PriceInput :label="t('sales.forms.common.labels.transportVehicleCount')" v-model="form.transport_no"
+            :placeholder="t('sales.forms.common.placeholders.vehicleCount')" density="comfortable"
             :rules="[required()]" />
-          <TextInput :label="t('sales.forms.common.labels.loadingOfficer')" v-model="form.loading_responsible_party" :placeholder="t('sales.forms.common.placeholders.enterLoadingResponsible')"
-            density="comfortable" :rules="[required()]" />
+          <MultipleSelectInput :label="t('sales.forms.logisticsDetailDialog.materialTypes')"
+            v-model="form.material_type" :items="categoriesList" :placeholder="t('common.form.choose')"
+            :rules="[required()]" />
 
-          <TextInput :label="t('sales.forms.common.labels.unloadingOfficer')" v-model="form.downloading_responsible_party"
-            :placeholder="t('sales.forms.common.placeholders.enterUnloadingResponsible')" density="comfortable" :rules="[required()]" />
+          <PriceInput :label="t('sales.forms.common.labels.tripsCount')" v-model="form.trip_no"
+            :placeholder="t('sales.forms.common.placeholders.tripCount')" density="comfortable" :rules="[required()]" />
+          <TextInput :label="t('sales.forms.common.labels.loadingOfficer')" v-model="form.loading_responsible_party"
+            :placeholder="t('sales.forms.common.placeholders.enterLoadingResponsible')" density="comfortable"
+            :rules="[required()]" />
+
+          <TextInput :label="t('sales.forms.common.labels.unloadingOfficer')"
+            v-model="form.downloading_responsible_party"
+            :placeholder="t('sales.forms.common.placeholders.enterUnloadingResponsible')" density="comfortable"
+            :rules="[required()]" />
         </div>
       </div>
     </v-form>
@@ -234,8 +247,8 @@ const showSourceMapDialog = ref(false);
     <template #actions>
       <div class="flex items-center justify-center gap-4 flex-1 mt-4">
         <ButtonWithIcon variant="flat" color="primary" custom-class="px-8"
-          :label="isEditMode ? t('common.productDialog.saveChanges') : t('sales.forms.logisticsDetailDialog.addService')" :prepend-icon="isEditMode ? undefined : plusCircleIcon"
-          @click="handleSave" />
+          :label="isEditMode ? t('common.productDialog.saveChanges') : t('sales.forms.logisticsDetailDialog.addService')"
+          :prepend-icon="isEditMode ? undefined : plusCircleIcon" @click="handleSave" />
 
         <ButtonWithIcon variant="outlined" color="gray-700" border="gray-300" size="large" custom-class="px-4"
           :label="t('common.actions.cancel')" @click="handleCancel" />
