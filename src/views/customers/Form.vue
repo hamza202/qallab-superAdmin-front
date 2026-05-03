@@ -91,6 +91,7 @@ interface CustomerPayload {
   sales_man_id: number | null;
   tree_chart_card_id: number | null;
   related_customers: number[];
+  responsible_employee: number[];
   minimum_credit: number | string;
   maximum_credit: number | string;
   minimum_debit: number | string;
@@ -222,6 +223,8 @@ const salesRepresentative = ref<number | null>(null);
 const createAccountInTree = ref<boolean | null>(true);
 const account = ref<number | null>(null);
 const relatedCustomers = ref<(number | string)[]>([]);
+const responsibleEmployee = ref<any[]>([]);
+const responsibleEmployeeOptionsCache = ref<Record<number, string>>({});
 const minimumCredit = ref<number | string>("");
 const maximumCredit = ref<number | string>("");
 const minimumDebit = ref<number | string>("");
@@ -348,6 +351,87 @@ const fetchRelatedCustomers = async () => {
   }
 };
 
+const normalizeSelectedId = (value: any): number | null => {
+  if (value && typeof value === 'object') {
+    const raw = value.id ?? value.value ?? value.user_id;
+    const parsed = Number(raw);
+    return Number.isNaN(parsed) ? null : parsed;
+  }
+
+  const parsed = Number(value);
+  return Number.isNaN(parsed) ? null : parsed;
+};
+
+const getResponsibleEmployeeLabel = (value: any): string => {
+  if (value && typeof value === 'object') {
+    return String(value.title || value.full_name || value.name || value.label || '');
+  }
+  return '';
+};
+
+const cacheResponsibleEmployeeOption = (value: any) => {
+  const id = normalizeSelectedId(value);
+  if (id === null) return;
+
+  const label = getResponsibleEmployeeLabel(value);
+  if (label) {
+    responsibleEmployeeOptionsCache.value[id] = label;
+  }
+};
+
+const fetchResponsibleEmployees = async (search = '', cursor?: string, perPage = 15) => {
+  try {
+    const params: any = { per_page: perPage };
+
+    if (search) {
+      params.name = search;
+    }
+
+    if (cursor) {
+      params.cursor = cursor;
+    }
+
+    const selectedIds = responsibleEmployee.value
+      .map((value: any) => normalizeSelectedId(value))
+      .filter((id: number | null): id is number => id !== null);
+
+    if (selectedIds.length > 0) {
+      params.order_by_id = selectedIds.join(',');
+    }
+
+    const response = await api.get<any>('/users/list', { params });
+
+    const users = Array.isArray(response.data) ? response.data : [];
+    const mappedUsers = users.map((user: any) => ({
+      title: user.full_name || user.name || user.title || '',
+      value: Number(user.id ?? user.value)
+    }));
+
+    mappedUsers.forEach((option) => cacheResponsibleEmployeeOption(option));
+
+    const selectedOptions = selectedIds.map((id) => ({
+      title: responsibleEmployeeOptionsCache.value[id] || String(id),
+      value: id
+    }));
+
+    const mergedOptionsMap = new Map<number, { title: string; value: number }>();
+    [...selectedOptions, ...mappedUsers].forEach((option) => {
+      mergedOptionsMap.set(option.value, option);
+    });
+
+    return {
+      data: Array.from(mergedOptionsMap.values()),
+      next_cursor: response.pagination?.next_cursor || null
+    };
+  } catch (err: any) {
+    console.error('Error fetching responsible employees:', err);
+    return {
+      data: [],
+      next_cursor: null
+    };
+  }
+};
+
 const fetchCustomerData = async () => {
   if (!route.params.id) return;
 
@@ -398,6 +482,14 @@ const fetchCustomerData = async () => {
     salesRepresentative.value = data.sales_man_id;
     account.value = data.tree_chart_card_id;
     relatedCustomers.value = data.related_customers?.map((id: string) => parseInt(id)) || [];
+    if (Array.isArray(data.responsible_employee)) {
+      data.responsible_employee.forEach((employee: any) => cacheResponsibleEmployeeOption(employee));
+      responsibleEmployee.value = data.responsible_employee
+        .map((employee: any) => normalizeSelectedId(employee))
+        .filter((id: number | null): id is number => id !== null);
+    } else {
+      responsibleEmployee.value = [];
+    }
     minimumCredit.value = data.minimum_credit;
     maximumCredit.value = data.maximum_credit;
     minimumDebit.value = data.minimum_debit;
@@ -457,6 +549,9 @@ const buildPayload = (step: number): CustomerPayload => {
     sales_man_id: salesRepresentative.value,
     tree_chart_card_id: account.value,
     related_customers: relatedCustomers.value.map(id => typeof id === 'string' ? parseInt(id) : id),
+    responsible_employee: responsibleEmployee.value
+      .map((value: any) => normalizeSelectedId(value))
+      .filter((id: number | null): id is number => id !== null),
     minimum_credit: minimumCredit.value,
     maximum_credit: maximumCredit.value,
     minimum_debit: minimumDebit.value,
@@ -721,6 +816,11 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
                 <TextInput v-model="taxNumber" :label="t('pages.customers.form.labels.taxNumber')" :placeholder="t('pages.customers.form.labels.taxNumberPlaceholder')" :hide-details="false"
                   :error-messages="formErrors['commercial_register']"
                   @input="delete formErrors['commercial_register']" />
+                <SelectInput v-model="responsibleEmployee" :items="[]" label="الموظف المسئول"
+                  item-title="title" item-value="value" density="comfortable" placeholder="اختر العميل المسئول"
+                  :server-side="true" :fetch-function="fetchResponsibleEmployees" :debounce-time="500" multiple :hide-details="false"
+                  :error-messages="formErrors['responsible_employee']"
+                  @update:model-value="delete formErrors['responsible_employee']" />
               </div>
             </div>
 
@@ -917,10 +1017,6 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
                 </div>
               </div>
             </div>
-
-
-
-
           </div>
 
           <!-- Balances Section -->

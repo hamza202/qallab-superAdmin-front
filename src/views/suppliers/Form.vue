@@ -74,6 +74,7 @@ interface SupplierPayload {
   address_1: string;
   buisnessno: string;
   taxno: string;
+  responsible_employee: number[];
   is_active: boolean;
   address: Address;
   contact_list: ContactListItem[];
@@ -138,6 +139,8 @@ const phone = ref("");
 const email = ref("");
 const businessNumber = ref("");
 const taxNumber = ref("");
+const responsibleEmployee = ref<any[]>([]);
+const responsibleEmployeeOptionsCache = ref<Record<number, string>>({});
 const nationalAddress = ref("");
 const status = ref(true);
 
@@ -219,6 +222,86 @@ const fetchTreeChartCards = async () => {
   }
 };
 
+const normalizeSelectedId = (value: any): number | null => {
+  if (value && typeof value === 'object') {
+    const raw = value.id ?? value.value ?? value.user_id;
+    const parsed = Number(raw);
+    return Number.isNaN(parsed) ? null : parsed;
+  }
+
+  const parsed = Number(value);
+  return Number.isNaN(parsed) ? null : parsed;
+};
+
+const getResponsibleEmployeeLabel = (value: any): string => {
+  if (value && typeof value === 'object') {
+    return String(value.title || value.full_name || value.name || value.label || '');
+  }
+  return '';
+};
+
+const cacheResponsibleEmployeeOption = (value: any) => {
+  const id = normalizeSelectedId(value);
+  if (id === null) return;
+
+  const label = getResponsibleEmployeeLabel(value);
+  if (label) {
+    responsibleEmployeeOptionsCache.value[id] = label;
+  }
+};
+
+const fetchResponsibleEmployees = async (search = '', cursor?: string, perPage = 15) => {
+  try {
+    const params: any = { per_page: perPage };
+
+    if (search) {
+      params.name = search;
+    }
+
+    if (cursor) {
+      params.cursor = cursor;
+    }
+
+    const selectedIds = responsibleEmployee.value
+      .map((value: any) => normalizeSelectedId(value))
+      .filter((id: number | null): id is number => id !== null);
+
+    if (selectedIds.length > 0) {
+      params.order_by_id = selectedIds.join(',');
+    }
+
+    const response = await api.get<any>('/users/list', { params });
+    const users = Array.isArray(response.data) ? response.data : [];
+    const mappedUsers = users.map((user: any) => ({
+      title: user.full_name || user.name || user.title || '',
+      value: Number(user.id ?? user.value)
+    }));
+
+    mappedUsers.forEach((option: { title: string; value: number }) => cacheResponsibleEmployeeOption(option));
+
+    const selectedOptions = selectedIds.map((id) => ({
+      title: responsibleEmployeeOptionsCache.value[id] || String(id),
+      value: id
+    }));
+
+    const mergedOptionsMap = new Map<number, { title: string; value: number }>();
+    [...selectedOptions, ...mappedUsers].forEach((option) => {
+      mergedOptionsMap.set(option.value, option);
+    });
+
+    return {
+      data: Array.from(mergedOptionsMap.values()),
+      next_cursor: response.pagination?.next_cursor || null
+    };
+  } catch (err: any) {
+    console.error('Error fetching responsible employees:', err);
+    return {
+      data: [],
+      next_cursor: null
+    };
+  }
+};
+
 const fetchSupplierData = async () => {
   if (!route.params.id) return;
 
@@ -244,6 +327,14 @@ const fetchSupplierData = async () => {
     defaultCurrency.value = data.default_currency_id;
     businessNumber.value = data.buisnessno;
     taxNumber.value = data.taxno;
+    if (Array.isArray(data.responsible_employee)) {
+      data.responsible_employee.forEach((employee: any) => cacheResponsibleEmployeeOption(employee));
+      responsibleEmployee.value = data.responsible_employee
+        .map((employee: any) => normalizeSelectedId(employee))
+        .filter((id: number | null): id is number => id !== null);
+    } else {
+      responsibleEmployee.value = [];
+    }
     nationalAddress.value = data.address_1;
     status.value = data.is_active;
 
@@ -306,6 +397,9 @@ const buildPayload = (step: number): any => {
       address_1: nationalAddress.value,
       buisnessno: businessNumber.value,
       taxno: taxNumber.value,
+      responsible_employee: responsibleEmployee.value
+        .map((value: any) => normalizeSelectedId(value))
+        .filter((id: number | null): id is number => id !== null),
       is_active: status.value,
       address: {
         country_id: country.value,
@@ -642,6 +736,11 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
                     </v-tooltip>
                   </template>
                 </TextInput>
+                <SelectInput v-model="responsibleEmployee" :items="[]" label="الموظف المسئول"
+                  item-title="title" item-value="value" density="comfortable" placeholder="اختر العميل المسئول"
+                  :server-side="true" :fetch-function="fetchResponsibleEmployees" :debounce-time="500" multiple
+                  :hide-details="false" :error-messages="formErrors['responsible_employee']"
+                  @update:model-value="delete formErrors['responsible_employee']" />
                 <div>
                   <div class="mb-[7px] text-sm font-semibold text-gray-700">{{ t('pages.suppliers.form.labels.status')
                     }}</div>
