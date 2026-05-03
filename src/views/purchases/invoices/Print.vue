@@ -141,10 +141,10 @@
             <!-- ===== Totals + QR Code ===== -->
             <div class="totals-qr-section">
                 <!-- QR Code Area -->
-                <div class="qr-area">
+                <!-- <div class="qr-area">
                     <img v-if="invoiceData.qr_code" :src="invoiceData.qr_code" alt="QR Code" class="qr-image" />
                     <div v-else class="qr-placeholder"></div>
-                </div>
+                </div> -->
 
                 <!-- Totals -->
                 <div class="totals-area">
@@ -706,7 +706,6 @@ onMounted(() => {
 .totals-area {
     flex: 1;
     margin-left: auto;
-    max-width: 520px;
     padding-right: 56px;
     background-color: rgba(248, 250, 252, 1);
 }

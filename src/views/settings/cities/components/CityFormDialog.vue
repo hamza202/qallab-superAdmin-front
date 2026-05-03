@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { computed, reactive, ref, watch, onMounted } from "vue";
+import { computed, reactive, ref, watch } from "vue";
 import { useApi } from "@/composables/useApi";
+import { useLazyCountryCityLists } from "@/composables/useLazyCountryCityLists";
 import { required, minLength, maxLength } from "@/utils/validators";
 import { useI18n } from 'vue-i18n';
 
@@ -62,27 +63,35 @@ const form = reactive<CityForm>({
   status: true,
 });
 
-const countryItems = ref<Array<{ title: string; value: string | number }>>([]);
-const loadingConstants = ref(false);
 const loadingCityData = ref(false);
 const saving = ref(false);
+const cityDataReady = ref(false);
 
+const { buildCountriesFetcher } = useLazyCountryCityLists();
 
-const fetchCountriesList = async () => {
-  try {
-    loadingConstants.value = true;
-    const response = await api.get('/countries/list');
-    countryItems.value = response.data.map((country: any) => ({
-      title: country.name,
-      value: country.id,
-    }));
-  } catch (err: any) {
-    console.error('Error fetching countries:', err);
-    toast.error(err?.response?.data?.message || t('common.messages.general.loadDataFailed'));
-  } finally {
-    loadingConstants.value = false;
-  }
-};
+const fetchCountriesLazy = buildCountriesFetcher({
+  getSelectedCountryId: () => {
+    const v = form.countryId;
+    if (v == null || v === "") return undefined;
+    const n = Number(v);
+    return Number.isFinite(n) ? n : undefined;
+  },
+  waitForReady: async () => {
+    if (!props.cityId) return;
+    await new Promise<void>((resolve) => {
+      if (cityDataReady.value) {
+        resolve();
+        return;
+      }
+      const stop = watch(cityDataReady, (ok) => {
+        if (ok) {
+          stop();
+          resolve();
+        }
+      });
+    });
+  },
+});
 
 const fetchCityData = async (cityId: number) => {
   try {
@@ -102,6 +111,7 @@ const fetchCityData = async (cityId: number) => {
     internalOpen.value = false;
   } finally {
     loadingCityData.value = false;
+    cityDataReady.value = true;
   }
 };
 
@@ -175,19 +185,20 @@ const handleSave = async () => {
 watch(
   () => props.modelValue,
   (open) => {
-    if (!open) return;
+    if (!open) {
+      cityDataReady.value = false;
+      return;
+    }
 
+    cityDataReady.value = false;
     if (props.cityId) {
       fetchCityData(props.cityId);
     } else {
       resetForm();
+      cityDataReady.value = true;
     }
   }
 );
-
-onMounted(() => {
-  fetchCountriesList();
-});
 </script>
 
 <template>
@@ -224,8 +235,13 @@ onMounted(() => {
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-x-3 gap-y-5 mb-4">
 
-          <SelectInput v-model="form.countryId" :label="t('form.address.country.label')" :placeholder="t('form.address.country.placeholder')" :items="countryItems"
-            :rules="[required()]" :hide-details="false" clearable :loading="loadingConstants"
+          <SelectInput v-model="form.countryId" :label="t('form.address.country.label')" :placeholder="t('form.address.country.placeholder')" :items="[]"
+            :rules="[required()]" :hide-details="false" clearable
+            :server-side="true"
+            :fetch-function="fetchCountriesLazy"
+            item-title-key="name"
+            item-value-key="id"
+            :debounce-time="500"
             :error-messages="formErrors['country_id']" @update:model-value="delete formErrors['country_id']" />
 
           <TextInput v-model="form.code2" :label="t('form.fields.code2.label')" :placeholder="t('form.fields.code2.placeholder')" :rules="[required(), exactLength(2)]"

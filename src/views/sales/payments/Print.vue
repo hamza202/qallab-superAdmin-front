@@ -20,7 +20,7 @@
                 <div class="invoice-header">
                     <div class="header-content">
                         <div class="title-block">
-                            <h1 class="title-en">Tax Invoice</h1>
+                            <h1 class="title-en">Sale Invoice</h1>
                             <h2 class="title-ar">{{ t('sales.forms.printInvoice.titleAr') }}</h2>
                         </div>
                         <img :src="logoImg" alt="Qallab" class="header-logo" />

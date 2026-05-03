@@ -43,6 +43,8 @@ interface SelectInputProps {
     itemValueKey?: string;
     debounceTime?: number;
     perPage?: number;
+    /** Merged into the menu/chips for serverSide (e.g. multiple) so selected values show labels before fetch matches */
+    presetItems?: any[];
 }
 
 const props = withDefaults(defineProps<SelectInputProps>(), {
@@ -58,6 +60,7 @@ const props = withDefaults(defineProps<SelectInputProps>(), {
     itemValueKey: "value",
     debounceTime: 500,
     perPage: 15,
+    presetItems: () => [],
 });
 const { t } = useI18n();
 
@@ -81,20 +84,41 @@ const observer = ref<IntersectionObserver | null>(null);
 
 const displayItems = computed(() => {
     if (props.serverSide) {
-        // Always include the selected item if it exists and is not already in the list
-        if (selectedItem.value) {
-            const selectedValueKey = props.itemValueKey || 'value';
-            const selectedValue = selectedItem.value[selectedValueKey];
-            const existsInList = serverItems.value.some(
-                (item: any) => item[selectedValueKey] === selectedValue
-            );
-            
+        const valueKey = props.itemValueKey || 'value';
+        const titleKey = props.itemTitleKey || 'title';
+        let merged = [...serverItems.value];
+
+        const addIfMissing = (entry: Record<string, any>) => {
+            const v = entry[valueKey] ?? entry.id;
+            if (v === null || v === undefined || v === '') return;
+            if (merged.some((item: any) => item[valueKey] === v)) return;
+            const title = entry.title ?? entry[titleKey] ?? entry.name ?? String(v);
+            merged.unshift({ ...entry, title, value: v, [valueKey]: v });
+        };
+
+        if (props.multiple && Array.isArray(props.modelValue)) {
+            for (const val of props.modelValue) {
+                const preset = (props.presetItems || []).find(
+                    (p: any) =>
+                        p[valueKey] === val ||
+                        p.id === val ||
+                        Number(p.id) === Number(val) ||
+                        String(p[valueKey]) === String(val)
+                );
+                if (preset) {
+                    addIfMissing(preset);
+                } else {
+                    addIfMissing({ [valueKey]: val, value: val, title: String(val) });
+                }
+            }
+        } else if (selectedItem.value) {
+            const selectedValue = selectedItem.value[valueKey];
+            const existsInList = merged.some((item: any) => item[valueKey] === selectedValue);
             if (!existsInList) {
-                // Add selected item at the beginning
-                return [selectedItem.value, ...serverItems.value];
+                merged = [selectedItem.value, ...merged];
             }
         }
-        return serverItems.value;
+        return merged;
     }
     return props.items;
 });
@@ -129,8 +153,8 @@ const fetchData = async (search: string = "", reset: boolean = true) => {
                 serverItems.value = [...serverItems.value, ...uniqueNewItems];
             }
 
-            // Update selectedItem if the current selection is in the new results
-            if (props.modelValue != null) {
+            // Update selectedItem if the current single selection is in the new results
+            if (props.modelValue != null && !props.multiple) {
                 const valueKey = props.itemValueKey || 'value';
                 const found = mappedItems.find(
                     (item: any) => item[valueKey] === props.modelValue
@@ -206,10 +230,9 @@ const setupObserver = async () => {
     }
 };
 
-// Watch for changes in modelValue to update selectedItem
+// Watch for changes in modelValue to update selectedItem (single-select serverSide only)
 watch(() => props.modelValue, async (newValue) => {
-    if (props.serverSide && newValue != null) {
-        // Find the selected item in current serverItems
+    if (props.serverSide && newValue != null && !props.multiple) {
         const valueKey = props.itemValueKey || 'value';
         const found = serverItems.value.find(
             (item: any) => item[valueKey] === newValue
@@ -217,7 +240,7 @@ watch(() => props.modelValue, async (newValue) => {
         if (found) {
             selectedItem.value = found;
         }
-    } else {
+    } else if (!props.multiple) {
         selectedItem.value = null;
     }
 }, { immediate: true });

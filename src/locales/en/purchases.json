@@ -295,6 +295,7 @@
           "purchaseOrderCode": "Order Code",
           "poDate": "Order Date",
           "project": "Project",
+          "supplyType": "Supply Type",
           "itemsTableTitle": "Order Items Table",
           "pricesIncludeTransport": "** Prices include transport",
           "paymentData": "Payment Data",

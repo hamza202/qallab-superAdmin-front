@@ -172,6 +172,10 @@
     },
     "settings": {
       "root": "Settings",
+      "cities": {
+        "list": "Cities",
+        "suburbs": "Suburbs"
+      },
       "docStatusTransitions": {
         "list": "Document status transitions",
         "transitionCreate": "Add status transition",
@@ -185,6 +189,10 @@
       "driversData": {
         "list": "Drivers data",
         "view": "Driver details"
+      },
+      "centralPaths": {
+        "list": "Central paths",
+        "zoneSuburbs": "Suburbs"
       }
     }
   }

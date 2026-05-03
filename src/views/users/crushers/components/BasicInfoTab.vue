@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { reactive, watch, ref } from 'vue';
 import { taxNo, unifiedLoginId, email } from '@/utils/validators';
+import AddressCountryCitySelects from '@/components/common/AddressCountryCitySelects.vue';
 
 // Available languages
 const availableLanguages = ref([
@@ -9,6 +10,7 @@ const availableLanguages = ref([
 ]);
 
 interface Props {
+  businessName: string;
   businessNameTranslations: { ar: string; en: string };
   ownerName: string;
   mobile: string;
@@ -25,8 +27,6 @@ interface Props {
   buildingNumber: string;
   address1: string;
   languageId: number | null;
-  countryItems: Array<{ title: string; value: number }>;
-  cityItems: Array<{ title: string; value: number }>;
   languageItems: Array<{ title: string; value: number }>;
   formErrors?: Record<string, string>;
 }
@@ -48,6 +48,7 @@ const handleInputUpdate = (field: string) => {
 };
 
 const formData = reactive({
+  businessName: props.businessName,
   businessNameTranslations: props.businessNameTranslations,
   ownerName: props.ownerName,
   mobile: props.mobile,
@@ -69,6 +70,7 @@ const formData = reactive({
 // Watch props and update local formData
 watch(() => props, (newProps) => {
   Object.assign(formData, {
+    businessName: newProps.businessName,
     businessNameTranslations: newProps.businessNameTranslations,
     ownerName: newProps.ownerName,
     mobile: newProps.mobile,
@@ -165,11 +167,17 @@ const markIcon = `<svg width="18" height="22" viewBox="0 0 18 22" fill="none" xm
 
       <h2 class="text-lg font-bold text-primary-900 mt-6 mb-2 md:col-span-3">{{ $t('form.address.sections.addressInfo') }}</h2>
 
-      <SelectWithIconInput clearable v-model="formData.countryId" @update:model-value="emitUpdate"
-        :label="$t('form.address.country.label')" :placeholder="$t('form.address.country.placeholder')"
-        :items="countryItems" />
-      <SelectWithIconInput clearable v-model="formData.cityId" @update:model-value="emitUpdate"
-        :label="$t('form.address.city.label')" :placeholder="$t('form.address.city.placeholder')" :items="cityItems" />
+      <AddressCountryCitySelects
+        :country-id="formData.countryId"
+        :city-id="formData.cityId"
+        :country-label="$t('form.address.country.label')"
+        :country-placeholder="$t('form.address.country.placeholder')"
+        :city-label="$t('form.address.city.label')"
+        :city-placeholder="$t('form.address.city.placeholder')"
+        @update:country-id="(v) => { formData.countryId = v; emitUpdate(); }"
+        @update:city-id="(v) => { formData.cityId = v; emitUpdate(); }"
+        @clear:error="clearError"
+      />
       <TextInput v-model="formData.neighborhood" @input="emitUpdate" :label="$t('form.address.district.label')"
         :placeholder="$t('form.address.district.placeholder')" />
       <TextInput v-model="formData.streetName" @input="emitUpdate" :label="$t('form.address.streetName.label')"

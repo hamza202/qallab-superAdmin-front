@@ -328,11 +328,11 @@ const handleSubmitToOrdersList = async () => {
                             </div>
 
                             <!-- Approved Quantity -->
-                            <div>
+                            <!-- <div>
                                 <PriceInput v-model="formData.approved_quantity"
                                     :placeholder="t('sales.forms.common.labels.approvedQtyQallab')"
                                     :label="t('sales.forms.common.labels.approvedQtyQallab')" density="comfortable" />
-                            </div>
+                            </div> -->
 
                             <!-- Created At (display only) -->
                             <div v-if="isEditMode">

@@ -2,12 +2,15 @@
 import { ref, computed, onMounted, nextTick, onBeforeUnmount } from "vue";
 import { useRouter } from "vue-router";
 import { useApi } from "@/composables/useApi";
+import { useLazyCountryCityLists } from "@/composables/useLazyCountryCityLists";
+import SelectInput from "@/components/common/forms/selectInput.vue";
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
 
 const router = useRouter();
 const api = useApi();
+const { buildCitiesFetcher } = useLazyCountryCityLists();
 
 // Suppliers icon
 const suppliersIcon = `<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -152,10 +155,14 @@ const showAdvancedFilters = ref(false);
 const filterBusinessName = ref("");
 const filterSupplierCode = ref("");
 const filterFullName = ref("");
-const filterCity = ref<string | null>(null);
+const filterCity = ref<number | null>(null);
 const filterStatus = ref<string | null>(null);
 
-const cityItems = ref<{ title: string; value: number }[]>([]);
+const fetchFilterCitiesList = buildCitiesFetcher({
+  getCountryId: () => undefined,
+  getSelectedCityId: () => filterCity.value ?? undefined,
+  requireCountry: false,
+});
 
 const toggleAdvancedFilters = () => {
     showAdvancedFilters.value = !showAdvancedFilters.value;
@@ -186,18 +193,6 @@ const headerCheckStates = computed(() => {
 });
 
 // API Functions
-const fetchCities = async () => {
-    try {
-        const response = await api.get<{ data: { id: number; name: string }[] }>('/cities/list');
-        cityItems.value = response.data.map(item => ({
-            title: item.name,
-            value: item.id
-        }));
-    } catch (err: any) {
-        console.error('Error fetching cities:', err);
-    }
-};
-
 const fetchSuppliers = async (append = false) => {
     try {
         if (append) {
@@ -214,7 +209,7 @@ const fetchSuppliers = async (append = false) => {
         if (filterBusinessName.value) filters.business_name = filterBusinessName.value;
         if (filterSupplierCode.value) filters.supplier_code = filterSupplierCode.value;
         if (filterFullName.value) filters.full_name = filterFullName.value;
-        if (filterCity.value) filters.city_id = filterCity.value;
+        if (filterCity.value != null) filters.city_id = String(filterCity.value);
         if (filterStatus.value) filters.status = filterStatus.value;
 
         const params = new URLSearchParams();
@@ -449,9 +444,6 @@ const cleanupInfiniteScroll = () => {
 
 // Lifecycle
 onMounted(async () => {
-    fetchCities();
-    fetchSuppliers();
-
     fetchSuppliers();
     nextTick(() => {
         setupInfiniteScroll();
@@ -540,9 +532,23 @@ onBeforeUnmount(() => {
                             placeholder="كود المورد" class="w-full sm:w-40 bg-white" @keyup.enter="applyFilters" />
                         <v-text-field v-model="filterFullName" density="comfortable" variant="outlined" hide-details
                             placeholder="الاسم الكامل" class="w-full sm:w-40 bg-white" @keyup.enter="applyFilters" />
-                        <v-select v-model="filterCity" :items="cityItems" item-title="title" item-value="value"
-                            density="comfortable" variant="outlined" hide-details placeholder="المدينة"
-                            class="w-full sm:w-40 bg-white" @update:model-value="applyFilters" />
+                        <div class="w-full sm:w-40 bg-white">
+                            <SelectInput
+                                v-model="filterCity"
+                                :items="[]"
+                                density="comfortable"
+                                variant="outlined"
+                                :hide-details="true"
+                                placeholder="المدينة"
+                                clearable
+                                :server-side="true"
+                                :fetch-function="fetchFilterCitiesList"
+                                item-title-key="name"
+                                item-value-key="id"
+                                :debounce-time="500"
+                                @update:model-value="applyFilters"
+                            />
+                        </div>
                         <v-select v-model="filterStatus" :items="StatusList" density="comfortable" variant="outlined"
                             hide-details placeholder="الحالة" class="w-full sm:w-40 bg-white"
                             @update:model-value="applyFilters" />

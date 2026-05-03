@@ -472,9 +472,6 @@ onMounted(() => {
                     <template #item.license_type="{ item }">
                         <span>{{ licenseTypeDisplay(item) }}</span>
                     </template>
-                    <template #item.logistics_company="{ item }">
-                        <span>{{ item.logistics_company?.name || item.logistics_company?.full_name || '--' }}</span>
-                    </template>
                 </DataTable>
 
                 <div ref="loadMoreTrigger" class="flex justify-center py-8">

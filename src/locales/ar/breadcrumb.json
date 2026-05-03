@@ -172,6 +172,10 @@
     },
     "settings": {
       "root": "الإعدادات",
+      "cities": {
+        "list": "المدن",
+        "suburbs": "الأحياء"
+      },
       "docStatusTransitions": {
         "list": "انتقالات حالات المستندات",
         "transitionCreate": "إضافة انتقال حالة",
@@ -185,6 +189,10 @@
       "driversData": {
         "list": "بيانات السائقين",
         "view": "تفاصيل السائق"
+      },
+      "centralPaths": {
+        "list": "المسارات المركزية",
+        "zoneSuburbs": "الأحياء"
       }
     }
   }

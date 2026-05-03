@@ -959,7 +959,7 @@
     },
     "printInvoice": {
       "printButton": "طباعة الفاتورة",
-      "titleAr": "فاتورة مبيعات ضريبية",
+      "titleAr": "فاتورة مبيعات",
       "invoiceNumber": "Invoice number (رقم الفاتورة):",
       "issued": "Issued (تاريخ الفاتورة):",
       "vatNo": "VAT No. (الرقم الضريبي):",

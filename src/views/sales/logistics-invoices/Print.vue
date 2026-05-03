@@ -20,7 +20,7 @@
                 <div class="invoice-header">
                     <div class="header-content">
                         <div class="title-block">
-                            <h1 class="title-en">Tax Invoice</h1>
+                            <h1 class="title-en">Sale Invoice</h1>
                             <h2 class="title-ar">{{ t('sales.forms.printInvoice.titleAr') }}</h2>
                         </div>
                         <img :src="logoImg" alt="Qallab" class="header-logo" />
@@ -134,7 +134,7 @@
             <!-- ===== Totals + QR Code ===== -->
             <div class="totals-qr-section">
                 <!-- QR Code Area -->
-                <div class="qr-area">
+                <!-- <div class="qr-area">
                     <img
                         v-if="invoiceData.qr_code"
                         :src="invoiceData.qr_code"
@@ -142,7 +142,7 @@
                         class="qr-image"
                     />
                     <div v-else class="qr-placeholder"></div>
-                </div>
+                </div> -->
 
                 <!-- Totals -->
                 <div class="totals-area">
@@ -678,7 +678,6 @@ onMounted(() => {
 .totals-area {
     flex: 1;
     margin-left: auto;
-    max-width: 520px;
     padding-right: 56px;
     background-color: rgba(248, 250, 252, 1);
 }

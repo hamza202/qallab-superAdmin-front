@@ -122,7 +122,10 @@
         "centralPaths": "المسارات المركزية",
         "pricingByTruck": "تسعير بالشاحنة",
         "driversData": "إدارة بيانات السائقين",
-        "vehiclesData": "إدارة بيانات المركبات"
+        "vehiclesData": "إدارة بيانات المركبات",
+        "pricingByTruckSuburbs": "تسعير بالشاحنة للأحياء",
+        "pricingPerTonSuburbs": "تسعير بالطن للأحياء",
+        "customPricingSuburbs": "تسعير مخصص للأحياء"
       },
       "taxes": {
         "title": "إدارة الضرائب",

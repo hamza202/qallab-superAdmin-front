@@ -2,6 +2,7 @@
 import { ref, computed, onMounted, watch, reactive } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useApi } from "@/composables/useApi";
+import { useLazyCountryCityLists } from "@/composables/useLazyCountryCityLists";
 import { useI18n } from "vue-i18n";
 
 // Available languages
@@ -14,6 +15,7 @@ const route = useRoute();
 const router = useRouter();
 const api = useApi();
 const { t } = useI18n();
+const { buildCountriesFetcher, buildCitiesFetcher } = useLazyCountryCityLists();
 
 // TypeScript Interfaces
 interface ListItem {
@@ -165,8 +167,7 @@ const supplierBalances = ref<SupplierBalance[]>([]);
 
 // Dropdown items from API
 const currencyItems = ref<{ title: string; value: number }[]>([]);
-const countryItems = ref<{ title: string; value: number }[]>([]);
-const cityItems = ref<{ title: string; value: number }[]>([]);
+const supplierDataLoaded = ref(!isEditing.value);
 const accountItems = ref<{ title: string; value: number }[]>([]);
 const pageLoading = ref(false)
 
@@ -174,29 +175,35 @@ const pageLoading = ref(false)
 const basicInfoSubTab = ref(0);
 
 // API Functions
-const fetchCountries = async () => {
-  try {
-    const response = await api.get<{ data: ListItem[] }>('/countries/list');
-    countryItems.value = response.data.map(item => ({
-      title: item.name,
-      value: item.id
-    }));
-  } catch (err: any) {
-    console.error('Error fetching countries:', err);
-  }
+const waitForSupplierDataLoaded = async () => {
+  if (!isEditing.value) return;
+  if (supplierDataLoaded.value) return;
+  await new Promise<void>((resolve) => {
+    const checkInterval = setInterval(() => {
+      if (supplierDataLoaded.value) {
+        clearInterval(checkInterval);
+        clearTimeout(timeoutId);
+        resolve();
+      }
+    }, 10);
+    const timeoutId = setTimeout(() => {
+      clearInterval(checkInterval);
+      resolve();
+    }, 5000);
+  });
 };
 
-const fetchCities = async (countryId: number) => {
-  try {
-    const response = await api.get<{ data: ListItem[] }>(`/cities/list?country_id=${countryId}`);
-    cityItems.value = response.data.map(item => ({
-      title: item.name,
-      value: item.id
-    }));
-  } catch (err: any) {
-    console.error('Error fetching cities:', err);
-  }
-};
+const fetchCountriesList = buildCountriesFetcher({
+  getSelectedCountryId: () => country.value ?? undefined,
+  waitForReady: waitForSupplierDataLoaded,
+});
+
+const fetchCitiesList = buildCitiesFetcher({
+  getCountryId: () => country.value ?? undefined,
+  getSelectedCityId: () => city.value ?? undefined,
+  waitForReady: waitForSupplierDataLoaded,
+  requireCountry: true,
+});
 
 const fetchCurrencies = async () => {
   try {
@@ -349,10 +356,6 @@ const fetchSupplierData = async () => {
       nationalAddress.value = data.address.address_1;
       address2.value = data.address.address_2;
 
-      // Fetch cities for selected country
-      if (data.address.country_id) {
-        await fetchCities(data.address.country_id);
-      }
     }
 
     // Contact List
@@ -368,6 +371,7 @@ const fetchSupplierData = async () => {
     toast.error(err?.response?.data?.message || t('pages.suppliers.form.messages.fetchError'));
   } finally {
     loading.value = false;
+    supplierDataLoaded.value = true;
   }
 };
 
@@ -527,29 +531,27 @@ const handleClose = () => {
   router.push({ name: "SuppliersList" });
 };
 
-// Watch country change to fetch cities
-watch(country, (newCountryId) => {
-  if (newCountryId) {
-    fetchCities(newCountryId);
-  } else {
-    city.value = null; // Reset city when country changes
+// Clear city only when the user changes country — not on initial load (null → id), otherwise
+// the watcher runs after fetchSupplierData sets both country and city and wipes city.
+watch(country, (newCountryId, oldCountryId) => {
+  if (oldCountryId != null && oldCountryId !== newCountryId) {
+    city.value = null;
   }
 });
 
 // Lifecycle
 onMounted(async () => {
-  pageLoading.value = true
-  await Promise.all([
-    fetchCountries(),
-    fetchCurrencies(),
-    fetchTreeChartCards()
-  ]);
-
-  if (isEditing.value) {
-    await fetchSupplierData();
+  pageLoading.value = true;
+  try {
+    if (isEditing.value) {
+      await fetchSupplierData();
+    } else {
+      supplierDataLoaded.value = true;
+    }
+    await Promise.all([fetchCurrencies(), fetchTreeChartCards()]);
+  } finally {
+    pageLoading.value = false;
   }
-  pageLoading.value = false
-
 });
 
 // Icons
@@ -794,14 +796,42 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
               <!-- Address Info Sub-tab -->
               <div v-if="basicInfoSubTab === 0" class="bg-gray-50 rounded-lg p-6 mt-4">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                  <SelectInput v-model="country" :label="t('pages.suppliers.form.labels.country')"
-                    :placeholder="t('pages.suppliers.form.labels.countryPlaceholder')" :items="countryItems"
-                    :rules="[required()]" :hide-details="false" clearable :error-messages="formErrors['country_code']"
-                    @update:model-value="delete formErrors['country_code']" />
-                  <SelectInput v-model="city" :label="t('pages.suppliers.form.labels.city')"
-                    :placeholder="t('pages.suppliers.form.labels.cityPlaceholder')" :items="cityItems"
-                    :rules="[required()]" :hide-details="false" :disabled="!country" clearable
-                    :error-messages="formErrors['city_id']" @update:model-value="delete formErrors['city_id']" />
+                  <SelectInput
+                    v-model="country"
+                    :items="[]"
+                    :label="t('pages.suppliers.form.labels.country')"
+                    :placeholder="t('pages.suppliers.form.labels.countryPlaceholder')"
+                    density="comfortable"
+                    :rules="[required()]"
+                    :hide-details="false"
+                    clearable
+                    :error-messages="formErrors['country_code']"
+                    :server-side="true"
+                    :fetch-function="fetchCountriesList"
+                    item-title-key="name"
+                    item-value-key="id"
+                    :debounce-time="500"
+                    @update:model-value="delete formErrors['country_code']"
+                  />
+                  <SelectInput
+                    :key="country ?? 'no-country'"
+                    v-model="city"
+                    :items="[]"
+                    :label="t('pages.suppliers.form.labels.city')"
+                    :placeholder="t('pages.suppliers.form.labels.cityPlaceholder')"
+                    density="comfortable"
+                    :rules="[required()]"
+                    :hide-details="false"
+                    :disabled="!country"
+                    clearable
+                    :error-messages="formErrors['city_id']"
+                    :server-side="true"
+                    :fetch-function="fetchCitiesList"
+                    item-title-key="name"
+                    item-value-key="id"
+                    :debounce-time="500"
+                    @update:model-value="delete formErrors['city_id']"
+                  />
                   <TextInput v-model="postalCode" :label="t('pages.suppliers.form.labels.postalCode')"
                     :placeholder="t('pages.suppliers.form.labels.postalCodePlaceholder')" :hide-details="false" />
                   <TextInput v-model="district" :label="t('pages.suppliers.form.labels.district')"
