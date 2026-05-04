@@ -11,7 +11,7 @@
         </div>
 
         <div v-else-if="loadFailed" class="print-error no-print">
-            <p>{{ t('sales.quotationsMaterialProduct.print.loadFailed') }}</p>
+            <p>{{ t('sales.quotationsFuels.print.loadFailed') }}</p>
         </div>
 
         <div v-else-if="!isLoading && !loadFailed" class="invoice-content">
@@ -418,13 +418,13 @@ const fetchDetail = async () => {
         await nextTick()
         await waitForImages()
         if (window.self !== window.top) {
-            window.parent.postMessage({ type: 'quotation-material-product-print-ready' }, '*')
+            window.parent.postMessage({ type: 'quotation-fuels-print-ready' }, '*')
         }
     } catch (e: unknown) {
         console.error('Quotation print detail failed:', e)
         loadFailed.value = true
         const err = e as { response?: { data?: { message?: string } } }
-        error(err?.response?.data?.message || t('sales.quotationsMaterialProduct.print.loadFailed'))
+        error(err?.response?.data?.message || t('sales.quotationsFuels.print.loadFailed'))
     } finally {
         isLoading.value = false
     }
