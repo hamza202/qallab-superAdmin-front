@@ -196,8 +196,11 @@ const handleCancel = () => {
     <v-form ref="formRef" v-model="isFormValid" @submit.prevent>
       <div class="space-y-4">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <DatePickerInput :label="t('purchases.requests.logistics.form.detailCard.fromDate')" v-model="form.from_date" :placeholder="t('purchases.shared.forms.common.select')"
-            density="comfortable" :rules="[required()]" />
+          <span>
+            <DatePickerInput :label="t('purchases.requests.logistics.form.detailCard.fromDate')" v-model="form.from_date" :placeholder="t('purchases.shared.forms.common.select')"
+              density="comfortable" :rules="[required()]" />
+            <p class="text-sm text-gray-500 mt-1">{{ t('purchases.shared.forms.common.dateHint') }}</p>
+          </span>
           <DatePickerInput :label="t('purchases.requests.logistics.form.detailCard.toDate')" v-model="form.to_date" :placeholder="t('purchases.shared.forms.common.select')"
             density="comfortable" :rules="[required()]" />
           <PriceInput :label="t('purchases.requests.logistics.form.detailCard.executionDuration')" v-model="form.actual_execution_interval"

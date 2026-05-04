@@ -1585,7 +1585,17 @@
       "FormDescription": "إصدار فاتورة طلبية مبيعات خدمة نقل",
       "FormTitleEdit": "تعديل فاتورة مبيعات خدمة نقل",
       "FormDescriptionEdit": "تعديل فاتورة طلبية مبيعات خدمة نقل",
-      "print": "طباعة الفاتورة"
+      "SimpleFormTitle": "إصدار فاتورة مبيعات خدمة نقل بسيطة",
+      "SimpleFormTitleEdit": "تعديل فاتورة مبيعات خدمة نقل بسيطة",
+      "print": "طباعة الفاتورة",
+      "form": {
+        "datePlaceholder": "اختر التاريخ",
+        "createdFromLabel": "من تاريخ",
+        "createdToLabel": "إلى تاريخ"
+      },
+      "list": {
+        "addSimpleInvoice": "إضافة فاتورة بسيطة"
+      }
     },
     "SalesOrdersFuels": {
       "title": "جدول طلبيات مبيعات المحروقات",
