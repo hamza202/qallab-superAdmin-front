@@ -416,7 +416,7 @@ const fetchResponsibleEmployees = async (search = '', cursor?: string, perPage =
       value: Number(user.id ?? user.value)
     }));
 
-    mappedUsers.forEach((option) => cacheResponsibleEmployeeOption(option));
+    mappedUsers.forEach((option: { title: string; value: number }) => cacheResponsibleEmployeeOption(option));
 
     const selectedOptions = selectedIds.map((id) => ({
       title: responsibleEmployeeOptionsCache.value[id] || String(id),
@@ -826,9 +826,9 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
                 <TextInput v-model="taxNumber" :label="t('pages.customers.form.labels.taxNumber')" :placeholder="t('pages.customers.form.labels.taxNumberPlaceholder')" :hide-details="false"
                   :error-messages="formErrors['commercial_register']"
                   @input="delete formErrors['commercial_register']" />
-                <SelectInput v-model="responsibleEmployee" :items="[]" label="الموظف المسئول"
+                <SelectInput v-model="responsibleEmployee" :items="[]" :label="t('pages.customers.form.labels.responsibleEmployee')"
                   item-title="title" item-value="value" density="comfortable" placeholder="اختر العميل المسئول"
-                  :server-side="true" :fetch-function="fetchResponsibleEmployees" :debounce-time="500" multiple :hide-details="false"
+                  :server-side="true" :fetch-function="fetchResponsibleEmployees" :debounce-time="500" multiple :check-mode="true" :hide-details="false"
                   :error-messages="formErrors['responsible_employee']"
                   @update:model-value="delete formErrors['responsible_employee']" />
               </div>

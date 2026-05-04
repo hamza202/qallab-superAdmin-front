@@ -738,9 +738,9 @@ const trashIcon = `<svg width="18" height="20" viewBox="0 0 18 20" fill="none" x
                     </v-tooltip>
                   </template>
                 </TextInput>
-                <SelectInput v-model="responsibleEmployee" :items="[]" label="الموظف المسئول"
+                <SelectInput v-model="responsibleEmployee" :items="[]" :label="t('pages.suppliers.form.labels.responsibleEmployee')"
                   item-title="title" item-value="value" density="comfortable" placeholder="اختر العميل المسئول"
-                  :server-side="true" :fetch-function="fetchResponsibleEmployees" :debounce-time="500" multiple
+                  :server-side="true" :fetch-function="fetchResponsibleEmployees" :debounce-time="500" multiple :check-mode="true"
                   :hide-details="false" :error-messages="formErrors['responsible_employee']"
                   @update:model-value="delete formErrors['responsible_employee']" />
                 <div>
