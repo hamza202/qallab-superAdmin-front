@@ -45,6 +45,7 @@ interface SelectInputProps {
     perPage?: number;
     /** Merged into the menu/chips for serverSide (e.g. multiple) so selected values show labels before fetch matches */
     presetItems?: any[];
+    checkMode?: boolean;
 }
 
 const props = withDefaults(defineProps<SelectInputProps>(), {
@@ -61,6 +62,7 @@ const props = withDefaults(defineProps<SelectInputProps>(), {
     debounceTime: 500,
     perPage: 15,
     presetItems: () => [],
+    checkMode: false,
 });
 const { t } = useI18n();
 
@@ -223,6 +225,25 @@ const customFilter = (itemTitle: string, queryText: string, item: any) => {
     return true;
 };
 
+const removeItem = (itemValue: string | number) => {
+    if (!Array.isArray(props.modelValue)) return;
+    const newValue = props.modelValue.filter((value) => String(value) !== String(itemValue));
+    emit("update:modelValue", newValue);
+};
+
+const getItemTitle = (value: string | number): string => {
+    const valueKey = props.itemValueKey || "value";
+    const item = displayItems.value.find((entry: any) => String(entry[valueKey]) === String(value));
+    return item?.title || item?.name || String(value);
+};
+
+const isItemSelected = (item: any): boolean => {
+    if (!Array.isArray(props.modelValue)) return false;
+    const valueKey = props.itemValueKey || "value";
+    const itemValue = item?.raw?.[valueKey] ?? item?.raw?.value;
+    return props.modelValue.some((value) => String(value) === String(itemValue));
+};
+
 const setupObserver = async () => {
     await nextTick();
     if (loadMoreRef.value && props.serverSide) {
@@ -305,12 +326,100 @@ watch(() => displayItems.value.length, async () => {
                     </v-list-item-title>
                 </v-list-item>
             </template>
-            <template #item="{ item, props: itemProps }">
-                <v-list-item v-bind="itemProps" :title="item.raw.title || item.raw.name || item.raw[itemTitleKey]">
+            <template #selection="{ index }">
+                <div v-if="checkMode && multiple && index === 0" class="selected-chips-container">
+                    <div
+                        v-for="selectedValue in (Array.isArray(modelValue) ? modelValue : [])"
+                        :key="selectedValue"
+                        class="selected-chip"
+                    >
+                        <span class="chip-text">{{ getItemTitle(selectedValue) }}</span>
+                        <button
+                            type="button"
+                            class="chip-close-btn"
+                            @click.stop="removeItem(selectedValue)"
+                            :disabled="disabled || readonly"
+                        >
+                            <svg
+                                width="10"
+                                height="10"
+                                viewBox="0 0 10 10"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                            >
+                                <path
+                                    d="M7.5 2.5L2.5 7.5M2.5 2.5L7.5 7.5"
+                                    stroke="#9AA4B2"
+                                    stroke-width="1.5"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </template>
+            <template #item="{ item, props: optionProps }">
+                <v-list-item v-bind="optionProps" :title="item.raw.title || item.raw.name || item.raw[itemTitleKey]">
+                    <template v-if="checkMode && multiple" #prepend>
+                        <v-checkbox-btn
+                            :model-value="isItemSelected(item)"
+                            color="primary"
+                            density="compact"
+                            tabindex="-1"
+                        />
+                    </template>
                 </v-list-item>
             </template>
         </v-select>
     </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.selected-chips-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+.selected-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    background-color: #ffffff;
+    border: 1px solid #cdd5df;
+    border-radius: 6px;
+    padding: 3px 4px 3px 8px;
+}
+
+.chip-text {
+    font-family: "Cairo", sans-serif;
+    font-weight: 500;
+    font-size: 12px;
+    line-height: 18px;
+    color: #364152;
+    text-align: center;
+}
+
+.chip-close-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    border-radius: 3px;
+    transition: background-color 0.2s ease;
+}
+
+.chip-close-btn:hover:not(:disabled) {
+    background-color: #f3f4f6;
+}
+
+.chip-close-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+</style>
