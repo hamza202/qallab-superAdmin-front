@@ -2,25 +2,23 @@
 <html lang="ar" dir="rtl">
 <!--
   Quotation PDF template — tuned for mPDF (table-first layout).
-  Embed Arabic-capable fonts in mPDF config if glyphs show as squares.
+  Logo: set absolute file URL for mPDF; in dev, /logo.svg resolves from public/.
 -->
 <head>
   <meta charset="UTF-8" />
   <title>عرض سعر</title>
   <style type="text/css">
-    /* Minimal rules; avoid flex/grid/absolute for mPDF */
     html, body {
       margin: 0;
       padding: 0;
-      font-family: DejaVu Sans, Arial, sans-serif;
+      font-family: "DejaVu Sans", sans-serif;
       font-size: 11pt;
       color: #374151;
       direction: rtl;
     }
-    .page-wrap {
-      width: 100%;
+    .page-outer {
+      padding: 14px 12px 20px;
     }
-    /* Repeat table header when table spans pages */
     thead {
       display: table-header-group;
     }
@@ -30,52 +28,84 @@
     tr {
       page-break-inside: avoid;
     }
-    .header-box {
+    .card {
       background-color: #f3f4f6;
-      border: 1px solid #e5e7eb;
-      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+    }
+    .card-inner {
+      padding: 16px 18px;
+    }
+    /* mPDF does not support linear-gradient — use solid fallback */
+    .header-wave {
+      height: 36px;
+      font-size: 0;
+      line-height: 0;
+      background-color: #dbeafe;
     }
     .intro-box {
-      background-color: #f9fafb;
-      border: 1px solid #e5e7eb;
-      border-radius: 10px;
+      background-color: #f3f4f6;
+      border: 1px solid #e2e8f0;
+    }
+    /* mPDF ignores overflow:hidden on tables */
+    .table-card {
+      background-color: #ffffff;
+      border: 1px solid #e2e8f0;
+    }
+    .items-table {
+      border-collapse: collapse;
     }
     .items-table thead th {
-      background-color: #1e40af;
+      background-color: #1849A9;
       color: #ffffff;
       font-weight: bold;
       text-align: center;
-      padding: 10px 6px;
-      border: 1px solid #1e3a8a;
+      padding: 12px 8px;
+      border: none;
     }
     .items-table tbody td {
-      padding: 10px 6px;
+      padding: 12px 8px;
       text-align: center;
+      border: none;
       border-bottom: 1px solid #e5e7eb;
       vertical-align: middle;
+      background-color: #ffffff;
     }
-    .items-table tbody tr:nth-child(even) td {
-      background-color: #fafafa;
+    .items-table tbody tr:last-child td {
+      border-bottom: none;
     }
     .summary-box {
-      background-color: #f3f4f6;
-      border: 1px solid #e5e7eb;
-      border-radius: 8px;
+      background-color: #f9fafb;
+      border: 1px solid #e2e8f0;
     }
     .grand-total-bar {
-      background-color: #1e40af;
+      background-color: #1849A9;
       color: #ffffff;
-      border-radius: 8px;
+    }
+    .grand-total-words {
+      font-size: 9.5pt;
+      font-weight: normal;
+      color: rgba(255, 255, 255, 0.92);
+      line-height: 1.35;
+    }
+    .hope-aside {
+      color: #1849A9;
+      font-size: 10.5pt;
+      line-height: 1.65;
+    }
+    .closing-line {
+      font-weight: bold;
+      color: #111827;
     }
     .accent-text {
-      color: #2563eb;
+      color: #1849A9;
+      font-weight: bold;
     }
     .notes-title {
-      color: #1e40af;
+      color: #1849A9;
       font-weight: bold;
     }
     .footer-line {
-      border-bottom: 4px solid #1e40af;
+      border-bottom: 4px solid #1849A9;
     }
     .muted {
       color: #6b7280;
@@ -88,239 +118,265 @@
       page-break-inside: avoid;
     }
     .spacer-cell {
-      height: 12px;
+      height: 14px;
     }
     .spacer-cell-sm {
-      height: 6px;
+      height: 7px;
+    }
+    .logo-img {
+      display: block;
+      margin: 0 auto 6px auto;
     }
   </style>
 </head>
 <body>
-
-<table class="page-wrap" width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation">
-  <!-- Header band -->
-  <tr>
-    <td>
-      <table class="header-box" width="100%" cellpadding="16" cellspacing="0" border="0" role="presentation">
-        <tr>
-          <!-- RTL: visually right column = company branding -->
-          <td width="42%" valign="top" align="center">
-            <table width="100%" cellpadding="0" cellspacing="0" border="0">
-              <tr>
-                <td align="center">
-                  <!-- Replace src with embedded image or absolute file path for mPDF -->
-                  <span style="font-size:14pt;font-weight:bold;color:#1e40af;">قَلاب</span><br />
-                  <span style="font-size:10pt;color:#64748b;">QALLAB</span>
-                </td>
-              </tr>
-              <tr><td class="spacer-cell-sm"></td></tr>
-              <tr>
-                <td align="center" class="muted">تاريخ عرض السعر : 2026/05/03</td>
-              </tr>
-            </table>
-          </td>
-          <td width="58%" valign="top">
-            <table width="100%" cellpadding="0" cellspacing="0" border="0">
-              <tr>
-                <td style="font-weight:bold;font-size:12pt;">Qallab Company</td>
-              </tr>
-              <tr><td class="spacer-cell-sm"></td></tr>
-              <tr>
-                <td class="muted">Phone No: +966 599 1454323 / Email: Info@qallab.sa</td>
-              </tr>
-              <tr>
-                <td class="muted">الرقم الضريبي : 3345323 / السجل التجاري : 3345323</td>
-              </tr>
-              <tr><td class="spacer-cell-sm"></td></tr>
-              <tr>
-                <td style="font-weight:bold;font-size:13pt;">رقم عرض سعر : #212431</td>
-              </tr>
-            </table>
-          </td>
-        </tr>
-      </table>
-    </td>
-  </tr>
-
-  <tr><td class="spacer-cell"></td></tr>
-
-  <!-- Introduction -->
-  <tr>
-    <td>
-      <table class="intro-box keep-together" width="100%" cellpadding="14" cellspacing="0" border="0">
-        <tr>
-          <td align="center" style="line-height:1.7;">
-            السادة / <span class="accent-text">شركة بريكس للمقاولات</span> المحترمين تحية طيبة وبعد.
-          </td>
-        </tr>
-        <tr><td class="spacer-cell-sm"></td></tr>
-        <tr>
-          <td align="center" style="font-weight:bold;">
-            الموضوع: عرض سعر توريد مع نقل \ نقل فقط
-          </td>
-        </tr>
-        <tr><td class="spacer-cell-sm"></td></tr>
-        <tr>
-          <td align="center" style="line-height:1.8;font-size:10.5pt;">
-            تحية طيبة، نفيد سعادتكم بأن شركة <span class="accent-text">قالب</span> تتشرف بتقديم عرض أسعار لتوريد ونقل (دفان / بحص / صبيز وأعمال متعلقة) لمشروعكم الكريم الواقع في محافظة
-            <span class="accent-text">مكة المكرمة — حي الشرقية</span> وفق المواصفات والكميات الموضحة أدناه.
-          </td>
-        </tr>
-      </table>
-    </td>
-  </tr>
-
-  <tr><td class="spacer-cell"></td></tr>
-
-  <!-- Line items: thead repeats on multipage splits -->
-  <tr>
-    <td>
-      <table class="items-table" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
-        <thead>
+  <table class="page-outer" width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation">
+    <tr>
+      <td align="center">
+        <table class="page-wrap" width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation">
+          <!-- Header card: wave, logo | company, date | quote # -->
           <tr>
-            <th width="42%">البند</th>
-            <th width="12%">الوحدة</th>
-            <th width="14%">الكمية</th>
-            <th width="16%">سعر الوحدة</th>
-            <th width="16%">السعر الإجمالي</th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- Sample row; duplicate <tr>...</tr> for more lines — long bodies flow to next pages -->
-          <tr>
-            <td style="text-align:right;padding-right:8px;">توريد ونقل \ نقل مادة ( دفان \ بحص \ صبيز \ غيره )</td>
-            <td>طن</td>
-            <td>23</td>
-            <td>32,312</td>
-            <td>123,235</td>
+            <td>
+              <table class="card" width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation">
+                <tr>
+                  <td colspan="2" class="header-wave">&nbsp;</td>
+                </tr>
+                <tr>
+                  <td class="card-inner header-body" width="40%" valign="top" align="center">
+                    <img class="logo-img" src="../../assets/logo.svg" width="104" height="52" alt="قلاب" />
+                  </td>
+                  <td class="card-inner header-body" width="60%" valign="top" align="left">
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td align="left" style="font-weight:bold;font-size:12pt;color:#5D6481;">Qallab Company</td>
+                      </tr>
+                      <tr>
+                        <td class="spacer-cell-sm"></td>
+                      </tr>
+                      <tr>
+                        <td align="left" class="muted">Phone No: +966 599 1454323 / Email: Info@qallab.sa</td>
+                      </tr>
+                      <tr>
+                        <td class="spacer-cell-sm"></td>
+                      </tr>
+                      <tr>
+                        <td align="left" class="muted">الرقم الضريبي : 3345323 / السجل التجاري : 3345323</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="card-inner" style="padding-top:0;" align="center" valign="middle">
+                    <span class="muted" style="font-size:10pt;font-weight:bold">تاريخ عرض السعر : 03\05\2026</span>
+                  </td>
+                  <td class="card-inner" style="padding-top:0;" align="left" valign="middle">
+                    <span style="font-weight:bold;font-size:12pt;color:#5D6481;">رقم عرض سعر : #212431</span>
+                  </td>
+                </tr>
+              </table>
+            </td>
           </tr>
           <tr>
-            <td style="text-align:right;padding-right:8px;">توريد ونقل \ نقل مادة ( ردمية \ أساسات \ غيرها )</td>
-            <td>طن</td>
-            <td>10</td>
-            <td>1,250</td>
-            <td>12,500</td>
+            <td class="spacer-cell"></td>
           </tr>
-          <!-- Uncomment or paste additional rows below for pagination testing -->
-          <!--
-          <tr><td style="text-align:right;padding-right:8px;">بند تجريبي</td><td>طن</td><td>1</td><td>100</td><td>100</td></tr>
-          -->
-        </tbody>
-      </table>
-    </td>
-  </tr>
-
-  <tr><td class="spacer-cell"></td></tr>
-
-  <!-- Subtotals -->
-  <tr>
-    <td>
-      <table class="summary-box keep-together hint" width="100%" cellpadding="12" cellspacing="0" border="0">
-        <tr>
-          <td width="70%" align="right" style="font-weight:bold;padding:6px 8px;">
-            الإجمالي غير شامل ضريبة القيمة المضافة
-          </td>
-          <td width="30%" align="left" dir="ltr" style="padding:6px 8px;">15,520.00 ﷼</td>
-        </tr>
-        <tr>
-          <td align="right" style="font-weight:bold;padding:6px 8px;">ضريبة القيمة المضافة</td>
-          <td align="left" dir="ltr" style="padding:6px 8px;">230.00 ﷼</td>
-        </tr>
-      </table>
-    </td>
-  </tr>
-
-  <tr><td class="spacer-cell-sm"></td></tr>
-
-  <!-- Grand total bar -->
-  <tr>
-    <td>
-      <!-- First <td> = visual right under dir="rtl" -->
-      <table class="grand-total-bar keep-together hint" width="100%" cellpadding="14" cellspacing="0" border="0">
-        <tr>
-          <td width="36%" valign="middle" align="right" style="font-weight:bold;font-size:13pt;">
-            الإجمالي الكلي
-          </td>
-          <td width="34%" valign="middle" dir="ltr" align="center" style="font-weight:bold;font-size:13pt;">
-            15,750.00 ﷼
-          </td>
-          <td width="30%" valign="middle" align="center" style="font-size:9.5pt;">
-            ثلاثة آلاف وعشرون ريال
-          </td>
-        </tr>
-      </table>
-    </td>
-  </tr>
-
-  <tr><td class="spacer-cell"></td></tr>
-
-  <!-- Closing line -->
-  <tr>
-    <td align="center" style="padding:4px 8px;line-height:1.8;font-size:10.5pt;" class="keep-together hint">
-      نأمل أن ينال عرض سعرنا قبولكم واستحسانكم، وللمزيد من الاستفسار نحن تحت الخدمة.
-    </td>
-  </tr>
-
-  <tr><td class="spacer-cell-sm"></td></tr>
-
-  <!-- Important notes -->
-  <tr>
-    <td>
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation">
-        <tr>
-          <td class="notes-title" align="right" style="padding-bottom:8px;">
-            ملاحظات هامة :
-          </td>
-        </tr>
-        <tr>
-          <td align="right" style="line-height:2;padding-right:18px;text-indent:-10px;font-size:10.5pt;">
-            • الأسعار أعلاه تشمل ضريبة القيمة المضافة<br />
-            • صلاحية عرض السعر 10 أيام<br />
-            • يتم رفع مستخلص كل 10 أيام على أن يتم سدادها بعد 14 يومًا<br />
-            • يتم بدء العمل فور الموافقة على عرض السعر وتحويله إلى طلبية مشتريات وتعميدها ورفعها على النظام
-          </td>
-        </tr>
-      </table>
-    </td>
-  </tr>
-
-  <tr><td class="spacer-cell"></td></tr>
-
-  <!-- Courtesy closing -->
-  <tr>
-    <td align="center" style="line-height:1.8;font-size:10.5pt;" class="keep-together hint">
-      وتفضلوا بقبول فائق الاحترام والتحية
-    </td>
-  </tr>
-
-  <tr><td class="spacer-cell"></td></tr>
-
-  <!-- Signature / dept block -->
-  <tr>
-    <td align="center">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" class="keep-together hint">
-        <tr>
-          <td align="center" style="padding:8px 0;color:#1e40af;font-weight:bold;line-height:1.6;">
-            إدارة المبيعات<br />
-            منصة قلاب
-          </td>
-        </tr>
-        <tr>
-          <td align="center" class="muted" style="font-size:9pt;">
-            (مساحة ختم أو شعار — استبدل هذا السطر بالصورة عبر mPDF)
-          </td>
-        </tr>
-      </table>
-    </td>
-  </tr>
-
-  <tr><td class="spacer-cell"></td></tr>
-
-  <!-- Bottom decorative bar -->
-  <tr class="footer-line">
-    <td style="height:4px;font-size:0;line-height:0;">&nbsp;</td>
-  </tr>
-</table>
-
+          <!-- Introduction -->
+          <tr>
+            <td>
+              <table class="intro-box keep-together" width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td class="card-inner" align="center" style="line-height:1.75;">
+                    السادة / <span class="accent-text">شركة بريكس للمقاولات المحترمين</span> تحية طيبة وبعد.
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" style="font-weight:bold;font-size:12pt">
+                    الموضوع: عرض سعر توريد مع نقل \ نقل فقط
+                  </td>
+                </tr>
+                <tr>
+                  <td class="spacer-cell-sm"></td>
+                </tr>
+                <tr>
+                  <td class="card-inner" align="center" style="line-height:1.85;font-size:10.5pt;padding-top:0;">
+                    تحية طيبة، نفيد سعادتكم بأن شركة قالب تتشرف بتقديم عرض أسعار لتوريد ونقل (دفان / بحص / صبيز وأعمال متعلقة) لمشروعكم الكريم
+                    <span class="accent-text">إنماء</span> الواقع في محافظة
+                    <span class="accent-text">مكة المكرمة - حي الشرقية</span>
+                    وفق المواصفات والكميات الموضحة أدناه.
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td class="spacer-cell"></td>
+          </tr>
+          <!-- Line items -->
+          <tr>
+            <td>
+              <table class="table-card" width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation">
+                <tr>
+                  <td style="padding:0;">
+                    <table class="items-table" width="100%" cellpadding="0" cellspacing="0" border="0">
+                      <thead>
+                        <tr>
+                          <th width="42%">البند</th>
+                          <th width="12%">الوحدة</th>
+                          <th width="14%">الكمية</th>
+                          <th width="16%">سعر الوحدة</th>
+                          <th width="16%">السعر الإجمالي</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td style="text-align:right;padding-right:12px;">توريد ونقل \ نقل مادة ( دفان \ بحص \ صبيز \ غيره )</td>
+                          <td>طن</td>
+                          <td>23</td>
+                          <td>32312</td>
+                          <td>123,235</td>
+                        </tr>
+                        <tr>
+                          <td style="text-align:right;padding-right:12px;">توريد ونقل \ نقل مادة ( دفان \ بحص \ صبيز \ غيره )</td>
+                          <td>طن</td>
+                          <td>23</td>
+                          <td>32312</td>
+                          <td>123,235</td>
+                        </tr>
+                        <tr>
+                          <td style="text-align:right;padding-right:12px;">توريد ونقل \ نقل مادة ( دفان \ بحص \ صبيز \ غيره )</td>
+                          <td>طن</td>
+                          <td>23</td>
+                          <td>32312</td>
+                          <td>123,235</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td class="spacer-cell"></td>
+          </tr>
+          <!-- Subtotals -->
+          <tr>
+            <td>
+              <table class="summary-box keep-together hint" width="100%" cellpadding="12" cellspacing="0" border="0">
+                <tr>
+                  <td width="70%" align="right" style="font-weight:bold;padding:10px 12px;">
+                    الإجمالي غير شامل ضريبة القيمة المضافة
+                  </td>
+                  <td width="30%" align="left" dir="ltr" style="padding:10px 12px;">
+                    15,520.00
+                    <svg width="11" height="12" viewBox="0 0 11 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M10.6242 9.25373C10.8205 8.79435 10.9503 8.29561 11 7.7727L7.76421 8.49922V7.10259L10.6241 6.46098C10.8204 6.0016 10.9502 5.50286 10.9999 4.97995L7.76411 5.70585V0.683132C7.26829 0.977024 6.82796 1.36823 6.47001 1.82967V5.99633L5.17591 6.28671V0C4.68009 0.293789 4.23976 0.685094 3.88181 1.14654V6.57699L0.986256 7.22655C0.789964 7.68593 0.660114 8.18467 0.610307 8.70758L3.88181 7.97362V9.73243L0.375754 10.519C0.179462 10.9784 0.0497091 11.4771 0 12L3.66986 11.1767C3.96861 11.1111 4.22537 10.9246 4.39231 10.668L5.06534 9.61467V9.61446C5.13521 9.50548 5.17591 9.37408 5.17591 9.23256V7.68324L6.47001 7.39286V10.1861L10.6241 9.25353L10.6242 9.25373Z" fill="#868DA6" />
+                    </svg>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="right" style="font-weight:bold;padding:10px 12px;">ضريبة القيمة المضافة</td>
+                  <td align="left" dir="ltr" style="padding:10px 12px;">
+                    230.00
+                    <svg width="11" height="12" viewBox="0 0 11 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M10.6242 9.25373C10.8205 8.79435 10.9503 8.29561 11 7.7727L7.76421 8.49922V7.10259L10.6241 6.46098C10.8204 6.0016 10.9502 5.50286 10.9999 4.97995L7.76411 5.70585V0.683132C7.26829 0.977024 6.82796 1.36823 6.47001 1.82967V5.99633L5.17591 6.28671V0C4.68009 0.293789 4.23976 0.685094 3.88181 1.14654V6.57699L0.986256 7.22655C0.789964 7.68593 0.660114 8.18467 0.610307 8.70758L3.88181 7.97362V9.73243L0.375754 10.519C0.179462 10.9784 0.0497091 11.4771 0 12L3.66986 11.1767C3.96861 11.1111 4.22537 10.9246 4.39231 10.668L5.06534 9.61467V9.61446C5.13521 9.50548 5.17591 9.37408 5.17591 9.23256V7.68324L6.47001 7.39286V10.1861L10.6241 9.25353L10.6242 9.25373Z" fill="#868DA6" />
+                    </svg>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td class="spacer-cell-sm"></td>
+          </tr>
+          <tr>
+            <td>
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" class="keep-together hint" role="presentation">
+                <tr>
+                  <td width="58%" valign="middle" style="padding:0;">
+                    <table class="grand-total-bar" width="100%" cellpadding="14" cellspacing="0" border="0">
+                      <tr>
+                        <td width="34%" valign="middle" align="right" style="font-weight:bold;font-size:13pt;">
+                          الإجمالي الكلي
+                        </td>
+                        <td width="32%" valign="middle" dir="ltr" align="center" style="font-weight:bold;font-size:13pt;">
+                          <svg width="13" height="14" viewBox="0 0 13 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12.5559 10.6949C12.7879 10.164 12.9413 9.58759 13 8.98324L9.17589 9.82291V8.20876L12.5558 7.46723C12.7878 6.9363 12.9411 6.35989 12.9999 5.75554L9.17577 6.59449V0.789524C8.5898 1.12919 8.0694 1.58132 7.64638 2.11463V6.93021L6.11699 7.26582V0C5.53102 0.339544 5.01062 0.791792 4.5876 1.32511V7.6013L1.16558 8.35202C0.933594 8.88295 0.780134 9.45936 0.721271 10.0637L4.5876 9.21545V11.2482L0.444073 12.1572C0.212091 12.6881 0.0587471 13.2646 0 13.8689L4.33711 12.9174C4.69017 12.8416 4.99362 12.6261 5.19091 12.3295L5.98631 11.1121V11.1118C6.06888 10.9859 6.11699 10.834 6.11699 10.6705V8.87985L7.64638 8.54424V11.7725L12.5558 10.6947L12.5559 10.6949Z" fill="white" />
+                          </svg>
+                          15,750.00
+                        </td>
+                        <td width="34%" valign="middle" align="center" class="grand-total-words">
+                          ثلاثة آلاف وعشرون
+                          <svg width="13" height="14" viewBox="0 0 13 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12.5559 10.6949C12.7879 10.164 12.9413 9.58759 13 8.98324L9.17589 9.82291V8.20876L12.5558 7.46723C12.7878 6.9363 12.9411 6.35989 12.9999 5.75554L9.17577 6.59449V0.789524C8.5898 1.12919 8.0694 1.58132 7.64638 2.11463V6.93021L6.11699 7.26582V0C5.53102 0.339544 5.01062 0.791792 4.5876 1.32511V7.6013L1.16558 8.35202C0.933594 8.88295 0.780134 9.45936 0.721271 10.0637L4.5876 9.21545V11.2482L0.444073 12.1572C0.212091 12.6881 0.0587471 13.2646 0 13.8689L4.33711 12.9174C4.69017 12.8416 4.99362 12.6261 5.19091 12.3295L5.98631 11.1121V11.1118C6.06888 10.9859 6.11699 10.834 6.11699 10.6705V8.87985L7.64638 8.54424V11.7725L12.5558 10.6947L12.5559 10.6949Z" fill="white" />
+                          </svg>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                  <td width="42%" valign="middle" class="hope-aside" style="padding:8px 14px 8px 0;font-weight:bold;">
+                    آملين أن ينال عرض سعرنا قبولكم واستحسانكم، وللمزيد من الاستفسار نحن تحت الخدمة.
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td class="spacer-cell"></td>
+          </tr>
+          <tr>
+            <td>
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation">
+                <tr>
+                  <td class="notes-title" align="right" style="padding-bottom:8px;">
+                    ملاحظات هامة :
+                  </td>
+                </tr>
+                <tr>
+                  <td align="right" style="line-height:1.75;padding-right:4px;font-size:10.5pt;color:#374151;">
+                    • الأسعار أعلاه تشمل ضريبة القيمة المضافة .<br />
+                    • صلاحية عرض السعر <span class="accent-text">10 أيام</span> .<br />
+                    • يتم رفع مستخلص <span class="accent-text">10 أيام</span> على أن يتم سدادها بعد <span class="accent-text">14 أيام</span> .<br />
+                    • يتم بدء العمل فور الموافقة على عرض السعر وتحويله الى طلبية مشتريات وتعميدها ورفعها على النظام .
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td class="spacer-cell"></td>
+          </tr>
+          <tr>
+            <td align="center" style="line-height:1.85;font-size:14pt;" class="keep-together hint closing-line">
+              وتفضلوا بقبول فائق الاحترام والتحية
+            </td>
+          </tr>
+          <tr>
+            <td class="spacer-cell"></td>
+          </tr>
+          <tr>
+            <td align="right">
+              <table cellpadding="0" cellspacing="0" border="0" role="presentation" align="right">
+                <tr>
+                  <td valign="middle" align="right" style="padding:4px 0;line-height:1.55;">
+                    <span style="display:block;color:#5D6481;font-size:11pt;">ادارة المبيعات</span>
+                    <span style="display:block;color:#1849A9;font-weight:bold;font-size:11pt;padding-top:4px;">منصة قلاب</span>
+                  </td>
+                  <td valign="middle" style="padding-right:14px;">
+                    <img src="../../assets/logo-black.svg" width="72" height="90" alt="قلاب" />
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td class="spacer-cell"></td>
+          </tr>
+          <tr class="footer-line">
+            <td style="height:4px;font-size:0;line-height:0;">&nbsp;</td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
 </body>
 </html>
