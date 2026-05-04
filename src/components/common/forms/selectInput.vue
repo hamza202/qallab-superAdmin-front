@@ -218,7 +218,7 @@ const setupIntersectionObserver = () => {
     }
 };
 
-const customFilter = (itemTitle: string, queryText: string, item: any) => {
+const customFilter = (itemTitle: string, queryText: string) => {
     if (!props.serverSide) {
         return itemTitle.toLowerCase().includes(queryText.toLowerCase());
     }
@@ -326,8 +326,8 @@ watch(() => displayItems.value.length, async () => {
                     </v-list-item-title>
                 </v-list-item>
             </template>
-            <template #selection="{ index }">
-                <div v-if="checkMode && multiple && index === 0" class="selected-chips-container">
+            <template v-if="checkMode && multiple" #selection="{ index }">
+                <div v-if="index === 0" class="selected-chips-container">
                     <div
                         v-for="selectedValue in (Array.isArray(modelValue) ? modelValue : [])"
                         :key="selectedValue"
