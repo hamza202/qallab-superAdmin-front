@@ -99,7 +99,7 @@
           "day": "يوم",
           "vehicleCount": "{count} مركبة",
           "select": "اختر",
-          "dateHint": "التاريخ المعتمد بعد تعميد امر الشراء",
+          "dateHint": "التاريخ يعتمد بعد تعميد أمر الشراء",
           "warnings": {
             "selectSupplierFirst": "يجب عليك اختيار اسم المورد أولاً",
             "atLeastOneProduct": "يجب إضافة منتج واحد على الأقل",

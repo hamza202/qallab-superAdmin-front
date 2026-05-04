@@ -237,6 +237,10 @@
       "messageSingle": "هل أنت متأكد من حذف هذا العرض؟",
       "messageBulk": "هل أنت متأكد من حذف {count} عرض؟"
     },
+    "print": {
+      "pageTitle": "طباعة عرض السعر",
+      "loadFailed": "تعذر تحميل بيانات عرض السعر للطباعة"
+    },
     "messages": {
       "loadListError": "فشل تحميل قائمة عروض السعر",
       "columnsUpdateError": "فشل تحديث الأعمدة",
@@ -266,6 +270,10 @@
       "titleBulk": "حذف عروض السعر",
       "messageSingle": "هل أنت متأكد من حذف هذا العرض؟",
       "messageBulk": "هل أنت متأكد من حذف {count} عرض؟"
+    },
+    "print": {
+      "pageTitle": "طباعة عرض السعر",
+      "loadFailed": "تعذر تحميل بيانات عرض السعر للطباعة"
     },
     "messages": {
       "loadListError": "فشل تحميل قائمة عروض السعر",
@@ -719,7 +727,7 @@
         "transportCompanyName": "اسم شركة النقل",
         "orderCreatedDate": "تاريخ انشاء الطلبية",
         "requestStatus": "حالة الطلب",
-        "dateHint": "التاريخ المعتمد بعد تعميد أمر الشراء",
+        "dateHint": "التاريخ يعتمد بعد تعميد أمر الشراء",
         "tripTransportCount": "عدد النقلات"
       },
       "validation": {

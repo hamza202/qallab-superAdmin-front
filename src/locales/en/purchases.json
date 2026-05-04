@@ -99,7 +99,7 @@
           "day": "Day",
           "vehicleCount": "{count} Vehicles",
           "select": "Select",
-          "dateHint": "The approved date after purchase order confirmation",
+          "dateHint": "The date will be determined after the purchase order is approved",
           "warnings": {
             "selectSupplierFirst": "You must select a supplier name first",
             "atLeastOneProduct": "At least one product must be added",

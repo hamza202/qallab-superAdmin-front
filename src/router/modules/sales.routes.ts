@@ -407,6 +407,14 @@ export const salesRoutes: RouteRecordRaw[] = [
           title: "pages.SalesQuotationsFuels.title",
         },
       },
+      {
+        path: "print/:id",
+        name: "SalesQuotationsFuelsPrint",
+        component: () => import("@/views/sales/quotations/fuels/Print.vue"),
+        meta: {
+          title: "sales.quotationsFuels.print.pageTitle",
+        },
+      },
     ],
   },
   {
@@ -746,6 +754,14 @@ export const salesRoutes: RouteRecordRaw[] = [
         component: () => import("@/views/sales/quotations/logistics/View.vue"),
         meta: {
           title: "pages.SalesQuotationsLogistics.title",
+        },
+      },
+      {
+        path: "print/:id",
+        name: "SalesQuotationsLogisticsPrint",
+        component: () => import("@/views/sales/quotations/logistics/Print.vue"),
+        meta: {
+          title: "sales.quotationsLogistics.print.pageTitle",
         },
       },
     ],

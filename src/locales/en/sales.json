@@ -237,6 +237,10 @@
       "messageSingle": "Are you sure you want to delete this quotation?",
       "messageBulk": "Are you sure you want to delete {count} quotations?"
     },
+    "print": {
+      "pageTitle": "Print quotation",
+      "loadFailed": "Could not load quotation for printing"
+    },
     "messages": {
       "loadListError": "Failed to load quotations list",
       "columnsUpdateError": "Failed to update columns",
@@ -266,6 +270,10 @@
       "titleBulk": "Delete Quotations",
       "messageSingle": "Are you sure you want to delete this quotation?",
       "messageBulk": "Are you sure you want to delete {count} quotations?"
+    },
+    "print": {
+      "pageTitle": "Print quotation",
+      "loadFailed": "Could not load quotation for printing"
     },
     "messages": {
       "loadListError": "Failed to load quotations list",
@@ -719,7 +727,7 @@
         "transportCompanyName": "Transport Company Name",
         "orderCreatedDate": "Order Creation Date",
         "requestStatus": "Request Status",
-        "dateHint": "The approved date after purchase order confirmation",
+        "dateHint": "The date will be determined after the purchase order is approved",
         "tripTransportCount": "Number of Transports"
       },
       "validation": {
