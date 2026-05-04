@@ -7,8 +7,8 @@ import { useNotification } from '@/composables/useNotification';
 import { useTableColumns } from '@/composables/useTableColumns';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog.vue';
 import DatePickerInput from '@/components/common/forms/DatePickerInput.vue';
-import { GridIcon, trash_1_icon, trash_2_icon, importIcon, columnIcon, exportIcon, plusIcon, searchIcon, linkIcon } from '@/components/icons/globalIcons';
-import { switchHorisinralIcon } from '@/components/icons/priceOffersIcons';
+import { GridIcon, trash_1_icon, trash_2_icon, importIcon, columnIcon, exportIcon, plusIcon, searchIcon, linkIcon, printerIcon } from '@/components/icons/globalIcons';
+import { switchHorisinralIcon, downloadIcon } from '@/components/icons/priceOffersIcons';
 import StatusChangeFeature from '@/components/common/StatusChangeFeature.vue';
 
 const { t } = useI18n();
@@ -33,6 +33,8 @@ interface ItemActions {
   can_delete: boolean;
   can_change_status: boolean;
   can_link: boolean;
+  can_details_pdf?: boolean;
+  can_download_pdf?: boolean;
 }
 
 interface BuildingMaterialRequest {
@@ -66,6 +68,15 @@ interface ListResponse {
   headers: TableHeader[];
   shownHeaders: TableHeader[];
   actions: { can_create: boolean; can_bulk_delete: boolean };
+}
+
+interface OrderPdfMetaResponse {
+  data?: {
+    url?: string;
+    pdf_path?: string;
+    pdf_generated_at?: string;
+  };
+  message?: string;
 }
 
 // API state
@@ -322,6 +333,79 @@ const confirmBulkDelete = async () => {
   }
 };
 
+const downloadingPdfUuid = ref<string | null>(null);
+
+const triggerPdfDownloadFromSignedUrl = async (signedUrl: string, filename: string) => {
+  try {
+    const res = await fetch(signedUrl, { mode: 'cors', credentials: 'omit' });
+    if (!res.ok) throw new Error('bad status');
+    const blob = await res.blob();
+    const objectUrl = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = objectUrl;
+    a.download = filename;
+    a.rel = 'noopener noreferrer';
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(objectUrl);
+  } catch {
+    window.open(signedUrl, '_blank', 'noopener,noreferrer');
+  }
+};
+
+const handlePrint = (item: { id?: string | number; uuid?: string }) => {
+  const uuid = item.uuid ?? String(item.id);
+  const routeData = router.resolve({ name: 'OrdersFuelsPrint', params: { id: uuid } });
+  const printUrl = routeData.href.startsWith('/') ? `${window.location.origin}${routeData.href}` : routeData.href;
+
+  const iframe = document.createElement('iframe');
+  iframe.style.cssText =
+    'position:fixed;top:0;left:-9999px;width:210mm;height:297mm;border:none;opacity:0;pointer-events:none;';
+  document.body.appendChild(iframe);
+
+  const onMessage = (e: MessageEvent) => {
+    if (
+      e.data?.type === 'order-fuels-print-ready' &&
+      e.source === iframe.contentWindow &&
+      iframe.contentWindow
+    ) {
+      window.removeEventListener('message', onMessage);
+      iframe.contentWindow.print();
+      setTimeout(() => {
+        if (iframe.parentNode) document.body.removeChild(iframe);
+      }, 1000);
+    }
+  };
+  window.addEventListener('message', onMessage);
+  iframe.src = printUrl;
+};
+
+const handleDownloadPdf = async (item: { id?: string | number; uuid?: string }) => {
+  const uuid = String(item.uuid ?? item.id ?? '');
+  if (!uuid) return;
+  downloadingPdfUuid.value = uuid;
+  try {
+    const body = (await api.get(
+      `/purchases/orders/fuels/${uuid}/pdf`
+    )) as OrderPdfMetaResponse;
+    const signedUrl = body?.data?.url;
+    if (!signedUrl) {
+      error(t('purchases.shared.messages.pdfDownloadNoUrl'));
+      return;
+    }
+    const pathName = body.data?.pdf_path?.split('/').pop();
+    const filename = pathName && pathName.endsWith('.pdf') ? pathName : `purchase-order-fuels-${uuid}.pdf`;
+    await triggerPdfDownloadFromSignedUrl(signedUrl, filename);
+  } catch (err: any) {
+    console.error('Error downloading purchase order PDF:', err);
+    error(err?.response?.data?.message || t('purchases.shared.messages.pdfDownloadError'));
+  } finally {
+    downloadingPdfUuid.value = null;
+  }
+};
+
 onMounted(() => {
   fetchList();
 });
@@ -541,7 +625,20 @@ onMounted(() => {
             </span>
           </template>
           <template #item.actions="{ item }">
-            <div class="flex items-center">
+            <div class="flex items-center gap-1">
+              <v-btn
+                v-if="item.actions?.can_details_pdf"
+                icon variant="text" color="success-700" size="x-small"
+                @click="handlePrint(item)">
+                <span class="w-5" v-html="printerIcon"></span>
+              </v-btn>
+              <v-btn
+                v-if="item.actions?.can_download_pdf"
+                icon variant="text" color="success-700" size="x-small"
+                :loading="downloadingPdfUuid === (item.uuid ?? item.id)"
+                @click="handleDownloadPdf(item)">
+                <span class="w-5" v-html="downloadIcon"></span>
+              </v-btn>
               <v-btn
                 v-if="item.actions?.can_change_status"
                 icon
