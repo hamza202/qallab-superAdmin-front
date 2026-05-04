@@ -155,6 +155,15 @@ export const salesRoutes: RouteRecordRaw[] = [
           title: "pages.PriceOfferMaterialProduct.view",
         },
       },
+      {
+        path: "print/:id",
+        name: "PriceOfferMaterialProductPrint",
+        component: () =>
+          import("@/views/sales/quotations/material-product/Print.vue"),
+        meta: {
+          title: "sales.quotationsMaterialProduct.print.pageTitle",
+        },
+      },
     ],
   },
   {
