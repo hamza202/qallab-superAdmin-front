@@ -243,7 +243,9 @@
       "deleteSuccess": "تم حذف عرض السعر بنجاح",
       "deleteError": "فشل حذف عرض السعر",
       "bulkDeleteSuccess": "تم حذف {count} عرض بنجاح",
-      "bulkDeleteError": "فشل الحذف الجماعي"
+      "bulkDeleteError": "فشل الحذف الجماعي",
+      "pdfDownloadError": "تعذر تنزيل ملف PDF",
+      "pdfDownloadNoUrl": "لم يُرجع رابط تنزيل لهذا العرض"
     }
   },
   "quotationsLogistics": {
@@ -271,7 +273,9 @@
       "deleteSuccess": "تم حذف عرض السعر بنجاح",
       "deleteError": "فشل حذف عرض السعر",
       "bulkDeleteSuccess": "تم حذف {count} عرض بنجاح",
-      "bulkDeleteError": "فشل الحذف الجماعي"
+      "bulkDeleteError": "فشل الحذف الجماعي",
+      "pdfDownloadError": "تعذر تنزيل ملف PDF",
+      "pdfDownloadNoUrl": "لم يُرجع رابط تنزيل لهذا العرض"
     }
   },
   "quotationsMaterialProduct": {
@@ -291,13 +295,19 @@
       "title": "حذف عروض السعر",
       "message": "هل أنت متأكد من حذف {count} عرض؟"
     },
+    "print": {
+      "pageTitle": "طباعة عرض السعر",
+      "loadFailed": "تعذر تحميل بيانات عرض السعر للطباعة"
+    },
     "messages": {
       "loadListError": "فشل تحميل قائمة عروض السعر",
       "columnsUpdateError": "فشل تحديث الأعمدة",
       "deleteSuccess": "تم حذف عرض السعر بنجاح",
       "deleteError": "فشل حذف عرض السعر",
       "bulkDeleteSuccess": "تم حذف {count} عرض بنجاح",
-      "bulkDeleteError": "فشل الحذف الجماعي"
+      "bulkDeleteError": "فشل الحذف الجماعي",
+      "pdfDownloadError": "تعذر تنزيل ملف PDF",
+      "pdfDownloadNoUrl": "لم يُرجع رابط تنزيل لهذا العرض"
     }
   },
   "requestsFuels": {
