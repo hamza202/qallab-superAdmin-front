@@ -207,6 +207,15 @@ export const salesRoutes: RouteRecordRaw[] = [
           title: "pages.SalesRequests.view",
         },
       },
+      {
+        path: "print/:id",
+        name: "SalesOrdersMaterialProductPrint",
+        component: () =>
+          import("@/views/sales/orders/material-product/Print.vue"),
+        meta: {
+          title: "pages.SalesOrdersMaterialProduct.print",
+        },
+      },
     ],
   },
   // Sales Orders Fuels
@@ -247,6 +256,14 @@ export const salesRoutes: RouteRecordRaw[] = [
           title: "pages.SalesOrdersFuels.view",
         },
       },
+      {
+        path: "print/:id",
+        name: "SalesOrdersFuelsPrint",
+        component: () => import("@/views/sales/orders/fuels/Print.vue"),
+        meta: {
+          title: "pages.SalesOrdersFuels.print",
+        },
+      },
     ],
   },
   // Sales Orders Logistics (طلبيات خدمة نقل)
@@ -285,6 +302,14 @@ export const salesRoutes: RouteRecordRaw[] = [
         component: () => import("@/views/sales/orders/logistics/View.vue"),
         meta: {
           title: "pages.SalesOrdersLogistics.view",
+        },
+      },
+      {
+        path: "print/:id",
+        name: "SalesOrdersLogisticsPrint",
+        component: () => import("@/views/sales/orders/logistics/Print.vue"),
+        meta: {
+          title: "pages.SalesOrdersLogistics.print",
         },
       },
     ],

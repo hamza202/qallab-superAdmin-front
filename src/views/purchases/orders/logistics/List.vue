@@ -321,24 +321,15 @@ const openChangeStatusDialog = (item: OrderItem | Record<string, unknown>) => {
 
 const downloadingPdfUuid = ref<string | null>(null);
 
-const triggerPdfDownloadFromSignedUrl = async (signedUrl: string, filename: string) => {
-  try {
-    const res = await fetch(signedUrl, { mode: 'cors', credentials: 'omit' });
-    if (!res.ok) throw new Error('bad status');
-    const blob = await res.blob();
-    const objectUrl = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = objectUrl;
-    a.download = filename;
-    a.rel = 'noopener noreferrer';
-    a.style.display = 'none';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(objectUrl);
-  } catch {
-    window.open(signedUrl, '_blank', 'noopener,noreferrer');
-  }
+const triggerPdfDownloadFromSignedUrl = (signedUrl: string, filename: string): void => {
+  const anchor = document.createElement('a');
+  anchor.href = signedUrl;
+  anchor.download = filename;
+  anchor.target = '_blank';
+  anchor.rel = 'noopener noreferrer';
+  document.body.appendChild(anchor);
+  anchor.click();
+  document.body.removeChild(anchor);
 };
 
 const handlePrint = (item: { id?: string | number; uuid?: string }) => {
@@ -383,7 +374,7 @@ const handleDownloadPdf = async (item: { id?: string | number; uuid?: string }) 
     }
     const pathName = body.data?.pdf_path?.split('/').pop();
     const filename = pathName && pathName.endsWith('.pdf') ? pathName : `purchase-order-logistics-${uuid}.pdf`;
-    await triggerPdfDownloadFromSignedUrl(signedUrl, filename);
+    triggerPdfDownloadFromSignedUrl(signedUrl, filename);
   } catch (err: any) {
     console.error('Error downloading purchase order PDF:', err);
     error(err?.response?.data?.message || t('purchases.shared.messages.pdfDownloadError'));

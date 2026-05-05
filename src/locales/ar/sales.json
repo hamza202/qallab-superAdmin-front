@@ -1,4 +1,10 @@
 {
+  "shared": {
+    "print": {
+      "printButton": "طباعة",
+      "loadFailed": "تعذر تحميل البيانات للطباعة"
+    }
+  },
   "deliveryDocs": {
     "list": {
       "title": "جدول وثائق التسليم",
@@ -126,13 +132,19 @@
       "messageSingle": "هل أنت متأكد من حذف هذا الطلب؟",
       "messageBulk": "هل أنت متأكد من حذف {count} طلب؟"
     },
+    "print": {
+      "pageTitle": "طباعة طلبية المبيعات",
+      "loadFailed": "تعذر تحميل بيانات طلبية المبيعات للطباعة"
+    },
     "messages": {
       "loadListError": "فشل تحميل قائمة الطلبات",
       "columnsUpdateError": "فشل تحديث الأعمدة",
       "deleteSuccess": "تم حذف الطلب بنجاح",
       "deleteError": "فشل حذف الطلب",
       "bulkDeleteSuccess": "تم حذف {count} طلب بنجاح",
-      "bulkDeleteError": "فشل الحذف الجماعي"
+      "bulkDeleteError": "فشل الحذف الجماعي",
+      "pdfDownloadError": "تعذر تنزيل ملف PDF",
+      "pdfDownloadNoUrl": "لم يُرجع رابط تنزيل لهذه الطلبية"
     }
   },
   "ordersLogistics": {
@@ -154,13 +166,19 @@
       "messageSingle": "هل أنت متأكد من حذف هذه الطلبية؟",
       "messageBulk": "هل أنت متأكد من حذف {count} طلبية؟"
     },
+    "print": {
+      "pageTitle": "طباعة طلبية المبيعات",
+      "loadFailed": "تعذر تحميل بيانات طلبية المبيعات للطباعة"
+    },
     "messages": {
       "loadListError": "فشل تحميل قائمة الطلبيات",
       "columnsUpdateError": "فشل تحديث الأعمدة",
       "deleteSuccess": "تم حذف الطلبية بنجاح",
       "deleteError": "فشل حذف الطلبية",
       "bulkDeleteSuccess": "تم حذف {count} طلبية بنجاح",
-      "bulkDeleteError": "فشل الحذف الجماعي"
+      "bulkDeleteError": "فشل الحذف الجماعي",
+      "pdfDownloadError": "تعذر تنزيل ملف PDF",
+      "pdfDownloadNoUrl": "لم يُرجع رابط تنزيل لهذه الطلبية"
     }
   },
   "ordersMaterialProduct": {
@@ -182,13 +200,19 @@
       "messageSingle": "هل أنت متأكد من حذف هذه الطلبية؟",
       "messageBulk": "هل أنت متأكد من حذف {count} طلبية؟"
     },
+    "print": {
+      "pageTitle": "طباعة طلبية المبيعات",
+      "loadFailed": "تعذر تحميل بيانات طلبية المبيعات للطباعة"
+    },
     "messages": {
       "loadListError": "فشل تحميل قائمة الطلبيات",
       "columnsUpdateError": "فشل تحديث الأعمدة",
       "deleteSuccess": "تم حذف الطلبية بنجاح",
       "deleteError": "فشل حذف الطلبية",
       "bulkDeleteSuccess": "تم حذف {count} طلبية بنجاح",
-      "bulkDeleteError": "فشل الحذف الجماعي"
+      "bulkDeleteError": "فشل الحذف الجماعي",
+      "pdfDownloadError": "تعذر تنزيل ملف PDF",
+      "pdfDownloadNoUrl": "لم يُرجع رابط تنزيل لهذه الطلبية"
     }
   },
   "payments": {
