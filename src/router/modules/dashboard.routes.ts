@@ -6,4 +6,9 @@ export const dashboardRoutes: RouteRecordRaw[] = [
     name: 'Dashboard',
     component: () => import('@/views/Dashboard.vue'),
   },
+  {
+    path: '/notifications',
+    name: 'Notifications',
+    component: () => import('@/views/notifications/NotificationsPage.vue'),
+  },
 ]

@@ -1,0 +1,17 @@
+{
+  "title": "الأشعارات",
+  "popupSubtitle": "جميع الأشعارات الخاصة بك في قلاب",
+  "newCount": "لديك {count} اشعار جديد ..",
+  "tabAll": "الجميع",
+  "tabUnread": "غير مقروء",
+  "markAllRead": "تعيين الكل كمقروء",
+  "deleteAll": "حذف الكل",
+  "sectionToday": "اليوم",
+  "sectionPrevious": "السابق",
+  "viewAll": "عرض الكل",
+  "empty": "لا توجد إشعارات",
+  "time": {
+    "today": "اليوم {time}",
+    "yesterday": "الأمس {time}"
+  }
+}

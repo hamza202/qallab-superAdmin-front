@@ -37,7 +37,15 @@
             </template>
           </v-list-item>
 
-          <!-- المنتجات -->
+          <v-list-item to="/notifications" value="notifications" :class="{ '!mx-1 gap-5': !isSidebarExpanded }"
+            class="mx-4 px-2 py-1.5 !ps-[11px] rounded-lg text-white hover:bg-primary-700/40 transition flex items-center justify-start gap-2">
+            <template #title> {{ t('navigation.sidebar.main.notifications') }} </template>
+            <template #prepend>
+              <div class="bg-qallab-yellow text-white rounded-md w-6 h-6 flex items-center justify-center">
+                <v-icon size="18">mdi-bell-outline</v-icon>
+              </div>
+            </template>
+          </v-list-item>
           <v-list-group v-if="hasAnyProductPermission" value="products" class="mt-1">
             <template #activator="{ props, isOpen }">
               <v-list-item v-bind="props" :class="[
