@@ -156,7 +156,7 @@ const logoImg = toDataUri(logoSvgRaw)
 const logoBlackImg = toDataUri(logoBlackSvgRaw)
 
 /** API path segment for detail (GET /sales/quotations/{segment}/:id/detail). */
-const QUOTATION_DETAIL_SEGMENT = 'fuels'
+const QUOTATION_DETAIL_SEGMENT = 'building-materials'
 
 const route = useRoute()
 const api = useApi()
