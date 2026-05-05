@@ -36,6 +36,15 @@ const isLoading = ref(false);
 const isSubmitting = ref(false);
 const isFormDataLoaded = ref(false);
 const isFromQuotation = ref(false);
+const isInvoiceIntervalFromQuotation = ref(false);
+const isPaymentTermNoFromQuotation = ref(false);
+
+const disableInvoiceInterval = computed(
+  () => isFromQuotation.value && formData.value.invoice_interval != null,
+);
+const disablePaymentTermNo = computed(
+  () => isFromQuotation.value && formData.value.payment_term_no != null,
+);
 
 const paymentMethodItems = ref<any[]>([]);
 const transportTypeItems = ref<any[]>([]);
@@ -286,6 +295,8 @@ const fetchQuotationForOrder = async () => {
       formData.value.source_longitude = data.source_longitude ?? null;
       formData.value.invoice_interval = data.invoice_interval ?? null;
       formData.value.payment_term_no = data.payment_term_no ?? null;
+      isInvoiceIntervalFromQuotation.value = data.invoice_interval != null;
+      isPaymentTermNoFromQuotation.value = data.payment_term_no != null;
       formData.value.late_fee_type = data.late_fee_type || null;
       formData.value.late_fee = data.late_fee ?? null;
       formData.value.cancel_fee_type = data.cancel_fee_type || null;
@@ -1619,13 +1630,17 @@ onMounted(async () => {
                 :placeholder="t('purchases.shared.forms.common.placeholders.enterAdvanceAmount')" />
 
               <PriceInput :label="t('purchases.orders.shared.labels.invoiceUploadDuration')" v-model="formData.invoice_interval" :placeholder="t('purchases.orders.shared.placeholders.enterDurationDays')"
-                :rules="[numeric()]" density="comfortable">
+                :disabled="disableInvoiceInterval"
+                :rules="disableInvoiceInterval ? [numeric()] : [required(), numeric()]"
+                density="comfortable">
                 <template #append-inner>
                   <span class="text-gray-500 text-sm"> {{ t('purchases.shared.forms.common.day') }} </span>
                 </template>
               </PriceInput>
               <PriceInput :label="t('purchases.orders.shared.labels.paymentDuration')" v-model="formData.payment_term_no" :placeholder="t('purchases.orders.shared.placeholders.enterDurationDays')"
-                :rules="[numeric()]" density="comfortable">
+                :disabled="disablePaymentTermNo"
+                :rules="disablePaymentTermNo ? [numeric()] : [required(), numeric()]"
+                density="comfortable">
                 <template #append-inner>
                   <span class="text-gray-500 text-sm"> {{ t('purchases.shared.forms.common.day') }} </span>
                 </template>

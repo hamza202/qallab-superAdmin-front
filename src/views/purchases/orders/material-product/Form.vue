@@ -42,6 +42,8 @@ const fromQuotationCode = computed(() => route.query.quotation_code as string | 
 const purchaseQuotationId = computed(() => route.query.purchase_quotation_id as string | undefined);
 // Track if data is loaded from quotation (to disable supplier select)
 const isFromQuotation = ref(false);
+const isInvoiceIntervalFromQuotation = ref(false);
+const isPaymentTermNoFromQuotation = ref(false);
 const isLoading = ref(false);
 const isSubmitting = ref(false);
 const isFormDataLoaded = ref(false);
@@ -402,6 +404,8 @@ const fetchQuotationForOrder = async () => {
       formData.value.advancePayment = data.upfront_payment || null;
       formData.value.invoice_interval = data.invoice_interval != null ? Number(data.invoice_interval) : null;
       formData.value.payment_term_no = data.payment_term_no != null ? Number(data.payment_term_no) : null;
+      isInvoiceIntervalFromQuotation.value = data.invoice_interval != null;
+      isPaymentTermNoFromQuotation.value = data.payment_term_no != null;
       formData.value.late_fee_type = data.late_fee_type || null;
       formData.value.late_fee = data.late_fee != null ? Number(data.late_fee) : null;
       formData.value.cancel_fee_type = data.cancel_fee_type || null;
@@ -1009,6 +1013,9 @@ const resetForm = () => {
   editingProduct.value = null;
   showAddProductDialog.value = false;
   showAddSupplyDialog.value = false;
+  isFromQuotation.value = false;
+  isInvoiceIntervalFromQuotation.value = false;
+  isPaymentTermNoFromQuotation.value = false;
 };
 
 /** options.redirectToList: بعد النجاح الانتقال لصفحة القائمة؛ وإلا (حفظ وإنشاء جديد) إعادة تعيين النموذج ثم التوجيه لصفحة الإنشاء */
@@ -1556,14 +1563,18 @@ const serviceTableItems = computed(() =>
               <TextInput :label="t('purchases.orders.shared.labels.invoiceUploadDuration')"
                 v-model="formData.invoice_interval"
                 :placeholder="t('purchases.orders.shared.placeholders.enterDurationDays')"
-                :rules="[required(), numeric()]" density="comfortable">
+                :disabled="isInvoiceIntervalFromQuotation"
+                :rules="[numeric()]"
+                density="comfortable">
                 <template #append-inner>
                   <span class="text-gray-500 text-sm"> {{ t('purchases.shared.forms.common.day') }} </span>
                 </template>
               </TextInput>
               <TextInput :label="t('purchases.orders.shared.labels.paymentDuration')" v-model="formData.payment_term_no"
                 :placeholder="t('purchases.orders.shared.placeholders.enterDurationDays')"
-                :rules="[required(), numeric()]" density="comfortable">
+                :disabled="isPaymentTermNoFromQuotation"
+                :rules="[numeric()]"
+                density="comfortable">
                 <template #append-inner>
                   <span class="text-gray-500 text-sm"> {{ t('purchases.shared.forms.common.day') }} </span>
                 </template>
