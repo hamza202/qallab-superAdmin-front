@@ -7,6 +7,7 @@ import DefaultLayout from "@/layouts/DefaultLayout.vue";
 import { useLocaleStore } from "@/stores/locale";
 import { useNotificationsStore, type AppNotification } from "@/stores/notifications";
 import { formatNotificationTimeLabel, isSameCalendarDay } from "@/utils/notificationDisplay";
+import { billIcon, checkSquareIcon, solidBillIcon, trash_1_icon, trash_2_icon } from "@/components/icons/globalIcons";
 
 const { t } = useI18n();
 const router = useRouter();
@@ -55,16 +56,16 @@ function actionLabelOf(n: AppNotification) {
 function timeLabel(iso: string) {
   return formatNotificationTimeLabel(
     iso,
-    locale.value,
+    "en",
     (time) => t("notifications.time.today", { time }),
     (time) => t("notifications.time.yesterday", { time }),
   );
 }
 
 function iconWrapClass(v: AppNotification["variant"]) {
-  if (v === "warning") return "bg-amber-100 text-amber-700";
-  if (v === "info") return "bg-blue-100 text-blue-700";
-  return "bg-gray-100 text-gray-600";
+  if (v === "warning") return "bg-warning-300";
+  if (v === "info") return "bg-blue-600";
+  return "bg-gray-500";
 }
 
 function setFilter(tab: "all" | "unread") {
@@ -85,102 +86,60 @@ function onActionClick(e: Event, n: AppNotification) {
 
 <template>
   <default-layout>
-    <div class="space-y-6 -mx-2">
-      <div
-        class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between"
-      >
-        <div class="flex items-center gap-3">
-          <div
-            class="w-11 h-11 rounded-full bg-primary-100 flex items-center justify-center text-primary-600"
-          >
-            <v-icon size="26">mdi-bell-outline</v-icon>
-          </div>
-          <div>
-            <h1 class="text-xl font-bold text-primary-600 m-0">
-              {{ t("notifications.title") }}
-            </h1>
-            <p class="text-sm text-primary-600 m-0 mt-0.5 font-medium">
-              {{ t("notifications.newCount", { count: unreadCount }) }}
-            </p>
-          </div>
-        </div>
-
-        <div class="flex flex-wrap items-center gap-3">
-          <div class="flex gap-2">
-            <v-btn
-              rounded="lg"
-              variant="flat"
-              size="small"
-              class="text-none font-semibold px-5"
-              :class="
-                filterTab === 'all' ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-700'
-              "
-              @click="setFilter('all')"
-            >
-              {{ t("notifications.tabAll") }}
-            </v-btn>
-            <v-btn
-              rounded="lg"
-              variant="flat"
-              size="small"
-              class="text-none font-semibold px-5"
-              :class="
-                filterTab === 'unread'
-                  ? 'bg-primary-600 text-white'
-                  : 'bg-gray-100 text-gray-700'
-              "
-              @click="setFilter('unread')"
-            >
-              {{ t("notifications.tabUnread") }}
-            </v-btn>
-          </div>
-          <ButtonWithIcon
-            color="success"
-            variant="flat"
-            class="!bg-emerald-50 !text-emerald-700 font-semibold"
-            height="40"
-            rounded="lg"
-            prepend-icon="mdi-check-circle-outline"
-            :label="t('notifications.markAllRead')"
-            @click="notificationsStore.markAllRead()"
-          />
-          <ButtonWithIcon
-            color="error"
-            variant="flat"
-            class="!bg-red-50 !text-red-600 font-semibold"
-            height="40"
-            rounded="lg"
-            prepend-icon="mdi-trash-can-outline"
-            :label="t('notifications.deleteAll')"
-            @click="notificationsStore.deleteAll()"
-          />
+    <div class="space-y-6 -mx-6">
+      <div class="flex items-center gap-3 text-primary-600 border-b !border-gray-200 pb-6 px-6">
+        <span v-html="billIcon"></span>
+        <div>
+          <h1 class="text-xl font-bold  m-0">
+            {{ t("notifications.title") }}
+          </h1>
         </div>
       </div>
 
-      <div v-if="sortedVisible.length === 0" class="text-center text-gray-500 py-16">
+      <div class="flex flex-wrap items-start gap-3 flex flex-col gap-4 lg:flex-row lg:justify-between px-6">
+        <div>
+          <div class="flex gap-2">
+            <v-btn variant="flat" height="42" 
+              class="text-[13px] font-bold !rounded border transition-colors border-primary-600 text-primary-600 bg-primary-50"
+              @click="setFilter('all')">
+              {{ t("notifications.tabAll") }}
+            </v-btn>
+            <v-btn variant="flat" height="42"  class="text-[13px] font-bold !rounded border transition-colors border-gray-400 !text-gray-400 bg-white"  @click="setFilter('unread')">
+              {{ t("notifications.tabUnread") }}
+            </v-btn>
+          </div>
+          <p class="text-sm text-primary-500 m-0 mt-2 font-bold">
+            {{ t("notifications.newCount", { count: unreadCount }) }}
+          </p>
+        </div>
+
+        <div class="flex gap-3">
+          <ButtonWithIcon color="success" variant="flat" class="!bg-emerald-100 !text-emerald-700 font-bold"
+            height="42" rounded="4" :prepend-icon="checkSquareIcon" :label="t('notifications.markAllRead')"
+            @click="notificationsStore.markAllRead()" />
+          <ButtonWithIcon color="error" variant="flat" class="!bg-red-100 !text-red-600 font-bold" height="42"
+            rounded="4" :prepend-icon="trash_2_icon" :label="t('notifications.deleteAll')"
+            @click="notificationsStore.deleteAll()" />
+        </div>
+      </div>
+
+
+      <div v-if="sortedVisible.length === 0" class="text-center text-gray-500 py-16 px-6">
         {{ t("notifications.empty") }}
       </div>
 
       <template v-else>
-        <section v-if="todayItems.length > 0" class="space-y-3">
-          <h2 class="text-base font-bold text-gray-800 m-0">
+        <section v-if="todayItems.length > 0" class="space-y-3 px-6">
+          <h2 class="text-base font-bold text-gray-500 m-0">
             {{ t("notifications.sectionToday") }}
           </h2>
           <div class="space-y-3">
-            <div
-              v-for="n in todayItems"
-              :key="n.id"
-              role="button"
-              tabindex="0"
+            <div v-for="n in todayItems" :key="n.id" role="button" tabindex="0"
               class="rounded-2xl border !border-gray-200 bg-white p-4 flex gap-4 items-start cursor-pointer hover:border-primary-200 transition-colors shadow-sm"
-              @click="onCardClick(n)"
-              @keydown.enter="onCardClick(n)"
-            >
-              <div
-                class="shrink-0 w-12 h-12 rounded-full flex items-center justify-center"
-                :class="iconWrapClass(n.variant)"
-              >
-                <v-icon size="22">mdi-bell-outline</v-icon>
+              @click="onCardClick(n)" @keydown.enter="onCardClick(n)">
+              <div class="shrink-0 w-[40px] h-[40px] rounded-lg flex items-center justify-center"
+                :class="iconWrapClass(n.variant)">
+                <span v-html="solidBillIcon"></span>
               </div>
               <div class="flex-1 min-w-0">
                 <p class="font-bold text-gray-900 m-0 leading-snug">
@@ -189,16 +148,8 @@ function onActionClick(e: Event, n: AppNotification) {
                 <p class="text-sm text-gray-500 mt-1 m-0">
                   {{ descriptionOf(n) }}
                 </p>
-                <v-btn
-                  v-if="n.action"
-                  variant="tonal"
-                  color="primary"
-                  size="small"
-                  class="text-none mt-3"
-                  prepend-icon="mdi-link-variant"
-                  rounded="lg"
-                  @click="onActionClick($event, n)"
-                >
+                <v-btn v-if="n.action" variant="tonal" color="primary"  class="text-none mt-3"
+                  prepend-icon="mdi-link-variant" rounded="4" @click="onActionClick($event, n)">
                   {{ actionLabelOf(n) }}
                 </v-btn>
               </div>
@@ -206,39 +157,26 @@ function onActionClick(e: Event, n: AppNotification) {
                 <span class="text-xs text-gray-400 whitespace-nowrap">{{
                   timeLabel(n.createdAt)
                 }}</span>
-                <v-btn
-                  icon
-                  variant="text"
-                  size="x-small"
-                  class="text-gray-400"
-                  @click.stop="notificationsStore.remove(n.id)"
-                >
-                  <v-icon size="20">mdi-trash-can-outline</v-icon>
+                <v-btn icon variant="text" size="x-small" class="text-gray-400"
+                  @click.stop="notificationsStore.remove(n.id)">
+                <span v-html="trash_2_icon"></span>
                 </v-btn>
               </div>
             </div>
           </div>
         </section>
 
-        <section v-if="previousItems.length > 0" class="space-y-3 pt-2">
-          <h2 class="text-base font-bold text-gray-800 m-0">
+        <section v-if="previousItems.length > 0" class="space-y-3 pt-2 px-6">
+          <h2 class="text-base font-bold text-gray-500 m-0">
             {{ t("notifications.sectionPrevious") }}
           </h2>
           <div class="space-y-3">
-            <div
-              v-for="n in previousItems"
-              :key="n.id"
-              role="button"
-              tabindex="0"
+            <div v-for="n in previousItems" :key="n.id" role="button" tabindex="0"
               class="rounded-2xl border !border-gray-200 bg-white p-4 flex gap-4 items-start cursor-pointer hover:border-primary-200 transition-colors shadow-sm"
-              @click="onCardClick(n)"
-              @keydown.enter="onCardClick(n)"
-            >
-              <div
-                class="shrink-0 w-12 h-12 rounded-full flex items-center justify-center"
-                :class="iconWrapClass(n.variant)"
-              >
-                <v-icon size="22">mdi-bell-outline</v-icon>
+              @click="onCardClick(n)" @keydown.enter="onCardClick(n)">
+              <div class="shrink-0 w-[40px] h-[40px] rounded-lg flex items-center justify-center"
+                :class="iconWrapClass(n.variant)">
+                <span v-html="solidBillIcon"></span>
               </div>
               <div class="flex-1 min-w-0">
                 <p class="font-bold text-gray-900 m-0 leading-snug">
@@ -247,16 +185,8 @@ function onActionClick(e: Event, n: AppNotification) {
                 <p class="text-sm text-gray-500 mt-1 m-0">
                   {{ descriptionOf(n) }}
                 </p>
-                <v-btn
-                  v-if="n.action"
-                  variant="tonal"
-                  color="primary"
-                  size="small"
-                  class="text-none mt-3"
-                  prepend-icon="mdi-link-variant"
-                  rounded="lg"
-                  @click="onActionClick($event, n)"
-                >
+                <v-btn v-if="n.action" variant="tonal" color="primary" class="text-none mt-3"
+                  prepend-icon="mdi-link-variant" rounded="4" @click="onActionClick($event, n)">
                   {{ actionLabelOf(n) }}
                 </v-btn>
               </div>
@@ -264,14 +194,9 @@ function onActionClick(e: Event, n: AppNotification) {
                 <span class="text-xs text-gray-400 whitespace-nowrap">{{
                   timeLabel(n.createdAt)
                 }}</span>
-                <v-btn
-                  icon
-                  variant="text"
-                  size="x-small"
-                  class="text-gray-400"
-                  @click.stop="notificationsStore.remove(n.id)"
-                >
-                  <v-icon size="20">mdi-trash-can-outline</v-icon>
+                <v-btn icon variant="text" size="x-small" class="text-gray-400"
+                  @click.stop="notificationsStore.remove(n.id)">
+                <span v-html="trash_2_icon"></span>
                 </v-btn>
               </div>
             </div>

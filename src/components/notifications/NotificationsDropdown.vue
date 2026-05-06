@@ -12,9 +12,10 @@ const triggerRef = ref<HTMLElement | null>(null);
 const panelRef = ref<HTMLElement | null>(null);
 const panelStyle = ref<Record<string, string>>({});
 
-const PANEL_MAX_W = 420;
+const PANEL_MAX_W = 520;
 const VIEWPORT_GUTTER = 16;
 const OFFSET_Y = 10;
+const MOBILE_BREAKPOINT = 768;
 
 let attachOutsideTimeout: ReturnType<typeof setTimeout> | null = null;
 let outsideAttached = false;
@@ -26,15 +27,22 @@ function updatePosition() {
   const rect = el.getBoundingClientRect();
   const vw = window.innerWidth;
   const vh = window.innerHeight;
-  const width = Math.min(PANEL_MAX_W, vw - VIEWPORT_GUTTER * 2);
+  const isMobile = vw < MOBILE_BREAKPOINT;
+
+  // On mobile: full width with gutters, on desktop: fixed max width
+  const width = isMobile ? vw - VIEWPORT_GUTTER * 2 : Math.min(PANEL_MAX_W, vw - VIEWPORT_GUTTER * 2);
 
   let top = rect.bottom + OFFSET_Y;
-  const estimatedPanelH = Math.min(520, vh * 0.85);
-  if (top + estimatedPanelH > vh - VIEWPORT_GUTTER) {
+  const estimatedPanelH = isMobile ? vh * 0.9 : Math.min(500, vh * 0.85);
+  
+  // On mobile, position near top with more space
+  if (isMobile) {
+    top = VIEWPORT_GUTTER * 2;
+  } else if (top + estimatedPanelH > vh - VIEWPORT_GUTTER) {
     top = Math.max(VIEWPORT_GUTTER, rect.top - estimatedPanelH - OFFSET_Y);
   }
 
-  let left = rect.right - width;
+  let left = isMobile ? VIEWPORT_GUTTER : rect.right - width;
   left = Math.max(VIEWPORT_GUTTER, Math.min(left, vw - width - VIEWPORT_GUTTER));
 
   panelStyle.value = {
@@ -42,6 +50,7 @@ function updatePosition() {
     top: `${top}px`,
     left: `${left}px`,
     width: `${width}px`,
+    'z-index': '9999',
   };
 }
 
@@ -139,7 +148,7 @@ onUnmounted(() => {
       </v-badge>
     </span>
 
-    <Teleport to="#global-overlays">
+    <Teleport to="#app">
       <Transition name="notifications-dropdown">
         <div
           v-if="open"
