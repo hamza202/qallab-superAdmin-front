@@ -1238,6 +1238,16 @@
             </template>
           </v-list-item>
 
+          <v-list-item to="/chat" value="chat" :class="{ '!mx-1 gap-5': !isSidebarExpanded }"
+            class="mx-4 px-2 py-1.5 !ps-[11px] rounded-lg text-white hover:bg-primary-700/40 transition flex items-center justify-start gap-2">
+            <template #title> {{ t('navigation.sidebar.main.chats') }} </template>
+            <template #prepend>
+              <div class="bg-qallab-yellow text-white rounded-md w-6 h-6 flex items-center justify-center">
+                <v-icon size="18">mdi-chat-outline</v-icon>
+              </div>
+            </template>
+          </v-list-item>
+
         </v-list>
       </div>
 

@@ -2,7 +2,8 @@
   "sidebar": {
     "main": {
       "home": "الرئيسية",
-      "notifications": "الأشعارات"
+      "notifications": "الأشعارات",
+      "chats": "المحادثات"
     },
     "products": {
       "title": "المنتجات",
