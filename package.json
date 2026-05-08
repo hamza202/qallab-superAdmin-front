@@ -22,7 +22,7 @@
     "@tiptap/vue-3": "^3.14.0",
     "@vuepic/vue-datepicker": "^12.1.0",
     "apexcharts": "^5.3.6",
-    "axios": "^1.7.9",
+    "axios": "^1.15.2",
     "leaflet": "^1.9.4",
     "lodash-es": "^4.17.23",
     "pinia": "^3.0.2",
