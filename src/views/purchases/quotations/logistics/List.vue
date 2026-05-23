@@ -7,8 +7,8 @@ import { useNotification } from '@/composables/useNotification';
 import { useTableColumns } from '@/composables/useTableColumns';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog.vue';
 import StatusChangeFeature from '@/components/common/StatusChangeFeature.vue';
-import { GridIcon, trash_1_icon, trash_2_icon, importIcon, columnIcon, exportIcon, searchIcon } from "@/components/icons/globalIcons";
-import { switcStatusIcon, refreshIcon } from '@/components/icons/priceOffersIcons';
+import { GridIcon, trash_1_icon, trash_2_icon, importIcon, columnIcon, exportIcon, searchIcon, printerIcon } from "@/components/icons/globalIcons";
+import { switcStatusIcon, refreshIcon, downloadIcon } from '@/components/icons/priceOffersIcons';
 
 const { t } = useI18n();
 const router = useRouter();
@@ -32,6 +32,8 @@ interface ItemActions {
   can_view: boolean;
   can_change_status: boolean;
   can_create_order: boolean;
+  can_details_pdf?: boolean;
+  can_download_pdf?: boolean;
 }
 
 interface QuotationItem {
@@ -62,6 +64,15 @@ interface ListResponse {
   headers: TableHeader[];
   shownHeaders: TableHeader[];
   actions: { can_create: boolean; can_bulk_delete: boolean };
+}
+
+interface QuotationPdfMetaResponse {
+  data?: {
+    url?: string;
+    pdf_path?: string;
+    pdf_generated_at?: string;
+  };
+  message?: string;
 }
 
 const tableItems = ref<QuotationItem[]>([]);
@@ -99,6 +110,79 @@ const deleteLoading = ref(false);
 
 const showChangeStatusDialog = ref(false);
 const itemToChangeStatus = ref<QuotationItem | null>(null);
+
+const downloadingPdfUuid = ref<string | null>(null);
+
+const triggerPdfDownloadFromSignedUrl = async (signedUrl: string, filename: string) => {
+  try {
+    const res = await fetch(signedUrl, { mode: 'cors', credentials: 'omit' });
+    if (!res.ok) throw new Error('bad status');
+    const blob = await res.blob();
+    const objectUrl = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = objectUrl;
+    a.download = filename;
+    a.rel = 'noopener noreferrer';
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(objectUrl);
+  } catch {
+    window.open(signedUrl, '_blank', 'noopener,noreferrer');
+  }
+};
+
+const handlePrint = (item: { id?: string | number; uuid?: string }) => {
+  const uuid = item.uuid ?? String(item.id);
+  const routeData = router.resolve({ name: 'QuotationsLogisticsPrint', params: { id: uuid } });
+  const printUrl = routeData.href.startsWith('/') ? `${window.location.origin}${routeData.href}` : routeData.href;
+
+  const iframe = document.createElement('iframe');
+  iframe.style.cssText =
+    'position:fixed;top:0;left:-9999px;width:210mm;height:297mm;border:none;opacity:0;pointer-events:none;';
+  document.body.appendChild(iframe);
+
+  const onMessage = (e: MessageEvent) => {
+    if (
+      e.data?.type === 'quotation-logistics-print-ready' &&
+      e.source === iframe.contentWindow &&
+      iframe.contentWindow
+    ) {
+      window.removeEventListener('message', onMessage);
+      iframe.contentWindow.print();
+      setTimeout(() => {
+        if (iframe.parentNode) document.body.removeChild(iframe);
+      }, 1000);
+    }
+  };
+  window.addEventListener('message', onMessage);
+  iframe.src = printUrl;
+};
+
+const handleDownloadPdf = async (item: { id?: string | number; uuid?: string }) => {
+  const uuid = String(item.uuid ?? item.id ?? '');
+  if (!uuid) return;
+  downloadingPdfUuid.value = uuid;
+  try {
+    const body = (await api.get(
+      `/purchases/quotations/logistics/${uuid}/pdf`
+    )) as QuotationPdfMetaResponse;
+    const signedUrl = body?.data?.url;
+    if (!signedUrl) {
+      error(t('sales.quotationsLogistics.messages.pdfDownloadNoUrl'));
+      return;
+    }
+    const pathName = body.data?.pdf_path?.split('/').pop();
+    const filename = pathName && pathName.endsWith('.pdf') ? pathName : `quotation-${uuid}.pdf`;
+    await triggerPdfDownloadFromSignedUrl(signedUrl, filename);
+  } catch (err: any) {
+    console.error('Error downloading quotation PDF:', err);
+    error(err?.response?.data?.message || t('sales.quotationsLogistics.messages.pdfDownloadError'));
+  } finally {
+    downloadingPdfUuid.value = null;
+  }
+};
 
 const openChangeStatusDialog = (item: QuotationItem | Record<string, unknown>) => {
   itemToChangeStatus.value = item as QuotationItem;
@@ -389,6 +473,19 @@ onBeforeUnmount(() => {
           </template>
           <template #item.actions="{ item }">
             <div class="flex items-center gap-1">
+              <v-btn
+                v-if="item.actions?.can_details_pdf"
+                icon variant="text" color="success-700" size="x-small"
+                @click="handlePrint(item)">
+                <span class="w-5" v-html="printerIcon"></span>
+              </v-btn>
+              <v-btn
+                v-if="item.actions?.can_download_pdf"
+                icon variant="text" color="success-700" size="x-small"
+                :loading="downloadingPdfUuid === (item.uuid ?? item.id)"
+                @click="handleDownloadPdf(item)">
+                <span class="w-5" v-html="downloadIcon"></span>
+              </v-btn>
               <v-btn v-if="item.actions?.can_create_order" icon variant="text" size="small"
                 @click="handleCreateOrder(item)">
                 <span v-html="refreshIcon"></span>

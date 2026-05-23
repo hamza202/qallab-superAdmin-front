@@ -89,6 +89,15 @@ export const purchasesRoutes: RouteRecordRaw[] = [
           title: "pages.QuotationsMaterialProduct.view",
         },
       },
+      {
+        path: "print/:id",
+        name: "QuotationsMaterialProductPrint",
+        component: () =>
+          import("@/views/purchases/quotations/material-product/Print.vue"),
+        meta: {
+          title: "sales.quotationsMaterialProduct.print.pageTitle",
+        },
+      },
     ],
   },
   {
@@ -520,6 +529,14 @@ export const purchasesRoutes: RouteRecordRaw[] = [
           title: "pages.QuotationsFuels.view",
         },
       },
+      {
+        path: "print/:id",
+        name: "QuotationsFuelsPrint",
+        component: () => import("@/views/purchases/quotations/fuels/Print.vue"),
+        meta: {
+          title: "sales.quotationsFuels.print.pageTitle",
+        },
+      },
     ],
   },
   {
@@ -586,6 +603,15 @@ export const purchasesRoutes: RouteRecordRaw[] = [
           import("@/views/purchases/quotations/logistics/View.vue"),
         meta: {
           title: "pages.QuotationsLogistics.view",
+        },
+      },
+      {
+        path: "print/:id",
+        name: "QuotationsLogisticsPrint",
+        component: () =>
+          import("@/views/purchases/quotations/logistics/Print.vue"),
+        meta: {
+          title: "sales.quotationsLogistics.print.pageTitle",
         },
       },
     ],
