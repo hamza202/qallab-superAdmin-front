@@ -7,9 +7,13 @@ import { useNotification } from '@/composables/useNotification';
 import { useTableColumns } from '@/composables/useTableColumns';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog.vue';
 import DatePickerInput from '@/components/common/forms/DatePickerInput.vue';
+import AppDialog from '@/components/common/AppDialog.vue';
+import FileUploadInput from '@/components/common/forms/FileUploadInput.vue';
 import { GridIcon, trash_1_icon, trash_2_icon, importIcon, columnIcon, exportIcon, plusIcon, searchIcon, printerIcon } from "@/components/icons/globalIcons";
 import { switchHorisinralIcon, downloadIcon } from '@/components/icons/priceOffersIcons';
 import StatusChangeFeature from '@/components/common/StatusChangeFeature.vue';
+
+const uploadSignedPoIcon = `<svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="none" width="20" height="20"><g fill="#194185"><path d="M4.24 5.8a.75.75 0 001.06-.04l1.95-2.1v6.59a.75.75 0 001.5 0V3.66l1.95 2.1a.75.75 0 101.1-1.02l-3.25-3.5a.75.75 0 00-1.101.001L4.2 4.74a.75.75 0 00.04 1.06z"/><path d="M1.75 9a.75.75 0 01.75.75v3c0 .414.336.75.75.75h9.5a.75.75 0 00.75-.75v-3a.75.75 0 011.5 0v3A2.25 2.25 0 0112.75 15h-9.5A2.25 2.25 0 011 12.75v-3A.75.75 0 011.75 9z"/></g></svg>`;
 
 const { t } = useI18n();
 const router = useRouter();
@@ -35,6 +39,7 @@ interface ItemActions {
   can_change_status: boolean;
   can_details_pdf?: boolean;
   can_download_pdf?: boolean;
+  can_upload_signed_po?: boolean;
 }
 
 interface OrderItem {
@@ -49,6 +54,8 @@ interface OrderItem {
   status_id: number;
   status_background_color?: string;
   status_text_color?: string;
+  signed_po_file?: string | null;
+  signed_po_file_url?: string | null;
   actions: ItemActions;
 }
 
@@ -110,6 +117,48 @@ const itemToDelete = ref<OrderItem | null>(null);
 const deleteLoading = ref(false);
 const showChangeStatusDialog = ref(false);
 const itemToChangeStatus = ref<OrderItem | null>(null);
+
+// Upload signed PO dialog
+const showUploadSignedPoDialog = ref(false);
+const itemToUploadSignedPo = ref<OrderItem | null>(null);
+const signedPoFile = ref<File[] | string | null>(null);
+const uploadingSignedPo = ref(false);
+
+const openUploadSignedPoDialog = (item: OrderItem | Record<string, unknown>) => {
+  const typed = item as OrderItem;
+  itemToUploadSignedPo.value = typed;
+  signedPoFile.value = typed.signed_po_file_url || null;
+  showUploadSignedPoDialog.value = true;
+};
+
+const closeUploadSignedPoDialog = () => {
+  showUploadSignedPoDialog.value = false;
+  itemToUploadSignedPo.value = null;
+  signedPoFile.value = null;
+};
+
+const handleUploadSignedPo = async () => {
+  if (!itemToUploadSignedPo.value) return;
+  if (!Array.isArray(signedPoFile.value) || signedPoFile.value.length === 0) {
+    error(t('common.uploads.attachFile'));
+    return;
+  }
+  const uuid = itemToUploadSignedPo.value.uuid;
+  const formData = new FormData();
+  formData.append('signed_po_file', signedPoFile.value[0]);
+  try {
+    uploadingSignedPo.value = true;
+    await api.upload(`/purchases/orders/logistics/${uuid}/signed-po`, formData);
+    success(t('common.messages.general.saveSuccess'));
+    closeUploadSignedPoDialog();
+    await fetchList();
+  } catch (err: any) {
+    console.error('Error uploading signed PO:', err);
+    error(err?.response?.data?.message || t('common.messages.general.saveError'));
+  } finally {
+    uploadingSignedPo.value = false;
+  }
+};
 
 const toggleAdvancedFilters = () => {
   showAdvancedFilters.value = !showAdvancedFilters.value;
@@ -506,6 +555,12 @@ onMounted(() => {
                 @click="handleDownloadPdf(item)">
                 <span class="w-5" v-html="downloadIcon"></span>
               </v-btn>
+              <v-btn
+                v-if="item.actions?.can_upload_signed_po"
+                icon variant="text" size="x-small"
+                @click="openUploadSignedPoDialog(item)">
+                <span class="w-5" v-html="uploadSignedPoIcon"></span>
+              </v-btn>
               <v-btn v-if="item.actions?.can_change_status" icon variant="text" size="x-small"
                 color="warning-600" @click="openChangeStatusDialog(item)">
                 <span v-html="switchHorisinralIcon"></span>
@@ -540,6 +595,50 @@ onMounted(() => {
       :message="t('purchases.shared.lists.purchaseOrder.dialogs.bulkDelete.message', { count: selectedRequests.length })"
       @confirm="confirmBulkDelete"
     />
+
+    <!-- Upload Signed PO Dialog -->
+    <AppDialog
+      v-model="showUploadSignedPoDialog"
+      :title="t('common.uploads.attachFile')"
+      :max-width="560"
+      :persistent="uploadingSignedPo"
+      @close="closeUploadSignedPoDialog"
+    >
+      <FileUploadInput
+        v-model="signedPoFile"
+        accept="image/png, image/jpeg, image/jpg, application/pdf"
+        :multiple="false"
+        :max-files="1"
+        :max-size="10"
+        :disabled="uploadingSignedPo"
+        :hide-remove="true"
+        :inner-label="t('common.uploads.attachFile')"
+        hint="PNG, JPG or PDF (max. 10MB)"
+      />
+      <template #actions>
+        <v-btn
+          variant="flat"
+          color="primary-50"
+          height="44"
+          class="font-semibold text-base text-primary-700 sm:flex-1"
+          :disabled="uploadingSignedPo"
+          @click="closeUploadSignedPoDialog"
+        >
+          {{ t('common.actions.cancel') }}
+        </v-btn>
+        <v-btn
+          variant="flat"
+          color="primary-500"
+          height="44"
+          class="font-semibold text-base !text-white sm:flex-1"
+          :loading="uploadingSignedPo"
+          :disabled="!Array.isArray(signedPoFile) || signedPoFile.length === 0"
+          @click="handleUploadSignedPo"
+        >
+          {{ t('common.actions.save') }}
+        </v-btn>
+      </template>
+    </AppDialog>
   </default-layout>
 </template>
 
