@@ -122,7 +122,8 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="notifications-dropdown-root relative inline-flex shrink-0 align-middle">
+<div></div>
+<!-- <div class="notifications-dropdown-root relative inline-flex shrink-0 align-middle">
     <span ref="triggerRef" class="inline-flex">
       <v-badge
         :model-value="unreadCount > 0"
@@ -132,7 +133,6 @@ onUnmounted(() => {
         offset-x="2"
         offset-y="4"
       >
-        <!-- Clicks must be on v-btn: Vuetify stops propagation so a parent @click on the span never runs. -->
         <v-btn
           size="small"
           icon
@@ -162,7 +162,7 @@ onUnmounted(() => {
         </div>
       </Transition>
     </Teleport>
-  </div>
+  </div> -->
 </template>
 
 <style scoped>
