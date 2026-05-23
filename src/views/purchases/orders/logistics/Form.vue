@@ -15,6 +15,7 @@ import { useForm } from '@/composables/useForm';
 import { useNotification as useNotify } from '@/composables/useNotification';
 import { binIcon, fileCheckIcon, HelpCircleIcon, returnIcon, saveIcon, rialIcon } from "@/components/icons/globalIcons";
 import AppFormBreadcrumb from "@/components/common/AppFormBreadcrumb.vue";
+import OtherTermsRepeater from '@/components/common/OtherTermsRepeater.vue';
 import { required, numeric, positive } from '@/utils/validators';
 
 
@@ -235,6 +236,7 @@ const formData = ref({
   approved_amount: null as string | null,
   final_logistics_service_amount: null as number | null,
   final_logistics_trip: null as number | null,
+  other_terms: [] as string[],
 });
 
 const productTableItems = ref<ProductTableItem[]>([]);
@@ -306,6 +308,9 @@ const fetchQuotationForOrder = async () => {
       formData.value.final_logistics_trip = data.final_logistics_trip != null ? Number(data.final_logistics_trip) : null;
       formData.value.final_logistics_service_amount = data.final_logistics_service_amount != null ? Number(data.final_logistics_service_amount) : null;
       formData.value.final_logistics_trip = data.final_logistics_trip != null ? Number(data.final_logistics_trip) : null;
+      formData.value.other_terms = Array.isArray(data.other_terms)
+        ? data.other_terms.filter((t: any) => typeof t === 'string')
+        : [];
 
       const mapToNumberArray = (value: any): number[] => {
         if (Array.isArray(value)) return value.map((v: any) => Number(v));
@@ -440,6 +445,9 @@ const fetchFormData = async () => {
       formData.value.cancel_fee_type = data.cancel_fee_type || null;
       formData.value.cancel_fee = data.cancel_fee ?? null;
       formData.value.approved_amount = data.approved_amount != null ? String(data.approved_amount) : null;
+      formData.value.other_terms = Array.isArray(data.other_terms)
+        ? data.other_terms.filter((t: any) => typeof t === 'string')
+        : [];
 
       if (data.po_logistics_details && Array.isArray(data.po_logistics_details)) {
         logisticsDetails.value = data.po_logistics_details.map((d: any) => ({
@@ -988,6 +996,9 @@ const buildPayload = () => {
     approved_amount: formData.value.approved_amount ?? null,
     final_logistics_service_amount: formData.value.final_logistics_service_amount ?? null,
     final_logistics_trip: formData.value.final_logistics_trip ?? null,
+    other_terms: (formData.value.other_terms || [])
+      .map((term) => (term ?? '').trim())
+      .filter((term) => term.length > 0),
   };
 
   // Include purchase_quotation_id if creating order from quotation
@@ -1653,6 +1664,11 @@ onMounted(async () => {
               <TextInputWithSelect v-model="formData.cancel_fee" v-model:selectValue="formData.cancel_fee_type"
                 :label="t('purchases.orders.shared.labels.cancelFee')" :placeholder="t('purchases.orders.shared.placeholders.enterFeeAmount')" type="number" :rules="[numeric(), positive()]"
                 select-width="110px" :select-items="feeTypeItems" :select-placeholder="t('purchases.shared.forms.common.select')" />
+            </div>
+
+            <!-- شروط أخرى -->
+            <div class="mt-6 pt-6 border-t !border-gray-100">
+              <OtherTermsRepeater v-model="formData.other_terms" />
             </div>
           </div>
         </div>

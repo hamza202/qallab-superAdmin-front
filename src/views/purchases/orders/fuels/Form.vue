@@ -27,6 +27,7 @@ import {
     rialIcon,
 } from '@/components/icons/globalIcons';
 import AppFormBreadcrumb from '@/components/common/AppFormBreadcrumb.vue';
+import OtherTermsRepeater from '@/components/common/OtherTermsRepeater.vue';
 
 const { t } = useI18n();
 const api = useApi();
@@ -206,6 +207,9 @@ const fetchFormData = async () => {
             formData.value.textNote = data.notes || '';
             formData.value.responsibleName = data.responsible_person || '';
             formData.value.responsiblePhone = data.responsible_phone || '';
+            formData.value.other_terms = Array.isArray(data.other_terms)
+                ? data.other_terms.filter((t: any) => typeof t === 'string')
+                : [];
 
             const attached = data.po_attached_logistics_detail || data.logistics_detail || null;
             if (attached) {
@@ -322,6 +326,9 @@ const fetchQuotationForOrder = async () => {
             formData.value.textNote = data.notes || '';
             formData.value.responsibleName = data.responsible_person || '';
             formData.value.responsiblePhone = data.responsible_phone || null;
+            formData.value.other_terms = Array.isArray(data.other_terms)
+                ? data.other_terms.filter((t: any) => typeof t === 'string')
+                : [];
 
             formData.value.responsibleName = data.responsible_person || '';
             formData.value.responsiblePhone = data.responsible_phone || null;
@@ -459,6 +466,7 @@ const formData = ref({
     advancePayment: null,
     project_name: '',
     textNote: '',
+    other_terms: [] as string[],
 });
 
 // Products table items (dynamically populated from dialog)
@@ -687,6 +695,14 @@ const buildFormData = (): FormData => {
     fd.append('cancel_fee', String(formData.value.cancel_fee ?? ''));
     fd.append('notes', formData.value.textNote || '');
 
+    // other_terms (array of strings)
+    (formData.value.other_terms || [])
+        .map((term) => (term ?? '').trim())
+        .filter((term) => term.length > 0)
+        .forEach((term, index) => {
+            fd.append(`other_terms[${index}]`, term);
+        });
+
     // po_attached_logistics_detail
     if (isEditMode.value && logisticsDetailId.value) {
         fd.append('po_attached_logistics_detail[id]', String(logisticsDetailId.value));
@@ -755,6 +771,7 @@ const resetForm = () => {
         advancePayment: null,
         project_name: '',
         textNote: '',
+        other_terms: [],
     };
     productTableItems.value = [];
     originalProductIds.value = {};
@@ -1131,6 +1148,11 @@ const tableItems = computed(() =>
                                 v-model:selectValue="formData.cancel_fee_type" :label="t('purchases.orders.shared.labels.cancelFee')"
                                 :placeholder="t('purchases.orders.shared.placeholders.enterFeeAmount')" type="number" :rules="[numeric(), positive()]"
                                 select-width="110px" :select-items="feeTypeItems" :select-placeholder="t('purchases.shared.forms.common.select')" />
+                        </div>
+
+                        <!-- شروط أخرى -->
+                        <div class="mt-6 pt-6 border-t !border-gray-100">
+                            <OtherTermsRepeater v-model="formData.other_terms" />
                         </div>
                     </div>
                 </div>

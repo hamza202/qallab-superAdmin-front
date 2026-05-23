@@ -125,7 +125,8 @@
             "advancePayment": "Advance Payment",
             "products": "Products",
             "services": "Services",
-            "requestCode": "Request Code"
+            "requestCode": "Request Code",
+            "otherTerms": "Other Terms"
           },
           "placeholders": {
             "selectSupplier": "Select Supplier",
@@ -136,7 +137,8 @@
             "selectDate": "Select Date",
             "addNote": "Add Note",
             "cashSample": "Cash",
-            "phoneSample": "5XX XXX XXXX"
+            "phoneSample": "5XX XXX XXXX",
+            "enterTerm": "Enter term here"
           },
           "actions": {
             "importExcel": "Import from Excel file",
@@ -144,7 +146,8 @@
             "editProducts": "Edit Products",
             "submitRequest": "Submit Request",
             "saveAndReturn": "Save and Return to Home",
-            "saveAndCreateNew": "Save and Create New"
+            "saveAndCreateNew": "Save and Create New",
+            "addTerm": "+ Add Term"
           },
           "textNote": {
             "title": "Text Note",
