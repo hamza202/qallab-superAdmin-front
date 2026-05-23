@@ -199,6 +199,7 @@ interface OrderPrintDetail {
     po_datetime?: string
     other_terms?: string[] | null
     sq_code?: string | null
+    sq_datetime?: string | null
 }
 
 const isLoading = ref(false)
@@ -252,12 +253,28 @@ const escapeHtml = (s: string) =>
 
 const accent = (s: string) => `<span class="blue-accent">${escapeHtml(s)}</span>`
 
+const formatSqDate = (d: string | null | undefined) => {
+    if (!d) return '—'
+    try {
+        const dt = new Date(d)
+        if (isNaN(dt.getTime())) return String(d)
+        const s = dt.toLocaleDateString('en-US-u-ca-gregory', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+        })
+        return s.replace(/\//g, '\\')
+    } catch {
+        return String(d)
+    }
+}
+
 const introBodyHtml = computed(() => {
     const quotationCode = (detail.value?.sq_code && String(detail.value.sq_code).trim()) || '—'
-    const orderDateVal = orderDate.value
+    const quotationDate = formatSqDate(detail.value?.sq_datetime)
     const supplierName = supplier.value?.full_name ?? '—'
 
-    return `<span class="intro-line intro-line--greeting">السادة / ${accent(supplierName)} المحترمين</span><span class="intro-line intro-line--salam">السلام عليكم ورحمة الله وبركاته،</span><span class="intro-line">إشارة إلى عرض السعر المقدم من قبلكم رقم ${accent(quotationCode)} بتاريخ ${accent(orderDateVal)} نعمدكم بالآتي حسب البنود أدناه :</span>`
+    return `<span class="intro-line intro-line--greeting">السادة / ${accent(supplierName)} المحترمين</span><span class="intro-line intro-line--salam">السلام عليكم ورحمة الله وبركاته،</span><span class="intro-line">إشارة إلى عرض السعر المقدم من قبلكم رقم ${accent(quotationCode)} بتاريخ ${accent(quotationDate)} نعمدكم بالآتي حسب البنود أدناه :</span>`
 })
 
 const lineItems = computed((): OrderLine[] => {
