@@ -18,12 +18,7 @@
                         </template>
                     </textInput>
 
-                    <v-badge content="34" color="error" location="top start" offset-x="2" offset-y="4">
-                        <v-btn size="small" icon variant="flat"
-                            class="bg-gray-50 border !border-gray-100 text-primary-600 !rounded-full">
-                            <v-icon>mdi-bell-outline</v-icon>
-                        </v-btn>
-                    </v-badge>
+                    <NotificationsDropdown />
                     <ButtonWithIcon :label="localeStore.currentLocale === 'ar' ? 'EN' : 'AR'" color="gray-200"
                          rounded="full" height="35" size="default" :class="'text-primary'"
                         @click="handleLanguageToggle" />
@@ -42,7 +37,7 @@
                             <v-img alt="John" src="https://cdn.vuetifyjs.com/images/john.jpg"
                                 class="rounded-full"></v-img>
                             <img alt="John" src="@/assets/vectors/qallab-icon.svg"
-                                class="position-absolute bottom-[-5px] start-[-4px] z-index-3"></img>
+                                class="position-absolute bottom-[-5px] start-[-4px] z-index-3" />
                         </v-avatar>
                     </div>
                     <v-btn size="small" icon variant="flat" class="bg-gray-50 border !border-gray-100 !rounded-full">
@@ -79,6 +74,14 @@
     </v-app-bar>
 </template>
 <script setup>
+import { useRouter } from 'vue-router';
+import { useAuthStore } from '@/stores/auth';
+import { useLocaleStore } from '@/stores/locale';
+import { useI18n } from 'vue-i18n';
+import { userIcon, logoutIcon } from '@/components/icons/headerIcons';
+import { searchIcon } from '../icons/globalIcons';
+import NotificationsDropdown from '@/components/notifications/NotificationsDropdown.vue';
+
 const props = defineProps({
     drawer: {
         type: Boolean,
@@ -89,13 +92,6 @@ const props = defineProps({
         default: false,
     },
 });
-
-import { useRouter } from 'vue-router';
-import { useAuthStore } from '@/stores/auth';
-import { useLocaleStore } from '@/stores/locale';
-import { useI18n } from 'vue-i18n';
-import { userIcon, logoutIcon } from '@/components/icons/headerIcons';
-import { searchIcon } from '../icons/globalIcons';
 
 const { t } = useI18n();
 const localeStore = useLocaleStore();
@@ -127,3 +123,4 @@ const onToggleDrawer = () => {
     emit("toggle-drawer");
 };
 </script>
+

@@ -1,7 +1,9 @@
 {
   "sidebar": {
     "main": {
-      "home": "Home"
+      "home": "Home",
+      "notifications": "Notifications",
+      "chats": "Chats"
     },
     "products": {
       "title": "Products",

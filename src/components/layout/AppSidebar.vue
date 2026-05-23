@@ -37,7 +37,6 @@
             </template>
           </v-list-item>
 
-          <!-- المنتجات -->
           <v-list-group v-if="hasAnyProductPermission" value="products" class="mt-1">
             <template #activator="{ props, isOpen }">
               <v-list-item v-bind="props" :class="[
@@ -55,7 +54,8 @@
                 </template>
                 <template #title>
                   <div class="flex-1">
-                    <span class="font-semibold" :class="isProductsActive ? '!text-[#1570EF]' : ''">{{ t('navigation.sidebar.products.title') }}</span>
+                    <span class="font-semibold" :class="isProductsActive ? '!text-[#1570EF]' : ''">{{
+                      t('navigation.sidebar.products.title') }}</span>
                   </div>
                 </template>
                 <template #prepend>
@@ -66,7 +66,8 @@
               </v-list-item>
             </template>
             <div class="relative mt-1 ps-10 pe-4 text-sm">
-              <h2 v-if="hasAnyProductsManagementPermission" class="text-sm font-medium leading-5 mb-2">{{ t('navigation.sidebar.products.management.title') }}
+              <h2 v-if="hasAnyProductsManagementPermission" class="text-sm font-medium leading-5 mb-2">{{
+                t('navigation.sidebar.products.management.title') }}
               </h2>
               <ul v-if="hasAnyProductsManagementPermission"
                 class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
@@ -158,7 +159,8 @@
                 </template>
                 <template #title>
                   <div class="flex-1">
-                    <span class="font-semibold" :class="isServicesActive ? '!text-[#1570EF]' : ''">{{ t('navigation.sidebar.services.title') }}</span>
+                    <span class="font-semibold" :class="isServicesActive ? '!text-[#1570EF]' : ''">{{
+                      t('navigation.sidebar.services.title') }}</span>
                   </div>
                 </template>
                 <template #prepend>
@@ -225,7 +227,8 @@
                 </template>
                 <template #title>
                   <div class="flex-1">
-                    <span class="font-semibold" :class="isSalesActive ? '!text-[#1570EF]' : ''">{{ t('navigation.sidebar.sales.title') }}</span>
+                    <span class="font-semibold" :class="isSalesActive ? '!text-[#1570EF]' : ''">{{
+                      t('navigation.sidebar.sales.title') }}</span>
                   </div>
                 </template>
                 <template #prepend>
@@ -236,7 +239,8 @@
               </v-list-item>
             </template>
             <div class="relative mt-1 ps-10 pe-4 text-sm">
-              <h2 v-if="showSalesCustomersSection" class="text-sm font-medium leading-5 mb-2">{{ t('navigation.sidebar.sales.customers.title') }}</h2>
+              <h2 v-if="showSalesCustomersSection" class="text-sm font-medium leading-5 mb-2">{{
+                t('navigation.sidebar.sales.customers.title') }}</h2>
               <ul v-if="showSalesCustomersSection" class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
                 <li v-if="canViewCustomers" class="relative">
                   <router-link to="/customers/list" :class="[
@@ -492,7 +496,8 @@
                 </template>
                 <template #title>
                   <div class="flex-1">
-                    <span class="font-semibold" :class="isPurchasesActive ? '!text-[#1570EF]' : ''">{{ t('navigation.sidebar.purchases.title') }}</span>
+                    <span class="font-semibold" :class="isPurchasesActive ? '!text-[#1570EF]' : ''">{{
+                      t('navigation.sidebar.purchases.title') }}</span>
                   </div>
                 </template>
                 <template #prepend>
@@ -503,7 +508,8 @@
               </v-list-item>
             </template>
             <div class="relative mt-1 ps-10 pe-4 text-sm">
-              <h2 v-if="showPurchasesSuppliersSection" class="text-sm font-medium leading-5 mb-2">{{ t('navigation.sidebar.purchases.suppliers.title') }}</h2>
+              <h2 v-if="showPurchasesSuppliersSection" class="text-sm font-medium leading-5 mb-2">{{
+                t('navigation.sidebar.purchases.suppliers.title') }}</h2>
               <ul v-if="showPurchasesSuppliersSection"
                 class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
                 <li v-if="canViewSuppliers" class="relative">
@@ -674,7 +680,8 @@
                 </template>
                 <template #title>
                   <div class="flex-1">
-                    <span class="font-semibold" :class="isFinanceActive ? '!text-[#1570EF]' : ''">{{ t('navigation.sidebar.finance.title') }}</span>
+                    <span class="font-semibold" :class="isFinanceActive ? '!text-[#1570EF]' : ''">{{
+                      t('navigation.sidebar.finance.title') }}</span>
                   </div>
                 </template>
                 <template #prepend>
@@ -740,7 +747,8 @@
                 </template>
                 <template #title>
                   <div class="flex-1">
-                    <span class="font-semibold" :class="isUsersActive ? '!text-[#1570EF]' : ''">{{ t('navigation.sidebar.users.title') }}</span>
+                    <span class="font-semibold" :class="isUsersActive ? '!text-[#1570EF]' : ''">{{
+                      t('navigation.sidebar.users.title') }}</span>
                   </div>
                 </template>
                 <template #prepend>
@@ -915,7 +923,8 @@
                 </template>
                 <template #title>
                   <div class="flex-1">
-                    <span class="font-semibold" :class="isSettingsActive ? '!text-[#1570EF]' : ''">{{ t('navigation.sidebar.settings.title') }}</span>
+                    <span class="font-semibold" :class="isSettingsActive ? '!text-[#1570EF]' : ''">{{
+                      t('navigation.sidebar.settings.title') }}</span>
                   </div>
                 </template>
                 <template #prepend>
@@ -1005,7 +1014,8 @@
                     {{ t('navigation.sidebar.settings.basic.geoZones') }}</router-link>
                 </li>
               </ul>
-              <h2 v-if="showSettingsTaxesSection" class="text-sm font-medium leading-5 my-2">{{ t('navigation.sidebar.settings.taxes.title') }}</h2>
+              <h2 v-if="showSettingsTaxesSection" class="text-sm font-medium leading-5 my-2">{{
+                t('navigation.sidebar.settings.taxes.title') }}</h2>
               <ul v-if="showSettingsTaxesSection" class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
                 <li v-if="canViewTaxes" class="relative">
                   <router-link to="/settings/tax-rules/list" :class="[
@@ -1025,7 +1035,8 @@
                     {{ t('navigation.sidebar.settings.taxes.taxes') }}</router-link>
                 </li>
               </ul>
-              <h2 v-if="showSettingsCountriesCurrenciesSection" class="text-sm font-medium leading-5 my-2">{{ t('navigation.sidebar.settings.countriesCurrencies.title') }}</h2>
+              <h2 v-if="showSettingsCountriesCurrenciesSection" class="text-sm font-medium leading-5 my-2">{{
+                t('navigation.sidebar.settings.countriesCurrencies.title') }}</h2>
               <ul v-if="showSettingsCountriesCurrenciesSection"
                 class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
                 <li v-if="canViewCountries" class="relative">
@@ -1055,7 +1066,8 @@
                     {{ t('navigation.sidebar.settings.countriesCurrencies.currenciesManagement') }}</router-link>
                 </li>
               </ul>
-              <h2 v-if="showSettingsAdvancedSection" class="text-sm font-medium leading-5 my-2">{{ t('navigation.sidebar.settings.advanced.title') }}</h2>
+              <h2 v-if="showSettingsAdvancedSection" class="text-sm font-medium leading-5 my-2">{{
+                t('navigation.sidebar.settings.advanced.title') }}</h2>
               <ul v-if="showSettingsAdvancedSection"
                 class="space-y-2 text-slate-100 text-xs list-disc list-outside ps-5">
                 <li v-if="canViewCodesSettings" class="relative">
@@ -1193,7 +1205,7 @@
                     {{ $t('navigation.sidebar.settings.basic.customPricingSuburbs') }}
                   </router-link>
                 </li>
-                
+
                 <li v-if="canViewSystemStatuses" class="relative">
                   <router-link to="/settings/system-statuses/list" :class="[
                     isMenuItemActive('/settings/system-statuses/list')
@@ -1215,6 +1227,27 @@
               </ul>
             </div>
           </v-list-group>
+
+          <v-list-item to="/notifications" value="notifications" :class="{ '!mx-1 gap-5': !isSidebarExpanded }"
+            class="mx-4 px-2 py-1.5 !ps-[11px] rounded-lg text-white hover:bg-primary-700/40 transition flex items-center justify-start gap-2">
+            <template #title> {{ t('navigation.sidebar.main.notifications') }} </template>
+            <template #prepend>
+              <div class="bg-qallab-yellow text-white rounded-md w-6 h-6 flex items-center justify-center">
+                <v-icon size="18">mdi-bell-outline</v-icon>
+              </div>
+            </template>
+          </v-list-item>
+
+          <v-list-item to="/chat" value="chat" :class="{ '!mx-1 gap-5': !isSidebarExpanded }"
+            class="mx-4 px-2 py-1.5 !ps-[11px] rounded-lg text-white hover:bg-primary-700/40 transition flex items-center justify-start gap-2">
+            <template #title> {{ t('navigation.sidebar.main.chats') }} </template>
+            <template #prepend>
+              <div class="bg-qallab-yellow text-white rounded-md w-6 h-6 flex items-center justify-center">
+                <v-icon size="18">mdi-chat-outline</v-icon>
+              </div>
+            </template>
+          </v-list-item>
+
         </v-list>
       </div>
 

@@ -1,0 +1,17 @@
+{
+  "title": "Notifications",
+  "popupSubtitle": "All your notifications in Qallab",
+  "newCount": "You have {count} new notifications..",
+  "tabAll": "All",
+  "tabUnread": "Unread",
+  "markAllRead": "Mark all as read",
+  "deleteAll": "Delete all",
+  "sectionToday": "Today",
+  "sectionPrevious": "Previous",
+  "viewAll": "View all",
+  "empty": "No notifications",
+  "time": {
+    "today": "Today {time}",
+    "yesterday": "Yesterday {time}"
+  }
+}
