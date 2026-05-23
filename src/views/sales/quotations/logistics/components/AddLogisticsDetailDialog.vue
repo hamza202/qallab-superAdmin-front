@@ -90,6 +90,34 @@ const discountTypeOptionsList = computed(() => props.discountTypeOptions || [
   { title: t('sales.forms.paymentsDemo.currencySar'), value: 2 },
 ]);
 
+const formatCurrency = (value: number): string => {
+  if (!Number.isFinite(value)) return '0.00';
+  return value.toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+};
+
+const computedTransportTotal = computed(() => {
+  const amount = Number(form.transport_amount);
+  const tripNo = Number(form.trip_no);
+  const safeAmount = isNaN(amount) ? 0 : amount;
+  const safeTripNo = isNaN(tripNo) || tripNo <= 0 ? 0 : tripNo;
+  let total = safeAmount * safeTripNo;
+  if (total > 0 && form.discount_val) {
+    const discountVal = Number(form.discount_val);
+    const discountType = Number(form.discount_type || 2);
+    if (!isNaN(discountVal) && discountVal > 0) {
+      if (discountType === 1) {
+        total = total - (total * (discountVal / 100));
+      } else {
+        total = total - discountVal;
+      }
+    }
+  }
+  return Math.max(0, total);
+});
+
 const populateFormFromEditDetail = () => {
   if (!props.editDetail) return;
   form.material_type = props.editDetail.material_type || [];
@@ -266,6 +294,27 @@ const showSourceMapDialog = ref(false);
           />
 
           </div>
+
+        <!-- Computed Transport Total -->
+        <div class="bg-primary-25 rounded-xl border !border-gray-100 p-4 mt-2">
+          <div class="flex items-center justify-between text-sm text-gray-700">
+            <span>{{ t('sales.forms.common.labels.tripsCount') }} × {{ t('sales.forms.common.labels.transportAmount') }}</span>
+            <span class="font-semibold text-gray-900">
+              {{ formatCurrency((Number(form.trip_no) || 0) * (Number(form.transport_amount) || 0)) }}
+            </span>
+          </div>
+          <div v-if="form.discount_val && Number(form.discount_val) > 0"
+            class="flex items-center justify-between text-sm text-gray-700 mt-2">
+            <span>{{ t('sales.forms.common.labels.discount') }}</span>
+            <span class="font-semibold text-gray-900">
+              {{ form.discount_val }}<span v-if="Number(form.discount_type) === 1">%</span>
+            </span>
+          </div>
+          <div class="flex items-center justify-between text-base font-bold text-primary-700 mt-3 pt-3 border-t !border-gray-200">
+            <span>{{ t('sales.forms.common.labels.transportServicesTotal') }}</span>
+            <span>{{ formatCurrency(computedTransportTotal) }}</span>
+          </div>
+        </div>
       </div>
     </v-form>
 
