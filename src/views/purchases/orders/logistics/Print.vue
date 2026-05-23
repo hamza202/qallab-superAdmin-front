@@ -19,27 +19,28 @@
             <div class="section-card">
                 <div class="header-top">
                     <div class="company-col" dir="rtl">
-                        <div class="co-name">{{ supplier?.full_name ?? 'شركة قلاب' }}</div>
-                        <div class="co-sub">Qallab Company</div>
-                        <div class="co-line">
+                        <div class="co-name">{{ customer?.full_name ?? 'شركة قلاب' }}</div>
+                        <!-- <div class="co-line">
                             هاتف: {{ supplier?.mobile ?? '+966 599 1454323' }} · البريد: {{ supplier?.email ?? 'info@qallab.sa' }}
+                        </div> -->
+                        <div class="co-line">
+                            الرقم الوطني الموحد : {{ customer?.unified_login_id ?? '—' }}
                         </div>
                         <div class="co-line">
-                            الرقم الضريبي: {{ supplier?.tax_number ?? '—' }} · السجل التجاري:
-                            {{ supplier?.commercial_register ?? '—' }}
+                            الرقم الضريبي: {{ customer?.tax_number ?? '—' }} · السجل التجاري:
+                            {{ customer?.commercial_register ?? '—' }}
                         </div>
                     </div>
                     <img :src="logoImg" alt="Qallab" class="header-logo" />
                 </div>
                 <div class="meta-strip" dir="rtl">
-                    <span class="meta-item">تاريخ الطلبية : <strong>{{ orderDate }}</strong></span>
                     <span class="meta-item">رقم طلبية المشتريات : <strong>{{ orderNumber }}</strong></span>
+                    <span class="meta-item">تاريخ الطلبية : <strong>{{ orderDate }}</strong></span>
                 </div>
             </div>
 
             <!-- ===== Introduction section ===== -->
             <div class="intro-block" dir="rtl">
-                <p class="intro-title">طلبية المشتريات رقم {{ orderNumber }}</p>
                 <p class="intro-body" v-html="introBodyHtml"></p>
             </div>
 
@@ -48,20 +49,24 @@
                 <table class="items-table">
                     <thead>
                         <tr>
-                            <th class="th-first"><span class="th-ar">البند</span></th>
-                            <th><span class="th-ar">الوحدة</span></th>
-                            <th><span class="th-ar">الكمية</span></th>
-                            <th><span class="th-ar">سعر الوحدة</span></th>
+                            <th class="th-first"><span class="th-ar">موقع الاستلام</span></th>
+                            <th><span class="th-ar">موقع التسليم</span></th>
+                            <th><span class="th-ar">العدد</span></th>
+                            <th><span class="th-ar">تاريخ بدء النقل</span></th>
+                            <th><span class="th-ar">تاريخ نهاية النقل</span></th>
+                            <th><span class="th-ar">سعر الرحلة</span></th>
                             <th class="th-last"><span class="th-ar">السعر الإجمالي</span></th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr v-for="(row, idx) in lineItems" :key="idx">
-                            <td class="td-name">{{ row.description }}</td>
-                            <td>{{ row.unit }}</td>
-                            <td>{{ row.quantity }}</td>
-                            <td>{{ row.unit_price }} <span v-html="rialIcon" class="sar-icon" /></td>
-                            <td class="td-subtotal">{{ row.total }} <span v-html="rialIcon" class="sar-icon" /></td>
+                            <td class="td-name">{{ row.source_location }}</td>
+                            <td class="td-name">{{ row.target_location }}</td>
+                            <td>{{ row.trip_count }}</td>
+                            <td>{{ row.transport_start_date }}</td>
+                            <td>{{ row.transport_end_date }}</td>
+                            <td>{{ row.trip_price }}</td>
+                            <td class="td-subtotal">{{ row.total }}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -71,29 +76,19 @@
             <div class="totals-table">
                 <div class="total-row">
                     <span class="total-label">الإجمالي غير شامل ضريبة القيمة المضافة</span>
-                    <span class="total-val">{{ formatCurrency(subtotal) }} <span v-html="rialIcon" class="sar-icon" /></span>
+                    <span class="total-val"><span v-html="rialIcon" class="sar-icon" /> {{ formatCurrency(subtotal) }}</span>
                 </div>
                 <div class="total-row">
                     <span class="total-label">ضريبة القيمة المضافة</span>
-                    <span class="total-val">{{ formatCurrency(vatAmount) }} <span v-html="rialIcon" class="sar-icon" /></span>
+                    <span class="total-val"><span v-html="rialIcon" class="sar-icon" /> {{ formatCurrency(vatAmount) }}</span>
                 </div>
-            </div>
-
-            <!-- ===== Grand total with payment method ===== -->
-            <div class="grand-total-section">
-                <div class="grand-total-bar">
-                    <div class="gt-cell gt-cell--label">
-                        <span class="gt-title">الإجمالي الكلي</span>
-                    </div>
-                    <div class="gt-cell gt-cell--amount">
-                        {{ formatCurrency(grandTotal) }}
-                        <span v-html="rialIconWhite" class="sar-icon sar-icon--white" />
-                    </div>
-                    <div class="gt-cell gt-cell--words">{{ grandTotalWords }}</div>
+                <div class="total-row">
+                    <span class="total-label">الإجمالي شامل ضريبة القيمة المضافة</span>
+                    <span class="total-val"><span v-html="rialIcon" class="sar-icon" /> {{ formatCurrency(grandTotal) }}</span>
                 </div>
-                <div class="payment-method-box">
-                    <div class="payment-title">طريقة السداد :</div>
-                    <div class="payment-text" v-html="paymentMethodHtml"></div>
+                <div class="total-row total-row--words">
+                    <span class="total-label">المجموع الكلي بالكلمات</span>
+                    <span class="total-val total-val--words">{{ grandTotalWords }}</span>
                 </div>
             </div>
 
@@ -103,6 +98,16 @@
                 <ul class="notes-list">
                     <li v-for="(note, i) in generalTerms" :key="'g' + i" v-html="note"></li>
                 </ul>
+                <div class="payment-method-inline">
+                    <span class="payment-title">طريقة السداد :</span>
+                    <span class="payment-text" v-html="paymentMethodHtml"></span>
+                </div>
+                <template v-if="otherTerms.length">
+                    <p class="notes-heading notes-heading--secondary">شروط أخرى :</p>
+                    <ul class="notes-list">
+                        <li v-for="(note, i) in otherTerms" :key="'o' + i" v-html="note"></li>
+                    </ul>
+                </template>
             </div>
 
             <p class="closing-line" dir="rtl">وتفضلوا بقبول فائق الاحترام والتحية</p>
@@ -115,7 +120,7 @@
                 </div>
                 <div class="sign-col sign-col--stamp">
                     <div class="sign-label">توقيع وختم العميل</div>
-                    <img :src="logoBlackImg" alt="Qallab stamp" class="stamp-img" />
+                    <!-- <img :src="logoBlackImg" alt="Qallab stamp" class="stamp-img" /> -->
                 </div>
             </div>
         </div>
@@ -140,17 +145,17 @@ const toDataUri = (svg: string) =>
 const logoImg = toDataUri(logoSvgRaw)
 const logoBlackImg = toDataUri(logoBlackSvgRaw)
 
-const rialIconWhite = `<svg width="13" height="14" viewBox="0 0 13 14" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12.5559 10.6949C12.7879 10.164 12.9413 9.58759 13 8.98324L9.17589 9.82291V8.20876L12.5558 7.46723C12.7878 6.9363 12.9411 6.35989 12.9999 5.75554L9.17577 6.59449V0.789524C8.5898 1.12919 8.0694 1.58132 7.64638 2.11463V6.93021L6.11699 7.26582V0C5.53102 0.339544 5.01062 0.791792 4.5876 1.32511V7.6013L1.16558 8.35202C0.933594 8.88295 0.780134 9.45936 0.721271 10.0637L4.5876 9.21545V11.2482L0.444073 12.1572C0.212091 12.6881 0.0587471 13.2646 0 13.8689L4.33711 12.9174C4.69017 12.8416 4.99362 12.6261 5.19091 12.3295L5.98631 11.1121V11.1118C6.06888 10.9859 6.11699 10.834 6.11699 10.6705V8.87985L7.64638 8.54424V11.7725L12.5558 10.6947L12.5559 10.6949Z" fill="white" /></svg>`
-
 const route = useRoute()
 const api = useApi()
 const { error } = useNotification()
 
-interface OrderLine {
-    description: string
-    unit: string
-    quantity: string
-    unit_price: string
+interface LogisticsLine {
+    source_location: string
+    target_location: string
+    trip_count: string
+    transport_start_date: string
+    transport_end_date: string
+    trip_price: string
     total: string
 }
 
@@ -169,6 +174,7 @@ interface OrderPrintDetail {
         email?: string | null
         tax_number?: number | string | null
         commercial_register?: number | string | null
+        unified_login_id?: number | string | null
     }
     subject?: {
         code?: string
@@ -179,11 +185,17 @@ interface OrderPrintDetail {
         source_location?: string | null
     }
     items?: Array<{
-        item_name?: string
-        unit_name?: string
-        quantity?: number | string
-        price_per_unit?: number | string | null
+        source_location?: string | null
+        target_location?: string | null
+        trip_count?: number | string | null
+        transport_start_date?: string | null
+        transport_end_date?: string | null
+        trip_price?: number | string | null
         line_total?: number | string | null
+        item_name?: string | null
+        unit_name?: string | null
+        quantity?: number | string | null
+        price_per_unit?: number | string | null
     }>
     totals?: {
         subtotal_excluding_vat?: number | string | null
@@ -197,6 +209,9 @@ interface OrderPrintDetail {
     actual_execution_duration?: number | string | null
     supply_start_date?: string | null
     po_datetime?: string
+    other_terms?: string[] | null
+    sq_code?: string | null
+    sq_datetime?: string | null
 }
 
 const isLoading = ref(false)
@@ -208,11 +223,19 @@ const routeId = computed(() => (route.params.id as string) || '')
 const supplier = computed(() => detail.value?.supplier ?? null)
 const customer = computed(() => detail.value?.customer ?? null)
 const subject = computed(() => detail.value?.subject ?? null)
+const locations = computed(() => detail.value?.locations ?? null)
 const totals = computed(() => detail.value?.totals ?? null)
 
-const PLACEHOLDER_LINES: OrderLine[] = [
-    { description: '[وصف البند]', unit: 'طن', quantity: '—', unit_price: '—', total: '—' },
-    { description: '[وصف البند]', unit: 'طن', quantity: '—', unit_price: '—', total: '—' },
+const PLACEHOLDER_LINES: LogisticsLine[] = [
+    {
+        source_location: '—',
+        target_location: '—',
+        trip_count: '—',
+        transport_start_date: '—',
+        transport_end_date: '—',
+        trip_price: '—',
+        total: '—',
+    },
 ]
 
 function normalizeDetail(body: unknown): OrderPrintDetail | null {
@@ -249,22 +272,54 @@ const escapeHtml = (s: string) =>
 
 const accent = (s: string) => `<span class="blue-accent">${escapeHtml(s)}</span>`
 
-const introBodyHtml = computed(() => {
-    const projectName = subject.value?.project_name
-    const quotationCode = orderNumber.value
-    const orderDateVal = orderDate.value
+const formatSqDate = (d: string | null | undefined) => {
+    if (!d) return '—'
+    try {
+        const dt = new Date(d)
+        if (isNaN(dt.getTime())) return String(d)
+        const s = dt.toLocaleDateString('en-US-u-ca-gregory', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+        })
+        return s.replace(/\//g, '\\')
+    } catch {
+        return String(d)
+    }
+}
 
-    return `تحية طيبة وبعد .. إشارة الى عرض السعر المقدم من قبلكم رقم ${accent(quotationCode)} بتاريخ ${accent(orderDateVal)}<br/>نعمدكم بالآتي حسب البنود أدناه ${projectName ? `لمشروع ${accent(projectName)}` : ''} :`
+const formatPlainDate = (d: string | null | undefined) => {
+    if (!d) return '—'
+    try {
+        const dt = new Date(d)
+        if (isNaN(dt.getTime())) return String(d)
+        const y = dt.getFullYear()
+        const m = String(dt.getMonth() + 1).padStart(2, '0')
+        const day = String(dt.getDate()).padStart(2, '0')
+        return `${y}-${m}-${day}`
+    } catch {
+        return String(d)
+    }
+}
+
+const introBodyHtml = computed(() => {
+    const quotationCode = (detail.value?.sq_code && String(detail.value.sq_code).trim()) || '—'
+    const quotationDate = formatSqDate(detail.value?.sq_datetime)
+    const supplierName = supplier.value?.full_name ?? '—'
+
+    return `<span class="intro-line intro-line--greeting">السادة / ${accent(supplierName)} المحترمين</span><span class="intro-line intro-line--salam">السلام عليكم ورحمة الله وبركاته،</span><span class="intro-line">إشارة إلى عرض السعر المقدم من قبلكم رقم ${accent(quotationCode)} بتاريخ ${accent(quotationDate)} نعمدكم بالآتي حسب البنود أدناه :</span>`
 })
 
-const lineItems = computed((): OrderLine[] => {
+const lineItems = computed((): LogisticsLine[] => {
     const items = detail.value?.items
     if (!items?.length) return PLACEHOLDER_LINES
     return items.map((it) => ({
-        description: String(it.item_name ?? '—'),
-        unit: String(it.unit_name ?? '—'),
-        quantity: it.quantity != null ? String(it.quantity) : '—',
-        unit_price: formatMoney(it.price_per_unit),
+        source_location: String(it.source_location ?? '—'),
+        target_location: String(it.target_location ?? '—'),
+        trip_count: it.trip_count != null ? String(it.trip_count) : '—',
+        transport_start_date: formatPlainDate(it.transport_start_date),
+        transport_end_date: formatPlainDate(it.transport_end_date),
+        trip_price: formatMoney(it.trip_price),
         total: formatMoney(it.line_total),
     }))
 })
@@ -313,6 +368,12 @@ const generalTerms = computed(() => {
         `تاريخ بداية التوريد <strong>${formatDate(supplyDate)}</strong> او يمكن تغييره بالتنسيق مع مبيعات منصة قلاب .`,
         'يتم احتساب وفوتورة الكميات <strong>(الموردة / المنقولة)</strong> حسب سندات الاستلام .',
     ]
+})
+
+const otherTerms = computed<string[]>(() => {
+    const list = detail.value?.other_terms
+    if (!Array.isArray(list)) return []
+    return list.map((t) => String(t ?? '').trim()).filter(Boolean)
 })
 
 function formatMoney(value: number | string | null | undefined): string {
@@ -509,11 +570,11 @@ onMounted(() => {
 
 .intro-block {
     margin: 0 36px 20px;
-    padding: 16px 24px;
+    padding: 5px 24px;
     text-align: center;
     line-height: 1.85;
-    background-color: #f9fafb;
-    border: 1px solid #e2e8f0;
+    /* background-color: #f9fafb;
+    border: 1px solid #e2e8f0; */
     border-radius: 12px;
 }
 
@@ -529,6 +590,20 @@ onMounted(() => {
     font-size: 0.92rem;
     font-weight: 600;
     color: #374151;
+}
+
+.intro-body :deep(.intro-line) {
+    display: block;
+}
+
+.intro-body :deep(.intro-line--greeting) {
+    text-align: right;
+    margin-bottom: 14px;
+}
+
+.intro-body :deep(.intro-line--salam) {
+    text-align: center;
+    margin-bottom: 18px;
 }
 
 .blue-accent {
@@ -556,26 +631,26 @@ onMounted(() => {
 
 .items-table th {
     color: #fff;
-    padding: 14px 12px;
+    padding: 14px 10px;
     text-align: center;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     font-weight: 700;
     vertical-align: middle;
 }
 
 .items-table th.th-first {
-    text-align: right;
-    padding-right: 24px;
+    text-align: center;
+    padding-right: 16px;
 }
 
 .items-table th.th-last {
-    padding-left: 24px;
+    padding-left: 16px;
 }
 
 .items-table tbody td {
-    padding: 14px 12px;
+    padding: 14px 10px;
     border-bottom: 1px solid #e5e7eb;
-    font-size: 0.875rem;
+    font-size: 0.8rem;
     color: #6b7280;
     text-align: center;
     vertical-align: middle;
@@ -590,13 +665,14 @@ onMounted(() => {
     text-align: right;
     font-weight: 500;
     color: #374151;
-    padding-right: 24px;
+    line-height: 1.6;
+    min-width: 140px;
 }
 
 .items-table tbody td.td-subtotal {
     font-weight: 700;
     color: #374151;
-    padding-left: 24px;
+    padding-left: 16px;
 }
 
 .totals-table {
@@ -633,89 +709,48 @@ onMounted(() => {
     direction: ltr;
 }
 
+.total-row--words .total-label {
+    color: #1849A9;
+    font-weight: 700;
+}
+
+.total-val--words {
+    direction: rtl;
+    font-weight: 600;
+    color: #374151;
+    text-align: left;
+    max-width: 60%;
+    line-height: 1.6;
+}
+
 .sar-icon {
     display: inline-block;
     vertical-align: middle;
     margin-inline-start: 4px;
 }
 
-.sar-icon--white :deep(svg path) {
-    fill: #fff;
-}
-
-.grand-total-section {
-    display: flex;
-    margin: 0 36px 20px;
-    gap: 0;
-    direction: rtl;
-}
-
-.grand-total-bar {
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    align-items: center;
-    gap: 16px;
-    background: #1849a9;
-    color: #fff;
-    padding: 16px 24px;
-    border-radius: 0 12px 12px 0;
-    flex: 1;
-}
-
-.gt-cell--label {
+.payment-method-inline {
+    margin-top: 14px;
+    padding-top: 12px;
+    font-size: 0.85rem;
+    line-height: 1.7;
+    color: #374151;
     text-align: right;
-}
-
-.gt-title {
-    font-size: 1rem;
-    font-weight: 800;
-}
-
-.gt-cell--amount {
-    text-align: center;
-    font-size: 1.25rem;
-    font-weight: 800;
-    font-variant-numeric: tabular-nums;
-    white-space: nowrap;
-    direction: ltr;
-}
-
-.gt-cell--words {
-    text-align: left;
-    font-size: 0.75rem;
-    font-weight: 500;
-    line-height: 1.45;
-    color: rgba(255, 255, 255, 0.92);
-    max-width: 160px;
-}
-
-.payment-method-box {
-    background-color: #f9fafb;
-    border: 1px solid #e2e8f0;
-    border-right: none;
-    border-radius: 12px 0 0 12px;
-    padding: 14px 16px;
-    min-width: 200px;
 }
 
 .payment-title {
     color: #1849A9;
     font-weight: 700;
-    margin-bottom: 6px;
-    font-size: 0.85rem;
+    margin-inline-end: 6px;
 }
 
 .payment-text {
-    font-size: 0.8rem;
     color: #374151;
-    line-height: 1.6;
 }
 
 .notes-section {
-    margin: 0 36px 16px;
-    padding: 16px 24px;
-    background-color: #f9fafb;
-    border: 1px solid #e2e8f0;
+    margin: 0 36px 0;
+    padding: 10px 24px;
     border-radius: 12px;
 }
 
@@ -725,6 +760,10 @@ onMounted(() => {
     font-weight: 800;
     color: #1849a9;
     text-align: right;
+}
+
+.notes-heading--secondary {
+    margin-top: 14px;
 }
 
 .notes-list {
@@ -743,15 +782,14 @@ onMounted(() => {
     font-weight: 700;
     font-size: 1rem;
     color: #374151;
-    margin: 24px 36px;
+    margin: 10px 36px;
 }
 
 .sign-strip {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    padding: 20px 36px;
-    margin-top: auto;
+    padding: 10px 36px;
 }
 
 .sign-col {
@@ -805,13 +843,11 @@ onMounted(() => {
 
     .items-table,
     .items-table thead tr,
-    .grand-total-bar,
     .section-card,
     .intro-block,
     .meta-strip,
     .totals-table,
-    .notes-section,
-    .payment-method-box {
+    .notes-section {
         print-color-adjust: exact;
         -webkit-print-color-adjust: exact;
     }
@@ -820,7 +856,6 @@ onMounted(() => {
     .intro-block,
     .table-wrapper,
     .totals-table,
-    .grand-total-section,
     .notes-section,
     .closing-line,
     .sign-strip {
@@ -839,12 +874,12 @@ onMounted(() => {
 
     .items-table th.th-first,
     .items-table tbody td.td-name {
-        padding-right: 20px;
+        padding-right: 12px;
     }
 
     .items-table th.th-last,
     .items-table tbody td.td-subtotal {
-        padding-left: 20px;
+        padding-left: 12px;
     }
 }
 </style>
