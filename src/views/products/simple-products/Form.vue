@@ -1347,9 +1347,9 @@ watch(activeTab, async (newTab) => {
                       </div>
                       <div class="grid grid-cols-2 gap-[14px]">
                         <PriceInput v-model="wholesalePrice" :label="t('pages.simpleProducts.form.labels.wholesalePrice')" :placeholder="t('pages.simpleProducts.form.labels.wholesalePrice')"
-                          :rules="[numeric(), positive()]" :hide-details="false" />
+                          :hide-details="true" />
                         <PriceInput v-model="halfWholesalePrice" :label="t('pages.simpleProducts.form.labels.halfWholesalePrice')" :placeholder="t('pages.simpleProducts.form.labels.halfWholesalePrice')"
-                          :rules="[numeric(), positive()]" :hide-details="false" />
+                          :hide-details="true" />
                       </div>
                       <!-- Discount Section -->
                       <div>
@@ -1427,8 +1427,8 @@ watch(activeTab, async (newTab) => {
                       </div>
 
                       <div>
-                        <TextInput type="number" :rules="[numeric(), positive()]" v-model="minQuantity" :label="t('pages.simpleProducts.form.labels.minQuantity')"
-                          :placeholder="t('pages.simpleProducts.form.labels.minQuantityPlaceholder')" :hide-details="false" />
+                        <TextInput type="number" v-model="minQuantity" :label="t('pages.simpleProducts.form.labels.minQuantity')"
+                          :placeholder="t('pages.simpleProducts.form.labels.minQuantityPlaceholder')" :hide-details="true" />
                       </div>
                     </div>
 
@@ -1436,11 +1436,11 @@ watch(activeTab, async (newTab) => {
                     <LanguageTabs :languages="availableLanguages" :label="t('pages.simpleProducts.form.labels.description')" class="mb-[20px]">
                       <template #en>
                         <TextareaInput  v-model="englishDescription"
-                          :placeholder="t('pages.simpleProducts.form.labels.descriptionPlaceholderEn')" min-height="120px" :hide-details="false" />
+                          :placeholder="t('pages.simpleProducts.form.labels.descriptionPlaceholderEn')" min-height="120px" :hide-details="true" />
                       </template>
                       <template #ar>
                         <TextareaInput v-model="arabicDescription"
-                          :placeholder="t('pages.simpleProducts.form.labels.descriptionPlaceholderAr')" min-height="120px" :hide-details="false" />
+                          :placeholder="t('pages.simpleProducts.form.labels.descriptionPlaceholderAr')" min-height="120px" :hide-details="true" />
                       </template>
                     </LanguageTabs>
 
