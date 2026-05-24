@@ -584,7 +584,7 @@ img {
 .quot-intro-block {
     margin: 14px 36px 25px;
     padding: 10px 15px;
-    text-align: center;
+    text-align: right;
     line-height: 1.85;
     background-color:#F8FAFC;
     border-radius:16px

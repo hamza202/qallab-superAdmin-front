@@ -15,55 +15,63 @@
         </div>
 
         <div v-else-if="!isLoading && !loadFailed" class="invoice-content">
-            <!-- ===== SECTION 1: section-card — company + logo (reference layout) ===== -->
-            <div class="section-card section-card--quotation">
-                <div class="quot-header-top">
-                        <div class="quot-company-col" dir="rtl">
-                            <div class="quot-co-name">{{ supplier?.full_name ?? 'شركة قلاب' }}</div>
-                        <div class="quot-co-sub">Qallab Company</div>
-                        <div class="quot-co-line">
-                            هاتف: {{ supplier?.mobile ?? '+966 599 1454323' }} · البريد: {{ supplier?.email ?? 'info@qallab.sa' }}
+            <!-- ===== Header card: company info (left) + logo/meta (right) ===== -->
+            <div class="section-card">
+                <div class="header-top">
+                    <div class="company-col" dir="ltr">
+                        <div class="co-name">{{ supplier?.full_name ?? 'شركة قلاب' }}</div>
+                        <div class="co-info" dir="rtl">
+                            <div class="co-line">
+                                السجل التجاري : {{ supplier?.commercial_register ?? '—' }}
+                            </div>
+                            <div class="co-line">
+                                الرقم الوطني الموحد : {{ supplier?.unified_login_id ?? '—' }}
+                            </div>
+                            <div class="co-line">
+                                الرقم الضريبي : {{ supplier?.tax_number ?? '—' }}
+                            </div>
                         </div>
-                        <div class="quot-co-line">
-                            الرقم الضريبي: {{ supplier?.tax_number ?? '—' }} · السجل التجاري:
-                            {{ supplier?.commercial_register ?? '—' }}
+                        <div class="co-meta" dir="rtl">
+                            تاريخ عرض السعر : <strong>{{ quotationDate }}</strong>
                         </div>
                     </div>
-                    <img :src="logoImg" alt="Qallab" class="quot-header-logo" />
-                </div>
-                <div class="quot-meta-strip" dir="rtl">
-                    <span class="quot-meta-item"
-                        >تاريخ عرض السعر : <strong>{{ quotationDate }}</strong></span
-                    >
-                    <span class="quot-meta-item"
-                        >رقم عرض سعر : <strong>{{ quotationNumber }}</strong></span
-                    >
+                    <div class="logo-col">
+                        <img
+                            v-if="supplier?.logo_url"
+                            :src="supplier.logo_url"
+                            alt="logo"
+                            class="header-logo"
+                        />
+                        <div v-else class="header-logo-placeholder"></div>
+                        <div class="logo-meta" dir="rtl">
+                            رقم عرض سعر : <strong>{{ quotationNumber }}</strong>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- ===== Intro (recipient / subject / body — reference copy) ===== -->
-            <div class="quot-intro-block" dir="rtl">
-                <p class="quot-recipient">
-                    السادة / <strong>{{ clientName }}</strong> المحترمين تحية طيبة وبعد.
+            <!-- ===== Recipient + subject + body ===== -->
+            <div class="intro-block" dir="rtl">
+                <p class="recipient-line">
+                    السادة / <strong class="blue-accent">{{ clientName }}</strong> المحترمين.
                 </p>
-                <p class="quot-subject-line">الموضوع: <strong>{{ subjectLine }}</strong></p>
-                <p class="quot-body-text" v-html="introBodyHtml"></p>
+                <p class="subject-line">
+                    الموضوع: <strong>{{ subjectLine }}</strong>
+                </p>
+                <p class="greeting-line">تحية طيبة وبعد،</p>
+                <p class="intro-body" v-html="introBodyHtml"></p>
             </div>
 
-            <!-- ===== Items Table (same wrapper + table pattern as invoice) ===== -->
+            <!-- ===== Items table ===== -->
             <div class="table-wrapper">
-                <table class="items-table items-table--quotation">
+                <table class="items-table">
                     <thead>
                         <tr>
-                            <th class="th-first">
-                                <span class="th-ar th-ar--only">البند</span>
-                            </th>
-                            <th><span class="th-ar th-ar--only">الوحدة</span></th>
-                            <th><span class="th-ar th-ar--only">الكمية</span></th>
-                            <th><span class="th-ar th-ar--only">سعر الوحدة</span></th>
-                            <th class="th-last">
-                                <span class="th-ar th-ar--only">السعر الإجمالي</span>
-                            </th>
+                            <th class="th-first"><span class="th-ar">البند</span></th>
+                            <th><span class="th-ar">الوحدة</span></th>
+                            <th><span class="th-ar">الكمية</span></th>
+                            <th><span class="th-ar">سعر الوحدة</span></th>
+                            <th class="th-last"><span class="th-ar">السعر الإجمالي</span></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -71,68 +79,60 @@
                             <td class="td-name">{{ row.description }}</td>
                             <td>{{ row.unit }}</td>
                             <td>{{ row.quantity }}</td>
-                            <td>{{ row.unit_price }} <span v-html="rialIcon" class="sar-icon" /></td>
-                            <td class="td-subtotal">{{ row.total }} <span v-html="rialIcon" class="sar-icon" /></td>
+                            <td>{{ row.unit_price }}</td>
+                            <td class="td-subtotal">{{ row.total }}</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
 
-            <!-- ===== totals-qr-section — totals column + hope (reference placement) ===== -->
-            <div class="totals-qr-table--quotation">
-                <div class="totals-area totals-table--quotation">
-                    <div class="total-row total-row--quotation">
-                        <span class="total-label-ar-only">الإجمالي غير شامل ضريبة القيمة المضافة</span>
-                        <span class="total-val"
-                            >{{ formatCurrency(subtotal) }} <span v-html="rialIcon" class="sar-icon"
-                        /></span>
-                    </div>
-                    <div class="total-row total-row--quotation">
-                        <span class="total-label-ar-only">ضريبة القيمة المضافة</span>
-                        <span class="total-val"
-                            >{{ formatCurrency(vatAmount) }} <span v-html="rialIcon" class="sar-icon"
-                        /></span>
-                    </div>
+            <!-- ===== Totals block ===== -->
+            <div class="totals-table">
+                <div class="total-row">
+                    <span class="total-label">الإجمالي غير شامل ضريبة القيمة المضافة</span>
+                    <span class="total-val" dir="rtl">
+                        <bdi>{{ formatCurrency(subtotal) }}</bdi>
+                        <span v-html="rialIcon" class="sar-icon" />
+                    </span>
+                </div>
+                <div class="total-row">
+                    <span class="total-label">ضريبة القيمة المضافة</span>
+                    <span class="total-val" dir="rtl">
+                        <bdi>{{ formatCurrency(vatAmount) }}</bdi>
+                        <span v-html="rialIcon" class="sar-icon" />
+                    </span>
+                </div>
+                <div class="total-row">
+                    <span class="total-label">الإجمالي شامل ضريبة القيمة المضافة</span>
+                    <span class="total-val" dir="rtl">
+                        <bdi>{{ formatCurrency(grandTotal) }}</bdi>
+                        <span v-html="rialIcon" class="sar-icon" />
+                    </span>
+                </div>
+                <div class="total-row total-row--words">
+                    <span class="total-label">المجموع الكلي بالكلمات</span>
+                    <span class="total-val total-val--words">{{ grandTotalWords }}</span>
                 </div>
             </div>
 
-            <div class="totals-qr-section totals-qr-section--quotation">
-                <div class="hope-area hope-area--quotation" dir="rtl">
-                    <p class="hope-text">{{ closingHope }}</p>
-                </div>
-                <div class="totals-area totals-area--quotation">
-                    <div class="total-due-box total-due-box--quotation-tri" dir="rtl">
-                        <div class="qgt-cell qgt-cell--label">
-                            <span class="qgt-title">الإجمالي الكلي</span>
-                        </div>
-                        <div class="qgt-cell qgt-cell--amount">
-                            {{ formatCurrency(grandTotal) }}
-                            <span v-html="rialIcon" class="sar-icon sar-icon--white" />
-                        </div>
-                        <div class="qgt-cell qgt-cell--words">{{ grandTotalWords }}</div>
-                    </div>
-                </div>
-            </div>
+            <!-- ===== Hope line ===== -->
+            <p class="hope-line" dir="rtl">{{ closingHope }}</p>
 
-            <!-- ===== Notes (project-section pattern — blue title like reference) ===== -->
-            <div class="project-section project-section--notes" dir="rtl">
+            <!-- ===== Notes ===== -->
+            <div class="notes-section" dir="rtl">
                 <p class="notes-heading">ملاحظات هامة :</p>
-                <ul class="terms-list">
+                <ul class="notes-list">
                     <li v-for="(note, i) in staticNotes" :key="i" v-html="note"></li>
                 </ul>
             </div>
 
-            <p class="quotation-respect" dir="rtl">وتفضلوا بقبول فائق الاحترام والتحية</p>
-
-            <!-- ===== Signature strip (reference) + invoice footer bar ===== -->
-            <div class="quot-sign-strip" dir="rtl">
-                <div class="quot-sign-text">
-                    <div>إدارة المبيعات</div>
-                    <div class="quot-sign-muted">منصة قلاب</div>
+            <!-- ===== Sign strip ===== -->
+            <div class="sign-strip" dir="rtl">
+                <div class="sign-block">
+                    <div class="sign-title">إدارة المبيعات</div>
+                    <div class="sign-name">{{ supplier?.full_name ?? '—' }}</div>
                 </div>
-                <img :src="logoBlackImg" alt="Qallab stamp" class="quot-stamp-img" />
             </div>
-
         </div>
     </div>
 </template>
@@ -144,16 +144,8 @@ import { useRoute } from 'vue-router'
 import { useApi } from '@/composables/useApi'
 import { useNotification } from '@/composables/useNotification'
 import { rialIcon } from '@/components/icons/globalIcons'
-import logoSvgRaw from '@/assets/logo.svg?raw'
-import logoBlackSvgRaw from '@/assets/logo-black.svg?raw'
 
 const { t } = useI18n()
-
-const toDataUri = (svg: string) =>
-    `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svg)))}`
-
-const logoImg = toDataUri(logoSvgRaw)
-const logoBlackImg = toDataUri(logoBlackSvgRaw)
 
 /** API path segment for detail (GET /purchases/quotations/{segment}/:id/detail). */
 const QUOTATION_DETAIL_SEGMENT = 'logistics'
@@ -177,6 +169,7 @@ interface QuotationPrintDetail {
         email?: string | null
         tax_number?: number | string | null
         commercial_register?: number | string | null
+        unified_login_id?: number | string | null
         logo_url?: string | null
     }
     customer?: {
@@ -185,11 +178,13 @@ interface QuotationPrintDetail {
         email?: string | null
         tax_number?: number | string | null
         commercial_register?: number | string | null
+        unified_login_id?: number | string | null
     }
     subject?: {
         summary?: string
         code?: string
         project_name?: string
+        quotation_type?: string
     }
     locations?: {
         target_location?: string | null
@@ -237,26 +232,6 @@ const PLACEHOLDER_LINES: QuotationLine[] = [
         unit_price: '—',
         total: '—',
     },
-    {
-        description: '[وصف البند — سيتم ربطه بالبيانات]',
-        unit: 'طن',
-        quantity: '—',
-        unit_price: '—',
-        total: '—',
-    },
-    {
-        description: '[وصف البند — سيتم ربطه بالبيانات]',
-        unit: 'طن',
-        quantity: '—',
-        unit_price: '—',
-        total: '—',
-    },
-]
-
-const DEFAULT_TERMS = [
-    '[بند الشروط — سيتم ربطه بالبيانات]',
-    '[صلاحية العرض — سيتم ربطه بالبيانات]',
-    '[شروط الدفع — سيتم ربطه بالبيانات]',
 ]
 
 function normalizeDetail(body: unknown): QuotationPrintDetail | null {
@@ -277,12 +252,10 @@ const quotationDate = computed(() => {
     try {
         const dt = new Date(d)
         if (isNaN(dt.getTime())) return String(d)
-        const s = dt.toLocaleDateString('en-US-u-ca-gregory', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-        })
-        return s.replace(/\//g, '\\')
+        const day = String(dt.getDate()).padStart(2, '0')
+        const month = String(dt.getMonth() + 1).padStart(2, '0')
+        const year = dt.getFullYear()
+        return `${day}-${month}-${year}`
     } catch {
         return String(d)
     }
@@ -290,18 +263,18 @@ const quotationDate = computed(() => {
 
 const clientName = computed(() => customer.value?.full_name ?? '[اسم العميل]')
 
-function isUnusableSubjectText(s: string | undefined): boolean {
-    if (!s || !String(s).trim()) return true
-    const x = String(s).trim()
-    if (x.startsWith('{') || x.startsWith('[')) return true
-    if (x.includes('"summary"') && x.includes('"code"')) return true
-    return false
-}
-
 const subjectLine = computed(() => {
-    const s = subject.value?.summary
-    if (!isUnusableSubjectText(s)) return String(s).trim()
-    return 'عرض سعر توريد مع نقل / نقل فقط'
+    const projectName = subject.value?.project_name
+        ? String(subject.value.project_name).trim()
+        : ''
+    const quotationType = subject.value?.quotation_type
+        ? String(subject.value.quotation_type).trim()
+        : ''
+
+    if (projectName && quotationType) return `${projectName} — ${quotationType}`
+    if (projectName) return projectName
+    if (quotationType) return quotationType
+    return 'عرض سعر خدمات لوجستية'
 })
 
 const escapeHtml = (s: string) =>
@@ -315,15 +288,15 @@ const introBodyHtml = computed(() => {
 
     const projectPart =
         projectName && String(projectName).trim()
-            ? accent(`لمشروعكم ${String(projectName).trim()}`)
-            : accent('لمشروعكم')
+            ? `لمشروعكم ${accent(String(projectName).trim())}`
+            : 'لمشروعكم'
 
     const locationPart =
         location && String(location).trim()
-            ? accent(`حسب الموقع ${String(location).trim()}`)
+            ? ` حسب الموقع ${accent(String(location).trim())}`
             : ''
 
-    return `بالإشارة إلى الموضوع أعلاه حيث أننا بفضل الله من الشركات الرائدة في مجال أعمال توريد ونقل مواد البناء الأولية في مكة وجدة وخارجهما، يسرنا أن نتقدم إليكم بعرض أسعارنا ${projectPart}${locationPart ? ` ${locationPart}` : ''} .`
+    return `بالإشارة إلى الموضوع أعلاه حيث أننا بفضل الله من الشركات الرائدة في مجال أعمال توريد ونقل مواد البناء الأولية في مكة وجدة وخارجهما، يسرنا أن نتقدم إليكم بعرض أسعارنا ${projectPart}${locationPart}.`
 })
 
 const lineItems = computed((): QuotationLine[] => {
@@ -345,15 +318,7 @@ const grandTotalWords = computed(
     () => totals.value?.grand_total_in_words ?? '[المبلغ كتابة — سيتم ربطه بالبيانات]'
 )
 
-const termsList = computed(() => {
-    const t1 = detail.value?.terms_and_conditions
-    if (t1?.length) return t1
-    const t2 = detail.value?.notes_list
-    if (t2?.length) return t2
-    return DEFAULT_TERMS
-})
-
-const closingHope = computed(() => 'آملين أن ينال عرض سعرنا قبولكم واستحسانكم ...')
+const closingHope = computed(() => 'آملين أن ينال عرض سعرنا قبولكم واستحسانكم.')
 
 const staticNotes = computed(() => {
     const invoiceIntervalDays = detail.value?.invoice_interval
@@ -371,10 +336,10 @@ const staticNotes = computed(() => {
     const paymentPhrase = accent(`${fmt(paymentTermDays)} أيام`)
 
     return [
-        'الأسعار أعلاه تشمل ضريبة القيمة المضافة.',
-        `صلاحية عرض السعر ${validityPhrase}.`,
-        `يتم رفع مستخلص خلال ${invoicePhrase} على أن يتم سدادها بعد ${paymentPhrase}.`,
-        'يتم بدء العمل فور الموافقة على عرض السعر وتحويله إلى طلب مشتريات وتصديقها ووضعها على النظام.',
+        'الأسعار أعلاه تشمل ضريبة القيمة المضافة .',
+        `صلاحية عرض السعر ${validityPhrase} .`,
+        `يتم رفع مستخلص ${invoicePhrase} على أن يتم سدادها بعد ${paymentPhrase} .`,
+        'يتم بدء العمل فور الموافقة على عرض السعر وتحويله إلى طلبية مشتريات وتعميدها ورفعها على النظام .',
     ]
 })
 
@@ -440,10 +405,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* ============================================
-   QUOTATION PRINT — aligned with sales/invoices/Print.vue
-   ============================================ */
-
 @page {
     size: A4;
     margin: 0;
@@ -497,219 +458,167 @@ onMounted(() => {
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    padding: 20px 0;
 }
 
+/* ===== Header card ===== */
 .section-card {
-    margin: 0 36px 10px;
-    padding: 15px 36px 15px;
-    background-color: rgba(248, 250, 252, 1);
-    border: 1px solid rgba(246, 248, 252, 1);
-    border-radius: 16px;
+    margin: 0 36px 16px;
+    padding: 20px 28px;
+    background-color: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
 }
 
-.section-card--quotation {
-    padding-bottom: 0;
-}
-
-.quot-header-top {
+.header-top {
     display: flex;
     flex-direction: row;
     align-items: flex-start;
     justify-content: space-between;
     direction: ltr;
     gap: 20px;
-    padding-bottom: 14px;
 }
 
-.quot-company-col {
+.company-col {
     flex: 1;
     min-width: 0;
     text-align: left;
 }
 
-.quot-co-name {
-    font-size: 1.1rem;
+.co-name {
+    font-size: 1.5rem;
     font-weight: 800;
-    color: #1849a9;
-    margin-bottom: 4px;
+    color: #1849A9;
+    margin-bottom: 12px;
+    text-align: left;
 }
 
-/* Improve image clarity inside iframe printing */
-img {
-    image-rendering: auto;
+.co-info {
+    text-align: left;
+    direction: rtl;
 }
 
-.quot-co-sub {
-    font-size: 0.75rem;
+.co-line {
+    font-size: 0.82rem;
+    line-height: 1.8;
+    color: #6b7280;
+    margin-bottom: 2px;
+    text-align: left;
+}
+
+.co-meta {
+    margin-top: 12px;
+    font-size: 0.86rem;
+    color: #374151;
     font-weight: 600;
-    color: #64748b;
-    margin-bottom: 8px;
+    text-align: left;
+    direction: rtl;
 }
 
-.quot-co-line {
-    font-size: 0.8rem;
-    line-height: 1.55;
-    color: #475569;
-    margin-bottom: 4px;
+.co-meta strong {
+    color: #111827;
+    font-weight: 700;
+    margin-inline-start: 4px;
 }
 
-.quot-header-logo {
-    height: 48px;
-    width: auto;
+.logo-col {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 14px;
     flex-shrink: 0;
-    margin-top: 4px;
+    min-width: 200px;
+    direction: ltr;
+}
+
+.header-logo {
+    height: 64px;
+    width: auto;
+    max-width: 180px;
     object-fit: contain;
 }
 
-.quot-meta-strip {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin: 0 -36px -1px;
-    padding: 12px 36px;
-    background: #eef2f7;
-    border-top: 1px solid #e2e8f0;
-    border-radius: 0 0 14px 14px;
+.header-logo-placeholder {
+    height: 64px;
+}
+
+.logo-meta {
     font-size: 0.86rem;
-    color: #334155;
+    color: #374151;
+    font-weight: 600;
+    text-align: right;
+    direction: rtl;
+    white-space: nowrap;
 }
 
-.quot-meta-item strong {
-    color: #0f172a;
+.logo-meta strong {
+    color: #111827;
     font-weight: 700;
+    margin-inline-start: 4px;
 }
 
-.quot-intro-block {
-    margin: 14px 36px 25px;
-    padding: 10px 15px;
-    text-align: center;
+/* ===== Intro (recipient + subject + body) ===== */
+.intro-block {
+    margin: 0 36px 16px;
+    padding: 6px 8px;
     line-height: 1.85;
-    background-color:#F8FAFC;
-    border-radius:16px
 }
 
-.quot-recipient {
-    margin: 0 0 6px;
+.recipient-line {
+    margin: 0 0 14px;
     font-size: 0.95rem;
     font-weight: 700;
-    color: #0f172a;
+    color: #111827;
+    text-align: right;
 }
 
-.quot-subject-line {
+.subject-line {
     margin: 0 0 8px;
-    font-size: 0.92rem;
-    font-weight: 700;
-    color: #0f172a;
+    font-size: 0.95rem;
+    color: #111827;
+    text-align: right;
 }
 
-.quot-intro-block strong,
-.quot-intro-block a,
+.subject-line strong {
+    font-weight: 800;
+    color: #111827;
+}
+
+.greeting-line {
+    margin: 0 0 10px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #111827;
+    text-align: center;
+}
+
+.intro-body {
+    margin: 0;
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: #374151;
+    text-align: center;
+    line-height: 1.9;
+}
+
 .blue-accent {
     color: #1849A9;
     font-weight: 800;
-    text-decoration: none;
 }
 
-.quot-body-text {
-    margin: 0;
-    font-size: 0.88rem;
-    text-align: center;
-    text-justify: inter-word;
-}
-
-.project-section {
-    border: 1px solid rgba(246, 248, 252, 1);
-    border-radius: 16px;
-    border-image: none;
-    padding: 13px 36px;
-    margin: 0 36px;
-    background: unset;
-    background-color: rgba(248, 250, 252, 1);
-    color: rgba(248, 250, 252, 1);
-}
-
-.project-section--notes {
-    margin-top: 12px;
-}
-
-.project-section--notes .notes-heading {
-    margin: 0 0 10px;
-    font-size: 0.95rem;
-    font-weight: 800;
-    color: #1849a9;
-    text-align: right;
-}
-
-.project-section--notes .terms-list {
-    margin: 0;
-    padding: 0 20px 0 0;
-    font-size: 0.86rem;
-    line-height: 1.65;
-    color: #334155;
-    text-align: right;
-    list-style-position: outside;
-    list-style: disc;
-}
-
-.quotation-respect {
-    text-align: center;
-    font-weight: 700;
-    font-size: 0.92rem;
-    color: #101828;
-    margin: 16px 36px 12px;
-}
-
+/* ===== Items table ===== */
 .table-wrapper {
-    margin: 10px 0 0;
-    padding: 0 36px;
+    margin: 8px 36px 16px;
 }
 
 .items-table {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
-    direction: ltr;
-    border-width: 0;
-    border-style: none;
-    border-color: transparent;
-    border-image: none;
-    border-radius: 8px;
-    overflow: hidden;
-}
-
-.items-table--quotation {
     direction: rtl;
-}
-
-.items-table--quotation th.th-first {
-    text-align: right;
-    padding-left: 12px;
-    padding-right: 36px;
-}
-
-.items-table--quotation th.th-last {
-    padding-right: 12px;
-    padding-left: 36px;
-}
-
-.items-table--quotation .th-ar--only {
-    display: block;
-    font-weight: 900;
-    font-size: 1rem;
-    opacity: 1;
-}
-
-.items-table--quotation tbody td.td-name {
-    text-align: right;
-    padding-right: 36px;
-    padding-left: 12px;
-}
-
-.items-table--quotation tbody td.td-subtotal {
-    padding-left: 36px;
-    padding-right: 12px;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
 }
 
 .items-table thead tr {
@@ -718,156 +627,100 @@ img {
 
 .items-table th {
     color: #fff;
-    padding: 4px 12px;
+    padding: 12px;
     text-align: center;
-    font-size: 0.78rem;
-    font-weight: 600;
+    font-size: 0.9rem;
+    font-weight: 700;
     vertical-align: middle;
-    line-height: 1.4;
-    white-space: nowrap;
-}
-
-.items-table th .th-en {
-    display: block;
-    font-weight: 700;
-    font-size: 0.78rem;
-    margin-bottom: 2px;
-}
-
-.items-table th .th-ar {
-    display: block;
-    font-weight: 700;
-    font-size: .8rem;
-    opacity: 0.85;
-    padding:8px 0
 }
 
 .items-table th.th-first {
-    text-align: left;
-    white-space: normal;
-    padding-left: 36px;
+    text-align: right;
+    padding-right: 24px;
 }
 
 .items-table th.th-last {
-    padding-right: 36px;
+    padding-left: 24px;
 }
 
 .items-table tbody td {
-    padding: 4px 12px;
-    border-bottom: 1px solid #f6f8fc;
+    padding: 14px 12px;
+    border-bottom: 1px solid #e5e7eb;
     font-size: 0.875rem;
-    color: #344054;
+    color: #6b7280;
     text-align: center;
     vertical-align: middle;
+    background: #fff;
+}
+
+.items-table tbody tr:last-child td {
+    border-bottom: none;
 }
 
 .items-table tbody td.td-name {
-    text-align: left;
+    text-align: right;
     font-weight: 500;
-    color: #101828;
-    padding-left: 36px;
+    color: #374151;
+    padding-right: 24px;
 }
 
 .items-table tbody td.td-subtotal {
     font-weight: 700;
-    color: #101828;
-    font-size: 0.85rem;
-    padding-right: 36px;
+    color: #374151;
+    padding-left: 24px;
 }
 
-.totals-qr-section {
-    display: flex;
-    direction: ltr;
-    gap: 10px;
-    padding: 0 36px 15px;
-    align-items: flex-start;
+/* ===== Totals ===== */
+.totals-table {
+    margin: 0 36px 16px;
+    background-color: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 6px 24px;
 }
 
-.totals-qr-table--quotation{
-    padding: 0 36px 15px;
-    width: 100%;
-}
-.totals-area {
-    flex: 1;
-    margin-left: auto;
-    padding-right: 56px;
-    background-color: rgba(248, 250, 252, 1);
-}
-
-.totals-table--quotation{
-    border-radius: 10px;
-    margin-left: 0;
-    margin-right: 0;
-    margin-top:15px;
-    padding: 12px 18px 14px 12px;
-}
-
-.totals-qr-section--quotation{
-    align-items:center
-}
-.totals-area--quotation {
-    flex: 1 1 58%;
-    max-width: 520px;
-    margin-left: 0;
-    margin-right: 0;
-    padding: 12px 18px 14px 12px;
-    border-radius: 10px;
-}
-
-.hope-area--quotation {
-    flex: 1 1 36%;
-    min-width: 160px;
-    max-width: 320px;
-    display: flex;
-    align-items: center;
-    padding: 8px;
-}
-
-.hope-text {
-    margin: 0;
-    font-size: .85rem;
-    line-height: 1.65;
-    color: #1849a9;
-    font-weight: 700;
-    text-align: right;
-}
-
-.total-row--quotation {
+.total-row {
     display: flex;
     justify-content: space-between;
-    direction: rtl;
-    padding: 6px 12px 6px 8px;
     align-items: center;
-    border-bottom: 1px solid #e2e8f0;
+    direction: rtl;
+    padding: 12px 0;
+    border-bottom: 1px solid #e5e7eb;
 }
 
-.total-row--quotation:last-of-type {
+.total-row:last-child {
     border-bottom: none;
 }
 
-.total-label-ar-only {
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: #344054;
-    line-height: 1.35;
-    text-align: right;
-    flex: 1;
-    min-width: 0;
-    padding-left: 10px;
-}
-
-.total-row--quotation .total-val {
-    text-align: left;
-    direction: ltr;
+.total-label {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #111827;
 }
 
 .total-val {
     font-size: 0.9rem;
+    font-weight: 700;
+    color: #111827;
+    direction: rtl;
+    unicode-bidi: isolate;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.total-row--words .total-label {
+    color: #1849A9;
+    font-weight: 800;
+}
+
+.total-val--words {
+    direction: rtl;
     font-weight: 600;
-    color: #101828;
-    min-width: 110px;
-    white-space: nowrap;
-    padding-top: 2px;
+    color: #374151;
+    text-align: left;
+    max-width: 60%;
+    line-height: 1.6;
 }
 
 .sar-icon {
@@ -876,98 +729,64 @@ img {
     margin-inline-start: 4px;
 }
 
-.sar-icon--white :deep(svg path) {
-    fill: #fff;
+/* ===== Hope line ===== */
+.hope-line {
+    text-align: center;
+    font-weight: 700;
+    font-size: 0.92rem;
+    color: #1849A9;
+    margin: 14px 36px 8px;
 }
 
-.total-due-box {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: #1849a9;
-    color: #fff;
-    padding: 10px 36px;
-    border-radius: 10px;
-    margin-right: -56px;
-    direction: ltr;
+/* ===== Notes ===== */
+.notes-section {
+    margin: 0 36px;
+    padding: 4px 12px;
 }
 
-.total-due-box--quotation-tri {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    align-items: center;
-    gap: 12px;
-    margin-right: 0;
-    padding: 12px 20px;
-    direction: rtl;
-}
-
-.qgt-cell--label {
-    text-align: right;
-}
-
-.qgt-title {
+.notes-heading {
+    margin: 0 0 10px;
     font-size: 0.95rem;
     font-weight: 800;
-    color: #fff;
-}
-
-.qgt-cell--amount {
-    text-align: center;
-    font-size: 1.2rem;
-    font-weight: 800;
-    font-variant-numeric: tabular-nums;
-    white-space: nowrap;
-    direction: ltr;
-}
-
-.qgt-cell--words {
-    text-align: left;
-    font-size: 0.75rem;
-    font-weight: 500;
-    line-height: 1.45;
-    color: rgba(255, 255, 255, 0.92);
-    padding-inline-start: 4px;
-}
-
-.quot-sign-strip {
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    gap: 20px;
-    padding: 16px 36px 20px;
-    margin-top: auto;
-    break-inside: avoid;
-    page-break-inside: avoid;
-}
-
-.quot-sign-text {
-    font-size: 0.88rem;
-    font-weight: 700;
-    color: #0f172a;
-    line-height: 1.5;
+    color: #1849A9;
     text-align: right;
 }
 
-.quot-sign-muted {
-    font-size: 0.82rem;
-    font-weight: 500;
-    color: #64748b;
+.notes-list {
+    margin: 0;
+    padding: 0 22px 0 0;
+    font-size: 0.86rem;
+    line-height: 1.85;
+    color: #374151;
+    text-align: right;
+    list-style-position: outside;
+    list-style: disc;
 }
 
-.quot-stamp-placeholder {
-    width: 64px;
-    height: 64px;
-    border-radius: 50%;
-    border: 2px dashed #94a3b8;
-    background: linear-gradient(145deg, #f8fafc, #f1f5f9);
-    flex-shrink: 0;
+/* ===== Sign strip ===== */
+.sign-strip {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 28px 36px 20px;
+    margin-top: auto;
 }
 
-.quot-stamp-img {
-    flex-shrink: 0;
-    object-fit: contain;
-    opacity: 0.95;
+.sign-block {
+    text-align: center;
+}
+
+.sign-title {
+    font-size: 1rem;
+    font-weight: 800;
+    color: #1849A9;
+    margin-bottom: 4px;
+}
+
+.sign-name {
+    font-size: 1rem;
+    font-weight: 800;
+    color: #1849A9;
 }
 
 @media print {
@@ -985,6 +804,7 @@ img {
         max-width: 100%;
         box-shadow: none;
         margin: 0;
+        padding: 14px 0;
     }
 
     body {
@@ -994,105 +814,37 @@ img {
 
     .items-table,
     .items-table thead tr,
-    .total-due-box,
-    .total-due-box--quotation-tri,
     .section-card,
-    .project-section,
-    .quot-meta-strip,
-    .totals-area--quotation {
+    .intro-block,
+    .totals-table,
+    .notes-section {
         print-color-adjust: exact;
         -webkit-print-color-adjust: exact;
     }
 
+    .section-card,
+    .intro-block,
+    .table-wrapper,
+    .totals-table,
+    .hope-line,
+    .notes-section,
+    .sign-strip {
+        margin-left: 28px;
+        margin-right: 28px;
+    }
+
     .section-card {
-        margin: 20px 28px 10px;
-        padding: 15px 28px 0;
+        padding: 16px 24px;
     }
 
-    .quot-meta-strip {
-        margin: 0 -28px 0;
-        padding: 10px 28px;
-    }
-
-    .table-wrapper {
-        margin: 10px 0 0;
-        padding: 0 28px;
-    }
-
-    .items-table th.th-first {
-        padding-left: 28px;
-    }
-
-    .items-table th.th-last {
-        padding-right: 28px;
-    }
-
+    .items-table th.th-first,
     .items-table tbody td.td-name {
-        padding-left: 28px;
+        padding-right: 20px;
     }
 
+    .items-table th.th-last,
     .items-table tbody td.td-subtotal {
-        padding-right: 28px;
+        padding-left: 20px;
     }
-
-    .items-table--quotation th.th-first {
-        padding-right: 28px;
-        padding-left: 10px;
-    }
-
-    .items-table--quotation th.th-last {
-        padding-left: 28px;
-        padding-right: 10px;
-    }
-
-    .items-table--quotation tbody td.td-name {
-        padding-right: 28px;
-        padding-left: 10px;
-    }
-
-    .items-table--quotation tbody td.td-subtotal {
-        padding-left: 28px;
-        padding-right: 10px;
-    }
-
-    .totals-qr-section {
-        padding: 0 28px 15px;
-    }
-
-    .totals-area--quotation {
-        padding: 10px 14px 12px 8px;
-    }
-
-    .total-due-box {
-        padding: 10px 28px;
-        margin-right: -46px;
-    }
-
-    .total-due-box--quotation-tri {
-        margin-right: 0;
-        padding: 10px 16px;
-    }
-
-    .project-section {
-        margin: 0 28px;
-        padding: 4px 28px;
-    }
-
-    .quotation-respect {
-        margin-left: 28px;
-        margin-right: 28px;
-    }
-
-    .quot-intro-block {
-        margin-left: 28px;
-        margin-right: 28px;
-    }
-
-    .quot-sign-strip {
-        padding-left: 28px;
-        padding-right: 28px;
-    }
-
-    /* footer removed */
 }
 </style>
