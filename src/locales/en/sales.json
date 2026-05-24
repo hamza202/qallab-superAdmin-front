@@ -237,13 +237,19 @@
       "messageSingle": "Are you sure you want to delete this quotation?",
       "messageBulk": "Are you sure you want to delete {count} quotations?"
     },
+    "print": {
+      "pageTitle": "Print quotation",
+      "loadFailed": "Could not load quotation for printing"
+    },
     "messages": {
       "loadListError": "Failed to load quotations list",
       "columnsUpdateError": "Failed to update columns",
       "deleteSuccess": "Quotation deleted successfully",
       "deleteError": "Failed to delete quotation",
       "bulkDeleteSuccess": "{count} quotations deleted successfully",
-      "bulkDeleteError": "Bulk delete failed"
+      "bulkDeleteError": "Bulk delete failed",
+      "pdfDownloadError": "Failed to download PDF",
+      "pdfDownloadNoUrl": "No download link was returned for this quotation"
     }
   },
   "quotationsLogistics": {
@@ -265,13 +271,19 @@
       "messageSingle": "Are you sure you want to delete this quotation?",
       "messageBulk": "Are you sure you want to delete {count} quotations?"
     },
+    "print": {
+      "pageTitle": "Print quotation",
+      "loadFailed": "Could not load quotation for printing"
+    },
     "messages": {
       "loadListError": "Failed to load quotations list",
       "columnsUpdateError": "Failed to update columns",
       "deleteSuccess": "Quotation deleted successfully",
       "deleteError": "Failed to delete quotation",
       "bulkDeleteSuccess": "{count} quotations deleted successfully",
-      "bulkDeleteError": "Bulk delete failed"
+      "bulkDeleteError": "Bulk delete failed",
+      "pdfDownloadError": "Failed to download PDF",
+      "pdfDownloadNoUrl": "No download link was returned for this quotation"
     }
   },
   "quotationsMaterialProduct": {
@@ -291,13 +303,19 @@
       "title": "Delete Quotations",
       "message": "Are you sure you want to delete {count} quotations?"
     },
+    "print": {
+      "pageTitle": "Print quotation",
+      "loadFailed": "Could not load quotation for printing"
+    },
     "messages": {
       "loadListError": "Failed to load quotations list",
       "columnsUpdateError": "Failed to update columns",
       "deleteSuccess": "Quotation deleted successfully",
       "deleteError": "Failed to delete quotation",
       "bulkDeleteSuccess": "{count} quotations deleted successfully",
-      "bulkDeleteError": "Bulk delete failed"
+      "bulkDeleteError": "Bulk delete failed",
+      "pdfDownloadError": "Failed to download PDF",
+      "pdfDownloadNoUrl": "No download link was returned for this quotation"
     }
   },
   "requestsFuels": {
@@ -709,6 +727,7 @@
         "transportCompanyName": "Transport Company Name",
         "orderCreatedDate": "Order Creation Date",
         "requestStatus": "Request Status",
+        "dateHint": "The date will be determined after the purchase order is approved",
         "tripTransportCount": "Number of Transports"
       },
       "validation": {

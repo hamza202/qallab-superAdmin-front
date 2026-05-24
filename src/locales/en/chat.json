@@ -1,0 +1,15 @@
+{
+  "title": "Conversations",
+  "conversations": "Conversations",
+  "search": "Search ...",
+  "noConversations": "No conversations yet ... Start now!",
+  "selectConversation": "Select a conversation to start chatting",
+  "noMessages": "No messages yet ... Start now!",
+  "startConversation": "Start Conversation!",
+  "startNewConversation": "Start New Conversation",
+  "startChat": "Start Chat",
+  "today": "Today",
+  "typeMessage": "Type a reply ...",
+  "send": "Send",
+  "attach": "Attach file"
+}

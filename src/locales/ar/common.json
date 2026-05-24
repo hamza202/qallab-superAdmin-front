@@ -3,7 +3,9 @@
     "import": "استيراد",
     "export": "تصدير",
     "delete": "حذف",
-    "deleteAll": "حذف الجميع"
+    "deleteAll": "حذف الجميع",
+    "print": "طباعة",
+    "downloadPdf": "تحميل PDF"
   },
   "actions": {
     "save": "حفظ",

@@ -198,7 +198,7 @@ const fetchFormData = async () => {
         formData.value.cancel_fee_type = data.cancel_fee_type ?? null;
         formData.value.cancel_fee = data.cancel_fee ?? null;
         formData.value.code = data.code ? String(data.code) : '';
-        formData.value.approved_amount = data.approved_amount ?? null;
+        formData.value.approved_amount = data.approved_amount ?? 'service_total_amount';
 
         // Populate totals from API (will be overridden by computed if data changes)
         if (data.final_logistics_service_amount != null) {
@@ -546,7 +546,7 @@ const formData = ref({
     cancel_fee_type: null as string | null,
     cancel_fee: null as number | string | null,
     code: '' as string,
-    approved_amount: null as string | null,
+    approved_amount: 'service_total_amount' as string | null,
     final_logistics_service_amount: null as number | null,
     final_logistics_trip: null as number | null
 });
@@ -563,7 +563,10 @@ const originalTripIds = ref<Map<number, number>>(new Map());
 const summaryTotals = computed(() => {
     const transportValue = logisticsDetails.value.reduce((total, detail) => {
         const amount = detail.transport_amount != null ? Number(detail.transport_amount) : 0;
-        let finalAmount = isNaN(amount) ? 0 : amount;
+        const tripNo = detail.trip_no != null ? Number(detail.trip_no) : 0;
+        const safeAmount = isNaN(amount) ? 0 : amount;
+        const safeTripNo = isNaN(tripNo) || tripNo <= 0 ? 1 : tripNo;
+        let finalAmount = safeAmount * safeTripNo;
         if (finalAmount > 0 && detail.discount_val) {
             const discountVal = Number(detail.discount_val);
             const discountType = Number(detail.discount_type || 2);
@@ -594,7 +597,10 @@ const summaryTotals = computed(() => {
 const computedFinalLogisticsServiceAmount = computed(() => {
     return logisticsDetails.value.reduce((total, detail) => {
         const amount = detail.transport_amount != null ? Number(detail.transport_amount) : 0;
-        let finalAmount = isNaN(amount) ? 0 : amount;
+        const tripNo = detail.trip_no != null ? Number(detail.trip_no) : 0;
+        const safeAmount = isNaN(amount) ? 0 : amount;
+        const safeTripNo = isNaN(tripNo) || tripNo <= 0 ? 1 : tripNo;
+        let finalAmount = safeAmount * safeTripNo;
         if (finalAmount > 0 && detail.discount_val) {
             const discountVal = Number(detail.discount_val);
             const discountType = Number(detail.discount_type || 2);
@@ -1162,7 +1168,7 @@ const getInitialFormData = () => ({
     cancel_fee_type: null as string | null,
     cancel_fee: null as number | string | null,
     code: '' as string,
-    approved_amount: null as string | null,
+    approved_amount: 'service_total_amount' as string | null,
     final_logistics_service_amount: null as number | null,
     final_logistics_trip: null as number | null
 });
@@ -1662,16 +1668,6 @@ onMounted(async () => {
                             <!-- Final Logistics Trip Amount -->
                             <PriceInput showRialIcon v-model="formData.final_logistics_trip" density="comfortable"
                                 :label="t('sales.forms.common.labels.tripsTotalValue')" :placeholder="t('sales.forms.common.misc.zeroPlaceholder')" disabled />
-
-                            <!-- Approved Amount Radio -->
-                            <div class="md:col-span-1" v-if="approvedAmountItems.length > 0">
-                                <label class="font-semibold text-sm text-gray-700 mb-2 block">{{ t('sales.forms.common.labels.approvedOfferTotal') }}</label>
-                                <v-radio-group v-model="formData.approved_amount" inline density="comfortable"
-                                    hide-details>
-                                    <v-radio v-for="item in approvedAmountItems" :key="item.value" :label="item.title"
-                                        :value="item.value" color="primary" />
-                                </v-radio-group>
-                            </div>
 
                             <!-- Payment Method -->
                             <SelectInput v-model="formData.payment_method" :items="paymentMethodItems"

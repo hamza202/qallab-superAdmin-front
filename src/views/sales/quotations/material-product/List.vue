@@ -8,8 +8,8 @@ import { useTableColumns } from '@/composables/useTableColumns';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog.vue';
 import DatePickerInput from '@/components/common/forms/DatePickerInput.vue';
 import StatusChangeFeature from '@/components/common/StatusChangeFeature.vue';
-import { GridIcon, trash_1_icon, trash_2_icon, importIcon, columnIcon, exportIcon, plusIcon, searchIcon } from "@/components/icons/globalIcons";
-import { switcStatusIcon, refreshIcon } from '@/components/icons/priceOffersIcons';
+import { GridIcon, trash_1_icon, trash_2_icon, importIcon, columnIcon, exportIcon, plusIcon, searchIcon, printerIcon } from "@/components/icons/globalIcons";
+import { switcStatusIcon, refreshIcon, downloadIcon } from '@/components/icons/priceOffersIcons';
 
 const { t } = useI18n();
 const router = useRouter();
@@ -33,6 +33,8 @@ interface ItemActions {
   can_view: boolean;
   can_change_status: boolean;
   can_create_order: boolean;
+  can_details_pdf?: boolean;
+  can_download_pdf?: boolean;
 }
 
 interface QuotationItem {
@@ -48,6 +50,7 @@ interface QuotationItem {
   payment_method: string;
   final_total: string;
   status_id: number;
+  signed_po_file_url: string | null;
   actions: ItemActions;
 }
 
@@ -63,6 +66,15 @@ interface ListResponse {
   headers: TableHeader[];
   shownHeaders: TableHeader[];
   actions: { can_create: boolean; can_bulk_delete: boolean };
+}
+
+interface QuotationPdfMetaResponse {
+  data?: {
+    url?: string;
+    pdf_path?: string;
+    pdf_generated_at?: string;
+  };
+  message?: string;
 }
 
 const tableItems = ref<QuotationItem[]>([]);
@@ -101,6 +113,63 @@ const deleteLoading = ref(false);
 
 const showChangeStatusDialog = ref(false);
 const itemToChangeStatus = ref<QuotationItem | null>(null);
+
+const downloadingPdfUuid = ref<string | null>(null);
+const downloadingSignedPoUuid = ref<string | null>(null);
+
+const signedPoDownloadIcon = `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M13.5 3H12H8C6.34315 3 5 4.34315 5 6V18C5 19.6569 6.34315 21 8 21H12M13.5 3L19 8.625M13.5 3V7.625C13.5 8.17728 13.9477 8.625 14.5 8.625H19M19 8.625V11.8125" stroke="#fec54b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M17.5 15V21M17.5 21L15 18.5M17.5 21L20 18.5" stroke="#fec54b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>`;
+
+const forceDownloadFromUrl = async (fileUrl: string, filename: string) => {
+  const res = await fetch(fileUrl, { mode: 'cors', credentials: 'omit' });
+  if (!res.ok) throw new Error(`bad status ${res.status}`);
+  const blob = await res.blob();
+  const objectUrl = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = objectUrl;
+  a.download = filename;
+  a.rel = 'noopener noreferrer';
+  a.style.display = 'none';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+};
+
+const handleDownloadSignedPo = async (item: { uuid?: string; id?: string | number; signed_po_file_url?: string | null }) => {
+  const url = item.signed_po_file_url;
+  if (!url) return;
+  const uuid = String(item.uuid ?? item.id ?? '');
+  downloadingSignedPoUuid.value = uuid;
+  try {
+    const pathName = url.split('?')[0].split('/').pop() || `signed-po-${uuid}`;
+    await forceDownloadFromUrl(url, pathName);
+  } catch (err: any) {
+    console.error('Error downloading signed PO file:', err);
+    error(err?.response?.data?.message || t('common.errors.downloadFailed'));
+  } finally {
+    downloadingSignedPoUuid.value = null;
+  }
+};
+
+const triggerPdfDownloadFromSignedUrl = async (signedUrl: string, filename: string) => {
+  try {
+    const res = await fetch(signedUrl, { mode: 'cors', credentials: 'omit' });
+    if (!res.ok) throw new Error('bad status');
+    const blob = await res.blob();
+    const objectUrl = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = objectUrl;
+    a.download = filename;
+    a.rel = 'noopener noreferrer';
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(objectUrl);
+  } catch {
+    window.open(signedUrl, '_blank', 'noopener,noreferrer');
+  }
+};
 
 const openChangeStatusDialog = (item: QuotationItem | Record<string, unknown>) => {
   itemToChangeStatus.value = item as QuotationItem;
@@ -195,6 +264,57 @@ const handleEdit = (item: { id?: string | number; uuid?: string }) => {
 const handleView = (item: { id?: string | number; uuid?: string }) => {
   const uuid = item.uuid ?? String(item.id);
   router.push({ name: 'PriceOfferMaterialProductView', params: { id: uuid } });
+};
+
+const handlePrint = (item: { id?: string | number; uuid?: string }) => {
+  const uuid = item.uuid ?? String(item.id);
+  const routeData = router.resolve({ name: 'PriceOfferMaterialProductPrint', params: { id: uuid } });
+  const printUrl = routeData.href.startsWith('/') ? `${window.location.origin}${routeData.href}` : routeData.href;
+
+  const iframe = document.createElement('iframe');
+  iframe.style.cssText =
+    'position:fixed;top:0;left:-9999px;width:210mm;height:297mm;border:none;opacity:0;pointer-events:none;';
+  document.body.appendChild(iframe);
+
+  const onMessage = (e: MessageEvent) => {
+    if (
+      e.data?.type === 'quotation-material-product-print-ready' &&
+      e.source === iframe.contentWindow &&
+      iframe.contentWindow
+    ) {
+      window.removeEventListener('message', onMessage);
+      iframe.contentWindow.print();
+      setTimeout(() => {
+        if (iframe.parentNode) document.body.removeChild(iframe);
+      }, 1000);
+    }
+  };
+  window.addEventListener('message', onMessage);
+  iframe.src = printUrl;
+};
+
+const handleDownloadPdf = async (item: { id?: string | number; uuid?: string }) => {
+  const uuid = String(item.uuid ?? item.id ?? '');
+  if (!uuid) return;
+  downloadingPdfUuid.value = uuid;
+  try {
+    const body = (await api.get(
+      `/sales/quotations/building-materials/${uuid}/pdf`
+    )) as QuotationPdfMetaResponse;
+    const signedUrl = body?.data?.url;
+    if (!signedUrl) {
+      error(t('sales.quotationsMaterialProduct.messages.pdfDownloadNoUrl'));
+      return;
+    }
+    const pathName = body.data?.pdf_path?.split('/').pop();
+    const filename = pathName && pathName.endsWith('.pdf') ? pathName : `quotation-${uuid}.pdf`;
+    await triggerPdfDownloadFromSignedUrl(signedUrl, filename);
+  } catch (err: any) {
+    console.error('Error downloading quotation PDF:', err);
+    error(err?.response?.data?.message || t('sales.quotationsMaterialProduct.messages.pdfDownloadError'));
+  } finally {
+    downloadingPdfUuid.value = null;
+  }
 };
 
 const confirmDelete = async (item:any) => {
@@ -394,6 +514,26 @@ onBeforeUnmount(() => {
           </template>
           <template #item.actions="{ item }">
             <div class="flex items-center gap-1">
+              <v-btn
+                v-if="item.actions?.can_details_pdf"
+                icon variant="text" color="success-700" size="x-small"
+                @click="handlePrint(item)">
+                <span class="w-5" v-html="printerIcon"></span>
+              </v-btn>
+              <v-btn
+                v-if="item.actions?.can_download_pdf"
+                icon variant="text" color="success-700" size="x-small"
+                :loading="downloadingPdfUuid === (item.uuid ?? item.id)"
+                @click="handleDownloadPdf(item)">
+                <span class="w-5" v-html="downloadIcon"></span>
+              </v-btn>
+              <v-btn
+                v-if="item.signed_po_file_url"
+                icon variant="text" size="x-small"
+                :loading="downloadingSignedPoUuid === (item.uuid ?? item.id)"
+                @click="handleDownloadSignedPo(item)">
+                <span class="w-5" v-html="signedPoDownloadIcon"></span>
+              </v-btn>
               <v-btn v-if="item.actions?.can_create_order" icon variant="text" size="small"
                 @click="handleCreateOrder(item)">
                 <span v-html="refreshIcon"></span>

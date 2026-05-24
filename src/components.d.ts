@@ -32,6 +32,7 @@ declare module 'vue' {
     Map: typeof import('./components/common/Map.vue')['default']
     MapDialog: typeof import('./components/common/MapDialog.vue')['default']
     MultipleSelectInput: typeof import('./components/common/forms/MultipleSelectInput.vue')['default']
+    OtherTermsRepeater: typeof import('./components/common/OtherTermsRepeater.vue')['default']
     PageHeader: typeof import('./components/common/PageHeader.vue')['default']
     PriceInput: typeof import('./components/common/forms/PriceInput.vue')['default']
     RichTextEditor: typeof import('./components/common/forms/RichTextEditor.vue')['default']

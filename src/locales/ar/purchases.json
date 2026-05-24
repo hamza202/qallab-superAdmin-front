@@ -99,6 +99,7 @@
           "day": "يوم",
           "vehicleCount": "{count} مركبة",
           "select": "اختر",
+          "dateHint": "التاريخ يعتمد بعد تعميد أمر الشراء",
           "warnings": {
             "selectSupplierFirst": "يجب عليك اختيار اسم المورد أولاً",
             "atLeastOneProduct": "يجب إضافة منتج واحد على الأقل",
@@ -124,7 +125,8 @@
             "advancePayment": "دفعة مقدمة",
             "products": "المنتجات",
             "services": "الخدمات",
-            "requestCode": "كود الطلب"
+            "requestCode": "كود الطلب",
+            "otherTerms": "شروط أخرى"
           },
           "placeholders": {
             "selectSupplier": "حدد المورد",
@@ -135,7 +137,8 @@
             "selectDate": "اختر التاريخ",
             "addNote": "أضف ملاحظة",
             "cashSample": "نقدي",
-            "phoneSample": "5XX XXX XXXX"
+            "phoneSample": "5XX XXX XXXX",
+            "enterTerm": "اكتب الشرط هنا"
           },
           "actions": {
             "importExcel": "استيراد من ملف إكسل",
@@ -143,7 +146,8 @@
             "editProducts": "تعديل المنتجات",
             "submitRequest": "إرسال الطلب",
             "saveAndReturn": "حفظ والعودة للرئيسية",
-            "saveAndCreateNew": "حفظ وانشاء جديد"
+            "saveAndCreateNew": "حفظ وانشاء جديد",
+            "addTerm": "+ إضافة شرط"
           },
           "textNote": {
             "title": "ملاحظة نصية",

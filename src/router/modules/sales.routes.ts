@@ -155,6 +155,15 @@ export const salesRoutes: RouteRecordRaw[] = [
           title: "pages.PriceOfferMaterialProduct.view",
         },
       },
+      {
+        path: "print/:id",
+        name: "PriceOfferMaterialProductPrint",
+        component: () =>
+          import("@/views/sales/quotations/material-product/Print.vue"),
+        meta: {
+          title: "sales.quotationsMaterialProduct.print.pageTitle",
+        },
+      },
     ],
   },
   {
@@ -198,6 +207,15 @@ export const salesRoutes: RouteRecordRaw[] = [
           title: "pages.SalesRequests.view",
         },
       },
+      {
+        path: "print/:id",
+        name: "SalesOrdersMaterialProductPrint",
+        component: () =>
+          import("@/views/sales/orders/material-product/Print.vue"),
+        meta: {
+          title: "pages.SalesOrdersMaterialProduct.print",
+        },
+      },
     ],
   },
   // Sales Orders Fuels
@@ -238,6 +256,14 @@ export const salesRoutes: RouteRecordRaw[] = [
           title: "pages.SalesOrdersFuels.view",
         },
       },
+      {
+        path: "print/:id",
+        name: "SalesOrdersFuelsPrint",
+        component: () => import("@/views/sales/orders/fuels/Print.vue"),
+        meta: {
+          title: "pages.SalesOrdersFuels.print",
+        },
+      },
     ],
   },
   // Sales Orders Logistics (طلبيات خدمة نقل)
@@ -276,6 +302,14 @@ export const salesRoutes: RouteRecordRaw[] = [
         component: () => import("@/views/sales/orders/logistics/View.vue"),
         meta: {
           title: "pages.SalesOrdersLogistics.view",
+        },
+      },
+      {
+        path: "print/:id",
+        name: "SalesOrdersLogisticsPrint",
+        component: () => import("@/views/sales/orders/logistics/Print.vue"),
+        meta: {
+          title: "pages.SalesOrdersLogistics.print",
         },
       },
     ],
@@ -398,6 +432,14 @@ export const salesRoutes: RouteRecordRaw[] = [
           title: "pages.SalesQuotationsFuels.title",
         },
       },
+      {
+        path: "print/:id",
+        name: "SalesQuotationsFuelsPrint",
+        component: () => import("@/views/sales/quotations/fuels/Print.vue"),
+        meta: {
+          title: "sales.quotationsFuels.print.pageTitle",
+        },
+      },
     ],
   },
   {
@@ -422,11 +464,29 @@ export const salesRoutes: RouteRecordRaw[] = [
         },
       },
       {
+        path: "simple/create",
+        name: "SalesLogisticsInvoicesSimpleCreate",
+        component: () =>
+          import("@/views/sales/logistics-invoices/SimpleInvoiceForm.vue"),
+        meta: {
+          title: "pages.SalesInvoices.SimpleFormTitleCreate",
+        },
+      },
+      {
         path: "edit/:id",
         name: "SalesInvoicesEdit",
         component: () => import("@/views/sales/invoices/Form.vue"),
         meta: {
           title: "pages.SalesInvoices.FormTitle",
+        },
+      },
+      {
+        path: "simple/edit/:id",
+        name: "SalesLogisticsInvoicesSimpleEdit",
+        component: () =>
+          import("@/views/sales/logistics-invoices/SimpleInvoiceForm.vue"),
+        meta: {
+          title: "pages.SalesInvoices.SimpleFormTitleEdit",
         },
       },
       {
@@ -516,6 +576,24 @@ export const salesRoutes: RouteRecordRaw[] = [
           title: "pages.SalesLogisticsInvoices.FormTitle",
         },
       },
+            {
+        path: "simple/create",
+        name: "SalesLogisticsInvoicesSimpleCreate",
+        component: () =>
+          import("@/views/sales/logistics-invoices/SimpleInvoiceForm.vue"),
+        meta: {
+          title: "pages.SalesInvoices.SimpleFormTitleCreate",
+        },
+      },
+      {
+        path: "simple/edit/:id",
+        name: "SalesLogisticsInvoicesSimpleEdit",
+        component: () =>
+          import("@/views/sales/logistics-invoices/SimpleInvoiceForm.vue"),
+        meta: {
+          title: "pages.SalesInvoices.SimpleFormTitleEdit",
+        },
+      },
       {
         path: "edit/:id",
         name: "SalesLogisticsInvoicesEdit",
@@ -589,7 +667,8 @@ export const salesRoutes: RouteRecordRaw[] = [
       {
         path: "list",
         name: "DeliveryDocsLogisticsList",
-        component: () => import("@/views/sales/delivery-docs-logistics/List.vue"),
+        component: () =>
+          import("@/views/sales/delivery-docs-logistics/List.vue"),
         meta: {
           title: "pages.DeliveryDocsLogistics.title",
         },
@@ -597,7 +676,8 @@ export const salesRoutes: RouteRecordRaw[] = [
       {
         path: "create",
         name: "DeliveryDocsLogisticsCreate",
-        component: () => import("@/views/sales/delivery-docs-logistics/Form.vue"),
+        component: () =>
+          import("@/views/sales/delivery-docs-logistics/Form.vue"),
         meta: {
           title: "pages.DeliveryDocsLogistics.title",
         },
@@ -605,7 +685,8 @@ export const salesRoutes: RouteRecordRaw[] = [
       {
         path: "edit/:id",
         name: "DeliveryDocsLogisticsEdit",
-        component: () => import("@/views/sales/delivery-docs-logistics/Form.vue"),
+        component: () =>
+          import("@/views/sales/delivery-docs-logistics/Form.vue"),
         meta: {
           title: "pages.DeliveryDocsLogistics.edit",
         },
@@ -613,7 +694,8 @@ export const salesRoutes: RouteRecordRaw[] = [
       {
         path: "view/:id",
         name: "DeliveryDocsLogisticsView",
-        component: () => import("@/views/sales/delivery-docs-logistics/View.vue"),
+        component: () =>
+          import("@/views/sales/delivery-docs-logistics/View.vue"),
         meta: {
           title: "pages.DeliveryDocsLogistics.view",
         },
@@ -697,6 +779,14 @@ export const salesRoutes: RouteRecordRaw[] = [
         component: () => import("@/views/sales/quotations/logistics/View.vue"),
         meta: {
           title: "pages.SalesQuotationsLogistics.title",
+        },
+      },
+      {
+        path: "print/:id",
+        name: "SalesQuotationsLogisticsPrint",
+        component: () => import("@/views/sales/quotations/logistics/Print.vue"),
+        meta: {
+          title: "sales.quotationsLogistics.print.pageTitle",
         },
       },
     ],

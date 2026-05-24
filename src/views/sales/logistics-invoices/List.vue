@@ -38,6 +38,7 @@ interface ItemActions {
 interface InvoiceItem {
     uuid: string;
     code: string;
+    type?: string;
     customer_name?: string;
     invoice_due_datetime?: string;
     final_total?: number;
@@ -190,9 +191,17 @@ const handleView = (item: { id?: string | number; uuid?: string }) => {
     router.push({ name: 'SalesLogisticsInvoicesView', params: { id: uuid } });
 };
 
-const handleEdit = (item: { id?: string | number; uuid?: string }) => {
+const handleEdit = (item: InvoiceItem) => {
     const uuid = item.uuid ?? String(item.id);
-    router.push({ name: 'SalesLogisticsInvoicesEdit', params: { id: uuid } });
+    if (item.type === 'simple') {
+        router.push({ name: 'SalesLogisticsInvoicesSimpleEdit', params: { id: uuid } });
+    } else {
+        router.push({ name: 'SalesLogisticsInvoicesEdit', params: { id: uuid } });
+    }
+
+};
+const openCreateSimpleInvoice = () => {
+    router.push({ name: 'SalesLogisticsInvoicesSimpleCreate' });
 };
 
 const handlePrint = (item: { id?: string | number; uuid?: string }) => {
@@ -398,7 +407,13 @@ onBeforeUnmount(() => {
 
                         <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4"
                             custom-class="px-7 font-semibold text-base !text-primary-800 border !border-primary-200"
-                            :prepend-icon="plusIcon" :label="t('sales.logisticsInvoices.addInvoice')" @click="openCreateInvoice" />
+                            :prepend-icon="plusIcon" :label="t('sales.logisticsInvoices.addInvoice')"
+                            @click="openCreateInvoice" />
+
+                        <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4"
+                            custom-class="px-7 font-semibold text-base !text-primary-800 border !border-primary-200"
+                            :prepend-icon="plusIcon" :label="t('pages.SalesLogisticsInvoices.list.addSimpleInvoice')"
+                            @click="openCreateSimpleInvoice" />
                     </div>
                 </div>
 
@@ -406,20 +421,26 @@ onBeforeUnmount(() => {
                     class="border-y border-y-primary-100 bg-primary-50 px-4 sm:px-6 py-3 gap-3 flex justify-between flex-wrap">
                     <div class="flex flex-wrap gap-3 items-end">
                         <TextInput v-model="filterInvoiceCode" density="comfortable" variant="outlined" hide-details
-                            :placeholder="t('sales.logisticsInvoices.filters.invoiceCode')" class="w-full sm:w-40 bg-white" />
+                            :placeholder="t('sales.logisticsInvoices.filters.invoiceCode')"
+                            class="w-full sm:w-40 bg-white" />
                         <TextInput v-model="filterCustomerName" density="comfortable" variant="outlined" hide-details
-                            :placeholder="t('sales.logisticsInvoices.filters.customerName')" class="w-full sm:w-40 bg-white" />
+                            :placeholder="t('sales.logisticsInvoices.filters.customerName')"
+                            class="w-full sm:w-40 bg-white" />
                         <TextInput v-model="filterFinalTotal" density="comfortable" variant="outlined" hide-details
-                            :placeholder="t('sales.logisticsInvoices.filters.finalTotal')" class="w-full sm:w-40 bg-white" />
+                            :placeholder="t('sales.logisticsInvoices.filters.finalTotal')"
+                            class="w-full sm:w-40 bg-white" />
                         <DatePickerInput v-model="filterStartDate" density="comfortable" hide-details
-                            :placeholder="t('sales.logisticsInvoices.filters.startDate')" class="w-full sm:w-40 bg-white" />
+                            :placeholder="t('sales.logisticsInvoices.filters.startDate')"
+                            class="w-full sm:w-40 bg-white" />
                         <DatePickerInput v-model="filterEndDate" density="comfortable" hide-details
-                            :placeholder="t('sales.logisticsInvoices.filters.endDate')" class="w-full sm:w-40 bg-white" />
+                            :placeholder="t('sales.logisticsInvoices.filters.endDate')"
+                            class="w-full sm:w-40 bg-white" />
                     </div>
                     <div class="flex gap-2 items-center">
                         <ButtonWithIcon variant="flat" color="primary-500" rounded="4" height="40"
                             custom-class="px-5 font-semibold !text-white text-sm sm:text-base"
-                            :prepend-icon="searchIcon" :label="t('sales.logisticsInvoices.search')" @click="applyFilters" />
+                            :prepend-icon="searchIcon" :label="t('sales.logisticsInvoices.search')"
+                            @click="applyFilters" />
                         <ButtonWithIcon variant="flat" color="primary-100" height="40" rounded="4" border="sm"
                             custom-class="px-5 font-semibold text-sm sm:text-base !text-primary-800 !border-primary-200"
                             prepend-icon="mdi-refresh" :label="t('common.actions.reset')" @click="resetFilters" />

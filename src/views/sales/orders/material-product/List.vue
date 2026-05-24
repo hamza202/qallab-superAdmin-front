@@ -7,7 +7,7 @@ import { useNotification } from '@/composables/useNotification';
 import { useTableColumns } from '@/composables/useTableColumns';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog.vue';
 import DatePickerInput from '@/components/common/forms/DatePickerInput.vue';
-import { GridIcon, fileCheckIcon, trash_1_icon, trash_2_icon, importIcon, columnIcon, exportIcon, plusIcon, searchIcon } from "@/components/icons/globalIcons";
+import { GridIcon, fileCheckIcon, trash_1_icon, trash_2_icon, importIcon, columnIcon, exportIcon, plusIcon, searchIcon, printerIcon, downloadIcon } from "@/components/icons/globalIcons";
 import { switcStatusIcon, truckIcon } from '@/components/icons/priceOffersIcons';
 import StatusChangeFeature from '@/components/common/StatusChangeFeature.vue';
 
@@ -36,6 +36,15 @@ interface ItemActions {
   can_receive_doc: boolean;
   can_create_pickup: boolean;
   can_create_trip: boolean;
+  can_details_pdf?: boolean;
+  can_download_pdf?: boolean;
+}
+
+interface OrderPdfMetaResponse {
+  data?: {
+    url?: string;
+    pdf_path?: string;
+  };
 }
 
 interface OrderItem {
@@ -193,6 +202,9 @@ const showDeleteDialog = ref(false);
 const itemToDelete = ref<{ id: string } | null>(null);
 const deleteLoading = ref(false);
 
+// PDF download state
+const downloadingPdfUuid = ref<string | null>(null);
+
 const handleDelete = (item: { id?: string | number }) => {
   itemToDelete.value = { id: String(item.id) };
   showDeleteDialog.value = true;
@@ -308,6 +320,68 @@ const handleCreateTrip = (item: unknown) => {
       sale_order_id: tableItem.id,
     }
   });
+};
+
+const triggerPdfDownloadFromSignedUrl = (signedUrl: string, filename: string): void => {
+  const anchor = document.createElement('a');
+  anchor.href = signedUrl;
+  anchor.download = filename;
+  anchor.target = '_blank';
+  anchor.rel = 'noopener noreferrer';
+  document.body.appendChild(anchor);
+  anchor.click();
+  document.body.removeChild(anchor);
+};
+
+const handlePrint = (item: { id?: string | number; uuid?: string }) => {
+  const uuid = item.uuid ?? String(item.id);
+  const routeData = router.resolve({ name: 'SalesOrdersMaterialProductPrint', params: { id: uuid } });
+  const printUrl = routeData.href.startsWith('/') ? `${window.location.origin}${routeData.href}` : routeData.href;
+
+  const iframe = document.createElement('iframe');
+  iframe.style.cssText =
+    'position:fixed;top:0;left:-9999px;width:210mm;height:297mm;border:none;opacity:0;pointer-events:none;';
+  document.body.appendChild(iframe);
+
+  const onMessage = (e: MessageEvent) => {
+    if (
+      e.data?.type === 'sales-order-material-product-print-ready' &&
+      e.source === iframe.contentWindow &&
+      iframe.contentWindow
+    ) {
+      window.removeEventListener('message', onMessage);
+      iframe.contentWindow.print();
+      setTimeout(() => {
+        if (iframe.parentNode) document.body.removeChild(iframe);
+      }, 1000);
+    }
+  };
+  window.addEventListener('message', onMessage);
+  iframe.src = printUrl;
+};
+
+const handleDownloadPdf = async (item: { id?: string | number; uuid?: string }) => {
+  const uuid = String(item.uuid ?? item.id ?? '');
+  if (!uuid) return;
+  downloadingPdfUuid.value = uuid;
+  try {
+    const body = (await api.get(
+      `/sales/orders/building-materials/${uuid}/pdf`
+    )) as OrderPdfMetaResponse;
+    const signedUrl = body?.data?.url;
+    if (!signedUrl) {
+      error(t('sales.ordersMaterialProduct.messages.pdfDownloadNoUrl'));
+      return;
+    }
+    const pathName = body.data?.pdf_path?.split('/').pop();
+    const filename = pathName && pathName.endsWith('.pdf') ? pathName : `sales-order-${uuid}.pdf`;
+    triggerPdfDownloadFromSignedUrl(signedUrl, filename);
+  } catch (err: any) {
+    console.error('Error downloading sales order PDF:', err);
+    error(err?.response?.data?.message || t('sales.ordersMaterialProduct.messages.pdfDownloadError'));
+  } finally {
+    downloadingPdfUuid.value = null;
+  }
 };
 
 onMounted(() => {
@@ -527,9 +601,26 @@ onBeforeUnmount(() => {
           </template>
           <template #item.actions="{ item }">
             <div class="flex items-center gap-1">
-                            <v-btn v-if="item.actions?.can_create_trip" icon variant="text" size="small"
+              <v-btn
+                v-if="item.actions?.can_details_pdf"
+                icon variant="text" color="success-700" size="x-small"
+                @click="handlePrint(item)">
+                <span class="w-5" v-html="printerIcon"></span>
+              </v-btn>
+              <v-btn
+                v-if="item.actions?.can_download_pdf"
+                icon
+                variant="text"
+                size="x-small"
+                color="primary-600"
+                :loading="downloadingPdfUuid === item.uuid"
+                :title="t('common.action.downloadPdf')"
+                @click="handleDownloadPdf(item)"
+              >
+                <span v-html="downloadIcon"></span>
+              </v-btn>
+              <v-btn v-if="item.actions?.can_create_trip" icon variant="text" size="small"
                 @click="handleCreateTrip(item)">
-                <!-- <span v-html="refreshIcon"></span> -->
                   <v-icon size="25">mdi-airplane</v-icon>
               </v-btn>
 

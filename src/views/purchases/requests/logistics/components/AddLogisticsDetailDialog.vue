@@ -197,8 +197,11 @@ const showSourceMapDialog = ref(false);
       <div class="space-y-4">
         <!-- Row 1: Date Range -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <DatePickerInput :label="t('purchases.requests.logistics.addDetailDialog.labels.fromDate')" v-model="form.from_date" :placeholder="t('purchases.shared.forms.common.select')"
-            density="comfortable" :rules="[required()]" />
+          <span>
+            <DatePickerInput :label="t('purchases.requests.logistics.addDetailDialog.labels.fromDate')" v-model="form.from_date" :placeholder="t('purchases.shared.forms.common.select')"
+              density="comfortable" :rules="[required()]" />
+            <p class="text-sm text-gray-500 mt-1">{{ t('purchases.shared.forms.common.dateHint') }}</p>
+          </span>
           <DatePickerInput :label="t('purchases.requests.logistics.addDetailDialog.labels.toDate')" v-model="form.to_date" :placeholder="t('purchases.shared.forms.common.select')"
             density="comfortable" :rules="[required()]" />
           <PriceInput :label="t('purchases.requests.logistics.addDetailDialog.labels.executionDuration')" v-model="form.actual_execution_interval"

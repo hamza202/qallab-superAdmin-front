@@ -15,6 +15,7 @@ import { useForm } from '@/composables/useForm';
 import { useNotification as useNotify } from '@/composables/useNotification';
 import { binIcon, fileCheckIcon, HelpCircleIcon, returnIcon, saveIcon, rialIcon } from "@/components/icons/globalIcons";
 import AppFormBreadcrumb from "@/components/common/AppFormBreadcrumb.vue";
+import OtherTermsRepeater from '@/components/common/OtherTermsRepeater.vue';
 import { required, numeric, positive } from '@/utils/validators';
 
 
@@ -36,6 +37,15 @@ const isLoading = ref(false);
 const isSubmitting = ref(false);
 const isFormDataLoaded = ref(false);
 const isFromQuotation = ref(false);
+const isInvoiceIntervalFromQuotation = ref(false);
+const isPaymentTermNoFromQuotation = ref(false);
+
+const disableInvoiceInterval = computed(
+  () => isFromQuotation.value && formData.value.invoice_interval != null,
+);
+const disablePaymentTermNo = computed(
+  () => isFromQuotation.value && formData.value.payment_term_no != null,
+);
 
 const paymentMethodItems = ref<any[]>([]);
 const transportTypeItems = ref<any[]>([]);
@@ -223,9 +233,10 @@ const formData = ref({
   cancel_fee_type: null as string | null,
   cancel_fee: null as number | null,
   purchase_quotation_code: null as string | null,
-  approved_amount: null as string | null,
+  approved_amount: 'service_total_amount' as string | null,
   final_logistics_service_amount: null as number | null,
   final_logistics_trip: null as number | null,
+  other_terms: [] as string[],
 });
 
 const productTableItems = ref<ProductTableItem[]>([]);
@@ -286,15 +297,20 @@ const fetchQuotationForOrder = async () => {
       formData.value.source_longitude = data.source_longitude ?? null;
       formData.value.invoice_interval = data.invoice_interval ?? null;
       formData.value.payment_term_no = data.payment_term_no ?? null;
+      isInvoiceIntervalFromQuotation.value = data.invoice_interval != null;
+      isPaymentTermNoFromQuotation.value = data.payment_term_no != null;
       formData.value.late_fee_type = data.late_fee_type || null;
       formData.value.late_fee = data.late_fee ?? null;
       formData.value.cancel_fee_type = data.cancel_fee_type || null;
       formData.value.cancel_fee = data.cancel_fee ?? null;
-      formData.value.approved_amount = data.approved_amount != null ? String(data.approved_amount) : null;
+      formData.value.approved_amount = data.approved_amount != null ? String(data.approved_amount) : 'service_total_amount';
       formData.value.final_logistics_service_amount = data.final_logistics_service_amount != null ? Number(data.final_logistics_service_amount) : null;
       formData.value.final_logistics_trip = data.final_logistics_trip != null ? Number(data.final_logistics_trip) : null;
       formData.value.final_logistics_service_amount = data.final_logistics_service_amount != null ? Number(data.final_logistics_service_amount) : null;
       formData.value.final_logistics_trip = data.final_logistics_trip != null ? Number(data.final_logistics_trip) : null;
+      formData.value.other_terms = Array.isArray(data.other_terms)
+        ? data.other_terms.filter((t: any) => typeof t === 'string')
+        : [];
 
       const mapToNumberArray = (value: any): number[] => {
         if (Array.isArray(value)) return value.map((v: any) => Number(v));
@@ -428,7 +444,10 @@ const fetchFormData = async () => {
       formData.value.late_fee = data.late_fee ?? null;
       formData.value.cancel_fee_type = data.cancel_fee_type || null;
       formData.value.cancel_fee = data.cancel_fee ?? null;
-      formData.value.approved_amount = data.approved_amount != null ? String(data.approved_amount) : null;
+      formData.value.approved_amount = data.approved_amount != null ? String(data.approved_amount) : 'service_total_amount';
+      formData.value.other_terms = Array.isArray(data.other_terms)
+        ? data.other_terms.filter((t: any) => typeof t === 'string')
+        : [];
 
       if (data.po_logistics_details && Array.isArray(data.po_logistics_details)) {
         logisticsDetails.value = data.po_logistics_details.map((d: any) => ({
@@ -977,6 +996,9 @@ const buildPayload = () => {
     approved_amount: formData.value.approved_amount ?? null,
     final_logistics_service_amount: formData.value.final_logistics_service_amount ?? null,
     final_logistics_trip: formData.value.final_logistics_trip ?? null,
+    other_terms: (formData.value.other_terms || [])
+      .map((term) => (term ?? '').trim())
+      .filter((term) => term.length > 0),
   };
 
   // Include purchase_quotation_id if creating order from quotation
@@ -1199,7 +1221,10 @@ const formatVehicleCount = (n: number | string | null | undefined) => {
 const summaryTotals = computed(() => {
   const transportValue = logisticsDetails.value.reduce((total, detail) => {
     const amount = detail.transport_amount != null ? Number(detail.transport_amount) : 0;
-    let finalAmount = isNaN(amount) ? 0 : amount;
+    const tripNo = detail.trip_no != null ? Number(detail.trip_no) : 0;
+    const safeAmount = isNaN(amount) ? 0 : amount;
+    const safeTripNo = isNaN(tripNo) || tripNo <= 0 ? 1 : tripNo;
+    let finalAmount = safeAmount * safeTripNo;
     if (finalAmount > 0 && detail.discount_val) {
       const discountVal = Number(detail.discount_val);
       const discountType = Number(detail.discount_type || 2);
@@ -1229,7 +1254,10 @@ const summaryTotals = computed(() => {
 const computedFinalLogisticsServiceAmount = computed(() => {
   return logisticsDetails.value.reduce((total, detail) => {
     const amount = detail.transport_amount != null ? Number(detail.transport_amount) : 0;
-    let finalAmount = isNaN(amount) ? 0 : amount;
+    const tripNo = detail.trip_no != null ? Number(detail.trip_no) : 0;
+    const safeAmount = isNaN(amount) ? 0 : amount;
+    const safeTripNo = isNaN(tripNo) || tripNo <= 0 ? 1 : tripNo;
+    let finalAmount = safeAmount * safeTripNo;
     if (finalAmount > 0 && detail.discount_val) {
       const discountVal = Number(detail.discount_val);
       const discountType = Number(detail.discount_type || 2);
@@ -1599,19 +1627,6 @@ onMounted(async () => {
               <PriceInput showRialIcon v-model="formData.final_logistics_trip" density="comfortable"
                 :label="t('purchases.orders.shared.labels.logisticsTripsTotal')" placeholder="0" disabled />
 
-              <div class="md:col-span-1" v-if="approvedAmountItems.length > 0">
-                <label class="font-semibold text-sm text-gray-700 mb-2 block">{{ t('purchases.orders.shared.labels.approvedOfferTotal') }}</label>
-                <v-radio-group v-model="formData.approved_amount" inline density="comfortable" hide-details>
-                  <v-radio
-                    v-for="item in approvedAmountItems"
-                    :key="item.value"
-                    :label="item.title"
-                    :value="item.value"
-                    color="primary"
-                  />
-                </v-radio-group>
-              </div>
-
               <SelectInput v-model="formData.payment_method" :items="paymentMethodItems" density="comfortable"
                 :placeholder="t('purchases.shared.forms.common.placeholders.selectPaymentMethod')" :label="t('purchases.shared.forms.common.labels.paymentMethod')" item-title="title" item-value="value"
                 :rules="[required()]" />
@@ -1619,13 +1634,17 @@ onMounted(async () => {
                 :placeholder="t('purchases.shared.forms.common.placeholders.enterAdvanceAmount')" />
 
               <PriceInput :label="t('purchases.orders.shared.labels.invoiceUploadDuration')" v-model="formData.invoice_interval" :placeholder="t('purchases.orders.shared.placeholders.enterDurationDays')"
-                :rules="[numeric()]" density="comfortable">
+                :disabled="disableInvoiceInterval"
+                :rules="disableInvoiceInterval ? [numeric()] : [required(), numeric()]"
+                density="comfortable">
                 <template #append-inner>
                   <span class="text-gray-500 text-sm"> {{ t('purchases.shared.forms.common.day') }} </span>
                 </template>
               </PriceInput>
               <PriceInput :label="t('purchases.orders.shared.labels.paymentDuration')" v-model="formData.payment_term_no" :placeholder="t('purchases.orders.shared.placeholders.enterDurationDays')"
-                :rules="[numeric()]" density="comfortable">
+                :disabled="disablePaymentTermNo"
+                :rules="disablePaymentTermNo ? [numeric()] : [required(), numeric()]"
+                density="comfortable">
                 <template #append-inner>
                   <span class="text-gray-500 text-sm"> {{ t('purchases.shared.forms.common.day') }} </span>
                 </template>
@@ -1638,6 +1657,11 @@ onMounted(async () => {
               <TextInputWithSelect v-model="formData.cancel_fee" v-model:selectValue="formData.cancel_fee_type"
                 :label="t('purchases.orders.shared.labels.cancelFee')" :placeholder="t('purchases.orders.shared.placeholders.enterFeeAmount')" type="number" :rules="[numeric(), positive()]"
                 select-width="110px" :select-items="feeTypeItems" :select-placeholder="t('purchases.shared.forms.common.select')" />
+            </div>
+
+            <!-- شروط أخرى -->
+            <div class="mt-6 pt-6 border-t !border-gray-100">
+              <OtherTermsRepeater v-model="formData.other_terms" />
             </div>
           </div>
         </div>

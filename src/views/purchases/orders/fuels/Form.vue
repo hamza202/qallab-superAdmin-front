@@ -27,6 +27,7 @@ import {
     rialIcon,
 } from '@/components/icons/globalIcons';
 import AppFormBreadcrumb from '@/components/common/AppFormBreadcrumb.vue';
+import OtherTermsRepeater from '@/components/common/OtherTermsRepeater.vue';
 
 const { t } = useI18n();
 const api = useApi();
@@ -45,6 +46,15 @@ const fromQuotationCode = computed(() => route.query.quotation_code as string | 
 const purchaseQuotationId = computed(() => route.query.purchase_quotation_id as string | undefined);
 // Track if data is loaded from quotation (to disable supplier select)
 const isFromQuotation = ref(false);
+const isInvoiceIntervalFromQuotation = ref(false);
+const isPaymentTermNoFromQuotation = ref(false);
+
+const disableInvoiceInterval = computed(
+    () => isFromQuotation.value && formData.value.invoice_interval != null,
+);
+const disablePaymentTermNo = computed(
+    () => isFromQuotation.value && formData.value.payment_term_no != null,
+);
 
 const requestTypeItems = ref<any[]>([]);
 const paymentMethodItems = ref<any[]>([]);
@@ -197,6 +207,9 @@ const fetchFormData = async () => {
             formData.value.textNote = data.notes || '';
             formData.value.responsibleName = data.responsible_person || '';
             formData.value.responsiblePhone = data.responsible_phone || '';
+            formData.value.other_terms = Array.isArray(data.other_terms)
+                ? data.other_terms.filter((t: any) => typeof t === 'string')
+                : [];
 
             const attached = data.po_attached_logistics_detail || data.logistics_detail || null;
             if (attached) {
@@ -304,6 +317,8 @@ const fetchQuotationForOrder = async () => {
             formData.value.advancePayment = data.upfront_payment || null;
             formData.value.invoice_interval = data.invoice_interval != null ? Number(data.invoice_interval) : null;
             formData.value.payment_term_no = data.payment_term_no != null ? Number(data.payment_term_no) : null;
+            isInvoiceIntervalFromQuotation.value = data.invoice_interval != null;
+            isPaymentTermNoFromQuotation.value = data.payment_term_no != null;
             formData.value.late_fee_type = data.late_fee_type || null;
             formData.value.late_fee = data.late_fee != null ? Number(data.late_fee) : null;
             formData.value.cancel_fee_type = data.cancel_fee_type || null;
@@ -311,6 +326,9 @@ const fetchQuotationForOrder = async () => {
             formData.value.textNote = data.notes || '';
             formData.value.responsibleName = data.responsible_person || '';
             formData.value.responsiblePhone = data.responsible_phone || null;
+            formData.value.other_terms = Array.isArray(data.other_terms)
+                ? data.other_terms.filter((t: any) => typeof t === 'string')
+                : [];
 
             formData.value.responsibleName = data.responsible_person || '';
             formData.value.responsiblePhone = data.responsible_phone || null;
@@ -448,6 +466,7 @@ const formData = ref({
     advancePayment: null,
     project_name: '',
     textNote: '',
+    other_terms: [] as string[],
 });
 
 // Products table items (dynamically populated from dialog)
@@ -676,6 +695,14 @@ const buildFormData = (): FormData => {
     fd.append('cancel_fee', String(formData.value.cancel_fee ?? ''));
     fd.append('notes', formData.value.textNote || '');
 
+    // other_terms (array of strings)
+    (formData.value.other_terms || [])
+        .map((term) => (term ?? '').trim())
+        .filter((term) => term.length > 0)
+        .forEach((term, index) => {
+            fd.append(`other_terms[${index}]`, term);
+        });
+
     // po_attached_logistics_detail
     if (isEditMode.value && logisticsDetailId.value) {
         fd.append('po_attached_logistics_detail[id]', String(logisticsDetailId.value));
@@ -744,12 +771,16 @@ const resetForm = () => {
         advancePayment: null,
         project_name: '',
         textNote: '',
+        other_terms: [],
     };
     productTableItems.value = [];
     originalProductIds.value = {};
     logisticsDetailId.value = null;
     editingProduct.value = null;
     showAddProductDialog.value = false;
+    isFromQuotation.value = false;
+    isInvoiceIntervalFromQuotation.value = false;
+    isPaymentTermNoFromQuotation.value = false;
 };
 
 const handleSubmit = async (options?: { redirectToList?: boolean }) => {
@@ -1088,13 +1119,19 @@ const tableItems = computed(() =>
                                 :label="t('purchases.shared.forms.common.labels.advancePayment')" :placeholder="t('purchases.shared.forms.common.placeholders.enterAdvanceAmount')" />
 
                             <TextInput :label="t('purchases.orders.shared.labels.invoiceUploadDuration')" v-model="formData.invoice_interval"
-                                :placeholder="t('purchases.orders.shared.placeholders.enterDurationDays')" :rules="[required(), numeric()]" density="comfortable">
+                                :placeholder="t('purchases.orders.shared.placeholders.enterDurationDays')"
+                                :disabled="disableInvoiceInterval"
+                                :rules="disableInvoiceInterval ? [numeric()] : [required(), numeric()]"
+                                density="comfortable">
                                 <template #append-inner>
                                     <span class="text-gray-500 text-sm"> {{ t('purchases.shared.forms.common.day') }} </span>
                                 </template>
                             </TextInput>
                             <TextInput :label="t('purchases.orders.shared.labels.paymentDuration')" v-model="formData.payment_term_no"
-                                :placeholder="t('purchases.orders.shared.placeholders.enterDurationDays')" :rules="[required(), numeric()]" density="comfortable">
+                                :placeholder="t('purchases.orders.shared.placeholders.enterDurationDays')"
+                                :disabled="disablePaymentTermNo"
+                                :rules="disablePaymentTermNo ? [numeric()] : [required(), numeric()]"
+                                density="comfortable">
                                 <template #append-inner>
                                     <span class="text-gray-500 text-sm"> {{ t('purchases.shared.forms.common.day') }} </span>
                                 </template>
@@ -1111,6 +1148,11 @@ const tableItems = computed(() =>
                                 v-model:selectValue="formData.cancel_fee_type" :label="t('purchases.orders.shared.labels.cancelFee')"
                                 :placeholder="t('purchases.orders.shared.placeholders.enterFeeAmount')" type="number" :rules="[numeric(), positive()]"
                                 select-width="110px" :select-items="feeTypeItems" :select-placeholder="t('purchases.shared.forms.common.select')" />
+                        </div>
+
+                        <!-- شروط أخرى -->
+                        <div class="mt-6 pt-6 border-t !border-gray-100">
+                            <OtherTermsRepeater v-model="formData.other_terms" />
                         </div>
                     </div>
                 </div>

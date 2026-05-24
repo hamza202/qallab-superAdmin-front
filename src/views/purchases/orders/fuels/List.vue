@@ -7,9 +7,13 @@ import { useNotification } from '@/composables/useNotification';
 import { useTableColumns } from '@/composables/useTableColumns';
 import DeleteConfirmDialog from '@/components/common/DeleteConfirmDialog.vue';
 import DatePickerInput from '@/components/common/forms/DatePickerInput.vue';
-import { GridIcon, trash_1_icon, trash_2_icon, importIcon, columnIcon, exportIcon, plusIcon, searchIcon, linkIcon } from '@/components/icons/globalIcons';
-import { switchHorisinralIcon } from '@/components/icons/priceOffersIcons';
+import AppDialog from '@/components/common/AppDialog.vue';
+import FileUploadInput from '@/components/common/forms/FileUploadInput.vue';
+import { GridIcon, trash_1_icon, trash_2_icon, importIcon, columnIcon, exportIcon, plusIcon, searchIcon, linkIcon, printerIcon } from '@/components/icons/globalIcons';
+import { switchHorisinralIcon, downloadIcon } from '@/components/icons/priceOffersIcons';
 import StatusChangeFeature from '@/components/common/StatusChangeFeature.vue';
+
+const uploadSignedPoIcon = `<svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="none" width="20" height="20"><g fill="#194185"><path d="M4.24 5.8a.75.75 0 001.06-.04l1.95-2.1v6.59a.75.75 0 001.5 0V3.66l1.95 2.1a.75.75 0 101.1-1.02l-3.25-3.5a.75.75 0 00-1.101.001L4.2 4.74a.75.75 0 00.04 1.06z"/><path d="M1.75 9a.75.75 0 01.75.75v3c0 .414.336.75.75.75h9.5a.75.75 0 00.75-.75v-3a.75.75 0 011.5 0v3A2.25 2.25 0 0112.75 15h-9.5A2.25 2.25 0 011 12.75v-3A.75.75 0 011.75 9z"/></g></svg>`;
 
 const { t } = useI18n();
 const router = useRouter();
@@ -33,6 +37,9 @@ interface ItemActions {
   can_delete: boolean;
   can_change_status: boolean;
   can_link: boolean;
+  can_details_pdf?: boolean;
+  can_download_pdf?: boolean;
+  can_upload_signed_po?: boolean;
 }
 
 interface BuildingMaterialRequest {
@@ -51,6 +58,8 @@ interface BuildingMaterialRequest {
   status_id: number;
   status_background_color?: string;
   status_text_color?: string;
+  signed_po_file?: string | null;
+  signed_po_file_url?: string | null;
   actions: ItemActions;
 }
 
@@ -66,6 +75,15 @@ interface ListResponse {
   headers: TableHeader[];
   shownHeaders: TableHeader[];
   actions: { can_create: boolean; can_bulk_delete: boolean };
+}
+
+interface OrderPdfMetaResponse {
+  data?: {
+    url?: string;
+    pdf_path?: string;
+    pdf_generated_at?: string;
+  };
+  message?: string;
 }
 
 // API state
@@ -105,6 +123,48 @@ const deleteLoading = ref(false);
 // Status change dialog
 const showChangeStatusDialog = ref(false);
 const itemToChangeStatus = ref<BuildingMaterialRequest | null>(null);
+
+// Upload signed PO dialog
+const showUploadSignedPoDialog = ref(false);
+const itemToUploadSignedPo = ref<BuildingMaterialRequest | null>(null);
+const signedPoFile = ref<File[] | string | null>(null);
+const uploadingSignedPo = ref(false);
+
+const openUploadSignedPoDialog = (item: BuildingMaterialRequest | Record<string, unknown>) => {
+  const typed = item as BuildingMaterialRequest;
+  itemToUploadSignedPo.value = typed;
+  signedPoFile.value = typed.signed_po_file_url || null;
+  showUploadSignedPoDialog.value = true;
+};
+
+const closeUploadSignedPoDialog = () => {
+  showUploadSignedPoDialog.value = false;
+  itemToUploadSignedPo.value = null;
+  signedPoFile.value = null;
+};
+
+const handleUploadSignedPo = async () => {
+  if (!itemToUploadSignedPo.value) return;
+  if (!Array.isArray(signedPoFile.value) || signedPoFile.value.length === 0) {
+    error(t('common.uploads.attachFile'));
+    return;
+  }
+  const uuid = itemToUploadSignedPo.value.uuid;
+  const formData = new FormData();
+  formData.append('signed_po_file', signedPoFile.value[0]);
+  try {
+    uploadingSignedPo.value = true;
+    await api.upload(`/purchases/orders/fuels/${uuid}/signed-po`, formData);
+    success(t('common.messages.general.saveSuccess'));
+    closeUploadSignedPoDialog();
+    await fetchList();
+  } catch (err: any) {
+    console.error('Error uploading signed PO:', err);
+    error(err?.response?.data?.message || t('common.messages.general.saveError'));
+  } finally {
+    uploadingSignedPo.value = false;
+  }
+};
 
 const isDeleteDialogOpen = computed({
   get: () => showDeleteDialog.value || showBulkDeleteDialog.value,
@@ -319,6 +379,70 @@ const confirmBulkDelete = async () => {
   } finally {
     deleteLoading.value = false;
     showBulkDeleteDialog.value = false;
+  }
+};
+
+const downloadingPdfUuid = ref<string | null>(null);
+
+const triggerPdfDownloadFromSignedUrl = (signedUrl: string, filename: string): void => {
+  const anchor = document.createElement('a');
+  anchor.href = signedUrl;
+  anchor.download = filename;
+  anchor.target = '_blank';
+  anchor.rel = 'noopener noreferrer';
+  document.body.appendChild(anchor);
+  anchor.click();
+  document.body.removeChild(anchor);
+};
+
+const handlePrint = (item: { id?: string | number; uuid?: string }) => {
+  const uuid = item.uuid ?? String(item.id);
+  const routeData = router.resolve({ name: 'OrdersFuelsPrint', params: { id: uuid } });
+  const printUrl = routeData.href.startsWith('/') ? `${window.location.origin}${routeData.href}` : routeData.href;
+
+  const iframe = document.createElement('iframe');
+  iframe.style.cssText =
+    'position:fixed;top:0;left:-9999px;width:210mm;height:297mm;border:none;opacity:0;pointer-events:none;';
+  document.body.appendChild(iframe);
+
+  const onMessage = (e: MessageEvent) => {
+    if (
+      e.data?.type === 'order-fuels-print-ready' &&
+      e.source === iframe.contentWindow &&
+      iframe.contentWindow
+    ) {
+      window.removeEventListener('message', onMessage);
+      iframe.contentWindow.print();
+      setTimeout(() => {
+        if (iframe.parentNode) document.body.removeChild(iframe);
+      }, 1000);
+    }
+  };
+  window.addEventListener('message', onMessage);
+  iframe.src = printUrl;
+};
+
+const handleDownloadPdf = async (item: { id?: string | number; uuid?: string }) => {
+  const uuid = String(item.uuid ?? item.id ?? '');
+  if (!uuid) return;
+  downloadingPdfUuid.value = uuid;
+  try {
+    const body = (await api.get(
+      `/purchases/orders/fuels/${uuid}/pdf`
+    )) as OrderPdfMetaResponse;
+    const signedUrl = body?.data?.url;
+    if (!signedUrl) {
+      error(t('purchases.shared.messages.pdfDownloadNoUrl'));
+      return;
+    }
+    const pathName = body.data?.pdf_path?.split('/').pop();
+    const filename = pathName && pathName.endsWith('.pdf') ? pathName : `purchase-order-fuels-${uuid}.pdf`;
+    triggerPdfDownloadFromSignedUrl(signedUrl, filename);
+  } catch (err: any) {
+    console.error('Error downloading purchase order PDF:', err);
+    error(err?.response?.data?.message || t('purchases.shared.messages.pdfDownloadError'));
+  } finally {
+    downloadingPdfUuid.value = null;
   }
 };
 
@@ -541,7 +665,26 @@ onMounted(() => {
             </span>
           </template>
           <template #item.actions="{ item }">
-            <div class="flex items-center">
+            <div class="flex items-center gap-1">
+              <v-btn
+                v-if="item.actions?.can_details_pdf"
+                icon variant="text" color="success-700" size="x-small"
+                @click="handlePrint(item)">
+                <span class="w-5" v-html="printerIcon"></span>
+              </v-btn>
+              <v-btn
+                v-if="item.actions?.can_download_pdf"
+                icon variant="text" color="success-700" size="x-small"
+                :loading="downloadingPdfUuid === (item.uuid ?? item.id)"
+                @click="handleDownloadPdf(item)">
+                <span class="w-5" v-html="downloadIcon"></span>
+              </v-btn>
+              <v-btn
+                v-if="item.actions?.can_upload_signed_po"
+                icon variant="text" size="x-small"
+                @click="openUploadSignedPoDialog(item)">
+                <span class="w-5" v-html="uploadSignedPoIcon"></span>
+              </v-btn>
               <v-btn
                 v-if="item.actions?.can_change_status"
                 icon
@@ -579,6 +722,50 @@ onMounted(() => {
       :message="t('purchases.shared.statusChange.message')"
       @success="fetchList"
     />
+
+    <!-- Upload Signed PO Dialog -->
+    <AppDialog
+      v-model="showUploadSignedPoDialog"
+      :title="t('common.uploads.attachFile')"
+      :max-width="560"
+      :persistent="uploadingSignedPo"
+      @close="closeUploadSignedPoDialog"
+    >
+      <FileUploadInput
+        v-model="signedPoFile"
+        accept="image/png, image/jpeg, image/jpg, application/pdf"
+        :multiple="false"
+        :max-files="1"
+        :max-size="10"
+        :disabled="uploadingSignedPo"
+        :hide-remove="true"
+        :inner-label="t('common.uploads.attachFile')"
+        hint="PNG, JPG or PDF (max. 10MB)"
+      />
+      <template #actions>
+        <v-btn
+          variant="flat"
+          color="primary-50"
+          height="44"
+          class="font-semibold text-base text-primary-700 sm:flex-1"
+          :disabled="uploadingSignedPo"
+          @click="closeUploadSignedPoDialog"
+        >
+          {{ t('common.actions.cancel') }}
+        </v-btn>
+        <v-btn
+          variant="flat"
+          color="primary-500"
+          height="44"
+          class="font-semibold text-base !text-white sm:flex-1"
+          :loading="uploadingSignedPo"
+          :disabled="!Array.isArray(signedPoFile) || signedPoFile.length === 0"
+          @click="handleUploadSignedPo"
+        >
+          {{ t('common.actions.save') }}
+        </v-btn>
+      </template>
+    </AppDialog>
   </default-layout>
 </template>
 
