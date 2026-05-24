@@ -303,11 +303,14 @@ const formatPlainDate = (d: string | null | undefined) => {
 }
 
 const introBodyHtml = computed(() => {
-    const quotationCode = (detail.value?.sq_code && String(detail.value.sq_code).trim()) || '—'
-    const quotationDate = formatSqDate(detail.value?.sq_datetime)
+    const quotationCode = (detail.value?.sq_code && String(detail.value.sq_code).trim()) || ''
+    const hasQuotationDate = Boolean(detail.value?.sq_datetime)
+    const quotationDate = hasQuotationDate ? formatSqDate(detail.value?.sq_datetime) : ''
     const supplierName = supplier.value?.full_name ?? '—'
+    const quotationCodePhrase = quotationCode ? ` رقم ${accent(quotationCode)}` : ''
+    const quotationDatePhrase = hasQuotationDate ? ` بتاريخ ${accent(quotationDate)}` : ''
 
-    return `<span class="intro-line intro-line--greeting">السادة / ${accent(supplierName)} المحترمين</span><span class="intro-line intro-line--salam">السلام عليكم ورحمة الله وبركاته،</span><span class="intro-line">إشارة إلى عرض السعر المقدم من قبلكم رقم ${accent(quotationCode)} بتاريخ ${accent(quotationDate)} نعمدكم بالآتي حسب البنود أدناه :</span>`
+    return `<span class="intro-line intro-line--greeting">السادة / ${accent(supplierName)} المحترمين</span><span class="intro-line intro-line--salam">السلام عليكم ورحمة الله وبركاته،</span><span class="intro-line">إشارة إلى عرض السعر المقدم من قبلكم${quotationCodePhrase}${quotationDatePhrase} نعمدكم بالآتي حسب البنود أدناه :</span>`
 })
 
 const lineItems = computed((): LogisticsLine[] => {
