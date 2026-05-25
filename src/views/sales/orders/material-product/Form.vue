@@ -26,6 +26,7 @@ import {
   rialIcon,
 } from "@/components/icons/globalIcons";
 import AppFormBreadcrumb from "@/components/common/AppFormBreadcrumb.vue";
+import OtherTermsRepeater from "@/components/common/OtherTermsRepeater.vue";
 
 const { t } = useI18n();
 const api = useApi();
@@ -205,6 +206,9 @@ const fetchFormData = async () => {
       formData.value.cancel_fee_type = data.cancel_fee_type ?? null;
       formData.value.cancel_fee = data.cancel_fee ?? null;
       formData.value.textNote = data.notes || "";
+      formData.value.other_terms = Array.isArray(data.other_terms)
+        ? data.other_terms.filter((t: any) => typeof t === 'string')
+        : [];
 
       const attached = data.so_attached_logistics_detail || null;
       if (attached) {
@@ -380,7 +384,10 @@ const fetchQuotationForOrder = async () => {
       formData.value.cancel_fee_type = data.cancel_fee_type || null;
       formData.value.cancel_fee = data.cancel_fee != null ? Number(data.cancel_fee) : null;
       formData.value.textNote = data.notes || "";
-      
+      formData.value.other_terms = Array.isArray(data.other_terms)
+        ? data.other_terms.filter((t: any) => typeof t === 'string')
+        : [];
+
       // Map quotation_type to so_type if available
       if (data.quotation_type) {
         formData.value.so_type = data.quotation_type;
@@ -563,6 +570,7 @@ const formData = ref({
   image: null,
   // account: null,
   voice_attachment: null,
+  other_terms: [] as string[],
 });
 
 // Products table items (dynamically populated from dialog)
@@ -782,6 +790,13 @@ const buildFormData = (): FormData => {
   fd.append("cancel_fee", String(formData.value.cancel_fee ?? ""));
   fd.append("notes", formData.value.textNote || "");
 
+  // other_terms (array of strings)
+  (formData.value.other_terms || [])
+    .filter((term: string) => typeof term === 'string' && term.trim() !== '')
+    .forEach((term: string, index: number) => {
+      fd.append(`other_terms[${index}]`, term);
+    });
+
   // so_attached_logistics_detail (بيانات التوريد الإضافية من الفورم - مطابق request-body.json)
   fd.append(
     "so_attached_logistics_detail[from_date]",
@@ -941,6 +956,7 @@ const resetForm = () => {
     textNote: "",
     image: null,
     voice_attachment: null,
+    other_terms: [],
   };
   productTableItems.value = [];
   Supply.value = null;
@@ -1696,6 +1712,11 @@ const serviceTableItems = computed(() =>
 
               <!-- <SelectInput v-model="formData.account" :items="customerItems" label="الحساب"
                                 :rules="[required()]" density="comfortable" placeholder="حدد الحساب" /> -->
+            </div>
+
+            <!-- شروط أخرى -->
+            <div class="mt-6 pt-6 border-t !border-gray-100">
+              <OtherTermsRepeater v-model="formData.other_terms" />
             </div>
           </div>
         </div>
