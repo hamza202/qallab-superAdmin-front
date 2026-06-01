@@ -91,10 +91,10 @@
                     </div>
                     <div class="gt-cell gt-cell--words">{{ grandTotalWords }}</div>
                 </div>
-                <div class="payment-method-box">
+                <!-- <div class="payment-method-box">
                     <div class="payment-title">طريقة السداد :</div>
                     <div class="payment-text" v-html="paymentMethodHtml"></div>
-                </div>
+                </div> -->
             </div>
 
             <!-- ===== Notes section ===== -->
@@ -105,7 +105,14 @@
                 </ul>
             </div>
 
-            <div class="notes-section notes-section--other" dir="rtl">
+            <div class="notes-section" dir="rtl">
+                <p class="notes-heading">طريقة السداد :</p>
+                <ul class="notes-list">
+                    <li v-for="(note, i) in paymentTerms" :key="'p' + i" v-html="note"></li>
+                </ul>
+            </div>
+
+            <div v-if="otherTerms.length" class="notes-section notes-section--other" dir="rtl">
                 <p class="notes-heading">شروط أخرى :</p>
                 <ul class="notes-list">
                     <li v-for="(note, i) in otherTerms" :key="'o' + i" v-html="note"></li>
@@ -144,8 +151,8 @@ const { t } = useI18n()
 const toDataUri = (svg: string) =>
     `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svg)))}`
 
-const logoImg = toDataUri(logoSvgRaw)
-const logoBlackImg = toDataUri(logoBlackSvgRaw)
+const defaultLogoImg = toDataUri(logoSvgRaw)
+const defaultLogoBlackImg = toDataUri(logoBlackSvgRaw)
 
 const rialIconWhite = `<svg width="13" height="14" viewBox="0 0 13 14" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12.5559 10.6949C12.7879 10.164 12.9413 9.58759 13 8.98324L9.17589 9.82291V8.20876L12.5558 7.46723C12.7878 6.9363 12.9411 6.35989 12.9999 5.75554L9.17577 6.59449V0.789524C8.5898 1.12919 8.0694 1.58132 7.64638 2.11463V6.93021L6.11699 7.26582V0C5.53102 0.339544 5.01062 0.791792 4.5876 1.32511V7.6013L1.16558 8.35202C0.933594 8.88295 0.780134 9.45936 0.721271 10.0637L4.5876 9.21545V11.2482L0.444073 12.1572C0.212091 12.6881 0.0587471 13.2646 0 13.8689L4.33711 12.9174C4.69017 12.8416 4.99362 12.6261 5.19091 12.3295L5.98631 11.1121V11.1118C6.06888 10.9859 6.11699 10.834 6.11699 10.6705V8.87985L7.64638 8.54424V11.7725L12.5558 10.6947L12.5559 10.6949Z" fill="white" /></svg>`
 
@@ -172,11 +179,15 @@ interface OrderPrintDetail {
         logo_url?: string | null
     }
     customer?: {
+        id?: number
+        trade_name?: string
         full_name?: string
         mobile?: string | null
         email?: string | null
         tax_number?: number | string | null
         commercial_register?: number | string | null
+        logo_url?: string | null
+        unified_login_id?: string | null
     }
     subject?: {
         code?: string
@@ -195,6 +206,7 @@ interface OrderPrintDetail {
         unit_name?: string
         quantity?: number | string
         price_per_unit?: number | string | null
+        subtotal_before_discount?: number | string | null
         line_total?: number | string | null
         subtotal_before_discount?: number | string | null
     }>
@@ -210,6 +222,9 @@ interface OrderPrintDetail {
     actual_execution_duration?: number | string | null
     supply_start_date?: string | null
     so_datetime?: string
+    po_reference?: string | null
+    referenced_po_datetime?: string | null
+    other_terms?: string[]
 }
 
 const isLoading = ref(false)
@@ -221,6 +236,19 @@ const routeId = computed(() => (route.params.id as string) || '')
 const supplier = computed(() => detail.value?.supplier ?? null)
 const customer = computed(() => detail.value?.customer ?? null)
 const subject = computed(() => detail.value?.subject ?? null)
+
+const resolveLogoUrl = (url: string | null | undefined) => {
+    const s = url != null ? String(url).trim() : ''
+    return s || null
+}
+
+const logoImg = computed(
+    () => resolveLogoUrl(supplier.value?.logo_url) ?? defaultLogoImg
+)
+
+const logoBlackImg = computed(
+    () => resolveLogoUrl(supplier.value?.logo_url) ?? defaultLogoBlackImg
+)
 const totals = computed(() => detail.value?.totals ?? null)
 
 const PLACEHOLDER_LINES: OrderLine[] = [
@@ -281,9 +309,15 @@ const formatDateForDisplay = (d: string | null | undefined) => {
 const introBodyHtml = computed(() => {
     const quotationCode = subject.value?.quotation_code || orderNumber.value
     const quotationDate = formatDateForDisplay(subject.value?.quotation_date || detail.value?.so_datetime)
-    const purchaseOrderCode = subject.value?.purchase_order_code
-    const purchaseOrderDate = formatDateForDisplay(subject.value?.purchase_order_date)
-    const customerName = customer.value?.full_name || 'العميل'
+    const purchaseOrderCode =
+        detail.value?.po_reference || subject.value?.purchase_order_code
+    const purchaseOrderDate = formatDateForDisplay(
+        detail.value?.referenced_po_datetime || subject.value?.purchase_order_date
+    )
+    const customerName =
+        customer.value?.trade_name?.trim() ||
+        customer.value?.full_name?.trim() ||
+        'العميل'
 
     let text = `إشارة الى عرض السعر رقم ${accent(quotationCode)} بتاريخ ${accent(quotationDate)}`
     
@@ -304,7 +338,7 @@ const lineItems = computed((): OrderLine[] => {
         unit: String(it.unit_name ?? '—'),
         quantity: it.quantity != null ? String(it.quantity) : '—',
         unit_price: formatMoney(it.price_per_unit),
-        total: formatMoney(it.line_total),
+        total: formatMoney(it.subtotal_before_discount),
         subtotal_before_discount: formatMoney(it.subtotal_before_discount ?? it.line_total),
     }))
 })
@@ -316,16 +350,19 @@ const grandTotalWords = computed(
     () => totals.value?.grand_total_in_words ?? '[المبلغ كتابة]'
 )
 
+const fmtDays = (v: unknown) => {
+    if (v == null || v === '') return '—'
+    const n = Number(v)
+    return Number.isFinite(n) ? String(n) : String(v)
+}
+
 const paymentMethodHtml = computed(() => {
     const invoiceDays = detail.value?.invoice_interval
     const paymentDays = detail.value?.payment_term_no
-    const fmt = (v: unknown) => {
-        if (v == null || v === '') return '—'
-        const n = Number(v)
-        return Number.isFinite(n) ? String(n) : String(v)
-    }
-    return `يتم رفع مستخلص بعد مدة ${accent(`${fmt(invoiceDays)} يوم`)} على أن يتم سدادها بعد ${accent(`${fmt(paymentDays)} يوم`)} .`
+    return `يتم رفع مستخلص بعد مدة ${accent(`${fmtDays(invoiceDays)} يوم`)} على أن يتم سدادها بعد ${accent(`${fmtDays(paymentDays)} يوم`)} .`
 })
+
+const paymentTerms = computed(() => [paymentMethodHtml.value])
 
 const generalTerms = computed(() => {
     const executionDuration = detail.value?.actual_execution_duration
@@ -356,10 +393,11 @@ const generalTerms = computed(() => {
 })
 
 const otherTerms = computed(() => {
-    return [
-        'مدة تنفيذ طلبية المبيعات في الظروف الطبيعية',
-        'تاريخ بداية التوريد او يمكن تغييره بالتنسيق مع مشتريات العميل .',
-    ]
+    const terms = detail.value?.other_terms
+    if (!Array.isArray(terms) || terms.length === 0) return []
+    return terms
+        .filter((t): t is string => typeof t === 'string' && t.trim() !== '')
+        .map((t) => escapeHtml(t.trim()))
 })
 
 function formatMoney(value: number | string | null | undefined): string {
@@ -704,7 +742,7 @@ onMounted(() => {
     background: #1849a9;
     color: #fff;
     padding: 16px 24px;
-    border-radius: 0 12px 12px 0;
+    border-radius:12pX;
     flex: 1;
 }
 
@@ -758,8 +796,8 @@ onMounted(() => {
 }
 
 .notes-section {
-    margin: 0 36px 16px;
-    padding: 16px 24px;
+    margin: 0 25px 0px;
+    padding: 8px 24px;
     background-color: transparent;
 }
 

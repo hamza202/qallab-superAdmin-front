@@ -25,6 +25,7 @@ import {
   packageIcon,
 } from "@/components/icons/globalIcons";
 import AppFormBreadcrumb from "@/components/common/AppFormBreadcrumb.vue";
+import OtherTermsRepeater from "@/components/common/OtherTermsRepeater.vue";
 import { useForm } from "@/composables/useForm";
 import { useNotification as useNotify } from "@/composables/useNotification";
 import AddLogisticsDetailDialog from "@/views/sales/quotations/logistics/components/AddLogisticsDetailDialog.vue";
@@ -163,6 +164,7 @@ const formData = ref({
   approved_amount: 'service_total_amount' as string | null,
   final_logistics_service_amount: null as number | null,
   final_logistics_trip: null as number | null,
+  other_terms: [] as string[],
 });
 
 // Fetch constants from API
@@ -343,6 +345,9 @@ const fetchFormData = async () => {
       formData.value.late_fee = data.late_fee ?? null;
       formData.value.cancel_fee_type = data.cancel_fee_type ?? null;
       formData.value.cancel_fee = data.cancel_fee ?? null;
+      formData.value.other_terms = Array.isArray(data.other_terms)
+        ? data.other_terms.filter((t: any) => typeof t === 'string')
+        : [];
     formData.value.sale_quotation_code = data.sale_quotation_code ?? null;
     formData.value.approved_amount = data.approved_amount ?? 'service_total_amount';
 
@@ -502,7 +507,10 @@ const fetchQuotationForOrder = async () => {
       formData.value.late_fee = data.late_fee != null ? Number(data.late_fee) : null;
       formData.value.cancel_fee_type = data.cancel_fee_type || null;
       formData.value.cancel_fee = data.cancel_fee != null ? Number(data.cancel_fee) : null;
-      
+      formData.value.other_terms = Array.isArray(data.other_terms)
+        ? data.other_terms.filter((t: any) => typeof t === 'string')
+        : [];
+
       // Map logistics product details (logistics_product_details -> productTableItems with logistics info)
       // Based on respons.json structure: logistics_product_details contains item logistics info
       const logisticsProductDetails = data.logistics_product_details ?? data.quotation_logistics_details;
@@ -649,6 +657,13 @@ const buildFormData = (): FormData => {
     fd.append('approved_amount', formData.value.approved_amount);
   }
 
+  // other_terms (array of strings)
+  (formData.value.other_terms || [])
+    .filter((term: string) => typeof term === 'string' && term.trim() !== '')
+    .forEach((term: string, index: number) => {
+      fd.append(`other_terms[${index}]`, term);
+    });
+
   // so_logistics_details (array)
   logisticsDetails.value.forEach((detail, index) => {
     if (isEditMode.value && detail.id) {
@@ -774,6 +789,7 @@ const getInitialFormData = () => ({
   approved_amount: 'service_total_amount' as string | null,
   final_logistics_service_amount: null as number | null,
   final_logistics_trip: null as number | null,
+  other_terms: [] as string[],
 });
 
 const resetForm = () => {
@@ -1878,6 +1894,11 @@ onMounted(async () => {
                   v-model:selectValue="formData.cancel_fee_type" :label="t('sales.forms.common.labels.cancelFee')"
                   :placeholder="t('sales.forms.common.placeholders.enterAmount')" type="number" select-width="110px"
                   :select-items="feeTypeItems" :select-placeholder="t('common.form.choose')" />
+            </div>
+
+            <!-- شروط أخرى -->
+            <div class="mt-6 pt-6 border-t !border-gray-100">
+              <OtherTermsRepeater v-model="formData.other_terms" />
             </div>
           </div>
         </div>

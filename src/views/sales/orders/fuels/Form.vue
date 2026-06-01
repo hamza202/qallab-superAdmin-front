@@ -26,6 +26,7 @@ import {
   rialIcon,
 } from '@/components/icons/globalIcons';
 import AppFormBreadcrumb from '@/components/common/AppFormBreadcrumb.vue';
+import OtherTermsRepeater from "@/components/common/OtherTermsRepeater.vue";
 
 const { t } = useI18n()
 const api = useApi();
@@ -163,6 +164,9 @@ const fetchFormData = async () => {
             formData.value.cancel_fee_type = data.cancel_fee_type ?? null;
             formData.value.cancel_fee = data.cancel_fee ?? null;
             formData.value.textNote = data.notes || '';
+            formData.value.other_terms = Array.isArray(data.other_terms)
+                ? data.other_terms.filter((t: any) => typeof t === 'string')
+                : [];
             formData.value.responsibleName = data.responsible_person || '';
             formData.value.responsiblePhone = data.responsible_phone || '';
 
@@ -253,6 +257,9 @@ const fetchQuotationForOrder = async () => {
             formData.value.cancel_fee_type = data.cancel_fee_type || null;
             formData.value.cancel_fee = data.cancel_fee != null ? Number(data.cancel_fee) : null;
             formData.value.textNote = data.notes || '';
+            formData.value.other_terms = Array.isArray(data.other_terms)
+                ? data.other_terms.filter((t: any) => typeof t === 'string')
+                : [];
             formData.value.po_reference = data.po_reference || '';
             formData.value.responsibleName = data.responsible_person || '';
             formData.value.responsiblePhone = data.responsible_phone || null;
@@ -375,6 +382,7 @@ const formData = ref({
     project_name: '',
     po_reference: '',
     textNote: '',
+    other_terms: [] as string[],
 });
 
 // Products table items (dynamically populated from dialog)
@@ -538,6 +546,13 @@ const buildFormData = (): FormData => {
     fd.append('cancel_fee', String(formData.value.cancel_fee ?? ''));
     fd.append('notes', formData.value.textNote || '');
 
+    // other_terms (array of strings)
+    (formData.value.other_terms || [])
+        .filter((term: string) => typeof term === 'string' && term.trim() !== '')
+        .forEach((term: string, index: number) => {
+            fd.append(`other_terms[${index}]`, term);
+        });
+
     // so_attached_logistics_detail
     if (isEditMode.value && logisticsDetailId.value) {
         fd.append('so_attached_logistics_detail[id]', String(logisticsDetailId.value));
@@ -600,6 +615,7 @@ const resetForm = () => {
         project_name: '',
         po_reference: '',
         textNote: '',
+        other_terms: [],
     };
     productTableItems.value = [];
     logisticsDetailId.value = null;
@@ -1032,6 +1048,11 @@ const tableItems = computed(() =>
                                 :select-items="feeTypeItems"
                                 :select-placeholder="t('common.form.choose')"
                             />
+                        </div>
+
+                        <!-- شروط أخرى -->
+                        <div class="mt-6 pt-6 border-t !border-gray-100">
+                            <OtherTermsRepeater v-model="formData.other_terms" />
                         </div>
                     </div>
                 </div>
