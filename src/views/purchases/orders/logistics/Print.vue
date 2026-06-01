@@ -66,7 +66,7 @@
                             <td>{{ row.transport_start_date }}</td>
                             <td>{{ row.transport_end_date }}</td>
                             <td>{{ row.trip_price }}</td>
-                            <td class="td-subtotal">{{ row.total }}</td>
+                            <td class="td-subtotal">{{ row.subtotal_before_discount }}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -192,6 +192,7 @@ interface OrderPrintDetail {
         transport_end_date?: string | null
         trip_price?: number | string | null
         line_total?: number | string | null
+        subtotal_before_discount?: number | string | null
         item_name?: string | null
         unit_name?: string | null
         quantity?: number | string | null
@@ -235,6 +236,7 @@ const PLACEHOLDER_LINES: LogisticsLine[] = [
         transport_end_date: '—',
         trip_price: '—',
         total: '—',
+        subtotal_before_discount: '—',
     },
 ]
 
@@ -324,6 +326,7 @@ const lineItems = computed((): LogisticsLine[] => {
         transport_end_date: formatPlainDate(it.transport_end_date),
         trip_price: formatMoney(it.trip_price),
         total: formatMoney(it.line_total),
+        subtotal_before_discount: formatMoney(it.subtotal_before_discount ?? it.line_total),
     }))
 })
 

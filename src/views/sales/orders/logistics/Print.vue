@@ -61,7 +61,7 @@
                             <td>{{ row.unit }}</td>
                             <td>{{ row.quantity }}</td>
                             <td>{{ row.unit_price }} <span v-html="rialIcon" class="sar-icon" /></td>
-                            <td class="td-subtotal">{{ row.total }} <span v-html="rialIcon" class="sar-icon" /></td>
+                            <td class="td-subtotal">{{ row.subtotal_before_discount }} <span v-html="rialIcon" class="sar-icon" /></td>
                         </tr>
                     </tbody>
                 </table>
@@ -159,6 +159,7 @@ interface OrderLine {
     quantity: string
     unit_price: string
     total: string
+    subtotal_before_discount: string
 }
 
 interface OrderPrintDetail {
@@ -195,6 +196,7 @@ interface OrderPrintDetail {
         quantity?: number | string
         price_per_unit?: number | string | null
         line_total?: number | string | null
+        subtotal_before_discount?: number | string | null
     }>
     totals?: {
         subtotal_excluding_vat?: number | string | null
@@ -222,8 +224,8 @@ const subject = computed(() => detail.value?.subject ?? null)
 const totals = computed(() => detail.value?.totals ?? null)
 
 const PLACEHOLDER_LINES: OrderLine[] = [
-    { description: '[وصف البند]', unit: 'طن', quantity: '—', unit_price: '—', total: '—' },
-    { description: '[وصف البند]', unit: 'طن', quantity: '—', unit_price: '—', total: '—' },
+    { description: '[وصف البند]', unit: 'طن', quantity: '—', unit_price: '—', total: '—', subtotal_before_discount: '—' },
+    { description: '[وصف البند]', unit: 'طن', quantity: '—', unit_price: '—', total: '—', subtotal_before_discount: '—' },
 ]
 
 function normalizeDetail(body: unknown): OrderPrintDetail | null {
@@ -303,6 +305,7 @@ const lineItems = computed((): OrderLine[] => {
         quantity: it.quantity != null ? String(it.quantity) : '—',
         unit_price: formatMoney(it.price_per_unit),
         total: formatMoney(it.line_total),
+        subtotal_before_discount: formatMoney(it.subtotal_before_discount ?? it.line_total),
     }))
 })
 
