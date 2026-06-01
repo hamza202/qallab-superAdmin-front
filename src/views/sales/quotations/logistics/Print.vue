@@ -80,7 +80,7 @@
                             <td>{{ row.unit }}</td>
                             <td>{{ row.quantity }}</td>
                             <td>{{ row.unit_price }}</td>
-                            <td class="td-subtotal">{{ row.total }}</td>
+                            <td class="td-subtotal">{{ row.subtotal_before_discount }}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -160,6 +160,7 @@ interface QuotationLine {
     quantity: string
     unit_price: string
     total: string
+    subtotal_before_discount: string
 }
 
 interface QuotationPrintDetail {
@@ -196,6 +197,7 @@ interface QuotationPrintDetail {
         quantity?: number | string
         price_per_unit?: number | string
         line_total?: number | string
+        subtotal_before_discount?: number | string | null
     }>
     totals?: {
         subtotal_excluding_vat?: number | string | null
@@ -231,6 +233,7 @@ const PLACEHOLDER_LINES: QuotationLine[] = [
         quantity: '—',
         unit_price: '—',
         total: '—',
+        subtotal_before_discount: '—',
     },
 ]
 
@@ -308,6 +311,7 @@ const lineItems = computed((): QuotationLine[] => {
         quantity: it.quantity != null ? String(it.quantity) : '—',
         unit_price: formatMoney(it.price_per_unit),
         total: formatMoney(it.line_total),
+        subtotal_before_discount: formatMoney(it.subtotal_before_discount ?? it.line_total),
     }))
 })
 
