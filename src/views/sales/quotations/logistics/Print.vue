@@ -67,19 +67,23 @@
                 <table class="items-table">
                     <thead>
                         <tr>
-                            <th class="th-first"><span class="th-ar">البند</span></th>
-                            <th><span class="th-ar">الوحدة</span></th>
-                            <th><span class="th-ar">الكمية</span></th>
-                            <th><span class="th-ar">سعر الوحدة</span></th>
+                            <th class="th-first"><span class="th-ar">موقع الاستلام</span></th>
+                            <th><span class="th-ar">موقع التسليم</span></th>
+                            <th><span class="th-ar">العدد</span></th>
+                            <th><span class="th-ar">تاريخ بدء النقل</span></th>
+                            <th><span class="th-ar">تاريخ نهاية النقل</span></th>
+                            <th><span class="th-ar">سعر الرحلة</span></th>
                             <th class="th-last"><span class="th-ar">السعر الإجمالي</span></th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr v-for="(row, idx) in lineItems" :key="idx">
-                            <td class="td-name">{{ row.description }}</td>
-                            <td>{{ row.unit }}</td>
+                            <td class="td-name">{{ row.source_location }}</td>
+                            <td>{{ row.target_location }}</td>
                             <td>{{ row.quantity }}</td>
-                            <td>{{ row.unit_price }}</td>
+                            <td>{{ row.start_date }}</td>
+                            <td>{{ row.end_date }}</td>
+                            <td>{{ row.trip_price }}</td>
                             <td class="td-subtotal">{{ row.subtotal_before_discount }}</td>
                         </tr>
                     </tbody>
@@ -155,11 +159,12 @@ const api = useApi()
 const { error } = useNotification()
 
 interface QuotationLine {
-    description: string
-    unit: string
+    source_location: string
+    target_location: string
     quantity: string
-    unit_price: string
-    total: string
+    start_date: string
+    end_date: string
+    trip_price: string
     subtotal_before_discount: string
 }
 
@@ -198,6 +203,11 @@ interface QuotationPrintDetail {
         price_per_unit?: number | string
         line_total?: number | string
         subtotal_before_discount?: number | string | null
+        source_location?: string | null
+        target_location?: string | null
+        transport_start_date?: string | null
+        transport_end_date?: string | null
+        trip_price?: number | string | null
     }>
     totals?: {
         subtotal_excluding_vat?: number | string | null
@@ -228,11 +238,12 @@ const totals = computed(() => detail.value?.totals ?? null)
 
 const PLACEHOLDER_LINES: QuotationLine[] = [
     {
-        description: '[وصف البند — سيتم ربطه بالبيانات]',
-        unit: 'طن',
+        source_location: '—',
+        target_location: '—',
         quantity: '—',
-        unit_price: '—',
-        total: '—',
+        start_date: '—',
+        end_date: '—',
+        trip_price: '—',
         subtotal_before_discount: '—',
     },
 ]
@@ -302,15 +313,21 @@ const introBodyHtml = computed(() => {
     return `بالإشارة إلى الموضوع أعلاه حيث أننا بفضل الله من الشركات الرائدة في مجال أعمال توريد ونقل مواد البناء الأولية في مكة وجدة وخارجهما، يسرنا أن نتقدم إليكم بعرض أسعارنا ${projectPart}${locationPart}.`
 })
 
+const formatDateOnly = (d: string | null | undefined) => {
+    if (!d || d === '—') return '—'
+    return d.split('T')[0]
+}
+
 const lineItems = computed((): QuotationLine[] => {
     const items = detail.value?.items
     if (!items?.length) return PLACEHOLDER_LINES
     return items.map((it) => ({
-        description: String(it.item_name ?? '—'),
-        unit: String(it.unit_name ?? '—'),
+        source_location: it.source_location ?? locations.value?.source_location ?? '—',
+        target_location: it.target_location ?? locations.value?.target_location ?? '—',
         quantity: it.quantity != null ? String(it.quantity) : '—',
-        unit_price: formatMoney(it.price_per_unit),
-        total: formatMoney(it.line_total),
+        start_date: formatDateOnly(it.transport_start_date),
+        end_date: formatDateOnly(it.transport_end_date),
+        trip_price: formatMoney(it.trip_price ?? it.price_per_unit),
         subtotal_before_discount: formatMoney(it.subtotal_before_discount ?? it.line_total),
     }))
 })
