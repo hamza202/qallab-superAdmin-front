@@ -20,9 +20,8 @@
                 <div class="header-top">
                     <div class="company-col" dir="rtl">
                         <div class="co-name">{{ supplier?.full_name ?? 'شركة قلاب' }}</div>
-                        <div class="co-sub">Qallab Company</div>
                         <div class="co-line">
-                            هاتف: {{ supplier?.mobile ?? '+966 599 1454323' }} · البريد: {{ supplier?.email ?? 'info@qallab.sa' }}
+                            الرقم الوطني الموحد : {{ supplier?.unified_login_id ?? '—' }}
                         </div>
                         <div class="co-line">
                             الرقم الضريبي: {{ supplier?.tax_number ?? '—' }} · السجل التجاري:
@@ -32,14 +31,13 @@
                     <img :src="logoImg" alt="Qallab" class="header-logo" />
                 </div>
                 <div class="meta-strip" dir="rtl">
-                    <span class="meta-item">تاريخ الطلبية : <strong>{{ orderDate }}</strong></span>
                     <span class="meta-item">رقم طلبية المبيعات : <strong>{{ orderNumber }}</strong></span>
+                    <span class="meta-item">تاريخ الطلبية : <strong>{{ orderDate }}</strong></span>
                 </div>
             </div>
 
             <!-- ===== Introduction section ===== -->
             <div class="intro-block" dir="rtl">
-                <p class="intro-title">طلبية المبيعات رقم {{ orderNumber }}</p>
                 <p class="intro-body" v-html="introBodyHtml"></p>
             </div>
 
@@ -60,8 +58,8 @@
                             <td class="td-name">{{ row.description }}</td>
                             <td>{{ row.unit }}</td>
                             <td>{{ row.quantity }}</td>
-                            <td>{{ row.unit_price }} <span v-html="rialIcon" class="sar-icon" /></td>
-                            <td class="td-subtotal">{{ row.subtotal_before_discount }} <span v-html="rialIcon" class="sar-icon" /></td>
+                            <td>{{ row.unit_price }} </td>
+                            <td class="td-subtotal">{{ row.subtotal_before_discount }}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -71,30 +69,20 @@
             <div class="totals-table">
                 <div class="total-row">
                     <span class="total-label">الإجمالي غير شامل ضريبة القيمة المضافة</span>
-                    <span class="total-val">{{ formatCurrency(subtotal) }} <span v-html="rialIcon" class="sar-icon" /></span>
+                    <span class="total-val"><span v-html="rialIcon" class="sar-icon" /> {{ formatCurrency(subtotal) }}</span>
                 </div>
                 <div class="total-row">
                     <span class="total-label">ضريبة القيمة المضافة</span>
-                    <span class="total-val">{{ formatCurrency(vatAmount) }} <span v-html="rialIcon" class="sar-icon" /></span>
+                    <span class="total-val"><span v-html="rialIcon" class="sar-icon" /> {{ formatCurrency(vatAmount) }}</span>
                 </div>
-            </div>
-
-            <!-- ===== Grand total with payment method ===== -->
-            <div class="grand-total-section">
-                <div class="grand-total-bar">
-                    <div class="gt-cell gt-cell--label">
-                        <span class="gt-title">الإجمالي الكلي</span>
-                    </div>
-                    <div class="gt-cell gt-cell--amount">
-                        {{ formatCurrency(grandTotal) }}
-                        <span v-html="rialIconWhite" class="sar-icon sar-icon--white" />
-                    </div>
-                    <div class="gt-cell gt-cell--words">{{ grandTotalWords }}</div>
+                <div class="total-row">
+                    <span class="total-label">الإجمالي شامل ضريبة القيمة المضافة</span>
+                    <span class="total-val"><span v-html="rialIcon" class="sar-icon" /> {{ formatCurrency(grandTotal) }}</span>
                 </div>
-                <!-- <div class="payment-method-box">
-                    <div class="payment-title">طريقة السداد :</div>
-                    <div class="payment-text" v-html="paymentMethodHtml"></div>
-                </div> -->
+                <div class="total-row total-row--words">
+                    <span class="total-label">المجموع الكلي بالكلمات</span>
+                    <span class="total-val total-val--words">{{ grandTotalWords }}</span>
+                </div>
             </div>
 
             <!-- ===== Notes section ===== -->
@@ -103,20 +91,16 @@
                 <ul class="notes-list">
                     <li v-for="(note, i) in generalTerms" :key="'g' + i" v-html="note"></li>
                 </ul>
-            </div>
-
-            <div class="notes-section" dir="rtl">
-                <p class="notes-heading">طريقة السداد :</p>
-                <ul class="notes-list">
-                    <li v-for="(note, i) in paymentTerms" :key="'p' + i" v-html="note"></li>
-                </ul>
-            </div>
-
-            <div v-if="otherTerms.length" class="notes-section notes-section--other" dir="rtl">
-                <p class="notes-heading">شروط أخرى :</p>
-                <ul class="notes-list">
-                    <li v-for="(note, i) in otherTerms" :key="'o' + i" v-html="note"></li>
-                </ul>
+                <div class="payment-method-inline">
+                    <span class="payment-title">طريقة السداد :</span>
+                    <span class="payment-text" v-html="paymentMethodHtml"></span>
+                </div>
+                <template v-if="otherTerms.length">
+                    <p class="notes-heading notes-heading--secondary">شروط أخرى :</p>
+                    <ul class="notes-list">
+                        <li v-for="(note, i) in otherTerms" :key="'o' + i" v-html="note"></li>
+                    </ul>
+                </template>
             </div>
 
             <p class="closing-line" dir="rtl">وتفضلوا بقبول فائق الاحترام والتحية</p>
@@ -125,11 +109,11 @@
             <div class="sign-strip" dir="rtl">
                 <div class="sign-col">
                     <div class="sign-label">اسم البائع</div>
-                    <div class="sign-value">{{ supplier?.full_name ?? 'شركة قلاب' }}</div>
+                    <div class="sign-value">{{ supplier?.full_name ?? '—' }}</div>
                 </div>
                 <div class="sign-col sign-col--stamp">
                     <div class="sign-label">توقيع وختم البائع</div>
-                    <img :src="logoBlackImg" alt="Qallab stamp" class="stamp-img" />
+                    <!-- <img :src="logoBlackImg" alt="Qallab stamp" class="stamp-img" /> -->
                 </div>
             </div>
         </div>
@@ -151,10 +135,8 @@ const { t } = useI18n()
 const toDataUri = (svg: string) =>
     `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svg)))}`
 
-const defaultLogoImg = toDataUri(logoSvgRaw)
-const defaultLogoBlackImg = toDataUri(logoBlackSvgRaw)
-
-const rialIconWhite = `<svg width="13" height="14" viewBox="0 0 13 14" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12.5559 10.6949C12.7879 10.164 12.9413 9.58759 13 8.98324L9.17589 9.82291V8.20876L12.5558 7.46723C12.7878 6.9363 12.9411 6.35989 12.9999 5.75554L9.17577 6.59449V0.789524C8.5898 1.12919 8.0694 1.58132 7.64638 2.11463V6.93021L6.11699 7.26582V0C5.53102 0.339544 5.01062 0.791792 4.5876 1.32511V7.6013L1.16558 8.35202C0.933594 8.88295 0.780134 9.45936 0.721271 10.0637L4.5876 9.21545V11.2482L0.444073 12.1572C0.212091 12.6881 0.0587471 13.2646 0 13.8689L4.33711 12.9174C4.69017 12.8416 4.99362 12.6261 5.19091 12.3295L5.98631 11.1121V11.1118C6.06888 10.9859 6.11699 10.834 6.11699 10.6705V8.87985L7.64638 8.54424V11.7725L12.5558 10.6947L12.5559 10.6949Z" fill="white" /></svg>`
+const logoImg = toDataUri(logoSvgRaw)
+const logoBlackImg = toDataUri(logoBlackSvgRaw)
 
 const route = useRoute()
 const api = useApi()
@@ -177,6 +159,7 @@ interface OrderPrintDetail {
         tax_number?: number | string | null
         commercial_register?: number | string | null
         logo_url?: string | null
+        unified_login_id?: number | string | null
     }
     customer?: {
         id?: number
@@ -206,7 +189,6 @@ interface OrderPrintDetail {
         unit_name?: string
         quantity?: number | string
         price_per_unit?: number | string | null
-        subtotal_before_discount?: number | string | null
         line_total?: number | string | null
         subtotal_before_discount?: number | string | null
     }>
@@ -224,7 +206,7 @@ interface OrderPrintDetail {
     so_datetime?: string
     po_reference?: string | null
     referenced_po_datetime?: string | null
-    other_terms?: string[]
+    other_terms?: string[] | null
 }
 
 const isLoading = ref(false)
@@ -236,19 +218,7 @@ const routeId = computed(() => (route.params.id as string) || '')
 const supplier = computed(() => detail.value?.supplier ?? null)
 const customer = computed(() => detail.value?.customer ?? null)
 const subject = computed(() => detail.value?.subject ?? null)
-
-const resolveLogoUrl = (url: string | null | undefined) => {
-    const s = url != null ? String(url).trim() : ''
-    return s || null
-}
-
-const logoImg = computed(
-    () => resolveLogoUrl(supplier.value?.logo_url) ?? defaultLogoImg
-)
-
-const logoBlackImg = computed(
-    () => resolveLogoUrl(supplier.value?.logo_url) ?? defaultLogoBlackImg
-)
+const locations = computed(() => detail.value?.locations ?? null)
 const totals = computed(() => detail.value?.totals ?? null)
 
 const PLACEHOLDER_LINES: OrderLine[] = [
@@ -290,7 +260,7 @@ const escapeHtml = (s: string) =>
 
 const accent = (s: string) => `<span class="blue-accent">${escapeHtml(s)}</span>`
 
-const formatDateForDisplay = (d: string | null | undefined) => {
+const formatSqDate = (d: string | null | undefined) => {
     if (!d) return '—'
     try {
         const dt = new Date(d)
@@ -308,26 +278,22 @@ const formatDateForDisplay = (d: string | null | undefined) => {
 
 const introBodyHtml = computed(() => {
     const quotationCode = subject.value?.quotation_code || orderNumber.value
-    const quotationDate = formatDateForDisplay(subject.value?.quotation_date || detail.value?.so_datetime)
+    const quotationDate = formatSqDate(subject.value?.quotation_date || detail.value?.so_datetime)
     const purchaseOrderCode =
         detail.value?.po_reference || subject.value?.purchase_order_code
-    const purchaseOrderDate = formatDateForDisplay(
+    const purchaseOrderDate = formatSqDate(
         detail.value?.referenced_po_datetime || subject.value?.purchase_order_date
     )
+    const supplierName = supplier.value?.full_name ?? '—'
     const customerName =
         customer.value?.trade_name?.trim() ||
         customer.value?.full_name?.trim() ||
         'العميل'
 
-    let text = `إشارة الى عرض السعر رقم ${accent(quotationCode)} بتاريخ ${accent(quotationDate)}`
-    
-    if (purchaseOrderCode) {
-        text += ` وطلبية الشراء رقم ${accent(purchaseOrderCode)} بتاريخ ${accent(purchaseOrderDate)}`
-    }
-    
-    text += ` والصادر من ${accent(customerName)} تم اصدار طلبية المبيعات التالية :`
+    const quotationPhrase = `عرض السعر رقم ${accent(quotationCode)} بتاريخ ${accent(quotationDate)}`
+    const poPhrase = purchaseOrderCode ? ` وطلبية الشراء رقم ${accent(purchaseOrderCode)} بتاريخ ${accent(purchaseOrderDate)}` : ''
 
-    return text
+    return `<span class="intro-line intro-line--greeting">السادة / ${accent(supplierName)} المحترمين</span><span class="intro-line intro-line--salam">السلام عليكم ورحمة الله وبركاته،</span><span class="intro-line">إشارة إلى ${quotationPhrase}${poPhrase} والصادر من ${accent(customerName)}، تم إصدار طلبية المبيعات التالية :</span>`
 })
 
 const lineItems = computed((): OrderLine[] => {
@@ -338,7 +304,7 @@ const lineItems = computed((): OrderLine[] => {
         unit: String(it.unit_name ?? '—'),
         quantity: it.quantity != null ? String(it.quantity) : '—',
         unit_price: formatMoney(it.price_per_unit),
-        total: formatMoney(it.subtotal_before_discount),
+        total: formatMoney(it.line_total),
         subtotal_before_discount: formatMoney(it.subtotal_before_discount ?? it.line_total),
     }))
 })
@@ -350,19 +316,16 @@ const grandTotalWords = computed(
     () => totals.value?.grand_total_in_words ?? '[المبلغ كتابة]'
 )
 
-const fmtDays = (v: unknown) => {
-    if (v == null || v === '') return '—'
-    const n = Number(v)
-    return Number.isFinite(n) ? String(n) : String(v)
-}
-
 const paymentMethodHtml = computed(() => {
     const invoiceDays = detail.value?.invoice_interval
     const paymentDays = detail.value?.payment_term_no
-    return `يتم رفع مستخلص بعد مدة ${accent(`${fmtDays(invoiceDays)} يوم`)} على أن يتم سدادها بعد ${accent(`${fmtDays(paymentDays)} يوم`)} .`
+    const fmt = (v: unknown) => {
+        if (v == null || v === '') return '—'
+        const n = Number(v)
+        return Number.isFinite(n) ? String(n) : String(v)
+    }
+    return `يتم رفع مستخلص بعد مدة ${accent(`${fmt(invoiceDays)} يوم`)} على أن يتم سدادها بعد ${accent(`${fmt(paymentDays)} يوم`)} .`
 })
-
-const paymentTerms = computed(() => [paymentMethodHtml.value])
 
 const generalTerms = computed(() => {
     const executionDuration = detail.value?.actual_execution_duration
@@ -392,12 +355,10 @@ const generalTerms = computed(() => {
     ]
 })
 
-const otherTerms = computed(() => {
-    const terms = detail.value?.other_terms
-    if (!Array.isArray(terms) || terms.length === 0) return []
-    return terms
-        .filter((t): t is string => typeof t === 'string' && t.trim() !== '')
-        .map((t) => escapeHtml(t.trim()))
+const otherTerms = computed<string[]>(() => {
+    const list = detail.value?.other_terms
+    if (!Array.isArray(list)) return []
+    return list.map((t) => String(t ?? '').trim()).filter(Boolean)
 })
 
 function formatMoney(value: number | string | null | undefined): string {
@@ -594,11 +555,11 @@ onMounted(() => {
 
 .intro-block {
     margin: 0 36px 20px;
-    padding: 16px 24px;
+    padding: 5px 24px;
     text-align: center;
     line-height: 1.85;
-    background-color: #f9fafb;
-    border: 1px solid #e2e8f0;
+    /* background-color: #f9fafb;
+    border: 1px solid #e2e8f0; */
     border-radius: 12px;
 }
 
@@ -612,7 +573,22 @@ onMounted(() => {
 .intro-body {
     margin: 0;
     font-size: 0.92rem;
+    font-weight: 600;
     color: #374151;
+}
+
+.intro-body :deep(.intro-line) {
+    display: block;
+}
+
+.intro-body :deep(.intro-line--greeting) {
+    text-align: right;
+    margin-bottom: 14px;
+}
+
+.intro-body :deep(.intro-line--salam) {
+    text-align: center;
+    margin-bottom: 18px;
 }
 
 .blue-accent {
@@ -717,93 +693,49 @@ onMounted(() => {
     direction: ltr;
 }
 
+.total-row--words .total-label {
+    color: #1849A9;
+    font-weight: 700;
+}
+
+.total-val--words {
+    direction: rtl;
+    font-weight: 600;
+    color: #374151;
+    text-align: left;
+    max-width: 60%;
+    line-height: 1.6;
+}
+
 .sar-icon {
     display: inline-block;
     vertical-align: middle;
     margin-inline-start: 4px;
 }
 
-.sar-icon--white :deep(svg path) {
-    fill: #fff;
-}
-
-.grand-total-section {
-    display: flex;
-    margin: 0 36px 20px;
-    gap: 0;
-    direction: rtl;
-}
-
-.grand-total-bar {
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    align-items: center;
-    gap: 16px;
-    background: #1849a9;
-    color: #fff;
-    padding: 16px 24px;
-    border-radius:12pX;
-    flex: 1;
-}
-
-.gt-cell--label {
+.payment-method-inline {
+    margin-top: 14px;
+    padding-top: 12px;
+    font-size: 0.85rem;
+    line-height: 1.7;
+    color: #374151;
     text-align: right;
-}
-
-.gt-title {
-    font-size: 1rem;
-    font-weight: 800;
-}
-
-.gt-cell--amount {
-    text-align: center;
-    font-size: 1.25rem;
-    font-weight: 800;
-    font-variant-numeric: tabular-nums;
-    white-space: nowrap;
-    direction: ltr;
-}
-
-.gt-cell--words {
-    text-align: left;
-    font-size: 0.75rem;
-    font-weight: 500;
-    line-height: 1.45;
-    color: rgba(255, 255, 255, 0.92);
-    max-width: 160px;
-}
-
-.payment-method-box {
-    background-color: #f9fafb;
-    border: 1px solid #e2e8f0;
-    border-right: none;
-    border-radius: 12px 0 0 12px;
-    padding: 14px 16px;
-    min-width: 200px;
 }
 
 .payment-title {
     color: #1849A9;
     font-weight: 700;
-    margin-bottom: 6px;
-    font-size: 0.85rem;
+    margin-inline-end: 6px;
 }
 
 .payment-text {
-    font-size: 0.8rem;
     color: #374151;
-    line-height: 1.6;
 }
 
 .notes-section {
-    margin: 0 25px 0px;
-    padding: 8px 24px;
-    background-color: transparent;
-}
-
-.notes-section--other {
-    margin-top: 0;
-    padding-top: 0;
+    margin: 0 36px 0;
+    padding: 10px 24px;
+    border-radius: 12px;
 }
 
 .notes-heading {
@@ -812,6 +744,10 @@ onMounted(() => {
     font-weight: 800;
     color: #1849a9;
     text-align: right;
+}
+
+.notes-heading--secondary {
+    margin-top: 14px;
 }
 
 .notes-list {
@@ -830,15 +766,14 @@ onMounted(() => {
     font-weight: 700;
     font-size: 1rem;
     color: #374151;
-    margin: 24px 36px;
+    margin: 10px 36px;
 }
 
 .sign-strip {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    padding: 20px 36px;
-    margin-top: auto;
+    padding: 10px 36px;
 }
 
 .sign-col {
@@ -892,12 +827,11 @@ onMounted(() => {
 
     .items-table,
     .items-table thead tr,
-    .grand-total-bar,
     .section-card,
     .intro-block,
     .meta-strip,
     .totals-table,
-    .payment-method-box {
+    .notes-section {
         print-color-adjust: exact;
         -webkit-print-color-adjust: exact;
     }
@@ -906,7 +840,6 @@ onMounted(() => {
     .intro-block,
     .table-wrapper,
     .totals-table,
-    .grand-total-section,
     .notes-section,
     .closing-line,
     .sign-strip {
