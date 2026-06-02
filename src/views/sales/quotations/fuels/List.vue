@@ -113,38 +113,6 @@ const downloadingSignedPoUuid = ref<string | null>(null);
 
 const signedPoDownloadIcon = `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M13.5 3H12H8C6.34315 3 5 4.34315 5 6V18C5 19.6569 6.34315 21 8 21H12M13.5 3L19 8.625M13.5 3V7.625C13.5 8.17728 13.9477 8.625 14.5 8.625H19M19 8.625V11.8125" stroke="#fec54b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M17.5 15V21M17.5 21L15 18.5M17.5 21L20 18.5" stroke="#fec54b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>`;
 
-const forceDownloadFromUrl = async (fileUrl: string, filename: string) => {
-  const res = await fetch(fileUrl, { mode: 'cors', credentials: 'omit' });
-  if (!res.ok) throw new Error(`bad status ${res.status}`);
-  const blob = await res.blob();
-  const objectUrl = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = objectUrl;
-  a.download = filename;
-  a.rel = 'noopener noreferrer';
-  a.style.display = 'none';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
-};
-
-const handleDownloadSignedPo = async (item: { uuid?: string; id?: string | number; signed_po_file_url?: string | null }) => {
-  const url = item.signed_po_file_url;
-  if (!url) return;
-  const uuid = String(item.uuid ?? item.id ?? '');
-  downloadingSignedPoUuid.value = uuid;
-  try {
-    const pathName = url.split('?')[0].split('/').pop() || `signed-po-${uuid}`;
-    await forceDownloadFromUrl(url, pathName);
-  } catch (err: any) {
-    console.error('Error downloading signed PO file:', err);
-    error(err?.response?.data?.message || t('common.errors.downloadFailed'));
-  } finally {
-    downloadingSignedPoUuid.value = null;
-  }
-};
-
 const triggerPdfDownloadFromSignedUrl = async (signedUrl: string, filename: string) => {
   try {
     const res = await fetch(signedUrl, { mode: 'cors', credentials: 'omit' });
@@ -162,6 +130,22 @@ const triggerPdfDownloadFromSignedUrl = async (signedUrl: string, filename: stri
     URL.revokeObjectURL(objectUrl);
   } catch {
     window.open(signedUrl, '_blank', 'noopener,noreferrer');
+  }
+};
+
+const handleDownloadSignedPo = async (item: { uuid?: string; id?: string | number; signed_po_file_url?: string | null }) => {
+  const url = item.signed_po_file_url;
+  if (!url) return;
+  const uuid = String(item.uuid ?? item.id ?? '');
+  downloadingSignedPoUuid.value = uuid;
+  try {
+    const pathName = url.split('?')[0].split('/').pop() || `signed-po-${uuid}`;
+    await triggerPdfDownloadFromSignedUrl(url, pathName);
+  } catch (err: any) {
+    console.error('Error downloading signed PO file:', err);
+    error(err?.response?.data?.message || t('common.errors.downloadFailed'));
+  } finally {
+    downloadingSignedPoUuid.value = null;
   }
 };
 
